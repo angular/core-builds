@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.2+sha-4f3ad98
+ * @license Angular v19.2.0-next.2+sha-6789c7e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-4f3ad98", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
-    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-4f3ad98", ngImport: i0, type: TestBedApplicationErrorHandler });
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-6789c7e", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-6789c7e", ngImport: i0, type: TestBedApplicationErrorHandler });
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-4f3ad98", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.2.0-next.2+sha-6789c7e", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -246,7 +246,7 @@ class ComponentFixture {
         this.componentRef = componentRef;
         if (this.autoDetect) {
             this._testAppRef.externalTestViews.add(this.componentRef.hostView);
-            this.scheduler?.notify(9 /* ɵNotificationSource.ViewAttached */);
+            this.scheduler?.notify(8 /* ɵNotificationSource.ViewAttached */);
             this.scheduler?.notify(0 /* ɵNotificationSource.MarkAncestorsForTraversal */);
         }
         this.componentRef.hostView.onDestroy(() => {

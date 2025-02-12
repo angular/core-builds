@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.2+sha-4f3ad98
+ * @license Angular v19.2.0-next.2+sha-6789c7e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2902,6 +2902,7 @@ const ON_DESTROY_HOOKS = 21;
 const EFFECTS_TO_SCHEDULE = 22;
 const EFFECTS = 23;
 const REACTIVE_TEMPLATE_CONSUMER = 24;
+const AFTER_RENDER_SEQUENCES_TO_ADD = 25;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -2909,7 +2910,7 @@ const REACTIVE_TEMPLATE_CONSUMER = 24;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-const HEADER_OFFSET = 25;
+const HEADER_OFFSET = 26;
 
 /**
  * Special location which allows easy identification of type. If we have an array which was
@@ -3419,7 +3420,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewAttached */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewAttached */);
     if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
         lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     }
@@ -6162,7 +6163,7 @@ class PendingTasks {
                 return;
             }
             // Notifying the scheduler will hold application stability open until the next tick.
-            this.scheduler.notify(12 /* NotificationSource.PendingTaskRemoved */);
+            this.scheduler.notify(11 /* NotificationSource.PendingTaskRemoved */);
             this.internalPendingTasks.remove(taskId);
         };
     }
@@ -8656,6 +8657,23 @@ function assertNotInReactiveContext(debugFn, extraContext) {
     }
 }
 
+class ViewContext {
+    view;
+    node;
+    constructor(view, node) {
+        this.view = view;
+        this.node = node;
+    }
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static __NG_ELEMENT_ID__ = injectViewContext;
+}
+function injectViewContext() {
+    return new ViewContext(getLView(), getCurrentTNode());
+}
+
 /**
  * The phase to run an `afterRender` or `afterNextRender` callback in.
  *
@@ -8794,7 +8812,7 @@ class AfterRenderImpl {
             this.sequences.add(sequence);
         }
         if (this.deferredRegistrations.size > 0) {
-            this.scheduler.notify(8 /* NotificationSource.DeferredRenderHook */);
+            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
         }
         this.deferredRegistrations.clear();
         if (hasSequencesToExecute) {
@@ -8802,15 +8820,26 @@ class AfterRenderImpl {
         }
     }
     register(sequence) {
-        if (!this.executing) {
-            this.sequences.add(sequence);
-            // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
-            // new render hook that needs to run.
-            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
+        const { view } = sequence;
+        if (view !== undefined) {
+            // Delay adding it to the manager, add it to the view instead.
+            (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
+            // Mark the view for traversal to ensure we eventually schedule the afterNextRender.
+            markAncestorsForTraversal(view);
+            view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+        }
+        else if (!this.executing) {
+            this.addSequence(sequence);
         }
         else {
             this.deferredRegistrations.add(sequence);
         }
+    }
+    addSequence(sequence) {
+        this.sequences.add(sequence);
+        // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
+        // new render hook that needs to run.
+        this.scheduler.notify(7 /* NotificationSource.RenderHook */);
     }
     unregister(sequence) {
         if (this.executing && this.sequences.has(sequence)) {
@@ -8841,6 +8870,7 @@ class AfterRenderImpl {
 class AfterRenderSequence {
     impl;
     hooks;
+    view;
     once;
     snapshot;
     /**
@@ -8854,9 +8884,10 @@ class AfterRenderSequence {
      */
     pipelinedValue = undefined;
     unregisterOnDestroy;
-    constructor(impl, hooks, once, destroyRef, snapshot = null) {
+    constructor(impl, hooks, view, once, destroyRef, snapshot = null) {
         this.impl = impl;
         this.hooks = hooks;
+        this.view = view;
         this.once = once;
         this.snapshot = snapshot;
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
@@ -8874,6 +8905,10 @@ class AfterRenderSequence {
     destroy() {
         this.impl.unregister(this);
         this.unregisterOnDestroy?.();
+        const scheduled = this.view?.[AFTER_RENDER_SEQUENCES_TO_ADD];
+        if (scheduled) {
+            this.view[AFTER_RENDER_SEQUENCES_TO_ADD] = scheduled.filter((s) => s !== this);
+        }
     }
 }
 
@@ -8924,7 +8959,8 @@ function afterRenderImpl(callbackOrSpec, injector, options, once) {
     const tracing = injector.get(TracingService, null, { optional: true });
     const hooks = options?.phase ?? AfterRenderPhase.MixedReadWrite;
     const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec, hooks), once, destroyRef, tracing?.snapshot(null));
+    const viewContext = injector.get(ViewContext, null, { optional: true });
+    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec, hooks), viewContext?.view, once, destroyRef, tracing?.snapshot(null));
     manager.impl.register(sequence);
     return sequence;
 }
@@ -9396,9 +9432,11 @@ function getTriggerElement(triggerLView, triggerIndex) {
 function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
     const injector = initialLView[INJECTOR];
     const zone = injector.get(NgZone);
+    let poll;
     function pollDomTrigger() {
         // If the initial view was destroyed, we don't need to do anything.
         if (isDestroyed(initialLView)) {
+            poll.destroy();
             return;
         }
         const lDetails = getLDeferBlockDetails(initialLView, tNode);
@@ -9406,14 +9444,16 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
         // If the block was loaded before the trigger was resolved, we don't need to do anything.
         if (renderedState !== DeferBlockInternalState.Initial &&
             renderedState !== DeferBlockState.Placeholder) {
+            poll.destroy();
             return;
         }
         const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
         // Keep polling until we resolve the trigger's LView.
         if (!triggerLView) {
-            afterNextRender({ read: pollDomTrigger }, { injector });
+            // Keep polling.
             return;
         }
+        poll.destroy();
         // It's possible that the trigger's view was destroyed before we resolved the trigger element.
         if (isDestroyed(triggerLView)) {
             return;
@@ -9440,7 +9480,7 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
         storeTriggerCleanupFn(type, lDetails, cleanup);
     }
     // Begin polling for the trigger.
-    afterNextRender({ read: pollDomTrigger }, { injector });
+    poll = afterRender({ read: pollDomTrigger }, { injector });
 }
 
 const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
@@ -13205,7 +13245,7 @@ function detachViewFromDOM(tView, lView) {
     // When we remove a view from the DOM, we need to rerun afterRender hooks
     // We don't necessarily needs to run change detection. DOM removal only requires
     // change detection if animations are enabled (this notification is handled by animations).
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(10 /* NotificationSource.ViewDetachedFromDOM */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewDetachedFromDOM */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -14095,6 +14135,15 @@ function collectNativeNodesInLContainer(lContainer, result) {
     }
 }
 
+function addAfterRenderSequencesForView(lView) {
+    if (lView[AFTER_RENDER_SEQUENCES_TO_ADD] !== null) {
+        for (const sequence of lView[AFTER_RENDER_SEQUENCES_TO_ADD]) {
+            sequence.impl.addSequence(sequence);
+        }
+        lView[AFTER_RENDER_SEQUENCES_TO_ADD].length = 0;
+    }
+}
+
 let freeConsumers = [];
 /**
  * Create a new template consumer pointing at the specified LView.
@@ -14440,6 +14489,7 @@ function refreshView(tView, lView, templateFn, context) {
         // no changes cycle, the component would be not be dirty for the next update pass. This would
         // be different in production mode where the component dirty state is not reset.
         if (!isInCheckNoChangesPass) {
+            addAfterRenderSequencesForView(lView);
             lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
         }
     }
@@ -14557,11 +14607,16 @@ function detectChangesInView(lView, mode) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
     else if (flags & 8192 /* LViewFlags.HasChildViewsToRefresh */) {
-        runEffectsInView(lView);
+        if (!isInCheckNoChangesPass) {
+            runEffectsInView(lView);
+        }
         detectChangesInEmbeddedViews(lView, 1 /* ChangeDetectionMode.Targeted */);
         const components = tView.components;
         if (components !== null) {
             detectChangesInChildComponents(lView, components, 1 /* ChangeDetectionMode.Targeted */);
+        }
+        if (!isInCheckNoChangesPass) {
+            addAfterRenderSequencesForView(lView);
         }
     }
 }
@@ -17967,7 +18022,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0-next.2+sha-4f3ad98']
+                ? ['ng-version', '19.2.0-next.2+sha-6789c7e']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -23416,12 +23471,6 @@ class ApplicationRef {
      */
     dirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
     /**
-     * Like `dirtyFlags` but don't cause `tick()` to loop.
-     *
-     * @internal
-     */
-    deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
-    /**
      * Most recent snapshot from the `TracingService`, if any.
      *
      * This snapshot attempts to capture the context when `tick()` was first
@@ -23634,9 +23683,6 @@ class ApplicationRef {
         if (this._rendererFactory === null && !this._injector.destroyed) {
             this._rendererFactory = this._injector.get(RendererFactory2, null, { optional: true });
         }
-        // When beginning synchronization, all deferred dirtiness becomes active dirtiness.
-        this.dirtyFlags |= this.deferredDirtyFlags;
-        this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
         let runs = 0;
         while (this.dirtyFlags !== 0 /* ApplicationRefDirtyFlags.None */ && runs++ < MAXIMUM_REFRESH_RERUNS) {
             profiler(14 /* ProfilerEvent.ChangeDetectionSyncStart */);
@@ -23654,9 +23700,6 @@ class ApplicationRef {
      * Perform a single synchronization pass.
      */
     synchronizeOnce() {
-        // If we happened to loop, deferred dirtiness can be processed as active dirtiness again.
-        this.dirtyFlags |= this.deferredDirtyFlags;
-        this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
         // First, process any dirty root effects.
         if (this.dirtyFlags & 16 /* ApplicationRefDirtyFlags.RootEffects */) {
             this.dirtyFlags &= ~16 /* ApplicationRefDirtyFlags.RootEffects */;
@@ -34952,7 +34995,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.2+sha-4f3ad98');
+const VERSION = new Version('19.2.0-next.2+sha-6789c7e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35362,13 +35405,6 @@ class ChangeDetectionSchedulerImpl {
                 this.appRef.dirtyFlags |= 4 /* ApplicationRefDirtyFlags.ViewTreeCheck */;
                 break;
             }
-            case 8 /* NotificationSource.DeferredRenderHook */: {
-                // Render hooks are "deferred" when they're triggered from other render hooks. Using the
-                // deferred dirty flags ensures that adding new hooks doesn't automatically trigger a loop
-                // inside tick().
-                this.appRef.deferredDirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
-                break;
-            }
             case 6 /* NotificationSource.CustomElement */: {
                 // We use `ViewTreeTraversal` to ensure we refresh the element even if this is triggered
                 // during CD. In practice this is a no-op since the elements code also calls via a
@@ -35377,7 +35413,7 @@ class ChangeDetectionSchedulerImpl {
                 force = true;
                 break;
             }
-            case 13 /* NotificationSource.RootEffect */: {
+            case 12 /* NotificationSource.RootEffect */: {
                 this.appRef.dirtyFlags |= 16 /* ApplicationRefDirtyFlags.RootEffects */;
                 // Root effects still force a CD, even if the scheduler is disabled. This ensures that
                 // effects always run, even when triggered from outside the zone when the scheduler is
@@ -35385,7 +35421,7 @@ class ChangeDetectionSchedulerImpl {
                 force = true;
                 break;
             }
-            case 14 /* NotificationSource.ViewEffect */: {
+            case 13 /* NotificationSource.ViewEffect */: {
                 // This is technically a no-op, since view effects will also send a
                 // `MarkAncestorsForTraversal` notification. Still, we set this for logical consistency.
                 this.appRef.dirtyFlags |= 2 /* ApplicationRefDirtyFlags.ViewTreeTraversal */;
@@ -35395,7 +35431,7 @@ class ChangeDetectionSchedulerImpl {
                 force = true;
                 break;
             }
-            case 12 /* NotificationSource.PendingTaskRemoved */: {
+            case 11 /* NotificationSource.PendingTaskRemoved */: {
                 // Removing a pending task via the public API forces a scheduled tick, ensuring that
                 // stability is async and delayed until there was at least an opportunity to run
                 // application synchronization. This prevents some footguns when working with the
@@ -35404,10 +35440,10 @@ class ChangeDetectionSchedulerImpl {
                 force = true;
                 break;
             }
-            case 10 /* NotificationSource.ViewDetachedFromDOM */:
-            case 9 /* NotificationSource.ViewAttached */:
+            case 9 /* NotificationSource.ViewDetachedFromDOM */:
+            case 8 /* NotificationSource.ViewAttached */:
             case 7 /* NotificationSource.RenderHook */:
-            case 11 /* NotificationSource.AsyncAnimationsLoaded */:
+            case 10 /* NotificationSource.AsyncAnimationsLoaded */:
             default: {
                 // These notifications only schedule a tick but do not change whether we should refresh
                 // views. Instead, we only need to run render hooks unless another notification from the
@@ -40616,23 +40652,6 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-class ViewContext {
-    view;
-    node;
-    constructor(view, node) {
-        this.view = view;
-        this.node = node;
-    }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static __NG_ELEMENT_ID__ = injectViewContext;
-}
-function injectViewContext() {
-    return new ViewContext(getLView(), getCurrentTNode());
-}
-
 /**
  * Controls whether effects use the legacy `microtaskEffect` by default.
  */
@@ -40900,7 +40919,7 @@ const ROOT_EFFECT_NODE =
     ...BASE_EFFECT_NODE,
     consumerMarkedDirty() {
         this.scheduler.schedule(this);
-        this.notifier.notify(13 /* NotificationSource.RootEffect */);
+        this.notifier.notify(12 /* NotificationSource.RootEffect */);
     },
     destroy() {
         consumerDestroy$1(this);
@@ -40915,7 +40934,7 @@ const VIEW_EFFECT_NODE =
     consumerMarkedDirty() {
         this.view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
         markAncestorsForTraversal(this.view);
-        this.notifier.notify(14 /* NotificationSource.ViewEffect */);
+        this.notifier.notify(13 /* NotificationSource.ViewEffect */);
     },
     destroy() {
         consumerDestroy$1(this);
@@ -40942,7 +40961,7 @@ function createRootEffect(fn, scheduler, notifier) {
     node.notifier = notifier;
     node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
     node.scheduler.schedule(node);
-    node.notifier.notify(13 /* NotificationSource.RootEffect */);
+    node.notifier.notify(12 /* NotificationSource.RootEffect */);
     return node;
 }
 
@@ -41033,10 +41052,10 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
      * These are initialized to `undefined` but set in the constructor.
      */
     nodes = [undefined, undefined, undefined, undefined];
-    constructor(impl, effectHooks, scheduler, destroyRef, snapshot = null) {
+    constructor(impl, effectHooks, view, scheduler, destroyRef, snapshot = null) {
         // Note that we also initialize the underlying `AfterRenderSequence` hooks to `undefined` and
         // populate them as we create reactive nodes below.
-        super(impl, [undefined, undefined, undefined, undefined], false, destroyRef, snapshot);
+        super(impl, [undefined, undefined, undefined, undefined], view, false, destroyRef, snapshot);
         this.scheduler = scheduler;
         // Setup a reactive node for each phase.
         for (const phase of AFTER_RENDER_PHASES) {
@@ -41095,7 +41114,8 @@ function afterRenderEffect(callbackOrSpec, options) {
     if (typeof spec === 'function') {
         spec = { mixedReadWrite: callbackOrSpec };
     }
-    const sequence = new AfterRenderEffectSequence(manager.impl, [spec.earlyRead, spec.write, spec.mixedReadWrite, spec.read], scheduler, injector.get(DestroyRef), tracing?.snapshot(null));
+    const viewContext = injector.get(ViewContext, null, { optional: true });
+    const sequence = new AfterRenderEffectSequence(manager.impl, [spec.earlyRead, spec.write, spec.mixedReadWrite, spec.read], viewContext?.view, scheduler, injector.get(DestroyRef), tracing?.snapshot(null));
     manager.impl.register(sequence);
     return sequence;
 }
