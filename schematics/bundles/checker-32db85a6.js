@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.2+sha-6f315fe
+ * @license Angular v19.2.0-next.2+sha-9e847fc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10118,7 +10118,14 @@ function transformExpressionsInOp(op, transform, flags) {
                 op.trustedValueFn && transformExpressionsInExpression(op.trustedValueFn, transform, flags);
             break;
         case OpKind.RepeaterCreate:
-            op.track = transformExpressionsInExpression(op.track, transform, flags);
+            if (op.trackByOps === null) {
+                op.track = transformExpressionsInExpression(op.track, transform, flags);
+            }
+            else {
+                for (const innerOp of op.trackByOps) {
+                    transformExpressionsInOp(innerOp, transform, flags | VisitorContextFlag.InChildOperation);
+                }
+            }
             if (op.trackByFn !== null) {
                 op.trackByFn = transformExpressionsInExpression(op.trackByFn, transform, flags);
             }
@@ -10647,6 +10654,7 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, em
         emptyView,
         track,
         trackByFn: null,
+        trackByOps: null,
         tag,
         emptyTag,
         emptyAttributes: null,
@@ -11145,6 +11153,11 @@ class CompilationUnit {
             if (op.kind === OpKind.Listener || op.kind === OpKind.TwoWayListener) {
                 for (const listenerOp of op.handlerOps) {
                     yield listenerOp;
+                }
+            }
+            else if (op.kind === OpKind.RepeaterCreate && op.trackByOps !== null) {
+                for (const trackOp of op.trackByOps) {
+                    yield trackOp;
                 }
             }
         }
@@ -12873,6 +12886,9 @@ function recursivelyProcessView(view, parentScope) {
                 recursivelyProcessView(view.job.views.get(op.xref), scope);
                 if (op.emptyView) {
                     recursivelyProcessView(view.job.views.get(op.emptyView), scope);
+                }
+                if (op.trackByOps !== null) {
+                    op.trackByOps.prepend(generateVariablesInScopeForView(view, scope, false));
                 }
                 break;
             case OpKind.Listener:
@@ -23103,7 +23119,7 @@ function reifyCreateOperations(unit, ops) {
                     emptyDecls = emptyView.decls;
                     emptyVars = emptyView.vars;
                 }
-                OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.emptyTag, op.emptyAttributes, op.wholeSourceSpan));
+                OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, reifyTrackBy(unit, op), op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.emptyTag, op.emptyAttributes, op.wholeSourceSpan));
                 break;
             case OpKind.SourceLocation:
                 const locationsLiteral = literalArr(op.locations.map(({ targetSlot, offset, line, column }) => {
@@ -23284,6 +23300,8 @@ function reifyIrExpression(expr) {
             return readContextLet(expr.targetSlot.slot);
         case ExpressionKind.StoreLet:
             return storeLet(expr.value, expr.sourceSpan);
+        case ExpressionKind.TrackContext:
+            return variable('this');
         default:
             throw new Error(`AssertionError: Unsupported reification of ir.Expression kind: ${ExpressionKind[expr.kind]}`);
     }
@@ -23311,6 +23329,42 @@ function reifyListenerHandler(unit, name, handlerOps, consumesDollarEvent) {
         params.push(new FnParam('$event'));
     }
     return fn(params, handlerStmts, undefined, undefined, name);
+}
+/** Reifies the tracking expression of a `RepeaterCreateOp`. */
+function reifyTrackBy(unit, op) {
+    // If the tracking function was created already, there's nothing left to do.
+    if (op.trackByFn !== null) {
+        return op.trackByFn;
+    }
+    const params = [new FnParam('$index'), new FnParam('$item')];
+    let fn$1;
+    if (op.trackByOps === null) {
+        // If there are no additional ops related to the tracking function, we just need
+        // to turn it into a function that returns the result of the expression.
+        fn$1 = op.usesComponentInstance
+            ? fn(params, [new ReturnStatement(op.track)])
+            : arrowFn(params, op.track);
+    }
+    else {
+        // Otherwise first we need to reify the track-related ops.
+        reifyUpdateOperations(unit, op.trackByOps);
+        const statements = [];
+        for (const trackOp of op.trackByOps) {
+            if (trackOp.kind !== OpKind.Statement) {
+                throw new Error(`AssertionError: expected reified statements, but found op ${OpKind[trackOp.kind]}`);
+            }
+            statements.push(trackOp.statement);
+        }
+        // Afterwards we can create the function from those ops.
+        fn$1 =
+            op.usesComponentInstance ||
+                statements.length !== 1 ||
+                !(statements[0] instanceof ReturnStatement)
+                ? fn(params, statements)
+                : arrowFn(params, statements[0].value);
+    }
+    op.trackByFn = unit.job.pool.getSharedFunctionReference(fn$1, '_forTrack');
+    return op.trackByFn;
 }
 
 /**
@@ -23409,6 +23463,11 @@ function processLexicalScope$1(view, ops) {
             case OpKind.Listener:
             case OpKind.TwoWayListener:
                 processLexicalScope$1(view, op.handlerOps);
+                break;
+            case OpKind.RepeaterCreate:
+                if (op.trackByOps !== null) {
+                    processLexicalScope$1(view, op.trackByOps);
+                }
                 break;
         }
     }
@@ -23842,6 +23901,11 @@ function processLexicalScope(unit, ops, savedView) {
                 // lexical scope.
                 processLexicalScope(unit, op.handlerOps, savedView);
                 break;
+            case OpKind.RepeaterCreate:
+                if (op.trackByOps !== null) {
+                    processLexicalScope(unit, op.trackByOps, savedView);
+                }
+                break;
         }
     }
     // Next, use the `scope` mapping to match `ir.LexicalReadExpr` with defined names in the lexical
@@ -24242,6 +24306,9 @@ function generateTemporaries(ops) {
         if (op.kind === OpKind.Listener || op.kind === OpKind.TwoWayListener) {
             op.handlerOps.prepend(generateTemporaries(op.handlerOps));
         }
+        else if (op.kind === OpKind.RepeaterCreate && op.trackByOps !== null) {
+            op.trackByOps.prepend(generateTemporaries(op.trackByOps));
+        }
     }
     return generatedStatements;
 }
@@ -24254,49 +24321,6 @@ function assignName(names, expr) {
         throw new Error(`Found xref with unassigned name: ${expr.xref}`);
     }
     expr.name = name;
-}
-
-/**
- * Generate track functions that need to be extracted to the constant pool. This entails wrapping
- * them in an arrow (or traditional) function, replacing context reads with `this.`, and storing
- * them in the constant pool.
- *
- * Note that, if a track function was previously optimized, it will not need to be extracted, and
- * this phase is a no-op.
- */
-function generateTrackFns(job) {
-    for (const unit of job.units) {
-        for (const op of unit.create) {
-            if (op.kind !== OpKind.RepeaterCreate) {
-                continue;
-            }
-            if (op.trackByFn !== null) {
-                // The final track function was already set, probably because it was optimized.
-                continue;
-            }
-            // Find all component context reads.
-            let usesComponentContext = false;
-            op.track = transformExpressionsInExpression(op.track, (expr) => {
-                if (expr instanceof PipeBindingExpr || expr instanceof PipeBindingVariadicExpr) {
-                    throw new Error(`Illegal State: Pipes are not allowed in this context`);
-                }
-                if (expr instanceof TrackContextExpr) {
-                    usesComponentContext = true;
-                    return variable('this');
-                }
-                return expr;
-            }, VisitorContextFlag.None);
-            let fn;
-            const fnParams = [new FnParam('$index'), new FnParam('$item')];
-            if (usesComponentContext) {
-                fn = new FunctionExpr(fnParams, [new ReturnStatement(op.track)]);
-            }
-            else {
-                fn = arrowFn(fnParams, op.track);
-            }
-            op.trackByFn = job.pool.getSharedFunctionReference(fn, '_forTrack');
-        }
-    }
 }
 
 /**
@@ -24345,12 +24369,20 @@ function optimizeTrackFns(job) {
                 // Replace context reads with a special IR expression, since context reads in a track
                 // function are emitted specially.
                 op.track = transformExpressionsInExpression(op.track, (expr) => {
-                    if (expr instanceof ContextExpr) {
+                    if (expr instanceof PipeBindingExpr || expr instanceof PipeBindingVariadicExpr) {
+                        throw new Error(`Illegal State: Pipes are not allowed in this context`);
+                    }
+                    else if (expr instanceof ContextExpr) {
                         op.usesComponentInstance = true;
                         return new TrackContextExpr(expr.view);
                     }
                     return expr;
                 }, VisitorContextFlag.None);
+                // Also create an OpList for the tracking expression since it may need
+                // additional ops when generating the final code (e.g. temporary variables).
+                const trackOpList = new OpList();
+                trackOpList.push(createStatementOp(new ReturnStatement(op.track, op.track.sourceSpan)));
+                op.trackByOps = trackOpList;
             }
         }
     }
@@ -24575,12 +24607,18 @@ function optimizeVariables(job) {
             if (op.kind === OpKind.Listener || op.kind === OpKind.TwoWayListener) {
                 inlineAlwaysInlineVariables(op.handlerOps);
             }
+            else if (op.kind === OpKind.RepeaterCreate && op.trackByOps !== null) {
+                inlineAlwaysInlineVariables(op.trackByOps);
+            }
         }
         optimizeVariablesInOpList(unit.create, job.compatibility);
         optimizeVariablesInOpList(unit.update, job.compatibility);
         for (const op of unit.create) {
             if (op.kind === OpKind.Listener || op.kind === OpKind.TwoWayListener) {
                 optimizeVariablesInOpList(op.handlerOps, job.compatibility);
+            }
+            else if (op.kind === OpKind.RepeaterCreate && op.trackByOps !== null) {
+                optimizeVariablesInOpList(op.trackByOps, job.compatibility);
             }
         }
     }
@@ -25162,7 +25200,6 @@ const phases = [
     { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
     { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
     { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
-    { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
     { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
     { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
     { kind: CompilationJobKind.Both, fn: collectElementConsts },
@@ -30696,7 +30733,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0-next.2+sha-6f315fe');
+new Version('19.2.0-next.2+sha-9e847fc');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32104,7 +32141,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-9af84be9.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-32db85a6.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
