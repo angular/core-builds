@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.5+sha-f9e5900
+ * @license Angular v19.1.5+sha-b41a263
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -297,11 +297,18 @@ class CommonCollector extends checker.RecursiveVisitor {
                 this.count++;
             }
         }
+        super.visitBlock(ast, null);
     }
     visitText(ast) {
         if (this.hasPipes(ast.value)) {
             this.count++;
         }
+    }
+    visitLetDeclaration(decl) {
+        if (this.hasPipes(decl.value)) {
+            this.count++;
+        }
+        super.visitLetDeclaration(decl, null);
     }
     hasDirectives(input) {
         return commonModuleDirectives.has(input);
