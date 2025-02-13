@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-fb39fe9
+ * @license Angular v19.2.0-next.3+sha-973033a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-32db85a6.js');
+var checker = require('./checker-67b89515.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-d5020c9c.js');
-var apply_import_manager = require('./apply_import_manager-f4d044b2.js');
+var index = require('./index-de161193.js');
+var apply_import_manager = require('./apply_import_manager-8f786f75.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-507de2f1.js');
+require('./program-8f664314.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
