@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.6+sha-04851c7
+ * @license Angular v19.1.6+sha-16fc074
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30488,7 +30488,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.6+sha-04851c7');
+new Version('19.1.6+sha-16fc074');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31896,7 +31896,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-58684f3f.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-2760b2a4.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32526,6 +32526,11 @@ const patchedReferencedAliasesSymbol = Symbol('patchedReferencedAliases');
  * that have been referenced in a value-position by the transform, such the installed patch can
  * ensure that those import declarations are not elided.
  *
+ * If `null` is returned then the transform operates in an isolated context, i.e. using the
+ * `ts.transform` API. In such scenario there is no information whether an alias declaration
+ * is referenced, so all alias declarations are naturally preserved and explicitly registering
+ * an alias declaration as used isn't necessary.
+ *
  * See below. Note that this uses sourcegraph as the TypeScript checker file doesn't display on
  * Github.
  * https://sourcegraph.com/github.com/microsoft/TypeScript@3eaa7c65f6f076a08a5f7f1946fd0df7c7430259/-/blob/src/compiler/checker.ts#L31219-31257
@@ -32537,6 +32542,11 @@ function loadIsReferencedAliasDeclarationPatch(context) {
         throwIncompatibleTransformationContextError();
     }
     const emitResolver = context.getEmitResolver();
+    if (emitResolver === undefined) {
+        // In isolated `ts.transform` operations no emit resolver is present, return null as `isReferencedAliasDeclaration`
+        // will never be invoked.
+        return null;
+    }
     // The emit resolver may have been patched already, in which case we return the set of referenced
     // aliases that was created when the patch was first applied.
     // See https://github.com/angular/angular/issues/40276.
@@ -32662,7 +32672,7 @@ class DefaultImportTracker {
                         if (clausesToPreserve === null) {
                             clausesToPreserve = loadIsReferencedAliasDeclarationPatch(context);
                         }
-                        clausesToPreserve.add(clause);
+                        clausesToPreserve?.add(clause);
                     }
                 }
                 return sourceFile;
@@ -35859,7 +35869,9 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
         // doesn't drop these thinking they are unused.
         if (reusedOriginalAliasDeclarations.size > 0) {
             const referencedAliasDeclarations = loadIsReferencedAliasDeclarationPatch(ctx);
-            reusedOriginalAliasDeclarations.forEach((aliasDecl) => referencedAliasDeclarations.add(aliasDecl));
+            if (referencedAliasDeclarations !== null) {
+                reusedOriginalAliasDeclarations.forEach((aliasDecl) => referencedAliasDeclarations.add(aliasDecl));
+            }
         }
         // Update the set of affected files to include files that need extra statements to be inserted.
         if (extraStatementsForFiles !== undefined) {
