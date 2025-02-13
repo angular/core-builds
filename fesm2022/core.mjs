@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.6+sha-adbf013
+ * @license Angular v19.1.6+sha-04851c7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -377,13 +377,11 @@ function stringify(token) {
  * @returns concatenated string.
  */
 function concatStringsWithSpace(before, after) {
-    return before == null || before === ''
-        ? after === null
-            ? ''
-            : after
-        : after == null || after === ''
-            ? before
-            : before + ' ' + after;
+    if (!before)
+        return after || '';
+    if (!after)
+        return before;
+    return `${before} ${after}`;
 }
 /**
  * Ellipses the string in the middle when longer than the max length
@@ -17951,7 +17949,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.6+sha-adbf013']
+                ? ['ng-version', '19.1.6+sha-04851c7']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34924,7 +34922,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.6+sha-adbf013');
+const VERSION = new Version('19.1.6+sha-04851c7');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
