@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.3+sha-973033a
+ * @license Angular v19.2.0-next.3+sha-2588985
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -280,7 +280,7 @@ export declare function setAlternateWeakRefImpl(impl: unknown): void;
 
 export declare function setPostSignalSetFn(fn: (() => void) | null): (() => void) | null;
 
-export declare function setThrowInvalidWriteToSignalError(fn: () => never): void;
+export declare function setThrowInvalidWriteToSignalError(fn: <T>(node: SignalNode<T>) => never): void;
 
 /**
  * Symbol used to tell `Signal`s apart from other functions.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.3+sha-973033a
+ * @license Angular v19.2.0-next.3+sha-2588985
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -421,8 +421,8 @@ function defaultThrowError() {
     throw new Error();
 }
 let throwInvalidWriteToSignalErrorFn = defaultThrowError;
-function throwInvalidWriteToSignalError() {
-    throwInvalidWriteToSignalErrorFn();
+function throwInvalidWriteToSignalError(node) {
+    throwInvalidWriteToSignalErrorFn(node);
 }
 function setThrowInvalidWriteToSignalError(fn) {
     throwInvalidWriteToSignalErrorFn = fn;
@@ -459,7 +459,7 @@ function signalGetFn() {
 }
 function signalSetFn(node, newValue) {
     if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
+        throwInvalidWriteToSignalError(node);
     }
     if (!node.equal(node.value, newValue)) {
         node.value = newValue;
@@ -468,7 +468,7 @@ function signalSetFn(node, newValue) {
 }
 function signalUpdateFn(node, updater) {
     if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
+        throwInvalidWriteToSignalError(node);
     }
     signalSetFn(node, updater(node.value));
 }
