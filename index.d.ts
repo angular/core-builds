@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.3+sha-47d5e1e
+ * @license Angular v19.2.0-next.3+sha-3e39da5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,6 +14,7 @@ import { SignalNode } from '@angular/core/primitives/signals';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
+import { ValueEqualityFn as ValueEqualityFn_2 } from '@angular/core/primitives/signals';
 import { ɵProfiler as ɵProfiler_2 } from '@angular/core';
 import { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 
@@ -1301,6 +1302,22 @@ export declare interface BaseResourceOptions<T, R> {
      * Overrides the `Injector` used by `resource`.
      */
     injector?: Injector;
+}
+
+/**
+ * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
+ */
+declare abstract class BaseWritableResource<T> implements WritableResource<T> {
+    readonly value: WritableSignal<T>;
+    abstract readonly status: Signal<ResourceStatus>;
+    abstract readonly error: Signal<unknown>;
+    abstract reload(): boolean;
+    constructor(value: Signal<T>);
+    abstract set(value: T): void;
+    update(updateFn: (value: T) => T): void;
+    readonly isLoading: Signal<boolean>;
+    hasValue(): this is ResourceRef<Exclude<T, undefined>>;
+    asReadonly(): Resource<T>;
 }
 
 
@@ -12761,6 +12778,11 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
     abstract onDestroy(callback: Function): void;
 }
 
+declare type WrappedRequest = {
+    request: unknown;
+    reload: number;
+};
+
 /**
  * A `Resource` with a mutable value.
  *
@@ -14669,6 +14691,40 @@ export declare function ɵresetJitOptions(): void;
 export declare function ɵresolveComponentResources(resourceResolver: (url: string) => Promise<string | {
     text(): Promise<string>;
 }>): Promise<void>;
+
+/**
+ * Implementation for `resource()` which uses a `linkedSignal` to manage the resource's state.
+ */
+export declare class ɵResourceImpl<T, R> extends BaseWritableResource<T> implements ResourceRef<T> {
+    private readonly loaderFn;
+    private readonly defaultValue;
+    private readonly equal;
+    private readonly pendingTasks;
+    /**
+     * The current state of the resource. Status, value, and error are derived from this.
+     */
+    private readonly state;
+    /**
+     * Combines the current request with a reload counter which allows the resource to be reloaded on
+     * imperative command.
+     */
+    protected readonly extRequest: WritableSignal<WrappedRequest>;
+    private readonly effectRef;
+    private pendingController;
+    private resolvePendingTask;
+    private destroyed;
+    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn_2<T> | undefined, injector: Injector);
+    readonly status: Signal<ResourceStatus>;
+    readonly error: Signal<unknown>;
+    /**
+     * Called either directly via `WritableResource.set` or via `.value.set()`.
+     */
+    set(value: T): void;
+    reload(): boolean;
+    destroy(): void;
+    private loadEffect;
+    private abortInProgressLoad;
+}
 
 export declare function ɵrestoreComponentResolutionQueue(queue: Map<Type<any>, Component>): void;
 
