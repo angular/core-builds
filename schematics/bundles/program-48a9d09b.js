@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-ea5b737
+ * @license Angular v19.2.0-next.3+sha-c076b57
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1011,7 +1011,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1029,7 +1029,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1124,7 +1124,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1540,7 +1540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1575,7 +1575,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1626,7 +1626,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1659,7 +1659,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1710,7 +1710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-c076b57'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -17802,6 +17802,7 @@ function requireRe () {
 		const re = exports.re = [];
 		const safeRe = exports.safeRe = [];
 		const src = exports.src = [];
+		const safeSrc = exports.safeSrc = [];
 		const t = exports.t = {};
 		let R = 0;
 
@@ -17834,6 +17835,7 @@ function requireRe () {
 		  debug(name, index, value);
 		  t[name] = index;
 		  src[index] = value;
+		  safeSrc[index] = safe;
 		  re[index] = new RegExp(value, isGlobal ? 'g' : undefined);
 		  safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined);
 		};
@@ -18075,7 +18077,7 @@ function requireSemver$1 () {
 	hasRequiredSemver$1 = 1;
 	const debug = requireDebug();
 	const { MAX_LENGTH, MAX_SAFE_INTEGER } = requireConstants();
-	const { safeRe: re, t } = requireRe();
+	const { safeRe: re, safeSrc: src, t } = requireRe();
 
 	const parseOptions = requireParseOptions();
 	const { compareIdentifiers } = requireIdentifiers();
@@ -18085,7 +18087,7 @@ function requireSemver$1 () {
 
 	    if (version instanceof SemVer) {
 	      if (version.loose === !!options.loose &&
-	          version.includePrerelease === !!options.includePrerelease) {
+	        version.includePrerelease === !!options.includePrerelease) {
 	        return version
 	      } else {
 	        version = version.version;
@@ -18251,6 +18253,20 @@ function requireSemver$1 () {
 	  // preminor will bump the version up to the next minor release, and immediately
 	  // down to pre-release. premajor and prepatch work the same way.
 	  inc (release, identifier, identifierBase) {
+	    if (release.startsWith('pre')) {
+	      if (!identifier && identifierBase === false) {
+	        throw new Error('invalid increment argument: identifier is empty')
+	      }
+	      // Avoid an invalid semver results
+	      if (identifier) {
+	        const r = new RegExp(`^${this.options.loose ? src[t.PRERELEASELOOSE] : src[t.PRERELEASE]}$`);
+	        const match = `-${identifier}`.match(r);
+	        if (!match || match[1] !== identifier) {
+	          throw new Error(`invalid identifier: ${identifier}`)
+	        }
+	      }
+	    }
+
 	    switch (release) {
 	      case 'premajor':
 	        this.prerelease.length = 0;
@@ -18280,6 +18296,12 @@ function requireSemver$1 () {
 	          this.inc('patch', identifier, identifierBase);
 	        }
 	        this.inc('pre', identifier, identifierBase);
+	        break
+	      case 'release':
+	        if (this.prerelease.length === 0) {
+	          throw new Error(`version ${this.raw} is not a prerelease`)
+	        }
+	        this.prerelease.length = 0;
 	        break
 
 	      case 'major':
@@ -18323,10 +18345,6 @@ function requireSemver$1 () {
 	      // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
 	      case 'pre': {
 	        const base = Number(identifierBase) ? 1 : 0;
-
-	        if (!identifier && identifierBase === false) {
-	          throw new Error('invalid increment argument: identifier is empty')
-	        }
 
 	        if (this.prerelease.length === 0) {
 	          this.prerelease = [base];
@@ -18496,20 +18514,13 @@ function requireDiff () {
 	      return 'major'
 	    }
 
-	    // Otherwise it can be determined by checking the high version
-
-	    if (highVersion.patch) {
-	      // anything higher than a patch bump would result in the wrong version
+	    // If the main part has no difference
+	    if (lowVersion.compareMain(highVersion) === 0) {
+	      if (lowVersion.minor && !lowVersion.patch) {
+	        return 'minor'
+	      }
 	      return 'patch'
 	    }
-
-	    if (highVersion.minor) {
-	      // anything higher than a minor bump would result in the wrong version
-	      return 'minor'
-	    }
-
-	    // bumping major/minor/patch all have same result
-	    return 'major'
 	  }
 
 	  // add the `pre` prefix if we are going to a prerelease version
@@ -20378,7 +20389,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.0-next.3+sha-ea5b737` usually means that core is at head so it supports
+    // A version of `19.2.0-next.3+sha-c076b57` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
