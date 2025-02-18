@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.6+sha-6d8c2e2
+ * @license Angular v19.1.6+sha-ec1e4c3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2913,10 +2913,6 @@ class Identifiers {
     static ProvidersFeature = { name: 'ɵɵProvidersFeature', moduleName: CORE };
     static HostDirectivesFeature = {
         name: 'ɵɵHostDirectivesFeature',
-        moduleName: CORE,
-    };
-    static InputTransformsFeatureFeature = {
-        name: 'ɵɵInputTransformsFeature',
         moduleName: CORE,
     };
     static ExternalStylesFeature = {
@@ -28502,19 +28498,12 @@ function addFeatures(definitionMap, meta) {
     const features = [];
     const providers = meta.providers;
     const viewProviders = meta.viewProviders;
-    const inputKeys = Object.keys(meta.inputs);
     if (providers || viewProviders) {
         const args = [providers || new LiteralArrayExpr([])];
         if (viewProviders) {
             args.push(viewProviders);
         }
         features.push(importExpr(Identifiers.ProvidersFeature).callFn(args));
-    }
-    for (const key of inputKeys) {
-        if (meta.inputs[key].transformFunction !== null) {
-            features.push(importExpr(Identifiers.InputTransformsFeatureFeature));
-            break;
-        }
     }
     // Note: host directives feature needs to be inserted before the
     // inheritance feature to ensure the correct execution order.
@@ -30488,7 +30477,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.6+sha-6d8c2e2');
+new Version('19.1.6+sha-ec1e4c3');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31896,7 +31885,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-2760b2a4.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-2bdbb582.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
