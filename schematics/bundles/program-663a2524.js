@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-be32d63
+ * @license Angular v19.2.0-next.3+sha-ea5b737
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1011,7 +1011,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1029,7 +1029,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1124,7 +1124,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1540,7 +1540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1575,7 +1575,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1626,7 +1626,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1659,7 +1659,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1710,7 +1710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-be32d63'));
+    definitionMap.set('version', checker.literal('19.2.0-next.3+sha-ea5b737'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -16781,7 +16781,7 @@ function buildDiagnosticForSignal(ctx, node, component) {
     }
     return [];
 }
-const factory$9 = {
+const factory$a = {
     code: checker.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED,
     name: checker.ExtendedTemplateDiagnosticName.INTERPOLATED_SIGNAL_NOT_INVOKED,
     create: () => new InterpolatedSignalCheck(),
@@ -16807,7 +16807,7 @@ class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$8 = {
+const factory$9 = {
     code: checker.ErrorCode.INVALID_BANANA_IN_BOX,
     name: checker.ExtendedTemplateDiagnosticName.INVALID_BANANA_IN_BOX,
     create: () => new InvalidBananaInBoxCheck(),
@@ -16868,7 +16868,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$7 = {
+const factory$8 = {
     code: checker.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_CONTROL_FLOW_DIRECTIVE,
     create: (options) => {
@@ -16901,7 +16901,7 @@ class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$6 = {
+const factory$7 = {
     code: checker.ErrorCode.MISSING_NGFOROF_LET,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_NGFOROF_LET,
     create: () => new MissingNgForOfLetCheck(),
@@ -16946,7 +16946,7 @@ class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$5 = {
+const factory$6 = {
     code: checker.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE,
     name: checker.ExtendedTemplateDiagnosticName.NULLISH_COALESCING_NOT_NULLABLE,
     create: (options) => {
@@ -17003,7 +17003,7 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$4 = {
+const factory$5 = {
     code: checker.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE,
     name: checker.ExtendedTemplateDiagnosticName.OPTIONAL_CHAIN_NOT_NULLABLE,
     create: (options) => {
@@ -17034,7 +17034,7 @@ class SuffixNotSupportedCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$3 = {
+const factory$4 = {
     code: checker.ErrorCode.SUFFIX_NOT_SUPPORTED,
     name: checker.ExtendedTemplateDiagnosticName.SUFFIX_NOT_SUPPORTED,
     create: () => new SuffixNotSupportedCheck(),
@@ -17079,7 +17079,7 @@ class TextAttributeNotBindingSpec extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$2 = {
+const factory$3 = {
     code: checker.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING,
     name: checker.ExtendedTemplateDiagnosticName.TEXT_ATTRIBUTE_NOT_BINDING,
     create: () => new TextAttributeNotBindingSpec(),
@@ -17139,7 +17139,7 @@ function assertExpressionInvoked(expression, component, node, expressionText, ct
 function generateStringFromExpression(expression, source) {
     return source.substring(expression.span.start, expression.span.end);
 }
-const factory$1 = {
+const factory$2 = {
     code: checker.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     name: checker.ExtendedTemplateDiagnosticName.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     create: () => new UninvokedFunctionInEventBindingSpec(),
@@ -17183,10 +17183,43 @@ class UnusedLetDeclarationCheck extends TemplateCheckWithVisitor {
         return this.analysis.get(node);
     }
 }
-const factory = {
+const factory$1 = {
     code: checker.ErrorCode.UNUSED_LET_DECLARATION,
     name: checker.ExtendedTemplateDiagnosticName.UNUSED_LET_DECLARATION,
     create: () => new UnusedLetDeclarationCheck(),
+};
+
+const NG_SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
+/**
+ * Ensures that the special attribute `ngSkipHydration` is not a binding and has no other
+ * value than `"true"` or an empty value.
+ */
+class NgSkipHydrationSpec extends TemplateCheckWithVisitor {
+    code = checker.ErrorCode.SKIP_HYDRATION_NOT_STATIC;
+    visitNode(ctx, component, node) {
+        /** Binding should always error */
+        if (node instanceof checker.BoundAttribute && node.name === NG_SKIP_HYDRATION_ATTR_NAME) {
+            const errorString = `ngSkipHydration should not be used as a binding.`;
+            const diagnostic = ctx.makeTemplateDiagnostic(node.sourceSpan, errorString);
+            return [diagnostic];
+        }
+        /** No value, empty string or `"true"` are the only valid values */
+        const acceptedValues = ['true', '' /* empty string */];
+        if (node instanceof checker.TextAttribute &&
+            node.name === NG_SKIP_HYDRATION_ATTR_NAME &&
+            !acceptedValues.includes(node.value) &&
+            node.value !== undefined) {
+            const errorString = `ngSkipHydration only accepts "true" or "" as value or no value at all. For example 'ngSkipHydration="true"' or 'ngSkipHydration'`;
+            const diagnostic = ctx.makeTemplateDiagnostic(node.sourceSpan, errorString);
+            return [diagnostic];
+        }
+        return [];
+    }
+}
+const factory = {
+    code: checker.ErrorCode.SKIP_HYDRATION_NOT_STATIC,
+    name: checker.ExtendedTemplateDiagnosticName.SKIP_HYDRATION_NOT_STATIC,
+    create: () => new NgSkipHydrationSpec(),
 };
 
 /**
@@ -17276,14 +17309,15 @@ function assertNever(value) {
 }
 
 const ALL_DIAGNOSTIC_FACTORIES = [
-    factory$8,
-    factory$5,
-    factory$4,
-    factory$7,
-    factory$2,
-    factory$6,
-    factory$3,
     factory$9,
+    factory$6,
+    factory$5,
+    factory$8,
+    factory$3,
+    factory$7,
+    factory$4,
+    factory$a,
+    factory$2,
     factory$1,
     factory,
 ];
@@ -20344,7 +20378,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.0-next.3+sha-be32d63` usually means that core is at head so it supports
+    // A version of `19.2.0-next.3+sha-ea5b737` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
