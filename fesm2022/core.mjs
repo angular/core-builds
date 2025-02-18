@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.6+sha-26c64a8
+ * @license Angular v19.1.6+sha-6d8c2e2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12192,6 +12192,206 @@ function setupStaticAttributes(renderer, element, tNode) {
 }
 
 /**
+ * Creates a TView instance
+ *
+ * @param type Type of `TView`.
+ * @param declTNode Declaration location of this `TView`.
+ * @param templateFn Template function
+ * @param decls The number of nodes, local refs, and pipes in this template
+ * @param directives Registry of directives for this view
+ * @param pipes Registry of pipes for this view
+ * @param viewQuery View queries for this view
+ * @param schemas Schemas for this view
+ * @param consts Constants for this view
+ */
+function createTView(type, declTNode, templateFn, decls, vars, directives, pipes, viewQuery, schemas, constsOrFactory, ssrId) {
+    ngDevMode && ngDevMode.tView++;
+    const bindingStartIndex = HEADER_OFFSET + decls;
+    // This length does not yet contain host bindings from child directives because at this point,
+    // we don't know which directives are active on this template. As soon as a directive is matched
+    // that has a host binding, we will update the blueprint with that def's hostVars count.
+    const initialViewLength = bindingStartIndex + vars;
+    const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
+    const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
+    const tView = (blueprint[TVIEW] = {
+        type: type,
+        blueprint: blueprint,
+        template: templateFn,
+        queries: null,
+        viewQuery: viewQuery,
+        declTNode: declTNode,
+        data: blueprint.slice().fill(null, bindingStartIndex),
+        bindingStartIndex: bindingStartIndex,
+        expandoStartIndex: initialViewLength,
+        hostBindingOpCodes: null,
+        firstCreatePass: true,
+        firstUpdatePass: true,
+        staticViewQueries: false,
+        staticContentQueries: false,
+        preOrderHooks: null,
+        preOrderCheckHooks: null,
+        contentHooks: null,
+        contentCheckHooks: null,
+        viewHooks: null,
+        viewCheckHooks: null,
+        destroyHooks: null,
+        cleanup: null,
+        contentQueries: null,
+        components: null,
+        directiveRegistry: typeof directives === 'function' ? directives() : directives,
+        pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
+        firstChild: null,
+        schemas: schemas,
+        consts: consts,
+        incompleteFirstPass: false,
+        ssrId,
+    });
+    if (ngDevMode) {
+        // For performance reasons it is important that the tView retains the same shape during runtime.
+        // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
+        // prevent class transitions.
+        Object.seal(tView);
+    }
+    return tView;
+}
+function createViewBlueprint(bindingStartIndex, initialViewLength) {
+    const blueprint = [];
+    for (let i = 0; i < initialViewLength; i++) {
+        blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
+    }
+    return blueprint;
+}
+/**
+ * Gets TView from a template function or creates a new TView
+ * if it doesn't already exist.
+ *
+ * @param def ComponentDef
+ * @returns TView
+ */
+function getOrCreateComponentTView(def) {
+    const tView = def.tView;
+    // Create a TView if there isn't one, or recreate it if the first create pass didn't
+    // complete successfully since we can't know for sure whether it's in a usable shape.
+    if (tView === null || tView.incompleteFirstPass) {
+        // Declaration node here is null since this function is called when we dynamically create a
+        // component and hence there is no declaration.
+        const declTNode = null;
+        return (def.tView = createTView(1 /* TViewType.Component */, declTNode, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts, def.id));
+    }
+    return tView;
+}
+function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
+    const lView = tView.blueprint.slice();
+    lView[HOST] = host;
+    lView[FLAGS] =
+        flags |
+            4 /* LViewFlags.CreationMode */ |
+            128 /* LViewFlags.Attached */ |
+            8 /* LViewFlags.FirstLViewPass */ |
+            64 /* LViewFlags.Dirty */ |
+            1024 /* LViewFlags.RefreshView */;
+    if (embeddedViewInjector !== null ||
+        (parentLView && parentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */)) {
+        lView[FLAGS] |= 2048 /* LViewFlags.HasEmbeddedViewInjector */;
+    }
+    resetPreOrderHookFlags(lView);
+    ngDevMode && tView.declTNode && parentLView && assertTNodeForLView(tView.declTNode, parentLView);
+    lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
+    lView[CONTEXT] = context;
+    lView[ENVIRONMENT] = (environment || (parentLView && parentLView[ENVIRONMENT]));
+    ngDevMode && assertDefined(lView[ENVIRONMENT], 'LViewEnvironment is required');
+    lView[RENDERER] = (renderer || (parentLView && parentLView[RENDERER]));
+    ngDevMode && assertDefined(lView[RENDERER], 'Renderer is required');
+    lView[INJECTOR] = injector || (parentLView && parentLView[INJECTOR]) || null;
+    lView[T_HOST] = tHostNode;
+    lView[ID] = getUniqueLViewId();
+    lView[HYDRATION] = hydrationInfo;
+    lView[EMBEDDED_VIEW_INJECTOR] = embeddedViewInjector;
+    ngDevMode &&
+        assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
+    lView[DECLARATION_COMPONENT_VIEW] =
+        tView.type == 2 /* TViewType.Embedded */ ? parentLView[DECLARATION_COMPONENT_VIEW] : lView;
+    return lView;
+}
+function createComponentLView(lView, hostTNode, def) {
+    const native = getNativeByTNode(hostTNode, lView);
+    const tView = getOrCreateComponentTView(def);
+    // Only component views should be added to the view tree directly. Embedded views are
+    // accessed through their containers because they may be removed / re-added later.
+    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+    const componentView = addToEndOfViewTree(lView, createLView(lView, tView, null, getInitialLViewFlagsFromDef(def), native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
+    // Component view will always be created before any injected LContainers,
+    // so this is a regular element, wrap it with the component view
+    return (lView[hostTNode.index] = componentView);
+}
+/**
+ * Gets the initial set of LView flags based on the component definition that the LView represents.
+ * @param def Component definition from which to determine the flags.
+ */
+function getInitialLViewFlagsFromDef(def) {
+    let flags = 16 /* LViewFlags.CheckAlways */;
+    if (def.signals) {
+        flags = 4096 /* LViewFlags.SignalView */;
+    }
+    else if (def.onPush) {
+        flags = 64 /* LViewFlags.Dirty */;
+    }
+    return flags;
+}
+/**
+ * When elements are created dynamically after a view blueprint is created (e.g. through
+ * i18nApply()), we need to adjust the blueprint for future template passes.
+ *
+ * @param tView `TView` associated with `LView`
+ * @param lView The `LView` containing the blueprint to adjust
+ * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
+ * @param initialValue Initial value to store in blueprint
+ */
+function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
+    if (numSlotsToAlloc === 0)
+        return -1;
+    if (ngDevMode) {
+        assertFirstCreatePass(tView);
+        assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
+        assertEqual(tView.data.length, lView.length, 'Expecting LView to be same size as TView');
+        assertEqual(tView.data.length, tView.blueprint.length, 'Expecting Blueprint to be same size as TView');
+        assertFirstUpdatePass(tView);
+    }
+    const allocIdx = lView.length;
+    for (let i = 0; i < numSlotsToAlloc; i++) {
+        lView.push(initialValue);
+        tView.blueprint.push(initialValue);
+        tView.data.push(null);
+    }
+    return allocIdx;
+}
+/**
+ * Adds LView or LContainer to the end of the current view tree.
+ *
+ * This structure will be used to traverse through nested views to remove listeners
+ * and call onDestroy callbacks.
+ *
+ * @param lView The view where LView or LContainer should be added
+ * @param adjustedHostIndex Index of the view's host node in LView[], adjusted for header
+ * @param lViewOrLContainer The LView or LContainer to add to the view tree
+ * @returns The state passed in
+ */
+function addToEndOfViewTree(lView, lViewOrLContainer) {
+    // TODO(benlesh/misko): This implementation is incorrect, because it always adds the LContainer
+    // to the end of the queue, which means if the developer retrieves the LContainers from RNodes out
+    // of order, the change detection will run out of order, as the act of retrieving the the
+    // LContainer from the RNode is what adds it to the queue.
+    if (lView[CHILD_HEAD]) {
+        lView[CHILD_TAIL][NEXT] = lViewOrLContainer;
+    }
+    else {
+        lView[CHILD_HEAD] = lViewOrLContainer;
+    }
+    lView[CHILD_TAIL] = lViewOrLContainer;
+    return lViewOrLContainer;
+}
+
+/**
  * Advances to an element for later binding instructions.
  *
  * Used in conjunction with instructions like {@link property} to act on elements with specified
@@ -12285,39 +12485,6 @@ function writeToDirectiveInput(def, instance, publicName, privateName, flags, va
     }
 }
 
-function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
-    const lView = tView.blueprint.slice();
-    lView[HOST] = host;
-    lView[FLAGS] =
-        flags |
-            4 /* LViewFlags.CreationMode */ |
-            128 /* LViewFlags.Attached */ |
-            8 /* LViewFlags.FirstLViewPass */ |
-            64 /* LViewFlags.Dirty */ |
-            1024 /* LViewFlags.RefreshView */;
-    if (embeddedViewInjector !== null ||
-        (parentLView && parentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */)) {
-        lView[FLAGS] |= 2048 /* LViewFlags.HasEmbeddedViewInjector */;
-    }
-    resetPreOrderHookFlags(lView);
-    ngDevMode && tView.declTNode && parentLView && assertTNodeForLView(tView.declTNode, parentLView);
-    lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
-    lView[CONTEXT] = context;
-    lView[ENVIRONMENT] = (environment || (parentLView && parentLView[ENVIRONMENT]));
-    ngDevMode && assertDefined(lView[ENVIRONMENT], 'LViewEnvironment is required');
-    lView[RENDERER] = (renderer || (parentLView && parentLView[RENDERER]));
-    ngDevMode && assertDefined(lView[RENDERER], 'Renderer is required');
-    lView[INJECTOR] = injector || (parentLView && parentLView[INJECTOR]) || null;
-    lView[T_HOST] = tHostNode;
-    lView[ID] = getUniqueLViewId();
-    lView[HYDRATION] = hydrationInfo;
-    lView[EMBEDDED_VIEW_INJECTOR] = embeddedViewInjector;
-    ngDevMode &&
-        assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
-    lView[DECLARATION_COMPONENT_VIEW] =
-        tView.type == 2 /* TViewType.Embedded */ ? parentLView[DECLARATION_COMPONENT_VIEW] : lView;
-    return lView;
-}
 function executeTemplate(tView, lView, templateFn, rf, context) {
     const prevSelectedIndex = getSelectedIndex();
     const isUpdatePhase = rf & 2 /* RenderFlags.Update */;
@@ -12376,95 +12543,6 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNative
             viewData[localIndex++] = value;
         }
     }
-}
-/**
- * Gets TView from a template function or creates a new TView
- * if it doesn't already exist.
- *
- * @param def ComponentDef
- * @returns TView
- */
-function getOrCreateComponentTView(def) {
-    const tView = def.tView;
-    // Create a TView if there isn't one, or recreate it if the first create pass didn't
-    // complete successfully since we can't know for sure whether it's in a usable shape.
-    if (tView === null || tView.incompleteFirstPass) {
-        // Declaration node here is null since this function is called when we dynamically create a
-        // component and hence there is no declaration.
-        const declTNode = null;
-        return (def.tView = createTView(1 /* TViewType.Component */, declTNode, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts, def.id));
-    }
-    return tView;
-}
-/**
- * Creates a TView instance
- *
- * @param type Type of `TView`.
- * @param declTNode Declaration location of this `TView`.
- * @param templateFn Template function
- * @param decls The number of nodes, local refs, and pipes in this template
- * @param directives Registry of directives for this view
- * @param pipes Registry of pipes for this view
- * @param viewQuery View queries for this view
- * @param schemas Schemas for this view
- * @param consts Constants for this view
- */
-function createTView(type, declTNode, templateFn, decls, vars, directives, pipes, viewQuery, schemas, constsOrFactory, ssrId) {
-    ngDevMode && ngDevMode.tView++;
-    const bindingStartIndex = HEADER_OFFSET + decls;
-    // This length does not yet contain host bindings from child directives because at this point,
-    // we don't know which directives are active on this template. As soon as a directive is matched
-    // that has a host binding, we will update the blueprint with that def's hostVars count.
-    const initialViewLength = bindingStartIndex + vars;
-    const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
-    const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
-    const tView = (blueprint[TVIEW] = {
-        type: type,
-        blueprint: blueprint,
-        template: templateFn,
-        queries: null,
-        viewQuery: viewQuery,
-        declTNode: declTNode,
-        data: blueprint.slice().fill(null, bindingStartIndex),
-        bindingStartIndex: bindingStartIndex,
-        expandoStartIndex: initialViewLength,
-        hostBindingOpCodes: null,
-        firstCreatePass: true,
-        firstUpdatePass: true,
-        staticViewQueries: false,
-        staticContentQueries: false,
-        preOrderHooks: null,
-        preOrderCheckHooks: null,
-        contentHooks: null,
-        contentCheckHooks: null,
-        viewHooks: null,
-        viewCheckHooks: null,
-        destroyHooks: null,
-        cleanup: null,
-        contentQueries: null,
-        components: null,
-        directiveRegistry: typeof directives === 'function' ? directives() : directives,
-        pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
-        firstChild: null,
-        schemas: schemas,
-        consts: consts,
-        incompleteFirstPass: false,
-        ssrId,
-    });
-    if (ngDevMode) {
-        // For performance reasons it is important that the tView retains the same shape during runtime.
-        // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
-        // prevent class transitions.
-        Object.seal(tView);
-    }
-    return tView;
-}
-function createViewBlueprint(bindingStartIndex, initialViewLength) {
-    const blueprint = [];
-    for (let i = 0; i < initialViewLength; i++) {
-        blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
-    }
-    return blueprint;
 }
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -12723,31 +12801,6 @@ function findDirectiveDefMatches(tView, tNode) {
     }
     return matches;
 }
-/**
- * Gets the initial set of LView flags based on the component definition that the LView represents.
- * @param def Component definition from which to determine the flags.
- */
-function getInitialLViewFlagsFromDef(def) {
-    let flags = 16 /* LViewFlags.CheckAlways */;
-    if (def.signals) {
-        flags = 4096 /* LViewFlags.SignalView */;
-    }
-    else if (def.onPush) {
-        flags = 64 /* LViewFlags.Dirty */;
-    }
-    return flags;
-}
-function createComponentLView(lView, hostTNode, def) {
-    const native = getNativeByTNode(hostTNode, lView);
-    const tView = getOrCreateComponentTView(def);
-    // Only component views should be added to the view tree directly. Embedded views are
-    // accessed through their containers because they may be removed / re-added later.
-    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-    const componentView = addToEndOfViewTree(lView, createLView(lView, tView, null, getInitialLViewFlagsFromDef(def), native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
-    // Component view will always be created before any injected LContainers,
-    // so this is a regular element, wrap it with the component view
-    return (lView[hostTNode.index] = componentView);
-}
 function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
     if (ngDevMode) {
         assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
@@ -12793,62 +12846,6 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initial
             }
         }
     }
-}
-//////////////////////////
-//// ViewContainer & View
-//////////////////////////
-/**
- * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
- *
- * @param hostNative The host element for the LContainer
- * @param hostTNode The host TNode for the LContainer
- * @param currentView The parent view of the LContainer
- * @param native The native comment element
- * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
- * @returns LContainer
- */
-function createLContainer(hostNative, currentView, native, tNode) {
-    ngDevMode && assertLView(currentView);
-    const lContainer = [
-        hostNative, // host native
-        true, // Boolean `true` in this position signifies that this is an `LContainer`
-        0, // flags
-        currentView, // parent
-        null, // next
-        tNode, // t_host
-        null, // dehydrated views
-        native, // native,
-        null, // view refs
-        null, // moved views
-    ];
-    ngDevMode &&
-        assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
-    return lContainer;
-}
-/**
- * Adds LView or LContainer to the end of the current view tree.
- *
- * This structure will be used to traverse through nested views to remove listeners
- * and call onDestroy callbacks.
- *
- * @param lView The view where LView or LContainer should be added
- * @param adjustedHostIndex Index of the view's host node in LView[], adjusted for header
- * @param lViewOrLContainer The LView or LContainer to add to the view tree
- * @returns The state passed in
- */
-function addToEndOfViewTree(lView, lViewOrLContainer) {
-    // TODO(benlesh/misko): This implementation is incorrect, because it always adds the LContainer
-    // to the end of the queue, which means if the developer retrieves the LContainers from RNodes out
-    // of order, the change detection will run out of order, as the act of retrieving the the
-    // LContainer from the RNode is what adds it to the queue.
-    if (lView[CHILD_HEAD]) {
-        lView[CHILD_TAIL][NEXT] = lViewOrLContainer;
-    }
-    else {
-        lView[CHILD_HEAD] = lViewOrLContainer;
-    }
-    lView[CHILD_TAIL] = lViewOrLContainer;
-    return lViewOrLContainer;
 }
 ///////////////////////////////
 //// Bindings & interpolations
@@ -13050,24 +13047,41 @@ function renderChildComponents(hostLView, components) {
     }
 }
 
+function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        const embeddedTView = templateTNode.tView;
+        ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+        ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+        // Embedded views follow the change detection strategy of the view they're declared in.
+        const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+        const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+        const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, options?.injector ?? null, options?.embeddedViewInjector ?? null, options?.dehydratedView ?? null);
+        const declarationLContainer = declarationLView[templateTNode.index];
+        ngDevMode && assertLContainer(declarationLContainer);
+        embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+        const declarationViewLQueries = declarationLView[QUERIES];
+        if (declarationViewLQueries !== null) {
+            embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+        }
+        // execute creation mode of a view
+        renderView(embeddedTView, embeddedLView, context);
+        return embeddedLView;
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
 /**
- * Flags for renderer-specific style modifiers.
- * @publicApi
+ * Returns whether an elements that belong to a view should be
+ * inserted into the DOM. For client-only cases, DOM elements are
+ * always inserted. For hydration cases, we check whether serialized
+ * info is available for a view and the view is not in a "skip hydration"
+ * block (in which case view contents was re-created, thus needing insertion).
  */
-var RendererStyleFlags2;
-(function (RendererStyleFlags2) {
-    // TODO(misko): This needs to be refactored into a separate file so that it can be imported from
-    // `node_manipulation.ts` Currently doing the import cause resolution order to change and fails
-    // the tests. The work around is to have hard coded value in `node_manipulation.ts` for now.
-    /**
-     * Marks a style as important.
-     */
-    RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
-    /**
-     * Marks a style as using dash case naming (this-is-dash-case).
-     */
-    RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
-})(RendererStyleFlags2 || (RendererStyleFlags2 = {}));
+function shouldAddViewToDom(tNode, dehydratedView) {
+    return (!dehydratedView || dehydratedView.firstChild === null || hasInSkipHydrationBlockFlag(tNode));
+}
 
 let _icuContainerIterate;
 /**
@@ -13089,6 +13103,25 @@ function ensureIcuContainerVisitorLoaded(loader) {
         _icuContainerIterate = loader();
     }
 }
+
+/**
+ * Flags for renderer-specific style modifiers.
+ * @publicApi
+ */
+var RendererStyleFlags2;
+(function (RendererStyleFlags2) {
+    // TODO(misko): This needs to be refactored into a separate file so that it can be imported from
+    // `node_manipulation.ts` Currently doing the import cause resolution order to change and fails
+    // the tests. The work around is to have hard coded value in `node_manipulation.ts` for now.
+    /**
+     * Marks a style as important.
+     */
+    RendererStyleFlags2[RendererStyleFlags2["Important"] = 1] = "Important";
+    /**
+     * Marks a style as using dash case naming (this-is-dash-case).
+     */
+    RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
+})(RendererStyleFlags2 || (RendererStyleFlags2 = {}));
 
 /**
  * Checks whether a TNode is considered detached, i.e. not present in the
@@ -13244,83 +13277,6 @@ function destroyViewTree(rootView) {
         lViewOrLContainer = next;
     }
 }
-/**
- * Inserts a view into a container.
- *
- * This adds the view to the container's array of active views in the correct
- * position. It also adds the view's elements to the DOM if the container isn't a
- * root node of another view (in that case, the view's elements will be added when
- * the container's parent view is added later).
- *
- * @param tView The `TView' of the `LView` to insert
- * @param lView The view to insert
- * @param lContainer The container into which the view should be inserted
- * @param index Which index in the container to insert the child view into
- */
-function insertView(tView, lView, lContainer, index) {
-    ngDevMode && assertLView(lView);
-    ngDevMode && assertLContainer(lContainer);
-    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
-    const containerLength = lContainer.length;
-    if (index > 0) {
-        // This is a new view, we need to add it to the children.
-        lContainer[indexInContainer - 1][NEXT] = lView;
-    }
-    if (index < containerLength - CONTAINER_HEADER_OFFSET) {
-        lView[NEXT] = lContainer[indexInContainer];
-        addToArray(lContainer, CONTAINER_HEADER_OFFSET + index, lView);
-    }
-    else {
-        lContainer.push(lView);
-        lView[NEXT] = null;
-    }
-    lView[PARENT] = lContainer;
-    // track views where declaration and insertion points are different
-    const declarationLContainer = lView[DECLARATION_LCONTAINER];
-    if (declarationLContainer !== null && lContainer !== declarationLContainer) {
-        trackMovedView(declarationLContainer, lView);
-    }
-    // notify query that a new view has been added
-    const lQueries = lView[QUERIES];
-    if (lQueries !== null) {
-        lQueries.insertView(tView);
-    }
-    updateAncestorTraversalFlagsOnAttach(lView);
-    // Sets the attached flag
-    lView[FLAGS] |= 128 /* LViewFlags.Attached */;
-}
-/**
- * Track views created from the declaration container (TemplateRef) and inserted into a
- * different LContainer or attached directly to ApplicationRef.
- */
-function trackMovedView(declarationContainer, lView) {
-    ngDevMode && assertDefined(lView, 'LView required');
-    ngDevMode && assertLContainer(declarationContainer);
-    const movedViews = declarationContainer[MOVED_VIEWS];
-    const parent = lView[PARENT];
-    ngDevMode && assertDefined(parent, 'missing parent');
-    if (isLView(parent)) {
-        declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
-    }
-    else {
-        const insertedComponentLView = parent[PARENT][DECLARATION_COMPONENT_VIEW];
-        ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
-        const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
-        ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
-        if (declaredComponentLView !== insertedComponentLView) {
-            // At this point the declaration-component is not same as insertion-component; this means that
-            // this is a transplanted view. Mark the declared lView as having transplanted views so that
-            // those views can participate in CD.
-            declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
-        }
-    }
-    if (movedViews === null) {
-        declarationContainer[MOVED_VIEWS] = [lView];
-    }
-    else {
-        movedViews.push(lView);
-    }
-}
 function detachMovedView(declarationContainer, lView) {
     ngDevMode && assertLContainer(declarationContainer);
     ngDevMode &&
@@ -13328,43 +13284,6 @@ function detachMovedView(declarationContainer, lView) {
     const movedViews = declarationContainer[MOVED_VIEWS];
     const declarationViewIndex = movedViews.indexOf(lView);
     movedViews.splice(declarationViewIndex, 1);
-}
-/**
- * Detaches a view from a container.
- *
- * This method removes the view from the container's array of active views. It also
- * removes the view's elements from the DOM.
- *
- * @param lContainer The container from which to detach a view
- * @param removeIndex The index of the view to detach
- * @returns Detached LView instance.
- */
-function detachView(lContainer, removeIndex) {
-    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
-        return;
-    const indexInContainer = CONTAINER_HEADER_OFFSET + removeIndex;
-    const viewToDetach = lContainer[indexInContainer];
-    if (viewToDetach) {
-        const declarationLContainer = viewToDetach[DECLARATION_LCONTAINER];
-        if (declarationLContainer !== null && declarationLContainer !== lContainer) {
-            detachMovedView(declarationLContainer, viewToDetach);
-        }
-        if (removeIndex > 0) {
-            lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
-        }
-        const removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
-        removeViewFromDOM(viewToDetach[TVIEW], viewToDetach);
-        // notify query that a view has been removed
-        const lQueries = removedLView[QUERIES];
-        if (lQueries !== null) {
-            lQueries.detachView(removedLView[TVIEW]);
-        }
-        viewToDetach[PARENT] = null;
-        viewToDetach[NEXT] = null;
-        // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~128 /* LViewFlags.Attached */;
-    }
-    return viewToDetach;
 }
 /**
  * A standalone function which destroys an LView,
@@ -13930,80 +13849,6 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
             renderer.setStyle(rNode, prop, value, flags);
         }
     }
-}
-
-function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const prevConsumer = setActiveConsumer$1(null);
-    try {
-        const embeddedTView = templateTNode.tView;
-        ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
-        ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-        // Embedded views follow the change detection strategy of the view they're declared in.
-        const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-        const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-        const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, options?.injector ?? null, options?.embeddedViewInjector ?? null, options?.dehydratedView ?? null);
-        const declarationLContainer = declarationLView[templateTNode.index];
-        ngDevMode && assertLContainer(declarationLContainer);
-        embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-        const declarationViewLQueries = declarationLView[QUERIES];
-        if (declarationViewLQueries !== null) {
-            embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
-        }
-        // execute creation mode of a view
-        renderView(embeddedTView, embeddedLView, context);
-        return embeddedLView;
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
-    }
-}
-function getLViewFromLContainer(lContainer, index) {
-    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
-    // avoid reading past the array boundaries
-    if (adjustedIndex < lContainer.length) {
-        const lView = lContainer[adjustedIndex];
-        ngDevMode && assertLView(lView);
-        return lView;
-    }
-    return undefined;
-}
-/**
- * Returns whether an elements that belong to a view should be
- * inserted into the DOM. For client-only cases, DOM elements are
- * always inserted. For hydration cases, we check whether serialized
- * info is available for a view and the view is not in a "skip hydration"
- * block (in which case view contents was re-created, thus needing insertion).
- */
-function shouldAddViewToDom(tNode, dehydratedView) {
-    return (!dehydratedView || dehydratedView.firstChild === null || hasInSkipHydrationBlockFlag(tNode));
-}
-function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
-    const tView = lView[TVIEW];
-    // Insert into the view tree so the new view can be change-detected
-    insertView(tView, lView, lContainer, index);
-    // Insert elements that belong to this view into the DOM tree
-    if (addToDOM) {
-        const beforeNode = getBeforeNodeForView(index, lContainer);
-        const renderer = lView[RENDERER];
-        const parentRNode = renderer.parentNode(lContainer[NATIVE]);
-        if (parentRNode !== null) {
-            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
-        }
-    }
-    // When in hydration mode, reset the pointer to the first child in
-    // the dehydrated view. This indicates that the view was hydrated and
-    // further attaching/detaching should work with this view as normal.
-    const hydrationInfo = lView[HYDRATION];
-    if (hydrationInfo !== null && hydrationInfo.firstChild !== null) {
-        hydrationInfo.firstChild = null;
-    }
-}
-function removeLViewFromLContainer(lContainer, index) {
-    const lView = detachView(lContainer, index);
-    if (lView !== undefined) {
-        destroyLView(lView[TVIEW], lView);
-    }
-    return lView;
 }
 
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
@@ -14625,6 +14470,187 @@ function markViewDirty(lView, source) {
         lView = parent;
     }
     return null;
+}
+
+/**
+ * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
+ *
+ * @param hostNative The host element for the LContainer
+ * @param hostTNode The host TNode for the LContainer
+ * @param currentView The parent view of the LContainer
+ * @param native The native comment element
+ * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
+ * @returns LContainer
+ */
+function createLContainer(hostNative, currentView, native, tNode) {
+    ngDevMode && assertLView(currentView);
+    const lContainer = [
+        hostNative, // host native
+        true, // Boolean `true` in this position signifies that this is an `LContainer`
+        0, // flags
+        currentView, // parent
+        null, // next
+        tNode, // t_host
+        null, // dehydrated views
+        native, // native,
+        null, // view refs
+        null, // moved views
+    ];
+    ngDevMode &&
+        assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
+    return lContainer;
+}
+function getLViewFromLContainer(lContainer, index) {
+    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
+    // avoid reading past the array boundaries
+    if (adjustedIndex < lContainer.length) {
+        const lView = lContainer[adjustedIndex];
+        ngDevMode && assertLView(lView);
+        return lView;
+    }
+    return undefined;
+}
+function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
+    const tView = lView[TVIEW];
+    // Insert into the view tree so the new view can be change-detected
+    insertView(tView, lView, lContainer, index);
+    // Insert elements that belong to this view into the DOM tree
+    if (addToDOM) {
+        const beforeNode = getBeforeNodeForView(index, lContainer);
+        const renderer = lView[RENDERER];
+        const parentRNode = renderer.parentNode(lContainer[NATIVE]);
+        if (parentRNode !== null) {
+            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
+        }
+    }
+    // When in hydration mode, reset the pointer to the first child in
+    // the dehydrated view. This indicates that the view was hydrated and
+    // further attaching/detaching should work with this view as normal.
+    const hydrationInfo = lView[HYDRATION];
+    if (hydrationInfo !== null && hydrationInfo.firstChild !== null) {
+        hydrationInfo.firstChild = null;
+    }
+}
+function removeLViewFromLContainer(lContainer, index) {
+    const lView = detachView(lContainer, index);
+    if (lView !== undefined) {
+        destroyLView(lView[TVIEW], lView);
+    }
+    return lView;
+}
+/**
+ * Detaches a view from a container.
+ *
+ * This method removes the view from the container's array of active views. It also
+ * removes the view's elements from the DOM.
+ *
+ * @param lContainer The container from which to detach a view
+ * @param removeIndex The index of the view to detach
+ * @returns Detached LView instance.
+ */
+function detachView(lContainer, removeIndex) {
+    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
+        return;
+    const indexInContainer = CONTAINER_HEADER_OFFSET + removeIndex;
+    const viewToDetach = lContainer[indexInContainer];
+    if (viewToDetach) {
+        const declarationLContainer = viewToDetach[DECLARATION_LCONTAINER];
+        if (declarationLContainer !== null && declarationLContainer !== lContainer) {
+            detachMovedView(declarationLContainer, viewToDetach);
+        }
+        if (removeIndex > 0) {
+            lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
+        }
+        const removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
+        removeViewFromDOM(viewToDetach[TVIEW], viewToDetach);
+        // notify query that a view has been removed
+        const lQueries = removedLView[QUERIES];
+        if (lQueries !== null) {
+            lQueries.detachView(removedLView[TVIEW]);
+        }
+        viewToDetach[PARENT] = null;
+        viewToDetach[NEXT] = null;
+        // Unsets the attached flag
+        viewToDetach[FLAGS] &= ~128 /* LViewFlags.Attached */;
+    }
+    return viewToDetach;
+}
+/**
+ * Inserts a view into a container.
+ *
+ * This adds the view to the container's array of active views in the correct
+ * position. It also adds the view's elements to the DOM if the container isn't a
+ * root node of another view (in that case, the view's elements will be added when
+ * the container's parent view is added later).
+ *
+ * @param tView The `TView' of the `LView` to insert
+ * @param lView The view to insert
+ * @param lContainer The container into which the view should be inserted
+ * @param index Which index in the container to insert the child view into
+ */
+function insertView(tView, lView, lContainer, index) {
+    ngDevMode && assertLView(lView);
+    ngDevMode && assertLContainer(lContainer);
+    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+    const containerLength = lContainer.length;
+    if (index > 0) {
+        // This is a new view, we need to add it to the children.
+        lContainer[indexInContainer - 1][NEXT] = lView;
+    }
+    if (index < containerLength - CONTAINER_HEADER_OFFSET) {
+        lView[NEXT] = lContainer[indexInContainer];
+        addToArray(lContainer, CONTAINER_HEADER_OFFSET + index, lView);
+    }
+    else {
+        lContainer.push(lView);
+        lView[NEXT] = null;
+    }
+    lView[PARENT] = lContainer;
+    // track views where declaration and insertion points are different
+    const declarationLContainer = lView[DECLARATION_LCONTAINER];
+    if (declarationLContainer !== null && lContainer !== declarationLContainer) {
+        trackMovedView(declarationLContainer, lView);
+    }
+    // notify query that a new view has been added
+    const lQueries = lView[QUERIES];
+    if (lQueries !== null) {
+        lQueries.insertView(tView);
+    }
+    updateAncestorTraversalFlagsOnAttach(lView);
+    // Sets the attached flag
+    lView[FLAGS] |= 128 /* LViewFlags.Attached */;
+}
+/**
+ * Track views created from the declaration container (TemplateRef) and inserted into a
+ * different LContainer or attached directly to ApplicationRef.
+ */
+function trackMovedView(declarationContainer, lView) {
+    ngDevMode && assertDefined(lView, 'LView required');
+    ngDevMode && assertLContainer(declarationContainer);
+    const movedViews = declarationContainer[MOVED_VIEWS];
+    const parent = lView[PARENT];
+    ngDevMode && assertDefined(parent, 'missing parent');
+    if (isLView(parent)) {
+        declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
+    }
+    else {
+        const insertedComponentLView = parent[PARENT][DECLARATION_COMPONENT_VIEW];
+        ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
+        const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
+        ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
+        if (declaredComponentLView !== insertedComponentLView) {
+            // At this point the declaration-component is not same as insertion-component; this means that
+            // this is a transplanted view. Mark the declared lView as having transplanted views so that
+            // those views can participate in CD.
+            declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
+        }
+    }
+    if (movedViews === null) {
+        declarationContainer[MOVED_VIEWS] = [lView];
+    }
+    else {
+        movedViews.push(lView);
+    }
 }
 
 class ViewRef$1 {
@@ -17362,34 +17388,6 @@ function ɵɵinvalidFactory() {
 }
 
 /**
- * When elements are created dynamically after a view blueprint is created (e.g. through
- * i18nApply()), we need to adjust the blueprint for future template passes.
- *
- * @param tView `TView` associated with `LView`
- * @param lView The `LView` containing the blueprint to adjust
- * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
- * @param initialValue Initial value to store in blueprint
- */
-function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
-    if (numSlotsToAlloc === 0)
-        return -1;
-    if (ngDevMode) {
-        assertFirstCreatePass(tView);
-        assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
-        assertEqual(tView.data.length, lView.length, 'Expecting LView to be same size as TView');
-        assertEqual(tView.data.length, tView.blueprint.length, 'Expecting Blueprint to be same size as TView');
-        assertFirstUpdatePass(tView);
-    }
-    const allocIdx = lView.length;
-    for (let i = 0; i < numSlotsToAlloc; i++) {
-        lView.push(initialValue);
-        tView.blueprint.push(initialValue);
-        tView.data.push(null);
-    }
-    return allocIdx;
-}
-
-/**
  * Resolve the matched directives on a node.
  */
 function resolveDirectives(tView, lView, tNode, localRefs, directiveMatcher) {
@@ -17949,7 +17947,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.6+sha-26c64a8']
+                ? ['ng-version', '19.1.6+sha-6d8c2e2']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34922,7 +34920,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.6+sha-26c64a8');
+const VERSION = new Version('19.1.6+sha-6d8c2e2');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
