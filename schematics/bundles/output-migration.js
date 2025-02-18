@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,13 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var apply_import_manager = require('./apply_import_manager-52c63c14.js');
+var project_paths = require('./project_paths-6467b259.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-67b89515.js');
 var program = require('./program-48a9d09b.js');
 require('path');
-var index = require('./index-f2ce7689.js');
+var apply_import_manager = require('./apply_import_manager-03afc2c6.js');
+var index = require('./index-a25c60db.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -95,7 +96,7 @@ function getOutputDecorator(node, reflector) {
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
 /** Computes an unique ID for a given Angular `@Output` property. */
 function getUniqueIdForProperty(info, prop) {
-    const { id } = apply_import_manager.projectFile(prop.getSourceFile(), info);
+    const { id } = project_paths.projectFile(prop.getSourceFile(), info);
     id.replace(/\.d\.ts$/, '.ts');
     return `${id}@@${prop.parent.name ?? 'unknown-class'}@@${prop.name.getText()}`;
 }
@@ -174,7 +175,7 @@ function calculateImportReplacements(info, sourceFiles) {
         const importManager = new checker.ImportManager();
         const addOnly = [];
         const addRemove = [];
-        const file = apply_import_manager.projectFile(sf, info);
+        const file = project_paths.projectFile(sf, info);
         importManager.addImport({
             requestedFile: sf,
             exportModuleSpecifier: '@angular/core',
@@ -230,21 +231,21 @@ function calculatePipeCallReplacement(info, node) {
 }
 function prepareTextReplacementForNode(info, node, replacement, start) {
     const sf = node.getSourceFile();
-    return new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
+    return new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
         position: start ?? node.getStart(),
         end: node.getEnd(),
         toInsert: replacement,
     }));
 }
 function prepareTextReplacement(file, replacement, start, end) {
-    return new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+    return new project_paths.Replacement(file, new project_paths.TextUpdate({
         position: start,
         end: end,
         toInsert: replacement,
     }));
 }
 
-class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
+class OutputMigration extends project_paths.TsurgeFunnelMigration {
     config;
     constructor(config = {}) {
         super();
@@ -295,7 +296,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
                             id: getUniqueIdForProperty(info, node),
                             aliasParam: outputDecorator.args?.at(0),
                         };
-                        const outputFile = apply_import_manager.projectFile(node.getSourceFile(), info);
+                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                         if (this.config.shouldMigrate === undefined ||
                             this.config.shouldMigrate({
                                 key: outputDef.id,
@@ -323,7 +324,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = apply_import_manager.projectFile(node.getSourceFile(), info);
+                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                     addOutputReplacement(outputFieldReplacements, id, outputFile, calculateNextFnReplacement(info, node.expression.name));
                 }
             }
@@ -332,7 +333,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = apply_import_manager.projectFile(node.getSourceFile(), info);
+                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                     if (ts__default["default"].isExpressionStatement(node.parent)) {
                         addOutputReplacement(outputFieldReplacements, id, outputFile, calculateCompleteCallReplacement(info, node.parent));
                     }
@@ -351,7 +352,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     if (isTestFile) {
-                        const outputFile = apply_import_manager.projectFile(node.getSourceFile(), info);
+                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                         addOutputReplacement(outputFieldReplacements, id, outputFile, ...calculatePipeCallReplacement(info, node));
                     }
                     else {
@@ -395,7 +396,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
         }
         // calculate import replacements but do so only for files that have output declarations
         const importReplacements = calculateImportReplacements(info, filesWithOutputDeclarations);
-        return apply_import_manager.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields: outputFieldReplacements,
             importReplacements,
@@ -425,7 +426,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
                 problematicUsages[declId] = unit.problematicUsages[declId];
             }
         }
-        return apply_import_manager.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields,
             importReplacements,
@@ -447,7 +448,7 @@ class OutputMigration extends apply_import_manager.TsurgeFunnelMigration {
             }
         }
         // Noop here as we don't have any form of special global metadata.
-        return apply_import_manager.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         const detectedOutputs = new Set(Object.keys(globalMetadata.outputFields)).size +
@@ -510,7 +511,7 @@ function migrate(options) {
         if (!buildPaths.length && !testPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run output migration.');
         }
-        const fs = new apply_import_manager.DevkitMigrationFilesystem(tree);
+        const fs = new project_paths.DevkitMigrationFilesystem(tree);
         checker.setFileSystem(fs);
         const migration = new OutputMigration({
             shouldMigrate: (_, file) => {
@@ -540,7 +541,7 @@ function migrate(options) {
         context.logger.info(``);
         context.logger.info(`Processing analysis data between targets..`);
         context.logger.info(``);
-        const combined = await apply_import_manager.synchronouslyCombineUnitData(migration, unitResults);
+        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
         if (combined === null) {
             context.logger.error('Migration failed unexpectedly with no analysis data');
             return;
@@ -550,7 +551,7 @@ function migrate(options) {
         for (const { info, tsconfigPath } of programInfos) {
             context.logger.info(`Migrating: ${tsconfigPath}..`);
             const { replacements } = await migration.migrate(globalMeta);
-            const changesPerFile = apply_import_manager.groupReplacementsByFile(replacements);
+            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
             for (const [file, changes] of changesPerFile) {
                 if (!replacementsPerFile.has(file)) {
                     replacementsPerFile.set(file, changes);

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,15 +10,16 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var apply_import_manager = require('./apply_import_manager-52c63c14.js');
+var project_paths = require('./project_paths-6467b259.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-67b89515.js');
 var program = require('./program-48a9d09b.js');
 require('path');
-var migrate_ts_type_references = require('./migrate_ts_type_references-811b7e44.js');
+var apply_import_manager = require('./apply_import_manager-03afc2c6.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-df4b91eb.js');
 var assert = require('assert');
-var index = require('./index-f2ce7689.js');
+var index = require('./index-a25c60db.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -63,7 +64,7 @@ function migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(bindingField.getSourceFile(), info), new apply_import_manager.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new project_paths.Replacement(project_paths.projectFile(bindingField.getSourceFile(), info), new project_paths.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -92,7 +93,7 @@ function migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new apply_import_manager.Replacement(reference.from.templateFile, new apply_import_manager.TextUpdate({
+        host.replacements.push(new project_paths.Replacement(reference.from.templateFile, new project_paths.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -223,7 +224,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     resolvedReadType === null && type !== undefined ? [type] : undefined, args);
     const updated = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
     return [
-        new apply_import_manager.Replacement(apply_import_manager.projectFile(node.getSourceFile(), info), new apply_import_manager.TextUpdate({
+        new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
             position: node.getStart(),
             end: node.getEnd(),
             toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, updated, sf),
@@ -264,7 +265,7 @@ function getUniqueIDForClassProperty(property, info) {
     if (property.name === undefined) {
         return null;
     }
-    const id = apply_import_manager.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
+    const id = project_paths.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
     // Note: If a class is nested, there could be an ID clash.
     // This is highly unlikely though, and this is not a problem because
     // in such cases, there is even less chance there are any references to
@@ -388,7 +389,7 @@ class KnownQueries {
         });
         this.knownQueryIDs.set(id, { key: id, node: queryField });
         const descriptor = { key: id, node: queryField };
-        const file = apply_import_manager.projectFile(queryField.getSourceFile(), this.info);
+        const file = project_paths.projectFile(queryField.getSourceFile(), this.info);
         if (this.config.shouldMigrateQuery !== undefined &&
             !this.config.shouldMigrateQuery(descriptor, file)) {
             this.markFieldIncompatible(descriptor, {
@@ -587,7 +588,7 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
             return;
         }
         const toArrayExpr = toArrayCallExpr.expression;
-        replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(toArrayExpr.getSourceFile(), info), new apply_import_manager.TextUpdate({
+        replacements.push(new project_paths.Replacement(project_paths.projectFile(toArrayExpr.getSourceFile(), info), new project_paths.TextUpdate({
             // Delete from expression end to call end. E.g. `.toArray(<..>)`.
             position: toArrayExpr.expression.getEnd(),
             end: toArrayCallExpr.getEnd(),
@@ -602,7 +603,7 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
         // Delete from expression end to call end. E.g. `.toArray(<..>)`.
         position: offset + callExpr.receiver.receiver.sourceSpan.end,
         end: offset + callExpr.sourceSpan.end,
@@ -626,7 +627,7 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
             return;
         }
         const getExpr = getCallExpr.expression;
-        replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(getExpr.getSourceFile(), info), new apply_import_manager.TextUpdate({
+        replacements.push(new project_paths.Replacement(project_paths.projectFile(getExpr.getSourceFile(), info), new project_paths.TextUpdate({
             position: getExpr.name.getStart(),
             end: getExpr.name.getEnd(),
             toInsert: 'at',
@@ -640,7 +641,7 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
         position: offset + callExpr.receiver.nameSpan.start,
         end: offset + callExpr.receiver.nameSpan.end,
         toInsert: 'at',
@@ -695,7 +696,7 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
         if (expr === null) {
             return;
         }
-        replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(expr.getSourceFile(), info), new apply_import_manager.TextUpdate({
+        replacements.push(new project_paths.Replacement(project_paths.projectFile(expr.getSourceFile(), info), new project_paths.TextUpdate({
             position: expr.name.getStart(),
             end: expr.name.getEnd(),
             toInsert: mapping.get(expr.name.text),
@@ -709,14 +710,14 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
         position: offset + expr.nameSpan.start,
         end: offset + expr.nameSpan.end,
         toInsert: mapping.get(expr.name),
     })));
 }
 
-class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration {
+class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
     config;
     constructor(config = {}) {
         super();
@@ -754,7 +755,7 @@ class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration
                     key: extractedQuery.id,
                     node: queryNode,
                 };
-                const containingFile = apply_import_manager.projectFile(queryNode.getSourceFile(), info);
+                const containingFile = project_paths.projectFile(queryNode.getSourceFile(), info);
                 // If we have a config filter function, use it here for later
                 // perf-boosted reference lookups. Useful in non-batch mode.
                 if (this.config.shouldMigrateQuery === undefined ||
@@ -858,7 +859,7 @@ class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration
         if (this.config.assumeNonBatch) {
             res.reusableAnalysisReferences = referenceResult.references;
         }
-        return apply_import_manager.confirmAsSerializable(res);
+        return project_paths.confirmAsSerializable(res);
     }
     async combine(unitA, unitB) {
         const combined = {
@@ -898,7 +899,7 @@ class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration
                 }
             }
         }
-        return apply_import_manager.confirmAsSerializable(combined);
+        return project_paths.confirmAsSerializable(combined);
     }
     async globalMeta(combinedData) {
         const globalUnitData = {
@@ -911,7 +912,7 @@ class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration
                 markFieldIncompatibleInMetadata(globalUnitData.problematicQueries, id, migrate_ts_type_references.FieldIncompatibilityReason.SignalQueries__QueryListProblematicFieldAccessed);
             }
         }
-        return apply_import_manager.confirmAsSerializable(globalUnitData);
+        return project_paths.confirmAsSerializable(globalUnitData);
     }
     async migrate(globalMetadata, info) {
         // Pre-Analyze the program and get access to the template type checker.
@@ -1116,7 +1117,7 @@ function migrate(options) {
         if (!buildPaths.length && !testPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal queries migration.');
         }
-        const fs = new apply_import_manager.DevkitMigrationFilesystem(tree);
+        const fs = new project_paths.DevkitMigrationFilesystem(tree);
         checker.setFileSystem(fs);
         const migration = new SignalQueriesMigration({
             bestEffortMode: options.bestEffortMode,
@@ -1148,7 +1149,7 @@ function migrate(options) {
         context.logger.info(``);
         context.logger.info(`Processing analysis data between targets..`);
         context.logger.info(``);
-        const combined = await apply_import_manager.synchronouslyCombineUnitData(migration, unitResults);
+        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
         if (combined === null) {
             context.logger.error('Migration failed unexpectedly with no analysis data');
             return;
@@ -1158,7 +1159,7 @@ function migrate(options) {
         for (const { info, tsconfigPath } of programInfos) {
             context.logger.info(`Migrating: ${tsconfigPath}..`);
             const { replacements } = await migration.migrate(globalMeta, info);
-            const changesPerFile = apply_import_manager.groupReplacementsByFile(replacements);
+            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
             for (const [file, changes] of changesPerFile) {
                 if (!replacementsPerFile.has(file)) {
                     replacementsPerFile.set(file, changes);

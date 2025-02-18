@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,8 +12,9 @@ var schematics = require('@angular-devkit/schematics');
 var p = require('path');
 var compiler_host = require('./compiler_host-3a32838f.js');
 var ts = require('typescript');
-var nodes = require('./nodes-a9f0b985.js');
+var ng_decorators = require('./ng_decorators-e699c081.js');
 var imports = require('./imports-abe29092.js');
+var nodes = require('./nodes-a535b2be.js');
 var leading_space = require('./leading_space-d190b83b.js');
 require('./checker-67b89515.js');
 require('os');
@@ -125,7 +126,7 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
             }
         }
         else if (ts__default["default"].isClassDeclaration(node)) {
-            const decorators = nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
+            const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
             const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
             const supportsDI = decorators.some((dec) => DECORATORS_SUPPORTING_DI.has(dec.name));
             const constructorNode = node.members.find((member) => ts__default["default"].isConstructorDeclaration(member) &&
@@ -138,7 +139,7 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
                 if (!param.type || !UNINJECTABLE_TYPE_KINDS.has(param.type.kind)) {
                     return true;
                 }
-                return nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []).some((dec) => dec.name === 'Inject' || dec.name === 'Attribute');
+                return ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []).some((dec) => dec.name === 'Inject' || dec.name === 'Attribute');
             });
             // Don't migrate abstract classes by default, because
             // their parameters aren't guaranteed to be injectable.
@@ -822,7 +823,7 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
 function createInjectReplacementCall(param, options, localTypeChecker, printer, tracker) {
     const moduleName = '@angular/core';
     const sourceFile = param.getSourceFile();
-    const decorators = nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []);
+    const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []);
     const literalProps = [];
     const type = param.type;
     let injectedType = '';

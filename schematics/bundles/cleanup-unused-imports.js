@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,13 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var apply_import_manager = require('./apply_import_manager-52c63c14.js');
+var project_paths = require('./project_paths-6467b259.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-67b89515.js');
 var program = require('./program-48a9d09b.js');
 require('path');
 require('./index-7bdf7186.js');
+var apply_import_manager = require('./apply_import_manager-03afc2c6.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -28,7 +29,7 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 /** Migration that cleans up unused imports from a project. */
-class UnusedImportsMigration extends apply_import_manager.TsurgeFunnelMigration {
+class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     printer = ts__default["default"].createPrinter();
     createProgram(tsconfigAbsPath, fs) {
         return super.createProgram(tsconfigAbsPath, fs, {
@@ -67,10 +68,10 @@ class UnusedImportsMigration extends apply_import_manager.TsurgeFunnelMigration 
             }
             this.generateReplacements(sourceFile, resolvedLocations, usageAnalysis, info, replacements);
         });
-        return apply_import_manager.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
+        return project_paths.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
     }
     async migrate(globalData) {
-        return apply_import_manager.confirmAsSerializable(globalData);
+        return project_paths.confirmAsSerializable(globalData);
     }
     async combine(unitA, unitB) {
         const combinedReplacements = [];
@@ -94,14 +95,14 @@ class UnusedImportsMigration extends apply_import_manager.TsurgeFunnelMigration 
                 }
             }
         });
-        return apply_import_manager.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             replacements: combinedReplacements,
             removedIdentifiers: combinedRemovedIdentifiers,
             changedFiles: changedFileIds.size,
         });
     }
     async globalMeta(combinedData) {
-        return apply_import_manager.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         return {
@@ -228,7 +229,7 @@ class UnusedImportsMigration extends apply_import_manager.TsurgeFunnelMigration 
         const importManager = new checker.ImportManager();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {
-            replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sourceFile, info), new apply_import_manager.TextUpdate({
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: '[]',
@@ -237,7 +238,7 @@ class UnusedImportsMigration extends apply_import_manager.TsurgeFunnelMigration 
         // Filter out the unused identifiers from an array.
         partialRemovals.forEach((toRemove, node) => {
             const newNode = ts__default["default"].factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
-            replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sourceFile, info), new apply_import_manager.TextUpdate({
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: this.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, sourceFile),
@@ -273,7 +274,7 @@ function migrate() {
         if (!buildPaths.length && !testPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot clean up unused imports.');
         }
-        const fs = new apply_import_manager.DevkitMigrationFilesystem(tree);
+        const fs = new project_paths.DevkitMigrationFilesystem(tree);
         checker.setFileSystem(fs);
         const migration = new UnusedImportsMigration();
         const unitResults = [];
@@ -287,7 +288,7 @@ function migrate() {
             context.logger.info(`Scanning for unused imports using ${tsconfigPath}`);
             unitResults.push(await migration.analyze(info));
         }
-        const combined = await apply_import_manager.synchronouslyCombineUnitData(migration, unitResults);
+        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
         if (combined === null) {
             context.logger.error('Schematic failed unexpectedly with no analysis data');
             return;
@@ -295,7 +296,7 @@ function migrate() {
         const globalMeta = await migration.globalMeta(combined);
         const replacementsPerFile = new Map();
         const { replacements } = await migration.migrate(globalMeta);
-        const changesPerFile = apply_import_manager.groupReplacementsByFile(replacements);
+        const changesPerFile = project_paths.groupReplacementsByFile(replacements);
         for (const [file, changes] of changesPerFile) {
             if (!replacementsPerFile.has(file)) {
                 replacementsPerFile.set(file, changes);

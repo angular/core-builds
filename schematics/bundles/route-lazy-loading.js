@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,6 +15,7 @@ var compiler_host = require('./compiler_host-3a32838f.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var ts = require('typescript');
 var checker = require('./checker-67b89515.js');
+var property_name = require('./property_name-7c8433f5.js');
 require('os');
 require('@angular-devkit/core');
 require('module');
@@ -34,11 +35,6 @@ function findClassDeclaration(reference, typeChecker) {
         .getTypeAtLocation(reference)
         .getSymbol()
         ?.declarations?.find(ts__default["default"].isClassDeclaration) || null);
-}
-
-/** Finds a property with a specific name in an object literal expression. */
-function findLiteralProperty(literal, name) {
-    return literal.properties.find((prop) => prop.name && ts__default["default"].isIdentifier(prop.name) && prop.name.text === name);
 }
 
 /*!
@@ -64,7 +60,7 @@ function isStandaloneComponent(node, reflector) {
     }
     const arg = decorator.args[0];
     if (ts__default["default"].isObjectLiteralExpression(arg)) {
-        const property = findLiteralProperty(arg, 'standalone');
+        const property = property_name.findLiteralProperty(arg, 'standalone');
         if (property) {
             return property.initializer.getText() === 'true';
         }
@@ -270,10 +266,10 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
     const skippedRoutes = [];
     const migratedRoutes = [];
     const importsToRemove = [];
-    const component = findLiteralProperty(element, 'component');
+    const component = property_name.findLiteralProperty(element, 'component');
     // this can be empty string or a variable that is not a string, or not present at all
-    const routePath = findLiteralProperty(element, 'path')?.getText() ?? '';
-    const children = findLiteralProperty(element, 'children');
+    const routePath = property_name.findLiteralProperty(element, 'path')?.getText() ?? '';
+    const children = property_name.findLiteralProperty(element, 'children');
     // recursively migrate children routes first if they exist
     if (children && ts__default["default"].isArrayLiteralExpression(children.initializer)) {
         for (const childRoute of children.initializer.elements) {

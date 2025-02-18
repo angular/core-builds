@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -666,65 +666,11 @@ function isWithinBasePath(fs, base, path) {
     return checker.isLocalRelativePath(fs.relative(base, path));
 }
 
-/**
- * Applies import manager changes, and writes them as replacements the
- * given result array.
- */
-function applyImportManagerChanges(importManager, replacements, sourceFiles, info) {
-    const { newImports, updatedImports, deletedImports } = importManager.finalize();
-    const printer = ts__default["default"].createPrinter({});
-    const pathToFile = new Map(sourceFiles.map((s) => [s.fileName, s]));
-    // Capture new imports
-    newImports.forEach((newImports, fileName) => {
-        newImports.forEach((newImport) => {
-            const printedImport = printer.printNode(ts__default["default"].EmitHint.Unspecified, newImport, pathToFile.get(fileName));
-            replacements.push(new Replacement(projectFile(checker.absoluteFrom(fileName), info), new TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
-        });
-    });
-    // Capture updated imports
-    for (const [oldBindings, newBindings] of updatedImports.entries()) {
-        // The import will be generated as multi-line if it already is multi-line,
-        // or if the number of elements significantly increased and it previously
-        // consisted of very few specifiers.
-        const isMultiline = oldBindings.getText().includes('\n') ||
-            (newBindings.elements.length >= 6 && oldBindings.elements.length <= 3);
-        const hasSpaceBetweenBraces = oldBindings.getText().startsWith('{ ');
-        let formatFlags = ts__default["default"].ListFormat.NamedImportsOrExportsElements |
-            ts__default["default"].ListFormat.Indented |
-            ts__default["default"].ListFormat.Braces |
-            ts__default["default"].ListFormat.PreserveLines |
-            (isMultiline ? ts__default["default"].ListFormat.MultiLine : ts__default["default"].ListFormat.SingleLine);
-        if (hasSpaceBetweenBraces) {
-            formatFlags |= ts__default["default"].ListFormat.SpaceBetweenBraces;
-        }
-        else {
-            formatFlags &= ~ts__default["default"].ListFormat.SpaceBetweenBraces;
-        }
-        const printedBindings = printer.printList(formatFlags, newBindings.elements, oldBindings.getSourceFile());
-        replacements.push(new Replacement(projectFile(oldBindings.getSourceFile(), info), new TextUpdate({
-            position: oldBindings.getStart(),
-            end: oldBindings.getEnd(),
-            // TS uses four spaces as indent. We migrate to two spaces as we
-            // assume this to be more common.
-            toInsert: printedBindings.replace(/^ {4}/gm, '  '),
-        })));
-    }
-    // Update removed imports
-    for (const removedImport of deletedImports) {
-        replacements.push(new Replacement(projectFile(removedImport.getSourceFile(), info), new TextUpdate({
-            position: removedImport.getStart(),
-            end: removedImport.getEnd(),
-            toInsert: '',
-        })));
-    }
-}
-
 exports.DevkitMigrationFilesystem = DevkitMigrationFilesystem;
 exports.Replacement = Replacement;
 exports.TextUpdate = TextUpdate;
 exports.TsurgeComplexMigration = TsurgeComplexMigration;
 exports.TsurgeFunnelMigration = TsurgeFunnelMigration;
-exports.applyImportManagerChanges = applyImportManagerChanges;
 exports.confirmAsSerializable = confirmAsSerializable;
 exports.createBaseProgramInfo = createBaseProgramInfo;
 exports.groupReplacementsByFile = groupReplacementsByFile;

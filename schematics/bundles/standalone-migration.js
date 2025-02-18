@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,8 @@ var p = require('path');
 var ts = require('typescript');
 var compiler_host = require('./compiler_host-3a32838f.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var nodes = require('./nodes-a9f0b985.js');
+var ng_decorators = require('./ng_decorators-e699c081.js');
+var nodes = require('./nodes-a535b2be.js');
 var imports = require('./imports-abe29092.js');
 var checker = require('./checker-67b89515.js');
 require('os');
@@ -671,7 +672,7 @@ function findNgModuleClassesToMigrate(sourceFile, typeChecker) {
     if (imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
         sourceFile.forEachChild(function walk(node) {
             if (ts__default["default"].isClassDeclaration(node)) {
-                const decorator = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');
+                const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');
                 const metadata = decorator ? extractMetadataLiteral(decorator.node) : null;
                 if (metadata) {
                     const declarations = findLiteralProperty(metadata, 'declarations');
@@ -854,7 +855,7 @@ function analyzeTestingModules(testObjects, typeChecker) {
             if (seenDeclarations.has(decl)) {
                 continue;
             }
-            const [decorator] = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(decl) || []);
+            const [decorator] = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(decl) || []);
             if (decorator) {
                 seenDeclarations.add(decl);
                 decorators.push(decorator);
@@ -1391,7 +1392,7 @@ function addRemovalTodos(nodes, tracker) {
 }
 /** Finds the `NgModule` decorator in a class, if it exists. */
 function findNgModuleDecorator(node, typeChecker) {
-    const decorators = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []);
+    const decorators = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []);
     return decorators.find((decorator) => decorator.name === 'NgModule') || null;
 }
 /**
@@ -1467,7 +1468,7 @@ function analyzeBootstrapCall(call, typeChecker, templateTypeChecker) {
     if (!declaration) {
         return null;
     }
-    const decorator = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
+    const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
     if (!decorator ||
         decorator.node.expression.arguments.length === 0 ||
         !ts__default["default"].isObjectLiteralExpression(decorator.node.expression.arguments[0])) {
@@ -1656,7 +1657,7 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
             : element;
         const classDeclaration = findClassDeclaration(target, typeChecker);
         const decorators = classDeclaration
-            ? nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(classDeclaration) || [])
+            ? ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(classDeclaration) || [])
             : undefined;
         if (!decorators ||
             decorators.length === 0 ||

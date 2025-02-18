@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ require('os');
 var checker = require('./checker-67b89515.js');
 var program = require('./program-48a9d09b.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-52c63c14.js');
+var project_paths = require('./project_paths-6467b259.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -615,7 +615,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
                 readAstPath: ref.readAstPath,
                 isObjectShorthandExpression: ref.isObjectShorthandExpression,
                 isWrite: ref.isWrite,
-                file: apply_import_manager.projectFile(ref.context.getSourceFile(), programInfo),
+                file: project_paths.projectFile(ref.context.getSourceFile(), programInfo),
                 hostPropertyNode: ref.context,
             },
             target: ref.targetField,
@@ -715,8 +715,8 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
                     readAstPath: res.readAstPath,
                     node: res.context,
                     isObjectShorthandExpression: res.isObjectShorthandExpression,
-                    originatingTsFile: apply_import_manager.projectFile(node.getSourceFile(), programInfo),
-                    templateFile: apply_import_manager.projectFile(checker.absoluteFrom(templateFilePath), programInfo),
+                    originatingTsFile: project_paths.projectFile(node.getSourceFile(), programInfo),
+                    templateFile: project_paths.projectFile(checker.absoluteFrom(templateFilePath), programInfo),
                     isLikelyPartOfNarrowing: res.isLikelyNarrowed,
                     isWrite: res.isWrite,
                 },
@@ -898,7 +898,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
         kind: exports.ReferenceKind.TsReference,
         from: {
             node,
-            file: apply_import_manager.projectFile(node.getSourceFile(), programInfo),
+            file: project_paths.projectFile(node.getSourceFile(), programInfo),
             isWrite: isWriteReference,
             isPartOfElementBinding: ts__default["default"].isBindingElement(node.parent),
         },
@@ -962,7 +962,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
             result.references.push({
                 kind: exports.ReferenceKind.TsClassTypeReference,
                 from: {
-                    file: apply_import_manager.projectFile(partialDirectiveInCatalyst.referenceNode.getSourceFile(), programInfo),
+                    file: project_paths.projectFile(partialDirectiveInCatalyst.referenceNode.getSourceFile(), programInfo),
                     node: partialDirectiveInCatalyst.referenceNode,
                 },
                 isPartialReference: true,

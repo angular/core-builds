@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.3+sha-b6fa69f
+ * @license Angular v19.2.0-next.3+sha-1cd3a7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var checker = require('./checker-67b89515.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-f2ce7689.js');
-var apply_import_manager = require('./apply_import_manager-52c63c14.js');
+var index = require('./index-a25c60db.js');
+var project_paths = require('./project_paths-6467b259.js');
 var leading_space = require('./leading_space-d190b83b.js');
 require('./program-48a9d09b.js');
 require('path');
@@ -915,7 +915,7 @@ function removeFromUnionIfPossible(union, filter) {
  */
 function insertPrecedingLine(node, info, text) {
     const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
-    return new apply_import_manager.Replacement(apply_import_manager.projectFile(node.getSourceFile(), info), new apply_import_manager.TextUpdate({
+    return new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
         position: node.getStart(),
         end: node.getStart(),
         toInsert: `${text}\n${leadingSpace}`,
@@ -1256,20 +1256,20 @@ function createNewBlockToInsertVariable(node, file, toInsert) {
     const contentSpace = ' '.repeat(character + 2);
     return [
         // Delete leading whitespace of the concise body.
-        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+        new project_paths.Replacement(file, new project_paths.TextUpdate({
             position: node.body.getFullStart(),
             end: node.body.getStart(),
             toInsert: '',
         })),
         // Insert leading block braces, and `toInsert` content.
         // Wrap the previous expression in a return now.
-        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+        new project_paths.Replacement(file, new project_paths.TextUpdate({
             position: node.body.getStart(),
             end: node.body.getStart(),
             toInsert: ` {\n${contentSpace}${toInsert}\n${contentSpace}return `,
         })),
         // Add trailing brace.
-        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+        new project_paths.Replacement(file, new project_paths.TextUpdate({
             position: node.body.getEnd(),
             end: node.body.getEnd(),
             toInsert: `;\n${blockSpace}}`,
@@ -1299,7 +1299,7 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
         const bindingElement = reference.parent;
         const bindingDecl = index.getBindingElementDeclaration(bindingElement);
         const sourceFile = bindingElement.getSourceFile();
-        const file = apply_import_manager.projectFile(sourceFile, info);
+        const file = project_paths.projectFile(sourceFile, info);
         const inputFieldName = bindingElement.propertyName ?? bindingElement.name;
         assert__default["default"](!ts__default["default"].isObjectBindingPattern(inputFieldName) && !ts__default["default"].isArrayBindingPattern(inputFieldName), 'Property of binding element cannot be another pattern.');
         const tmpName = nameGenerator.generate(reference.text, bindingElement);
@@ -1317,7 +1317,7 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
             console.error(`Could not migrate reference ${reference.text} in ${file.rootRelativePath}`);
             continue;
         }
-        replacements.push(new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+        replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
             position: bindingElement.getStart(),
             end: bindingElement.getEnd(),
             toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, newBindingToAccessInputField, sourceFile),
@@ -1342,7 +1342,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         const statement = parent.parent;
         return [
-            new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+            new project_paths.Replacement(file, new project_paths.TextUpdate({
                 position: statement.getEnd(),
                 end: statement.getEnd(),
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -1360,7 +1360,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpaceCount = ts__default["default"].getLineAndCharacterOfPosition(sf, spaceReferenceNode.getStart()).character + spaceOffset;
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         return [
-            new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
+            new project_paths.Replacement(file, new project_paths.TextUpdate({
                 position: bodyBlock.getStart() + 1,
                 end: bodyBlock.getStart() + 1,
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -1761,7 +1761,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // Unwrap the signal directly.
             if (recommendedNode === 'preserve') {
                 // Append `()` to unwrap the signal.
-                replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
+                replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                     position: originalNode.getEnd(),
                     end: originalNode.getEnd(),
                     toInsert: '()',
@@ -1775,7 +1775,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 const toInsert = idToSharedField.get(recommendedNode);
                 const replaceNode = index.traverseAccess(originalNode);
                 assert__default["default"](toInsert, 'no shared variable yet available');
-                replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
+                replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                     position: replaceNode.getStart(),
                     end: replaceNode.getEnd(),
                     toInsert,
@@ -1795,7 +1795,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 parent = parent.parent;
             }
             const replaceNode = index.traverseAccess(originalNode);
-            const filePath = apply_import_manager.projectFile(sf, info);
+            const filePath = project_paths.projectFile(sf, info);
             const initializer = `${replaceNode.getText()}()`;
             const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
             let sharedValueAccessExpr;
@@ -1817,13 +1817,13 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             }
             else {
                 const leadingSpace = ts__default["default"].getLineAndCharacterOfPosition(sf, referenceNodeInBlock.getStart());
-                replacements.push(new apply_import_manager.Replacement(filePath, new apply_import_manager.TextUpdate({
+                replacements.push(new project_paths.Replacement(filePath, new project_paths.TextUpdate({
                     position: referenceNodeInBlock.getStart(),
                     end: referenceNodeInBlock.getStart(),
                     toInsert: `${temporaryVariableStr}\n${' '.repeat(leadingSpace.character)}`,
                 })));
             }
-            replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                 position: replaceNode.getStart(),
                 end: replaceNode.getEnd(),
                 toInsert: sharedValueAccessExpr,
@@ -1932,12 +1932,12 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
                 exportSymbolName: 'UnwrapSignalInputs',
                 requestedFile: sf,
             });
-            host.replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
+            host.replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                 position: firstArg.getStart(),
                 end: firstArg.getStart(),
                 toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
             })));
-            host.replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
+            host.replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
         }
     }
 }
