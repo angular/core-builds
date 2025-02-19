@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.6+sha-4ec0e66
+ * @license Angular v19.1.6+sha-e16394a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -350,23 +350,21 @@ function stringify(token) {
         return token;
     }
     if (Array.isArray(token)) {
-        return '[' + token.map(stringify).join(', ') + ']';
+        return `[${token.map(stringify).join(', ')}]`;
     }
     if (token == null) {
         return '' + token;
     }
-    if (token.overriddenName) {
-        return `${token.overriddenName}`;
+    const name = token.overriddenName || token.name;
+    if (name) {
+        return `${name}`;
     }
-    if (token.name) {
-        return `${token.name}`;
+    const result = token.toString();
+    if (result == null) {
+        return '' + result;
     }
-    const res = token.toString();
-    if (res == null) {
-        return '' + res;
-    }
-    const newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+    const newLineIndex = result.indexOf('\n');
+    return newLineIndex >= 0 ? result.slice(0, newLineIndex) : result;
 }
 /**
  * Concatenates two strings with separator, allocating new strings only when necessary.
@@ -17903,7 +17901,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.6+sha-4ec0e66']
+                ? ['ng-version', '19.1.6+sha-e16394a']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34909,7 +34907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.6+sha-4ec0e66');
+const VERSION = new Version('19.1.6+sha-e16394a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
