@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.7+sha-5a66f60
+ * @license Angular v19.1.7+sha-c2102c5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7564,6 +7564,35 @@ declare const MULTIPLIER = "x";
 
 declare const NATIVE = 7;
 
+declare interface NavigateEventInit extends EventInit {
+    navigationType?: ɵNavigationTypeString;
+    canIntercept?: boolean;
+    userInitiated?: boolean;
+    hashChange?: boolean;
+    destination: ɵNavigationDestination;
+    signal: AbortSignal;
+    formData?: FormData | null;
+    downloadRequest?: string | null;
+    info?: unknown;
+}
+
+declare interface NavigationCurrentEntryChangeEventInit extends EventInit {
+    navigationType?: ɵNavigationTypeString | null;
+    from: ɵNavigationHistoryEntry;
+}
+
+
+declare interface NavigationEventMap {
+    navigate: ɵNavigateEvent;
+    navigatesuccess: Event;
+    navigateerror: ErrorEvent;
+    currententrychange: ɵNavigationCurrentEntryChangeEvent;
+}
+
+declare interface NavigationHistoryEntryEventMap {
+    dispose: Event;
+}
+
 declare const NEXT = 4;
 
 declare interface NgGlobalPublishUtils {
@@ -14027,6 +14056,108 @@ export declare class ɵMicrotaskEffectScheduler extends ZoneAwareEffectScheduler
     flush(): void;
     /** @nocollapse */
     static ɵprov: unknown;
+}
+
+export declare class ɵNavigateEvent extends Event {
+    constructor(type: string, eventInit?: NavigateEventInit);
+    readonly navigationType: ɵNavigationTypeString;
+    readonly canIntercept: boolean;
+    readonly userInitiated: boolean;
+    readonly hashChange: boolean;
+    readonly destination: ɵNavigationDestination;
+    readonly signal: AbortSignal;
+    readonly formData: FormData | null;
+    readonly downloadRequest: string | null;
+    readonly info?: unknown;
+    intercept(options?: ɵNavigationInterceptOptions): void;
+    scroll(): void;
+}
+
+export declare class ɵNavigation extends EventTarget {
+    entries(): ɵNavigationHistoryEntry[];
+    readonly currentEntry: ɵNavigationHistoryEntry | null;
+    updateCurrentEntry(options: ɵNavigationUpdateCurrentEntryOptions): void;
+    readonly transition: ɵNavigationTransition | null;
+    readonly canGoBack: boolean;
+    readonly canGoForward: boolean;
+    navigate(url: string, options?: ɵNavigationNavigateOptions): ɵNavigationResult;
+    reload(options?: ɵNavigationReloadOptions): ɵNavigationResult;
+    traverseTo(key: string, options?: ɵNavigationOptions): ɵNavigationResult;
+    back(options?: ɵNavigationOptions): ɵNavigationResult;
+    forward(options?: ɵNavigationOptions): ɵNavigationResult;
+    onnavigate: ((this: ɵNavigation, ev: ɵNavigateEvent) => any) | null;
+    onnavigatesuccess: ((this: ɵNavigation, ev: Event) => any) | null;
+    onnavigateerror: ((this: ɵNavigation, ev: ErrorEvent) => any) | null;
+    oncurrententrychange: ((this: ɵNavigation, ev: ɵNavigationCurrentEntryChangeEvent) => any) | null;
+    addEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: ɵNavigation, ev: NavigationEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: ɵNavigation, ev: NavigationEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+export declare class ɵNavigationCurrentEntryChangeEvent extends Event {
+    constructor(type: string, eventInit?: NavigationCurrentEntryChangeEventInit);
+    readonly navigationType: ɵNavigationTypeString | null;
+    readonly from: ɵNavigationHistoryEntry;
+}
+
+export declare class ɵNavigationDestination {
+    readonly url: string;
+    readonly key: string | null;
+    readonly id: string | null;
+    readonly index: number;
+    readonly sameDocument: boolean;
+    getState(): unknown;
+}
+
+export declare class ɵNavigationHistoryEntry extends EventTarget {
+    readonly key: string;
+    readonly id: string;
+    readonly url: string | null;
+    readonly index: number;
+    readonly sameDocument: boolean;
+    getState(): unknown;
+    ondispose: ((this: ɵNavigationHistoryEntry, ev: Event) => any) | null;
+    addEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: ɵNavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: ɵNavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+export declare interface ɵNavigationInterceptOptions {
+    handler?: () => Promise<void>;
+    focusReset?: 'after-transition' | 'manual';
+    scroll?: 'after-transition' | 'manual';
+}
+
+export declare interface ɵNavigationNavigateOptions extends ɵNavigationOptions {
+    state?: unknown;
+    history?: 'auto' | 'push' | 'replace';
+}
+
+export declare interface ɵNavigationOptions {
+    info?: unknown;
+}
+
+export declare interface ɵNavigationReloadOptions extends ɵNavigationOptions {
+    state?: unknown;
+}
+
+export declare interface ɵNavigationResult {
+    committed: Promise<ɵNavigationHistoryEntry>;
+    finished: Promise<ɵNavigationHistoryEntry>;
+}
+
+export declare class ɵNavigationTransition {
+    readonly navigationType: ɵNavigationTypeString;
+    readonly from: ɵNavigationHistoryEntry;
+    readonly finished: Promise<void>;
+}
+
+export declare type ɵNavigationTypeString = 'reload' | 'push' | 'replace' | 'traverse';
+
+export declare interface ɵNavigationUpdateCurrentEntryOptions {
+    state: unknown;
 }
 
 
