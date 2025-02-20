@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.7+sha-1dc5c39
+ * @license Angular v19.1.7+sha-20f806a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17901,7 +17901,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.7+sha-1dc5c39']
+                ? ['ng-version', '19.1.7+sha-20f806a']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34907,7 +34907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.7+sha-1dc5c39');
+const VERSION = new Version('19.1.7+sha-20f806a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35748,10 +35748,9 @@ class ImagePerformanceWarning {
     window = null;
     observer = null;
     options = inject(IMAGE_CONFIG);
-    isBrowser = inject(PLATFORM_ID) === 'browser';
     lcpImageUrl;
     start() {
-        if (!this.isBrowser ||
+        if ((typeof ngServerMode !== 'undefined' && ngServerMode) ||
             typeof PerformanceObserver === 'undefined' ||
             (this.options?.disableImageSizeWarning && this.options?.disableImageLazyLoadWarning)) {
             return;
@@ -35759,7 +35758,7 @@ class ImagePerformanceWarning {
         this.observer = this.initPerformanceObserver();
         const doc = getDocument();
         const win = doc.defaultView;
-        if (typeof win !== 'undefined') {
+        if (win) {
             this.window = win;
             // Wait to avoid race conditions where LCP image triggers
             // load event before it's recorded by the performance observer
