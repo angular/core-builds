@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.3.0-next.0+sha-aa58339
+ * @license Angular v19.3.0-next.0+sha-628ab40
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12676,17 +12676,15 @@ function mapPropName(name) {
 }
 function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    let inputData = tNode.inputs;
-    let dataValue;
-    if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
-        setInputsForProperty(tView, lView, dataValue, propName, value);
-        if (isComponentHost(tNode))
-            markDirtyIfOnPush(lView, tNode.index);
-        if (ngDevMode) {
-            setNgReflectProperties(lView, tView, tNode, dataValue, value);
+    if (!nativeOnly) {
+        const hasSetInput = setInputsForProperty(tNode, tView, lView, propName, value);
+        if (hasSetInput) {
+            isComponentHost(tNode) && markDirtyIfOnPush(lView, tNode.index);
+            ngDevMode && setNgReflectProperties(lView, tView, tNode, propName, value);
+            return; // Stop propcessing if we've matched at least one input.
         }
     }
-    else if (tNode.type & 3 /* TNodeType.AnyRNode */) {
+    if (tNode.type & 3 /* TNodeType.AnyRNode */) {
         const element = getNativeByTNode(tNode, lView);
         propName = mapPropName(propName);
         if (ngDevMode) {
@@ -12735,14 +12733,25 @@ function setNgReflectProperty(lView, tNode, attrName, value) {
         renderer.setValue(element, textContent);
     }
 }
-function setNgReflectProperties(lView, tView, tNode, inputConfig, value) {
-    if (tNode.type & (3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */)) {
-        // Note: we set the private name of the input as the reflected property, not the public one.
-        for (let i = 0; i < inputConfig.length; i += 2) {
-            const index = inputConfig[i];
-            const lookupName = inputConfig[i + 1];
+function setNgReflectProperties(lView, tView, tNode, publicName, value) {
+    if (!(tNode.type & (3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */))) {
+        return;
+    }
+    const inputConfig = tNode.inputs?.[publicName];
+    const hostInputConfig = tNode.hostDirectiveInputs?.[publicName];
+    if (hostInputConfig) {
+        for (let i = 0; i < hostInputConfig.length; i += 2) {
+            const index = hostInputConfig[i];
+            const publicName = hostInputConfig[i + 1];
             const def = tView.data[index];
-            setNgReflectProperty(lView, tNode, def.inputs[lookupName][0], value);
+            setNgReflectProperty(lView, tNode, def.inputs[publicName][0], value);
+        }
+    }
+    // Note: we set the private name of the input as the reflected property, not the public one.
+    if (inputConfig) {
+        for (const index of inputConfig) {
+            const def = tView.data[index];
+            setNgReflectProperty(lView, tNode, def.inputs[publicName][0], value);
         }
     }
 }
@@ -12911,7 +12920,7 @@ function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex, 
     // Since we don't have a concept of the "first update pass" we need to check for presence of the
     // binding meta-data to decide if one should be stored (or if was stored already).
     if (tData[bindingIndex] === null) {
-        if (tNode.inputs == null || !tNode.inputs[propertyName]) {
+        if (!tNode.inputs?.[propertyName] && !tNode.hostDirectiveInputs?.[propertyName]) {
             const propBindingIdxs = tNode.propertyBindings || (tNode.propertyBindings = []);
             propBindingIdxs.push(bindingIndex);
             let bindingMetadata = propertyName;
@@ -12948,21 +12957,35 @@ function handleError(lView, error) {
 /**
  * Set the inputs of directives at the current node to corresponding value.
  *
+ * @param tNode TNode on which the input is being set.
  * @param tView The current TView
  * @param lView the `LView` which contains the directives.
- * @param inputs mapping between the public "input" name and privately-known,
- *        possibly minified, property names to write to.
  * @param value Value to set.
  */
-function setInputsForProperty(tView, lView, inputs, publicName, value) {
-    for (let i = 0; i < inputs.length; i += 2) {
-        const index = inputs[i];
-        ngDevMode && assertIndexInRange(lView, index);
-        const privateName = inputs[i + 1];
-        const instance = lView[index];
-        const def = tView.data[index];
-        writeToDirectiveInput(def, instance, privateName, value);
+function setInputsForProperty(tNode, tView, lView, publicName, value) {
+    const inputs = tNode.inputs?.[publicName];
+    const hostDirectiveInputs = tNode.hostDirectiveInputs?.[publicName];
+    let hasMatch = false;
+    if (hostDirectiveInputs) {
+        for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
+            const index = hostDirectiveInputs[i];
+            ngDevMode && assertIndexInRange(lView, index);
+            const publicName = hostDirectiveInputs[i + 1];
+            const def = tView.data[index];
+            writeToDirectiveInput(def, lView[index], publicName, value);
+            hasMatch = true;
+        }
     }
+    if (inputs) {
+        for (const index of inputs) {
+            ngDevMode && assertIndexInRange(lView, index);
+            const instance = lView[index];
+            const def = tView.data[index];
+            writeToDirectiveInput(def, instance, publicName, value);
+            hasMatch = true;
+        }
+    }
+    return hasMatch;
 }
 
 function renderComponent(hostLView, componentHostIdx) {
@@ -15615,9 +15638,11 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         attrs: attrs,
         mergedAttrs: null,
         localNames: null,
-        initialInputs: undefined,
+        initialInputs: null,
         inputs: null,
+        hostDirectiveInputs: null,
         outputs: null,
+        hostDirectiveOutputs: null,
         tView: null,
         next: null,
         prev: null,
@@ -17587,87 +17612,84 @@ function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostD
  * Initializes data structures required to work with directive inputs and outputs.
  * Initialization is done for all directives matched on a given TNode.
  */
-function initializeInputAndOutputAliases(tView, tNode, hostDirectiveDefinitionMap) {
+function initializeInputAndOutputAliases(tView, tNode, hostDirectiveDefs) {
     ngDevMode && assertFirstCreatePass(tView);
-    const start = tNode.directiveStart;
-    const end = tNode.directiveEnd;
-    const tViewData = tView.data;
-    const tNodeAttrs = tNode.attrs;
-    const inputsFromAttrs = [];
-    let inputsStore = null;
-    let outputsStore = null;
-    for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
-        const directiveDef = tViewData[directiveIndex];
-        const aliasData = hostDirectiveDefinitionMap
-            ? hostDirectiveDefinitionMap.get(directiveDef)
-            : null;
-        const aliasedInputs = aliasData ? aliasData.inputs : null;
-        const aliasedOutputs = aliasData ? aliasData.outputs : null;
-        inputsStore = captureNodeBindings(0 /* CaptureNodeBindingMode.Inputs */, directiveDef.inputs, directiveIndex, inputsStore, aliasedInputs);
-        outputsStore = captureNodeBindings(1 /* CaptureNodeBindingMode.Outputs */, directiveDef.outputs, directiveIndex, outputsStore, aliasedOutputs);
-        // Do not use unbound attributes as inputs to structural directives, since structural
-        // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
-        const initialInputs = inputsStore !== null && tNodeAttrs !== null && !isInlineTemplate(tNode)
-            ? generateInitialInputs(inputsStore, directiveIndex, tNodeAttrs)
-            : null;
-        inputsFromAttrs.push(initialInputs);
-    }
-    if (inputsStore !== null) {
-        if (inputsStore.hasOwnProperty('class')) {
-            tNode.flags |= 8 /* TNodeFlags.hasClassInput */;
-        }
-        if (inputsStore.hasOwnProperty('style')) {
-            tNode.flags |= 16 /* TNodeFlags.hasStyleInput */;
-        }
-    }
-    tNode.initialInputs = inputsFromAttrs;
-    tNode.inputs = inputsStore;
-    tNode.outputs = outputsStore;
-}
-function captureNodeBindings(mode, aliasMap, directiveIndex, bindingsResult, hostDirectiveAliasMap) {
-    for (let publicName in aliasMap) {
-        if (!aliasMap.hasOwnProperty(publicName)) {
-            continue;
-        }
-        const value = aliasMap[publicName];
-        if (value === undefined) {
-            continue;
-        }
-        bindingsResult ??= {};
-        // If there are no host directive mappings, we want to remap using the alias map from the
-        // definition itself. If there is an alias map, it has two functions:
-        // 1. It serves as an allowlist of bindings that are exposed by the host directives. Only the
-        // ones inside the host directive map will be exposed on the host.
-        // 2. The public name of the property is aliased using the host directive alias map, rather
-        // than the alias map from the definition.
-        let finalPublicName = publicName;
-        if (hostDirectiveAliasMap !== null) {
-            // If there is no mapping, it's not part of the allowlist and this input/output
-            // is not captured and should be ignored.
-            if (!hostDirectiveAliasMap.hasOwnProperty(publicName)) {
-                continue;
-            }
-            finalPublicName = hostDirectiveAliasMap[publicName];
-        }
-        if (mode === 0 /* CaptureNodeBindingMode.Inputs */) {
-            addPropertyBinding(bindingsResult, directiveIndex, finalPublicName, publicName);
+    for (let index = tNode.directiveStart; index < tNode.directiveEnd; index++) {
+        const directiveDef = tView.data[index];
+        if (hostDirectiveDefs === null || !hostDirectiveDefs.has(directiveDef)) {
+            setupSelectorMatchedInputsOrOutputs(0 /* BindingType.Inputs */, tNode, directiveDef, index);
+            setupSelectorMatchedInputsOrOutputs(1 /* BindingType.Outputs */, tNode, directiveDef, index);
+            setupInitialInputs(tNode, index, false);
         }
         else {
-            addPropertyBinding(bindingsResult, directiveIndex, finalPublicName, value);
+            const hostDirectiveDef = hostDirectiveDefs.get(directiveDef);
+            setupHostDirectiveInputsOrOutputs(0 /* BindingType.Inputs */, tNode, hostDirectiveDef, index);
+            setupHostDirectiveInputsOrOutputs(1 /* BindingType.Outputs */, tNode, hostDirectiveDef, index);
+            setupInitialInputs(tNode, index, true);
         }
-    }
-    return bindingsResult;
-}
-function addPropertyBinding(bindings, directiveIndex, publicName, lookupName) {
-    if (bindings.hasOwnProperty(publicName)) {
-        bindings[publicName].push(directiveIndex, lookupName);
-    }
-    else {
-        bindings[publicName] = [directiveIndex, lookupName];
     }
 }
 /**
- * Generates initialInputData for a node and stores it in the template's static storage
+ * Sets up the input/output bindings for a directive that was matched in the template through its
+ * selector. This method is called repeatedly to build up all of the available inputs on a node.
+ *
+ * @param mode Whether inputs or outputs are being contructed.
+ * @param tNode Node on which the bindings are being set up.
+ * @param def Directive definition for which the bindings are being set up.
+ * @param directiveIndex Index at which the directive instance will be stored in the LView.
+ */
+function setupSelectorMatchedInputsOrOutputs(mode, tNode, def, directiveIndex) {
+    const aliasMap = mode === 0 /* BindingType.Inputs */ ? def.inputs : def.outputs;
+    for (const publicName in aliasMap) {
+        if (aliasMap.hasOwnProperty(publicName)) {
+            let bindings;
+            if (mode === 0 /* BindingType.Inputs */) {
+                bindings = tNode.inputs ??= {};
+            }
+            else {
+                bindings = tNode.outputs ??= {};
+            }
+            bindings[publicName] ??= [];
+            bindings[publicName].push(directiveIndex);
+            setShadowStylingInputFlags(tNode, publicName);
+        }
+    }
+}
+/**
+ * Sets up input/output bindings that were defined through host directives on a specific node.
+ * @param mode Whether inputs or outputs are being contructed.
+ * @param tNode Node on which the bindings are being set up.
+ * @param config Host directive definition that is being set up.
+ * @param directiveIndex Index at which the directive instance will be stored in the LView.
+ */
+function setupHostDirectiveInputsOrOutputs(mode, tNode, config, directiveIndex) {
+    const aliasMap = mode === 0 /* BindingType.Inputs */ ? config.inputs : config.outputs;
+    for (const initialName in aliasMap) {
+        if (aliasMap.hasOwnProperty(initialName)) {
+            const publicName = aliasMap[initialName];
+            let bindings;
+            if (mode === 0 /* BindingType.Inputs */) {
+                bindings = tNode.hostDirectiveInputs ??= {};
+            }
+            else {
+                bindings = tNode.hostDirectiveOutputs ??= {};
+            }
+            bindings[publicName] ??= [];
+            bindings[publicName].push(directiveIndex, initialName);
+            setShadowStylingInputFlags(tNode, publicName);
+        }
+    }
+}
+function setShadowStylingInputFlags(tNode, publicName) {
+    if (publicName === 'class') {
+        tNode.flags |= 8 /* TNodeFlags.hasClassInput */;
+    }
+    else if (publicName === 'style') {
+        tNode.flags |= 16 /* TNodeFlags.hasStyleInput */;
+    }
+}
+/**
+ * Sets up the initialInputData for a node and stores it in the template's static storage
  * so subsequent template invocations don't have to recalculate it.
  *
  * initialInputData is an array containing values that need to be set as input properties
@@ -17677,11 +17699,21 @@ function addPropertyBinding(bindings, directiveIndex, publicName, lookupName) {
  *
  * <my-component name="Bess"></my-component>
  *
- * @param inputs Input alias map that was generated from the directive def inputs.
+ * @param tNode TNode on which to set up the initial inputs.
  * @param directiveIndex Index of the directive that is currently being processed.
- * @param attrs Static attrs on this node.
  */
-function generateInitialInputs(inputs, directiveIndex, attrs) {
+function setupInitialInputs(tNode, directiveIndex, isHostDirective) {
+    const { attrs, inputs, hostDirectiveInputs } = tNode;
+    if (attrs === null ||
+        (!isHostDirective && inputs === null) ||
+        (isHostDirective && hostDirectiveInputs === null) ||
+        // Do not use unbound attributes as inputs to structural directives, since structural
+        // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
+        isInlineTemplate(tNode)) {
+        tNode.initialInputs ??= [];
+        tNode.initialInputs.push(null);
+        return;
+    }
     let inputsToStore = null;
     let i = 0;
     while (i < attrs.length) {
@@ -17696,26 +17728,38 @@ function generateInitialInputs(inputs, directiveIndex, attrs) {
             i += 2;
             continue;
         }
-        // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
-        if (typeof attrName === 'number')
+        else if (typeof attrName === 'number') {
+            // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
             break;
-        if (inputs.hasOwnProperty(attrName)) {
+        }
+        if (!isHostDirective && inputs.hasOwnProperty(attrName)) {
             // Find the input's public name from the input store. Note that we can be found easier
             // through the directive def, but we want to do it using the inputs store so that it can
             // account for host directive aliases.
             const inputConfig = inputs[attrName];
-            for (let j = 0; j < inputConfig.length; j += 2) {
-                if (inputConfig[j] === directiveIndex) {
+            for (const index of inputConfig) {
+                if (index === directiveIndex) {
                     inputsToStore ??= [];
-                    inputsToStore.push(inputConfig[j + 1], attrs[i + 1]);
+                    inputsToStore.push(attrName, attrs[i + 1]);
                     // A directive can't have multiple inputs with the same name so we can break here.
+                    break;
+                }
+            }
+        }
+        else if (isHostDirective && hostDirectiveInputs.hasOwnProperty(attrName)) {
+            const config = hostDirectiveInputs[attrName];
+            for (let j = 0; j < config.length; j += 2) {
+                if (config[j] === directiveIndex) {
+                    inputsToStore ??= [];
+                    inputsToStore.push(config[j + 1], attrs[i + 1]);
                     break;
                 }
             }
         }
         i += 2;
     }
-    return inputsToStore;
+    tNode.initialInputs ??= [];
+    tNode.initialInputs.push(inputsToStore);
 }
 /**
  * Setup directive for instantiation.
@@ -17975,7 +18019,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.3.0-next.0+sha-aa58339']
+                ? ['ng-version', '19.3.0-next.0+sha-628ab40']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -18064,29 +18108,24 @@ class ComponentRef extends ComponentRef$1 {
         this.componentType = componentType;
     }
     setInput(name, value) {
-        const inputData = this._tNode.inputs;
-        let dataValue;
-        if (inputData !== null && (dataValue = inputData[name])) {
-            this.previousInputValues ??= new Map();
-            // Do not set the input if it is the same as the last value
-            // This behavior matches `bindingUpdated` when binding inputs in templates.
-            if (this.previousInputValues.has(name) &&
-                Object.is(this.previousInputValues.get(name), value)) {
-                return;
-            }
-            const lView = this._rootLView;
-            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
-            this.previousInputValues.set(name, value);
-            const childComponentLView = getComponentLViewByIndex(this._tNode.index, lView);
-            markViewDirty(childComponentLView, 1 /* NotificationSource.SetInput */);
+        const tNode = this._tNode;
+        this.previousInputValues ??= new Map();
+        // Do not set the input if it is the same as the last value
+        // This behavior matches `bindingUpdated` when binding inputs in templates.
+        if (this.previousInputValues.has(name) &&
+            Object.is(this.previousInputValues.get(name), value)) {
+            return;
         }
-        else {
-            if (ngDevMode) {
-                const cmpNameForError = stringifyForError(this.componentType);
-                let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
-                message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
-                reportUnknownPropertyError(message);
-            }
+        const lView = this._rootLView;
+        const hasSetInput = setInputsForProperty(tNode, lView[TVIEW], lView, name, value);
+        this.previousInputValues.set(name, value);
+        const childComponentLView = getComponentLViewByIndex(tNode.index, lView);
+        markViewDirty(childComponentLView, 1 /* NotificationSource.SetInput */);
+        if (ngDevMode && !hasSetInput) {
+            const cmpNameForError = stringifyForError(this.componentType);
+            let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
+            message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
+            reportUnknownPropertyError(message);
         }
     }
     get injector() {
@@ -26277,10 +26316,8 @@ function ɵɵproperty(propName, value, sanitizer) {
  * directive input.
  */
 function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
-    const inputs = tNode.inputs;
-    const property = isClassBased ? 'class' : 'style';
     // We support both 'class' and `className` hence the fallback.
-    setInputsForProperty(tView, lView, inputs[property], property, value);
+    setInputsForProperty(tNode, tView, lView, isClassBased ? 'class' : 'style', value);
 }
 
 /**
@@ -30336,7 +30373,7 @@ function findExistingListener(tView, lView, eventName, tNodeIdx) {
 function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
     const isTNodeDirectiveHost = isDirectiveHost(tNode);
     const firstCreatePass = tView.firstCreatePass;
-    const tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
     const context = lView[CONTEXT];
     // When the ɵɵlistener instruction was generated and is executed we know that there is either a
     // native listener or a directive output on this element. As such we we know that we will have to
@@ -30401,28 +30438,36 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         // ancestors are marked dirty when an event occurs.
         listenerFn = wrapListener(tNode, lView, context, listenerFn);
     }
-    // subscribe to directive outputs
-    const outputs = tNode.outputs;
-    let props;
-    if (processOutputs && outputs !== null && (props = outputs[eventName])) {
-        const propsLength = props.length;
-        if (propsLength) {
-            for (let i = 0; i < propsLength; i += 2) {
-                const index = props[i];
-                ngDevMode && assertIndexInRange(lView, index);
-                const minifiedName = props[i + 1];
-                const directiveInstance = lView[index];
-                const output = directiveInstance[minifiedName];
-                if (ngDevMode && !isOutputSubscribable(output)) {
-                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
-                }
-                const subscription = output.subscribe(listenerFn);
-                const idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+    if (processOutputs) {
+        const outputConfig = tNode.outputs?.[eventName];
+        const hostDirectiveOutputConfig = tNode.hostDirectiveOutputs?.[eventName];
+        if (hostDirectiveOutputConfig && hostDirectiveOutputConfig.length) {
+            for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
+                const index = hostDirectiveOutputConfig[i];
+                const lookupName = hostDirectiveOutputConfig[i + 1];
+                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
+            }
+        }
+        if (outputConfig && outputConfig.length) {
+            for (const index of outputConfig) {
+                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
             }
         }
     }
+}
+function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
+    ngDevMode && assertIndexInRange(lView, index);
+    const instance = lView[index];
+    const def = tView.data[index];
+    const propertyName = def.outputs[lookupName];
+    const output = instance[propertyName];
+    if (ngDevMode && !isOutputSubscribable(output)) {
+        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
+    }
+    const subscription = output.subscribe(listenerFn);
+    const idx = lCleanup.length;
+    lCleanup.push(listenerFn, subscription);
+    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
 }
 function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
     const prevConsumer = setActiveConsumer$1(null);
@@ -35021,7 +35066,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.3.0-next.0+sha-aa58339');
+const VERSION = new Version('19.3.0-next.0+sha-628ab40');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
