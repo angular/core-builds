@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-rc.0+sha-3fd6551
+ * @license Angular v19.2.0-rc.0+sha-35d20cb
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5209,6 +5209,26 @@ declare interface HostDirectiveDef<T = unknown> {
 declare type HostDirectiveDefs = Map<ɵDirectiveDef<unknown>, HostDirectiveDef>;
 
 /**
+ * Represents inputs coming from a host directive and exposed on a TNode.
+ *
+ * - The key is the public name of an input as it is exposed on the specific node.
+ * - The value is an array where:
+ *   - i+0: Index of the host directive that should be written to.
+ *   - i+1: Public name of the input as it was defined on the host directive before aliasing.
+ */
+declare type HostDirectiveInputs = Record<string, (number | string)[]>;
+
+/**
+ * Represents outputs coming from a host directive and exposed on a TNode.
+ *
+ * - The key is the public name of an output as it is exposed on the specific node.
+ * - The value is an array where:
+ *   - i+0: Index of the host directive on which the output is defined..
+ *   - i+1: Public name of the output as it was defined on the host directive before aliasing.
+ */
+declare type HostDirectiveOutputs = Record<string, (number | string)[]>;
+
+/**
  * Type of the HostListener metadata.
  *
  * @publicApi
@@ -8187,36 +8207,28 @@ export declare interface NgZoneOptions {
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 
 /**
- * Store the runtime input for all directives applied to a node.
+ * Maps the public names of inputs applied to a specific node to the index of the
+ * directive instance to which the input value should be written, for example:
  *
- * This allows efficiently setting the same input on a directive that
- * might apply to multiple directives.
- *
- * i+0: directive instance index
- * i+1: privateName
- *
- * e.g.
  * ```
  * {
- *   "publicName": [0, 'change-minified']
+ *   "publicName": [0, 5]
  * }
  * ```
  */
-declare type NodeInputBindings = Record<string, (number | string)[]>;
+declare type NodeInputBindings = Record<string, number[]>;
 
 /**
- * Store the runtime output names for all the directives.
+ * Maps the public names of outputs available on a specific node to the index
+ * of the directive instance that defines the output, for example:
  *
- * i+0: directive instance index
- * i+1: privateName
- *
- * e.g.
  * ```
  * {
- *   "publicName": [0, 'change-minified']
+ *   "publicName": [0, 5]
  * }
+ * ```
  */
-declare type NodeOutputBindings = Record<string, (number | string)[]>;
+declare type NodeOutputBindings = Record<string, number[]>;
 
 declare const NODES = "n";
 
@@ -11116,17 +11128,25 @@ declare interface TNode {
      */
     localNames: (string | number)[] | null;
     /** Information about input properties that need to be set once from attribute data. */
-    initialInputs: InitialInputData | null | undefined;
+    initialInputs: InitialInputData | null;
     /**
      * Input data for all directives on this node. `null` means that there are no directives with
      * inputs on this node.
      */
     inputs: NodeInputBindings | null;
     /**
+     * Input data for host directives applied to the node.
+     */
+    hostDirectiveInputs: HostDirectiveInputs | null;
+    /**
      * Output data for all directives on this node. `null` means that there are no directives with
      * outputs on this node.
      */
     outputs: NodeOutputBindings | null;
+    /**
+     * Input data for host directives applied to the node.
+     */
+    hostDirectiveOutputs: HostDirectiveOutputs | null;
     /**
      * The TView attached to this node.
      *
