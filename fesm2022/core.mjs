@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.3.0-next.0+sha-35e25f6
+ * @license Angular v19.3.0-next.0+sha-aa58339
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12562,15 +12562,6 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
 /**
  * Creates directive instances.
  */
-function createDirectivesInstancesInInstruction(tView, lView, tNode) {
-    if (!getBindingsEnabled())
-        return;
-    attachPatchData(getNativeByTNode(tNode, lView), lView);
-    createDirectivesInstances(tView, lView, tNode);
-}
-/**
- * Creates directive instances.
- */
 function createDirectivesInstances(tView, lView, tNode) {
     instantiateAllDirectives(tView, lView, tNode);
     if ((tNode.flags & 64 /* TNodeFlags.hasHostBindings */) === 64 /* TNodeFlags.hasHostBindings */) {
@@ -16814,6 +16805,18 @@ function removeDehydratedViews(lContainer) {
     // once again in case a `ViewContainerRef` is created later).
     lContainer[DEHYDRATED_VIEWS] = retainedViews;
 }
+function removeDehydratedViewList(deferBlock) {
+    const { lContainer } = deferBlock;
+    const dehydratedViews = lContainer[DEHYDRATED_VIEWS];
+    if (dehydratedViews === null)
+        return;
+    const parentLView = lContainer[PARENT];
+    const renderer = parentLView[RENDERER];
+    for (const view of dehydratedViews) {
+        removeDehydratedView(view, renderer);
+        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+    }
+}
 /**
  * Helper function to remove all nodes from a dehydrated view.
  */
@@ -17972,7 +17975,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.3.0-next.0+sha-35e25f6']
+                ? ['ng-version', '19.3.0-next.0+sha-aa58339']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -20705,7 +20708,7 @@ function declareTemplate(declarationLView, declarationTView, index, templateFn, 
     // In client-only mode, this function is a noop.
     populateDehydratedViewsInLContainer(lContainer, tNode, declarationLView);
     if (isDirectiveHost(tNode)) {
-        createDirectivesInstancesInInstruction(declarationTView, declarationLView, tNode);
+        createDirectivesInstances(declarationTView, declarationLView, tNode);
     }
     if (localRefsIndex != null) {
         saveResolvedLocalsInData(declarationLView, tNode, localRefExtractor);
@@ -21240,8 +21243,9 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     }
 }
 function findMatchingDehydratedViewForDeferBlock(lContainer, lDetails) {
-    // Find matching view based on serialized defer block state.
-    return (lContainer[DEHYDRATED_VIEWS]?.find((view) => view.data[DEFER_BLOCK_STATE$1] === lDetails[DEFER_BLOCK_STATE]) ?? null);
+    const dehydratedViewIx = lContainer[DEHYDRATED_VIEWS]?.findIndex((view) => view.data[DEFER_BLOCK_STATE$1] === lDetails[DEFER_BLOCK_STATE]) ?? -1;
+    const dehydratedView = dehydratedViewIx > -1 ? lContainer[DEHYDRATED_VIEWS][dehydratedViewIx] : null;
+    return { dehydratedView, dehydratedViewIx };
 }
 /**
  * Applies changes to the DOM to reflect a given state.
@@ -21273,21 +21277,23 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
                 injector = createDeferBlockInjector(hostLView[INJECTOR], tDetails, providers);
             }
         }
-        const dehydratedView = findMatchingDehydratedViewForDeferBlock(lContainer, lDetails);
-        // Erase dehydrated view info, so that it's not removed later
-        // by post-hydration cleanup process.
-        lContainer[DEHYDRATED_VIEWS] = null;
+        const { dehydratedView, dehydratedViewIx } = findMatchingDehydratedViewForDeferBlock(lContainer, lDetails);
         const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, {
             injector,
             dehydratedView,
         });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView, 2 /* NotificationSource.DeferBlockStateUpdate */);
-        // TODO(incremental-hydration):
-        // - what if we had some views in `lContainer[DEHYDRATED_VIEWS]`, but
-        //   we didn't find a view that matches the expected state?
-        // - for example, handle a situation when a block was in the "completed" state
-        //   on the server, but the loading failing on the client. How do we reconcile and cleanup?
+        if (dehydratedViewIx > -1) {
+            // Erase dehydrated view info in a given LContainer, so that the view is not
+            // removed later by post-hydration cleanup process (which iterates over all
+            // dehydrated views in component tree). This clears only the dehydrated view
+            // that was found for this render, which in most cases will be the only view.
+            // In the case that there was control flow that changed, there may be either
+            // more than one or the views would not match up due to the server rendered
+            // content being a different branch of the control flow.
+            lContainer[DEHYDRATED_VIEWS]?.splice(dehydratedViewIx, 1);
+        }
         if ((newState === DeferBlockState.Complete || newState === DeferBlockState.Error) &&
             Array.isArray(lDetails[ON_COMPLETE_FNS])) {
             for (const callback of lDetails[ON_COMPLETE_FNS]) {
@@ -24136,16 +24142,36 @@ async function triggerHydrationFromBlockName(injector, blockName, replayQueuedEv
         await parentBlockPromise;
     }
     // Actually do the triggering and hydration of the queue of blocks
-    for (const dehydratedBlockId of hydrationQueue) {
-        await triggerResourceLoadingForHydration(dehydratedBlockId, dehydratedBlockRegistry);
-        await nextRender(injector);
-        // TODO(incremental-hydration): assert (in dev mode) that a defer block is present in the dehydrated registry
-        // at this point. If not - it means that the block has not been hydrated, for example due to different
-        // `@if` conditions on the client and the server. If we detect this case, we should also do the cleanup
-        // of all child block (promises, registry state, etc).
-        // TODO(incremental-hydration): call `rejectFn` when lDetails[DEFER_BLOCK_STATE] is `DeferBlockState.Error`.
-        blocksBeingHydrated.get(dehydratedBlockId).resolve();
-        // TODO(incremental-hydration): consider adding a wait for stability here
+    for (let blockQueueIdx = 0; blockQueueIdx < hydrationQueue.length; blockQueueIdx++) {
+        const dehydratedBlockId = hydrationQueue[blockQueueIdx];
+        const dehydratedDeferBlock = dehydratedBlockRegistry.get(dehydratedBlockId);
+        if (dehydratedDeferBlock != null) {
+            // trigger the block resources and await next render for hydration. This should result
+            // in the next block ɵɵdefer instruction being called and that block being added to the dehydrated registry.
+            await triggerResourceLoadingForHydration(dehydratedDeferBlock);
+            await nextRender(injector);
+            // if the content has changed since server rendering, we need to check for the expected block
+            // being in the registry or if errors occurred. In that case, we need to clean up the remaining expected
+            // content that won't be rendered or fetched.
+            if (deferBlockHasErrored(dehydratedDeferBlock)) {
+                // Either the expected block has not yet had its ɵɵdefer instruction called or the block errored out when fetching
+                // resources. In the former case, either we're hydrating too soon or the client and server differ. In both cases,
+                // we need to clean up child content and promises.
+                removeDehydratedViewList(dehydratedDeferBlock);
+                cleanupRemainingHydrationQueue(hydrationQueue.slice(blockQueueIdx), dehydratedBlockRegistry);
+                break;
+            }
+            // The defer block has not errored and we've finished fetching resources and rendering.
+            // At this point it is safe to resolve the hydration promise.
+            blocksBeingHydrated.get(dehydratedBlockId).resolve();
+        }
+        else {
+            // The expected block has not yet had its ɵɵdefer instruction called. This is likely due to content changing between
+            // client and server. We need to clean up the dehydrated DOM in the container since it no longer is valid.
+            cleanupParentContainer(blockQueueIdx, hydrationQueue, dehydratedBlockRegistry);
+            cleanupRemainingHydrationQueue(hydrationQueue.slice(blockQueueIdx), dehydratedBlockRegistry);
+            break;
+        }
     }
     // Await hydration completion for the requested block.
     await blocksBeingHydrated.get(blockName)?.promise;
@@ -24157,6 +24183,33 @@ async function triggerHydrationFromBlockName(injector, blockName, replayQueuedEv
     }
     // Cleanup after hydration of all affected defer blocks.
     cleanupHydratedDeferBlocks(dehydratedBlockRegistry.get(blockName), hydrationQueue, dehydratedBlockRegistry, injector.get(ApplicationRef));
+}
+function deferBlockHasErrored(deferBlock) {
+    return (getLDeferBlockDetails(deferBlock.lView, deferBlock.tNode)[DEFER_BLOCK_STATE] ===
+        DeferBlockState.Error);
+}
+/**
+ * Clean up the parent container of a block where content changed between server and client.
+ * The parent of a block going through `triggerHydrationFromBlockName` will contain the
+ * dehydrated content that needs to be cleaned up. So we have to do the clean up from that location
+ * in the tree.
+ */
+function cleanupParentContainer(currentBlockIdx, hydrationQueue, dehydratedBlockRegistry) {
+    // If a parent block exists, it's in the hydration queue in front of the current block.
+    const parentDeferBlockIdx = currentBlockIdx - 1;
+    const parentDeferBlock = parentDeferBlockIdx > -1
+        ? dehydratedBlockRegistry.get(hydrationQueue[parentDeferBlockIdx])
+        : null;
+    if (parentDeferBlock) {
+        cleanupLContainer(parentDeferBlock.lContainer);
+    }
+}
+function cleanupRemainingHydrationQueue(hydrationQueue, dehydratedBlockRegistry) {
+    const blocksBeingHydrated = dehydratedBlockRegistry.hydrating;
+    for (const dehydratedBlockId in hydrationQueue) {
+        blocksBeingHydrated.get(dehydratedBlockId)?.reject();
+    }
+    dehydratedBlockRegistry.cleanup(hydrationQueue);
 }
 /**
  * Generates a new promise for every defer block in the hydrating queue
@@ -24170,18 +24223,8 @@ function populateHydratingStateForQueue(registry, queue) {
 function nextRender(injector) {
     return new Promise((resolveFn) => afterNextRender(resolveFn, { injector }));
 }
-async function triggerResourceLoadingForHydration(dehydratedBlockId, dehydratedBlockRegistry) {
-    const deferBlock = dehydratedBlockRegistry.get(dehydratedBlockId);
-    // Since we trigger hydration for nested defer blocks in a sequence (parent -> child),
-    // there is a chance that a defer block may not be present at hydration time. For example,
-    // when a nested block was in an `@if` condition, which has changed.
-    if (deferBlock === null) {
-        // TODO(incremental-hydration): handle the cleanup for cases when
-        // defer block is no longer present during hydration (e.g. `@if` condition
-        // has changed during hydration/rendering).
-        return;
-    }
-    const { tNode, lView } = deferBlock;
+async function triggerResourceLoadingForHydration(dehydratedBlock) {
+    const { tNode, lView } = dehydratedBlock;
     const lDetails = getLDeferBlockDetails(lView, tNode);
     return new Promise((resolve) => {
         onDeferBlockCompletion(lDetails, resolve);
@@ -28061,12 +28104,12 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     // any immediate children of a component or template container must be pre-emptively
     // monkey-patched with the component view data so that the element can be inspected
     // later on using any element discovery utility methods (see `element_discovery.ts`)
-    if (getElementDepthCount() === 0) {
+    if (getElementDepthCount() === 0 || hasDirectives) {
         attachPatchData(native, lView);
     }
     increaseElementDepthCount();
     if (hasDirectives) {
-        createDirectivesInstancesInInstruction(tView, lView, tNode);
+        createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
     if (localRefsIndex !== null) {
@@ -28238,7 +28281,7 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     }
     attachPatchData(comment, lView);
     if (isDirectiveHost(tNode)) {
-        createDirectivesInstancesInInstruction(tView, lView, tNode);
+        createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
     if (localRefsIndex != null) {
@@ -34978,7 +35021,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.3.0-next.0+sha-35e25f6');
+const VERSION = new Version('19.3.0-next.0+sha-aa58339');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
