@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.7+sha-3b0b493
+ * @license Angular v19.1.7+sha-c611c8d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17913,7 +17913,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.7+sha-3b0b493']
+                ? ['ng-version', '19.1.7+sha-c611c8d']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -33525,11 +33525,12 @@ function executeWithInvalidateFallback(importMeta, id, callback) {
         callback();
     }
     catch (e) {
-        const errorMessage = e.message;
+        const error = e;
         // If we have all the necessary information and APIs to send off the invalidation
         // request, send it before rethrowing so the dev server can decide what to do.
-        if (id !== null && errorMessage) {
-            importMeta?.hot?.send?.('angular:invalidate', { id, message: errorMessage, error: true });
+        if (id !== null && error.message) {
+            const toLog = error.message + (error.stack ? '\n' + error.stack : '');
+            importMeta?.hot?.send?.('angular:invalidate', { id, message: toLog, error: true });
         }
         // Throw the error in case the page doesn't get refreshed.
         throw e;
@@ -34959,7 +34960,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.7+sha-3b0b493');
+const VERSION = new Version('19.1.7+sha-c611c8d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
