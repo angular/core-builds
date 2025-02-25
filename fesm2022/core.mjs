@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-rc.0+sha-ef17371
+ * @license Angular v19.2.0-rc.0+sha-ce3a9a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7106,23 +7106,6 @@ function unwrapElementRef(value) {
     return value instanceof ElementRef ? value.nativeElement : value;
 }
 
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
-}
-
 /**
  * Checks if the given `value` is a reactive `Signal`.
  */
@@ -7145,7 +7128,6 @@ function ɵunwrapWritableSignal(value) {
  * Create a `Signal` that can be set or updated directly.
  */
 function signal(initialValue, options) {
-    performanceMarkFeature('NgSignals');
     const signalFn = createSignal$1(initialValue);
     const node = signalFn[SIGNAL$1];
     if (options?.equal) {
@@ -8624,6 +8606,23 @@ var TracingAction;
  * Injection token for a `TracingService`, optionally provided.
  */
 const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
+
+const markedFeatures = new Set();
+// tslint:disable:ban
+/**
+ * A guarded `performance.mark` for feature marking.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
+    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
+}
 
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
@@ -18127,7 +18126,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0-rc.0+sha-ef17371']
+                ? ['ng-version', '19.2.0-rc.0+sha-ce3a9a2']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35175,7 +35174,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-rc.0+sha-ef17371');
+const VERSION = new Version('19.2.0-rc.0+sha-ce3a9a2');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40624,7 +40623,6 @@ function untracked(nonReactiveReadsFn) {
  * Create a computed `Signal` which derives a reactive value from an expression.
  */
 function computed(computation, options) {
-    performanceMarkFeature('NgSignals');
     const getter = createComputed$1(computation);
     if (options?.equal) {
         getter[SIGNAL$1].equal = options.equal;
@@ -40722,7 +40720,6 @@ function effect$1() { }
  * Create a global `Effect` for the given reactive function.
  */
 function microtaskEffect(effectFn, options) {
-    performanceMarkFeature('NgSignals');
     ngDevMode &&
         assertNotInReactiveContext(effect$1, 'Call `effect` outside of a reactive context. For example, schedule the ' +
             'effect inside the component constructor.');
@@ -40795,7 +40792,6 @@ function effect(effectFn, options) {
         }
         return microtaskEffect(effectFn, options);
     }
-    performanceMarkFeature('NgSignals');
     ngDevMode &&
         assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
             'effect inside the component constructor.');
@@ -40992,7 +40988,6 @@ var ResourceStatus;
 
 const identityFn = (v) => v;
 function linkedSignal(optionsOrComputation, options) {
-    performanceMarkFeature('NgSignals');
     if (typeof optionsOrComputation === 'function') {
         const getter = createLinkedSignal$1(optionsOrComputation, (identityFn), options?.equal);
         return upgradeLinkedSignalGetter(getter);
