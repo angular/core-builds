@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-rc.0+sha-d5f467e
+ * @license Angular v19.2.0-rc.0+sha-ef17371
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3930,6 +3930,27 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
  * The function is necessary to be able to support forward declarations.
  */
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
+
+/**
+ * Represents a map between a class reference and the index at which its directive is available on
+ * a specific TNode. The value can be either:
+ *   1. A number means that there's only one selector-matched directive on the node and it
+ *      doesn't have any host directives.
+ *   2. An array means that there's a selector-matched directive and it has host directives.
+ *      The array is structured as follows:
+ *        - 0: Index of the selector-matched directive.
+ *        - 1: Start index of the range within which the host directives are defined.
+ *        - 2: End of the host directive range.
+ *
+ * Example:
+ * ```
+ * Map {
+ *   [NoHostDirectives]: 5,
+ *   [HasHostDirectives]: [10, 6, 8],
+ * }
+ * ```
+ */
+declare type DirectiveIndexMap = Map<Type<unknown>, number | [directiveIndex: number, hostDirectivesStart: number, hostDirectivesEnd: number]>;
 
 /**
  * Map of inputs for a given directive/component.
@@ -11147,6 +11168,10 @@ declare interface TNode {
      * Input data for host directives applied to the node.
      */
     hostDirectiveOutputs: HostDirectiveOutputs | null;
+    /**
+     * Mapping between directive classes applied to the node and their indexes.
+     */
+    directiveToIndex: DirectiveIndexMap | null;
     /**
      * The TView attached to this node.
      *

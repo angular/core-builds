@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-rc.0+sha-d5f467e
+ * @license Angular v19.2.0-rc.0+sha-ef17371
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12677,7 +12677,7 @@ function mapPropName(name) {
 function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     if (!nativeOnly) {
-        const hasSetInput = setInputsForProperty(tNode, tView, lView, propName, value);
+        const hasSetInput = setAllInputsForProperty(tNode, tView, lView, propName, value);
         if (hasSetInput) {
             isComponentHost(tNode) && markDirtyIfOnPush(lView, tNode.index);
             ngDevMode && setNgReflectProperties(lView, tView, tNode, propName, value);
@@ -12955,14 +12955,15 @@ function handleError(lView, error) {
     errorHandler && errorHandler.handleError(error);
 }
 /**
- * Set the inputs of directives at the current node to corresponding value.
+ * Set all directive inputs with the specific public name on the node.
  *
  * @param tNode TNode on which the input is being set.
- * @param tView The current TView
- * @param lView the `LView` which contains the directives.
+ * @param tView Current TView
+ * @param lView `LView` which contains the directives.
+ * @param publicName Public name of the input being set.
  * @param value Value to set.
  */
-function setInputsForProperty(tNode, tView, lView, publicName, value) {
+function setAllInputsForProperty(tNode, tView, lView, publicName, value) {
     const inputs = tNode.inputs?.[publicName];
     const hostDirectiveInputs = tNode.hostDirectiveInputs?.[publicName];
     let hasMatch = false;
@@ -12986,6 +12987,56 @@ function setInputsForProperty(tNode, tView, lView, publicName, value) {
         }
     }
     return hasMatch;
+}
+/**
+ * Sets an input value only on a specific directive and its host directives.
+ * @param tNode TNode on which the input is being set.
+ * @param tView Current TView
+ * @param lView `LView` which contains the directives.
+ * @param target Directive on which to set the input.
+ * @param publicName Public name of the input being set.
+ * @param value Value to set.
+ */
+function setDirectiveInput(tNode, tView, lView, target, publicName, value) {
+    let hostIndex = null;
+    let hostDirectivesStart = null;
+    let hostDirectivesEnd = null;
+    let hasSet = false;
+    if (ngDevMode && !tNode.directiveToIndex?.has(target.type)) {
+        throw new Error(`Node does not have a directive with type ${target.type.name}`);
+    }
+    const data = tNode.directiveToIndex.get(target.type);
+    if (typeof data === 'number') {
+        hostIndex = data;
+    }
+    else {
+        [hostIndex, hostDirectivesStart, hostDirectivesEnd] = data;
+    }
+    if (hostDirectivesStart !== null &&
+        hostDirectivesEnd !== null &&
+        tNode.hostDirectiveInputs?.hasOwnProperty(publicName)) {
+        const hostDirectiveInputs = tNode.hostDirectiveInputs[publicName];
+        for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
+            const index = hostDirectiveInputs[i];
+            if (index >= hostDirectivesStart && index <= hostDirectivesEnd) {
+                ngDevMode && assertIndexInRange(lView, index);
+                const def = tView.data[index];
+                const hostDirectivePublicName = hostDirectiveInputs[i + 1];
+                writeToDirectiveInput(def, lView[index], hostDirectivePublicName, value);
+                hasSet = true;
+            }
+            else if (index > hostDirectivesEnd) {
+                // Directives here are in ascending order so we can stop looking once we're past the range.
+                break;
+            }
+        }
+    }
+    if (hostIndex !== null) {
+        ngDevMode && assertIndexInRange(lView, hostIndex);
+        writeToDirectiveInput(target, lView[hostIndex], publicName, value);
+        hasSet = true;
+    }
+    return hasSet;
 }
 
 function renderComponent(hostLView, componentHostIdx) {
@@ -15643,6 +15694,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         hostDirectiveInputs: null,
         outputs: null,
         hostDirectiveOutputs: null,
+        directiveToIndex: null,
         tView: null,
         next: null,
         prev: null,
@@ -17481,14 +17533,22 @@ function ɵɵinvalidFactory() {
  * Resolve the matched directives on a node.
  */
 function resolveDirectives(tView, lView, tNode, localRefs, directiveMatcher) {
-    // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in
-    // tsickle.
+    // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
     ngDevMode && assertFirstCreatePass(tView);
     const exportsMap = localRefs === null ? null : { '': -1 };
     const matchedDirectiveDefs = directiveMatcher(tView, tNode);
     if (matchedDirectiveDefs !== null) {
-        const [directiveDefs, hostDirectiveDefs] = resolveHostDirectives(tView, tNode, matchedDirectiveDefs);
-        initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs);
+        let directiveDefs;
+        let hostDirectiveDefs = null;
+        let hostDirectiveRanges = null;
+        const hostDirectiveResolution = resolveHostDirectives(matchedDirectiveDefs);
+        if (hostDirectiveResolution === null) {
+            directiveDefs = matchedDirectiveDefs;
+        }
+        else {
+            [directiveDefs, hostDirectiveDefs, hostDirectiveRanges] = hostDirectiveResolution;
+        }
+        initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs, hostDirectiveRanges);
     }
     if (exportsMap !== null && localRefs !== null) {
         cacheMatchingLocalNames(tNode, localRefs, exportsMap);
@@ -17507,40 +17567,63 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         localNames.push(localRefs[i], index);
     }
 }
-function resolveHostDirectives(tView, tNode, matches) {
-    const allDirectiveDefs = [];
+function resolveHostDirectives(matches) {
+    let componentDef = null;
+    let hasHostDirectives = false;
+    for (let i = 0; i < matches.length; i++) {
+        const def = matches[i];
+        if (i === 0 && isComponentDef(def)) {
+            componentDef = def;
+        }
+        if (def.findHostDirectiveDefs !== null) {
+            hasHostDirectives = true;
+            break;
+        }
+    }
+    if (!hasHostDirectives) {
+        return null;
+    }
+    let allDirectiveDefs = null;
     let hostDirectiveDefs = null;
+    let hostDirectiveRanges = null;
+    // Components are inserted at the front of the matches array so that their lifecycle
+    // hooks run before any directive lifecycle hooks. This appears to be for ViewEngine
+    // compatibility. This logic doesn't make sense with host directives, because it
+    // would allow the host directives to undo any overrides the host may have made.
+    // To handle this case, the host directives of components are inserted at the beginning
+    // of the array, followed by the component. As such, the insertion order is as follows:
+    // 1. Host directives belonging to the selector-matched component.
+    // 2. Selector-matched component.
+    // 3. Host directives belonging to selector-matched directives.
+    // 4. Selector-matched dir
     for (const def of matches) {
         if (def.findHostDirectiveDefs !== null) {
-            // TODO(pk): probably could return matches instead of taking in an array to fill in?
+            allDirectiveDefs ??= [];
             hostDirectiveDefs ??= new Map();
-            // Components are inserted at the front of the matches array so that their lifecycle
-            // hooks run before any directive lifecycle hooks. This appears to be for ViewEngine
-            // compatibility. This logic doesn't make sense with host directives, because it
-            // would allow the host directives to undo any overrides the host may have made.
-            // To handle this case, the host directives of components are inserted at the beginning
-            // of the array, followed by the component. As such, the insertion order is as follows:
-            // 1. Host directives belonging to the selector-matched component.
-            // 2. Selector-matched component.
-            // 3. Host directives belonging to selector-matched directives.
-            // 4. Selector-matched directives.
-            def.findHostDirectiveDefs(def, allDirectiveDefs, hostDirectiveDefs);
+            hostDirectiveRanges ??= new Map();
+            resolveHostDirectivesForDef(def, allDirectiveDefs, hostDirectiveRanges, hostDirectiveDefs);
         }
-        if (isComponentDef(def)) {
+        // Component definition needs to be pushed early to maintain the correct ordering.
+        if (def === componentDef) {
+            allDirectiveDefs ??= [];
             allDirectiveDefs.push(def);
-            markAsComponentHost(tView, tNode, allDirectiveDefs.length - 1);
         }
     }
-    if (isComponentHost(tNode)) {
-        allDirectiveDefs.push(...matches.slice(1));
+    if (allDirectiveDefs !== null) {
+        allDirectiveDefs.push(...(componentDef === null ? matches : matches.slice(1)));
+        ngDevMode && assertNoDuplicateDirectives(allDirectiveDefs);
+        return [allDirectiveDefs, hostDirectiveDefs, hostDirectiveRanges];
     }
-    else {
-        allDirectiveDefs.push(...matches);
-    }
-    if (ngDevMode) {
-        assertNoDuplicateDirectives(allDirectiveDefs);
-    }
-    return [allDirectiveDefs, hostDirectiveDefs];
+    return null;
+}
+function resolveHostDirectivesForDef(def, allDirectiveDefs, hostDirectiveRanges, hostDirectiveDefs) {
+    ngDevMode && assertDefined(def.findHostDirectiveDefs, 'Expected host directive resolve function');
+    const start = allDirectiveDefs.length;
+    // TODO(pk): probably could return matches instead of taking in an array to fill in?
+    def.findHostDirectiveDefs(def, allDirectiveDefs, hostDirectiveDefs);
+    // Note that these indexes are within the offset by `directiveStart`. We can't do the
+    // offsetting here, because `directiveStart` hasn't been initialized on the TNode yet.
+    hostDirectiveRanges.set(def, [start, allDirectiveDefs.length - 1]);
 }
 /**
  * Marks a given TNode as a component's host. This consists of:
@@ -17554,37 +17637,62 @@ function markAsComponentHost(tView, hostTNode, componentOffset) {
     (tView.components ??= []).push(hostTNode.index);
 }
 /** Initializes the data structures necessary for a list of directives to be instantiated. */
-function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostDirectiveDefs) {
+function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostDirectiveDefs, hostDirectiveRanges) {
     ngDevMode && assertFirstCreatePass(tView);
+    const directivesLength = directives.length;
+    let hasSeenComponent = false;
     // Publishes the directive types to DI so they can be injected. Needs to
     // happen in a separate pass before the TNode flags have been initialized.
-    for (let i = 0; i < directives.length; i++) {
-        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, directives[i].type);
+    for (let i = 0; i < directivesLength; i++) {
+        const def = directives[i];
+        if (!hasSeenComponent && isComponentDef(def)) {
+            hasSeenComponent = true;
+            markAsComponentHost(tView, tNode, i);
+        }
+        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, def.type);
     }
-    initTNodeFlags(tNode, tView.data.length, directives.length);
+    initTNodeFlags(tNode, tView.data.length, directivesLength);
     // When the same token is provided by several directives on the same node, some rules apply in
     // the viewEngine:
     // - viewProviders have priority over providers
     // - the last directive in NgModule.declarations has priority over the previous one
     // So to match these rules, the order in which providers are added in the arrays is very
     // important.
-    for (let i = 0; i < directives.length; i++) {
+    for (let i = 0; i < directivesLength; i++) {
         const def = directives[i];
         if (def.providersResolver)
             def.providersResolver(def);
     }
     let preOrderHooksFound = false;
     let preOrderCheckHooksFound = false;
-    let directiveIdx = allocExpando(tView, lView, directives.length, null);
+    let directiveIdx = allocExpando(tView, lView, directivesLength, null);
     ngDevMode &&
         assertSame(directiveIdx, tNode.directiveStart, 'TNode.directiveStart should point to just allocated space');
-    for (let i = 0; i < directives.length; i++) {
+    // If there's at least one directive, we'll have to track it so initialize the map.
+    if (directivesLength > 0) {
+        tNode.directiveToIndex = new Map();
+    }
+    for (let i = 0; i < directivesLength; i++) {
         const def = directives[i];
         // Merge the attrs in the order of matches. This assumes that the first directive is the
         // component itself, so that the component has the least priority.
         tNode.mergedAttrs = mergeHostAttrs(tNode.mergedAttrs, def.hostAttrs);
         configureViewWithDirective(tView, tNode, lView, directiveIdx, def);
         saveNameToExportMap(directiveIdx, def, exportsMap);
+        // If a directive has host directives, we need to track both its index and the range within
+        // the host directives are declared. Host directives are not tracked, but should be resolved
+        // by looking up the host and getting its indexes from there.
+        if (hostDirectiveRanges !== null && hostDirectiveRanges.has(def)) {
+            const [start, end] = hostDirectiveRanges.get(def);
+            tNode.directiveToIndex.set(def.type, [
+                directiveIdx,
+                start + tNode.directiveStart,
+                end + tNode.directiveStart,
+            ]);
+        }
+        else if (hostDirectiveDefs === null || !hostDirectiveDefs.has(def)) {
+            tNode.directiveToIndex.set(def.type, directiveIdx);
+        }
         if (def.contentQueries !== null)
             tNode.flags |= 4 /* TNodeFlags.hasContentQuery */;
         if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
@@ -18019,7 +18127,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0-rc.0+sha-d5f467e']
+                ? ['ng-version', '19.2.0-rc.0+sha-ef17371']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -18117,7 +18225,7 @@ class ComponentRef extends ComponentRef$1 {
             return;
         }
         const lView = this._rootLView;
-        const hasSetInput = setInputsForProperty(tNode, lView[TVIEW], lView, name, value);
+        const hasSetInput = setAllInputsForProperty(tNode, lView[TVIEW], lView, name, value);
         this.previousInputValues.set(name, value);
         const childComponentLView = getComponentLViewByIndex(tNode.index, lView);
         markViewDirty(childComponentLView, 1 /* NotificationSource.SetInput */);
@@ -26317,7 +26425,7 @@ function ɵɵproperty(propName, value, sanitizer) {
  */
 function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
     // We support both 'class' and `className` hence the fallback.
-    setInputsForProperty(tNode, tView, lView, isClassBased ? 'class' : 'style', value);
+    setAllInputsForProperty(tNode, tView, lView, isClassBased ? 'class' : 'style', value);
 }
 
 /**
@@ -35067,7 +35175,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-rc.0+sha-d5f467e');
+const VERSION = new Version('19.2.0-rc.0+sha-ef17371');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
