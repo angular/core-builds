@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-6c9247c
+ * @license Angular v20.0.0-next.0+sha-f2d5cf7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -921,6 +921,7 @@ var BinaryOperator;
     BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
     BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
+    BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -991,6 +992,9 @@ class Expression {
     }
     modulo(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.Modulo, this, rhs, null, sourceSpan);
+    }
+    power(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Exponentiation, this, rhs, null, sourceSpan);
     }
     and(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
@@ -1067,6 +1071,25 @@ class TypeofExpr extends Expression {
     }
     clone() {
         return new TypeofExpr(this.expr.clone());
+    }
+}
+class VoidExpr extends Expression {
+    expr;
+    constructor(expr, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.expr = expr;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitVoidExpr(this, context);
+    }
+    isEquivalent(e) {
+        return e instanceof VoidExpr && e.expr.isEquivalent(this.expr);
+    }
+    isConstant() {
+        return this.expr.isConstant();
+    }
+    clone() {
+        return new VoidExpr(this.expr.clone());
     }
 }
 class WrappedNodeExpr extends Expression {
@@ -1964,6 +1987,9 @@ class RecursiveAstVisitor$1 {
         return ast;
     }
     visitTypeofExpr(ast, context) {
+        return this.visitExpression(ast, context);
+    }
+    visitVoidExpr(ast, context) {
         return this.visitExpression(ast, context);
     }
     visitReadVarExpr(ast, context) {
@@ -3516,6 +3542,10 @@ class AbstractEmitterVisitor {
         ctx.print(expr, 'typeof ');
         expr.expr.visitExpression(this, ctx);
     }
+    visitVoidExpr(expr, ctx) {
+        ctx.print(expr, 'void ');
+        expr.expr.visitExpression(this, ctx);
+    }
     visitReadVarExpr(ast, ctx) {
         ctx.print(ast, ast.name);
         return null;
@@ -3628,6 +3658,9 @@ class AbstractEmitterVisitor {
                 break;
             case BinaryOperator.Modulo:
                 opStr = '%';
+                break;
+            case BinaryOperator.Exponentiation:
+                opStr = '**';
                 break;
             case BinaryOperator.Lower:
                 opStr = '<';
@@ -4321,6 +4354,16 @@ class TypeofExpression extends AST {
         return visitor.visitTypeofExpression(this, context);
     }
 }
+class VoidExpression extends AST {
+    expression;
+    constructor(span, sourceSpan, expression) {
+        super(span, sourceSpan);
+        this.expression = expression;
+    }
+    visit(visitor, context = null) {
+        return visitor.visitVoidExpression(this, context);
+    }
+}
 class NonNullAssert extends AST {
     expression;
     constructor(span, sourceSpan, expression) {
@@ -4501,6 +4544,9 @@ class RecursiveAstVisitor {
         this.visit(ast.expression, context);
     }
     visitTypeofExpression(ast, context) {
+        this.visit(ast.expression, context);
+    }
+    visitVoidExpression(ast, context) {
         this.visit(ast.expression, context);
     }
     visitNonNullAssert(ast, context) {
@@ -10246,6 +10292,9 @@ function transformExpressionsInExpression(expr, transform, flags) {
     else if (expr instanceof TypeofExpr) {
         expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
     }
+    else if (expr instanceof VoidExpr) {
+        expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
+    }
     else if (expr instanceof WriteVarExpr) {
         expr.value = transformExpressionsInExpression(expr.value, transform, flags);
     }
@@ -11749,6 +11798,7 @@ const BINARY_OPERATORS$3 = new Map([
     ['<=', BinaryOperator.LowerEquals],
     ['-', BinaryOperator.Minus],
     ['%', BinaryOperator.Modulo],
+    ['**', BinaryOperator.Exponentiation],
     ['*', BinaryOperator.Multiply],
     ['!=', BinaryOperator.NotEquals],
     ['!==', BinaryOperator.NotIdentical],
@@ -17447,6 +17497,7 @@ const KEYWORDS = [
     'else',
     'this',
     'typeof',
+    'void',
 ];
 class Lexer {
     tokenize(text) {
@@ -17510,6 +17561,9 @@ class Token {
     }
     isKeywordTypeof() {
         return this.type === TokenType.Keyword && this.strValue === 'typeof';
+    }
+    isKeywordVoid() {
+        return this.type === TokenType.Keyword && this.strValue === 'void';
     }
     isError() {
         return this.type === TokenType.Error;
@@ -17655,11 +17709,12 @@ class _Scanner {
                 return this.scanPrivateIdentifier();
             case $PLUS:
             case $MINUS:
-            case $STAR:
             case $SLASH:
             case $PERCENT:
             case $CARET:
                 return this.scanOperator(start, String.fromCharCode(peek));
+            case $STAR:
+                return this.scanComplexOperator(start, '*', $STAR, '*');
             case $QUESTION:
                 return this.scanQuestion(start);
             case $LT:
@@ -18227,6 +18282,7 @@ class _ParseAST {
     parseFlags;
     errors;
     offset;
+    lastUnary = null;
     rparensExpected = 0;
     rbracketsExpected = 0;
     rbracesExpected = 0;
@@ -18593,7 +18649,7 @@ class _ParseAST {
     parseMultiplicative() {
         // '*', '%', '/'
         const start = this.inputIndex;
-        let result = this.parsePrefix();
+        let result = this.parseExponentiation();
         while (this.next.type == TokenType.Operator) {
             const operator = this.next.strValue;
             switch (operator) {
@@ -18601,11 +18657,28 @@ class _ParseAST {
                 case '%':
                 case '/':
                     this.advance();
-                    let right = this.parsePrefix();
+                    const right = this.parseExponentiation();
                     result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
                     continue;
             }
             break;
+        }
+        return result;
+    }
+    parseExponentiation() {
+        // '**'
+        const start = this.inputIndex;
+        let result = this.parsePrefix();
+        while (this.next.type == TokenType.Operator && this.next.strValue === '**') {
+            // This aligns with Javascript semantics which require any unary operator preceeding the
+            // exponentiation operation to be explicitly grouped as either applying to the base or result
+            // of the exponentiation operation.
+            if (result === this.lastUnary) {
+                this.error('Unary operator used immediately before exponentiation expression. Parenthesis must be used to disambiguate operator precedence');
+            }
+            this.advance();
+            const right = this.parsePrefix();
+            result = new Binary(this.span(start), this.sourceSpan(start), '**', result, right);
         }
         return result;
     }
@@ -18618,22 +18691,28 @@ class _ParseAST {
                 case '+':
                     this.advance();
                     result = this.parsePrefix();
-                    return Unary.createPlus(this.span(start), this.sourceSpan(start), result);
+                    return (this.lastUnary = Unary.createPlus(this.span(start), this.sourceSpan(start), result));
                 case '-':
                     this.advance();
                     result = this.parsePrefix();
-                    return Unary.createMinus(this.span(start), this.sourceSpan(start), result);
+                    return (this.lastUnary = Unary.createMinus(this.span(start), this.sourceSpan(start), result));
                 case '!':
                     this.advance();
                     result = this.parsePrefix();
-                    return new PrefixNot(this.span(start), this.sourceSpan(start), result);
+                    return (this.lastUnary = new PrefixNot(this.span(start), this.sourceSpan(start), result));
             }
         }
         else if (this.next.isKeywordTypeof()) {
             this.advance();
             const start = this.inputIndex;
             let result = this.parsePrefix();
-            return new TypeofExpression(this.span(start), this.sourceSpan(start), result);
+            return (this.lastUnary = new TypeofExpression(this.span(start), this.sourceSpan(start), result));
+        }
+        else if (this.next.isKeywordVoid()) {
+            this.advance();
+            const start = this.inputIndex;
+            let result = this.parsePrefix();
+            return (this.lastUnary = new VoidExpression(this.span(start), this.sourceSpan(start), result));
         }
         return this.parseCallChain();
     }
@@ -18674,6 +18753,7 @@ class _ParseAST {
             this.rparensExpected++;
             const result = this.parsePipe();
             this.rparensExpected--;
+            this.lastUnary = null;
             this.expectCharacter($RPAREN);
             return result;
         }
@@ -19296,6 +19376,9 @@ class SerializeExpressionVisitor {
     }
     visitTypeofExpression(ast, context) {
         return `typeof ${ast.expression.visit(this, context)}`;
+    }
+    visitVoidExpression(ast, context) {
+        return `void ${ast.expression.visit(this, context)}`;
     }
     visitASTWithSource(ast, context) {
         return ast.ast.visit(this, context);
@@ -25978,6 +26061,9 @@ function convertAst(ast, job, baseSourceSpan) {
     else if (ast instanceof TypeofExpression) {
         return typeofExpr(convertAst(ast.expression, job, baseSourceSpan));
     }
+    else if (ast instanceof VoidExpression) {
+        return new VoidExpr(convertAst(ast.expression, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
+    }
     else if (ast instanceof TemplateLiteral) {
         return new TemplateLiteralExpr(ast.elements.map((el) => {
             return new TemplateLiteralElementExpr(el.text, convertSourceSpan(el.span, baseSourceSpan));
@@ -30717,13 +30803,6 @@ function publishFacade(global) {
     ng.ɵcompilerFacade = new CompilerFacadeImpl();
 }
 
-/**
- * @module
- * @description
- * Entry point for all public APIs of the compiler package.
- */
-new Version('20.0.0-next.0+sha-6c9247c');
-
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
 const _I18N_COMMENT_PREFIX_REGEXP = /^i18n:?/;
@@ -31199,6 +31278,13 @@ var FactoryTarget;
     FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
     FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
 })(FactoryTarget || (FactoryTarget = {}));
+
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of the compiler package.
+ */
+new Version('20.0.0-next.0+sha-f2d5cf7');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32130,7 +32216,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-2eecc677.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-cf6f7980.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -36632,6 +36718,7 @@ const BINARY_OPERATORS$1 = new Map([
     [BinaryOperator.Or, '||'],
     [BinaryOperator.Plus, '+'],
     [BinaryOperator.NullishCoalesce, '??'],
+    [BinaryOperator.Exponentiation, '**'],
 ]);
 class ExpressionTranslatorVisitor {
     factory;
@@ -36875,6 +36962,9 @@ class ExpressionTranslatorVisitor {
     }
     visitTypeofExpr(ast, context) {
         return this.factory.createTypeOfExpression(ast.expr.visitExpression(this, context));
+    }
+    visitVoidExpr(ast, context) {
+        return this.factory.createVoidExpression(ast.expr.visitExpression(this, context));
     }
     visitUnaryOperatorExpr(ast, context) {
         if (!UNARY_OPERATORS$1.has(ast.operator)) {
@@ -37292,6 +37382,9 @@ class TypeTranslatorVisitor {
         }
         return ts__default["default"].factory.createTypeQueryNode(typeNode.typeName);
     }
+    visitVoidExpr(ast, context) {
+        throw new Error('Method not implemented.');
+    }
     translateType(type, context) {
         const typeNode = type.visitType(this, context);
         if (!ts__default["default"].isTypeNode(typeNode)) {
@@ -37363,6 +37456,7 @@ const BINARY_OPERATORS = {
     '-': ts__default["default"].SyntaxKind.MinusToken,
     '%': ts__default["default"].SyntaxKind.PercentToken,
     '*': ts__default["default"].SyntaxKind.AsteriskToken,
+    '**': ts__default["default"].SyntaxKind.AsteriskAsteriskToken,
     '!=': ts__default["default"].SyntaxKind.ExclamationEqualsToken,
     '!==': ts__default["default"].SyntaxKind.ExclamationEqualsEqualsToken,
     '||': ts__default["default"].SyntaxKind.BarBarToken,
@@ -37502,6 +37596,7 @@ class TypeScriptAstFactory {
     }
     createThrowStatement = ts__default["default"].factory.createThrowStatement;
     createTypeOfExpression = ts__default["default"].factory.createTypeOfExpression;
+    createVoidExpression = ts__default["default"].factory.createVoidExpression;
     createUnaryExpression(operator, operand) {
         return ts__default["default"].factory.createPrefixUnaryExpression(UNARY_OPERATORS[operator], operand);
     }
@@ -41237,6 +41332,7 @@ const BINARY_OPS = new Map([
     ['==', ts__default["default"].SyntaxKind.EqualsEqualsToken],
     ['===', ts__default["default"].SyntaxKind.EqualsEqualsEqualsToken],
     ['*', ts__default["default"].SyntaxKind.AsteriskToken],
+    ['**', ts__default["default"].SyntaxKind.AsteriskAsteriskToken],
     ['/', ts__default["default"].SyntaxKind.SlashToken],
     ['%', ts__default["default"].SyntaxKind.PercentToken],
     ['!=', ts__default["default"].SyntaxKind.ExclamationEqualsToken],
@@ -41412,6 +41508,12 @@ class AstTranslator {
     visitTypeofExpression(ast) {
         const expression = wrapForDiagnostics(this.translate(ast.expression));
         const node = ts__default["default"].factory.createTypeOfExpression(expression);
+        addParseSpanInfo(node, ast.sourceSpan);
+        return node;
+    }
+    visitVoidExpression(ast) {
+        const expression = wrapForDiagnostics(this.translate(ast.expression));
+        const node = ts__default["default"].factory.createVoidExpression(expression);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41648,6 +41750,9 @@ class VeSafeLhsInferenceBugDetector {
         return ast.expression.visit(this);
     }
     visitTypeofExpression(ast) {
+        return ast.expression.visit(this);
+    }
+    visitVoidExpression(ast) {
         return ast.expression.visit(this);
     }
     visitNonNullAssert(ast) {

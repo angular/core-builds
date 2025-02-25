@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-6c9247c
+ * @license Angular v20.0.0-next.0+sha-f2d5cf7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-2eecc677.js');
+var checker = require('./checker-cf6f7980.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-24a2ad1e.js');
-var project_paths = require('./project_paths-b073c4d6.js');
+var index = require('./index-6a920f40.js');
+var project_paths = require('./project_paths-3015c5a3.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-24da9092.js');
+require('./program-362689f0.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -161,6 +161,7 @@ var BinaryOperator;
     BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
     BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
+    BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -231,6 +232,9 @@ class Expression {
     }
     modulo(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.Modulo, this, rhs, null, sourceSpan);
+    }
+    power(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Exponentiation, this, rhs, null, sourceSpan);
     }
     and(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
