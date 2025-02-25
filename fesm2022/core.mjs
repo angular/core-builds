@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-af2e79e
+ * @license Angular v20.0.0-next.0+sha-491b0a4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14166,7 +14166,7 @@ function runEffectsInView(view) {
  * The maximum number of times the change detection traversal will rerun before throwing an error.
  */
 const MAXIMUM_REFRESH_RERUNS$1 = 100;
-function detectChangesInternal(lView, notifyErrorHandler = true, mode = 0 /* ChangeDetectionMode.Global */) {
+function detectChangesInternal(lView, mode = 0 /* ChangeDetectionMode.Global */) {
     const environment = lView[ENVIRONMENT];
     const rendererFactory = environment.rendererFactory;
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
@@ -14178,12 +14178,6 @@ function detectChangesInternal(lView, notifyErrorHandler = true, mode = 0 /* Cha
     }
     try {
         detectChangesInViewWhileDirty(lView, mode);
-    }
-    catch (error) {
-        if (notifyErrorHandler) {
-            handleError(lView, error);
-        }
-        throw error;
     }
     finally {
         if (!checkNoChangesMode) {
@@ -14225,10 +14219,10 @@ function detectChangesInViewWhileDirty(lView, mode) {
         setIsRefreshingViews(lastIsRefreshingViewsValue);
     }
 }
-function checkNoChangesInternal(lView, mode, notifyErrorHandler = true) {
+function checkNoChangesInternal(lView, mode) {
     setIsInCheckNoChangesMode(mode);
     try {
-        detectChangesInternal(lView, notifyErrorHandler);
+        detectChangesInternal(lView);
     }
     finally {
         setIsInCheckNoChangesMode(CheckNoChangesMode.Off);
@@ -14782,7 +14776,6 @@ function trackMovedView(declarationContainer, lView) {
 class ViewRef$1 {
     _lView;
     _cdRefInjectingView;
-    notifyErrorHandler;
     _appRef = null;
     _attachedToViewContainer = false;
     get rootNodes() {
@@ -14809,10 +14802,9 @@ class ViewRef$1 {
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView, notifyErrorHandler = true) {
+    _cdRefInjectingView) {
         this._lView = _lView;
         this._cdRefInjectingView = _cdRefInjectingView;
-        this.notifyErrorHandler = notifyErrorHandler;
     }
     get context() {
         return this._lView[CONTEXT];
@@ -15044,7 +15036,7 @@ class ViewRef$1 {
         // until the end of the refresh. Using `RefreshView` prevents creating a potential difference
         // in the state of the LViewFlags during template execution.
         this._lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
-        detectChangesInternal(this._lView, this.notifyErrorHandler);
+        detectChangesInternal(this._lView);
     }
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
@@ -15054,7 +15046,7 @@ class ViewRef$1 {
      */
     checkNoChanges() {
         if (ngDevMode) {
-            checkNoChangesInternal(this._lView, CheckNoChangesMode.OnlyDirtyViews, this.notifyErrorHandler);
+            checkNoChangesInternal(this._lView, CheckNoChangesMode.OnlyDirtyViews);
         }
     }
     attachToViewContainerRef() {
@@ -18126,7 +18118,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '20.0.0-next.0+sha-af2e79e']
+                ? ['ng-version', '20.0.0-next.0+sha-491b0a4']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -18211,7 +18203,7 @@ class ComponentRef extends ComponentRef$1 {
         this._tNode = getTNode(_rootLView[TVIEW], HEADER_OFFSET);
         this.location = createElementRef(this._tNode, _rootLView);
         this.instance = getComponentLViewByIndex(this._tNode.index, _rootLView)[CONTEXT];
-        this.hostView = this.changeDetectorRef = new ViewRef$1(_rootLView, undefined /* _cdRefInjectingView */, false /* notifyErrorHandler */);
+        this.hostView = this.changeDetectorRef = new ViewRef$1(_rootLView, undefined /* _cdRefInjectingView */);
         this.componentType = componentType;
     }
     setInput(name, value) {
@@ -23852,8 +23844,8 @@ class ApplicationRef {
             // Set the AfterRender bit, as we're checking views and will need to run afterRender hooks.
             this.dirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
             // Check all potentially dirty views.
-            for (let { _lView, notifyErrorHandler } of this.allViews) {
-                detectChangesInViewIfRequired(_lView, notifyErrorHandler, useGlobalCheck, this.zonelessEnabled);
+            for (let { _lView } of this.allViews) {
+                detectChangesInViewIfRequired(_lView, useGlobalCheck, this.zonelessEnabled);
             }
             // If `markForCheck()` was called during view checking, it will have set the `ViewTreeCheck`
             // flag. We clear the flag here because, for backwards compatibility, `markForCheck()`
@@ -24012,7 +24004,7 @@ function remove(list, el) {
         list.splice(index, 1);
     }
 }
-function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, zonelessEnabled) {
+function detectChangesInViewIfRequired(lView, isFirstPass, zonelessEnabled) {
     // When re-checking, only check views which actually need it.
     if (!isFirstPass && !requiresRefreshOrTraversal(lView)) {
         return;
@@ -24022,7 +24014,7 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
             0 /* ChangeDetectionMode.Global */
         : // Only refresh views with the `RefreshView` flag or views is a changed signal
             1 /* ChangeDetectionMode.Targeted */;
-    detectChangesInternal(lView, notifyErrorHandler, mode);
+    detectChangesInternal(lView, mode);
 }
 
 /**
@@ -35174,7 +35166,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-af2e79e');
+const VERSION = new Version('20.0.0-next.0+sha-491b0a4');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -36684,7 +36676,7 @@ class DebugNgZoneForCheckNoChanges extends NgZone {
         this.applicationRef ||= this.injector.get(ApplicationRef);
         for (const view of this.applicationRef.allViews) {
             try {
-                checkNoChangesInternal(view._lView, this.checkNoChangesMode, view.notifyErrorHandler);
+                checkNoChangesInternal(view._lView, this.checkNoChangesMode);
             }
             catch (e) {
                 this.errorHandler ||= this.injector.get(ErrorHandler);
@@ -36715,7 +36707,7 @@ function exhaustiveCheckNoChangesInterval(interval, checkNoChangesMode) {
                             }
                             for (const view of applicationRef.allViews) {
                                 try {
-                                    checkNoChangesInternal(view._lView, checkNoChangesMode, view.notifyErrorHandler);
+                                    checkNoChangesInternal(view._lView, checkNoChangesMode);
                                 }
                                 catch (e) {
                                     errorHandler.handleError(e);

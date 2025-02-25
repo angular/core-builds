@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-af2e79e
+ * @license Angular v20.0.0-next.0+sha-491b0a4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13528,7 +13528,7 @@ export declare enum ɵDeferBlockState {
 /** The deps tracker to be used in the current Angular app in dev mode. */
 export declare const ɵdepsTracker: DepsTracker;
 
-export declare function ɵdetectChangesInViewIfRequired(lView: LView, notifyErrorHandler: boolean, isFirstPass: boolean, zonelessEnabled: boolean): void;
+export declare function ɵdetectChangesInViewIfRequired(lView: LView, isFirstPass: boolean, zonelessEnabled: boolean): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
@@ -15294,7 +15294,6 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
     private _cdRefInjectingView?;
-    readonly notifyErrorHandler: boolean;
     private _appRef;
     private _attachedToViewContainer;
     get rootNodes(): any[];
@@ -15317,7 +15316,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: LView | undefined, notifyErrorHandler?: boolean);
+    _cdRefInjectingView?: LView | undefined);
     get context(): T;
     /**
      * Reports whether the given view is considered dirty according to the different marking mechanisms.
