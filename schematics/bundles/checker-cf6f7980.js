@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-911a210
+ * @license Angular v20.0.0-next.0+sha-b070100
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31284,7 +31284,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.0+sha-911a210');
+new Version('20.0.0-next.0+sha-b070100');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
