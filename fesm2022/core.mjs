@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.7+sha-adf4987
+ * @license Angular v19.1.7+sha-567d48f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15864,7 +15864,7 @@ function createIcuIterator(tIcu, lView) {
  *  - the `b` char which indicates that the lookup should start from the `document.body`
  *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
  */
-const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+const REF_EXTRACTOR_REGEXP = /* @__PURE__ */ new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
 /**
  * Helper function that takes a reference node location and a set of navigation steps
  * (from the reference node) to a target node and outputs a string that represents
@@ -17913,7 +17913,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.7+sha-adf4987']
+                ? ['ng-version', '19.1.7+sha-567d48f']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34960,7 +34960,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.7+sha-adf4987');
+const VERSION = new Version('19.1.7+sha-567d48f');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
