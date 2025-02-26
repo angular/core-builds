@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-d85ebb4
+ * @license Angular v20.0.0-next.0+sha-11ab5db
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -967,8 +967,9 @@ function stringifyTypeFromDebugInfo(debugInfo) {
 
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token, path) {
-    const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
-    throw new RuntimeError(-200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, ngDevMode ? `Circular dependency in DI detected for ${token}${depPath}` : token);
+    throw new RuntimeError(-200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, ngDevMode
+        ? `Circular dependency in DI detected for ${token}${path ? `. Dependency path: ${path.join(' > ')} > ${token}` : ''}`
+        : token);
 }
 function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
@@ -18118,7 +18119,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '20.0.0-next.0+sha-d85ebb4']
+                ? ['ng-version', '20.0.0-next.0+sha-11ab5db']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35166,7 +35167,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-d85ebb4');
+const VERSION = new Version('20.0.0-next.0+sha-11ab5db');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
