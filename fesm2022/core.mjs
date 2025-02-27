@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-4078895
+ * @license Angular v20.0.0-next.0+sha-08d9081
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2046,6 +2046,8 @@ function getNullInjector() {
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @publicApi
  */
 class EnvironmentInjector {
 }
@@ -9469,15 +9471,6 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
 }
 
 const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
-function invokeRegisteredDelegationListeners(event) {
-    const handlerFns = event.currentTarget?.__jsaction_fns?.get(event.type);
-    if (!handlerFns) {
-        return;
-    }
-    for (const handler of handlerFns) {
-        handler(event);
-    }
-}
 function setJSActionAttributes(nativeElement, eventTypes, parentDeferBlockId = null) {
     // jsaction attributes specifically should be applied to elements and not comment nodes.
     // Comment nodes also have no setAttribute function. So this avoids errors.
@@ -9539,7 +9532,7 @@ const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_D
 });
 function invokeListeners(event, currentTarget) {
     const handlerFns = currentTarget?.__jsaction_fns?.get(event.type);
-    if (!handlerFns) {
+    if (!handlerFns || !currentTarget?.isConnected) {
         return;
     }
     for (const handler of handlerFns) {
@@ -18119,7 +18112,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '20.0.0-next.0+sha-4078895']
+                ? ['ng-version', '20.0.0-next.0+sha-08d9081']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35167,7 +35160,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-4078895');
+const VERSION = new Version('20.0.0-next.0+sha-08d9081');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

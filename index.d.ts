@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-4078895
+ * @license Angular v20.0.0-next.0+sha-08d9081
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3403,6 +3403,15 @@ declare interface DepsTrackerApi {
 }
 
 /**
+ * An Injector that the owner can destroy and trigger the DestroyRef.destroy hooks.
+ *
+ * @publicApi
+ */
+export declare interface DestroyableInjector extends Injector {
+    destroy(): void;
+}
+
+/**
  * Array of destroy hooks that should be executed for a view and their directive indices.
  *
  * The array is set up as a series of number/function or number/(number|function)[]:
@@ -4296,6 +4305,8 @@ export declare const ENVIRONMENT_INITIALIZER: InjectionToken<readonly (() => voi
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @publicApi
  */
 export declare abstract class EnvironmentInjector implements Injector {
     /**
@@ -6218,7 +6229,7 @@ export declare abstract class Injector {
         providers: Array<Provider | StaticProvider>;
         parent?: Injector;
         name?: string;
-    }): Injector;
+    }): DestroyableInjector;
     /** @nocollapse */
     static ɵprov: unknown;
 }
