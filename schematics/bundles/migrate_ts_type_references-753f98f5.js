@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-08d9081
+ * @license Angular v20.0.0-next.0+sha-25db666
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-cf6f7980.js');
+var checker = require('./checker-51859505.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-6a920f40.js');
-var project_paths = require('./project_paths-3015c5a3.js');
+var index = require('./index-0ddf59f7.js');
+var project_paths = require('./project_paths-86f8936a.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-362689f0.js');
+require('./program-1146154b.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -239,11 +239,11 @@ class Expression {
     and(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
     }
-    bitwiseOr(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
+    bitwiseOr(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan);
     }
-    bitwiseAnd(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
+    bitwiseAnd(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan);
     }
     or(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.Or, this, rhs, null, sourceSpan);
@@ -425,13 +425,11 @@ class ConditionalExpr extends Expression {
 class BinaryOperatorExpr extends Expression {
     operator;
     rhs;
-    parens;
     lhs;
-    constructor(operator, lhs, rhs, type, sourceSpan, parens = true) {
+    constructor(operator, lhs, rhs, type, sourceSpan) {
         super(type || lhs.type, sourceSpan);
         this.operator = operator;
         this.rhs = rhs;
-        this.parens = parens;
         this.lhs = lhs;
     }
     isEquivalent(e) {
@@ -447,7 +445,7 @@ class BinaryOperatorExpr extends Expression {
         return visitor.visitBinaryOperatorExpr(this, context);
     }
     clone() {
-        return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan, this.parens);
+        return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan);
     }
 }
 class ReadPropExpr extends Expression {

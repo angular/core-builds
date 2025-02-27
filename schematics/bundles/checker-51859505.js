@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-08d9081
+ * @license Angular v20.0.0-next.0+sha-25db666
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -999,11 +999,11 @@ class Expression {
     and(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
     }
-    bitwiseOr(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
+    bitwiseOr(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan);
     }
-    bitwiseAnd(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
+    bitwiseAnd(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan);
     }
     or(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.Or, this, rhs, null, sourceSpan);
@@ -1676,16 +1676,34 @@ class UnaryOperatorExpr extends Expression {
         return new UnaryOperatorExpr(this.operator, this.expr.clone(), this.type, this.sourceSpan, this.parens);
     }
 }
+class ParenthesizedExpr extends Expression {
+    expr;
+    constructor(expr, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.expr = expr;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitParenthesizedExpr(this, context);
+    }
+    isEquivalent(e) {
+        // TODO: should this ignore paren depth? i.e. is `(1)` equivalent to `1`?
+        return e instanceof ParenthesizedExpr && e.expr.isEquivalent(this.expr);
+    }
+    isConstant() {
+        return this.expr.isConstant();
+    }
+    clone() {
+        return new ParenthesizedExpr(this.expr.clone());
+    }
+}
 class BinaryOperatorExpr extends Expression {
     operator;
     rhs;
-    parens;
     lhs;
-    constructor(operator, lhs, rhs, type, sourceSpan, parens = true) {
+    constructor(operator, lhs, rhs, type, sourceSpan) {
         super(type || lhs.type, sourceSpan);
         this.operator = operator;
         this.rhs = rhs;
-        this.parens = parens;
         this.lhs = lhs;
     }
     isEquivalent(e) {
@@ -1701,7 +1719,7 @@ class BinaryOperatorExpr extends Expression {
         return visitor.visitBinaryOperatorExpr(this, context);
     }
     clone() {
-        return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan, this.parens);
+        return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan);
     }
 }
 class ReadPropExpr extends Expression {
@@ -2101,6 +2119,10 @@ class RecursiveAstVisitor$1 {
         return this.visitExpression(ast, context);
     }
     visitTemplateLiteralElementExpr(ast, context) {
+        return this.visitExpression(ast, context);
+    }
+    visitParenthesizedExpr(ast, context) {
+        ast.expr.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
     visitAllExpressions(exprs, context) {
@@ -3397,6 +3419,7 @@ class EmitterVisitorContext {
 }
 class AbstractEmitterVisitor {
     _escapeDollarInStrings;
+    lastIfCondition = null;
     constructor(_escapeDollarInStrings) {
         this._escapeDollarInStrings = _escapeDollarInStrings;
     }
@@ -3436,7 +3459,9 @@ class AbstractEmitterVisitor {
     visitIfStmt(stmt, ctx) {
         this.printLeadingComments(stmt, ctx);
         ctx.print(stmt, `if (`);
+        this.lastIfCondition = stmt.condition; // We can skip redundant parentheses for the condition.
         stmt.condition.visitExpression(this, ctx);
+        this.lastIfCondition = null;
         ctx.print(stmt, `) {`);
         const hasElseCase = stmt.falseCase != null && stmt.falseCase.length > 0;
         if (stmt.trueCase.length <= 1 && !hasElseCase) {
@@ -3609,11 +3634,12 @@ class AbstractEmitterVisitor {
             default:
                 throw new Error(`Unknown operator ${ast.operator}`);
         }
-        if (ast.parens)
+        const parens = ast !== this.lastIfCondition;
+        if (parens)
             ctx.print(ast, `(`);
         ctx.print(ast, opStr);
         ast.expr.visitExpression(this, ctx);
-        if (ast.parens)
+        if (parens)
             ctx.print(ast, `)`);
         return null;
     }
@@ -3680,12 +3706,13 @@ class AbstractEmitterVisitor {
             default:
                 throw new Error(`Unknown operator ${ast.operator}`);
         }
-        if (ast.parens)
+        const parens = ast !== this.lastIfCondition;
+        if (parens)
             ctx.print(ast, `(`);
         ast.lhs.visitExpression(this, ctx);
         ctx.print(ast, ` ${opStr} `);
         ast.rhs.visitExpression(this, ctx);
-        if (ast.parens)
+        if (parens)
             ctx.print(ast, `)`);
         return null;
     }
@@ -3722,6 +3749,12 @@ class AbstractEmitterVisitor {
         this.visitAllExpressions(ast.parts, ctx, ',');
         ctx.print(ast, ')');
         return null;
+    }
+    visitParenthesizedExpr(ast, ctx) {
+        // We parenthesize everything regardless of an explicit ParenthesizedExpr, so we can just visit
+        // the inner expression.
+        // TODO: Do we *need* to parenthesize everything?
+        ast.expr.visitExpression(this, ctx);
     }
     visitAllExpressions(expressions, ctx, separator) {
         this.visitAllObjects((expr) => expr.visitExpression(this, ctx), expressions, ctx, separator);
@@ -3809,7 +3842,7 @@ function guardedExpression(guard, expr) {
     const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal$1('undefined'));
     const guardUndefinedOrTrue = new BinaryOperatorExpr(BinaryOperator.Or, guardNotDefined, guardExpr, 
     /* type */ undefined, 
-    /* sourceSpan */ undefined, true);
+    /* sourceSpan */ undefined);
     return new BinaryOperatorExpr(BinaryOperator.And, guardUndefinedOrTrue, expr);
 }
 function wrapReference(value) {
@@ -10325,6 +10358,9 @@ function transformExpressionsInExpression(expr, transform, flags) {
         for (let i = 0; i < expr.expressions.length; i++) {
             expr.expressions[i] = transformExpressionsInExpression(expr.expressions[i], transform, flags);
         }
+    }
+    else if (expr instanceof ParenthesizedExpr) {
+        expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
     }
     else if (expr instanceof ReadVarExpr ||
         expr instanceof ExternalExpr ||
@@ -26464,7 +26500,7 @@ function getTemplateSourceLocationsEnabled() {
 
 //  if (rf & flags) { .. }
 function renderFlagCheckIfStmt(flags, statements) {
-    return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal$1(flags), null, false), statements);
+    return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal$1(flags), null), statements);
 }
 /**
  * Translates query flags into `TQueryFlags` type in
@@ -31284,7 +31320,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.0+sha-08d9081');
+new Version('20.0.0-next.0+sha-25db666');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32216,7 +32252,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-cf6f7980.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-51859505.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -36972,6 +37008,9 @@ class ExpressionTranslatorVisitor {
         }
         return this.factory.createUnaryExpression(UNARY_OPERATORS$1.get(ast.operator), ast.expr.visitExpression(this, context));
     }
+    visitParenthesizedExpr(ast, context) {
+        return this.factory.createParenthesizedExpression(ast.expr.visitExpression(this, context));
+    }
     visitStatements(statements, context) {
         return statements
             .map((stmt) => stmt.visitStatement(this, context))
@@ -37383,6 +37422,9 @@ class TypeTranslatorVisitor {
         return ts__default["default"].factory.createTypeQueryNode(typeNode.typeName);
     }
     visitVoidExpr(ast, context) {
+        throw new Error('Method not implemented.');
+    }
+    visitParenthesizedExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
     translateType(type, context) {
