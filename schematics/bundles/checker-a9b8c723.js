@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0+sha-b81ea4f
+ * @license Angular v19.2.0+sha-1dd9447
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30722,7 +30722,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0+sha-b81ea4f');
+new Version('19.2.0+sha-1dd9447');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32130,7 +32130,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-2eecc677.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-a9b8c723.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38287,20 +38287,16 @@ function parseTemplateAsSourceFile(fileName, template) {
     /* setParentNodes */ false, ts__default["default"].ScriptKind.JSX);
 }
 
-const TEMPLATE_ID = Symbol('ngTemplateId');
-const NEXT_TEMPLATE_ID = Symbol('ngNextTemplateId');
+const TEMPLATE_ID_MAP = Symbol('ngTemplateId');
 function getTemplateId$1(clazz) {
-    const node = clazz;
-    if (node[TEMPLATE_ID] === undefined) {
-        node[TEMPLATE_ID] = allocateTemplateId(node.getSourceFile());
+    const sf = clazz.getSourceFile();
+    if (sf[TEMPLATE_ID_MAP] === undefined) {
+        sf[TEMPLATE_ID_MAP] = new Map();
     }
-    return node[TEMPLATE_ID];
-}
-function allocateTemplateId(sf) {
-    if (sf[NEXT_TEMPLATE_ID] === undefined) {
-        sf[NEXT_TEMPLATE_ID] = 1;
+    if (sf[TEMPLATE_ID_MAP].get(clazz) === undefined) {
+        sf[TEMPLATE_ID_MAP].set(clazz, `tcb${sf[TEMPLATE_ID_MAP].size + 1}`);
     }
-    return `tcb${sf[NEXT_TEMPLATE_ID]++}`;
+    return sf[TEMPLATE_ID_MAP].get(clazz);
 }
 
 const parseSpanComment = /^(\d+),(\d+)$/;

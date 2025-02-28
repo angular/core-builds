@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-b81ea4f
+ * @license Angular v19.2.0+sha-1dd9447
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18114,7 +18114,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-b81ea4f']
+                ? ['ng-version', '19.2.0+sha-1dd9447']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35162,7 +35162,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-b81ea4f');
+const VERSION = new Version('19.2.0+sha-1dd9447');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
