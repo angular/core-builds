@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-c2a46d2
+ * @license Angular v20.0.0-next.0+sha-af02914
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2004,12 +2004,6 @@ class RecursiveAstVisitor$1 {
     visitWrappedNodeExpr(ast, context) {
         return ast;
     }
-    visitTypeofExpr(ast, context) {
-        return this.visitExpression(ast, context);
-    }
-    visitVoidExpr(ast, context) {
-        return this.visitExpression(ast, context);
-    }
     visitReadVarExpr(ast, context) {
         return this.visitExpression(ast, context);
     }
@@ -2084,6 +2078,14 @@ class RecursiveAstVisitor$1 {
         return this.visitExpression(ast, context);
     }
     visitUnaryOperatorExpr(ast, context) {
+        ast.expr.visitExpression(this, context);
+        return this.visitExpression(ast, context);
+    }
+    visitTypeofExpr(ast, context) {
+        ast.expr.visitExpression(this, context);
+        return this.visitExpression(ast, context);
+    }
+    visitVoidExpr(ast, context) {
         ast.expr.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
@@ -11435,6 +11437,33 @@ function assignI18nSlotDependencies(job) {
 }
 
 /**
+ * Locates all of the elements defined in a creation block and outputs an op
+ * that will expose their definition location in the DOM.
+ */
+function attachSourceLocations(job) {
+    if (!job.enableDebugLocations || job.relativeTemplatePath === null) {
+        return;
+    }
+    for (const unit of job.units) {
+        const locations = [];
+        for (const op of unit.create) {
+            if (op.kind === OpKind.ElementStart || op.kind === OpKind.Element) {
+                const start = op.startSourceSpan.start;
+                locations.push({
+                    targetSlot: op.handle,
+                    offset: start.offset,
+                    line: start.line,
+                    column: start.col,
+                });
+            }
+        }
+        if (locations.length > 0) {
+            unit.create.push(createSourceLocationOp(job.relativeTemplatePath, locations));
+        }
+    }
+}
+
+/**
  * Gets a map of all elements in the given view by their xref id.
  */
 function createOpXrefMap(unit) {
@@ -12119,29 +12148,6 @@ function convertI18nBindings(job) {
                     }
                     OpList.replaceWithMany(op, ops);
                     break;
-            }
-        }
-    }
-}
-
-/**
- * Resolve the dependency function of a deferred block.
- */
-function resolveDeferDepsFns(job) {
-    for (const unit of job.units) {
-        for (const op of unit.create) {
-            if (op.kind === OpKind.Defer) {
-                if (op.resolverFn !== null) {
-                    continue;
-                }
-                if (op.ownResolverFn !== null) {
-                    if (op.handle.slot === null) {
-                        throw new Error('AssertionError: slot must be assigned before extracting defer deps functions');
-                    }
-                    const fullPathName = unit.fnName?.replace('_Template', '');
-                    op.resolverFn = job.pool.getSharedFunctionReference(op.ownResolverFn, `${fullPathName}_Defer_${op.handle.slot}_DepsFn`, 
-                    /* Don't use unique names for TDB compatibility */ false);
-                }
             }
         }
     }
@@ -12885,6 +12891,27 @@ function generateAdvance(job) {
                 OpList.insertBefore(createAdvanceOp(delta, consumer.sourceSpan), op);
                 slotContext = slot;
             }
+        }
+    }
+}
+
+/**
+ * Replaces the `storeLet` ops with variables that can be
+ * used to reference the value within the same view.
+ */
+function generateLocalLetReferences(job) {
+    for (const unit of job.units) {
+        for (const op of unit.update) {
+            if (op.kind !== OpKind.StoreLet) {
+                continue;
+            }
+            const variable = {
+                kind: SemanticVariableKind.Identifier,
+                name: null,
+                identifier: op.declaredName,
+                local: true,
+            };
+            OpList.replace(op, createVariableOp(job.allocateXrefId(), variable, new StoreLetExpr(op.target, op.value, op.sourceSpan), VariableFlags.None));
         }
     }
 }
@@ -18713,7 +18740,7 @@ class _ParseAST {
                 this.error('Unary operator used immediately before exponentiation expression. Parenthesis must be used to disambiguate operator precedence');
             }
             this.advance();
-            const right = this.parsePrefix();
+            const right = this.parseExponentiation();
             result = new Binary(this.span(start), this.sourceSpan(start), '**', result, right);
         }
         return result;
@@ -23525,6 +23552,33 @@ function removeI18nContexts(job) {
 }
 
 /**
+ * It's not allowed to access a `@let` declaration before it has been defined. This is enforced
+ * already via template type checking, however it can trip some of the assertions in the pipeline.
+ * E.g. the naming phase can fail because we resolved the variable here, but the variable doesn't
+ * exist anymore because the optimization phase removed it since it's invalid. To avoid surfacing
+ * confusing errors to users in the case where template type checking isn't running (e.g. in JIT
+ * mode) this phase detects illegal forward references and replaces them with `undefined`.
+ * Eventually users will see the proper error from the template type checker.
+ */
+function removeIllegalLetReferences(job) {
+    for (const unit of job.units) {
+        for (const op of unit.update) {
+            if (op.kind !== OpKind.Variable ||
+                op.variable.kind !== SemanticVariableKind.Identifier ||
+                !(op.initializer instanceof StoreLetExpr)) {
+                continue;
+            }
+            const name = op.variable.identifier;
+            let current = op;
+            while (current && current.kind !== OpKind.ListEnd) {
+                transformExpressionsInOp(current, (expr) => expr instanceof LexicalReadExpr && expr.name === name ? literal$1(undefined) : expr, VisitorContextFlag.None);
+                current = current.prev;
+            }
+        }
+    }
+}
+
+/**
  * i18nAttributes ops will be generated for each i18n attribute. However, not all i18n attribues
  * will contain dynamic content, and so some of these i18nAttributes ops may be unnecessary.
  */
@@ -23545,6 +23599,31 @@ function removeUnusedI18nAttributesOps(job) {
                     }
                     OpList.remove(op);
             }
+        }
+    }
+}
+
+// TODO: create AST for parentheses when parsing, then we can remove the unnecessary ones instead of
+// adding them out of thin air. This should simplify the parsing and give us valid spans for the
+// parentheses.
+/**
+ * In some cases we need to add parentheses to expressions for them to be considered valid
+ * JavaScript. This phase adds parentheses to cover such cases. Currently these cases are:
+ *
+ * 1. Unary operators in the base of an exponentiation expression. For example, `-2 ** 3` is not
+ *    valid JavaScript, but `(-2) ** 3` is.
+ */
+function requiredParentheses(job) {
+    for (const unit of job.units) {
+        for (const op of unit.ops()) {
+            transformExpressionsInOp(op, (expr) => {
+                if (expr instanceof BinaryOperatorExpr &&
+                    expr.operator === BinaryOperator.Exponentiation &&
+                    expr.lhs instanceof UnaryOperatorExpr) {
+                    expr.lhs = new ParenthesizedExpr(expr.lhs);
+                }
+                return expr;
+            }, VisitorContextFlag.None);
         }
     }
 }
@@ -23602,6 +23681,29 @@ function processLexicalScope$1(view, ops) {
                 return expr;
             }
         }, VisitorContextFlag.None);
+    }
+}
+
+/**
+ * Resolve the dependency function of a deferred block.
+ */
+function resolveDeferDepsFns(job) {
+    for (const unit of job.units) {
+        for (const op of unit.create) {
+            if (op.kind === OpKind.Defer) {
+                if (op.resolverFn !== null) {
+                    continue;
+                }
+                if (op.ownResolverFn !== null) {
+                    if (op.handle.slot === null) {
+                        throw new Error('AssertionError: slot must be assigned before extracting defer deps functions');
+                    }
+                    const fullPathName = unit.fnName?.replace('_Template', '');
+                    op.resolverFn = job.pool.getSharedFunctionReference(op.ownResolverFn, `${fullPathName}_Defer_${op.handle.slot}_DepsFn`, 
+                    /* Don't use unique names for TDB compatibility */ false);
+                }
+            }
+        }
     }
 }
 
@@ -24182,39 +24284,6 @@ function getOnlySecurityContext(securityContext) {
 }
 
 /**
- * Transforms a `TwoWayBindingSet` expression into an expression that either
- * sets a value through the `twoWayBindingSet` instruction or falls back to setting
- * the value directly. E.g. the expression `TwoWayBindingSet(target, value)` becomes:
- * `ng.twoWayBindingSet(target, value) || (target = value)`.
- */
-function transformTwoWayBindingSet(job) {
-    for (const unit of job.units) {
-        for (const op of unit.create) {
-            if (op.kind === OpKind.TwoWayListener) {
-                transformExpressionsInOp(op, (expr) => {
-                    if (!(expr instanceof TwoWayBindingSetExpr)) {
-                        return expr;
-                    }
-                    const { target, value } = expr;
-                    if (target instanceof ReadPropExpr || target instanceof ReadKeyExpr) {
-                        return twoWayBindingSet(target, value).or(target.set(value));
-                    }
-                    // ASSUMPTION: here we're assuming that `ReadVariableExpr` will be a reference
-                    // to a local template variable. This appears to be the case at the time of writing.
-                    // If the expression is targeting a variable read, we only emit the `twoWayBindingSet`
-                    // since the fallback would be attempting to write into a constant. Invalid usages will be
-                    // flagged during template type checking.
-                    if (target instanceof ReadVariableExpr) {
-                        return twoWayBindingSet(target, value);
-                    }
-                    throw new Error(`Unsupported expression in two-way action binding.`);
-                }, VisitorContextFlag.InChildOperation);
-            }
-        }
-    }
-}
-
-/**
  * When inside of a listener, we may need access to one or more enclosing views. Therefore, each
  * view should save the current view, and each listener must have the ability to restore the
  * appropriate view. We eagerly generate all save view variables; they will be optimized away later.
@@ -24319,6 +24388,40 @@ function allocateSlots(job) {
                 // TODO: currently we handle the decls for the RepeaterCreate empty template in the reify
                 // phase. We should handle that here instead.
             }
+        }
+    }
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Removes any `storeLet` calls that aren't referenced outside of the current view.
+ */
+function optimizeStoreLet(job) {
+    const letUsedExternally = new Set();
+    // Since `@let` declarations can be referenced in child views, both in
+    // the creation block (via listeners) and in the update block, we have
+    // to look through all the ops to find the references.
+    for (const unit of job.units) {
+        for (const op of unit.ops()) {
+            visitExpressionsInOp(op, (expr) => {
+                if (expr instanceof ContextLetReferenceExpr) {
+                    letUsedExternally.add(expr.target);
+                }
+            });
+        }
+    }
+    // TODO(crisbeto): potentially remove the unused calls completely, pending discussion.
+    for (const unit of job.units) {
+        for (const op of unit.update) {
+            transformExpressionsInOp(op, (expression) => expression instanceof StoreLetExpr && !letUsedExternally.has(expression.target)
+                ? expression.value
+                : expression, VisitorContextFlag.None);
         }
     }
 }
@@ -24546,6 +24649,39 @@ function generateTrackVariables(job) {
                 }
                 return expr;
             }, VisitorContextFlag.None);
+        }
+    }
+}
+
+/**
+ * Transforms a `TwoWayBindingSet` expression into an expression that either
+ * sets a value through the `twoWayBindingSet` instruction or falls back to setting
+ * the value directly. E.g. the expression `TwoWayBindingSet(target, value)` becomes:
+ * `ng.twoWayBindingSet(target, value) || (target = value)`.
+ */
+function transformTwoWayBindingSet(job) {
+    for (const unit of job.units) {
+        for (const op of unit.create) {
+            if (op.kind === OpKind.TwoWayListener) {
+                transformExpressionsInOp(op, (expr) => {
+                    if (!(expr instanceof TwoWayBindingSetExpr)) {
+                        return expr;
+                    }
+                    const { target, value } = expr;
+                    if (target instanceof ReadPropExpr || target instanceof ReadKeyExpr) {
+                        return twoWayBindingSet(target, value).or(target.set(value));
+                    }
+                    // ASSUMPTION: here we're assuming that `ReadVariableExpr` will be a reference
+                    // to a local template variable. This appears to be the case at the time of writing.
+                    // If the expression is targeting a variable read, we only emit the `twoWayBindingSet`
+                    // since the fallback would be attempting to write into a constant. Invalid usages will be
+                    // flagged during template type checking.
+                    if (target instanceof ReadVariableExpr) {
+                        return twoWayBindingSet(target, value);
+                    }
+                    throw new Error(`Unsupported expression in two-way action binding.`);
+                }, VisitorContextFlag.InChildOperation);
+            }
         }
     }
 }
@@ -25149,115 +25285,6 @@ function wrapI18nIcus(job) {
     }
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-/**
- * Removes any `storeLet` calls that aren't referenced outside of the current view.
- */
-function optimizeStoreLet(job) {
-    const letUsedExternally = new Set();
-    // Since `@let` declarations can be referenced in child views, both in
-    // the creation block (via listeners) and in the update block, we have
-    // to look through all the ops to find the references.
-    for (const unit of job.units) {
-        for (const op of unit.ops()) {
-            visitExpressionsInOp(op, (expr) => {
-                if (expr instanceof ContextLetReferenceExpr) {
-                    letUsedExternally.add(expr.target);
-                }
-            });
-        }
-    }
-    // TODO(crisbeto): potentially remove the unused calls completely, pending discussion.
-    for (const unit of job.units) {
-        for (const op of unit.update) {
-            transformExpressionsInOp(op, (expression) => expression instanceof StoreLetExpr && !letUsedExternally.has(expression.target)
-                ? expression.value
-                : expression, VisitorContextFlag.None);
-        }
-    }
-}
-
-/**
- * It's not allowed to access a `@let` declaration before it has been defined. This is enforced
- * already via template type checking, however it can trip some of the assertions in the pipeline.
- * E.g. the naming phase can fail because we resolved the variable here, but the variable doesn't
- * exist anymore because the optimization phase removed it since it's invalid. To avoid surfacing
- * confusing errors to users in the case where template type checking isn't running (e.g. in JIT
- * mode) this phase detects illegal forward references and replaces them with `undefined`.
- * Eventually users will see the proper error from the template type checker.
- */
-function removeIllegalLetReferences(job) {
-    for (const unit of job.units) {
-        for (const op of unit.update) {
-            if (op.kind !== OpKind.Variable ||
-                op.variable.kind !== SemanticVariableKind.Identifier ||
-                !(op.initializer instanceof StoreLetExpr)) {
-                continue;
-            }
-            const name = op.variable.identifier;
-            let current = op;
-            while (current && current.kind !== OpKind.ListEnd) {
-                transformExpressionsInOp(current, (expr) => expr instanceof LexicalReadExpr && expr.name === name ? literal$1(undefined) : expr, VisitorContextFlag.None);
-                current = current.prev;
-            }
-        }
-    }
-}
-
-/**
- * Replaces the `storeLet` ops with variables that can be
- * used to reference the value within the same view.
- */
-function generateLocalLetReferences(job) {
-    for (const unit of job.units) {
-        for (const op of unit.update) {
-            if (op.kind !== OpKind.StoreLet) {
-                continue;
-            }
-            const variable = {
-                kind: SemanticVariableKind.Identifier,
-                name: null,
-                identifier: op.declaredName,
-                local: true,
-            };
-            OpList.replace(op, createVariableOp(job.allocateXrefId(), variable, new StoreLetExpr(op.target, op.value, op.sourceSpan), VariableFlags.None));
-        }
-    }
-}
-
-/**
- * Locates all of the elements defined in a creation block and outputs an op
- * that will expose their definition location in the DOM.
- */
-function attachSourceLocations(job) {
-    if (!job.enableDebugLocations || job.relativeTemplatePath === null) {
-        return;
-    }
-    for (const unit of job.units) {
-        const locations = [];
-        for (const op of unit.create) {
-            if (op.kind === OpKind.ElementStart || op.kind === OpKind.Element) {
-                const start = op.startSourceSpan.start;
-                locations.push({
-                    targetSlot: op.handle,
-                    offset: start.offset,
-                    line: start.line,
-                    column: start.col,
-                });
-            }
-        }
-        if (locations.length > 0) {
-            unit.create.push(createSourceLocationOp(job.relativeTemplatePath, locations));
-        }
-    }
-}
-
 /**
  *
  * @license
@@ -25307,6 +25334,7 @@ const phases = [
     { kind: CompilationJobKind.Both, fn: resolveSanitizers },
     { kind: CompilationJobKind.Tmpl, fn: liftLocalRefs },
     { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
+    { kind: CompilationJobKind.Both, fn: requiredParentheses },
     { kind: CompilationJobKind.Both, fn: expandSafeReads },
     { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
     { kind: CompilationJobKind.Both, fn: optimizeVariables },
@@ -31320,7 +31348,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.0+sha-c2a46d2');
+new Version('20.0.0-next.0+sha-af02914');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32252,7 +32280,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-51859505.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-87925f49.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

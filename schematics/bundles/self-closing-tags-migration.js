@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-c2a46d2
+ * @license Angular v20.0.0-next.0+sha-af02914
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,11 +10,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var project_paths = require('./project_paths-86f8936a.js');
+var project_paths = require('./project_paths-6a4b8cda.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-51859505.js');
-require('./program-1146154b.js');
+var checker = require('./checker-87925f49.js');
+require('./program-ea6ef5ce.js');
 require('path');
 var ng_decorators = require('./ng_decorators-e699c081.js');
 var property_name = require('./property_name-7c8433f5.js');
@@ -315,6 +315,7 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         const tagReplacements = [];
         for (const sf of sourceFiles) {
             ts__default["default"].forEachChild(sf, (node) => {
+                // Skipping any non component declarations
                 if (!ts__default["default"].isClassDeclaration(node)) {
                     return;
                 }
@@ -326,22 +327,23 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
                 templateVisitor.visitNode(node);
                 templateVisitor.resolvedTemplates.forEach((template) => {
                     const { migrated, changed, replacementCount } = migrateTemplateToSelfClosingTags(template.content);
-                    if (changed) {
-                        const fileToMigrate = template.inline
-                            ? file
-                            : project_paths.projectFile(template.filePath, info);
-                        const end = template.start + template.content.length;
-                        const replacements = [
-                            prepareTextReplacement(fileToMigrate, migrated, template.start, end),
-                        ];
-                        const fileReplacements = tagReplacements.find((tagReplacement) => tagReplacement.file === file);
-                        if (fileReplacements) {
-                            fileReplacements.replacements.push(...replacements);
-                            fileReplacements.replacementCount += replacementCount;
-                        }
-                        else {
-                            tagReplacements.push({ file, replacements, replacementCount });
-                        }
+                    if (!changed) {
+                        return;
+                    }
+                    const fileToMigrate = template.inline
+                        ? file
+                        : project_paths.projectFile(template.filePath, info);
+                    const end = template.start + template.content.length;
+                    const replacements = [
+                        prepareTextReplacement(fileToMigrate, migrated, template.start, end),
+                    ];
+                    const fileReplacements = tagReplacements.find((tagReplacement) => tagReplacement.file === file);
+                    if (fileReplacements) {
+                        fileReplacements.replacements.push(...replacements);
+                        fileReplacements.replacementCount += replacementCount;
+                    }
+                    else {
+                        tagReplacements.push({ file, replacements, replacementCount });
                     }
                 });
             });
@@ -349,9 +351,11 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable({ tagReplacements });
     }
     async combine(unitA, unitB) {
-        return project_paths.confirmAsSerializable({
-            tagReplacements: unitA.tagReplacements.concat(unitB.tagReplacements),
-        });
+        const uniqueReplacements = removeDuplicateReplacements([
+            ...unitA.tagReplacements,
+            ...unitB.tagReplacements,
+        ]);
+        return project_paths.confirmAsSerializable({ tagReplacements: uniqueReplacements });
     }
     async globalMeta(combinedData) {
         const globalMeta = {
@@ -379,6 +383,18 @@ function prepareTextReplacement(file, replacement, start, end) {
         end: end,
         toInsert: replacement,
     }));
+}
+function removeDuplicateReplacements(replacements) {
+    const uniqueFiles = new Set();
+    const result = [];
+    for (const replacement of replacements) {
+        const fileId = replacement.file.id;
+        if (!uniqueFiles.has(fileId)) {
+            uniqueFiles.add(fileId);
+            result.push(replacement);
+        }
+    }
+    return result;
 }
 
 function migrate(options) {
