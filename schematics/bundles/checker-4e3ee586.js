@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-78b27a8
+ * @license Angular v20.0.0-next.0+sha-51b8ff2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4437,6 +4437,18 @@ class SafeCall extends AST {
         return visitor.visitSafeCall(this, context);
     }
 }
+class TaggedTemplateLiteral extends AST {
+    tag;
+    template;
+    constructor(span, sourceSpan, tag, template) {
+        super(span, sourceSpan);
+        this.tag = tag;
+        this.template = template;
+    }
+    visit(visitor, context) {
+        return visitor.visitTaggedTemplateLiteral(this, context);
+    }
+}
 class TemplateLiteral extends AST {
     elements;
     expressions;
@@ -4621,6 +4633,10 @@ class RecursiveAstVisitor {
         }
     }
     visitTemplateLiteralElement(ast, context) { }
+    visitTaggedTemplateLiteral(ast, context) {
+        this.visit(ast.tag, context);
+        this.visit(ast.template, context);
+    }
     // This is not part of the AstVisitor interface, just a helper method
     visitAll(asts, context) {
         for (const ast of asts) {
@@ -18805,6 +18821,12 @@ class _ParseAST {
             else if (this.consumeOptionalOperator('!')) {
                 result = new NonNullAssert(this.span(start), this.sourceSpan(start), result);
             }
+            else if (this.next.isTemplateLiteralEnd()) {
+                result = this.parseNoInterpolationTaggedTemplateLiteral(result, start);
+            }
+            else if (this.next.isTemplateLiteralPart()) {
+                result = this.parseTaggedTemplateLiteral(result, start);
+            }
             else {
                 return result;
             }
@@ -18859,7 +18881,7 @@ class _ParseAST {
             return new LiteralPrimitive(this.span(start), this.sourceSpan(start), value);
         }
         else if (this.next.isTemplateLiteralEnd()) {
-            return this.parseNoInterpolationTemplateLiteral(start);
+            return this.parseNoInterpolationTemplateLiteral();
         }
         else if (this.next.isTemplateLiteralPart()) {
             return this.parseTemplateLiteral();
@@ -19189,17 +19211,25 @@ class _ParseAST {
         const sourceSpan = new AbsoluteSourceSpan(spanStart, this.currentAbsoluteOffset);
         return new VariableBinding(sourceSpan, key, value);
     }
-    parseNoInterpolationTemplateLiteral(start) {
+    parseNoInterpolationTaggedTemplateLiteral(tag, start) {
+        const template = this.parseNoInterpolationTemplateLiteral();
+        return new TaggedTemplateLiteral(this.span(start), this.sourceSpan(start), tag, template);
+    }
+    parseNoInterpolationTemplateLiteral() {
         const text = this.next.strValue;
         this.advance();
-        const span = this.span(start);
-        const sourceSpan = this.sourceSpan(start);
+        const span = this.span(this.inputIndex);
+        const sourceSpan = this.sourceSpan(this.inputIndex);
         return new TemplateLiteral(span, sourceSpan, [new TemplateLiteralElement(span, sourceSpan, text)], []);
     }
+    parseTaggedTemplateLiteral(tag, start) {
+        const template = this.parseTemplateLiteral();
+        return new TaggedTemplateLiteral(this.span(start), this.sourceSpan(start), tag, template);
+    }
     parseTemplateLiteral() {
-        const start = this.inputIndex;
         const elements = [];
         const expressions = [];
+        const start = this.inputIndex;
         while (this.next !== EOF) {
             const token = this.next;
             if (token.isTemplateLiteralPart() || token.isTemplateLiteralEnd()) {
@@ -19459,6 +19489,9 @@ class SerializeExpressionVisitor {
     }
     visitTemplateLiteralElement(ast, context) {
         return ast.text;
+    }
+    visitTaggedTemplateLiteral(ast, context) {
+        return ast.tag.visit(this, context) + ast.template.visit(this, context);
     }
 }
 /** Zips the two input arrays into a single array of pairs of elements at the same index. */
@@ -26129,13 +26162,19 @@ function convertAst(ast, job, baseSourceSpan) {
         return new VoidExpr(convertAst(ast.expression, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
     }
     else if (ast instanceof TemplateLiteral) {
-        return new TemplateLiteralExpr(ast.elements.map((el) => {
-            return new TemplateLiteralElementExpr(el.text, convertSourceSpan(el.span, baseSourceSpan));
-        }), ast.expressions.map((expr) => convertAst(expr, job, baseSourceSpan)), convertSourceSpan(ast.span, baseSourceSpan));
+        return convertTemplateLiteral(ast, job, baseSourceSpan);
+    }
+    else if (ast instanceof TaggedTemplateLiteral) {
+        return new TaggedTemplateLiteralExpr(convertAst(ast.tag, job, baseSourceSpan), convertTemplateLiteral(ast.template, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
     }
     else {
         throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan?.start.file.url}"`);
     }
+}
+function convertTemplateLiteral(ast, job, baseSourceSpan) {
+    return new TemplateLiteralExpr(ast.elements.map((el) => {
+        return new TemplateLiteralElementExpr(el.text, convertSourceSpan(el.span, baseSourceSpan));
+    }), ast.expressions.map((expr) => convertAst(expr, job, baseSourceSpan)), convertSourceSpan(ast.span, baseSourceSpan));
 }
 function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
     let expression;
@@ -31348,7 +31387,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.0+sha-78b27a8');
+new Version('20.0.0-next.0+sha-51b8ff2');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32280,7 +32319,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-87925f49.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-4e3ee586.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38452,20 +38491,16 @@ function parseTemplateAsSourceFile(fileName, template) {
     /* setParentNodes */ false, ts__default["default"].ScriptKind.JSX);
 }
 
-const TEMPLATE_ID = Symbol('ngTemplateId');
-const NEXT_TEMPLATE_ID = Symbol('ngNextTemplateId');
+const TEMPLATE_ID_MAP = Symbol('ngTemplateId');
 function getTemplateId$1(clazz) {
-    const node = clazz;
-    if (node[TEMPLATE_ID] === undefined) {
-        node[TEMPLATE_ID] = allocateTemplateId(node.getSourceFile());
+    const sf = clazz.getSourceFile();
+    if (sf[TEMPLATE_ID_MAP] === undefined) {
+        sf[TEMPLATE_ID_MAP] = new Map();
     }
-    return node[TEMPLATE_ID];
-}
-function allocateTemplateId(sf) {
-    if (sf[NEXT_TEMPLATE_ID] === undefined) {
-        sf[NEXT_TEMPLATE_ID] = 1;
+    if (sf[TEMPLATE_ID_MAP].get(clazz) === undefined) {
+        sf[TEMPLATE_ID_MAP].set(clazz, `tcb${sf[TEMPLATE_ID_MAP].size + 1}`);
     }
-    return `tcb${sf[NEXT_TEMPLATE_ID]++}`;
+    return sf[TEMPLATE_ID_MAP].get(clazz);
 }
 
 const parseSpanComment = /^(\d+),(\d+)$/;
@@ -41738,6 +41773,9 @@ class AstTranslator {
     visitTemplateLiteralElement(ast, context) {
         throw new Error('Method not implemented');
     }
+    visitTaggedTemplateLiteral(ast) {
+        return ts__default["default"].factory.createTaggedTemplateExpression(this.translate(ast.tag), undefined, this.visitTemplateLiteral(ast.template));
+    }
     convertToSafeCall(ast, expr, args) {
         if (this.config.strictSafeNavigationTypes) {
             // "a?.method(...)" becomes (0 as any ? a!.method(...) : undefined)
@@ -41844,6 +41882,9 @@ class VeSafeLhsInferenceBugDetector {
         return false;
     }
     visitTemplateLiteralElement(ast, context) {
+        return false;
+    }
+    visitTaggedTemplateLiteral(ast, context) {
         return false;
     }
 }
