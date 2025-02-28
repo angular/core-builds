@@ -1,11 +1,12 @@
 /**
- * @license Angular v20.0.0-next.0+sha-af02914
+ * @license Angular v20.0.0-next.0+sha-78b27a8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1, createLinkedSignal as createLinkedSignal$1, linkedSignalSetFn as linkedSignalSetFn$1, linkedSignalUpdateFn as linkedSignalUpdateFn$1 } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
+import * as di from '@angular/core/primitives/di';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
 import { map } from 'rxjs/operators';
@@ -1078,6 +1079,12 @@ function assertInjectImplementationNotEqual(fn) {
 
 const _THROW_IF_NOT_FOUND = {};
 const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+function getCurrentInjector() {
+    return di.getCurrentInjector();
+}
+function setCurrentInjector(injector) {
+    return di.setCurrentInjector(injector);
+}
 /*
  * Name of a property (that we patch onto DI decorator), which is used as an annotation of which
  * InjectFlag this decorator represents. This allows to avoid direct references to the DI decorators
@@ -1089,31 +1096,16 @@ const NG_TOKEN_PATH = 'ngTokenPath';
 const NEW_LINE = /\n/gm;
 const NO_NEW_LINE = 'ɵ';
 const SOURCE = '__source';
-/**
- * Current injector value used by `inject`.
- * - `undefined`: it is an error to call `inject`
- * - `null`: `inject` can be called but there is no injector (limp-mode).
- * - Injector instance: Use the injector for resolution.
- */
-let _currentInjector = undefined;
-function getCurrentInjector() {
-    return _currentInjector;
-}
-function setCurrentInjector(injector) {
-    const former = _currentInjector;
-    _currentInjector = injector;
-    return former;
-}
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
-    if (_currentInjector === undefined) {
+    if (getCurrentInjector() === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
             `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
     }
-    else if (_currentInjector === null) {
+    else if (getCurrentInjector() === null) {
         return injectRootLimpMode(token, undefined, flags);
     }
     else {
-        const value = _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+        const value = getCurrentInjector().get(token, flags & InjectFlags.Optional ? null : undefined, flags);
         ngDevMode && emitInjectEvent(token, value, flags);
         return value;
     }
@@ -18116,7 +18108,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '20.0.0-next.0+sha-af02914']
+                ? ['ng-version', '20.0.0-next.0+sha-78b27a8']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35164,7 +35156,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-af02914');
+const VERSION = new Version('20.0.0-next.0+sha-78b27a8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

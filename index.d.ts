@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-af02914
+ * @license Angular v20.0.0-next.0+sha-78b27a8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15113,7 +15113,7 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
  */
 export declare function ɵsetClassMetadataAsync(type: Type<any>, dependencyLoaderFn: () => Array<Promise<Type<unknown>>>, metadataSetterFn: (...types: Type<unknown>[]) => void): () => Promise<Array<Type<unknown>>>;
 
-export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector;
 
 
 /**
