@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-b09f4a5
+ * @license Angular v19.2.0+sha-1b3b05b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9499,8 +9499,8 @@ const sharedStashFunction = (rEl, eventType, listenerFn) => {
     el.__jsaction_fns = eventListenerMap;
 };
 const sharedMapFunction = (rEl, jsActionMap) => {
-    let blockName = rEl.getAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE) ?? '';
     const el = rEl;
+    let blockName = el.getAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE) ?? '';
     const blockSet = jsActionMap.get(blockName) ?? new Set();
     if (!blockSet.has(el)) {
         blockSet.add(el);
@@ -18092,11 +18092,15 @@ class ComponentFactory extends ComponentFactory$1 {
     componentType;
     ngContentSelectors;
     isBoundToModule;
+    cachedInputs = null;
+    cachedOutputs = null;
     get inputs() {
-        return toInputRefArray(this.componentDef.inputs);
+        this.cachedInputs ??= toInputRefArray(this.componentDef.inputs);
+        return this.cachedInputs;
     }
     get outputs() {
-        return toOutputRefArray(this.componentDef.outputs);
+        this.cachedOutputs ??= toOutputRefArray(this.componentDef.outputs);
+        return this.cachedOutputs;
     }
     /**
      * @param componentDef The component definition.
@@ -18118,7 +18122,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-b09f4a5']
+                ? ['ng-version', '19.2.0+sha-1b3b05b']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -30525,7 +30529,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         }
         else {
             listenerFn = wrapListener(tNode, lView, context, listenerFn);
-            stashEventListener(native, eventName, listenerFn);
+            stashEventListener(target, eventName, listenerFn);
             const cleanupFn = renderer.listen(target, eventName, listenerFn);
             ngDevMode && ngDevMode.rendererAddEventListener++;
             lCleanup.push(listenerFn, cleanupFn);
@@ -35166,7 +35170,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-b09f4a5');
+const VERSION = new Version('19.2.0+sha-1b3b05b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39350,6 +39354,11 @@ function withEventReplay() {
                     const jsActionMap = inject(JSACTION_BLOCK_ELEMENT_MAP);
                     if (shouldEnableEventReplay(injector)) {
                         setStashFn((rEl, eventName, listenerFn) => {
+                            // If a user binds to a ng-container and uses a directive that binds using a host listener,
+                            // this element could be a comment node. So we need to ensure we have an actual element
+                            // node before stashing anything.
+                            if (rEl.nodeType !== Node.ELEMENT_NODE)
+                                return;
                             sharedStashFunction(rEl, eventName, listenerFn);
                             sharedMapFunction(rEl, jsActionMap);
                         });

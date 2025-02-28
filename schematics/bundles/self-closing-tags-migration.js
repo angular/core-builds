@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0+sha-b09f4a5
+ * @license Angular v19.2.0+sha-1b3b05b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -315,6 +315,7 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         const tagReplacements = [];
         for (const sf of sourceFiles) {
             ts__default["default"].forEachChild(sf, (node) => {
+                // Skipping any non component declarations
                 if (!ts__default["default"].isClassDeclaration(node)) {
                     return;
                 }
@@ -326,22 +327,23 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
                 templateVisitor.visitNode(node);
                 templateVisitor.resolvedTemplates.forEach((template) => {
                     const { migrated, changed, replacementCount } = migrateTemplateToSelfClosingTags(template.content);
-                    if (changed) {
-                        const fileToMigrate = template.inline
-                            ? file
-                            : project_paths.projectFile(template.filePath, info);
-                        const end = template.start + template.content.length;
-                        const replacements = [
-                            prepareTextReplacement(fileToMigrate, migrated, template.start, end),
-                        ];
-                        const fileReplacements = tagReplacements.find((tagReplacement) => tagReplacement.file === file);
-                        if (fileReplacements) {
-                            fileReplacements.replacements.push(...replacements);
-                            fileReplacements.replacementCount += replacementCount;
-                        }
-                        else {
-                            tagReplacements.push({ file, replacements, replacementCount });
-                        }
+                    if (!changed) {
+                        return;
+                    }
+                    const fileToMigrate = template.inline
+                        ? file
+                        : project_paths.projectFile(template.filePath, info);
+                    const end = template.start + template.content.length;
+                    const replacements = [
+                        prepareTextReplacement(fileToMigrate, migrated, template.start, end),
+                    ];
+                    const fileReplacements = tagReplacements.find((tagReplacement) => tagReplacement.file === file);
+                    if (fileReplacements) {
+                        fileReplacements.replacements.push(...replacements);
+                        fileReplacements.replacementCount += replacementCount;
+                    }
+                    else {
+                        tagReplacements.push({ file, replacements, replacementCount });
                     }
                 });
             });
@@ -349,9 +351,11 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable({ tagReplacements });
     }
     async combine(unitA, unitB) {
-        return project_paths.confirmAsSerializable({
-            tagReplacements: unitA.tagReplacements.concat(unitB.tagReplacements),
-        });
+        const uniqueReplacements = removeDuplicateReplacements([
+            ...unitA.tagReplacements,
+            ...unitB.tagReplacements,
+        ]);
+        return project_paths.confirmAsSerializable({ tagReplacements: uniqueReplacements });
     }
     async globalMeta(combinedData) {
         const globalMeta = {
@@ -379,6 +383,18 @@ function prepareTextReplacement(file, replacement, start, end) {
         end: end,
         toInsert: replacement,
     }));
+}
+function removeDuplicateReplacements(replacements) {
+    const uniqueFiles = new Set();
+    const result = [];
+    for (const replacement of replacements) {
+        const fileId = replacement.file.id;
+        if (!uniqueFiles.has(fileId)) {
+            uniqueFiles.add(fileId);
+            result.push(replacement);
+        }
+    }
+    return result;
 }
 
 function migrate(options) {

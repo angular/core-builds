@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-b09f4a5
+ * @license Angular v19.2.0+sha-1b3b05b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14730,6 +14730,8 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     componentType: Type<any>;
     ngContentSelectors: string[];
     isBoundToModule: boolean;
+    private cachedInputs;
+    private cachedOutputs;
     get inputs(): {
         propName: string;
         templateName: string;
