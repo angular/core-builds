@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "19.2.0+sha-1b3b05b",
+  "version": "19.2.0+sha-b81ea4f",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -20,6 +20,10 @@
     ".": {
       "types": "./index.d.ts",
       "default": "./fesm2022/core.mjs"
+    },
+    "./primitives/di": {
+      "types": "./primitives/di/index.d.ts",
+      "default": "./fesm2022/primitives/di.mjs"
     },
     "./primitives/event-dispatch": {
       "types": "./primitives/event-dispatch/index.d.ts",
