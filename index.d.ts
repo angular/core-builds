@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-51b8ff2
+ * @license Angular v20.0.0-next.0+sha-36b60a9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8593,8 +8593,9 @@ declare const PARENT = 3;
  * @developerPreview
  */
 export declare class PendingTasks {
-    private internalPendingTasks;
-    private scheduler;
+    private readonly internalPendingTasks;
+    private readonly scheduler;
+    private readonly errorHandler;
     /**
      * Adds a new task that should block application's stability.
      * @returns A cleanup function that removes a task when called.
@@ -8610,17 +8611,9 @@ export declare class PendingTasks {
      * });
      * ```
      *
-     * Application stability is at least delayed until the next tick after the `run` method resolves
-     * so it is safe to make additional updates to application state that would require UI synchronization:
-     *
-     * ```ts
-     * const userData = await pendingTasks.run(() => fetch('/api/user'));
-     * this.userData.set(userData);
-     * ```
-     *
      * @param fn The asynchronous function to execute
      */
-    run<T>(fn: () => Promise<T>): Promise<T>;
+    run<T>(fn: () => Promise<T>): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }
@@ -14040,9 +14033,6 @@ export declare interface ɵInputSignalNode<T, TransformT> extends SignalNode<T> 
 
 /**
  * `InjectionToken` used to configure how to call the `ErrorHandler`.
- *
- * `NgZone` is provided by default today so the default (and only) implementation for this
- * is calling `ErrorHandler.handleError` outside of the Angular zone.
  */
 export declare const ɵINTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
 
