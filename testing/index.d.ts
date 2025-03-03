@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-c2de5f6
+ * @license Angular v19.2.0+sha-2717416
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -195,6 +195,7 @@ export declare function fakeAsync(fn: Function, options?: {
  * Fake equivalent of `NavigationHistoryEntry`.
  */
 declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
+    private eventTarget;
     readonly url: string | null;
     readonly sameDocument: boolean;
     readonly id: string;
@@ -203,7 +204,7 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     private readonly state;
     private readonly historyState;
     ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
-    constructor(url: string | null, { id, key, index, sameDocument, state, historyState, }: {
+    constructor(eventTarget: EventTarget, url: string | null, { id, key, index, sameDocument, state, historyState, }: {
         id: string;
         key: string;
         index: number;
@@ -216,6 +217,8 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     addEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
     removeEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
     dispatchEvent(event: Event): boolean;
+    /** internal */
+    dispose(): void;
 }
 
 /**
@@ -741,10 +744,6 @@ export declare class ɵFakeNavigation implements Navigation {
      */
     private currentEntryIndex;
     /**
-     * The current navigate event.
-     */
-    private navigateEvent;
-    /**
      * A Map of pending traversals, so that traversals to the same entry can be
      * re-used.
      */
@@ -766,8 +765,6 @@ export declare class ɵFakeNavigation implements Navigation {
     private synchronousTraversals;
     /** Whether to allow a call to setInitialEntryForTesting. */
     private canSetInitialEntry;
-    /** `EventTarget` to dispatch events. */
-    private eventTarget;
     /** The next unique id for created entries. Replace recreates this id. */
     private nextId;
     /** The next unique key for created entries. Replace inherits this id. */
@@ -830,12 +827,25 @@ export declare class ɵFakeNavigation implements Navigation {
     isDisposed(): boolean;
     /** Implementation for all navigations and traversals. */
     private userAgentNavigate;
-    /** Implementation to commit a navigation. */
-    private userAgentCommit;
-    /** Implementation for a push or replace navigation. */
-    private userAgentPushOrReplace;
-    /** Implementation for a traverse navigation. */
+    /**
+     * Implementation for a push or replace navigation.
+     * https://whatpr.org/html/10919/browsing-the-web.html#url-and-history-update-steps
+     * https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation
+     */
+    private urlAndHistoryUpdateSteps;
+    /**
+     * Implementation for a traverse navigation.
+     *
+     * https://whatpr.org/html/10919/browsing-the-web.html#apply-the-traverse-history-step
+     * ...
+     * > Let updateDocument be an algorithm step which performs update document for history step application given targetEntry's document, targetEntry, changingNavigableContinuation's update-only, scriptHistoryLength, scriptHistoryIndex, navigationType, entriesForNavigationAPI, and previousEntry.
+     * > If targetEntry's document is equal to displayedDocument, then perform updateDocument.
+     * https://whatpr.org/html/10919/browsing-the-web.html#update-document-for-history-step-application
+     * which then goes to https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation
+     */
     private userAgentTraverse;
+    /** https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation */
+    private updateNavigationEntriesForSameDocumentNavigation;
     /** Utility method for finding entries with the given `key`. */
     private findEntry;
     set onnavigate(_handler: ((this: Navigation, ev: NavigateEvent) => any) | null);
@@ -848,6 +858,7 @@ export declare class ɵFakeNavigation implements Navigation {
     get onnavigatesuccess(): ((this: Navigation, ev: Event) => any) | null;
     set onnavigateerror(_handler: ((this: Navigation, ev: ErrorEvent) => any) | null);
     get onnavigateerror(): ((this: Navigation, ev: ErrorEvent) => any) | null;
+    private _transition;
     get transition(): NavigationTransition | null;
     updateCurrentEntry(_options: NavigationUpdateCurrentEntryOptions): void;
     reload(_options?: NavigationReloadOptions): NavigationResult;
