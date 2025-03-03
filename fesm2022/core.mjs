@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-a3575e2
+ * @license Angular v20.0.0-next.0+sha-809b5b4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -839,6 +839,20 @@ function emitProviderConfiguredEvent(eventProvider, isViewProvider = false) {
     });
 }
 /**
+ * Emits an event to the injector profiler when an instance corresponding to a given token is about to be created be an injector. Note that
+ * the injector associated with this emission can be accessed by using getDebugInjectContext()
+ *
+ * @param instance an object created by an injector
+ */
+function emitInjectorToCreateInstanceEvent(token) {
+    !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    injectorProfiler({
+        type: 4 /* InjectorProfilerEventType.InjectorToCreateInstanceEvent */,
+        context: getInjectorProfilerContext(),
+        token: token,
+    });
+}
+/**
  * Emits an event to the injector profiler with the instance that was created. Note that
  * the injector associated with this emission can be accessed by using getDebugInjectContext()
  *
@@ -1673,9 +1687,9 @@ class NullInjector {
     }
 }
 
-function getNgModuleDef(type, throwNotFound) {
+function getNgModuleDef(type, throwIfNotFound) {
     const ngModuleDef = type[NG_MOD_DEF] || null;
-    if (!ngModuleDef && throwNotFound === true) {
+    if (!ngModuleDef && throwIfNotFound === true) {
         throw new Error(`Type ${stringify(type)} does not have 'ɵmod' property.`);
     }
     return ngModuleDef;
@@ -1688,8 +1702,12 @@ function getNgModuleDef(type, throwNotFound) {
 function getComponentDef(type) {
     return type[NG_COMP_DEF] || null;
 }
-function getDirectiveDef(type) {
-    return type[NG_DIR_DEF] || null;
+function getDirectiveDef(type, throwIfNotFound) {
+    const def = type[NG_DIR_DEF] || null;
+    if (!def && throwIfNotFound === true) {
+        throw new Error(`Type ${stringify(type)} does not have 'ɵdir' property.`);
+    }
+    return def;
 }
 function getPipeDef$1(type) {
     return type[NG_PIPE_DEF] || null;
@@ -2270,6 +2288,7 @@ class R3Injector extends EnvironmentInjector {
                 // these are the only providers that do not go through the value hydration logic
                 // where this event would normally be emitted from.
                 if (isValueProvider(provider)) {
+                    emitInjectorToCreateInstanceEvent(token);
                     emitInstanceCreatedByInjectorEvent(provider.useValue);
                 }
                 emitProviderConfiguredEvent(provider);
@@ -2313,6 +2332,7 @@ class R3Injector extends EnvironmentInjector {
                 record.value = CIRCULAR;
                 if (ngDevMode) {
                     runInInjectorProfilerContext(this, token, () => {
+                        emitInjectorToCreateInstanceEvent(token);
                         record.value = record.factory();
                         emitInstanceCreatedByInjectorEvent(record.value);
                     });
@@ -3232,13 +3252,14 @@ const setProfiler = (profiler) => {
  *
  * @param event ProfilerEvent corresponding to the execution context
  * @param instance component instance
- * @param hookOrListener lifecycle hook function or output listener. The value depends on the
- *  execution context
+ * @param eventFn function associated with event.
+ *    For example a template function, lifecycle hook, or output listener.
+ *    The value depends on the execution context
  * @returns
  */
-const profiler = function (event, instance = null, hookOrListener) {
+const profiler = function (event, instance = null, eventFn) {
     if (profilerCallback != null /* both `null` and `undefined` */) {
-        profilerCallback(event, instance, hookOrListener);
+        profilerCallback(event, instance, eventFn);
     }
 };
 
@@ -5269,10 +5290,9 @@ function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue)
             let value;
             if (ngDevMode) {
                 runInInjectorProfilerContext(new NodeInjector(getCurrentTNode(), getLView()), token, () => {
+                    emitInjectorToCreateInstanceEvent(token);
                     value = bloomHash(flags);
-                    if (value != null) {
-                        emitInstanceCreatedByInjectorEvent(value);
-                    }
+                    emitInstanceCreatedByInjectorEvent(value);
                 });
             }
             else {
@@ -5436,13 +5456,13 @@ function getNodeInjectable(lView, tView, index, tNode) {
         }
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
+        // tData indexes mirror the concrete instances in its corresponding LView.
+        // lView[index] here is either the injectable instance itself or a factory,
+        // therefore tData[index] is the constructor of that injectable or a
+        // definition object that contains the constructor in a `.type` field.
+        const token = tData[index].type || tData[index];
         let prevInjectContext;
         if (ngDevMode) {
-            // tData indexes mirror the concrete instances in its corresponding LView.
-            // lView[index] here is either the injectable instace itself or a factory,
-            // therefore tData[index] is the constructor of that injectable or a
-            // definition object that contains the constructor in a `.type` field.
-            const token = tData[index].type || tData[index];
             const injector = new NodeInjector(tNode, lView);
             prevInjectContext = setInjectorProfilerContext({ injector, token });
         }
@@ -5453,6 +5473,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
         ngDevMode &&
             assertEqual(success, true, "Because flags do not contain `SkipSelf' we expect this to always succeed.");
         try {
+            ngDevMode && emitInjectorToCreateInstanceEvent(token);
             value = lView[index] = factory.factory(undefined, tData, lView, tNode);
             ngDevMode && emitInstanceCreatedByInjectorEvent(value);
             // This code path is hit for both directives and providers.
@@ -12517,7 +12538,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         const preHookType = isUpdatePhase
             ? 2 /* ProfilerEvent.TemplateUpdateStart */
             : 0 /* ProfilerEvent.TemplateCreateStart */;
-        profiler(preHookType, context);
+        profiler(preHookType, context, templateFn);
         templateFn(rf, context);
     }
     finally {
@@ -12525,7 +12546,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         const postHookType = isUpdatePhase
             ? 3 /* ProfilerEvent.TemplateUpdateEnd */
             : 1 /* ProfilerEvent.TemplateCreateEnd */;
-        profiler(postHookType, context);
+        profiler(postHookType, context, templateFn);
     }
 }
 /**
@@ -13000,7 +13021,7 @@ function setDirectiveInput(tNode, tView, lView, target, publicName, value) {
             }
         }
     }
-    if (hostIndex !== null) {
+    if (hostIndex !== null && target.inputs.hasOwnProperty(publicName)) {
         ngDevMode && assertIndexInRange(lView, hostIndex);
         writeToDirectiveInput(target, lView[hostIndex], publicName, value);
         hasSet = true;
@@ -17509,6 +17530,7 @@ function resolveDirectives(tView, lView, tNode, localRefs, directiveMatcher) {
         else {
             [directiveDefs, hostDirectiveDefs, hostDirectiveRanges] = hostDirectiveResolution;
         }
+        ngDevMode && assertNoDuplicateDirectives(directiveDefs);
         initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs, hostDirectiveRanges);
     }
     if (exportsMap !== null && localRefs !== null) {
@@ -17531,8 +17553,11 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
 function resolveHostDirectives(matches) {
     let componentDef = null;
     let hasHostDirectives = false;
+    // Having host directives is the less common scenario. Make an initial
+    // validation pass so we don't allocate memory unnecessarily.
     for (let i = 0; i < matches.length; i++) {
         const def = matches[i];
+        // Given that we may need this further down, we can resolve it already while validating.
         if (i === 0 && isComponentDef(def)) {
             componentDef = def;
         }
@@ -17541,10 +17566,11 @@ function resolveHostDirectives(matches) {
             break;
         }
     }
+    // If there's at least one def with host directive, we can't bail out of this function.
     if (!hasHostDirectives) {
         return null;
     }
-    let allDirectiveDefs = null;
+    const allDirectiveDefs = [];
     let hostDirectiveDefs = null;
     let hostDirectiveRanges = null;
     // Components are inserted at the front of the matches array so that their lifecycle
@@ -17559,23 +17585,22 @@ function resolveHostDirectives(matches) {
     // 4. Selector-matched dir
     for (const def of matches) {
         if (def.findHostDirectiveDefs !== null) {
-            allDirectiveDefs ??= [];
             hostDirectiveDefs ??= new Map();
             hostDirectiveRanges ??= new Map();
             resolveHostDirectivesForDef(def, allDirectiveDefs, hostDirectiveRanges, hostDirectiveDefs);
         }
         // Component definition needs to be pushed early to maintain the correct ordering.
         if (def === componentDef) {
-            allDirectiveDefs ??= [];
             allDirectiveDefs.push(def);
         }
     }
-    if (allDirectiveDefs !== null) {
-        allDirectiveDefs.push(...(componentDef === null ? matches : matches.slice(1)));
-        ngDevMode && assertNoDuplicateDirectives(allDirectiveDefs);
-        return [allDirectiveDefs, hostDirectiveDefs, hostDirectiveRanges];
+    if (componentDef === null) {
+        allDirectiveDefs.push(...matches);
     }
-    return null;
+    else {
+        allDirectiveDefs.push(...matches.slice(1));
+    }
+    return [allDirectiveDefs, hostDirectiveDefs, hostDirectiveRanges];
 }
 function resolveHostDirectivesForDef(def, allDirectiveDefs, hostDirectiveRanges, hostDirectiveDefs) {
     ngDevMode && assertDefined(def.findHostDirectiveDefs, 'Expected host directive resolve function');
@@ -17974,6 +17999,532 @@ function elementEndFirstCreatePass(tView, tNode) {
     }
 }
 
+function isIterable(obj) {
+    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
+}
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return (Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            Symbol.iterator in obj)); // JS Iterable have a Symbol.iterator prop
+}
+function areIterablesEqual(a, b, comparator) {
+    const iterator1 = a[Symbol.iterator]();
+    const iterator2 = b[Symbol.iterator]();
+    while (true) {
+        const item1 = iterator1.next();
+        const item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        const iterator = obj[Symbol.iterator]();
+        let item;
+        while (!(item = iterator.next()).done) {
+            fn(item.value);
+        }
+    }
+}
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+function devModeEqual(a, b) {
+    const isListLikeIterableA = isListLikeIterable(a);
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return Object.is(a, b);
+        }
+    }
+}
+
+// TODO(misko): consider inlining
+/** Updates binding and returns the value. */
+function updateBinding(lView, bindingIndex, value) {
+    return (lView[bindingIndex] = value);
+}
+/** Gets the current binding value. */
+function getBinding(lView, bindingIndex) {
+    ngDevMode && assertIndexInRange(lView, bindingIndex);
+    ngDevMode &&
+        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return lView[bindingIndex];
+}
+/**
+ * Updates binding if changed, then returns whether it was updated.
+ *
+ * This function also checks the `CheckNoChangesMode` and throws if changes are made.
+ * Some changes (Objects/iterables) during `CheckNoChangesMode` are exempt to comply with VE
+ * behavior.
+ *
+ * @param lView current `LView`
+ * @param bindingIndex The binding in the `LView` to check
+ * @param value New value to check against `lView[bindingIndex]`
+ * @returns `true` if the bindings has changed. (Throws if binding has changed during
+ *          `CheckNoChangesMode`)
+ */
+function bindingUpdated(lView, bindingIndex, value) {
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+    ngDevMode &&
+        assertLessThan(bindingIndex, lView.length, `Slot should have been initialized to NO_CHANGE`);
+    const oldValue = lView[bindingIndex];
+    if (Object.is(oldValue, value)) {
+        return false;
+    }
+    else {
+        if (ngDevMode && isInCheckNoChangesMode()) {
+            // View engine didn't report undefined values as changed on the first checkNoChanges pass
+            // (before the change detection was run).
+            const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
+            if (!devModeEqual(oldValueToCompare, value)) {
+                const details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
+                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName, lView);
+            }
+            // There was a change, but the `devModeEqual` decided that the change is exempt from an error.
+            // For this reason we exit as if no change. The early exit is needed to prevent the changed
+            // value to be written into `LView` (If we would write the new value that we would not see it
+            // as change on next CD.)
+            return false;
+        }
+        lView[bindingIndex] = value;
+        return true;
+    }
+}
+/** Updates 2 bindings if changed, then returns whether either was updated. */
+function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
+    const different = bindingUpdated(lView, bindingIndex, exp1);
+    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
+}
+/** Updates 3 bindings if changed, then returns whether any was updated. */
+function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
+    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
+}
+/** Updates 4 bindings if changed, then returns whether any was updated. */
+function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
+    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
+}
+
+/**
+ * Contains a reference to a function that disables event replay feature
+ * for server-side rendered applications. This function is overridden with
+ * an actual implementation when the event replay feature is enabled via
+ * `withEventReplay()` call.
+ */
+let stashEventListener = (el, eventName, listenerFn) => { };
+function setStashFn(fn) {
+    stashEventListener = fn;
+}
+/**
+ * Adds an event listener to the current node.
+ *
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
+ *     from the Renderer3 infrastructure and should be removed from the instruction arguments
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @codeGenApi
+ */
+function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    const lView = getLView();
+    const tView = getTView();
+    const tNode = getCurrentTNode();
+    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
+    return ɵɵlistener;
+}
+/**
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation @triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @codeGenApi
+ */
+function ɵɵsyntheticHostListener(eventName, listenerFn) {
+    const tNode = getCurrentTNode();
+    const lView = getLView();
+    const tView = getTView();
+    const currentDef = getCurrentDirectiveDef(tView.data);
+    const renderer = loadComponentRenderer(currentDef, tNode, lView);
+    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
+    return ɵɵsyntheticHostListener;
+}
+/**
+ * A utility function that checks if a given element has already an event handler registered for an
+ * event with a specified name. The TView.cleanup data structure is used to find out which events
+ * are registered for a given element.
+ */
+function findExistingListener(tView, lView, eventName, tNodeIdx) {
+    const tCleanup = tView.cleanup;
+    if (tCleanup != null) {
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            const cleanupEventName = tCleanup[i];
+            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
+                // We have found a matching event name on the same node but it might not have been
+                // registered yet, so we must explicitly verify entries in the LView cleanup data
+                // structures.
+                const lCleanup = lView[CLEANUP];
+                const listenerIdxInLCleanup = tCleanup[i + 2];
+                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+            }
+            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+            // documentation of TView.cleanup for more details of this data structure layout.
+            if (typeof cleanupEventName === 'string') {
+                i += 2;
+            }
+        }
+    }
+    return null;
+}
+function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
+    const isTNodeDirectiveHost = isDirectiveHost(tNode);
+    const firstCreatePass = tView.firstCreatePass;
+    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const context = lView[CONTEXT];
+    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+    // native listener or a directive output on this element. As such we we know that we will have to
+    // register a listener and store its cleanup function on LView.
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
+    let processOutputs = true;
+    // Adding a native event listener is applicable when:
+    // - The corresponding TNode represents a DOM element.
+    // - The event target has a resolver (usually resulting in a global object,
+    //   such as `window` or `document`).
+    if (tNode.type & 3 /* TNodeType.AnyRNode */ || eventTargetResolver) {
+        const native = getNativeByTNode(tNode, lView);
+        const target = eventTargetResolver ? eventTargetResolver(native) : native;
+        const lCleanupIndex = lCleanup.length;
+        const idxOrTargetGetter = eventTargetResolver
+            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
+            : tNode.index;
+        // In order to match current behavior, native DOM event listeners must be added for all
+        // events (including outputs).
+        // There might be cases where multiple directives on the same element try to register an event
+        // handler function for the same event. In this situation we want to avoid registration of
+        // several native listeners as each registration would be intercepted by NgZone and
+        // trigger change detection. This would mean that a single user action would result in several
+        // change detections being invoked. To avoid this situation we want to have only one call to
+        // native handler registration (for the same element and same type of event).
+        //
+        // In order to have just one native event handler in presence of multiple handler functions,
+        // we just register a first handler function as a native event listener and then chain
+        // (coalesce) other handler functions on top of the first native handler function.
+        let existingListener = null;
+        // Please note that the coalescing described here doesn't happen for events specifying an
+        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+        // view engine.
+        // Also, we don't have to search for existing listeners is there are no directives
+        // matching on a given node as we can't register multiple event handlers for the same event in
+        // a template (this would mean having duplicate attributes).
+        if (!eventTargetResolver && isTNodeDirectiveHost) {
+            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
+        }
+        if (existingListener !== null) {
+            // Attach a new listener to coalesced listeners list, maintaining the order in which
+            // listeners are registered. For performance reasons, we keep a reference to the last
+            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+            // the entire set each time we need to add a new listener.
+            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+            lastListenerFn.__ngNextListenerFn__ = listenerFn;
+            existingListener.__ngLastListenerFn__ = listenerFn;
+            processOutputs = false;
+        }
+        else {
+            listenerFn = wrapListener(tNode, lView, context, listenerFn);
+            stashEventListener(target, eventName, listenerFn);
+            const cleanupFn = renderer.listen(target, eventName, listenerFn);
+            ngDevMode && ngDevMode.rendererAddEventListener++;
+            lCleanup.push(listenerFn, cleanupFn);
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+        }
+    }
+    else {
+        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
+        // ancestors are marked dirty when an event occurs.
+        listenerFn = wrapListener(tNode, lView, context, listenerFn);
+    }
+    if (processOutputs) {
+        const outputConfig = tNode.outputs?.[eventName];
+        const hostDirectiveOutputConfig = tNode.hostDirectiveOutputs?.[eventName];
+        if (hostDirectiveOutputConfig && hostDirectiveOutputConfig.length) {
+            for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
+                const index = hostDirectiveOutputConfig[i];
+                const lookupName = hostDirectiveOutputConfig[i + 1];
+                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
+            }
+        }
+        if (outputConfig && outputConfig.length) {
+            for (const index of outputConfig) {
+                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
+            }
+        }
+    }
+}
+function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
+    ngDevMode && assertIndexInRange(lView, index);
+    const instance = lView[index];
+    const def = tView.data[index];
+    const propertyName = def.outputs[lookupName];
+    const output = instance[propertyName];
+    if (ngDevMode && !isOutputSubscribable(output)) {
+        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
+    }
+    const subscription = output.subscribe(listenerFn);
+    const idx = lCleanup.length;
+    lCleanup.push(listenerFn, subscription);
+    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+}
+function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
+    }
+    catch (error) {
+        handleError(lView, error);
+        return false;
+    }
+    finally {
+        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+/**
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param tNode The TNode associated with this listener
+ * @param lView The LView that contains this listener
+ * @param listenerFn The listener function to call
+ * @param wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
+ */
+function wrapListener(tNode, lView, context, listenerFn) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // Ivy uses `Function` as a special token that allows us to unwrap the function
+        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
+        if (e === Function) {
+            return listenerFn;
+        }
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
+        markViewDirty(startView, 5 /* NotificationSource.Listener */);
+        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
+        // A just-invoked listener function might have coalesced listeners so we need to check for
+        // their presence and invoke as needed.
+        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
+        while (nextListenerFn) {
+            // We should prevent default if any of the listeners explicitly return false
+            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
+            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
+        }
+        return result;
+    };
+}
+/**
+ * Whether the given value represents a subscribable output.
+ *
+ * For example, an `EventEmitter, a `Subject`, an `Observable` or an
+ * `OutputEmitter`.
+ */
+function isOutputSubscribable(value) {
+    return (value != null && typeof value.subscribe === 'function');
+}
+/** Listens to an output on a specific directive. */
+function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listenerFn) {
+    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    let hostIndex = null;
+    let hostDirectivesStart = null;
+    let hostDirectivesEnd = null;
+    let hasOutput = false;
+    if (ngDevMode && !tNode.directiveToIndex?.has(target.type)) {
+        throw new Error(`Node does not have a directive with type ${target.type.name}`);
+    }
+    const data = tNode.directiveToIndex.get(target.type);
+    if (typeof data === 'number') {
+        hostIndex = data;
+    }
+    else {
+        [hostIndex, hostDirectivesStart, hostDirectivesEnd] = data;
+    }
+    if (hostDirectivesStart !== null &&
+        hostDirectivesEnd !== null &&
+        tNode.hostDirectiveOutputs?.hasOwnProperty(eventName)) {
+        const hostDirectiveOutputs = tNode.hostDirectiveOutputs[eventName];
+        for (let i = 0; i < hostDirectiveOutputs.length; i += 2) {
+            const index = hostDirectiveOutputs[i];
+            if (index >= hostDirectivesStart && index <= hostDirectivesEnd) {
+                ngDevMode && assertIndexInRange(lView, index);
+                hasOutput = true;
+                listenToOutput(tNode, tView, lView, index, hostDirectiveOutputs[i + 1], eventName, listenerFn, lCleanup, tCleanup);
+            }
+            else if (index > hostDirectivesEnd) {
+                break;
+            }
+        }
+    }
+    if (hostIndex !== null && target.outputs.hasOwnProperty(eventName)) {
+        ngDevMode && assertIndexInRange(lView, hostIndex);
+        hasOutput = true;
+        listenToOutput(tNode, tView, lView, hostIndex, eventName, eventName, listenerFn, lCleanup, tCleanup);
+    }
+    return hasOutput;
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/** Symbol used to store and retrieve metadata about a binding. */
+const BINDING = /* @__PURE__ */ Symbol('BINDING');
+// These are constant between all the bindings so we can reuse the objects.
+const INPUT_BINDING_METADATA = { kind: 'input', requiredVars: 1 };
+const OUTPUT_BINDING_METADATA = { kind: 'output', requiredVars: 0 };
+/**
+ * Creates an input binding.
+ * @param publicName Public name of the input to bind to.
+ * @param value Callback that returns the current value for the binding. Can be either a signal or
+ *   a plain getter function.
+ *
+ * ### Usage Example
+ * In this example we create an instance of the `MyButton` component and bind the value of
+ * the `isDisabled` signal to its `disabled` input.
+ *
+ * ```
+ * const isDisabled = signal(false);
+ *
+ * createComponent(MyButton, {
+ *   bindings: [inputBinding('disabled', isDisabled)]
+ * });
+ * ```
+ */
+function inputBinding(publicName, value) {
+    // Note: ideally we would use a class here, but it seems like they
+    // don't get tree shaken when constructed by a function like this.
+    const binding = {
+        [BINDING]: INPUT_BINDING_METADATA,
+        target: null,
+        update: () => {
+            const target = binding.target;
+            const lView = getLView();
+            const bindingIndex = nextBindingIndex();
+            const resolvedValue = value();
+            if (bindingUpdated(lView, bindingIndex, resolvedValue)) {
+                const tView = getTView();
+                const tNode = getSelectedTNode();
+                if (!target && ngDevMode) {
+                    throw new RuntimeError(315 /* RuntimeErrorCode.NO_BINDING_TARGET */, `Input binding to property "${publicName}" does not have a target.`);
+                }
+                const hasSet = setDirectiveInput(tNode, tView, lView, target, publicName, resolvedValue);
+                if (ngDevMode) {
+                    if (!hasSet) {
+                        throw new RuntimeError(315 /* RuntimeErrorCode.NO_BINDING_TARGET */, `${stringifyForError(target.type)} does not have an input with a public name of "${publicName}".`);
+                    }
+                    storePropertyBindingMetadata(tView.data, tNode, publicName, bindingIndex);
+                }
+            }
+        },
+    };
+    return binding;
+}
+/**
+ * Creates an output binding.
+ * @param eventName Public name of the output to listen to.
+ * @param listener Function to be called when the output emits.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and listen
+ * to its `onChange` event.
+ *
+ * ```
+ * interface CheckboxChange {
+ *   value: string;
+ * }
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
+ *   ],
+ * });
+ * ```
+ */
+function outputBinding(eventName, listener) {
+    // Note: ideally we would use a class here, but it seems like they
+    // don't get tree shaken when constructed by a function like this.
+    const binding = {
+        [BINDING]: OUTPUT_BINDING_METADATA,
+        target: null,
+        create: () => {
+            const target = binding.target;
+            if (!target && ngDevMode) {
+                throw new RuntimeError(315 /* RuntimeErrorCode.NO_BINDING_TARGET */, `Output binding to "${eventName}" does not have a target.`);
+            }
+            const lView = getLView();
+            const tView = getTView();
+            const tNode = getCurrentTNode();
+            const context = lView[CONTEXT];
+            const wrappedListener = wrapListener(tNode, lView, context, listener);
+            const hasBound = listenToDirectiveOutput(tNode, tView, lView, target, eventName, wrappedListener);
+            if (!hasBound && ngDevMode) {
+                throw new RuntimeError(316 /* RuntimeErrorCode.INVALID_BINDING_TARGET */, `${stringifyForError(target.type)} does not have an output with a public name of "${eventName}".`);
+            }
+        },
+    };
+    return binding;
+}
+
 class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
     ngModule;
     /**
@@ -18085,25 +18636,34 @@ class ComponentFactory extends ComponentFactory$1 {
         this.ngContentSelectors = componentDef.ngContentSelectors ?? [];
         this.isBoundToModule = !!ngModule;
     }
-    create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
+    create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings) {
         profiler(22 /* ProfilerEvent.DynamicComponentStart */);
         const prevConsumer = setActiveConsumer$1(null);
         try {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
-            const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '20.0.0-next.0+sha-a3575e2']
-                : // Extract attributes and classes from the first selector only to match VE behavior.
-                    extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
-            // Create the root view. Uses empty TView and ContentTemplate.
-            const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, [tAttributes], null);
+            const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives);
             const rootViewInjector = createRootViewInjector(cmpDef, environmentInjector || this.ngModule, injector);
             const environment = createRootLViewEnvironment(rootViewInjector);
             const hostRenderer = environment.rendererFactory.createRenderer(null, cmpDef);
             const hostElement = rootSelectorOrNode
                 ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector)
                 : createHostElement(cmpDef, hostRenderer);
+            const hasInputBindings = componentBindings?.some(isInputBinding) ||
+                directives?.some((d) => typeof d !== 'function' && d.bindings.some(isInputBinding));
             const rootLView = createLView(null, rootTView, null, 512 /* LViewFlags.IsRoot */ | getInitialLViewFlagsFromDef(cmpDef), null, null, environment, hostRenderer, rootViewInjector, null, retrieveHydrationInfo(hostElement, rootViewInjector, true /* isRootView */));
+            const directivesToApply = [this.componentDef];
+            if (directives) {
+                for (const directive of directives) {
+                    const directiveType = typeof directive === 'function' ? directive : directive.type;
+                    const directiveDef = getDirectiveDef(directiveType, true);
+                    if (ngDevMode && !directiveDef.standalone) {
+                        throw new RuntimeError(907 /* RuntimeErrorCode.TYPE_IS_NOT_STANDALONE */, `The ${stringifyForError(directiveType)} directive must be standalone in ` +
+                            `order to be applied to a dynamically-created component.`);
+                    }
+                    directivesToApply.push(directiveDef);
+                }
+            }
             rootLView[HEADER_OFFSET] = hostElement;
             // rootView is the parent when bootstrapping
             // TODO(misko): it looks like we are entering view here but we don't really need to as
@@ -18113,9 +18673,9 @@ class ComponentFactory extends ComponentFactory$1 {
             enterView(rootLView);
             let componentView = null;
             try {
-                const hostTNode = elementStartFirstCreatePass(HEADER_OFFSET, rootTView, rootLView, '#host', () => [this.componentDef], true, 0);
+                const hostTNode = elementStartFirstCreatePass(HEADER_OFFSET, rootTView, rootLView, '#host', () => directivesToApply, true, 0);
                 // ---- element instruction
-                // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some
+                // TODO(crisbeto): in practice `hostElement` should always be defined, but there are some
                 // tests where the renderer is mocked out and `undefined` is returned. We should update the
                 // tests so that this check can be removed.
                 if (hostElement) {
@@ -18147,12 +18707,74 @@ class ComponentFactory extends ComponentFactory$1 {
                 profiler(23 /* ProfilerEvent.DynamicComponentEnd */);
                 leaveView();
             }
-            return new ComponentRef(this.componentType, rootLView);
+            return new ComponentRef(this.componentType, rootLView, !!hasInputBindings);
         }
         finally {
             setActiveConsumer$1(prevConsumer);
         }
     }
+}
+function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
+    const tAttributes = rootSelectorOrNode
+        ? ['ng-version', '20.0.0-next.0+sha-809b5b4']
+        : // Extract attributes and classes from the first selector only to match VE behavior.
+            extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+    let creationBindings = null;
+    let updateBindings = null;
+    let varsToAllocate = 0;
+    if (componentBindings) {
+        for (const binding of componentBindings) {
+            varsToAllocate += binding[BINDING].requiredVars;
+            if (binding.create) {
+                binding.target = componentDef;
+                (creationBindings ??= []).push(binding);
+            }
+            if (binding.update) {
+                binding.target = componentDef;
+                (updateBindings ??= []).push(binding);
+            }
+        }
+    }
+    if (directives) {
+        for (const directive of directives) {
+            if (typeof directive !== 'function') {
+                const def = getDirectiveDef(directive.type, true);
+                for (const binding of directive.bindings) {
+                    varsToAllocate += binding[BINDING].requiredVars;
+                    if (binding.create) {
+                        binding.target = def;
+                        (creationBindings ??= []).push(binding);
+                    }
+                    if (binding.update) {
+                        binding.target = def;
+                        (updateBindings ??= []).push(binding);
+                    }
+                }
+            }
+        }
+    }
+    const rootTView = createTView(0 /* TViewType.Root */, null, getRootTViewTemplate(creationBindings, updateBindings), 1, varsToAllocate, null, null, null, null, [tAttributes], null);
+    return rootTView;
+}
+function getRootTViewTemplate(creationBindings, updateBindings) {
+    if (!creationBindings && !updateBindings) {
+        return null;
+    }
+    return (flags) => {
+        if (flags & 1 /* RenderFlags.Create */ && creationBindings) {
+            for (const binding of creationBindings) {
+                binding.create();
+            }
+        }
+        if (flags & 2 /* RenderFlags.Update */ && updateBindings) {
+            for (const binding of updateBindings) {
+                binding.update();
+            }
+        }
+    };
+}
+function isInputBinding(binding) {
+    return binding[BINDING].kind === 'input';
 }
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
@@ -18164,6 +18786,7 @@ class ComponentFactory extends ComponentFactory$1 {
  */
 class ComponentRef extends ComponentRef$1 {
     _rootLView;
+    _hasInputBindings;
     instance;
     hostView;
     changeDetectorRef;
@@ -18171,9 +18794,10 @@ class ComponentRef extends ComponentRef$1 {
     location;
     previousInputValues = null;
     _tNode;
-    constructor(componentType, _rootLView) {
+    constructor(componentType, _rootLView, _hasInputBindings) {
         super();
         this._rootLView = _rootLView;
+        this._hasInputBindings = _hasInputBindings;
         this._tNode = getTNode(_rootLView[TVIEW], HEADER_OFFSET);
         this.location = createElementRef(this._tNode, _rootLView);
         this.instance = getComponentLViewByIndex(this._tNode.index, _rootLView)[CONTEXT];
@@ -18181,6 +18805,9 @@ class ComponentRef extends ComponentRef$1 {
         this.componentType = componentType;
     }
     setInput(name, value) {
+        if (this._hasInputBindings && ngDevMode) {
+            throw new RuntimeError(317 /* RuntimeErrorCode.INVALID_SET_INPUT_CALL */, 'Cannot call `setInput` on a component that is using the `inputBinding` function.');
+        }
         const tNode = this._tNode;
         this.previousInputValues ??= new Map();
         // Do not set the input if it is the same as the last value
@@ -18351,7 +18978,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         this.insertImpl(viewRef, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
         return viewRef;
     }
-    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
+    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector, directives, bindings) {
         const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
         let index;
         // This function supports 2 signatures and we need to handle options correctly for both:
@@ -18386,6 +19013,8 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
             injector = options.injector;
             projectableNodes = options.projectableNodes;
             environmentInjector = options.environmentInjector || options.ngModuleRef;
+            directives = options.directives;
+            bindings = options.bindings;
         }
         const componentFactory = isComponentFactory
             ? componentFactoryOrType
@@ -18421,7 +19050,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         const componentDef = getComponentDef(componentFactory.componentType ?? {});
         const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
         const rNode = dehydratedView?.firstChild ?? null;
-        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector, directives, bindings);
         this.insertImpl(componentRef.hostView, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
         return componentRef;
     }
@@ -20639,134 +21268,6 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
     }
 }
 
-function isIterable(obj) {
-    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
-}
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return (Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            Symbol.iterator in obj)); // JS Iterable have a Symbol.iterator prop
-}
-function areIterablesEqual(a, b, comparator) {
-    const iterator1 = a[Symbol.iterator]();
-    const iterator2 = b[Symbol.iterator]();
-    while (true) {
-        const item1 = iterator1.next();
-        const item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        const iterator = obj[Symbol.iterator]();
-        let item;
-        while (!(item = iterator.next()).done) {
-            fn(item.value);
-        }
-    }
-}
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-function devModeEqual(a, b) {
-    const isListLikeIterableA = isListLikeIterable(a);
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return Object.is(a, b);
-        }
-    }
-}
-
-// TODO(misko): consider inlining
-/** Updates binding and returns the value. */
-function updateBinding(lView, bindingIndex, value) {
-    return (lView[bindingIndex] = value);
-}
-/** Gets the current binding value. */
-function getBinding(lView, bindingIndex) {
-    ngDevMode && assertIndexInRange(lView, bindingIndex);
-    ngDevMode &&
-        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
-    return lView[bindingIndex];
-}
-/**
- * Updates binding if changed, then returns whether it was updated.
- *
- * This function also checks the `CheckNoChangesMode` and throws if changes are made.
- * Some changes (Objects/iterables) during `CheckNoChangesMode` are exempt to comply with VE
- * behavior.
- *
- * @param lView current `LView`
- * @param bindingIndex The binding in the `LView` to check
- * @param value New value to check against `lView[bindingIndex]`
- * @returns `true` if the bindings has changed. (Throws if binding has changed during
- *          `CheckNoChangesMode`)
- */
-function bindingUpdated(lView, bindingIndex, value) {
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    ngDevMode &&
-        assertLessThan(bindingIndex, lView.length, `Slot should have been initialized to NO_CHANGE`);
-    const oldValue = lView[bindingIndex];
-    if (Object.is(oldValue, value)) {
-        return false;
-    }
-    else {
-        if (ngDevMode && isInCheckNoChangesMode()) {
-            // View engine didn't report undefined values as changed on the first checkNoChanges pass
-            // (before the change detection was run).
-            const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
-            if (!devModeEqual(oldValueToCompare, value)) {
-                const details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
-                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName, lView);
-            }
-            // There was a change, but the `devModeEqual` decided that the change is exempt from an error.
-            // For this reason we exit as if no change. The early exit is needed to prevent the changed
-            // value to be written into `LView` (If we would write the new value that we would not see it
-            // as change on next CD.)
-            return false;
-        }
-        lView[bindingIndex] = value;
-        return true;
-    }
-}
-/** Updates 2 bindings if changed, then returns whether either was updated. */
-function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
-    const different = bindingUpdated(lView, bindingIndex, exp1);
-    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
-}
-/** Updates 3 bindings if changed, then returns whether any was updated. */
-function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
-    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
-}
-/** Updates 4 bindings if changed, then returns whether any was updated. */
-function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
-    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
-}
-
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrs, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -21813,6 +22314,11 @@ function getNodeInjectorContext(injector) {
  */
 function handleInstanceCreatedByInjectorEvent(context, data) {
     const { value } = data;
+    // It might happen that a DI token is requested but there is no corresponding value.
+    // The InstanceCreatedByInjectorEvent will be still emitted in this case (to mirror the InjectorToCreateInstanceEvent) but we don't want to do any particular processing for those situations.
+    if (data.value == null) {
+        return;
+    }
     if (getDIResolver(context.injector) === null) {
         throwError('An InjectorCreatedInstance event must be run within an injection context.');
     }
@@ -30352,258 +30858,6 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 }
 
 /**
- * Contains a reference to a function that disables event replay feature
- * for server-side rendered applications. This function is overridden with
- * an actual implementation when the event replay feature is enabled via
- * `withEventReplay()` call.
- */
-let stashEventListener = (el, eventName, listenerFn) => { };
-function setStashFn(fn) {
-    stashEventListener = fn;
-}
-/**
- * Adds an event listener to the current node.
- *
- * If an output exists on one of the node's directives, it also subscribes to the output
- * and saves the subscription for later cleanup.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
- *     from the Renderer3 infrastructure and should be removed from the instruction arguments
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
-    const lView = getLView();
-    const tView = getTView();
-    const tNode = getCurrentTNode();
-    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
-    return ɵɵlistener;
-}
-/**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵsyntheticHostListener(eventName, listenerFn) {
-    const tNode = getCurrentTNode();
-    const lView = getLView();
-    const tView = getTView();
-    const currentDef = getCurrentDirectiveDef(tView.data);
-    const renderer = loadComponentRenderer(currentDef, tNode, lView);
-    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
-    return ɵɵsyntheticHostListener;
-}
-/**
- * A utility function that checks if a given element has already an event handler registered for an
- * event with a specified name. The TView.cleanup data structure is used to find out which events
- * are registered for a given element.
- */
-function findExistingListener(tView, lView, eventName, tNodeIdx) {
-    const tCleanup = tView.cleanup;
-    if (tCleanup != null) {
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            const cleanupEventName = tCleanup[i];
-            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
-                // We have found a matching event name on the same node but it might not have been
-                // registered yet, so we must explicitly verify entries in the LView cleanup data
-                // structures.
-                const lCleanup = lView[CLEANUP];
-                const listenerIdxInLCleanup = tCleanup[i + 2];
-                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
-            }
-            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
-            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
-            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
-            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
-            // documentation of TView.cleanup for more details of this data structure layout.
-            if (typeof cleanupEventName === 'string') {
-                i += 2;
-            }
-        }
-    }
-    return null;
-}
-function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
-    const isTNodeDirectiveHost = isDirectiveHost(tNode);
-    const firstCreatePass = tView.firstCreatePass;
-    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const context = lView[CONTEXT];
-    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
-    // native listener or a directive output on this element. As such we we know that we will have to
-    // register a listener and store its cleanup function on LView.
-    const lCleanup = getOrCreateLViewCleanup(lView);
-    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
-    let processOutputs = true;
-    // Adding a native event listener is applicable when:
-    // - The corresponding TNode represents a DOM element.
-    // - The event target has a resolver (usually resulting in a global object,
-    //   such as `window` or `document`).
-    if (tNode.type & 3 /* TNodeType.AnyRNode */ || eventTargetResolver) {
-        const native = getNativeByTNode(tNode, lView);
-        const target = eventTargetResolver ? eventTargetResolver(native) : native;
-        const lCleanupIndex = lCleanup.length;
-        const idxOrTargetGetter = eventTargetResolver
-            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
-            : tNode.index;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        // There might be cases where multiple directives on the same element try to register an event
-        // handler function for the same event. In this situation we want to avoid registration of
-        // several native listeners as each registration would be intercepted by NgZone and
-        // trigger change detection. This would mean that a single user action would result in several
-        // change detections being invoked. To avoid this situation we want to have only one call to
-        // native handler registration (for the same element and same type of event).
-        //
-        // In order to have just one native event handler in presence of multiple handler functions,
-        // we just register a first handler function as a native event listener and then chain
-        // (coalesce) other handler functions on top of the first native handler function.
-        let existingListener = null;
-        // Please note that the coalescing described here doesn't happen for events specifying an
-        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-        // view engine.
-        // Also, we don't have to search for existing listeners is there are no directives
-        // matching on a given node as we can't register multiple event handlers for the same event in
-        // a template (this would mean having duplicate attributes).
-        if (!eventTargetResolver && isTNodeDirectiveHost) {
-            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
-        }
-        if (existingListener !== null) {
-            // Attach a new listener to coalesced listeners list, maintaining the order in which
-            // listeners are registered. For performance reasons, we keep a reference to the last
-            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-            // the entire set each time we need to add a new listener.
-            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-            lastListenerFn.__ngNextListenerFn__ = listenerFn;
-            existingListener.__ngLastListenerFn__ = listenerFn;
-            processOutputs = false;
-        }
-        else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn);
-            stashEventListener(target, eventName, listenerFn);
-            const cleanupFn = renderer.listen(target, eventName, listenerFn);
-            ngDevMode && ngDevMode.rendererAddEventListener++;
-            lCleanup.push(listenerFn, cleanupFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-        }
-    }
-    else {
-        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
-        // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, context, listenerFn);
-    }
-    if (processOutputs) {
-        const outputConfig = tNode.outputs?.[eventName];
-        const hostDirectiveOutputConfig = tNode.hostDirectiveOutputs?.[eventName];
-        if (hostDirectiveOutputConfig && hostDirectiveOutputConfig.length) {
-            for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
-                const index = hostDirectiveOutputConfig[i];
-                const lookupName = hostDirectiveOutputConfig[i + 1];
-                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
-            }
-        }
-        if (outputConfig && outputConfig.length) {
-            for (const index of outputConfig) {
-                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
-            }
-        }
-    }
-}
-function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
-    ngDevMode && assertIndexInRange(lView, index);
-    const instance = lView[index];
-    const def = tView.data[index];
-    const propertyName = def.outputs[lookupName];
-    const output = instance[propertyName];
-    if (ngDevMode && !isOutputSubscribable(output)) {
-        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
-    }
-    const subscription = output.subscribe(listenerFn);
-    const idx = lCleanup.length;
-    lCleanup.push(listenerFn, subscription);
-    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-}
-function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
-    const prevConsumer = setActiveConsumer$1(null);
-    try {
-        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
-        // Only explicitly returning false from a listener should preventDefault
-        return listenerFn(e) !== false;
-    }
-    catch (error) {
-        handleError(lView, error);
-        return false;
-    }
-    finally {
-        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
-        setActiveConsumer$1(prevConsumer);
-    }
-}
-/**
- * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
- * if applicable.
- *
- * @param tNode The TNode associated with this listener
- * @param lView The LView that contains this listener
- * @param listenerFn The listener function to call
- * @param wrapWithPreventDefault Whether or not to prevent default behavior
- * (the procedural renderer does this already, so in those cases, we should skip)
- */
-function wrapListener(tNode, lView, context, listenerFn) {
-    // Note: we are performing most of the work in the listener function itself
-    // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // Ivy uses `Function` as a special token that allows us to unwrap the function
-        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
-        if (e === Function) {
-            return listenerFn;
-        }
-        // In order to be backwards compatible with View Engine, events on component host nodes
-        // must also mark the component view itself dirty (i.e. the view that it owns).
-        const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView, 5 /* NotificationSource.Listener */);
-        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
-        // A just-invoked listener function might have coalesced listeners so we need to check for
-        // their presence and invoke as needed.
-        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
-        while (nextListenerFn) {
-            // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
-            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
-        }
-        return result;
-    };
-}
-/**
- * Whether the given value represents a subscribable output.
- *
- * For example, an `EventEmitter, a `Subject`, an `Observable` or an
- * `OutputEmitter`.
- */
-function isOutputSubscribable(value) {
-    return (value != null && typeof value.subscribe === 'function');
-}
-
-/**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
  * Will get the next level up if level is not specified.
  *
@@ -35140,7 +35394,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-a3575e2');
+const VERSION = new Version('20.0.0-next.0+sha-809b5b4');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41642,6 +41896,8 @@ function afterRenderEffect(callbackOrSpec, options) {
  * `[[element1, element2]]`: projects `element1` and `element2` into the same `<ng-content>`.
  * `[[element1, element2], [element3]]`: projects `element1` and `element2` into one `<ng-content>`,
  * and `element3` into a separate `<ng-content>`.
+ *  * `directives` (optional): Directives that should be applied to the component.
+ *  * `binding` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
  * @publicApi
@@ -41651,7 +41907,7 @@ function createComponent(component, options) {
     const componentDef = getComponentDef(component);
     const elementInjector = options.elementInjector || getNullInjector();
     const factory = new ComponentFactory(componentDef);
-    return factory.create(elementInjector, options.projectableNodes, options.hostElement, options.environmentInjector);
+    return factory.create(elementInjector, options.projectableNodes, options.hostElement, options.environmentInjector, options.directives, options.bindings);
 }
 /**
  * Creates an object that allows to retrieve component metadata.
@@ -41830,5 +42086,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

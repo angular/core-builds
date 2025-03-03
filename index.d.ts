@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-a3575e2
+ * @license Angular v20.0.0-next.0+sha-809b5b4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1320,6 +1320,26 @@ declare abstract class BaseWritableResource<T> implements WritableResource<T> {
     asReadonly(): Resource<T>;
 }
 
+/** Symbol used to store and retrieve metadata about a binding. */
+declare const BINDING: unique symbol;
+
+/**
+ * A dynamically-defined binding targeting.
+ * For example, `inputBinding('value', () => 123)` creates an input binding.
+ */
+declare interface Binding {
+    readonly [BINDING]: {
+        readonly kind: string;
+        readonly requiredVars: number;
+    };
+    /** Target to which to apply the binding. */
+    readonly target?: unknown;
+    /** Callback that will be invoked during creation. */
+    create?(): void;
+    /** Callback that will be invoked during updates. */
+    update?(): void;
+}
+
 
 /**
  * Transforms a value (typically a string) to a boolean.
@@ -2118,7 +2138,7 @@ declare abstract class ComponentFactory<C> {
     /**
      * Creates a new component.
      */
-    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>): ComponentRef<C>;
+    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef<C>;
 }
 export { ComponentFactory }
 export { ComponentFactory as ɵComponentFactory }
@@ -2650,6 +2670,8 @@ declare const CONTEXT = 8;
  * `[[element1, element2]]`: projects `element1` and `element2` into the same `<ng-content>`.
  * `[[element1, element2], [element3]]`: projects `element1` and `element2` into one `<ng-content>`,
  * and `element3` into a separate `<ng-content>`.
+ *  * `directives` (optional): Directives that should be applied to the component.
+ *  * `binding` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
  * @publicApi
@@ -2659,6 +2681,8 @@ export declare function createComponent<C>(component: Type<C>, options: {
     hostElement?: Element;
     elementInjector?: Injector;
     projectableNodes?: Node[][];
+    directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[];
+    bindings?: Binding[];
 }): ComponentRef<C>;
 
 /**
@@ -4027,6 +4051,16 @@ declare type DirectiveInputs<T> = {
     transform?: InputTransformFunction
     ];
 };
+
+/**
+ * Represents a dynamically-created directive with bindings targeting it specifically.
+ */
+declare interface DirectiveWithBindings<T> {
+    /** Directive type that should be created. */
+    type: Type<T>;
+    /** Bindings that should be applied to the specific directive. */
+    bindings: Binding[];
+}
 
 declare const DISCONNECTED_NODES = "d";
 
@@ -6343,6 +6377,26 @@ export declare const Input: InputDecorator;
 export declare const input: InputFunction;
 
 /**
+ * Creates an input binding.
+ * @param publicName Public name of the input to bind to.
+ * @param value Callback that returns the current value for the binding. Can be either a signal or
+ *   a plain getter function.
+ *
+ * ### Usage Example
+ * In this example we create an instance of the `MyButton` component and bind the value of
+ * the `isDisabled` signal to its `disabled` input.
+ *
+ * ```
+ * const isDisabled = signal(false);
+ *
+ * createComponent(MyButton, {
+ *   bindings: [inputBinding('disabled', isDisabled)]
+ * });
+ * ```
+ */
+export declare function inputBinding(publicName: string, value: () => unknown): Binding;
+
+/**
  * @publicApi
  */
 export declare interface InputDecorator {
@@ -8470,6 +8524,29 @@ export declare const Output: OutputDecorator;
  * @publicAPI
  */
 export declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
+
+/**
+ * Creates an output binding.
+ * @param eventName Public name of the output to listen to.
+ * @param listener Function to be called when the output emits.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and listen
+ * to its `onChange` event.
+ *
+ * ```
+ * interface CheckboxChange {
+ *   value: string;
+ * }
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
+ *   ],
+ * });
+ * ```
+ */
+export declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
 
 /**
  * Type of the Output decorator / constructor function.
@@ -12709,6 +12786,8 @@ export declare abstract class ViewContainerRef {
      *                 replace the `ngModuleRef` parameter.
      *  * projectableNodes: list of DOM nodes that should be projected through
      *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
+     *  * directives: Directives that should be applied to the component.
+     *  * bindings: Bindings that should be applied to the component.
      *
      * @returns The new `ComponentRef` which contains the component instance and the host view.
      */
@@ -12718,6 +12797,8 @@ export declare abstract class ViewContainerRef {
         ngModuleRef?: NgModuleRef<unknown>;
         environmentInjector?: EnvironmentInjector | NgModuleRef<unknown>;
         projectableNodes?: Node[][];
+        directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[];
+        bindings?: Binding[];
     }): ComponentRef<C>;
     /**
      * Instantiates a single component and inserts its host view into this container.
@@ -12730,6 +12811,8 @@ export declare abstract class ViewContainerRef {
      *     [`<ng-content>`](api/core/ng-content) of the new component instance.
      * @param ngModuleRef An instance of the NgModuleRef that represent an NgModule.
      * This information is used to retrieve corresponding NgModule injector.
+     * @param directives Directives that should be applied to the component.
+     * @param bindings Bindings that should be applied to the component.
      *
      * @returns The new `ComponentRef` which contains the component instance and the host view.
      *
@@ -12737,7 +12820,7 @@ export declare abstract class ViewContainerRef {
      *     Use different signature of the `createComponent` method, which allows passing
      *     Component class directly.
      */
-    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], environmentInjector?: EnvironmentInjector | NgModuleRef<any>): ComponentRef<C>;
+    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], environmentInjector?: EnvironmentInjector | NgModuleRef<any>, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef<C>;
     /**
      * Inserts a view into this container.
      * @param viewRef The view to insert.
@@ -14532,7 +14615,7 @@ export declare interface ɵPipeDef<T> {
  * Profiler function which the runtime will invoke before and after user code.
  */
 export declare interface ɵProfiler {
-    (event: ɵProfilerEvent, instance?: {} | null, hookOrListener?: (e?: any) => any): void;
+    (event: ɵProfilerEvent, instance?: {} | null, eventFn?: Function): void;
 }
 
 /**
@@ -14748,7 +14831,7 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
      * @param ngModule The NgModuleRef to which the factory is bound.
      */
     constructor(componentDef: ɵComponentDef<any>, ngModule?: NgModuleRef<any> | undefined);
-    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef<any> | EnvironmentInjector | undefined): ComponentRef<T>;
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef<any> | EnvironmentInjector | undefined, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[]): ComponentRef<T>;
 }
 
 /**
@@ -14760,7 +14843,8 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
  *
  */
 export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
-    private _rootLView;
+    private readonly _rootLView;
+    private readonly _hasInputBindings;
     instance: T;
     hostView: ɵViewRef<T>;
     changeDetectorRef: ChangeDetectorRef;
@@ -14768,7 +14852,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     location: ElementRef;
     private previousInputValues;
     private _tNode;
-    constructor(componentType: Type<T>, _rootLView: LView);
+    constructor(componentType: Type<T>, _rootLView: LView, _hasInputBindings: boolean);
     setInput(name: string, value: unknown): void;
     get injector(): Injector;
     destroy(): void;
@@ -14963,6 +15047,9 @@ export declare const enum ɵRuntimeErrorCode {
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
     MULTIPLE_MATCHING_PIPES = 313,
     UNINITIALIZED_LET_ACCESS = 314,
+    NO_BINDING_TARGET = 315,
+    INVALID_BINDING_TARGET = 316,
+    INVALID_SET_INPUT_CALL = 317,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
