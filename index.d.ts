@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-3f01166
+ * @license Angular v19.2.0+sha-aff6d3d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -909,7 +909,6 @@ export declare class ApplicationModule {
  * A reference to an Angular application running on a page.
  *
  * @usageNotes
- * {@a is-stable-examples}
  * ### isStable examples and caveats
  *
  * Note two important points about `isStable`, demonstrated in the examples below:

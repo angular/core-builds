@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-3f01166
+ * @license Angular v19.2.0+sha-aff6d3d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18114,7 +18114,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-3f01166']
+                ? ['ng-version', '19.2.0+sha-aff6d3d']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -23486,7 +23486,6 @@ function optionsReducer(dst, objs) {
  * A reference to an Angular application running on a page.
  *
  * @usageNotes
- * {@a is-stable-examples}
  * ### isStable examples and caveats
  *
  * Note two important points about `isStable`, demonstrated in the examples below:
@@ -35162,7 +35161,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-3f01166');
+const VERSION = new Version('19.2.0+sha-aff6d3d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
