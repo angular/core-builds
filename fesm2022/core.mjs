@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-cd31bfc
+ * @license Angular v19.2.0+sha-c615bdc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18114,7 +18114,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-cd31bfc']
+                ? ['ng-version', '19.2.0+sha-c615bdc']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35162,7 +35162,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-cd31bfc');
+const VERSION = new Version('19.2.0+sha-c615bdc');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -36724,7 +36724,7 @@ function exhaustiveCheckNoChangesInterval(interval, checkNoChangesMode) {
  *
  * By default, this is true, unless `enableProdMode` is invoked prior to calling this method or the
  * application is built using the Angular CLI with the `optimization` option.
- * @see {@link cli/build ng build}
+ * @see {@link /cli/build ng build}
  *
  * @publicApi
  */
@@ -36741,7 +36741,7 @@ function isDevMode() {
  *
  * Using this method is discouraged as the Angular CLI will set production mode when using the
  * `optimization` option.
- * @see {@link cli/build ng build}
+ * @see {@link /cli/build ng build}
  *
  * @publicApi
  */

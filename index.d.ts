@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-cd31bfc
+ * @license Angular v19.2.0+sha-c615bdc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4270,7 +4270,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
  *
  * Using this method is discouraged as the Angular CLI will set production mode when using the
  * `optimization` option.
- * @see {@link cli/build ng build}
+ * @see {@link /cli/build ng build}
  *
  * @publicApi
  */
@@ -6590,7 +6590,7 @@ declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
  *
  * By default, this is true, unless `enableProdMode` is invoked prior to calling this method or the
  * application is built using the Angular CLI with the `optimization` option.
- * @see {@link cli/build ng build}
+ * @see {@link /cli/build ng build}
  *
  * @publicApi
  */
