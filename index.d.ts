@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-286e4da
+ * @license Angular v20.0.0-next.0+sha-ff46280
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14179,6 +14179,11 @@ export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
  */
 export declare function ɵisSubscribable<T>(obj: any | Subscribable<T>): obj is Subscribable<T>;
 
+/**
+ * Reports whether the given view is considered dirty according to the different marking mechanisms.
+ */
+export declare function ɵisViewDirty(view: ɵViewRef<unknown>): boolean;
+
 export declare const ɵJSACTION_EVENT_CONTRACT: InjectionToken<EventContractDetails>;
 
 /**
@@ -14263,6 +14268,8 @@ export declare enum ɵLocaleDataIndex {
     PluralCase = 20,
     ExtraData = 21
 }
+
+export declare function ɵmarkForRefresh(view: ɵViewRef<unknown>): void;
 
 /**
  * Create a global `Effect` for the given reactive function.
@@ -15402,10 +15409,6 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
     _cdRefInjectingView?: LView | undefined);
     get context(): T;
     /**
-     * Reports whether the given view is considered dirty according to the different marking mechanisms.
-     */
-    get dirty(): boolean;
-    /**
      * @deprecated Replacing the full context object is not supported. Modify the context
      *   directly, or consider using a `Proxy` if you need to replace the full object.
      * // TODO(devversion): Remove this.
@@ -15446,7 +15449,6 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * ```
      */
     markForCheck(): void;
-    markForRefresh(): void;
     /**
      * Detaches the view from the change detection tree.
      *
