@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-0007d20
+ * @license Angular v20.0.0-next.0+sha-bec6e56
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var project_paths = require('./project_paths-2f01794d.js');
+var project_paths = require('./project_paths-970d15f4.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-4e3ee586.js');
-var program = require('./program-ec673cec.js');
+var checker = require('./checker-dd223639.js');
+var program = require('./program-dc1cc980.js');
 require('path');
-require('./index-fb3ce351.js');
-var apply_import_manager = require('./apply_import_manager-b290f416.js');
+require('./index-5a8a0d39.js');
+var apply_import_manager = require('./apply_import_manager-a6832f5d.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');

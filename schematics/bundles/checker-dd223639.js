@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-0007d20
+ * @license Angular v20.0.0-next.0+sha-bec6e56
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22042,30 +22042,6 @@ function disableBindings$1(job) {
     }
 }
 
-/**
- * Nullish coalescing expressions such as `a ?? b` have different semantics in Angular templates as
- * compared to JavaScript. In particular, they default to `null` instead of `undefined`. Therefore,
- * we replace them with ternary expressions, assigning temporaries as needed to avoid re-evaluating
- * the same sub-expression multiple times.
- */
-function generateNullishCoalesceExpressions(job) {
-    for (const unit of job.units) {
-        for (const op of unit.ops()) {
-            transformExpressionsInOp(op, (expr) => {
-                if (!(expr instanceof BinaryOperatorExpr) ||
-                    expr.operator !== BinaryOperator.NullishCoalesce) {
-                    return expr;
-                }
-                const assignment = new AssignTemporaryExpr(expr.lhs.clone(), job.allocateXrefId());
-                const read = new ReadTemporaryExpr(assignment.xref);
-                // TODO: When not in compatibility mode for TemplateDefinitionBuilder, we can just emit
-                // `t != null` instead of including an undefined check as well.
-                return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(undefined))), read.clone(), expr.rhs);
-            }, VisitorContextFlag.None);
-        }
-    }
-}
-
 function kindTest(kind) {
     return (op) => op.kind === kind;
 }
@@ -23645,20 +23621,46 @@ function removeUnusedI18nAttributesOps(job) {
  *
  * 1. Unary operators in the base of an exponentiation expression. For example, `-2 ** 3` is not
  *    valid JavaScript, but `(-2) ** 3` is.
+ * 2. When mixing nullish coalescing (`??`) and logical and/or operators (`&&`, `||`), we need to
+ *    add parentheses. For example, `a ?? b && c` is not valid JavaScript, but `a ?? (b && c)` is.
+ * 3. Safe property access that has been down-leveled into a ternary expression needs parentheses
+ *    when used with nullish coalescing.
  */
 function requiredParentheses(job) {
     for (const unit of job.units) {
         for (const op of unit.ops()) {
             transformExpressionsInOp(op, (expr) => {
-                if (expr instanceof BinaryOperatorExpr &&
-                    expr.operator === BinaryOperator.Exponentiation &&
-                    expr.lhs instanceof UnaryOperatorExpr) {
-                    expr.lhs = new ParenthesizedExpr(expr.lhs);
+                if (expr instanceof BinaryOperatorExpr) {
+                    switch (expr.operator) {
+                        case BinaryOperator.Exponentiation:
+                            parenthesizeExponentiation(expr);
+                            break;
+                        case BinaryOperator.NullishCoalesce:
+                            parenthesizeNullishCoalescing(expr);
+                            break;
+                    }
                 }
                 return expr;
             }, VisitorContextFlag.None);
         }
     }
+}
+function parenthesizeExponentiation(expr) {
+    if (expr.lhs instanceof UnaryOperatorExpr) {
+        expr.lhs = new ParenthesizedExpr(expr.lhs);
+    }
+}
+function parenthesizeNullishCoalescing(expr) {
+    if (isLogicalAndOr(expr.lhs) || expr.lhs instanceof ConditionalExpr) {
+        expr.lhs = new ParenthesizedExpr(expr.lhs);
+    }
+    if (isLogicalAndOr(expr.rhs) || expr.rhs instanceof ConditionalExpr) {
+        expr.rhs = new ParenthesizedExpr(expr.rhs);
+    }
+}
+function isLogicalAndOr(expr) {
+    return (expr instanceof BinaryOperatorExpr &&
+        (expr.operator === BinaryOperator.And || expr.operator === BinaryOperator.Or));
 }
 
 /**
@@ -25366,9 +25368,8 @@ const phases = [
     { kind: CompilationJobKind.Both, fn: resolveContexts },
     { kind: CompilationJobKind.Both, fn: resolveSanitizers },
     { kind: CompilationJobKind.Tmpl, fn: liftLocalRefs },
-    { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
-    { kind: CompilationJobKind.Both, fn: requiredParentheses },
     { kind: CompilationJobKind.Both, fn: expandSafeReads },
+    { kind: CompilationJobKind.Both, fn: requiredParentheses },
     { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
     { kind: CompilationJobKind.Both, fn: optimizeVariables },
     { kind: CompilationJobKind.Both, fn: optimizeStoreLet },
@@ -31387,7 +31388,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.0+sha-0007d20');
+new Version('20.0.0-next.0+sha-bec6e56');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32319,7 +32320,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-4e3ee586.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-dd223639.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
