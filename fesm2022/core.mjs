@@ -1,6 +1,6 @@
 /**
- * @license Angular v19.2.0+sha-aff6d3d
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v19.2.0+sha-8579ff8
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -2304,7 +2304,7 @@ class R3Injector extends EnvironmentInjector {
     hydrate(token, record) {
         const prevConsumer = setActiveConsumer$1(null);
         try {
-            if (ngDevMode && record.value === CIRCULAR) {
+            if (record.value === CIRCULAR) {
                 throwCyclicDependencyError(stringify(token));
             }
             else if (record.value === NOT_YET) {
@@ -18114,7 +18114,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-aff6d3d']
+                ? ['ng-version', '19.2.0+sha-8579ff8']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35161,7 +35161,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-aff6d3d');
+const VERSION = new Version('19.2.0+sha-8579ff8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35874,11 +35874,7 @@ const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
  *
  * <div class="docs-alert docs-alert-helpful">
  *
- * **Deprecation notice:**
- *
- * The default currency code is currently always `USD` but this is deprecated from v9.
- *
- * **In v10 the default currency code will be taken from the current locale.**
+ * The default currency code is currently always `USD`.
  *
  * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
  * your application `NgModule`:

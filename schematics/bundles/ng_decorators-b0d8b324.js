@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v19.2.0+sha-aff6d3d
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v19.2.0+sha-8579ff8
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var imports = require('./imports-abe29092.js');
+var imports = require('./imports-047fbbc8.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 

@@ -1,6 +1,6 @@
 /**
- * @license Angular v19.2.0+sha-aff6d3d
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v19.2.0+sha-8579ff8
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -3050,11 +3050,7 @@ declare const DECLARATION_VIEW = 14;
  *
  * <div class="docs-alert docs-alert-helpful">
  *
- * **Deprecation notice:**
- *
- * The default currency code is currently always `USD` but this is deprecated from v9.
- *
- * **In v10 the default currency code will be taken from the current locale.**
+ * The default currency code is currently always `USD`.
  *
  * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
  * your application `NgModule`:

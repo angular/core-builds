@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v19.2.0+sha-aff6d3d
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v19.2.0+sha-8579ff8
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
@@ -12,23 +12,23 @@ var schematics = require('@angular-devkit/schematics');
 var signalQueriesMigration = require('./signal-queries-migration.js');
 var signalInputMigration = require('./signal-input-migration.js');
 var outputMigration = require('./output-migration.js');
-require('./project_tsconfig_paths-e9ccccbf.js');
+require('./project_tsconfig_paths-b558633b.js');
 require('@angular-devkit/core');
-require('./project_paths-8d8090c4.js');
+require('./project_paths-bb72fdae.js');
 require('node:path/posix');
 require('os');
 require('typescript');
-require('./checker-a9b8c723.js');
+require('./checker-89987c98.js');
 require('fs');
 require('module');
 require('path');
 require('url');
-require('./program-b3483bba.js');
-require('./apply_import_manager-2c29fa65.js');
-require('./migrate_ts_type_references-bb1d3ba7.js');
+require('./program-37aaf98b.js');
+require('./apply_import_manager-616cb3b5.js');
+require('./migrate_ts_type_references-19e87f48.js');
 require('assert');
-require('./index-70604a89.js');
-require('./leading_space-d190b83b.js');
+require('./index-cbc692ff.js');
+require('./leading_space-f8944434.js');
 
 function migrate(options) {
     // The migrations are independent so we can run them in any order, but we sort them here

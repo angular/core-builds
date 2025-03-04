@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v19.2.0+sha-aff6d3d
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v19.2.0+sha-8579ff8
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
@@ -9,18 +9,18 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-require('./index-efa9b1c0.js');
+require('./index-67ef89e3.js');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-2b5bce46.js');
-var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var ng_decorators = require('./ng_decorators-e699c081.js');
-var nodes = require('./nodes-a535b2be.js');
-var imports = require('./imports-abe29092.js');
-var checker = require('./checker-a9b8c723.js');
+var compiler_host = require('./compiler_host-2398e4ca.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
+var ng_decorators = require('./ng_decorators-b0d8b324.js');
+var nodes = require('./nodes-7758dbf6.js');
+var imports = require('./imports-047fbbc8.js');
+var checker = require('./checker-89987c98.js');
 require('os');
-var program = require('./program-b3483bba.js');
+var program = require('./program-37aaf98b.js');
 require('@angular-devkit/core');
 require('module');
 require('url');
