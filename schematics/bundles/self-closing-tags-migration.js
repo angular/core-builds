@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-bec6e56
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v20.0.0-next.0+sha-6f6d9f1
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
@@ -9,21 +9,21 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var project_paths = require('./project_paths-970d15f4.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
+var project_paths = require('./project_paths-69de86a9.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-dd223639.js');
-require('./program-dc1cc980.js');
+var checker = require('./checker-af521da6.js');
+require('./program-76bf6e7a.js');
 require('path');
-var ng_decorators = require('./ng_decorators-e699c081.js');
-var property_name = require('./property_name-7c8433f5.js');
+var ng_decorators = require('./ng_decorators-b0d8b324.js');
+var property_name = require('./property_name-ac18447e.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
-require('./imports-abe29092.js');
+require('./imports-047fbbc8.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 

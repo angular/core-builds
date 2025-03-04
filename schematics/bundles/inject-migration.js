@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.0+sha-bec6e56
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v20.0.0-next.0+sha-6f6d9f1
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
@@ -10,13 +10,13 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-254a6728.js');
+var compiler_host = require('./compiler_host-5a29293c.js');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-e699c081.js');
-var imports = require('./imports-abe29092.js');
-var nodes = require('./nodes-a535b2be.js');
-var leading_space = require('./leading_space-d190b83b.js');
-require('./checker-dd223639.js');
+var ng_decorators = require('./ng_decorators-b0d8b324.js');
+var imports = require('./imports-047fbbc8.js');
+var nodes = require('./nodes-7758dbf6.js');
+var leading_space = require('./leading_space-f8944434.js');
+require('./checker-af521da6.js');
 require('os');
 require('fs');
 require('module');
