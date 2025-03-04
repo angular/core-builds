@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-26b3a8f
+ * @license Angular v19.2.0+sha-31bbbe9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1184,7 +1184,7 @@ export declare class ApplicationRef {
  * Marks a component for check (in case of OnPush components) and synchronously
  * performs change detection on the application this component belongs to.
  *
- * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ * @param component Component to {@link /api/core/ChangeDetectorRef#markForCheck mark for check}
  *
  * @publicApi
  */
@@ -1208,7 +1208,7 @@ export declare function assertInInjectionContext(debugFn: Function): void;
 
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs/toSignal toSignal})
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
@@ -1414,8 +1414,8 @@ export declare interface BootstrapOptions {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
- * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
- * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
+ * @see {@link /api/core/ChangeDetectorRef?tab=usage-notes Change detection usage}
+ * @see {@link /best-practices/skipping-subtrees Skipping component subtrees}
  *
  * @publicApi
  */
@@ -2036,7 +2036,7 @@ declare interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'f
      */
     features?: ComponentDefFeature[];
     /**
-     * Defines template and style encapsulation options available for Component's {@link Component}.
+     * Defines template and style encapsulation options available for Component's {@link /api/core/Component Component}.
      */
     encapsulation?: ViewEncapsulation;
     /**
@@ -6678,7 +6678,7 @@ export declare interface IterableChanges<V> {
 }
 
 /**
- * A strategy for tracking changes over time to an iterable. Used by {@link NgForOf} to
+ * A strategy for tracking changes over time to an iterable. Used by {@link /api/common/NgForOf NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
  * @publicApi
@@ -9019,7 +9019,7 @@ export declare function provideExperimentalCheckNoChangesForDebug(options: {
  *
  * @publicApi
  * @experimental
- * @see [bootstrapApplication](/api/platform-browser/bootstrapApplication)
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  */
 export declare function provideExperimentalZonelessChangeDetection(): EnvironmentProviders;
 
@@ -9074,7 +9074,7 @@ export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToke
  * ```
  *
  * @publicApi
- * @see {@link bootstrapApplication}
+ * @see {@link /api/core/bootstrapApplication bootstrapApplication}
  * @see {@link NgZoneOptions}
  */
 export declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
@@ -9792,8 +9792,7 @@ export declare interface RendererType2 {
         [kind: string]: any;
     };
     /**
-     * A function added by the {@link ɵɵExternalStylesFeature} and used by the framework to create
-     * the list of external runtime style URLs.
+     * A function used by the framework to create the list of external runtime style URLs.
      */
     getExternalStyles?: ((encapsulationId?: string) => string[]) | null;
 }
@@ -12773,7 +12772,7 @@ declare interface ViewEffectNode extends EffectNode {
 
 
 /**
- * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
+ * Defines the CSS styles encapsulation policies for the {@link /api/core/Component Component} decorator's
  * `encapsulation` option.
  *
  * See {@link Component#encapsulation encapsulation}.
@@ -12822,7 +12821,7 @@ declare type ViewQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) =
 /**
  * Represents an Angular view.
  *
- * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
+ * @see {@link /api/core/ChangeDetectorRef?tab=usage-notes Change detection usage}
  *
  * @publicApi
  */
@@ -13369,8 +13368,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     getStandaloneInjector: ((parentInjector: EnvironmentInjector) => EnvironmentInjector | null) | null;
     /**
-     * A function added by the {@link ɵɵExternalStylesFeature} and used by the framework to create
-     * the list of external runtime style URLs.
+     * A function used by the framework to create the list of external runtime style URLs.
      */
     getExternalStyles: ((encapsulationId?: string) => string[]) | null;
     /**

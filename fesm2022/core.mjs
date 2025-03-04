@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-26b3a8f
+ * @license Angular v19.2.0+sha-31bbbe9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7379,8 +7379,8 @@ function isI18nInSkipHydrationBlock(parentTNode) {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
- * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
- * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
+ * @see {@link /api/core/ChangeDetectorRef?tab=usage-notes Change detection usage}
+ * @see {@link /best-practices/skipping-subtrees Skipping component subtrees}
  *
  * @publicApi
  */
@@ -8619,7 +8619,7 @@ function performanceMarkFeature(feature) {
 
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs/toSignal toSignal})
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
@@ -10171,7 +10171,7 @@ function executeContentQueries(tView, tNode, lView) {
 }
 
 /**
- * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
+ * Defines the CSS styles encapsulation policies for the {@link /api/core/Component Component} decorator's
  * `encapsulation` option.
  *
  * See {@link Component#encapsulation encapsulation}.
@@ -18114,7 +18114,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-26b3a8f']
+                ? ['ng-version', '19.2.0+sha-31bbbe9']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -21928,7 +21928,7 @@ function canBeHeldWeakly(value) {
  * Marks a component for check (in case of OnPush components) and synchronously
  * performs change detection on the application this component belongs to.
  *
- * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ * @param component Component to {@link /api/core/ChangeDetectorRef#markForCheck mark for check}
  *
  * @publicApi
  */
@@ -35161,7 +35161,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-26b3a8f');
+const VERSION = new Version('19.2.0+sha-31bbbe9');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35403,7 +35403,7 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
  * ```
  *
  * @publicApi
- * @see {@link bootstrapApplication}
+ * @see {@link /api/core/bootstrapApplication bootstrapApplication}
  * @see {@link NgZoneOptions}
  */
 function provideZoneChangeDetection(options) {
@@ -35789,7 +35789,7 @@ class ChangeDetectionSchedulerImpl {
  *
  * @publicApi
  * @experimental
- * @see [bootstrapApplication](/api/platform-browser/bootstrapApplication)
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  */
 function provideExperimentalZonelessChangeDetection() {
     performanceMarkFeature('NgZoneless');
@@ -36862,7 +36862,7 @@ function createViewRef(tNode, lView, isPipe) {
 /**
  * Represents an Angular view.
  *
- * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
+ * @see {@link /api/core/ChangeDetectorRef?tab=usage-notes Change detection usage}
  *
  * @publicApi
  */
