@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0+sha-65d2ca9
+ * @license Angular v19.2.0+sha-48d899f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4487,9 +4487,6 @@ class NodeInjectorFactory {
         this.injectImpl = injectImplementation;
     }
 }
-function isFactory(obj) {
-    return obj instanceof NodeInjectorFactory;
-}
 
 /**
  * Converts `TNodeType` into human readable text.
@@ -5427,7 +5424,7 @@ function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, 
 function getNodeInjectable(lView, tView, index, tNode) {
     let value = lView[index];
     const tData = tView.data;
-    if (isFactory(value)) {
+    if (value instanceof NodeInjectorFactory) {
         const factory = value;
         if (factory.resolving) {
             throwCyclicDependencyError(stringifyForError(tData[index]));
@@ -12483,7 +12480,7 @@ function writeToDirectiveInput(def, instance, publicName, value) {
             // Usually we resolve the directive instance using `LView[someIndex]` before writing to an
             // input, however if the read happens to early, the `LView[someIndex]` might actually be a
             // `NodeInjectorFactory`. Check for this specific case here since it can break in subtle ways.
-            if (isFactory(instance)) {
+            if (instance instanceof NodeInjectorFactory) {
                 throw new Error(`ASSERTION ERROR: Cannot write input to factory for type ${def.type.name}. Directive has not been created yet.`);
             }
         }
@@ -18113,7 +18110,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.0+sha-65d2ca9']
+                ? ['ng-version', '19.2.0+sha-48d899f']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35160,7 +35157,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0+sha-65d2ca9');
+const VERSION = new Version('19.2.0+sha-48d899f');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
