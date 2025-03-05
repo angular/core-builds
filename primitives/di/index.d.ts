@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-699733f
+ * @license Angular v19.2.1+sha-8d770ec
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ export declare interface InjectionToken<T> extends Type<T> {
 }
 
 export declare interface Injector {
-    retrieve?<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
+    retrieve<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
 }
 
 /**

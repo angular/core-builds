@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-699733f
+ * @license Angular v19.2.1+sha-8d770ec
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16,6 +16,7 @@ import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { ValueEqualityFn as ValueEqualityFn_2 } from '@angular/core/primitives/signals';
 import { ɵProfiler as ɵProfiler_2 } from '@angular/core';
+import { setCurrentInjector as ɵsetCurrentInjector } from '@angular/core/primitives/di';
 import { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 
 /**
@@ -15102,7 +15103,7 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
  */
 export declare function ɵsetClassMetadataAsync(type: Type<any>, dependencyLoaderFn: () => Array<Promise<Type<unknown>>>, metadataSetterFn: (...types: Type<unknown>[]) => void): () => Promise<Array<Type<unknown>>>;
 
-export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector;
+export { ɵsetCurrentInjector }
 
 
 /**
