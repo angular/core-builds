@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-8d770ec
+ * @license Angular v19.2.1+sha-484e0cf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1104,7 +1104,7 @@ const SOURCE = '__source';
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (getCurrentInjector() === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
-            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
+            `The \`${stringify(token)}\` token injection failed. \`inject()\` function must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
     }
     else if (getCurrentInjector() === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -18132,7 +18132,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.1+sha-8d770ec']
+                ? ['ng-version', '19.2.1+sha-484e0cf']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35179,7 +35179,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.1+sha-8d770ec');
+const VERSION = new Version('19.2.1+sha-484e0cf');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39366,8 +39366,8 @@ function withEventReplay() {
         providers.push({
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => {
-                const injector = inject(Injector);
-                const appRef = injector.get(ApplicationRef);
+                const appRef = inject(ApplicationRef);
+                const { injector } = appRef;
                 // We have to check for the appRef here due to the possibility of multiple apps
                 // being present on the same page. We only want to enable event replay for the
                 // apps that actually want it.
@@ -39391,8 +39391,8 @@ function withEventReplay() {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
                 const appId = inject(APP_ID);
-                const injector = inject(Injector);
                 const appRef = inject(ApplicationRef);
+                const { injector } = appRef;
                 return () => {
                     // We have to check for the appRef here due to the possibility of multiple apps
                     // being present on the same page. We only want to enable event replay for the
@@ -39419,6 +39419,15 @@ function withEventReplay() {
                     // of the application is completed. This timing is similar to the unclaimed
                     // dehydrated views cleanup timing.
                     appRef.whenStable().then(() => {
+                        // Note: we have to check whether the application is destroyed before
+                        // performing other operations with the `injector`.
+                        // The application may be destroyed **before** it becomes stable, so when
+                        // the `whenStable` resolves, the injector might already be in
+                        // a destroyed state. Thus, calling `injector.get` would throw an error
+                        // indicating that the injector has already been destroyed.
+                        if (appRef.destroyed) {
+                            return;
+                        }
                         const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
                         initEventReplay(eventContractDetails, injector);
                         const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
