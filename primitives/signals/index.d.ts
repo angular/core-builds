@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-c492db4
+ * @license Angular v20.0.0-next.1+sha-1d3b914
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -307,6 +307,13 @@ export declare interface SignalNode<T> extends ReactiveNode {
 export declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
 
 export declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
+
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+export declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
 
 /**
