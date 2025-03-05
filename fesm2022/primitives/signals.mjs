@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-d9e022d
+ * @license Angular v19.2.1+sha-699733f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -656,5 +656,21 @@ function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
 }
 
-export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn };
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer(prevConsumer);
+    }
+}
+
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
 //# sourceMappingURL=signals.mjs.map

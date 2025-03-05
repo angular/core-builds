@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-d9e022d
+ * @license Angular v19.2.1+sha-699733f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18110,7 +18110,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.1+sha-d9e022d']
+                ? ['ng-version', '19.2.1+sha-699733f']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -35157,7 +35157,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.1+sha-d9e022d');
+const VERSION = new Version('19.2.1+sha-699733f');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39232,6 +39232,22 @@ const WATCH_NODE = /* @__PURE__ */ (() => {
 
 function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked$1(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer(prevConsumer);
+    }
 }
 
 /**
