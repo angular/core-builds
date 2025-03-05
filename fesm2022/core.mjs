@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-9068163
+ * @license Angular v20.0.0-next.0+sha-aa8dff8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1689,8 +1689,9 @@ class NullInjector {
 
 function getNgModuleDef(type, throwIfNotFound) {
     const ngModuleDef = type[NG_MOD_DEF] || null;
-    if (!ngModuleDef && throwIfNotFound === true) {
-        throw new Error(`Type ${stringify(type)} does not have 'ɵmod' property.`);
+    if (!ngModuleDef && throwIfNotFound) {
+        throw new RuntimeError(915 /* RuntimeErrorCode.MISSING_NG_MODULE_DEFINITION */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            `Type ${stringify(type)} does not have 'ɵmod' property.`);
     }
     return ngModuleDef;
 }
@@ -1704,8 +1705,9 @@ function getComponentDef(type) {
 }
 function getDirectiveDef(type, throwIfNotFound) {
     const def = type[NG_DIR_DEF] || null;
-    if (!def && throwIfNotFound === true) {
-        throw new Error(`Type ${stringify(type)} does not have 'ɵdir' property.`);
+    if (!def && throwIfNotFound) {
+        throw new RuntimeError(916 /* RuntimeErrorCode.MISSING_DIRECTIVE_DEFINITION */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            `Type ${stringify(type)} does not have 'ɵdir' property.`);
     }
     return def;
 }
@@ -18730,7 +18732,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.0+sha-9068163']
+        ? ['ng-version', '20.0.0-next.0+sha-aa8dff8']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -35407,7 +35409,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.0+sha-9068163');
+const VERSION = new Version('20.0.0-next.0+sha-aa8dff8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

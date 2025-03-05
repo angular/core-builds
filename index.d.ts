@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.0+sha-9068163
+ * @license Angular v20.0.0-next.0+sha-aa8dff8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15090,6 +15090,8 @@ export declare const enum ɵRuntimeErrorCode {
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
     UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
+    MISSING_NG_MODULE_DEFINITION = 915,
+    MISSING_DIRECTIVE_DEFINITION = 916,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
