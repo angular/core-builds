@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-81fe053
+ * @license Angular v20.0.0-next.1+sha-1b91de3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29412,23 +29412,35 @@ class R3TargetBinder {
      */
     bind(target) {
         if (!target.template) {
-            // TODO(alxhub): handle targets which contain things like HostBindings, etc.
-            throw new Error('Binding without a template not yet supported');
+            throw new Error('Empty bound targets are not supported');
         }
-        // First, parse the template into a `Scope` structure. This operation captures the syntactic
-        // scopes in the template and makes them available for later use.
-        const scope = Scope$1.apply(target.template);
-        // Use the `Scope` to extract the entities present at every level of the template.
-        const scopedNodeEntities = extractScopedNodeEntities(scope);
-        // Next, perform directive matching on the template using the `DirectiveBinder`. This returns:
-        //   - directives: Map of nodes (elements & ng-templates) to the directives on them.
-        //   - bindings: Map of inputs, outputs, and attributes to the directive/element that claims
-        //     them. TODO(alxhub): handle multiple directives claiming an input/output/etc.
-        //   - references: Map of #references to their targets.
-        const { directives, eagerDirectives, bindings, references } = DirectiveBinder.apply(target.template, this.directiveMatcher);
-        // Finally, run the TemplateBinder to bind references, variables, and other entities within the
-        // template. This extracts all the metadata that doesn't depend on directive matching.
-        const { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks } = TemplateBinder.applyWithScope(target.template, scope);
+        const directives = new Map();
+        const eagerDirectives = [];
+        const bindings = new Map();
+        const references = new Map();
+        const scopedNodeEntities = new Map();
+        const expressions = new Map();
+        const symbols = new Map();
+        const nestingLevel = new Map();
+        const usedPipes = new Set();
+        const eagerPipes = new Set();
+        const deferBlocks = [];
+        if (target.template) {
+            // First, parse the template into a `Scope` structure. This operation captures the syntactic
+            // scopes in the template and makes them available for later use.
+            const scope = Scope$1.apply(target.template);
+            // Use the `Scope` to extract the entities present at every level of the template.
+            extractScopedNodeEntities(scope, scopedNodeEntities);
+            // Next, perform directive matching on the template using the `DirectiveBinder`. This returns:
+            //   - directives: Map of nodes (elements & ng-templates) to the directives on them.
+            //   - bindings: Map of inputs, outputs, and attributes to the directive/element that claims
+            //     them. TODO(alxhub): handle multiple directives claiming an input/output/etc.
+            //   - references: Map of #references to their targets.
+            DirectiveBinder.apply(target.template, this.directiveMatcher, directives, eagerDirectives, bindings, references);
+            // Finally, run the TemplateBinder to bind references, variables, and other entities within the
+            // template. This extracts all the metadata that doesn't depend on directive matching.
+            TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
+        }
         return new R3BoundTarget(target, directives, eagerDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
     }
 }
@@ -29655,14 +29667,9 @@ class DirectiveBinder {
      * map which resolves #references (`Reference`s) within the template to the named directive or
      * template node.
      */
-    static apply(template, selectorMatcher) {
-        const directives = new Map();
-        const bindings = new Map();
-        const references = new Map();
-        const eagerDirectives = [];
+    static apply(template, selectorMatcher, directives, eagerDirectives, bindings, references) {
         const matcher = new DirectiveBinder(selectorMatcher, directives, eagerDirectives, bindings, references);
         matcher.ingest(template);
-        return { directives, eagerDirectives, bindings, references };
     }
     ingest(template) {
         template.forEach((node) => node.visit(this));
@@ -29847,18 +29854,11 @@ class TemplateBinder extends RecursiveAstVisitor {
      * nesting level (how many levels deep within the template structure the `Template` is), starting
      * at 1.
      */
-    static applyWithScope(nodes, scope) {
-        const expressions = new Map();
-        const symbols = new Map();
-        const nestingLevel = new Map();
-        const usedPipes = new Set();
-        const eagerPipes = new Set();
+    static applyWithScope(nodes, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks) {
         const template = nodes instanceof Template ? nodes : null;
-        const deferBlocks = [];
         // The top-level template has nesting level 0.
         const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template, 0);
         binder.ingest(nodes);
-        return { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks };
     }
     ingest(nodeOrNodes) {
         if (nodeOrNodes instanceof Template) {
@@ -30208,7 +30208,7 @@ class R3BoundTarget {
         return this.referenceTargetToElement(target.node);
     }
 }
-function extractScopedNodeEntities(rootScope) {
+function extractScopedNodeEntities(rootScope, templateEntities) {
     const entityMap = new Map();
     function extractScopeEntities(scope) {
         if (entityMap.has(scope.rootNode)) {
@@ -30233,11 +30233,9 @@ function extractScopedNodeEntities(rootScope) {
         }
         extractScopeEntities(scope);
     }
-    const templateEntities = new Map();
     for (const [template, entities] of entityMap) {
         templateEntities.set(template, new Set(entities.values()));
     }
-    return templateEntities;
 }
 
 /**
@@ -31388,7 +31386,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.1+sha-81fe053');
+new Version('20.0.0-next.1+sha-1b91de3');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32320,7 +32318,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-af521da6.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-e8a16b54.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38374,7 +38372,7 @@ exports.SymbolKind = void 0;
 /**
  * Constructs a `ts.Diagnostic` for a given `ParseSourceSpan` within a template.
  */
-function makeTemplateDiagnostic(templateId, mapping, span, category, code, messageText, relatedMessages) {
+function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, relatedMessages) {
     if (mapping.type === 'direct') {
         let relatedInformation = undefined;
         if (relatedMessages !== undefined) {
@@ -38399,8 +38397,8 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
             category,
             messageText,
             file: mapping.node.getSourceFile(),
-            componentFile: mapping.node.getSourceFile(),
-            templateId,
+            sourceFile: mapping.node.getSourceFile(),
+            typeCheckId: id,
             start: span.start.offset,
             length: span.end.offset - span.start.offset,
             relatedInformation,
@@ -38441,8 +38439,8 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
                 code,
                 messageText: addDiagnosticChain(messageText, [failureChain]),
                 file: componentSf,
-                componentFile: componentSf,
-                templateId,
+                sourceFile: componentSf,
+                typeCheckId: id,
                 // mapping.node represents either the 'template' or 'templateUrl' expression. getStart()
                 // and getEnd() are used because they don't include surrounding whitespace.
                 start: mapping.node.getStart(),
@@ -38466,8 +38464,8 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
             code,
             messageText,
             file: sf,
-            componentFile: componentSf,
-            templateId,
+            sourceFile: componentSf,
+            typeCheckId: id,
             start: span.start.offset,
             length: span.end.offset - span.start.offset,
             // Show a secondary message indicating the component whose template contains the error.
@@ -38492,16 +38490,16 @@ function parseTemplateAsSourceFile(fileName, template) {
     /* setParentNodes */ false, ts__default["default"].ScriptKind.JSX);
 }
 
-const TEMPLATE_ID_MAP = Symbol('ngTemplateId');
-function getTemplateId$1(clazz) {
+const TYPE_CHECK_ID_MAP = Symbol('TypeCheckId');
+function getTypeCheckId(clazz) {
     const sf = clazz.getSourceFile();
-    if (sf[TEMPLATE_ID_MAP] === undefined) {
-        sf[TEMPLATE_ID_MAP] = new Map();
+    if (sf[TYPE_CHECK_ID_MAP] === undefined) {
+        sf[TYPE_CHECK_ID_MAP] = new Map();
     }
-    if (sf[TEMPLATE_ID_MAP].get(clazz) === undefined) {
-        sf[TEMPLATE_ID_MAP].set(clazz, `tcb${sf[TEMPLATE_ID_MAP].size + 1}`);
+    if (sf[TYPE_CHECK_ID_MAP].get(clazz) === undefined) {
+        sf[TYPE_CHECK_ID_MAP].set(clazz, `tcb${sf[TYPE_CHECK_ID_MAP].size + 1}`);
     }
-    return sf[TEMPLATE_ID_MAP].get(clazz);
+    return sf[TYPE_CHECK_ID_MAP].get(clazz);
 }
 
 const parseSpanComment = /^(\d+),(\d+)$/;
@@ -40248,7 +40246,7 @@ class RegistryDomSchemaChecker {
         // in the registry are without a namespace.
         const name = element.name.replace(REMOVE_XHTML_REGEX, '');
         if (!REGISTRY$1.hasElement(name, schemas)) {
-            const mapping = this.resolver.getSourceMapping(id);
+            const mapping = this.resolver.getTemplateSourceMapping(id);
             const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
             let errorMsg = `'${name}' is not a known element:\n`;
             errorMsg += `1. If '${name}' is an Angular component, then verify that it is ${hostIsStandalone
@@ -40266,7 +40264,7 @@ class RegistryDomSchemaChecker {
     }
     checkProperty(id, element, name, span, schemas, hostIsStandalone) {
         if (!REGISTRY$1.hasProperty(element.name, name, schemas)) {
-            const mapping = this.resolver.getSourceMapping(id);
+            const mapping = this.resolver.getTemplateSourceMapping(id);
             const decorator = hostIsStandalone ? '@Component' : '@NgModule';
             const schemas = `'${decorator}.schemas'`;
             let errorMsg = `Can't bind to '${name}' since it isn't a known property of '${element.name}'.`;
@@ -40641,21 +40639,21 @@ function requiresInlineTypeCheckBlock(ref, env, usedPipes, reflector) {
         return TcbInliningRequirement.None;
     }
 }
-/** Maps a shim position back to a template location. */
-function getTemplateMapping(shimSf, position, resolver, isDiagnosticRequest) {
+/** Maps a shim position back to a source code location. */
+function getSourceMapping(shimSf, position, resolver, isDiagnosticRequest) {
     const node = getTokenAtPosition(shimSf, position);
     const sourceLocation = findSourceLocation(node, shimSf, isDiagnosticRequest);
     if (sourceLocation === null) {
         return null;
     }
-    const mapping = resolver.getSourceMapping(sourceLocation.id);
-    const span = resolver.toParseSourceSpan(sourceLocation.id, sourceLocation.span);
+    const mapping = resolver.getTemplateSourceMapping(sourceLocation.id);
+    const span = resolver.toTemplateParseSourceSpan(sourceLocation.id, sourceLocation.span);
     if (span === null) {
         return null;
     }
     // TODO(atscott): Consider adding a context span by walking up from `node` until we get a
     // different span.
-    return { sourceLocation, templateSourceMapping: mapping, span };
+    return { sourceLocation, sourceMapping: mapping, span };
 }
 function findTypeCheckBlock(file, id, isDiagnosticRequest) {
     for (const stmt of file.statements) {
@@ -41084,43 +41082,43 @@ class OutOfBandDiagnosticRecorderImpl {
     get diagnostics() {
         return this._diagnostics;
     }
-    missingReferenceTarget(templateId, ref) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    missingReferenceTarget(id, ref) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const value = ref.value.trim();
         const errorMsg = `No directive found with exportAs '${value}'.`;
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, ref.valueSpan || ref.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REFERENCE_TARGET), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, ref.valueSpan || ref.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REFERENCE_TARGET), errorMsg));
     }
-    missingPipe(templateId, ast) {
+    missingPipe(id, ast) {
         if (this.recordedPipes.has(ast)) {
             return;
         }
-        const mapping = this.resolver.getSourceMapping(templateId);
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `No pipe found with name '${ast.name}'.`;
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, ast.nameSpan);
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, ast.nameSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${ast.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_PIPE), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_PIPE), errorMsg));
         this.recordedPipes.add(ast);
     }
-    deferredPipeUsedEagerly(templateId, ast) {
+    deferredPipeUsedEagerly(id, ast) {
         if (this.recordedPipes.has(ast)) {
             return;
         }
-        const mapping = this.resolver.getSourceMapping(templateId);
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `Pipe '${ast.name}' was imported  via \`@Component.deferredImports\`, ` +
             `but was used outside of a \`@defer\` block in a template. To fix this, either ` +
             `use the '${ast.name}' pipe inside of a \`@defer\` block or import this dependency ` +
             `using the \`@Component.imports\` field.`;
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, ast.nameSpan);
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, ast.nameSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${ast.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_PIPE_USED_EAGERLY), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_PIPE_USED_EAGERLY), errorMsg));
         this.recordedPipes.add(ast);
     }
-    deferredComponentUsedEagerly(templateId, element) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    deferredComponentUsedEagerly(id, element) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `Element '${element.name}' contains a component or a directive that ` +
             `was imported  via \`@Component.deferredImports\`, but the element itself is located ` +
             `outside of a \`@defer\` block in a template. To fix this, either ` +
@@ -41128,21 +41126,21 @@ class OutOfBandDiagnosticRecorderImpl {
             `import referenced component/directive dependency using the \`@Component.imports\` field.`;
         const { start, end } = element.startSourceSpan;
         const absoluteSourceSpan = new AbsoluteSourceSpan(start.offset, end.offset);
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, absoluteSourceSpan);
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, absoluteSourceSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${element.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_DIRECTIVE_USED_EAGERLY), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_DIRECTIVE_USED_EAGERLY), errorMsg));
     }
-    duplicateTemplateVar(templateId, variable, firstDecl) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    duplicateTemplateVar(id, variable, firstDecl) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `Cannot redeclare variable '${variable.name}' as it was previously declared elsewhere for the same template.`;
         // The allocation of the error here is pretty useless for variables declared in microsyntax,
         // since the sourceSpan refers to the entire microsyntax property, not a span for the specific
         // variable in question.
         //
         // TODO(alxhub): allocate to a tighter span once one is available.
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, variable.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DUPLICATE_VARIABLE_DECLARATION), errorMsg, [
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, variable.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DUPLICATE_VARIABLE_DECLARATION), errorMsg, [
             {
                 text: `The variable '${firstDecl.name}' was first declared here.`,
                 start: firstDecl.sourceSpan.start.offset,
@@ -41151,10 +41149,10 @@ class OutOfBandDiagnosticRecorderImpl {
             },
         ]));
     }
-    requiresInlineTcb(templateId, node) {
-        this._diagnostics.push(makeInlineDiagnostic(templateId, exports.ErrorCode.INLINE_TCB_REQUIRED, node.name, `This component requires inline template type-checking, which is not supported by the current environment.`));
+    requiresInlineTcb(id, node) {
+        this._diagnostics.push(makeInlineDiagnostic(id, exports.ErrorCode.INLINE_TCB_REQUIRED, node.name, `This component requires inline template type-checking, which is not supported by the current environment.`));
     }
-    requiresInlineTypeConstructors(templateId, node, directives) {
+    requiresInlineTypeConstructors(id, node, directives) {
         let message;
         if (directives.length > 1) {
             message = `This component uses directives which require inline type constructors, which are not supported by the current environment.`;
@@ -41162,10 +41160,10 @@ class OutOfBandDiagnosticRecorderImpl {
         else {
             message = `This component uses a directive which requires an inline type constructor, which is not supported by the current environment.`;
         }
-        this._diagnostics.push(makeInlineDiagnostic(templateId, exports.ErrorCode.INLINE_TYPE_CTOR_REQUIRED, node.name, message, directives.map((dir) => makeRelatedInformation(dir.name, `Requires an inline type constructor.`))));
+        this._diagnostics.push(makeInlineDiagnostic(id, exports.ErrorCode.INLINE_TYPE_CTOR_REQUIRED, node.name, message, directives.map((dir) => makeRelatedInformation(dir.name, `Requires an inline type constructor.`))));
     }
-    suboptimalTypeInference(templateId, variables) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    suboptimalTypeInference(id, variables) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         // Select one of the template variables that's most suitable for reporting the diagnostic. Any
         // variable will do, but prefer one bound to the context's $implicit if present.
         let diagnosticVar = null;
@@ -41186,10 +41184,10 @@ class OutOfBandDiagnosticRecorderImpl {
             varIdentification += ` (and ${variables.length - 1} others)`;
         }
         const message = `This structural directive supports advanced type inference, but the current compiler configuration prevents its usage. The variable ${varIdentification} will have type 'any' as a result.\n\nConsider enabling the 'strictTemplates' option in your tsconfig.json for better type inference within this template.`;
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, diagnosticVar.keySpan, ts__default["default"].DiagnosticCategory.Suggestion, ngErrorCode(exports.ErrorCode.SUGGEST_SUBOPTIMAL_TYPE_INFERENCE), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, diagnosticVar.keySpan, ts__default["default"].DiagnosticCategory.Suggestion, ngErrorCode(exports.ErrorCode.SUGGEST_SUBOPTIMAL_TYPE_INFERENCE), message));
     }
-    splitTwoWayBinding(templateId, input, output, inputConsumer, outputConsumer) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    splitTwoWayBinding(id, input, output, inputConsumer, outputConsumer) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `The property and event halves of the two-way binding '${input.name}' are not bound to the same target.
             Find more at https://angular.dev/guide/templates/two-way-binding#how-two-way-binding-works`;
         const relatedMessages = [];
@@ -41219,16 +41217,16 @@ class OutOfBandDiagnosticRecorderImpl {
                 sourceFile: outputConsumer.name.getSourceFile(),
             });
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, input.keySpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SPLIT_TWO_WAY_BINDING), errorMsg, relatedMessages));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, input.keySpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SPLIT_TWO_WAY_BINDING), errorMsg, relatedMessages));
     }
-    missingRequiredInputs(templateId, element, directiveName, isComponent, inputAliases) {
+    missingRequiredInputs(id, element, directiveName, isComponent, inputAliases) {
         const message = `Required input${inputAliases.length === 1 ? '' : 's'} ${inputAliases
             .map((n) => `'${n}'`)
             .join(', ')} from ${isComponent ? 'component' : 'directive'} ${directiveName} must be specified.`;
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), element.startSourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), element.startSourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
     }
-    illegalForLoopTrackAccess(templateId, block, access) {
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, access.sourceSpan);
+    illegalForLoopTrackAccess(id, block, access) {
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, access.sourceSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for property read.`);
         }
@@ -41237,9 +41235,9 @@ class OutOfBandDiagnosticRecorderImpl {
             .join(', ');
         const message = `Cannot access '${access.name}' inside of a track expression. ` +
             `Only ${messageVars} and properties on the containing component are available to this expression.`;
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_FOR_LOOP_TRACK_ACCESS), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_FOR_LOOP_TRACK_ACCESS), message));
     }
-    inaccessibleDeferredTriggerElement(templateId, trigger) {
+    inaccessibleDeferredTriggerElement(id, trigger) {
         let message;
         if (trigger.reference === null) {
             message =
@@ -41252,9 +41250,9 @@ class OutOfBandDiagnosticRecorderImpl {
                     `@defer block.\nDeferred blocks can only access triggers in same view, a parent ` +
                     `embedded view or the root view of the @placeholder block.`;
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), trigger.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
     }
-    controlFlowPreventingContentProjection(templateId, category, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
+    controlFlowPreventingContentProjection(id, category, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
         const blockName = controlFlowNode.nameSpan.toString().trim();
         const lines = [
             `Node matches the "${slotSelector}" slot of the "${componentName}" component, but will not be projected into the specific slot because the surrounding ${blockName} has more than one node at its root. To project the node in the right slot, you can:\n`,
@@ -41268,33 +41266,33 @@ class OutOfBandDiagnosticRecorderImpl {
         }
         lines.push('', 'This check can be disabled using the `extendedDiagnostics.checks.' +
             'controlFlowPreventingContentProjection = "suppress" compiler option.`');
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), projectionNode.startSourceSpan, category, ngErrorCode(exports.ErrorCode.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION), lines.join('\n')));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), projectionNode.startSourceSpan, category, ngErrorCode(exports.ErrorCode.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION), lines.join('\n')));
     }
-    illegalWriteToLetDeclaration(templateId, node, target) {
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, node.sourceSpan);
+    illegalWriteToLetDeclaration(id, node, target) {
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, node.sourceSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for property write.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_LET_WRITE), `Cannot assign to @let declaration '${target.name}'.`));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_LET_WRITE), `Cannot assign to @let declaration '${target.name}'.`));
     }
-    letUsedBeforeDefinition(templateId, node, target) {
-        const sourceSpan = this.resolver.toParseSourceSpan(templateId, node.sourceSpan);
+    letUsedBeforeDefinition(id, node, target) {
+        const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, node.sourceSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for property read.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.LET_USED_BEFORE_DEFINITION), `Cannot read @let declaration '${target.name}' before it has been defined.`));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.LET_USED_BEFORE_DEFINITION), `Cannot read @let declaration '${target.name}' before it has been defined.`));
     }
-    conflictingDeclaration(templateId, decl) {
-        const mapping = this.resolver.getSourceMapping(templateId);
+    conflictingDeclaration(id, decl) {
+        const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `Cannot declare @let called '${decl.name}' as there is another symbol in the template with the same name.`;
-        this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, decl.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.CONFLICTING_LET_DECLARATION), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, decl.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.CONFLICTING_LET_DECLARATION), errorMsg));
     }
 }
-function makeInlineDiagnostic(templateId, code, node, messageText, relatedInformation) {
+function makeInlineDiagnostic(id, code, node, messageText, relatedInformation) {
     return {
         ...makeDiagnostic(code, node, messageText, relatedInformation),
-        componentFile: node.getSourceFile(),
-        templateId,
+        sourceFile: node.getSourceFile(),
+        typeCheckId: id,
     };
 }
 
@@ -41363,10 +41361,10 @@ function addParseSpanInfo(node, span) {
     /* hasTrailingNewLine */ false);
 }
 /**
- * Adds a synthetic comment to the function declaration that contains the template id
+ * Adds a synthetic comment to the function declaration that contains the type checking ID
  * of the class declaration.
  */
-function addTemplateId(tcb, id) {
+function addTypeCheckId(tcb, id) {
     ts__default["default"].addSyntheticLeadingComment(tcb, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, id, true);
 }
 /**
@@ -41402,12 +41400,12 @@ function translateDiagnostic(diagnostic, resolver) {
     if (diagnostic.file === undefined || diagnostic.start === undefined) {
         return null;
     }
-    const fullMapping = getTemplateMapping(diagnostic.file, diagnostic.start, resolver, 
+    const fullMapping = getSourceMapping(diagnostic.file, diagnostic.start, resolver, 
     /*isDiagnosticsRequest*/ true);
     if (fullMapping === null) {
         return null;
     }
-    const { sourceLocation, templateSourceMapping, span } = fullMapping;
+    const { sourceLocation, sourceMapping: templateSourceMapping, span } = fullMapping;
     return makeTemplateDiagnostic(sourceLocation.id, templateSourceMapping, span, diagnostic.category, diagnostic.code, diagnostic.messageText);
 }
 
@@ -41984,7 +41982,7 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
     /* parameters */ paramList, 
     /* type */ undefined, 
     /* body */ body);
-    addTemplateId(fnDecl, meta.id);
+    addTypeCheckId(fnDecl, meta.id);
     return fnDecl;
 }
 /**
@@ -43411,7 +43409,7 @@ class Context {
         return ts__default["default"].factory.createIdentifier(`_t${this.nextId++}`);
     }
     getPipeByName(name) {
-        if (!this.pipes.has(name)) {
+        if (this.pipes === null || !this.pipes.has(name)) {
             return null;
         }
         return this.pipes.get(name);
@@ -44542,8 +44540,7 @@ var InliningMode;
 /**
  * A template type checking context for a program.
  *
- * The `TypeCheckContext` allows registration of components and their templates which need to be
- * type checked.
+ * The `TypeCheckContext` allows registration of directives to be type checked.
  */
 class TypeCheckContextImpl {
     config;
@@ -44582,18 +44579,18 @@ class TypeCheckContextImpl {
      *
      * Implements `TypeCheckContext.addTemplate`.
      */
-    addTemplate(ref, binder, template, pipes, schemas, sourceMapping, file, parseErrors, isStandalone, preserveWhitespaces) {
-        if (!this.host.shouldCheckComponent(ref.node)) {
+    addDirective(ref, binder, schemas, templateContext, isStandalone) {
+        if (!this.host.shouldCheckClass(ref.node)) {
             return;
         }
         const fileData = this.dataForFile(ref.node.getSourceFile());
-        const shimData = this.pendingShimForComponent(ref.node);
-        const templateId = fileData.sourceManager.getTemplateId(ref.node);
-        const templateDiagnostics = [];
-        if (parseErrors !== null) {
-            templateDiagnostics.push(...getTemplateDiagnostics(parseErrors, templateId, sourceMapping));
+        const shimData = this.pendingShimForClass(ref.node);
+        const id = fileData.sourceManager.getTypeCheckId(ref.node);
+        const templateParsingDiagnostics = [];
+        if (templateContext !== null && templateContext.parseErrors !== null) {
+            templateParsingDiagnostics.push(...getTemplateDiagnostics(templateContext.parseErrors, id, templateContext.sourceMapping));
         }
-        const boundTarget = binder.bind({ template });
+        const boundTarget = binder.bind({ template: templateContext?.nodes });
         if (this.inlining === InliningMode.InlineOps) {
             // Get all of the directives used in the template and record inline type constructors when
             // required.
@@ -44619,17 +44616,18 @@ class TypeCheckContextImpl {
                 });
             }
         }
-        shimData.templates.set(templateId, {
-            template,
+        shimData.data.set(id, {
+            template: templateContext?.nodes || null,
             boundTarget,
-            templateDiagnostics,
+            templateParsingDiagnostics,
         });
         const usedPipes = [];
-        for (const name of boundTarget.getUsedPipes()) {
-            if (!pipes.has(name)) {
-                continue;
+        if (templateContext !== null) {
+            for (const name of boundTarget.getUsedPipes()) {
+                if (templateContext.pipes.has(name)) {
+                    usedPipes.push(templateContext.pipes.get(name).ref);
+                }
             }
-            usedPipes.push(pipes.get(name).ref);
         }
         const inliningRequirement = requiresInlineTypeCheckBlock(ref, shimData.file, usedPipes, this.reflector);
         // If inlining is not supported, but is required for either the TCB or one of its directive
@@ -44639,18 +44637,21 @@ class TypeCheckContextImpl {
             // This template cannot be supported because the underlying strategy does not support inlining
             // and inlining would be required.
             // Record diagnostics to indicate the issues with this template.
-            shimData.oobRecorder.requiresInlineTcb(templateId, ref.node);
+            shimData.oobRecorder.requiresInlineTcb(id, ref.node);
             // Checking this template would be unsupported, so don't try.
             this.perf.eventCount(exports.PerfEvent.SkipGenerateTcbNoInline);
             return;
         }
+        if (templateContext !== null) {
+            fileData.sourceManager.captureTemplateSource(id, templateContext.sourceMapping, templateContext.file);
+        }
         const meta = {
-            id: fileData.sourceManager.captureSource(ref.node, sourceMapping, file),
+            id,
             boundTarget,
-            pipes,
+            pipes: templateContext?.pipes || null,
             schemas,
             isStandalone,
-            preserveWhitespaces,
+            preserveWhitespaces: templateContext?.preserveWhitespaces ?? false,
         };
         this.perf.eventCount(exports.PerfEvent.GenerateTcb);
         if (inliningRequirement !== TcbInliningRequirement.None &&
@@ -44661,10 +44662,10 @@ class TypeCheckContextImpl {
         }
         else if (inliningRequirement === TcbInliningRequirement.ShouldInlineForGenericBounds &&
             this.inlining === InliningMode.Error) {
-            // It's suggested that this TCB should be generated inline due to the component's generic
+            // It's suggested that this TCB should be generated inline due to the class' generic
             // bounds, but inlining is not supported by the current environment. Use a non-inline type
             // check block, but fall back to `any` generic parameters since the generic bounds can't be
-            // referenced in that context. This will infer a less useful type for the component, but allow
+            // referenced in that context. This will infer a less useful type for the class, but allow
             // for type-checking it in an environment where that would not be possible otherwise.
             shimData.file.addTypeCheckBlock(ref, meta, shimData.domSchemaChecker, shimData.oobRecorder, TcbGenericContextBehavior.FallbackToAny);
         }
@@ -44775,7 +44776,7 @@ class TypeCheckContextImpl {
                     ],
                     hasInlines: pendingFileData.hasInlines,
                     path: pendingShimData.file.fileName,
-                    templates: pendingShimData.templates,
+                    data: pendingShimData.data,
                 });
                 const sfText = pendingShimData.file.render(false /* removeComments */);
                 updates.set(pendingShimData.file.fileName, {
@@ -44796,7 +44797,7 @@ class TypeCheckContextImpl {
         ops.push(new InlineTcbOp(ref, tcbMeta, this.config, this.reflector, shimData.domSchemaChecker, shimData.oobRecorder));
         fileData.hasInlines = true;
     }
-    pendingShimForComponent(node) {
+    pendingShimForClass(node) {
         const fileData = this.dataForFile(node.getSourceFile());
         const shimPath = TypeCheckShimGenerator.shimFor(absoluteFromSourceFile(node.getSourceFile()));
         if (!fileData.shimData.has(shimPath)) {
@@ -44804,7 +44805,7 @@ class TypeCheckContextImpl {
                 domSchemaChecker: new RegistryDomSchemaChecker(fileData.sourceManager),
                 oobRecorder: new OutOfBandDiagnosticRecorderImpl(fileData.sourceManager),
                 file: new TypeCheckFile(shimPath, this.config, this.refEmitter, this.reflector, this.compilerHost),
-                templates: new Map(),
+                data: new Map(),
             });
         }
         return fileData.shimData.get(shimPath);
@@ -44836,7 +44837,7 @@ function getTemplateDiagnostics(parseErrors, templateId, sourceMapping) {
     });
 }
 /**
- * A type check block operation which produces inline type check code for a particular component.
+ * A type check block operation which produces inline type check code for a particular directive.
  */
 class InlineTcbOp {
     ref;
@@ -44854,7 +44855,7 @@ class InlineTcbOp {
         this.oobRecorder = oobRecorder;
     }
     /**
-     * Type check blocks are inserted immediately after the end of the component class.
+     * Type check blocks are inserted immediately after the end of the directve class.
      */
     get splitPoint() {
         return this.ref.node.end + 1;
@@ -44976,32 +44977,30 @@ class TemplateSource {
     }
 }
 /**
- * Assigns IDs to templates and keeps track of their origins.
+ * Assigns IDs for type checking and keeps track of their origins.
  *
- * Implements `TemplateSourceResolver` to resolve the source of a template based on these IDs.
+ * Implements `TypeCheckSourceResolver` to resolve the source of a template based on these IDs.
  */
-class TemplateSourceManager {
+class DirectiveSourceManager {
     /**
      * This map keeps track of all template sources that have been type-checked by the id that is
      * attached to a TCB's function declaration as leading trivia. This enables translation of
      * diagnostics produced for TCB code to their source location in the template.
      */
     templateSources = new Map();
-    getTemplateId(node) {
-        return getTemplateId$1(node);
+    getTypeCheckId(node) {
+        return getTypeCheckId(node);
     }
-    captureSource(node, mapping, file) {
-        const id = getTemplateId$1(node);
+    captureTemplateSource(id, mapping, file) {
         this.templateSources.set(id, new TemplateSource(mapping, file));
-        return id;
     }
-    getSourceMapping(id) {
+    getTemplateSourceMapping(id) {
         if (!this.templateSources.has(id)) {
-            throw new Error(`Unexpected unknown template ID: ${id}`);
+            throw new Error(`Unexpected unknown type check ID: ${id}`);
         }
         return this.templateSources.get(id).mapping;
     }
-    toParseSourceSpan(id, span) {
+    toTemplateParseSourceSpan(id, span) {
         if (!this.templateSources.has(id)) {
             return null;
         }
@@ -45020,18 +45019,18 @@ class SymbolBuilder {
     tcbPath;
     tcbIsShim;
     typeCheckBlock;
-    templateData;
+    typeCheckData;
     componentScopeReader;
     getTypeChecker;
     symbolCache = new Map();
-    constructor(tcbPath, tcbIsShim, typeCheckBlock, templateData, componentScopeReader, 
+    constructor(tcbPath, tcbIsShim, typeCheckBlock, typeCheckData, componentScopeReader, 
     // The `ts.TypeChecker` depends on the current type-checking program, and so must be requested
     // on-demand instead of cached.
     getTypeChecker) {
         this.tcbPath = tcbPath;
         this.tcbIsShim = tcbIsShim;
         this.typeCheckBlock = typeCheckBlock;
-        this.templateData = templateData;
+        this.typeCheckData = typeCheckData;
         this.componentScopeReader = componentScopeReader;
         this.getTypeChecker = getTypeChecker;
     }
@@ -45178,7 +45177,7 @@ class SymbolBuilder {
         }
     }
     getDirectiveMeta(host, directiveDeclaration) {
-        let directives = this.templateData.boundTarget.getDirectivesOfNode(host);
+        let directives = this.typeCheckData.boundTarget.getDirectivesOfNode(host);
         // `getDirectivesOfNode` will not return the directives intended for an element
         // on a microsyntax template, for example `<div *ngFor="let user of users;" dir>`,
         // the `dir` will be skipped, but it's needed in language service.
@@ -45186,7 +45185,7 @@ class SymbolBuilder {
         if (firstChild instanceof Element$1) {
             const isMicrosyntaxTemplate = host instanceof Template && sourceSpanEqual(firstChild.sourceSpan, host.sourceSpan);
             if (isMicrosyntaxTemplate) {
-                const firstChildDirectives = this.templateData.boundTarget.getDirectivesOfNode(firstChild);
+                const firstChildDirectives = this.typeCheckData.boundTarget.getDirectivesOfNode(firstChild);
                 if (firstChildDirectives !== null && directives !== null) {
                     directives = directives.concat(firstChildDirectives);
                 }
@@ -45208,7 +45207,7 @@ class SymbolBuilder {
         return scope.ngModule;
     }
     getSymbolOfBoundEvent(eventBinding) {
-        const consumer = this.templateData.boundTarget.getConsumerOfBinding(eventBinding);
+        const consumer = this.typeCheckData.boundTarget.getConsumerOfBinding(eventBinding);
         if (consumer === null) {
             return null;
         }
@@ -45305,7 +45304,7 @@ class SymbolBuilder {
         return { kind: exports.SymbolKind.Output, bindings };
     }
     getSymbolOfInputBinding(binding) {
-        const consumer = this.templateData.boundTarget.getConsumerOfBinding(binding);
+        const consumer = this.typeCheckData.boundTarget.getConsumerOfBinding(binding);
         if (consumer === null) {
             return null;
         }
@@ -45443,7 +45442,7 @@ class SymbolBuilder {
         };
     }
     getSymbolOfReference(ref) {
-        const target = this.templateData.boundTarget.getReferenceTarget(ref);
+        const target = this.typeCheckData.boundTarget.getReferenceTarget(ref);
         // Find the node for the reference declaration, i.e. `var _t2 = _t1;`
         let node = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: ref.sourceSpan,
@@ -45560,7 +45559,7 @@ class SymbolBuilder {
         if (expression instanceof ASTWithSource) {
             expression = expression.ast;
         }
-        const expressionTarget = this.templateData.boundTarget.getExpressionTarget(expression);
+        const expressionTarget = this.typeCheckData.boundTarget.getExpressionTarget(expression);
         if (expressionTarget !== null) {
             return this.getSymbol(expressionTarget);
         }
@@ -45799,9 +45798,8 @@ class TemplateTypeCheckerImpl {
         if (!fileRecord.shimData.has(shimPath)) {
             return { data: null, tcb: null, tcbPath: shimPath, tcbIsShim: true };
         }
-        const templateId = fileRecord.sourceManager.getTemplateId(component);
+        const id = fileRecord.sourceManager.getTypeCheckId(component);
         const shimRecord = fileRecord.shimData.get(shimPath);
-        const id = fileRecord.sourceManager.getTemplateId(component);
         const program = this.programDriver.getProgram();
         const shimSf = getSourceFileOrNull(program, shimPath);
         if (shimSf === null || !fileRecord.shimData.has(shimPath)) {
@@ -45818,8 +45816,8 @@ class TemplateTypeCheckerImpl {
             }
         }
         let data = null;
-        if (shimRecord.templates.has(templateId)) {
-            data = shimRecord.templates.get(templateId);
+        if (shimRecord.data.has(id)) {
+            data = shimRecord.data.get(id);
         }
         return { data, tcb, tcbPath, tcbIsShim: tcbPath === shimPath };
     }
@@ -45855,7 +45853,7 @@ class TemplateTypeCheckerImpl {
         }
         return null;
     }
-    getTemplateMappingAtTcbLocation(tcbLocation) {
+    getSourceMappingAtTcbLocation(tcbLocation) {
         const fileRecord = this.getFileRecordForTcbLocation(tcbLocation);
         if (fileRecord === null) {
             return null;
@@ -45864,7 +45862,7 @@ class TemplateTypeCheckerImpl {
         if (shimSf === undefined) {
             return null;
         }
-        return getTemplateMapping(shimSf, tcbLocation.positionInFile, fileRecord.sourceManager, 
+        return getSourceMapping(shimSf, tcbLocation.positionInFile, fileRecord.sourceManager, 
         /*isDiagnosticsRequest*/ false);
     }
     generateAllTypeCheckBlocks() {
@@ -45900,8 +45898,8 @@ class TemplateTypeCheckerImpl {
                     .getSemanticDiagnostics(shimSf)
                     .map((diag) => convertDiagnostic(diag, fileRecord.sourceManager)));
                 diagnostics.push(...shimRecord.genesisDiagnostics);
-                for (const templateData of shimRecord.templates.values()) {
-                    diagnostics.push(...templateData.templateDiagnostics);
+                for (const templateData of shimRecord.data.values()) {
+                    diagnostics.push(...templateData.templateParsingDiagnostics);
                 }
             }
             return diagnostics.filter((diag) => diag !== null);
@@ -45917,7 +45915,7 @@ class TemplateTypeCheckerImpl {
             if (!fileRecord.shimData.has(shimPath)) {
                 return [];
             }
-            const templateId = fileRecord.sourceManager.getTemplateId(component);
+            const id = fileRecord.sourceManager.getTypeCheckId(component);
             const shimRecord = fileRecord.shimData.get(shimPath);
             const typeCheckProgram = this.programDriver.getProgram();
             const diagnostics = [];
@@ -45932,10 +45930,10 @@ class TemplateTypeCheckerImpl {
                 .getSemanticDiagnostics(shimSf)
                 .map((diag) => convertDiagnostic(diag, fileRecord.sourceManager)));
             diagnostics.push(...shimRecord.genesisDiagnostics);
-            for (const templateData of shimRecord.templates.values()) {
-                diagnostics.push(...templateData.templateDiagnostics);
+            for (const templateData of shimRecord.data.values()) {
+                diagnostics.push(...templateData.templateParsingDiagnostics);
             }
-            return diagnostics.filter((diag) => diag !== null && diag.templateId === templateId);
+            return diagnostics.filter((diag) => diag !== null && diag.typeCheckId === id);
         });
     }
     getTypeCheckBlock(component) {
@@ -45971,7 +45969,7 @@ class TemplateTypeCheckerImpl {
         const sfPath = absoluteFromSourceFile(sf);
         const shimPath = TypeCheckShimGenerator.shimFor(sfPath);
         const fileData = this.getFileData(sfPath);
-        fileData.sourceManager.getTemplateId(clazz);
+        fileData.sourceManager.getTypeCheckId(clazz);
         fileData.shimData.delete(shimPath);
         fileData.isComplete = false;
         this.isComplete = false;
@@ -45982,10 +45980,10 @@ class TemplateTypeCheckerImpl {
     makeTemplateDiagnostic(clazz, sourceSpan, category, errorCode, message, relatedInformation) {
         const sfPath = absoluteFromSourceFile(clazz.getSourceFile());
         const fileRecord = this.state.get(sfPath);
-        const templateId = fileRecord.sourceManager.getTemplateId(clazz);
-        const mapping = fileRecord.sourceManager.getSourceMapping(templateId);
+        const id = fileRecord.sourceManager.getTypeCheckId(clazz);
+        const mapping = fileRecord.sourceManager.getTemplateSourceMapping(id);
         return {
-            ...makeTemplateDiagnostic(templateId, mapping, sourceSpan, category, ngErrorCode(errorCode), message, relatedInformation),
+            ...makeTemplateDiagnostic(id, mapping, sourceSpan, category, ngErrorCode(errorCode), message, relatedInformation),
             __ngCode: errorCode,
         };
     }
@@ -46114,7 +46112,7 @@ class TemplateTypeCheckerImpl {
         if (!this.state.has(path)) {
             this.state.set(path, {
                 hasInlines: false,
-                sourceManager: new TemplateSourceManager(),
+                sourceManager: new DirectiveSourceManager(),
                 isComplete: false,
                 shimData: new Map(),
             });
@@ -46425,7 +46423,7 @@ class WholeProgramTypeCheckingHost {
     getSourceManager(sfPath) {
         return this.impl.getFileData(sfPath).sourceManager;
     }
-    shouldCheckComponent(node) {
+    shouldCheckClass(node) {
         const sfPath = absoluteFromSourceFile(node.getSourceFile());
         const shimPath = TypeCheckShimGenerator.shimFor(sfPath);
         const fileData = this.impl.getFileData(sfPath);
@@ -46465,7 +46463,7 @@ class SingleFileTypeCheckingHost {
         this.assertPath(sfPath);
         return this.fileData.sourceManager;
     }
-    shouldCheckComponent(node) {
+    shouldCheckClass(node) {
         if (this.sfPath !== absoluteFromSourceFile(node.getSourceFile())) {
             return false;
         }

@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.1+sha-81fe053
+ * @license Angular v20.0.0-next.1+sha-1b91de3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ApplicationRef, ɵPendingTasksInternal, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵEffectScheduler, ɵMicrotaskEffectScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, ɵDeferBlockBehavior, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ApplicationRef, ɵPendingTasksInternal, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵEffectScheduler, ɵMicrotaskEffectScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution, ɵgetAsyncClassMetadataFn, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵNG_COMP_DEF, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵgenerateStandaloneInDeclarationsError, ɵtransitiveScopesFor, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-81fe053", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
-    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-81fe053", ngImport: i0, type: TestBedApplicationErrorHandler });
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-1b91de3", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-1b91de3", ngImport: i0, type: TestBedApplicationErrorHandler });
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-81fe053", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "20.0.0-next.1+sha-1b91de3", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -2314,12 +2314,6 @@ function getCleanupHook(expectedTeardownValue) {
 const __core_private_testing_placeholder__ = '';
 
 /**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
-
-/**
  * Fake implementation of user agent history and navigation behavior. This is a
  * high-fidelity implementation of browser behavior that attempts to emulate
  * things like traversal delay.
@@ -2708,9 +2702,7 @@ class FakeNavigation {
         else if (navigateEvent.navigationType === 'reload') {
             this.updateNavigationEntriesForSameDocumentNavigation(navigateEvent);
         }
-        else if (navigateEvent.navigationType === 'traverse') {
-            // "If navigationType is "traverse", then this event firing is happening as part of the traversal process, and that process will take care of performing the appropriate session history entry updates."
-        }
+        else ;
     }
     /**
      * Implementation for a push or replace navigation.
@@ -3170,15 +3162,6 @@ class InternalNavigationResult {
         this.finished.catch(() => { });
     }
 }
-
-/// <reference types="jasmine" />
-// This file only reexports content of the `src` folder. Keep it that way.
-
-// This file is not used to build this module. It is only used during editing
-
-/**
- * Generated bundle index. Do not edit.
- */
 
 export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
