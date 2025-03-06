@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.1+sha-e044b4c
+ * @license Angular v20.0.0-next.1+sha-978a0b8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
+import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -126,27 +126,6 @@ function toObservable(source, options) {
     const injector = options?.injector ?? inject(Injector);
     const subject = new ReplaySubject(1);
     const watcher = effect(() => {
-        let value;
-        try {
-            value = source();
-        }
-        catch (err) {
-            untracked(() => subject.error(err));
-            return;
-        }
-        untracked(() => subject.next(value));
-    }, { injector, manualCleanup: true });
-    injector.get(DestroyRef).onDestroy(() => {
-        watcher.destroy();
-        subject.complete();
-    });
-    return subject.asObservable();
-}
-function toObservableMicrotask(source, options) {
-    !options?.injector && assertInInjectionContext(toObservable);
-    const injector = options?.injector ?? inject(Injector);
-    const subject = new ReplaySubject(1);
-    const watcher = ɵmicrotaskEffect(() => {
         let value;
         try {
             value = source();
@@ -339,5 +318,5 @@ function rxResource(opts) {
     });
 }
 
-export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal };
 //# sourceMappingURL=rxjs-interop.mjs.map

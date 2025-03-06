@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-e044b4c
+ * @license Angular v20.0.0-next.1+sha-978a0b8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -70,7 +70,6 @@ export declare class ComponentFixture<T> {
     private readonly zonelessEnabled;
     private readonly scheduler;
     private readonly rootEffectScheduler;
-    private readonly microtaskEffectScheduler;
     private readonly autoDetectDefault;
     private autoDetect;
     private subscriptions;

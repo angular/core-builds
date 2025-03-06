@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-e044b4c
+ * @license Angular v20.0.0-next.1+sha-978a0b8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12981,26 +12981,6 @@ export declare interface WritableSignal<T> extends Signal<T> {
 }
 
 /**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-declare class ZoneAwareEffectScheduler implements ɵEffectScheduler {
-    private queuedEffectCount;
-    private queues;
-    schedule(handle: SchedulableEffect): void;
-    remove(handle: SchedulableEffect): void;
-    private enqueue;
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush(): void;
-    private flushQueue;
-}
-
-/**
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
@@ -14271,20 +14251,6 @@ export declare enum ɵLocaleDataIndex {
 }
 
 export declare function ɵmarkForRefresh(view: ɵViewRef<unknown>): void;
-
-/**
- * Create a global `Effect` for the given reactive function.
- */
-export declare function ɵmicrotaskEffect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
-
-export declare class ɵMicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
-    private readonly pendingTasks;
-    private taskId;
-    schedule(effect: SchedulableEffect): void;
-    flush(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
 
 export declare class ɵNavigateEvent extends Event {
     constructor(type: string, eventInit?: NavigateEventInit);
