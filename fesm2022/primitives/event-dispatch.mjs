@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-dad02c6
+ * @license Angular v19.2.1+sha-48dc0d6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -82,16 +82,6 @@ function getParsed(text) {
  */
 function setParsed(text, parsed) {
     parseCache[text] = parsed;
-}
-/**
- * Clears the jsaction parser cache from the given DOM Element.
- *
- * @param element .
- */
-function clear(element) {
-    if (Property.JSACTION in element) {
-        delete element[Property.JSACTION];
-    }
 }
 
 /*
@@ -505,34 +495,11 @@ function removeEventListener(element, info) {
     }
 }
 /**
- * Cancels propagation of an event.
- * @param e The event to cancel propagation for.
- */
-function stopPropagation(e) {
-    e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
-}
-/**
  * Prevents the default action of an event.
  * @param e The event to prevent the default action for.
  */
 function preventDefault(e) {
     e.preventDefault ? e.preventDefault() : (e.returnValue = false);
-}
-/**
- * Gets the target Element of the event. In Firefox, a text node may appear as
- * the target of the event, in which case we return the parent element of the
- * text node.
- * @param e The event to get the target of.
- * @return The target element.
- */
-function getTarget(e) {
-    let el = e.target;
-    // In Firefox, the event may have a text node as its target. We always
-    // want the parent Element the text node belongs to, however.
-    if (!el.getAttribute && el.parentNode) {
-        el = el.parentNode;
-    }
-    return el;
 }
 /**
  * Whether we are on a Mac. Not pulling in useragent just for this.
@@ -572,176 +539,16 @@ function isModifiedClickEvent(e) {
         e.shiftKey);
 }
 /** Whether we are on WebKit (e.g., Chrome). */
-const isWebKit = typeof navigator !== 'undefined' &&
+typeof navigator !== 'undefined' &&
     !/Opera/.test(navigator.userAgent) &&
     /WebKit/.test(navigator.userAgent);
 /** Whether we are on IE. */
-const isIe = typeof navigator !== 'undefined' &&
+typeof navigator !== 'undefined' &&
     (/MSIE/.test(navigator.userAgent) || /Trident/.test(navigator.userAgent));
 /** Whether we are on Gecko (e.g., Firefox). */
-const isGecko = typeof navigator !== 'undefined' &&
+typeof navigator !== 'undefined' &&
     !/Opera|WebKit/.test(navigator.userAgent) &&
     /Gecko/.test(navigator.product);
-/**
- * Determines and returns whether the given element is a valid target for
- * keypress/keydown DOM events that act like regular DOM clicks.
- * @param el The element.
- * @return Whether the given element is a valid action key target.
- */
-function isValidActionKeyTarget(el) {
-    if (!('getAttribute' in el)) {
-        return false;
-    }
-    if (isTextControl(el)) {
-        return false;
-    }
-    if (isNativelyActivatable(el)) {
-        return false;
-    }
-    // `isContentEditable` is an old DOM API.
-    if (el.isContentEditable) {
-        return false;
-    }
-    return true;
-}
-/**
- * Whether an event has a modifier key activated.
- * @param e The event.
- * @return True, if a modifier key is activated.
- */
-function hasModifierKey(e) {
-    return (
-    // `ctrlKey` is an old DOM API.
-    e.ctrlKey ||
-        // `shiftKey` is an old DOM API.
-        e.shiftKey ||
-        // `altKey` is an old DOM API.
-        e.altKey ||
-        // `metaKey` is an old DOM API.
-        e.metaKey);
-}
-/**
- * Determines and returns whether the given event has a target that already
- * has event handlers attached because it is a native HTML control. Used to
- * determine if preventDefault should be called when isActionKeyEvent is true.
- * @param e The event.
- * @return If preventDefault should be called.
- */
-function shouldCallPreventDefaultOnNativeHtmlControl(e) {
-    const el = getTarget(e);
-    const tagName = el.tagName.toUpperCase();
-    const role = (el.getAttribute('role') || '').toUpperCase();
-    if (tagName === 'BUTTON' || role === 'BUTTON') {
-        return true;
-    }
-    if (!isNativeHTMLControl(el)) {
-        return false;
-    }
-    if (tagName === 'A') {
-        return false;
-    }
-    /**
-     * Fix for physical d-pads on feature phone platforms; the native event
-     * (ie. isTrusted: true) needs to fire to show the OPTION list. See
-     * b/135288469 for more info.
-     */
-    if (tagName === 'SELECT') {
-        return false;
-    }
-    if (processSpace(el)) {
-        return false;
-    }
-    if (isTextControl(el)) {
-        return false;
-    }
-    return true;
-}
-/**
- * Determines and returns whether the given event acts like a regular DOM click,
- * and should be handled instead of the click.  If this returns true, the caller
- * will call preventDefault() to prevent a possible duplicate event.
- * This is represented by a keypress (keydown on Gecko browsers) on Enter or
- * Space key.
- * @param e The event.
- * @return True, if the event emulates a DOM click.
- */
-function isActionKeyEvent(e) {
-    let key = 
-    // `which` is an old DOM API.
-    e.which ||
-        // `keyCode` is an old DOM API.
-        e.keyCode;
-    if (!key && e.key) {
-        key = ACTION_KEY_TO_KEYCODE[e.key];
-    }
-    if (isWebKit && key === KeyCode.MAC_ENTER) {
-        key = KeyCode.ENTER;
-    }
-    if (key !== KeyCode.ENTER && key !== KeyCode.SPACE) {
-        return false;
-    }
-    const el = getTarget(e);
-    if (e.type !== EventType.KEYDOWN || !isValidActionKeyTarget(el) || hasModifierKey(e)) {
-        return false;
-    }
-    // For <input type="checkbox">, we must only handle the browser's native click
-    // event, so that the browser can toggle the checkbox.
-    if (processSpace(el) && key === KeyCode.SPACE) {
-        return false;
-    }
-    // If this element is non-focusable, ignore stray keystrokes (b/18337209)
-    // Sscreen readers can move without tab focus, so any tabIndex is focusable.
-    // See B/21809604
-    if (!isFocusable(el)) {
-        return false;
-    }
-    const type = (el.getAttribute('role') ||
-        el.type ||
-        el.tagName).toUpperCase();
-    const isSpecificTriggerKey = IDENTIFIER_TO_KEY_TRIGGER_MAPPING[type] % key === 0;
-    const isDefaultTriggerKey = !(type in IDENTIFIER_TO_KEY_TRIGGER_MAPPING) && key === KeyCode.ENTER;
-    const hasType = el.tagName.toUpperCase() !== 'INPUT' || !!el.type;
-    return (isSpecificTriggerKey || isDefaultTriggerKey) && hasType;
-}
-/**
- * Checks whether a DOM element can receive keyboard focus.
- * This code is based on goog.dom.isFocusable, but simplified since we shouldn't
- * care about visibility if we're already handling a keyboard event.
- */
-function isFocusable(el) {
-    return ((el.tagName in NATIVELY_FOCUSABLE_ELEMENTS || hasSpecifiedTabIndex(el)) &&
-        !el.disabled);
-}
-/**
- * @param element Element to check.
- * @return Whether the element has a specified tab index.
- */
-function hasSpecifiedTabIndex(element) {
-    // IE returns 0 for an unset tabIndex, so we must use getAttributeNode(),
-    // which returns an object with a 'specified' property if tabIndex is
-    // specified.  This works on other browsers, too.
-    const attrNode = element.getAttributeNode('tabindex'); // Must be lowercase!
-    return attrNode != null && attrNode.specified;
-}
-/** Element tagnames that are focusable by default. */
-const NATIVELY_FOCUSABLE_ELEMENTS = {
-    'A': 1,
-    'INPUT': 1,
-    'TEXTAREA': 1,
-    'SELECT': 1,
-    'BUTTON': 1,
-};
-/** @return True, if the Space key was pressed. */
-function isSpaceKeyEvent(e) {
-    const key = 
-    // `which` is an old DOM API.
-    e.which ||
-        // `keyCode` is an old DOM API.
-        e.keyCode;
-    const el = getTarget(e);
-    const elementName = (el.type || el.tagName).toUpperCase();
-    return key === KeyCode.SPACE && elementName !== 'CHECKBOX';
-}
 /**
  * Determines whether the event corresponds to a non-bubbling mouse
  * event type (mouseenter, mouseleave, pointerenter, and pointerleave).
@@ -822,102 +629,19 @@ function createMouseSpecialEvent(e, target) {
     return copy;
 }
 /**
- * Returns touch data extracted from the touch event: clientX, clientY, screenX
- * and screenY. If the event has no touch information at all, the returned
- * value is null.
- *
- * The fields of this Object are unquoted.
- *
- * @param event A touch event.
- */
-function getTouchData(event) {
-    const touch = (event.changedTouches && event.changedTouches[0]) || (event.touches && event.touches[0]);
-    if (!touch) {
-        return null;
-    }
-    return {
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-        screenX: touch.screenX,
-        screenY: touch.screenY,
-    };
-}
-/**
- * Creates a new EventLike object for a "click" event that's derived from the
- * original corresponding "touchend" event for a fast-click implementation.
- *
- * It takes a touch event, adds common fields found in a click event and
- * changes the type to 'click', so that the resulting event looks more like
- * a real click event.
- *
- * @param event A touch event.
- * @return A modified event-like object copied from the event object passed into
- *     this function.
- */
-function recreateTouchEventAsClick(event) {
-    const click = {};
-    click['originalEventType'] = event.type;
-    click['type'] = EventType.CLICK;
-    for (const property in event) {
-        if (property === 'type' || property === 'srcElement') {
-            continue;
-        }
-        const key = property;
-        // Making a copy requires iterating through all properties of `TouchEvent`.
-        const value = event[key];
-        if (typeof value === 'function') {
-            continue;
-        }
-        // Value should be the expected type, but the value of `key` is not known
-        // statically.
-        click[key] = value;
-    }
-    // Ensure that the event has the most recent timestamp. This timestamp
-    // may be used in the future to validate or cancel subsequent click events.
-    click['timeStamp'] = Date.now();
-    // Emulate preventDefault and stopPropagation behavior
-    click['defaultPrevented'] = false;
-    click['preventDefault'] = syntheticPreventDefault;
-    click['_propagationStopped'] = false;
-    click['stopPropagation'] = syntheticStopPropagation;
-    // Emulate click coordinates using touch info
-    const touch = getTouchData(event);
-    if (touch) {
-        click['clientX'] = touch.clientX;
-        click['clientY'] = touch.clientY;
-        click['screenX'] = touch.screenX;
-        click['screenY'] = touch.screenY;
-    }
-    return click;
-}
-/**
- * An implementation of "preventDefault" for a synthesized event. Simply
- * sets "defaultPrevented" property to true.
- */
-function syntheticPreventDefault() {
-    this.defaultPrevented = true;
-}
-/**
- * An implementation of "stopPropagation" for a synthesized event. It simply
- * sets a synthetic non-standard "_propagationStopped" property to true.
- */
-function syntheticStopPropagation() {
-    this._propagationStopped = true;
-}
-/**
  * Mapping of KeyboardEvent.key values to
  * KeyCode values.
  */
-const ACTION_KEY_TO_KEYCODE = {
+({
     'Enter': KeyCode.ENTER,
     ' ': KeyCode.SPACE,
-};
+});
 /**
  * Mapping of HTML element identifiers (ARIA role, type, or tagName) to the
  * keys (enter and/or space) that should activate them. A value of zero means
  * that both should activate them.
  */
-const IDENTIFIER_TO_KEY_TRIGGER_MAPPING = {
+({
     'A': KeyCode.ENTER,
     'BUTTON': 0,
     'CHECKBOX': KeyCode.SPACE,
@@ -940,99 +664,7 @@ const IDENTIFIER_TO_KEY_TRIGGER_MAPPING = {
     'TAB': 0,
     'TREE': KeyCode.ENTER,
     'TREEITEM': KeyCode.ENTER,
-};
-/**
- * Returns whether or not to process space based on the type of the element;
- * checks to make sure that type is not null.
- * @param element The element.
- * @return Whether or not to process space based on type.
- */
-function processSpace(element) {
-    const type = (element.getAttribute('type') || element.tagName).toUpperCase();
-    return type in PROCESS_SPACE;
-}
-/**
- * Returns whether or not the given element is a text control.
- * @param el The element.
- * @return Whether or not the given element is a text control.
- */
-function isTextControl(el) {
-    const type = (el.getAttribute('type') || el.tagName).toUpperCase();
-    return type in TEXT_CONTROLS;
-}
-/**
- * Returns if the given element is a native HTML control.
- * @param el The element.
- * @return If the given element is a native HTML control.
- */
-function isNativeHTMLControl(el) {
-    return el.tagName.toUpperCase() in NATIVE_HTML_CONTROLS;
-}
-/**
- * Returns if the given element is natively activatable. Browsers emit click
- * events for natively activatable elements, even when activated via keyboard.
- * For these elements, we don't need to raise a11y click events.
- * @param el The element.
- * @return If the given element is a native HTML control.
- */
-function isNativelyActivatable(el) {
-    return (el.tagName.toUpperCase() === 'BUTTON' ||
-        (!!el.type && el.type.toUpperCase() === 'FILE'));
-}
-/**
- * HTML <input> types (not ARIA roles) which will auto-trigger a click event for
- * the Space key, with side-effects. We will not call preventDefault if space is
- * pressed, nor will we raise a11y click events.  For all other elements, we can
- * suppress the default event (which has no desired side-effects) and handle the
- * keydown ourselves.
- */
-const PROCESS_SPACE = {
-    'CHECKBOX': true,
-    'FILE': true,
-    'OPTION': true,
-    'RADIO': true,
-};
-/** TagNames and Input types for which to not process enter/space as click. */
-const TEXT_CONTROLS = {
-    'COLOR': true,
-    'DATE': true,
-    'DATETIME': true,
-    'DATETIME-LOCAL': true,
-    'EMAIL': true,
-    'MONTH': true,
-    'NUMBER': true,
-    'PASSWORD': true,
-    'RANGE': true,
-    'SEARCH': true,
-    'TEL': true,
-    'TEXT': true,
-    'TEXTAREA': true,
-    'TIME': true,
-    'URL': true,
-    'WEEK': true,
-};
-/** TagNames that are native HTML controls. */
-const NATIVE_HTML_CONTROLS = {
-    'A': true,
-    'AREA': true,
-    'BUTTON': true,
-    'DIALOG': true,
-    'IMG': true,
-    'INPUT': true,
-    'LINK': true,
-    'MENU': true,
-    'OPTGROUP': true,
-    'OPTION': true,
-    'PROGRESS': true,
-    'SELECT': true,
-    'TEXTAREA': true,
-};
-/** Exported for testing. */
-const testing = {
-    setIsMac(value) {
-        isMac = value;
-    },
-};
+});
 
 /**
  * Whether the user agent is running on iOS.
@@ -1156,10 +788,6 @@ function unsetAction(eventInfo) {
     eventInfo.eia = undefined;
 }
 /** Added for readability when accessing stable property names. */
-function getActionName(actionInfo) {
-    return actionInfo[0];
-}
-/** Added for readability when accessing stable property names. */
 function getActionElement(actionInfo) {
     return actionInfo[1];
 }
@@ -1170,14 +798,6 @@ function getIsReplay(eventInfo) {
 /** Added for readability when accessing stable property names. */
 function setIsReplay(eventInfo, replay) {
     eventInfo.eirp = replay;
-}
-/** Added for readability when accessing stable property names. */
-function getA11yClickKey(eventInfo) {
-    return eventInfo.eiack;
-}
-/** Added for readability when accessing stable property names. */
-function setA11yClickKey(eventInfo, a11yClickKey) {
-    eventInfo.eiack = a11yClickKey;
 }
 /** Added for readability when accessing stable property names. */
 function getResolved(eventInfo) {
@@ -1215,24 +835,6 @@ function createEventInfoFromParameters(eventType, event, targetElement, containe
         eic: container,
         timeStamp: timestamp,
         eia: action,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action ? [action.name, action.element] : undefined,
         eirp: isReplay,
         eiack: a11yClickKey,
     };
@@ -1629,17 +1231,6 @@ class Dispatcher {
     }
 }
 /**
- * Creates an `EventReplayer` that calls the `replay` function for every `eventInfoWrapper` in
- * the queue.
- */
-function createEventReplayer(replay) {
-    return (eventInfoWrappers) => {
-        for (const eventInfoWrapper of eventInfoWrappers) {
-            replay(eventInfoWrapper);
-        }
-    };
-}
-/**
  * Returns true if the default action of this event should be prevented before
  * this event is dispatched.
  */
@@ -1651,15 +1242,6 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfoWrapper) 
     return (actionElement.tagName === 'A' &&
         (eventInfoWrapper.getEventType() === EventType.CLICK ||
             eventInfoWrapper.getEventType() === EventType.CLICKMOD));
-}
-/**
- * Registers deferred functionality for an EventContract and a Jsaction
- * Dispatcher.
- */
-function registerDispatcher$2(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo) => {
-        dispatcher.dispatch(eventInfo);
-    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
 
 /** An internal symbol used to indicate whether propagation should be stopped or not. */
@@ -1794,24 +1376,6 @@ function registerDispatcher$1(eventContract, dispatcher) {
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
 
-/**
- * EarlyEventContract intercepts events in the bubbling phase at the
- * boundary of the document body. This mapping will be passed to the
- * late-loaded EventContract.
- */
-class EarlyEventContract {
-    dataContainer;
-    constructor(dataContainer = window, container = window.document.documentElement) {
-        this.dataContainer = dataContainer;
-        dataContainer._ejsa = createEarlyJsactionData(container);
-    }
-    /**
-     * Installs a list of event types for container .
-     */
-    addEvents(types, capture) {
-        addEvents(this.dataContainer._ejsa, types, capture);
-    }
-}
 /** Creates an `EarlyJsactionData` object. */
 function createEarlyJsactionData(container) {
     const q = [];

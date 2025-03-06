@@ -1,16 +1,17 @@
 /**
- * @license Angular v19.2.1+sha-dad02c6
+ * @license Angular v19.2.1+sha-48dc0d6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1, createLinkedSignal as createLinkedSignal$1, linkedSignalSetFn as linkedSignalSetFn$1, linkedSignalUpdateFn as linkedSignalUpdateFn$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, getActiveConsumer, setActiveConsumer, createSignal, signalUpdateFn, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError, createWatch, isInNotificationPhase, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
-import { NOT_FOUND as NOT_FOUND$1, getCurrentInjector, setCurrentInjector } from '@angular/core/primitives/di';
+import { getCurrentInjector, NOT_FOUND as NOT_FOUND$1, setCurrentInjector } from '@angular/core/primitives/di';
 export { setCurrentInjector as ɵsetCurrentInjector } from '@angular/core/primitives/di';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
+import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, EventPhase, isEarlyEventType, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
 import { map } from 'rxjs/operators';
+export { s as ɵsetAlternateWeakRefImpl } from './weak_ref-101188f1.mjs';
 
 /**
  * Base URL for the error details page.
@@ -72,15 +73,14 @@ const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
 // TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
 const INPUT_SIGNAL_NODE = /* @__PURE__ */ (() => {
     return {
-        ...SIGNAL_NODE$1,
+        ...SIGNAL_NODE,
         transformFn: undefined,
         applyValueToInputSignal(node, value) {
-            signalSetFn$1(node, value);
+            signalSetFn(node, value);
         },
     };
 })();
 
-const ɵINPUT_SIGNAL_BRAND_READ_TYPE = /* @__PURE__ */ Symbol();
 const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE = /* @__PURE__ */ Symbol();
 /**
  * Creates an input signal.
@@ -97,13 +97,13 @@ function createInputSignal(initialValue, options) {
     node.transformFn = options?.transform;
     function inputValueFn() {
         // Record that someone looked at this signal.
-        producerAccessed$1(node);
+        producerAccessed(node);
         if (node.value === REQUIRED_UNSET_VALUE) {
             throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, ngDevMode && 'Input is required but no value is available yet.');
         }
         return node.value;
     }
-    inputValueFn[SIGNAL$1] = node;
+    inputValueFn[SIGNAL] = node;
     if (ngDevMode) {
         inputValueFn.toString = () => `[Input Signal: ${inputValueFn()}]`;
         node.debugName = options?.debugName;
@@ -530,11 +530,6 @@ function assertGreaterThanOrEqual(actual, expected, msg) {
         throwError(msg, actual, expected, '>=');
     }
 }
-function assertNotDefined(actual, msg) {
-    if (actual != null) {
-        throwError(msg, actual, null, '==');
-    }
-}
 function assertDefined(actual, msg) {
     if (actual == null) {
         throwError(msg, actual, null, '!=');
@@ -567,7 +562,7 @@ function assertOneOf(value, ...validValues) {
     throwError(`Expected value to be one of ${JSON.stringify(validValues)} but was ${JSON.stringify(value)}.`);
 }
 function assertNotReactive(fn) {
-    if (getActiveConsumer$1() !== null) {
+    if (getActiveConsumer() !== null) {
         throwError(`${fn}() should never be called in a reactive context.`);
     }
 }
@@ -1452,27 +1447,6 @@ function arraySplice(array, index, count) {
     }
 }
 /**
- * Same as `Array.splice(index, 0, value)` but faster.
- *
- * `Array.splice()` is not fast because it has to allocate an array for the elements which were
- * removed. This causes memory pressure and slows down code when most of the time we don't
- * care about the deleted items array.
- *
- * @param array Array to splice.
- * @param index Index in array where the `value` should be added.
- * @param value Value to add to array.
- */
-function arrayInsert(array, index, value) {
-    ngDevMode && assertLessThanOrEqual(index, array.length, "Can't insert past array end.");
-    let end = array.length;
-    while (end > index) {
-        const previousEnd = end - 1;
-        array[end] = array[previousEnd];
-        end = previousEnd;
-    }
-    array[index] = value;
-}
-/**
  * Same as `Array.splice2(index, 0, value1, value2)` but faster.
  *
  * `Array.splice()` is not fast because it has to allocate an array for the elements which were
@@ -1507,22 +1481,6 @@ function arrayInsert2(array, index, value1, value2) {
         array[index] = value1;
         array[index + 1] = value2;
     }
-}
-/**
- * Get an index of an `value` in a sorted `array`.
- *
- * NOTE:
- * - This uses binary search algorithm for fast removals.
- *
- * @param array A sorted array to binary search.
- * @param value The value to look for.
- * @returns index of the value.
- *   - positive index if value found.
- *   - negative index if value not found. (`~index` to get the value where it should have been
- *     located)
- */
-function arrayIndexOfSorted(array, value) {
-    return _arrayIndexOfSorted(array, value, 0);
 }
 /**
  * Set a `value` for a `key`.
@@ -1571,24 +1529,6 @@ function keyValueArrayGet(keyValueArray, key) {
  */
 function keyValueArrayIndexOf(keyValueArray, key) {
     return _arrayIndexOfSorted(keyValueArray, key, 1);
-}
-/**
- * Delete a `key` (and `value`) from the `KeyValueArray`.
- *
- * @param keyValueArray to modify.
- * @param key The key to locate or delete (if exist).
- * @returns index of where the key was (or should have been.)
- *   - positive (even) index if key found and deleted.
- *   - negative index if key not found. (`~index` (even) to get the index where it should have
- *     been.)
- */
-function keyValueArrayDelete(keyValueArray, key) {
-    const index = keyValueArrayIndexOf(keyValueArray, key);
-    if (index >= 0) {
-        // if we found it remove it.
-        arraySplice(keyValueArray, index, 2);
-    }
-    return index;
 }
 /**
  * INTERNAL: Get an index of an `value` in a sorted `array` by grouping search by `shift`.
@@ -2112,7 +2052,7 @@ class R3Injector extends EnvironmentInjector {
         assertNotDestroyed(this);
         // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
         this._destroyed = true;
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             // Call all the lifecycle hooks.
             for (const service of this._ngOnDestroyHooks) {
@@ -2131,7 +2071,7 @@ class R3Injector extends EnvironmentInjector {
             this.records.clear();
             this._ngOnDestroyHooks.clear();
             this.injectorDefTypes.clear();
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
     onDestroy(callback) {
@@ -2233,7 +2173,7 @@ class R3Injector extends EnvironmentInjector {
     }
     /** @internal */
     resolveInjectorInitializers() {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
         let prevInjectContext;
@@ -2256,7 +2196,7 @@ class R3Injector extends EnvironmentInjector {
             setCurrentInjector(previousInjector);
             setInjectImplementation(previousInjectImplementation);
             ngDevMode && setInjectorProfilerContext(prevInjectContext);
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
     toString() {
@@ -2319,7 +2259,7 @@ class R3Injector extends EnvironmentInjector {
         this.records.set(token, record);
     }
     hydrate(token, record) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             if (record.value === CIRCULAR) {
                 throwCyclicDependencyError(stringify(token));
@@ -2342,7 +2282,7 @@ class R3Injector extends EnvironmentInjector {
             return record.value;
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
     injectableDefInScope(def) {
@@ -3026,9 +2966,6 @@ function assertNgModuleType(actual, msg = "Type passed in is not NgModuleType, i
         throwError(msg);
     }
 }
-function assertCurrentTNodeIsParent(isParent) {
-    assertEqual(isParent, true, 'currentTNode should be a parent');
-}
 function assertHasParent(tNode) {
     assertDefined(tNode, 'currentTNode should exist!');
     assertDefined(tNode.parent, 'currentTNode should have a parent');
@@ -3078,20 +3015,6 @@ function assertProjectionSlots(lView, errMessage) {
 }
 function assertParentView(lView, errMessage) {
     assertDefined(lView, errMessage || "Component views should always have a parent view (component's host view)");
-}
-function assertNoDuplicateDirectives$1(directives) {
-    // The array needs at least two elements in order to have duplicates.
-    if (directives.length < 2) {
-        return;
-    }
-    const seenDirectives = new Set();
-    for (const current of directives) {
-        if (seenDirectives.has(current)) {
-            throw new RuntimeError(309 /* RuntimeErrorCode.DUPLICATE_DIRECTIVE */, `Directive ${current.type.name} matches multiple times on the same element. ` +
-                `Directives can only match an element once.`);
-        }
-        seenDirectives.add(current);
-    }
 }
 /**
  * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
@@ -3556,14 +3479,6 @@ let _checkNoChangesMode = 0; /* CheckNoChangesMode.Off */
  * @see detectChangesInViewWhileDirty
  */
 let _isRefreshingViews = false;
-/**
- * Returns true if the instruction state stack is empty.
- *
- * Intended to be called from tests only (tree shaken otherwise).
- */
-function specOnlyIsInstructionStateEmpty() {
-    return instructionState.lFrame.parent === null;
-}
 function getElementDepthCount() {
     return instructionState.lFrame.elementDepthCount;
 }
@@ -4285,12 +4200,12 @@ function callHooks(currentView, arr, initPhase, currentNodeIndex) {
  */
 function callHookInternal(directive, hook) {
     profiler(4 /* ProfilerEvent.LifecycleHookStart */, directive, hook);
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         hook.call(directive);
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
         profiler(5 /* ProfilerEvent.LifecycleHookEnd */, directive, hook);
     }
 }
@@ -4708,9 +4623,7 @@ function isAnimationProp(name) {
  * @param src `TAttributes` which should be appended to `dst`
  */
 function mergeHostAttrs(dst, src) {
-    if (src === null || src.length === 0) {
-        // do nothing
-    }
+    if (src === null || src.length === 0) ;
     else if (dst === null || dst.length === 0) {
         // We have source, but dst is empty, just make a copy.
         dst = src.slice();
@@ -4723,9 +4636,7 @@ function mergeHostAttrs(dst, src) {
                 srcMarker = item;
             }
             else {
-                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) {
-                    // Case where we need to consume `key1`, `key2`, `value` items.
-                }
+                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) ;
                 else if (srcMarker === -1 /* AttributeMarker.ImplicitAttributes */ ||
                     srcMarker === 2 /* AttributeMarker.Styles */) {
                     // Case where we have to consume `key1` and `value` only.
@@ -6021,29 +5932,6 @@ function getDevModeNodeName(tNode) {
     }
 }
 
-/**
- * @module
- * @description
- * The `di` module provides dependency injection container services.
- */
-
-/**
- * This file should not be necessary because node resolution should just default to `./di/index`!
- *
- * However it does not seem to work and it breaks:
- *  - //packages/animations/browser/test:test_web_chromium-local
- *  - //packages/compiler-cli/test:extract_i18n
- *  - //packages/compiler-cli/test:ngc
- *  - //packages/compiler-cli/test:perform_watch
- *  - //packages/compiler-cli/test/diagnostics:check_types
- *  - //packages/compiler-cli/test/transformers:test
- *  - //packages/compiler/test:test
- *  - //tools/public_api_guard:core_api
- *
- * Remove this file once the above is solved or wait until `ngc` is deleted and then it should be
- * safe to delete this file.
- */
-
 const SCHEDULE_IN_ROOT_ZONE_DEFAULT = false;
 
 /**
@@ -6231,12 +6119,12 @@ class EventEmitter_ extends Subject {
         }
     }
     emit(value) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             super.next(value);
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
     subscribe(observerOrNext, error, complete) {
@@ -6813,8 +6701,6 @@ function getNgZone(ngZoneToUse = 'zone.js', options) {
     return ngZoneToUse;
 }
 
-// Public API for Zone
-
 /**
  * Provides a hook for centralized exception handling.
  *
@@ -6922,7 +6808,7 @@ class OutputEmitterRef {
         if (this.listeners === null) {
             return;
         }
-        const previousConsumer = setActiveConsumer$1(null);
+        const previousConsumer = setActiveConsumer(null);
         try {
             for (const listenerFn of this.listeners) {
                 try {
@@ -6934,7 +6820,7 @@ class OutputEmitterRef {
             }
         }
         finally {
-            setActiveConsumer$1(previousConsumer);
+            setActiveConsumer(previousConsumer);
         }
     }
 }
@@ -7122,11 +7008,9 @@ function unwrapElementRef(value) {
  * Checks if the given `value` is a reactive `Signal`.
  */
 function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+    return typeof value === 'function' && value[SIGNAL] !== undefined;
 }
 
-/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
-const ɵWRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
 /**
  * Utility function used during template type checking to extract the value from a `WritableSignal`.
  * @codeGenApi
@@ -7140,13 +7024,13 @@ function ɵunwrapWritableSignal(value) {
  * Create a `Signal` that can be set or updated directly.
  */
 function signal(initialValue, options) {
-    const signalFn = createSignal$1(initialValue);
-    const node = signalFn[SIGNAL$1];
+    const signalFn = createSignal(initialValue);
+    const node = signalFn[SIGNAL];
     if (options?.equal) {
         node.equal = options.equal;
     }
-    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
-    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.set = (newValue) => signalSetFn(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn(node, updateFn);
     signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
     if (ngDevMode) {
         signalFn.toString = () => `[Signal: ${signalFn()}]`;
@@ -7155,10 +7039,10 @@ function signal(initialValue, options) {
     return signalFn;
 }
 function signalAsReadonlyFn() {
-    const node = this[SIGNAL$1];
+    const node = this[SIGNAL];
     if (node.readonlyFn === undefined) {
         const readonlyFn = () => this();
-        readonlyFn[SIGNAL$1] = node;
+        readonlyFn[SIGNAL] = node;
         node.readonlyFn = readonlyFn;
     }
     return node.readonlyFn;
@@ -7636,20 +7520,6 @@ function getComponentViewByInstance(componentInstance) {
  * This property will be monkey-patched on elements, components and directives.
  */
 const MONKEY_PATCH_KEY_NAME = '__ngContext__';
-function attachLViewId(target, data) {
-    target[MONKEY_PATCH_KEY_NAME] = data[ID];
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-function readLView(target) {
-    const data = readPatchedData(target);
-    if (isLView(data)) {
-        return data;
-    }
-    return data ? data.lView : null;
-}
 /**
  * Assigns the given data to the given target (which could be a component,
  * directive or DOM node instance) using monkey-patching.
@@ -8116,20 +7986,6 @@ function getHostElement(componentOrDirective) {
     return getLContext(componentOrDirective).native;
 }
 /**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-function getRenderedText(component) {
-    const hostElement = getHostElement(component);
-    return hostElement.textContent || '';
-}
-/**
  * Retrieves a list of event listeners associated with a DOM element. The list does include host
  * listeners, but it does not include event listeners defined outside of the Angular context
  * (e.g. through `addEventListener`).
@@ -8206,23 +8062,6 @@ function isDirectiveDefHack(obj) {
     return (obj.type !== undefined &&
         obj.declaredInputs !== undefined &&
         obj.findHostDirectiveDefs !== undefined);
-}
-/**
- * Retrieve the component `LView` from component/element.
- *
- * NOTE: `LView` is a private and should not be leaked outside.
- *       Don't export this method to `ng.*` on window.
- *
- * @param target DOM element or component instance for which to retrieve the LView.
- */
-function getComponentLView(target) {
-    const lContext = getLContext(target);
-    const nodeIndx = lContext.nodeIndex;
-    const lView = lContext.lView;
-    ngDevMode && assertLView(lView);
-    const componentLView = lView[nodeIndx];
-    ngDevMode && assertLView(componentLView);
-    return componentLView;
 }
 /** Asserts that a value is a DOM Element. */
 function assertDomElement(value) {
@@ -8566,7 +8405,6 @@ const DEFER_BLOCK_ID = 'di';
 const DEFER_BLOCK_STATE$1 = 's';
 const DEFER_PARENT_BLOCK_ID = 'p';
 const DEFER_HYDRATE_TRIGGERS = 't';
-const DEFER_PREFETCH_TRIGGERS = 'pt';
 
 /**
  * Internal token that specifies whether DOM reuse logic
@@ -8647,7 +8485,7 @@ function performanceMarkFeature(feature) {
 function assertNotInReactiveContext(debugFn, extraContext) {
     // Taking a `Function` instead of a string name here prevents the un-minified name of the function
     // from being retained in the bundle regardless of minification.
-    if (getActiveConsumer$1() !== null) {
+    if (getActiveConsumer() !== null) {
         throw new RuntimeError(-602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
             `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
     }
@@ -10136,7 +9974,7 @@ function processBlockData(injector) {
 function refreshContentQueries(tView, lView) {
     const contentQueries = tView.contentQueries;
     if (contentQueries !== null) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             for (let i = 0; i < contentQueries.length; i += 2) {
                 const queryStartIdx = contentQueries[i];
@@ -10152,24 +9990,24 @@ function refreshContentQueries(tView, lView) {
             }
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
 }
 function executeViewQueryFn(flags, viewQueryFn, component) {
     ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
     setCurrentQueryIndex(0);
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         viewQueryFn(flags, component);
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 function executeContentQueries(tView, tNode, lView) {
     if (isContentQueryHost(tNode)) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             const start = tNode.directiveStart;
             const end = tNode.directiveEnd;
@@ -10184,7 +10022,7 @@ function executeContentQueries(tView, tNode, lView) {
             }
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
 }
@@ -10281,16 +10119,6 @@ function trustedHTMLFromString(html) {
     return getPolicy$1()?.createHTML(html) || html;
 }
 /**
- * Unsafely promote a string to a TrustedScript, falling back to strings when
- * Trusted Types are not available.
- * @security In particular, it must be assured that the provided string will
- * never cause an XSS vulnerability if used in a context that will be
- * interpreted and executed as a script by a browser, e.g. when calling eval.
- */
-function trustedScriptFromString(script) {
-    return getPolicy$1()?.createScript(script) || script;
-}
-/**
  * Unsafely promote a string to a TrustedScriptURL, falling back to strings
  * when Trusted Types are not available.
  * @security This is a security-sensitive function; any use of this function
@@ -10301,54 +10129,6 @@ function trustedScriptFromString(script) {
  */
 function trustedScriptURLFromString(url) {
     return getPolicy$1()?.createScriptURL(url) || url;
-}
-/**
- * Unsafely call the Function constructor with the given string arguments. It
- * is only available in development mode, and should be stripped out of
- * production code.
- * @security This is a security-sensitive function; any use of this function
- * must go through security review. In particular, it must be assured that it
- * is only called from development code, as use in production code can lead to
- * XSS vulnerabilities.
- */
-function newTrustedFunctionForDev(...args) {
-    if (typeof ngDevMode === 'undefined') {
-        throw new Error('newTrustedFunctionForDev should never be called in production');
-    }
-    if (!_global.trustedTypes) {
-        // In environments that don't support Trusted Types, fall back to the most
-        // straightforward implementation:
-        return new Function(...args);
-    }
-    // Chrome currently does not support passing TrustedScript to the Function
-    // constructor. The following implements the workaround proposed on the page
-    // below, where the Chromium bug is also referenced:
-    // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
-    const fnArgs = args.slice(0, -1).join(',');
-    const fnBody = args[args.length - 1];
-    const body = `(function anonymous(${fnArgs}
-) { ${fnBody}
-})`;
-    // Using eval directly confuses the compiler and prevents this module from
-    // being stripped out of JS binaries even if not used. The global['eval']
-    // indirection fixes that.
-    const fn = _global['eval'](trustedScriptFromString(body));
-    if (fn.bind === undefined) {
-        // Workaround for a browser bug that only exists in Chrome 83, where passing
-        // a TrustedScript to eval just returns the TrustedScript back without
-        // evaluating it. In that case, fall back to the most straightforward
-        // implementation:
-        return new Function(...args);
-    }
-    // To completely mimic the behavior of calling "new Function", two more
-    // things need to happen:
-    // 1. Stringifying the resulting function should return its source code
-    fn.toString = () => body;
-    // 2. When calling the resulting function, `this` should refer to `global`
-    return fn.bind(_global);
-    // When Trusted Types support in Function constructors is widely available,
-    // the implementation of this function can be simplified to:
-    // return new Function(...args.map(a => trustedScriptFromString(a)));
 }
 
 /**
@@ -12493,7 +12273,7 @@ var InputFlags;
 })(InputFlags || (InputFlags = {}));
 
 function writeToDirectiveInput(def, instance, publicName, value) {
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         if (ngDevMode) {
             if (!def.inputs.hasOwnProperty(publicName)) {
@@ -12514,7 +12294,7 @@ function writeToDirectiveInput(def, instance, publicName, value) {
         let inputSignalNode = null;
         if ((flags & InputFlags.SignalBased) !== 0) {
             const field = instance[privateName];
-            inputSignalNode = field[SIGNAL$1];
+            inputSignalNode = field[SIGNAL];
         }
         // If there is a signal node and a transform, run it before potentially
         // delegating to features like `NgOnChanges`.
@@ -12533,7 +12313,7 @@ function writeToDirectiveInput(def, instance, publicName, value) {
         }
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 
@@ -12990,56 +12770,6 @@ function setAllInputsForProperty(tNode, tView, lView, publicName, value) {
     }
     return hasMatch;
 }
-/**
- * Sets an input value only on a specific directive and its host directives.
- * @param tNode TNode on which the input is being set.
- * @param tView Current TView
- * @param lView `LView` which contains the directives.
- * @param target Directive on which to set the input.
- * @param publicName Public name of the input being set.
- * @param value Value to set.
- */
-function setDirectiveInput(tNode, tView, lView, target, publicName, value) {
-    let hostIndex = null;
-    let hostDirectivesStart = null;
-    let hostDirectivesEnd = null;
-    let hasSet = false;
-    if (ngDevMode && !tNode.directiveToIndex?.has(target.type)) {
-        throw new Error(`Node does not have a directive with type ${target.type.name}`);
-    }
-    const data = tNode.directiveToIndex.get(target.type);
-    if (typeof data === 'number') {
-        hostIndex = data;
-    }
-    else {
-        [hostIndex, hostDirectivesStart, hostDirectivesEnd] = data;
-    }
-    if (hostDirectivesStart !== null &&
-        hostDirectivesEnd !== null &&
-        tNode.hostDirectiveInputs?.hasOwnProperty(publicName)) {
-        const hostDirectiveInputs = tNode.hostDirectiveInputs[publicName];
-        for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
-            const index = hostDirectiveInputs[i];
-            if (index >= hostDirectivesStart && index <= hostDirectivesEnd) {
-                ngDevMode && assertIndexInRange(lView, index);
-                const def = tView.data[index];
-                const hostDirectivePublicName = hostDirectiveInputs[i + 1];
-                writeToDirectiveInput(def, lView[index], hostDirectivePublicName, value);
-                hasSet = true;
-            }
-            else if (index > hostDirectivesEnd) {
-                // Directives here are in ascending order so we can stop looking once we're past the range.
-                break;
-            }
-        }
-    }
-    if (hostIndex !== null) {
-        ngDevMode && assertIndexInRange(lView, hostIndex);
-        writeToDirectiveInput(target, lView[hostIndex], publicName, value);
-        hasSet = true;
-    }
-    return hasSet;
-}
 
 function renderComponent(hostLView, componentHostIdx) {
     ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
@@ -13160,7 +12890,7 @@ function renderChildComponents(hostLView, components) {
 }
 
 function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         const embeddedTView = templateTNode.tView;
         ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
@@ -13181,7 +12911,7 @@ function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, 
         return embeddedLView;
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 /**
@@ -13426,7 +13156,7 @@ function cleanUpView(tView, lView) {
     if (isDestroyed(lView)) {
         return;
     }
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         // Usually the Attached flag is removed when the view is detached from its parent, however
         // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
@@ -13437,7 +13167,7 @@ function cleanUpView(tView, lView) {
         // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
         // really more of an "afterDestroy" hook if you think about it.
         lView[FLAGS] |= 256 /* LViewFlags.Destroyed */;
-        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
+        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy(lView[REACTIVE_TEMPLATE_CONSUMER]);
         executeOnDestroys(tView, lView);
         processCleanups(tView, lView);
         // For component views only, the local renderer is destroyed at clean up time.
@@ -13462,7 +13192,7 @@ function cleanUpView(tView, lView) {
         unregisterLView(lView);
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 /** Removes listeners and unsubscribes from output subscriptions */
@@ -14069,7 +13799,7 @@ function maybeReturnReactiveLViewConsumer(consumer) {
     freeConsumers.push(consumer);
 }
 const REACTIVE_LVIEW_CONSUMER_NODE = {
-    ...REACTIVE_NODE$1,
+    ...REACTIVE_NODE,
     consumerIsAlwaysLive: true,
     kind: 'template',
     consumerMarkedDirty: (node) => {
@@ -14097,7 +13827,7 @@ function getOrCreateTemporaryConsumer(lView) {
     return consumer;
 }
 const TEMPORARY_CONSUMER_NODE = {
-    ...REACTIVE_NODE$1,
+    ...REACTIVE_NODE,
     consumerIsAlwaysLive: true,
     kind: 'template',
     consumerMarkedDirty: (node) => {
@@ -14264,9 +13994,9 @@ function refreshView(tView, lView, templateFn, context) {
     if (!isInCheckNoChangesPass) {
         if (viewShouldHaveReactiveConsumer(tView)) {
             currentConsumer = getOrBorrowReactiveLViewConsumer(lView);
-            prevConsumer = consumerBeforeComputation$1(currentConsumer);
+            prevConsumer = consumerBeforeComputation(currentConsumer);
         }
-        else if (getActiveConsumer$1() === null) {
+        else if (getActiveConsumer() === null) {
             // If the current view should not have a reactive consumer but we don't have an active consumer,
             // we still need to create a temporary consumer to track any signal reads in this template.
             // This is a rare case that can happen with `viewContainerRef.createEmbeddedView(...).detectChanges()`.
@@ -14275,10 +14005,10 @@ function refreshView(tView, lView, templateFn, context) {
             // the temporary one.
             returnConsumerToPool = false;
             currentConsumer = getOrCreateTemporaryConsumer(lView);
-            prevConsumer = consumerBeforeComputation$1(currentConsumer);
+            prevConsumer = consumerBeforeComputation(currentConsumer);
         }
         else if (lView[REACTIVE_TEMPLATE_CONSUMER]) {
-            consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
+            consumerDestroy(lView[REACTIVE_TEMPLATE_CONSUMER]);
             lView[REACTIVE_TEMPLATE_CONSUMER] = null;
         }
     }
@@ -14407,7 +14137,7 @@ function refreshView(tView, lView, templateFn, context) {
     }
     finally {
         if (currentConsumer !== null) {
-            consumerAfterComputation$1(currentConsumer, prevConsumer);
+            consumerAfterComputation(currentConsumer, prevConsumer);
             if (returnConsumerToPool) {
                 maybeReturnReactiveLViewConsumer(currentConsumer);
             }
@@ -14497,7 +14227,7 @@ function detectChangesInView(lView, mode) {
     // Always refresh views marked for refresh, regardless of mode.
     shouldRefreshView ||= !!(flags & 1024 /* LViewFlags.RefreshView */);
     // Refresh views when they have a dirty reactive consumer, regardless of mode.
-    shouldRefreshView ||= !!(consumer?.dirty && consumerPollProducersForChange$1(consumer));
+    shouldRefreshView ||= !!(consumer?.dirty && consumerPollProducersForChange(consumer));
     shouldRefreshView ||= !!(ngDevMode && isExhaustiveCheckNoChanges());
     // Mark the Flags and `ReactiveNode` as not dirty before refreshing the component, so that they
     // can be re-dirtied during the refresh process.
@@ -17458,7 +17188,6 @@ function addSet(sourceSet, targetSet) {
 }
 /** The deps tracker to be used in the current Angular app in dev mode. */
 const depsTracker = new DepsTracker();
-const TEST_ONLY = { DepsTracker };
 
 /**
  * Compute the static styling (class/style) from `TAttributes`.
@@ -18127,12 +17856,12 @@ class ComponentFactory extends ComponentFactory$1 {
     }
     create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
         profiler(22 /* ProfilerEvent.DynamicComponentStart */);
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.1+sha-dad02c6']
+                ? ['ng-version', '19.2.1+sha-48dc0d6']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -18190,7 +17919,7 @@ class ComponentFactory extends ComponentFactory$1 {
             return new ComponentRef(this.componentType, rootLView);
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
 }
@@ -19141,7 +18870,7 @@ function getQueryResults(lView, queryIndex) {
  */
 function createQuerySignalFn(firstOnly, required, opts) {
     let node;
-    const signalFn = createComputed$1(() => {
+    const signalFn = createComputed(() => {
         // A dedicated signal that increments its value every time a query changes its dirty status. By
         // using this signal we can implement a query as computed and avoid creation of a specialized
         // reactive node type. Please note that a query gets marked dirty under the following
@@ -19155,7 +18884,7 @@ function createQuerySignalFn(firstOnly, required, opts) {
         }
         return value;
     });
-    node = signalFn[SIGNAL$1];
+    node = signalFn[SIGNAL];
     node._dirtyCounter = signal(0);
     node._flatValue = undefined;
     if (ngDevMode) {
@@ -19174,7 +18903,7 @@ function createMultiResultQuerySignalFn(opts) {
     return createQuerySignalFn(/* firstOnly */ false, /* required */ false, opts);
 }
 function bindQueryToSignal(target, queryIndex) {
-    const node = target[SIGNAL$1];
+    const node = target[SIGNAL];
     node._lView = getLView();
     node._queryIndex = queryIndex;
     node._queryList = loadQueryInternal(node._lView, queryIndex);
@@ -19347,16 +19076,16 @@ function createModelSignal(initialValue, opts) {
     const emitterRef = new OutputEmitterRef();
     node.value = initialValue;
     function getter() {
-        producerAccessed$1(node);
+        producerAccessed(node);
         assertModelSet(node.value);
         return node.value;
     }
-    getter[SIGNAL$1] = node;
+    getter[SIGNAL] = node;
     getter.asReadonly = signalAsReadonlyFn.bind(getter);
     // TODO: Should we throw an error when updating a destroyed model?
     getter.set = (newValue) => {
         if (!node.equal(node.value, newValue)) {
-            signalSetFn$1(node, newValue);
+            signalSetFn(node, newValue);
             emitterRef.emit(newValue);
         }
     };
@@ -19665,9 +19394,6 @@ function registerNgModuleType(ngModuleType, id) {
     const existing = modules.get(id) || null;
     assertSameOrNotExisting(id, existing, ngModuleType);
     modules.set(id, ngModuleType);
-}
-function clearModulesForTest() {
-    modules.clear();
 }
 function getRegisteredNgModuleType(id) {
     return modules.get(id);
@@ -20679,9 +20405,6 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
     }
 }
 
-function isIterable(obj) {
-    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
-}
 function isListLikeIterable(obj) {
     if (!isJsObject(obj))
         return false;
@@ -20915,7 +20638,7 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
-        return createContainerAnchorImpl(tView, lView, tNode, index);
+        return createContainerAnchorImpl(tView, lView);
     }
     const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
     // Apply `ssrId` value to the underlying TView if it was not previously set.
@@ -21654,26 +21377,6 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
         }
     });
 }
-
-/*
- * This file exists to support compilation of @angular/core in Ivy mode.
- *
- * When the Angular compiler processes a compilation unit, it normally writes imports to
- * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
- * compiler writes imports to this file.
- *
- * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
- * A check in ngtsc's `R3SymbolsImportRewriter` validates this condition. The rewriter is only used
- * when compiling @angular/core and is responsible for translating an external name (prefixed with
- * ɵ) to the internal symbol name as exported below.
- *
- * The below symbols are used for @Injectable and @NgModule compilation.
- */
-/**
- * The existence of this constant (in this particular file) informs the Angular compiler that the
- * current program is actually @angular/core, which needs to be compiled specially.
- */
-const ITS_JUST_ANGULAR = true;
 
 class Console {
     log(message) {
@@ -22742,7 +22445,7 @@ function extractEffectsFromInjector(injector) {
     }
     const resolverToEffects = getFrameworkDIDebugData().resolverToEffects;
     const effects = resolverToEffects.get(diResolver) ?? [];
-    return effects.map((effect) => effect[SIGNAL$1]);
+    return effects.map((effect) => effect[SIGNAL]);
 }
 function extractSignalNodesAndEdgesFromRoots(nodes, signalDependenciesMap = new Map()) {
     for (const node of nodes) {
@@ -23471,7 +23174,7 @@ function publishDefaultGlobalUtils() {
  * Sets the error for an invalid write to a signal to be an Angular `RuntimeError`.
  */
 function publishSignalConfiguration() {
-    setThrowInvalidWriteToSignalError$1(() => {
+    setThrowInvalidWriteToSignalError(() => {
         throw new RuntimeError(600 /* RuntimeErrorCode.SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT */, ngDevMode && 'Writing to signals is not allowed in a `computed`.');
     });
 }
@@ -23793,7 +23496,7 @@ class ApplicationRef {
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
         }
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             this._runningTick = true;
             this.synchronize();
@@ -23811,7 +23514,7 @@ class ApplicationRef {
             this._runningTick = false;
             this.tracingSnapshot?.dispose();
             this.tracingSnapshot = null;
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
             this.afterTick.next();
             profiler(13 /* ProfilerEvent.ChangeDetectionEnd */);
         }
@@ -24622,7 +24325,7 @@ function ɵɵdeferWhen(rawValue) {
         return;
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             const value = Boolean(rawValue); // handle truthy or falsy values
             const lDetails = getLDeferBlockDetails(lView, tNode);
@@ -24638,7 +24341,7 @@ function ɵɵdeferWhen(rawValue) {
             }
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
 }
@@ -24656,7 +24359,7 @@ function ɵɵdeferPrefetchWhen(rawValue) {
         return;
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             const value = Boolean(rawValue); // handle truthy or falsy values
             const tView = lView[TVIEW];
@@ -24668,7 +24371,7 @@ function ɵɵdeferPrefetchWhen(rawValue) {
             }
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
 }
@@ -24697,7 +24400,7 @@ function ɵɵdeferHydrateWhen(rawValue) {
         }
         else {
             const injector = lView[INJECTOR];
-            const prevConsumer = setActiveConsumer$1(null);
+            const prevConsumer = setActiveConsumer(null);
             try {
                 const value = Boolean(rawValue); // handle truthy or falsy values
                 if (value === true) {
@@ -24711,7 +24414,7 @@ function ɵɵdeferHydrateWhen(rawValue) {
                 }
             }
             finally {
-                setActiveConsumer$1(prevConsumer);
+                setActiveConsumer(prevConsumer);
             }
         }
     }
@@ -24761,7 +24464,7 @@ function ɵɵdeferPrefetchOnIdle() {
     }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
-    scheduleDelayedPrefetching(onIdle, 0 /* DeferBlockTrigger.Idle */);
+    scheduleDelayedPrefetching(onIdle);
 }
 /**
  * Sets up logic to handle the `on idle` deferred trigger.
@@ -24877,7 +24580,7 @@ function ɵɵdeferPrefetchOnTimer(delay) {
     }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
-    scheduleDelayedPrefetching(onTimer(delay), 5 /* DeferBlockTrigger.Timer */);
+    scheduleDelayedPrefetching(onTimer(delay));
 }
 /**
  * Creates runtime data structures for the `on timer` hydrate trigger.
@@ -25720,166 +25423,7 @@ function setTStylingRangeNextDuplicate(tStylingRange) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
     return (tStylingRange | 1 /* StylingRange.NEXT_DUPLICATE */);
 }
-function getTStylingRangeTail(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    const next = getTStylingRangeNext(tStylingRange);
-    return next === 0 ? getTStylingRangePrev(tStylingRange) : next;
-}
 
-/**
- * NOTE: The word `styling` is used interchangeably as style or class styling.
- *
- * This file contains code to link styling instructions together so that they can be replayed in
- * priority order. The file exists because Ivy styling instruction execution order does not match
- * that of the priority order. The purpose of this code is to create a linked list so that the
- * instructions can be traversed in priority order when computing the styles.
- *
- * Assume we are dealing with the following code:
- * ```angular-ts
- * @Component({
- *   template: `
- *     <my-cmp [style]=" {color: '#001'} "
- *             [style.color]=" #002 "
- *             dir-style-color-1
- *             dir-style-color-2> `
- * })
- * class ExampleComponent {
- *   static ngComp = ... {
- *     ...
- *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
- *     ɵɵstyleMap({color: '#001'});
- *     ɵɵstyleProp('color', '#002');
- *     ...
- *   }
- * }
- *
- * @Directive({
- *   selector: `[dir-style-color-1]',
- * })
- * class Style1Directive {
- *   @HostBinding('style') style = {color: '#005'};
- *   @HostBinding('style.color') color = '#006';
- *
- *   static ngDir = ... {
- *     ...
- *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
- *     ɵɵstyleMap({color: '#005'});
- *     ɵɵstyleProp('color', '#006');
- *     ...
- *   }
- * }
- *
- * @Directive({
- *   selector: `[dir-style-color-2]',
- * })
- * class Style2Directive {
- *   @HostBinding('style') style = {color: '#007'};
- *   @HostBinding('style.color') color = '#008';
- *
- *   static ngDir = ... {
- *     ...
- *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
- *     ɵɵstyleMap({color: '#007'});
- *     ɵɵstyleProp('color', '#008');
- *     ...
- *   }
- * }
- *
- * @Directive({
- *   selector: `my-cmp',
- * })
- * class MyComponent {
- *   @HostBinding('style') style = {color: '#003'};
- *   @HostBinding('style.color') color = '#004';
- *
- *   static ngComp = ... {
- *     ...
- *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
- *     ɵɵstyleMap({color: '#003'});
- *     ɵɵstyleProp('color', '#004');
- *     ...
- *   }
- * }
- * ```
- *
- * The Order of instruction execution is:
- *
- * NOTE: the comment binding location is for illustrative purposes only.
- *
- * ```ts
- * // Template: (ExampleComponent)
- *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
- *     ɵɵstyleProp('color', '#002');  // Binding index: 12
- * // MyComponent
- *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
- *     ɵɵstyleProp('color', '#004');  // Binding index: 22
- * // Style1Directive
- *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
- *     ɵɵstyleProp('color', '#006');  // Binding index: 26
- * // Style2Directive
- *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
- *     ɵɵstyleProp('color', '#008');  // Binding index: 30
- * ```
- *
- * The correct priority order of concatenation is:
- *
- * ```ts
- * // MyComponent
- *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
- *     ɵɵstyleProp('color', '#004');  // Binding index: 22
- * // Style1Directive
- *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
- *     ɵɵstyleProp('color', '#006');  // Binding index: 26
- * // Style2Directive
- *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
- *     ɵɵstyleProp('color', '#008');  // Binding index: 30
- * // Template: (ExampleComponent)
- *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
- *     ɵɵstyleProp('color', '#002');  // Binding index: 12
- * ```
- *
- * What color should be rendered?
- *
- * Once the items are correctly sorted in the list, the answer is simply the last item in the
- * concatenation list which is `#002`.
- *
- * To do so we keep a linked list of all of the bindings which pertain to this element.
- * Notice that the bindings are inserted in the order of execution, but the `TView.data` allows
- * us to traverse them in the order of priority.
- *
- * |Idx|`TView.data`|`LView`          | Notes
- * |---|------------|-----------------|--------------
- * |...|            |                 |
- * |10 |`null`      |`{color: '#001'}`| `ɵɵstyleMap('color', {color: '#001'})`
- * |11 |`30 | 12`   | ...             |
- * |12 |`color`     |`'#002'`         | `ɵɵstyleProp('color', '#002')`
- * |13 |`10 | 0`    | ...             |
- * |...|            |                 |
- * |20 |`null`      |`{color: '#003'}`| `ɵɵstyleMap('color', {color: '#003'})`
- * |21 |`0 | 22`    | ...             |
- * |22 |`color`     |`'#004'`         | `ɵɵstyleProp('color', '#004')`
- * |23 |`20 | 24`   | ...             |
- * |24 |`null`      |`{color: '#005'}`| `ɵɵstyleMap('color', {color: '#005'})`
- * |25 |`22 | 26`   | ...             |
- * |26 |`color`     |`'#006'`         | `ɵɵstyleProp('color', '#006')`
- * |27 |`24 | 28`   | ...             |
- * |28 |`null`      |`{color: '#007'}`| `ɵɵstyleMap('color', {color: '#007'})`
- * |29 |`26 | 30`   | ...             |
- * |30 |`color`     |`'#008'`         | `ɵɵstyleProp('color', '#008')`
- * |31 |`28 | 10`   | ...             |
- *
- * The above data structure allows us to re-concatenate the styling no matter which data binding
- * changes.
- *
- * NOTE: in addition to keeping track of next/previous index the `TView.data` also stores prev/next
- * duplicate bit. The duplicate bit if true says there either is a binding with the same name or
- * there is a map (which may contain the name). This information is useful in knowing if other
- * styles with higher priority need to be searched for overwrites.
- *
- * NOTE: See `should support example in 'tnode_linked_list.ts' documentation` in
- * `tnode_linked_list_spec.ts` for working example.
- */
-let __unused_const_as_closure_does_not_like_standalone_comment_blocks__;
 /**
  * Insert new `tStyleValue` at `TData` and link existing style bindings such that we maintain linked
  * list of styles and compute the duplicate flag.
@@ -27200,12 +26744,7 @@ function isStylingValuePresent(value) {
  * @param suffix
  */
 function normalizeSuffix(value, suffix) {
-    if (value == null || value === '') {
-        // do nothing
-        // Do not add the suffix if the value is going to be empty.
-        // As it produce invalid CSS, which the browsers will automatically omit but Domino will not.
-        // Example: `"left": "px;"` instead of `"left": ""`.
-    }
+    if (value == null || value === '') ;
     else if (typeof suffix === 'string') {
         value = value + suffix;
     }
@@ -27912,7 +27451,7 @@ function ɵɵconditional(matchingTemplateIndex, contextValue) {
         : undefined;
     const viewInContainerIdx = 0;
     if (bindingUpdated(hostLView, bindingIndex, matchingTemplateIndex)) {
-        const prevConsumer = setActiveConsumer$1(null);
+        const prevConsumer = setActiveConsumer(null);
         try {
             // The index of the view to show changed - remove the previously displayed one
             // (it is a noop if there are no active views in a container).
@@ -27933,7 +27472,7 @@ function ɵɵconditional(matchingTemplateIndex, contextValue) {
             }
         }
         finally {
-            setActiveConsumer$1(prevConsumer);
+            setActiveConsumer(prevConsumer);
         }
     }
     else if (prevContainer !== undefined) {
@@ -28135,7 +27674,7 @@ class LiveCollectionLContainerImpl extends LiveCollection {
  * @codeGenApi
  */
 function ɵɵrepeater(collection) {
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     const metadataSlotIdx = getSelectedIndex();
     try {
         const hostLView = getLView();
@@ -28187,7 +27726,7 @@ function ɵɵrepeater(collection) {
         }
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 function getLContainer(lView, index) {
@@ -28592,25 +28131,10 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
     return ɵɵsyntheticHostProperty;
 }
 
-/**
- * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
- */
-if (typeof ngI18nClosureMode === 'undefined') {
-    // These property accesses can be ignored because ngI18nClosureMode will be set to false
-    // when optimizing code and the whole if statement will be dropped.
-    // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
-    // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
-    (function () {
-        _global['ngI18nClosureMode'] =
-            // TODO(FW-1250): validate that this actually, you know, works.
-            typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
-    })();
-}
-
 // THIS CODE IS GENERATED - DO NOT MODIFY.
 const u = undefined;
 function plural(val) {
-    const n = val, i = Math.floor(Math.abs(val)), v = val.toString().replace(/^[^.]*\.?/, '').length;
+    const i = Math.floor(Math.abs(val)), v = val.toString().replace(/^[^.]*\.?/, '').length;
     if (i === 1 && v === 0)
         return 1;
     return 5;
@@ -30582,7 +30106,7 @@ function listenToOutput(tNode, tView, lView, index, lookupName, eventName, liste
     tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
 }
 function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     try {
         profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
         // Only explicitly returning false from a listener should preventDefault
@@ -30594,7 +30118,7 @@ function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
     }
     finally {
         profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 /**
@@ -32557,26 +32081,6 @@ function ɵɵattachSourceLocations(templatePath, locations) {
     }
 }
 
-/*
- * This file re-exports all symbols contained in this directory.
- *
- * Why is this file not `index.ts`?
- *
- * There seems to be an inconsistent path resolution of an `index.ts` file
- * when only the parent directory is referenced. This could be due to the
- * node module resolution configuration differing from rollup and/or typescript.
- *
- * With commit
- * https://github.com/angular/angular/commit/d5e3f2c64bd13ce83e7c70788b7fc514ca4a9918
- * the `instructions.ts` file was moved to `instructions/instructions.ts` and an
- * `index.ts` file was used to re-export everything. Having had file names that were
- * importing from `instructions' directly (not the from the sub file or the `index.ts`
- * file) caused strange CI issues. `index.ts` had to be renamed to `all.ts` for this
- * to work.
- *
- * Jira Issue = FW-1184
- */
-
 /**
  * Resolves the providers which are defined in the DirectiveDef.
  *
@@ -34030,10 +33534,6 @@ function resetJitOptions() {
     jitOptions = null;
 }
 
-function patchModuleCompilation() {
-    // Does nothing, but exists as a target for patching.
-}
-
 const moduleQueue = [];
 /**
  * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -34083,7 +33583,6 @@ function isResolvedDeclaration(declaration) {
  * This function automatically gets called when a class has a `@NgModule` decorator.
  */
 function compileNgModule(moduleType, ngModule = {}) {
-    patchModuleCompilation();
     compileNgModuleDefs(moduleType, ngModule);
     if (ngModule.id !== undefined) {
         registerNgModuleType(moduleType, ngModule.id);
@@ -34447,16 +33946,13 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
  */
 function transitiveScopesFor(type) {
     if (isNgModule(type)) {
-        if (USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
+        {
             const scope = depsTracker.getNgModuleScope(type);
             const def = getNgModuleDef(type, true);
             return {
                 schemas: def.schemas || null,
                 ...scope,
             };
-        }
-        else {
-            return transitiveScopesForNgModule(type);
         }
     }
     else if (isStandalone(type)) {
@@ -34491,77 +33987,6 @@ function transitiveScopesFor(type) {
     }
     // TODO: change the error message to be more user-facing and take standalone into account
     throw new Error(`${type.name} does not have a module def (ɵmod property)`);
-}
-/**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
- *
- * This operation is memoized and the result is cached on the module's definition. This function can
- * be called on modules with components that have not fully compiled yet, but the result should not
- * be used until they have.
- *
- * @param moduleType module that transitive scope should be calculated for.
- */
-function transitiveScopesForNgModule(moduleType) {
-    const def = getNgModuleDef(moduleType, true);
-    if (def.transitiveCompileScopes !== null) {
-        return def.transitiveCompileScopes;
-    }
-    const scopes = {
-        schemas: def.schemas || null,
-        compilation: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-        exported: {
-            directives: new Set(),
-            pipes: new Set(),
-        },
-    };
-    maybeUnwrapFn(def.imports).forEach((imported) => {
-        // When this module imports another, the imported module's exported directives and pipes are
-        // added to the compilation scope of this module.
-        const importedScope = transitiveScopesFor(imported);
-        importedScope.exported.directives.forEach((entry) => scopes.compilation.directives.add(entry));
-        importedScope.exported.pipes.forEach((entry) => scopes.compilation.pipes.add(entry));
-    });
-    maybeUnwrapFn(def.declarations).forEach((declared) => {
-        const declaredWithDefs = declared;
-        if (getPipeDef$1(declaredWithDefs)) {
-            scopes.compilation.pipes.add(declared);
-        }
-        else {
-            // Either declared has a ɵcmp or ɵdir, or it's a component which hasn't
-            // had its template compiled yet. In either case, it gets added to the compilation's
-            // directives.
-            scopes.compilation.directives.add(declared);
-        }
-    });
-    maybeUnwrapFn(def.exports).forEach((exported) => {
-        const exportedType = exported;
-        // Either the type is a module, a pipe, or a component/directive (which may not have a
-        // ɵcmp as it might be compiled asynchronously).
-        if (isNgModule(exportedType)) {
-            // When this module exports another, the exported module's exported directives and pipes are
-            // added to both the compilation and exported scopes of this module.
-            const exportedScope = transitiveScopesFor(exportedType);
-            exportedScope.exported.directives.forEach((entry) => {
-                scopes.compilation.directives.add(entry);
-                scopes.exported.directives.add(entry);
-            });
-            exportedScope.exported.pipes.forEach((entry) => {
-                scopes.compilation.pipes.add(entry);
-                scopes.exported.pipes.add(entry);
-            });
-        }
-        else if (getPipeDef$1(exportedType)) {
-            scopes.exported.pipes.add(exportedType);
-        }
-        else {
-            scopes.exported.directives.add(exportedType);
-        }
-    });
-    def.transitiveCompileScopes = scopes;
-    return scopes;
 }
 function expandModuleWithProviders(value) {
     if (isModuleWithProviders(value)) {
@@ -34735,43 +34160,8 @@ function compileComponent(type, metadata) {
  * component's `imports`.
  */
 function getStandaloneDefFunctions(type, imports) {
-    let cachedDirectiveDefs = null;
-    let cachedPipeDefs = null;
     const directiveDefs = () => {
-        if (!USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-            if (cachedDirectiveDefs === null) {
-                // Standalone components are always able to self-reference, so include the component's own
-                // definition in its `directiveDefs`.
-                cachedDirectiveDefs = [getComponentDef(type)];
-                const seen = new Set([type]);
-                for (const rawDep of imports) {
-                    ngDevMode && verifyStandaloneImport(rawDep, type);
-                    const dep = resolveForwardRef(rawDep);
-                    if (seen.has(dep)) {
-                        continue;
-                    }
-                    seen.add(dep);
-                    if (!!getNgModuleDef(dep)) {
-                        const scope = transitiveScopesFor(dep);
-                        for (const dir of scope.exported.directives) {
-                            const def = getComponentDef(dir) || getDirectiveDef(dir);
-                            if (def && !seen.has(dir)) {
-                                seen.add(dir);
-                                cachedDirectiveDefs.push(def);
-                            }
-                        }
-                    }
-                    else {
-                        const def = getComponentDef(dep) || getDirectiveDef(dep);
-                        if (def) {
-                            cachedDirectiveDefs.push(def);
-                        }
-                    }
-                }
-            }
-            return cachedDirectiveDefs;
-        }
-        else {
+        {
             if (ngDevMode) {
                 for (const rawDep of imports) {
                     verifyStandaloneImport(rawDep, type);
@@ -34787,37 +34177,7 @@ function getStandaloneDefFunctions(type, imports) {
         }
     };
     const pipeDefs = () => {
-        if (!USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-            if (cachedPipeDefs === null) {
-                cachedPipeDefs = [];
-                const seen = new Set();
-                for (const rawDep of imports) {
-                    const dep = resolveForwardRef(rawDep);
-                    if (seen.has(dep)) {
-                        continue;
-                    }
-                    seen.add(dep);
-                    if (!!getNgModuleDef(dep)) {
-                        const scope = transitiveScopesFor(dep);
-                        for (const pipe of scope.exported.pipes) {
-                            const def = getPipeDef$1(pipe);
-                            if (def && !seen.has(pipe)) {
-                                seen.add(pipe);
-                                cachedPipeDefs.push(def);
-                            }
-                        }
-                    }
-                    else {
-                        const def = getPipeDef$1(dep);
-                        if (def) {
-                            cachedPipeDefs.push(def);
-                        }
-                    }
-                }
-            }
-            return cachedPipeDefs;
-        }
-        else {
+        {
             if (ngDevMode) {
                 for (const rawDep of imports) {
                     verifyStandaloneImport(rawDep, type);
@@ -35154,11 +34514,6 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
 (type, meta) => compileNgModule(type, meta));
 
 /**
- * This indirection is needed to free up Component, etc symbols in the public API
- * to be used by the decorator versions of these annotations.
- */
-
-/**
  * @description Represents the version of Angular
  *
  * @publicApi
@@ -35179,7 +34534,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.1+sha-dad02c6');
+const VERSION = new Version('19.2.1+sha-48dc0d6');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -36766,8 +36121,6 @@ function enableProdMode() {
     }
 }
 
-// Public API for render
-
 /**
  * Returns the NgModuleFactory with the given id (specified using [@NgModule.id
  * field](api/core/NgModule#id)), if it exists and has been loaded. Factories for NgModules that do
@@ -36941,11 +36294,6 @@ class ViewRef extends ChangeDetectorRef {
  */
 class EmbeddedViewRef extends ViewRef {
 }
-
-// Public API for compiler
-
-// This file exists for easily patching NgModuleFactoryLoader in g3
-var ng_module_factory_loader_impl = {};
 
 /**
  * @publicApi
@@ -37491,8 +36839,6 @@ function collectPropertyBindings(properties, tNode, lView, tData) {
         }
     }
 }
-// Need to keep the nodes in a global Map so that multiple angular apps are supported.
-const _nativeNodeToDebugNode = new Map();
 const NG_DEBUG_PROPERTY = '__ng_debug__';
 /**
  * @publicApi
@@ -37508,15 +36854,6 @@ function getDebugNode(nativeNode) {
         return nativeNode[NG_DEBUG_PROPERTY];
     }
     return null;
-}
-function getAllDebugNodes() {
-    return Array.from(_nativeNodeToDebugNode.values());
-}
-function indexDebugNode(node) {
-    _nativeNodeToDebugNode.set(node.nativeNode, node);
-}
-function removeDebugNodeFromIndex(node) {
-    _nativeNodeToDebugNode.delete(node.nativeNode);
 }
 
 class DefaultIterableDifferFactory {
@@ -38574,12 +37911,6 @@ const defaultIterableDiffers = new IterableDiffers(iterableDiff);
 const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
 /**
- * @module
- * @description
- * Change detection enables data binding in Angular.
- */
-
-/**
  * This platform has to be included in any other platform
  *
  * @publicApi
@@ -38603,674 +37934,6 @@ class ApplicationModule {
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
         type: NgModule
     }], () => [{ type: ApplicationRef }], null); })();
-
-/**
- * The default equality function used for `signal` and `computed`, which uses referential equality.
- */
-function defaultEquals(a, b) {
-    return Object.is(a, b);
-}
-
-/**
- * The currently active consumer `ReactiveNode`, if running code in a reactive context.
- *
- * Change this via `setActiveConsumer`.
- */
-let activeConsumer = null;
-let inNotificationPhase = false;
-/**
- * Global epoch counter. Incremented whenever a source signal is set.
- */
-let epoch = 1;
-/**
- * Symbol used to tell `Signal`s apart from other functions.
- *
- * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
- */
-const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
-function setActiveConsumer(consumer) {
-    const prev = activeConsumer;
-    activeConsumer = consumer;
-    return prev;
-}
-function getActiveConsumer() {
-    return activeConsumer;
-}
-function isInNotificationPhase() {
-    return inNotificationPhase;
-}
-function isReactive(value) {
-    return value[SIGNAL] !== undefined;
-}
-const REACTIVE_NODE = {
-    version: 0,
-    lastCleanEpoch: 0,
-    dirty: false,
-    producerNode: undefined,
-    producerLastReadVersion: undefined,
-    producerIndexOfThis: undefined,
-    nextProducerIndex: 0,
-    liveConsumerNode: undefined,
-    liveConsumerIndexOfThis: undefined,
-    consumerAllowSignalWrites: false,
-    consumerIsAlwaysLive: false,
-    kind: 'unknown',
-    producerMustRecompute: () => false,
-    producerRecomputeValue: () => { },
-    consumerMarkedDirty: () => { },
-    consumerOnSignalRead: () => { },
-};
-/**
- * Called by implementations when a producer's signal is read.
- */
-function producerAccessed(node) {
-    if (inNotificationPhase) {
-        throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode
-            ? `Assertion error: signal read during notification phase`
-            : '');
-    }
-    if (activeConsumer === null) {
-        // Accessed outside of a reactive context, so nothing to record.
-        return;
-    }
-    activeConsumer.consumerOnSignalRead(node);
-    // This producer is the `idx`th dependency of `activeConsumer`.
-    const idx = activeConsumer.nextProducerIndex++;
-    assertConsumerNode(activeConsumer);
-    if (idx < activeConsumer.producerNode.length && activeConsumer.producerNode[idx] !== node) {
-        // There's been a change in producers since the last execution of `activeConsumer`.
-        // `activeConsumer.producerNode[idx]` holds a stale dependency which will be be removed and
-        // replaced with `this`.
-        //
-        // If `activeConsumer` isn't live, then this is a no-op, since we can replace the producer in
-        // `activeConsumer.producerNode` directly. However, if `activeConsumer` is live, then we need
-        // to remove it from the stale producer's `liveConsumer`s.
-        if (consumerIsLive(activeConsumer)) {
-            const staleProducer = activeConsumer.producerNode[idx];
-            producerRemoveLiveConsumerAtIndex(staleProducer, activeConsumer.producerIndexOfThis[idx]);
-            // At this point, the only record of `staleProducer` is the reference at
-            // `activeConsumer.producerNode[idx]` which will be overwritten below.
-        }
-    }
-    if (activeConsumer.producerNode[idx] !== node) {
-        // We're a new dependency of the consumer (at `idx`).
-        activeConsumer.producerNode[idx] = node;
-        // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
-        // placeholder value.
-        activeConsumer.producerIndexOfThis[idx] = consumerIsLive(activeConsumer)
-            ? producerAddLiveConsumer(node, activeConsumer, idx)
-            : 0;
-    }
-    activeConsumer.producerLastReadVersion[idx] = node.version;
-}
-/**
- * Increment the global epoch counter.
- *
- * Called by source producers (that is, not computeds) whenever their values change.
- */
-function producerIncrementEpoch() {
-    epoch++;
-}
-/**
- * Ensure this producer's `version` is up-to-date.
- */
-function producerUpdateValueVersion(node) {
-    if (consumerIsLive(node) && !node.dirty) {
-        // A live consumer will be marked dirty by producers, so a clean state means that its version
-        // is guaranteed to be up-to-date.
-        return;
-    }
-    if (!node.dirty && node.lastCleanEpoch === epoch) {
-        // Even non-live consumers can skip polling if they previously found themselves to be clean at
-        // the current epoch, since their dependencies could not possibly have changed (such a change
-        // would've increased the epoch).
-        return;
-    }
-    if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
-        // None of our producers report a change since the last time they were read, so no
-        // recomputation of our value is necessary, and we can consider ourselves clean.
-        producerMarkClean(node);
-        return;
-    }
-    node.producerRecomputeValue(node);
-    // After recomputing the value, we're no longer dirty.
-    producerMarkClean(node);
-}
-/**
- * Propagate a dirty notification to live consumers of this producer.
- */
-function producerNotifyConsumers(node) {
-    if (node.liveConsumerNode === undefined) {
-        return;
-    }
-    // Prevent signal reads when we're updating the graph
-    const prev = inNotificationPhase;
-    inNotificationPhase = true;
-    try {
-        for (const consumer of node.liveConsumerNode) {
-            if (!consumer.dirty) {
-                consumerMarkDirty(consumer);
-            }
-        }
-    }
-    finally {
-        inNotificationPhase = prev;
-    }
-}
-/**
- * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
- * based on the current consumer context.
- */
-function producerUpdatesAllowed() {
-    return activeConsumer?.consumerAllowSignalWrites !== false;
-}
-function consumerMarkDirty(node) {
-    node.dirty = true;
-    producerNotifyConsumers(node);
-    node.consumerMarkedDirty?.(node);
-}
-function producerMarkClean(node) {
-    node.dirty = false;
-    node.lastCleanEpoch = epoch;
-}
-/**
- * Prepare this consumer to run a computation in its reactive context.
- *
- * Must be called by subclasses which represent reactive computations, before those computations
- * begin.
- */
-function consumerBeforeComputation(node) {
-    node && (node.nextProducerIndex = 0);
-    return setActiveConsumer(node);
-}
-/**
- * Finalize this consumer's state after a reactive computation has run.
- *
- * Must be called by subclasses which represent reactive computations, after those computations
- * have finished.
- */
-function consumerAfterComputation(node, prevConsumer) {
-    setActiveConsumer(prevConsumer);
-    if (!node ||
-        node.producerNode === undefined ||
-        node.producerIndexOfThis === undefined ||
-        node.producerLastReadVersion === undefined) {
-        return;
-    }
-    if (consumerIsLive(node)) {
-        // For live consumers, we need to remove the producer -> consumer edge for any stale producers
-        // which weren't dependencies after the recomputation.
-        for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Truncate the producer tracking arrays.
-    // Perf note: this is essentially truncating the length to `node.nextProducerIndex`, but
-    // benchmarking has shown that individual pop operations are faster.
-    while (node.producerNode.length > node.nextProducerIndex) {
-        node.producerNode.pop();
-        node.producerLastReadVersion.pop();
-        node.producerIndexOfThis.pop();
-    }
-}
-/**
- * Determine whether this consumer has any dependencies which have changed since the last time
- * they were read.
- */
-function consumerPollProducersForChange(node) {
-    assertConsumerNode(node);
-    // Poll producers for change.
-    for (let i = 0; i < node.producerNode.length; i++) {
-        const producer = node.producerNode[i];
-        const seenVersion = node.producerLastReadVersion[i];
-        // First check the versions. A mismatch means that the producer's value is known to have
-        // changed since the last time we read it.
-        if (seenVersion !== producer.version) {
-            return true;
-        }
-        // The producer's version is the same as the last time we read it, but it might itself be
-        // stale. Force the producer to recompute its version (calculating a new value if necessary).
-        producerUpdateValueVersion(producer);
-        // Now when we do this check, `producer.version` is guaranteed to be up to date, so if the
-        // versions still match then it has not changed since the last time we read it.
-        if (seenVersion !== producer.version) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * Disconnect this consumer from the graph.
- */
-function consumerDestroy(node) {
-    assertConsumerNode(node);
-    if (consumerIsLive(node)) {
-        // Drop all connections from the graph to this node.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Truncate all the arrays to drop all connection from this node to the graph.
-    node.producerNode.length =
-        node.producerLastReadVersion.length =
-            node.producerIndexOfThis.length =
-                0;
-    if (node.liveConsumerNode) {
-        node.liveConsumerNode.length = node.liveConsumerIndexOfThis.length = 0;
-    }
-}
-/**
- * Add `consumer` as a live consumer of this node.
- *
- * Note that this operation is potentially transitive. If this node becomes live, then it becomes
- * a live consumer of all of its current producers.
- */
-function producerAddLiveConsumer(node, consumer, indexOfThis) {
-    assertProducerNode(node);
-    if (node.liveConsumerNode.length === 0 && isConsumerNode(node)) {
-        // When going from 0 to 1 live consumers, we become a live consumer to our producers.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
-        }
-    }
-    node.liveConsumerIndexOfThis.push(indexOfThis);
-    return node.liveConsumerNode.push(consumer) - 1;
-}
-/**
- * Remove the live consumer at `idx`.
- */
-function producerRemoveLiveConsumerAtIndex(node, idx) {
-    assertProducerNode(node);
-    if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
-        throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
-    }
-    if (node.liveConsumerNode.length === 1 && isConsumerNode(node)) {
-        // When removing the last live consumer, we will no longer be live. We need to remove
-        // ourselves from our producers' tracking (which may cause consumer-producers to lose
-        // liveness as well).
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Move the last value of `liveConsumers` into `idx`. Note that if there's only a single
-    // live consumer, this is a no-op.
-    const lastIdx = node.liveConsumerNode.length - 1;
-    node.liveConsumerNode[idx] = node.liveConsumerNode[lastIdx];
-    node.liveConsumerIndexOfThis[idx] = node.liveConsumerIndexOfThis[lastIdx];
-    // Truncate the array.
-    node.liveConsumerNode.length--;
-    node.liveConsumerIndexOfThis.length--;
-    // If the index is still valid, then we need to fix the index pointer from the producer to this
-    // consumer, and update it from `lastIdx` to `idx` (accounting for the move above).
-    if (idx < node.liveConsumerNode.length) {
-        const idxProducer = node.liveConsumerIndexOfThis[idx];
-        const consumer = node.liveConsumerNode[idx];
-        assertConsumerNode(consumer);
-        consumer.producerIndexOfThis[idxProducer] = idx;
-    }
-}
-function consumerIsLive(node) {
-    return node.consumerIsAlwaysLive || (node?.liveConsumerNode?.length ?? 0) > 0;
-}
-function assertConsumerNode(node) {
-    node.producerNode ??= [];
-    node.producerIndexOfThis ??= [];
-    node.producerLastReadVersion ??= [];
-}
-function assertProducerNode(node) {
-    node.liveConsumerNode ??= [];
-    node.liveConsumerIndexOfThis ??= [];
-}
-function isConsumerNode(node) {
-    return node.producerNode !== undefined;
-}
-
-/**
- * Create a computed signal which derives a reactive value from an expression.
- */
-function createComputed(computation) {
-    const node = Object.create(COMPUTED_NODE);
-    node.computation = computation;
-    const computed = () => {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion(node);
-        // Record that someone looked at this signal.
-        producerAccessed(node);
-        if (node.value === ERRORED) {
-            throw node.error;
-        }
-        return node.value;
-    };
-    computed[SIGNAL] = node;
-    return computed;
-}
-/**
- * A dedicated symbol used before a computed value has been calculated for the first time.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const UNSET = /* @__PURE__ */ Symbol('UNSET');
-/**
- * A dedicated symbol used in place of a computed signal value to indicate that a given computation
- * is in progress. Used to detect cycles in computation chains.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
-/**
- * A dedicated symbol used in place of a computed signal value to indicate that a given computation
- * failed. The thrown error is cached until the computation gets dirty again.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const COMPUTED_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        value: UNSET,
-        dirty: true,
-        error: null,
-        equal: defaultEquals,
-        kind: 'computed',
-        producerMustRecompute(node) {
-            // Force a recomputation if there's no current value, or if the current value is in the
-            // process of being calculated (which should throw an error).
-            return node.value === UNSET || node.value === COMPUTING;
-        },
-        producerRecomputeValue(node) {
-            if (node.value === COMPUTING) {
-                // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
-            }
-            const oldValue = node.value;
-            node.value = COMPUTING;
-            const prevConsumer = consumerBeforeComputation(node);
-            let newValue;
-            let wasEqual = false;
-            try {
-                newValue = node.computation();
-                // We want to mark this node as errored if calling `equal` throws; however, we don't want
-                // to track any reactive reads inside `equal`.
-                setActiveConsumer(null);
-                wasEqual =
-                    oldValue !== UNSET &&
-                        oldValue !== ERRORED &&
-                        newValue !== ERRORED &&
-                        node.equal(oldValue, newValue);
-            }
-            catch (err) {
-                newValue = ERRORED;
-                node.error = err;
-            }
-            finally {
-                consumerAfterComputation(node, prevConsumer);
-            }
-            if (wasEqual) {
-                // No change to `valueVersion` - old and new values are
-                // semantically equivalent.
-                node.value = oldValue;
-                return;
-            }
-            node.value = newValue;
-            node.version++;
-        },
-    };
-})();
-
-function defaultThrowError() {
-    throw new Error();
-}
-let throwInvalidWriteToSignalErrorFn = defaultThrowError;
-function throwInvalidWriteToSignalError(node) {
-    throwInvalidWriteToSignalErrorFn(node);
-}
-function setThrowInvalidWriteToSignalError(fn) {
-    throwInvalidWriteToSignalErrorFn = fn;
-}
-
-/**
- * If set, called after `WritableSignal`s are updated.
- *
- * This hook can be used to achieve various effects, such as running effects synchronously as part
- * of setting a signal.
- */
-let postSignalSetFn = null;
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function createSignal(initialValue) {
-    const node = Object.create(SIGNAL_NODE);
-    node.value = initialValue;
-    const getter = (() => {
-        producerAccessed(node);
-        return node.value;
-    });
-    getter[SIGNAL] = node;
-    return getter;
-}
-function setPostSignalSetFn(fn) {
-    const prev = postSignalSetFn;
-    postSignalSetFn = fn;
-    return prev;
-}
-function signalGetFn() {
-    producerAccessed(this);
-    return this.value;
-}
-function signalSetFn(node, newValue) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError(node);
-    }
-    if (!node.equal(node.value, newValue)) {
-        node.value = newValue;
-        signalValueChanged(node);
-    }
-}
-function signalUpdateFn(node, updater) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError(node);
-    }
-    signalSetFn(node, updater(node.value));
-}
-function runPostSignalSetFn() {
-    postSignalSetFn?.();
-}
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        equal: defaultEquals,
-        value: undefined,
-        kind: 'signal',
-    };
-})();
-function signalValueChanged(node) {
-    node.version++;
-    producerIncrementEpoch();
-    producerNotifyConsumers(node);
-    postSignalSetFn?.();
-}
-
-function createLinkedSignal(sourceFn, computationFn, equalityFn) {
-    const node = Object.create(LINKED_SIGNAL_NODE);
-    node.source = sourceFn;
-    node.computation = computationFn;
-    if (equalityFn != undefined) {
-        node.equal = equalityFn;
-    }
-    const linkedSignalGetter = () => {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion(node);
-        // Record that someone looked at this signal.
-        producerAccessed(node);
-        if (node.value === ERRORED) {
-            throw node.error;
-        }
-        return node.value;
-    };
-    const getter = linkedSignalGetter;
-    getter[SIGNAL] = node;
-    return getter;
-}
-function linkedSignalSetFn(node, newValue) {
-    producerUpdateValueVersion(node);
-    signalSetFn(node, newValue);
-    producerMarkClean(node);
-}
-function linkedSignalUpdateFn(node, updater) {
-    producerUpdateValueVersion(node);
-    signalUpdateFn(node, updater);
-    producerMarkClean(node);
-}
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        value: UNSET,
-        dirty: true,
-        error: null,
-        equal: defaultEquals,
-        producerMustRecompute(node) {
-            // Force a recomputation if there's no current value, or if the current value is in the
-            // process of being calculated (which should throw an error).
-            return node.value === UNSET || node.value === COMPUTING;
-        },
-        producerRecomputeValue(node) {
-            if (node.value === COMPUTING) {
-                // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
-            }
-            const oldValue = node.value;
-            node.value = COMPUTING;
-            const prevConsumer = consumerBeforeComputation(node);
-            let newValue;
-            try {
-                const newSourceValue = node.source();
-                const prev = oldValue === UNSET || oldValue === ERRORED
-                    ? undefined
-                    : {
-                        source: node.sourceValue,
-                        value: oldValue,
-                    };
-                newValue = node.computation(newSourceValue, prev);
-                node.sourceValue = newSourceValue;
-            }
-            catch (err) {
-                newValue = ERRORED;
-                node.error = err;
-            }
-            finally {
-                consumerAfterComputation(node, prevConsumer);
-            }
-            if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
-                // No change to `valueVersion` - old and new values are
-                // semantically equivalent.
-                node.value = oldValue;
-                return;
-            }
-            node.value = newValue;
-            node.version++;
-        },
-    };
-})();
-
-function createWatch(fn, schedule, allowSignalWrites) {
-    const node = Object.create(WATCH_NODE);
-    if (allowSignalWrites) {
-        node.consumerAllowSignalWrites = true;
-    }
-    node.fn = fn;
-    node.schedule = schedule;
-    const registerOnCleanup = (cleanupFn) => {
-        node.cleanupFn = cleanupFn;
-    };
-    function isWatchNodeDestroyed(node) {
-        return node.fn === null && node.schedule === null;
-    }
-    function destroyWatchNode(node) {
-        if (!isWatchNodeDestroyed(node)) {
-            consumerDestroy(node); // disconnect watcher from the reactive graph
-            node.cleanupFn();
-            // nullify references to the integration functions to mark node as destroyed
-            node.fn = null;
-            node.schedule = null;
-            node.cleanupFn = NOOP_CLEANUP_FN;
-        }
-    }
-    const run = () => {
-        if (node.fn === null) {
-            // trying to run a destroyed watch is noop
-            return;
-        }
-        if (isInNotificationPhase()) {
-            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
-        }
-        node.dirty = false;
-        if (node.hasRun && !consumerPollProducersForChange(node)) {
-            return;
-        }
-        node.hasRun = true;
-        const prevConsumer = consumerBeforeComputation(node);
-        try {
-            node.cleanupFn();
-            node.cleanupFn = NOOP_CLEANUP_FN;
-            node.fn(registerOnCleanup);
-        }
-        finally {
-            consumerAfterComputation(node, prevConsumer);
-        }
-    };
-    node.ref = {
-        notify: () => consumerMarkDirty(node),
-        run,
-        cleanup: () => node.cleanupFn(),
-        destroy: () => destroyWatchNode(node),
-        [SIGNAL]: node,
-    };
-    return node.ref;
-}
-const NOOP_CLEANUP_FN = () => { };
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const WATCH_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        consumerIsAlwaysLive: true,
-        consumerAllowSignalWrites: false,
-        consumerMarkedDirty: (node) => {
-            if (node.schedule !== null) {
-                node.schedule(node.ref);
-            }
-        },
-        hasRun: false,
-        cleanupFn: NOOP_CLEANUP_FN,
-    };
-})();
-
-function setAlternateWeakRefImpl(impl) {
-    // TODO: remove this function
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked$1(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer(prevConsumer);
-    }
-}
 
 /**
  * Internal create application API that implements the core application creation logic and optional
@@ -39632,7 +38295,7 @@ function annotateComponentLViewForHydration(lView, context, injector) {
 function annotateLContainerForHydration(lContainer, context, injector) {
     const componentLView = unwrapLView(lContainer[HOST]);
     // Serialize the root component itself.
-    const componentLViewNghIndex = annotateComponentLViewForHydration(componentLView, context, injector);
+    const componentLViewNghIndex = annotateComponentLViewForHydration(componentLView, context);
     if (componentLViewNghIndex === null) {
         // Component was not serialized (for example, if hydration was skipped by adding
         // the `ngSkipHydration` attribute or this component uses i18n blocks in the template,
@@ -39697,10 +38360,10 @@ function annotateForHydration(appRef, doc) {
                 deferBlocks,
             };
             if (isLContainer(lNode)) {
-                annotateLContainerForHydration(lNode, context, injector);
+                annotateLContainerForHydration(lNode, context);
             }
             else {
-                annotateComponentLViewForHydration(lNode, context, injector);
+                annotateComponentLViewForHydration(lNode, context);
             }
             insertCorruptedTextNodeMarkers(corruptedTextNodes, doc);
         }
@@ -39755,7 +38418,7 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                 // `<app-root /><#VIEW1><#VIEW2>...<!--container-->`
                 // The `+1` is to capture the `<app-root />` element.
                 numRootNodes = calcNumRootNodesInLContainer(childLView) + 1;
-                annotateLContainerForHydration(childLView, context, lView[INJECTOR]);
+                annotateLContainerForHydration(childLView, context);
                 const componentLView = unwrapLView(childLView[HOST]);
                 serializedView = {
                     [TEMPLATE_ID]: componentLView[TVIEW].ssrId,
@@ -40639,14 +39302,14 @@ function disableProfiling() {
  * can, optionally, return a value.
  */
 function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer$1(null);
+    const prevConsumer = setActiveConsumer(null);
     // We are not trying to catch any particular errors here, just making sure that the consumers
     // stack is restored in case of errors.
     try {
         return nonReactiveReadsFn();
     }
     finally {
-        setActiveConsumer$1(prevConsumer);
+        setActiveConsumer(prevConsumer);
     }
 }
 
@@ -40654,13 +39317,13 @@ function untracked(nonReactiveReadsFn) {
  * Create a computed `Signal` which derives a reactive value from an expression.
  */
 function computed(computation, options) {
-    const getter = createComputed$1(computation);
+    const getter = createComputed(computation);
     if (options?.equal) {
-        getter[SIGNAL$1].equal = options.equal;
+        getter[SIGNAL].equal = options.equal;
     }
     if (ngDevMode) {
         getter.toString = () => `[Computed: ${getter()}]`;
-        getter[SIGNAL$1].debugName = options?.debugName;
+        getter[SIGNAL].debugName = options?.debugName;
     }
     return getter;
 }
@@ -40718,7 +39381,7 @@ class EffectHandle {
         this.effectFn = effectFn;
         this.zone = zone;
         this.injector = injector;
-        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.watcher = createWatch((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
     }
     runEffect(onCleanup) {
@@ -40781,21 +39444,13 @@ function microtaskEffect(effectFn, options) {
 }
 
 let useMicrotaskEffectsByDefault = USE_MICROTASK_EFFECT_BY_DEFAULT;
-/**
- * Toggle the flag on whether to use microtask effects (for testing).
- */
-function setUseMicrotaskEffectsByDefault(value) {
-    const prev = useMicrotaskEffectsByDefault;
-    useMicrotaskEffectsByDefault = value;
-    return prev;
-}
 class EffectRefImpl {
-    [SIGNAL$1];
+    [SIGNAL];
     constructor(node) {
-        this[SIGNAL$1] = node;
+        this[SIGNAL] = node;
     }
     destroy() {
-        this[SIGNAL$1].destroy();
+        this[SIGNAL].destroy();
     }
 }
 /**
@@ -40870,13 +39525,13 @@ function effect(effectFn, options) {
  * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
  * injector.
  */
-const APP_EFFECT_SCHEDULER = /* @__PURE__ */ new InjectionToken('', {
+/* @__PURE__ */ new InjectionToken('', {
     providedIn: 'root',
     factory: () => inject(EffectScheduler),
 });
 const BASE_EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
-    ...REACTIVE_NODE$1,
+    ...REACTIVE_NODE,
     consumerIsAlwaysLive: true,
     consumerAllowSignalWrites: true,
     dirty: true,
@@ -40887,15 +39542,15 @@ const BASE_EFFECT_NODE =
     onDestroyFn: noop,
     run() {
         this.dirty = false;
-        if (ngDevMode && isInNotificationPhase$1()) {
+        if (ngDevMode && isInNotificationPhase()) {
             throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
         }
-        if (this.hasRun && !consumerPollProducersForChange$1(this)) {
+        if (this.hasRun && !consumerPollProducersForChange(this)) {
             return;
         }
         this.hasRun = true;
         const registerCleanupFn = (cleanupFn) => (this.cleanupFns ??= []).push(cleanupFn);
-        const prevNode = consumerBeforeComputation$1(this);
+        const prevNode = consumerBeforeComputation(this);
         // We clear `setIsRefreshingViews` so that `markForCheck()` within the body of an effect will
         // cause CD to reach the component in question.
         const prevRefreshingViews = setIsRefreshingViews(false);
@@ -40905,7 +39560,7 @@ const BASE_EFFECT_NODE =
         }
         finally {
             setIsRefreshingViews(prevRefreshingViews);
-            consumerAfterComputation$1(this, prevNode);
+            consumerAfterComputation(this, prevNode);
         }
     },
     maybeCleanup() {
@@ -40933,7 +39588,7 @@ const ROOT_EFFECT_NODE =
         this.notifier.notify(12 /* NotificationSource.RootEffect */);
     },
     destroy() {
-        consumerDestroy$1(this);
+        consumerDestroy(this);
         this.onDestroyFn();
         this.maybeCleanup();
         this.scheduler.remove(this);
@@ -40948,7 +39603,7 @@ const VIEW_EFFECT_NODE =
         this.notifier.notify(13 /* NotificationSource.ViewEffect */);
     },
     destroy() {
-        consumerDestroy$1(this);
+        consumerDestroy(this);
         this.onDestroyFn();
         this.maybeCleanup();
         this.view[EFFECTS]?.delete(this);
@@ -41020,11 +39675,11 @@ var ResourceStatus;
 const identityFn = (v) => v;
 function linkedSignal(optionsOrComputation, options) {
     if (typeof optionsOrComputation === 'function') {
-        const getter = createLinkedSignal$1(optionsOrComputation, (identityFn), options?.equal);
+        const getter = createLinkedSignal(optionsOrComputation, (identityFn), options?.equal);
         return upgradeLinkedSignalGetter(getter);
     }
     else {
-        const getter = createLinkedSignal$1(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
+        const getter = createLinkedSignal(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
         return upgradeLinkedSignalGetter(getter);
     }
 }
@@ -41032,10 +39687,10 @@ function upgradeLinkedSignalGetter(getter) {
     if (ngDevMode) {
         getter.toString = () => `[LinkedSignal: ${getter()}]`;
     }
-    const node = getter[SIGNAL$1];
+    const node = getter[SIGNAL];
     const upgradedGetter = getter;
-    upgradedGetter.set = (newValue) => linkedSignalSetFn$1(node, newValue);
-    upgradedGetter.update = (updateFn) => linkedSignalUpdateFn$1(node, updateFn);
+    upgradedGetter.set = (newValue) => linkedSignalSetFn(node, newValue);
+    upgradedGetter.update = (updateFn) => linkedSignalUpdateFn(node, updateFn);
     upgradedGetter.asReadonly = signalAsReadonlyFn.bind(getter);
     return upgradedGetter;
 }
@@ -41477,12 +40132,10 @@ function ɵɵngDeclarePipe(decl) {
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
 }
 
-// we reexport these symbols just so that they are retained during the dead code elimination
-
 const NOT_SET = Symbol('NOT_SET');
 const EMPTY_CLEANUP_SET = new Set();
 const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
-    ...SIGNAL_NODE$1,
+    ...SIGNAL_NODE,
     consumerIsAlwaysLive: true,
     consumerAllowSignalWrites: true,
     value: NOT_SET,
@@ -41510,7 +40163,7 @@ const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
             return this.signal;
         }
         this.dirty = false;
-        if (this.value !== NOT_SET && !consumerPollProducersForChange$1(this)) {
+        if (this.value !== NOT_SET && !consumerPollProducersForChange(this)) {
             // None of our producers report a change since the last time they were read, so no
             // recomputation of our value is necessary.
             return this.signal;
@@ -41533,13 +40186,13 @@ const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
         }
         args.push(this.registerCleanupFn);
         // Call the user's callback in our reactive context.
-        const prevConsumer = consumerBeforeComputation$1(this);
+        const prevConsumer = consumerBeforeComputation(this);
         let newValue;
         try {
             newValue = this.userFn.apply(null, args);
         }
         finally {
-            consumerAfterComputation$1(this, prevConsumer);
+            consumerAfterComputation(this, prevConsumer);
         }
         if (this.value === NOT_SET || !this.equal(this.value, newValue)) {
             this.value = newValue;
@@ -41583,10 +40236,10 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
             node.userFn = effectHook;
             node.dirty = true;
             node.signal = (() => {
-                producerAccessed$1(node);
+                producerAccessed(node);
                 return node.value;
             });
-            node.signal[SIGNAL$1] = node;
+            node.signal[SIGNAL] = node;
             node.registerCleanupFn = (fn) => (node.cleanup ??= new Set()).add(fn);
             this.nodes[phase] = node;
             // Install the upstream hook which runs the `phaseFn` for this phase.
@@ -41633,8 +40286,6 @@ function afterRenderEffect(callbackOrSpec, options) {
     manager.impl.register(sequence);
     return sequence;
 }
-
-// This file exists to allow the set of reactivity exports to be modified in g3, as these APIs are
 
 /**
  * Creates a `ComponentRef` instance based on provided component type and a set of options.
@@ -41847,40 +40498,5 @@ const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || n
     factory: () => null,
 });
 
-/**
- * @module
- * @description
- * Entry point from which you should import all public core APIs.
- */
-if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    // This helper is to give a reasonable error message to people upgrading to v9 that have not yet
-    // installed `@angular/localize` in their app.
-    // tslint:disable-next-line: no-toplevel-property-access
-    _global.$localize ??= function () {
-        throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
-            'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
-            'Please run `ng add @angular/localize` from the Angular CLI.\n' +
-            "(For non-CLI projects, add `import '@angular/localize/init';` to your `polyfills.ts` file.\n" +
-            'For server-side rendering applications add the import to your `main.server.ts` file.)');
-    };
-}
-
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-// This file only reexports content of the `src` folder. Keep it that way.
-
-/* This file is not used to build this module. It is only used during editing
- * by the TypeScript language service and during build for verification. `ngc`
- * replaces this file with production index.ts when it rewrites private symbol
- * names.
- */
-
-/**
- * Generated bundle index. Do not edit.
- */
-
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

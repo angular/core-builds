@@ -1,8 +1,10 @@
 /**
- * @license Angular v19.2.1+sha-dad02c6
+ * @license Angular v19.2.1+sha-48dc0d6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
+
+export { s as setAlternateWeakRefImpl } from '../weak_ref-101188f1.mjs';
 
 /**
  * The default equality function used for `signal` and `computed`, which uses referential equality.
@@ -453,10 +455,6 @@ function setPostSignalSetFn(fn) {
     postSignalSetFn = fn;
     return prev;
 }
-function signalGetFn() {
-    producerAccessed(this);
-    return this.value;
-}
 function signalSetFn(node, newValue) {
     if (!producerUpdatesAllowed()) {
         throwInvalidWriteToSignalError(node);
@@ -652,10 +650,6 @@ const WATCH_NODE = /* @__PURE__ */ (() => {
     };
 })();
 
-function setAlternateWeakRefImpl(impl) {
-    // TODO: remove this function
-}
-
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
  * can, optionally, return a value.
@@ -672,5 +666,5 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
 //# sourceMappingURL=signals.mjs.map
