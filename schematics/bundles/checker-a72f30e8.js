@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-aa1ab41
+ * @license Angular v20.0.0-next.1+sha-a02e270
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31386,7 +31386,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.1+sha-aa1ab41');
+new Version('20.0.0-next.1+sha-a02e270');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32318,7 +32318,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-e8a16b54.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-a72f30e8.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -34295,8 +34295,8 @@ function toR3Reference(origin, ref, context, refEmitter) {
 function isAngularCore(decorator) {
     return decorator.import !== null && decorator.import.from === CORE_MODULE;
 }
-function isAngularCoreReference(reference, symbolName) {
-    return reference.ownedByModuleGuess === CORE_MODULE && reference.debugName === symbolName;
+function isAngularCoreReference(reference, symbolName, isCore) {
+    return ((reference.ownedByModuleGuess === CORE_MODULE || isCore) && reference.debugName === symbolName);
 }
 function findAngularDecorator(decorators, name, isCore) {
     return decorators.find((decorator) => isAngularDecorator(decorator, name, isCore));
@@ -34392,18 +34392,20 @@ function tryUnwrapForwardRef(node, reflector) {
  * @param args the arguments to the invocation of the forwardRef expression
  * @returns an unwrapped argument if `ref` pointed to forwardRef, or null otherwise
  */
-const forwardRefResolver = (fn, callExpr, resolve, unresolvable) => {
-    if (!isAngularCoreReference(fn, 'forwardRef') || callExpr.arguments.length !== 1) {
-        return unresolvable;
-    }
-    const expanded = expandForwardRef(callExpr.arguments[0]);
-    if (expanded !== null) {
-        return resolve(expanded);
-    }
-    else {
-        return unresolvable;
-    }
-};
+function createForwardRefResolver(isCore) {
+    return (fn, callExpr, resolve, unresolvable) => {
+        if (!isAngularCoreReference(fn, 'forwardRef', isCore) || callExpr.arguments.length !== 1) {
+            return unresolvable;
+        }
+        const expanded = expandForwardRef(callExpr.arguments[0]);
+        if (expanded !== null) {
+            return resolve(expanded);
+        }
+        else {
+            return unresolvable;
+        }
+    };
+}
 /**
  * Combines an array of resolver functions into a one.
  * @param resolvers Resolvers to be combined.
@@ -46650,6 +46652,7 @@ exports.copyFileShimData = copyFileShimData;
 exports.createComponentType = createComponentType;
 exports.createDirectiveType = createDirectiveType;
 exports.createFactoryType = createFactoryType;
+exports.createForwardRefResolver = createForwardRefResolver;
 exports.createHostDirectivesMappingArray = createHostDirectivesMappingArray;
 exports.createInjectableType = createInjectableType;
 exports.createInjectorType = createInjectorType;
@@ -46669,7 +46672,6 @@ exports.extractMessages = extractMessages;
 exports.extractReferencesFromType = extractReferencesFromType;
 exports.filterToMembersWithDecorator = filterToMembersWithDecorator;
 exports.findAngularDecorator = findAngularDecorator;
-exports.forwardRefResolver = forwardRefResolver;
 exports.generateForwardRef = generateForwardRef;
 exports.getAngularDecorators = getAngularDecorators;
 exports.getContainingImportDeclaration = getContainingImportDeclaration;
