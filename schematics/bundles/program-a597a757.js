@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-70fb3bb
+ * @license Angular v19.2.1+sha-bde1b37
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-3784dfc6.js');
+var checker = require('./checker-9a0e59d0.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -1011,7 +1011,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1029,7 +1029,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1124,7 +1124,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1540,7 +1540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1575,7 +1575,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1626,7 +1626,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1659,7 +1659,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1710,7 +1710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.1+sha-70fb3bb'));
+    definitionMap.set('version', checker.literal('19.2.1+sha-bde1b37'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5208,12 +5208,13 @@ function assertLocalCompilationUnresolvedConst(compilationMode, value, nodeToHig
     }
 }
 
-function resolveEnumValue(evaluator, metadata, field, enumSymbolName) {
+function resolveEnumValue(evaluator, metadata, field, enumSymbolName, isCore) {
     let resolved = null;
     if (metadata.has(field)) {
         const expr = metadata.get(field);
         const value = evaluator.evaluate(expr);
-        if (value instanceof checker.EnumValue && checker.isAngularCoreReference(value.enumRef, enumSymbolName)) {
+        if (value instanceof checker.EnumValue &&
+            checker.isAngularCoreReference(value.enumRef, enumSymbolName, isCore)) {
             resolved = value.resolved;
         }
         else {
@@ -6955,7 +6956,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     const rawHostDirectives = directive.get('hostDirectives') || null;
     const hostDirectives = rawHostDirectives === null
         ? null
-        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode);
+        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, checker.createForwardRefResolver(isCore));
     if (compilationMode !== checker.CompilationMode.LOCAL && hostDirectives !== null) {
         // In global compilation mode where we do type checking, the template type-checker will need to
         // import host directive types, so add them as referenced by `clazz`. This will ensure that
@@ -7725,8 +7726,8 @@ function getHostBindingErrorNode(error, hostExpr) {
  * Extracts and prepares the host directives metadata from an array literal expression.
  * @param rawHostDirectives Expression that defined the `hostDirectives`.
  */
-function extractHostDirectives(rawHostDirectives, evaluator, compilationMode) {
-    const resolved = evaluator.evaluate(rawHostDirectives, checker.forwardRefResolver);
+function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver) {
+    const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
     if (!Array.isArray(resolved)) {
         throw createValueHasWrongTypeError(rawHostDirectives, resolved, 'hostDirectives must be an array');
     }
@@ -8457,16 +8458,17 @@ class NgModuleDecoratorHandler {
             // The only allowed value is true, so there's no need to expand further.
             return {};
         }
+        const forwardRefResolver = checker.createForwardRefResolver(this.isCore);
         const moduleResolvers = checker.combineResolvers([
             createModuleWithProvidersResolver(this.reflector, this.isCore),
-            checker.forwardRefResolver,
+            forwardRefResolver,
         ]);
         const diagnostics = [];
         // Resolving declarations
         let declarationRefs = [];
         const rawDeclarations = ngModule.get('declarations') ?? null;
         if (rawDeclarations !== null) {
-            const declarationMeta = this.evaluator.evaluate(rawDeclarations, checker.forwardRefResolver);
+            const declarationMeta = this.evaluator.evaluate(rawDeclarations, forwardRefResolver);
             declarationRefs = this.resolveTypeList(rawDeclarations, declarationMeta, name, 'declarations', 0, this.compilationMode === checker.CompilationMode.LOCAL).references;
             // Look through the declarations to make sure they're all a part of the current compilation.
             for (const ref of declarationRefs) {
@@ -8514,7 +8516,7 @@ class NgModuleDecoratorHandler {
         let bootstrapRefs = [];
         const rawBootstrap = ngModule.get('bootstrap') ?? null;
         if (this.compilationMode !== checker.CompilationMode.LOCAL && rawBootstrap !== null) {
-            const bootstrapMeta = this.evaluator.evaluate(rawBootstrap, checker.forwardRefResolver);
+            const bootstrapMeta = this.evaluator.evaluate(rawBootstrap, forwardRefResolver);
             bootstrapRefs = this.resolveTypeList(rawBootstrap, bootstrapMeta, name, 'bootstrap', 0, 
             /* allowUnresolvedReferences */ false).references;
             // Verify that the `@NgModule.bootstrap` list doesn't have Standalone Components.
@@ -10796,12 +10798,12 @@ class ComponentDecoratorHandler {
         // Next, read the `@Component`-specific fields.
         const { decorator: component, metadata, inputs, outputs, hostDirectives, rawHostDirectives, } = directiveResult;
         const encapsulation = (this.compilationMode !== checker.CompilationMode.LOCAL
-            ? resolveEnumValue(this.evaluator, component, 'encapsulation', 'ViewEncapsulation')
+            ? resolveEnumValue(this.evaluator, component, 'encapsulation', 'ViewEncapsulation', this.isCore)
             : resolveEncapsulationEnumValueLocally(component.get('encapsulation'))) ??
             checker.ViewEncapsulation.Emulated;
         let changeDetection = null;
         if (this.compilationMode !== checker.CompilationMode.LOCAL) {
-            changeDetection = resolveEnumValue(this.evaluator, component, 'changeDetection', 'ChangeDetectionStrategy');
+            changeDetection = resolveEnumValue(this.evaluator, component, 'changeDetection', 'ChangeDetectionStrategy', this.isCore);
         }
         else if (component.has('changeDetection')) {
             changeDetection = new checker.WrappedNodeExpr(component.get('changeDetection'));
@@ -10862,7 +10864,7 @@ class ComponentDecoratorHandler {
             (rawImports || rawDeferredImports)) {
             const importResolvers = checker.combineResolvers([
                 createModuleWithProvidersResolver(this.reflector, this.isCore),
-                checker.forwardRefResolver,
+                checker.createForwardRefResolver(this.isCore),
             ]);
             const importDiagnostics = [];
             if (rawImports) {
@@ -20403,7 +20405,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.1+sha-70fb3bb` usually means that core is at head so it supports
+    // A version of `19.2.1+sha-bde1b37` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -21192,7 +21194,7 @@ class NgCompiler {
         return diagnostics;
     }
     makeCompilation() {
-        const isCore = isAngularCorePackage(this.inputProgram);
+        const isCore = this.options._isAngularCoreCompilation ?? isAngularCorePackage(this.inputProgram);
         // Note: If this compilation builds `@angular/core`, we always build in full compilation
         // mode. Code inside the core package is always compatible with itself, so it does not
         // make sense to go through the indirection of partial compilation

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-70fb3bb
+ * @license Angular v19.2.1+sha-bde1b37
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1721,7 +1721,7 @@ export declare interface Component extends Directive {
      */
     template?: string;
     /**
-     * One relative paths or an absolute URL for files containing CSS stylesheet to use
+     * One relative path or an absolute URL for file containing a CSS stylesheet to use
      * in this component.
      */
     styleUrl?: string;
