@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-a02e270
+ * @license Angular v20.0.0-next.1+sha-338818c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18503,7 +18503,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-a02e270']
+        ? ['ng-version', '20.0.0-next.1+sha-338818c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -24032,10 +24032,6 @@ class ApplicationRef {
                 }
             }
         }
-        catch (e) {
-            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-            this.internalErrorHandler(e);
-        }
         finally {
             this._runningTick = false;
             this.tracingSnapshot?.dispose();
@@ -24164,7 +24160,12 @@ class ApplicationRef {
     }
     _loadComponent(componentRef) {
         this.attachView(componentRef.hostView);
-        this.tick();
+        try {
+            this.tick();
+        }
+        catch (e) {
+            this.internalErrorHandler(e);
+        }
         this.components.push(componentRef);
         // Get the listeners lazily to prevent DI cycles.
         const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []);
@@ -34837,7 +34838,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-a02e270');
+const VERSION = new Version('20.0.0-next.1+sha-338818c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -34990,6 +34991,7 @@ class NgZoneChangeDetectionScheduler {
     zone = inject(NgZone);
     changeDetectionScheduler = inject(ChangeDetectionScheduler);
     applicationRef = inject(ApplicationRef);
+    applicationErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
     _onMicrotaskEmptySubscription;
     initialize() {
         if (this._onMicrotaskEmptySubscription) {
@@ -35004,7 +35006,12 @@ class NgZoneChangeDetectionScheduler {
                     return;
                 }
                 this.zone.run(() => {
-                    this.applicationRef.tick();
+                    try {
+                        this.applicationRef.tick();
+                    }
+                    catch (e) {
+                        this.applicationErrorHandler(e);
+                    }
                 });
             },
         });
@@ -35184,6 +35191,7 @@ function trackMicrotaskNotificationForDebugging() {
     }
 }
 class ChangeDetectionSchedulerImpl {
+    applicationErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
     appRef = inject(ApplicationRef);
     taskService = inject(PendingTasksInternal);
     ngZone = inject(NgZone);
@@ -35392,7 +35400,7 @@ class ChangeDetectionSchedulerImpl {
         }
         catch (e) {
             this.taskService.remove(task);
-            throw e;
+            this.applicationErrorHandler(e);
         }
         finally {
             this.cleanup();
