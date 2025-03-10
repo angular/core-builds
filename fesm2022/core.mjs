@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.0-next.1+sha-3602c53
+ * @license Angular v20.0.0-next.1+sha-0cff9a1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, getActiveConsumer, setActiveConsumer, createSignal, signalUpdateFn, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError, isInNotificationPhase, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
-import { getCurrentInjector, NOT_FOUND as NOT_FOUND$1, setCurrentInjector } from '@angular/core/primitives/di';
+import { getCurrentInjector, setCurrentInjector } from '@angular/core/primitives/di';
 export { setCurrentInjector as ɵsetCurrentInjector } from '@angular/core/primitives/di';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, EventPhase, isEarlyEventType, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
@@ -1076,14 +1076,21 @@ const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
  * in the code, thus making them tree-shakable.
  */
 const DI_DECORATOR_FLAG = '__NG_DI_FLAG__';
+/**
+ * A wrapper around an `Injector` that implements the `PrimitivesInjector` interface.
+ *
+ * This is used to allow the `inject` function to be used with the new primitives-based DI system.
+ */
 class RetrievingInjector {
     injector;
     constructor(injector) {
         this.injector = injector;
     }
     retrieve(token, options) {
-        const ngOptions = options;
-        return this.injector.get(token, ngOptions.optional ? NOT_FOUND$1 : THROW_IF_NOT_FOUND, ngOptions);
+        const flags = convertToBitFlags(options) || InjectFlags.Default;
+        return this.injector.get(token, 
+        // When a dependency is requested with an optional flag, DI returns null as the default value.
+        flags & InjectFlags.Optional ? null : undefined, flags);
     }
 }
 const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
@@ -1092,23 +1099,16 @@ const NEW_LINE = /\n/gm;
 const NO_NEW_LINE = 'ɵ';
 const SOURCE = '__source';
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
-    if (getCurrentInjector() === undefined) {
+    const currentInjector = getCurrentInjector();
+    if (currentInjector === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
             `The \`${stringify(token)}\` token injection failed. \`inject()\` function must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
     }
-    else if (getCurrentInjector() === null) {
+    else if (currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
     }
     else {
-        const currentInjector = getCurrentInjector();
-        let injector;
-        if (currentInjector instanceof RetrievingInjector) {
-            injector = currentInjector.injector;
-        }
-        else {
-            injector = currentInjector;
-        }
-        const value = injector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+        const value = currentInjector.retrieve(token, convertToInjectOptions(flags));
         ngDevMode && emitInjectEvent(token, value, flags);
         return value;
     }
@@ -1215,6 +1215,15 @@ function convertToBitFlags(flags) {
         (flags.host && 1 /* InternalInjectFlags.Host */) |
         (flags.self && 2 /* InternalInjectFlags.Self */) |
         (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
+}
+// Converts bitflags to inject options
+function convertToInjectOptions(flags) {
+    return {
+        optional: !!(flags & 8 /* InternalInjectFlags.Optional */),
+        host: !!(flags & 1 /* InternalInjectFlags.Host */),
+        self: !!(flags & 2 /* InternalInjectFlags.Self */),
+        skipSelf: !!(flags & 4 /* InternalInjectFlags.SkipSelf */),
+    };
 }
 function injectArgs(types) {
     const args = [];
@@ -2042,8 +2051,10 @@ class R3Injector extends EnvironmentInjector {
         this.injectorDefTypes = new Set(this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self));
     }
     retrieve(token, options) {
-        const ngOptions = options;
-        return this.get(token, ngOptions.optional ? NOT_FOUND$1 : THROW_IF_NOT_FOUND, ngOptions);
+        const flags = convertToBitFlags(options) || InjectFlags.Default;
+        return this.get(token, 
+        // When a dependency is requested with an optional flag, DI returns null as the default value.
+        flags & InjectFlags.Optional ? null : undefined, flags);
     }
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
@@ -18503,7 +18514,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-3602c53']
+        ? ['ng-version', '20.0.0-next.1+sha-0cff9a1']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34838,7 +34849,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-3602c53');
+const VERSION = new Version('20.0.0-next.1+sha-0cff9a1');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
