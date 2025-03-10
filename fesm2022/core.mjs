@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-0cff9a1
+ * @license Angular v20.0.0-next.1+sha-f2a8006
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7555,7 +7555,7 @@ function makeStateKey(key) {
 }
 function initTransferState() {
     const transferState = new TransferState();
-    if (inject(PLATFORM_ID) === 'browser') {
+    if (typeof ngServerMode === 'undefined' || !ngServerMode) {
         transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
     }
     return transferState;
@@ -18514,7 +18514,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-0cff9a1']
+        ? ['ng-version', '20.0.0-next.1+sha-f2a8006']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34849,7 +34849,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-0cff9a1');
+const VERSION = new Version('20.0.0-next.1+sha-f2a8006');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
