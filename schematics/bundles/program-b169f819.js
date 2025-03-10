@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-3089ab4
+ * @license Angular v20.0.0-next.1+sha-3602c53
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-a72f30e8.js');
+var checker = require('./checker-f5246ea0.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -874,7 +874,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -892,7 +892,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -987,7 +987,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1403,7 +1403,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1438,7 +1438,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1489,7 +1489,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1522,7 +1522,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1573,7 +1573,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3089ab4'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-3602c53'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -9200,6 +9200,46 @@ function extractTemplate(node, template, evaluator, depTracker, resourceLoader, 
         };
     }
 }
+function createEmptyTemplate(componentClass, component, containingFile) {
+    const templateUrl = component.get('templateUrl');
+    const template = component.get('template');
+    return {
+        content: '',
+        diagNodes: [],
+        nodes: [],
+        errors: null,
+        styles: [],
+        styleUrls: [],
+        ngContentSelectors: [],
+        file: new checker.ParseSourceFile('', ''),
+        sourceMapping: templateUrl
+            ? { type: 'direct', node: template }
+            : {
+                type: 'external',
+                componentClass,
+                node: templateUrl,
+                template: '',
+                templateUrl: 'missing.ng.html',
+            },
+        declaration: templateUrl
+            ? {
+                isInline: false,
+                interpolationConfig: checker.InterpolationConfig.fromArray(null),
+                preserveWhitespaces: false,
+                templateUrlExpression: templateUrl,
+                templateUrl: 'missing.ng.html',
+                resolvedTemplateUrl: '/missing.ng.html',
+            }
+            : {
+                isInline: true,
+                interpolationConfig: checker.InterpolationConfig.fromArray(null),
+                preserveWhitespaces: false,
+                expression: template,
+                templateUrl: containingFile,
+                resolvedTemplateUrl: containingFile,
+            },
+    };
+}
 function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedString, sourceMapUrl, options) {
     // We always normalize line endings if the template has been escaped (i.e. is inline).
     const i18nNormalizeLineEndingsInICUs = escapedString || options.i18nNormalizeLineEndingsInICUs;
@@ -10159,7 +10199,7 @@ class TsCreateProgramDriver {
 function extractHmrDependencies(node, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator) {
     const name = ts__default["default"].isClassDeclaration(node) && node.name ? node.name.text : null;
     const visitor = new PotentialTopLevelReadsVisitor();
-    const sourceFile = node.getSourceFile();
+    const sourceFile = ts__default["default"].getOriginalNode(node).getSourceFile();
     // Visit all of the compiled expressions to look for potential
     // local references that would have to be retained.
     definition.expression.visitExpression(visitor, null);
@@ -10492,7 +10532,7 @@ function extractHmrMetatadata(clazz, reflection, evaluator, compilerHost, rootDi
     if (!reflection.isClass(clazz)) {
         return null;
     }
-    const sourceFile = clazz.getSourceFile();
+    const sourceFile = ts__default["default"].getOriginalNode(clazz).getSourceFile();
     const filePath = getProjectRelativePath(sourceFile.fileName, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
     const dependencies = extractHmrDependencies(clazz, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator);
@@ -10520,9 +10560,9 @@ function extractHmrMetatadata(clazz, reflection, evaluator, compilerHost, rootDi
  * Gets the declaration for the function that replaces the metadata of a class during HMR.
  * @param compilationResults Code generated for the class during compilation.
  * @param meta HMR metadata about the class.
- * @param sourceFile File in which the class is defined.
+ * @param declaration Class for which the update declaration is being generated.
  */
-function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, sourceFile) {
+function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, declaration) {
     const namespaceSpecifiers = meta.namespaceDependencies.reduce((result, current) => {
         result.set(current.moduleName, current.assignedName);
         return result;
@@ -10533,6 +10573,7 @@ function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, s
         rewriter: importRewriter,
     });
     const callback = compileHmrUpdateCallback(compilationResults, constantStatements, meta);
+    const sourceFile = ts__default["default"].getOriginalNode(declaration).getSourceFile();
     const node = checker.translateStatement(sourceFile, callback, importManager);
     // The output AST doesn't support modifiers so we have to emit to
     // TS and then update the declaration to add `export default`.
@@ -10917,28 +10958,46 @@ class ComponentDecoratorHandler {
             template = preanalyzed;
         }
         else {
-            const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, this.evaluator, this.depTracker, this.resourceLoader, this.defaultPreserveWhitespaces);
-            template = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
-                enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
-                i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-                usePoisonedData: this.usePoisonedData,
-                enableBlockSyntax: this.enableBlockSyntax,
-                enableLetSyntax: this.enableLetSyntax,
-                preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
-            }, this.compilationMode);
-            if (this.compilationMode === checker.CompilationMode.LOCAL &&
-                template.errors &&
-                template.errors.length > 0) {
-                // Template errors are handled at the type check phase. But we skip this phase in local
-                // compilation mode. As a result we need to handle the errors now and add them to the diagnostics.
-                if (diagnostics === undefined) {
-                    diagnostics = [];
+            try {
+                const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, this.evaluator, this.depTracker, this.resourceLoader, this.defaultPreserveWhitespaces);
+                template = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
+                    enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
+                    i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
+                    usePoisonedData: this.usePoisonedData,
+                    enableBlockSyntax: this.enableBlockSyntax,
+                    enableLetSyntax: this.enableLetSyntax,
+                    preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
+                }, this.compilationMode);
+                if (this.compilationMode === checker.CompilationMode.LOCAL &&
+                    template.errors &&
+                    template.errors.length > 0) {
+                    // Template errors are handled at the type check phase. But we skip this phase in local
+                    // compilation mode. As a result we need to handle the errors now and add them to the diagnostics.
+                    if (diagnostics === undefined) {
+                        diagnostics = [];
+                    }
+                    diagnostics.push(...checker.getTemplateDiagnostics(template.errors, 
+                    // Type check ID is required as part of the ype check, mainly for mapping the
+                    // diagnostic back to its source. But here we are generating the diagnostic outside
+                    // of the type check context, and so we skip the template ID.
+                    '', template.sourceMapping));
                 }
-                diagnostics.push(...checker.getTemplateDiagnostics(template.errors, 
-                // Type check ID is required as part of the ype check, mainly for mapping the
-                // diagnostic back to its source. But here we are generating the diagnostic outside
-                // of the type check context, and so we skip the template ID.
-                '', template.sourceMapping));
+            }
+            catch (e) {
+                if (e instanceof checker.FatalDiagnosticError) {
+                    diagnostics ??= [];
+                    diagnostics.push(e.toDiagnostic());
+                    isPoisoned = true;
+                    // Create an empty template for the missing/invalid template.
+                    // A build will still fail in this case. However, for the language service,
+                    // this allows the component to exist in the compiler registry and prevents
+                    // cascading diagnostics within an IDE due to "missing" components. The
+                    // originating template related errors will still be reported in the IDE.
+                    template = createEmptyTemplate(node, component, containingFile);
+                }
+                else {
+                    throw e;
+                }
             }
         }
         const templateResource = template.declaration.isInline
@@ -11749,7 +11808,7 @@ class ComponentDecoratorHandler {
         const res = checker.compileResults(fac, def, classMetadata, 'ɵcmp', null, null, debugInfo, null);
         return hmrMeta === null || res.length === 0
             ? null
-            : getHmrUpdateDeclaration(res, pool.statements, hmrMeta, node.getSourceFile());
+            : getHmrUpdateDeclaration(res, pool.statements, hmrMeta, node);
     }
     /**
      * Locates defer blocks in case scope information is not available.
@@ -20405,7 +20464,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.1+sha-3089ab4` usually means that core is at head so it supports
+    // A version of `20.0.0-next.1+sha-3602c53` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
