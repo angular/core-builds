@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-a920f87
+ * @license Angular v20.0.0-next.1+sha-e3afa24
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-require('./index-89f94361.js');
+require('./index-148b1e3a.js');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
@@ -19,7 +19,7 @@ var ng_decorators = require('./ng_decorators-ccbd63d1.js');
 var nodes = require('./nodes-7758dbf6.js');
 var checker = require('./checker-f5246ea0.js');
 require('os');
-var program = require('./program-b169f819.js');
+var program = require('./program-6b7935ea.js');
 require('@angular-devkit/core');
 require('module');
 require('url');

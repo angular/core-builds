@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-a920f87
+ * @license Angular v20.0.0-next.1+sha-e3afa24
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6078,9 +6078,10 @@ class OutputEmitterRef {
     /** Emits a new value to the output. */
     emit(value) {
         if (this.destroyed) {
-            throw new RuntimeError(953 /* RuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
+            console.warn(formatRuntimeError(953 /* RuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
                 'Unexpected emit for destroyed `OutputRef`. ' +
-                    'The owning directive/component is destroyed.');
+                    'The owning directive/component is destroyed.'));
+            return;
         }
         if (this.listeners === null) {
             return;
@@ -18514,7 +18515,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-a920f87']
+        ? ['ng-version', '20.0.0-next.1+sha-e3afa24']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34849,7 +34850,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-a920f87');
+const VERSION = new Version('20.0.0-next.1+sha-e3afa24');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

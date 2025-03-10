@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-a920f87
+ * @license Angular v20.0.0-next.1+sha-e3afa24
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -874,7 +874,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -892,7 +892,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -987,7 +987,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1403,7 +1403,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1438,7 +1438,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1489,7 +1489,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1522,7 +1522,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1573,7 +1573,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-a920f87'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-e3afa24'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -13970,7 +13970,9 @@ class FunctionExtractor {
         const implementation = findImplementationOfFunction(this.exportDeclaration, this.typeChecker) ??
             this.exportDeclaration;
         const type = this.typeChecker.getTypeAtLocation(this.exportDeclaration);
-        const overloads = extractCallSignatures(this.name, this.typeChecker, type);
+        const overloads = ts__default["default"].isConstructorDeclaration(this.exportDeclaration)
+            ? constructorOverloads(this.exportDeclaration, this.typeChecker)
+            : extractCallSignatures(this.name, this.typeChecker, type);
         const jsdocsTags = extractJsDocTags(implementation);
         const description = extractJsDocDescription(implementation);
         return {
@@ -13995,6 +13997,25 @@ class FunctionExtractor {
         };
     }
 }
+function constructorOverloads(constructorDeclaration, typeChecker) {
+    const classDeclaration = constructorDeclaration.parent;
+    const constructorNode = classDeclaration.members.filter((member) => {
+        return ts__default["default"].isConstructorDeclaration(member) && !member.body;
+    });
+    return constructorNode.map((n) => {
+        return {
+            name: 'constructor',
+            params: extractAllParams(n.parameters, typeChecker),
+            returnType: typeChecker.getTypeAtLocation(classDeclaration)?.symbol.name,
+            description: extractJsDocDescription(n),
+            entryType: EntryType.Function,
+            jsdocTags: extractJsDocTags(n),
+            rawComment: extractRawJsDoc(n),
+            generics: extractGenerics(n),
+            isNewType: false,
+        };
+    });
+}
 /** Extracts parameters of the given parameter declaration AST nodes. */
 function extractAllParams(params, typeChecker) {
     return params.map((param) => ({
@@ -14012,7 +14033,8 @@ function filterSignatureDeclarations(signatures) {
         const decl = signature.getDeclaration();
         if (ts__default["default"].isFunctionDeclaration(decl) ||
             ts__default["default"].isCallSignatureDeclaration(decl) ||
-            ts__default["default"].isMethodDeclaration(decl)) {
+            ts__default["default"].isMethodDeclaration(decl) ||
+            ts__default["default"].isConstructSignatureDeclaration(decl)) {
             result.push({ signature, decl });
         }
     }
@@ -14112,6 +14134,9 @@ class ClassExtractor {
         else if (ts__default["default"].isAccessor(memberDeclaration)) {
             return this.extractGetterSetter(memberDeclaration);
         }
+        else if (ts__default["default"].isConstructorDeclaration(memberDeclaration)) {
+            return this.extractConstructor(memberDeclaration);
+        }
         // We only expect methods, properties, and accessors. If we encounter something else,
         // return undefined and let the rest of the program filter it out.
         return undefined;
@@ -14157,6 +14182,14 @@ class ClassExtractor {
         return {
             ...this.extractClassProperty(accessor),
             memberType: ts__default["default"].isGetAccessor(accessor) ? MemberType.Getter : MemberType.Setter,
+        };
+    }
+    extractConstructor(constructorDeclaration) {
+        const functionExtractor = new FunctionExtractor('constructor', constructorDeclaration, this.typeChecker);
+        return {
+            ...functionExtractor.extract(),
+            memberType: MemberType.Method,
+            memberTags: this.getMemberTags(constructorDeclaration),
         };
     }
     extractInheritance(declaration) {
@@ -14210,12 +14243,13 @@ class ClassExtractor {
         // classes may narrow types or add method overloads.
         const type = this.typeChecker.getTypeAtLocation(this.declaration);
         const members = type.getProperties();
+        const constructor = type.getSymbol()?.members?.get(ts__default["default"].InternalSymbolName.Constructor);
         // While the properties of the declaration type represent the properties that exist
         // on a class *instance*, static members are properties on the class symbol itself.
         const typeOfConstructor = this.typeChecker.getTypeOfSymbol(type.symbol);
         const staticMembers = typeOfConstructor.getProperties();
         const result = [];
-        for (const member of [...members, ...staticMembers]) {
+        for (const member of [...(constructor ? [constructor] : []), ...members, ...staticMembers]) {
             // A member may have multiple declarations in the case of function overloads.
             const memberDeclarations = this.filterMethodOverloads(member.getDeclarations() ?? []);
             for (const memberDeclaration of memberDeclarations) {
@@ -14230,15 +14264,19 @@ class ClassExtractor {
     filterMethodOverloads(declarations) {
         return declarations.filter((declaration, index) => {
             // Check if the declaration is a function or method
-            if (ts__default["default"].isFunctionDeclaration(declaration) || ts__default["default"].isMethodDeclaration(declaration)) {
+            if (ts__default["default"].isFunctionDeclaration(declaration) ||
+                ts__default["default"].isMethodDeclaration(declaration) ||
+                ts__default["default"].isConstructorDeclaration(declaration)) {
                 // TypeScript ensures that all declarations for a given abstract method appear consecutively.
                 const nextDeclaration = declarations[index + 1];
-                const isNextAbstractMethodWithSameName = nextDeclaration &&
-                    ts__default["default"].isMethodDeclaration(nextDeclaration) &&
-                    nextDeclaration.name.getText() === declaration.name?.getText();
-                // Return only the last occurrence of an abstract method to avoid overload duplication.
+                const isNextMethodWithSameName = nextDeclaration &&
+                    ((ts__default["default"].isMethodDeclaration(nextDeclaration) &&
+                        nextDeclaration.name.getText() === declaration.name?.getText()) ||
+                        (ts__default["default"].isConstructorDeclaration(nextDeclaration) &&
+                            ts__default["default"].isConstructorDeclaration(declaration)));
+                // Return only the last occurrence of a method to avoid overload duplication.
                 // Subsequent overloads or implementations are handled separately by the function extractor.
-                return !isNextAbstractMethodWithSameName;
+                return !isNextMethodWithSameName;
             }
             // Include non-method declarations, such as properties, without filtering.
             return true;
@@ -14279,6 +14317,10 @@ class ClassExtractor {
      *  - The member is marked as internal via JSDoc.
      */
     isMemberExcluded(member) {
+        if (ts__default["default"].isConstructorDeclaration(member)) {
+            // A constructor has no name
+            return false;
+        }
         return (!member.name ||
             !this.isDocumentableMember(member) ||
             (!ts__default["default"].isCallSignatureDeclaration(member) &&
@@ -14292,6 +14334,7 @@ class ClassExtractor {
         return (this.isMethod(member) ||
             this.isProperty(member) ||
             ts__default["default"].isAccessor(member) ||
+            ts__default["default"].isConstructorDeclaration(member) ||
             // Signatures are documentable if they are part of an interface.
             ts__default["default"].isCallSignatureDeclaration(member));
     }
@@ -20464,7 +20507,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.1+sha-a920f87` usually means that core is at head so it supports
+    // A version of `20.0.0-next.1+sha-e3afa24` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
