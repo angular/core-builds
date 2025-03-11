@@ -1,34 +1,28 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var compiler_host = require('./compiler_host-469692fa.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var compiler_host = require('./compiler_host-DzM2hemp.js');
 var ts = require('typescript');
-var imports = require('./imports-047fbbc8.js');
+var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
-require('./checker-f433e61e.js');
+require('./checker-DP-zos5Q.js');
 require('os');
 require('fs');
 require('module');
 require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 const CORE = '@angular/core';
 const EXPERIMENTAL_PENDING_TASKS = 'ExperimentalPendingTasks';
 function migrateFile(sourceFile, typeChecker, rewriteFn) {
-    const changeTracker = new compiler_host.ChangeTracker(ts__default["default"].createPrinter());
+    const changeTracker = new compiler_host.ChangeTracker(ts.createPrinter());
     // Check if there are any imports of the `AfterRenderPhase` enum.
     const coreImports = imports.getNamedImports(sourceFile, CORE);
     if (!coreImports) {
@@ -39,21 +33,21 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
         return;
     }
     const nodeToReplace = importSpecifier.propertyName ?? importSpecifier.name;
-    if (!ts__default["default"].isIdentifier(nodeToReplace)) {
+    if (!ts.isIdentifier(nodeToReplace)) {
         return;
     }
-    changeTracker.replaceNode(nodeToReplace, ts__default["default"].factory.createIdentifier('PendingTasks'));
-    ts__default["default"].forEachChild(sourceFile, function visit(node) {
+    changeTracker.replaceNode(nodeToReplace, ts.factory.createIdentifier('PendingTasks'));
+    ts.forEachChild(sourceFile, function visit(node) {
         // import handled above
-        if (ts__default["default"].isImportDeclaration(node)) {
+        if (ts.isImportDeclaration(node)) {
             return;
         }
-        if (ts__default["default"].isIdentifier(node) &&
+        if (ts.isIdentifier(node) &&
             node.text === EXPERIMENTAL_PENDING_TASKS &&
             imports.getImportOfIdentifier(typeChecker, node)?.name === EXPERIMENTAL_PENDING_TASKS) {
-            changeTracker.replaceNode(node, ts__default["default"].factory.createIdentifier('PendingTasks'));
+            changeTracker.replaceNode(node, ts.factory.createIdentifier('PendingTasks'));
         }
-        ts__default["default"].forEachChild(node, visit);
+        ts.forEachChild(node, visit);
     });
     // Write the changes.
     for (const changesInFile of changeTracker.recordChanges().values()) {

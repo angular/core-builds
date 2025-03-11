@@ -1,23 +1,10 @@
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-
-/**
- * Records information about the action that should handle a given `Event`.
- */
-declare interface ActionInfo {
-    name: string;
-    element: Element;
-}
-
-declare type ActionInfoInternal = [name: string, element: Element];
-
-
-export declare const Attribute: {
+declare const Attribute: {
     /**
      * The jsaction attribute defines a mapping of a DOM event to a
      * generic event (aka jsaction), to which the actual event handlers
@@ -34,45 +21,107 @@ export declare const Attribute: {
 };
 
 /**
- * Creates an `EarlyJsactionData`, adds events to it, and populates it on a nested object on
- * the window.
+ * Reads the jsaction parser cache for the given DOM element. If no cache is yet present,
+ * creates an empty one.
  */
-export declare function bootstrapAppScopedEarlyEventContract(container: HTMLElement, appId: string, bubbleEventTypes: string[], captureEventTypes: string[], dataContainer?: EarlyJsactionDataContainer): void;
-
-/** Clear the early event contract. */
-export declare function clearAppScopedEarlyEventContract(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
-
-/** Clones an `EventInfo` */
-declare function cloneEventInfo(eventInfo: EventInfo): EventInfo;
+declare function getDefaulted(element: Element): {
+    [key: string]: string | undefined;
+};
 
 /**
- * Utility function for creating an `EventInfo`.
+ * Records information about the action that should handle a given `Event`.
+ */
+interface ActionInfo {
+    name: string;
+    element: Element;
+}
+type ActionInfoInternal = [name: string, element: Element];
+/**
+ * Records information for later handling of events. This type is
+ * shared, and instances of it are passed, between the eventcontract
+ * and the dispatcher jsbinary. Therefore, the fields of this type are
+ * referenced by string literals rather than property literals
+ * throughout the code.
+ *
+ * 'targetElement' is the element the action occurred on, 'actionElement'
+ * is the element that has the jsaction handler.
+ *
+ * A null 'actionElement' identifies an EventInfo instance that didn't match a
+ * jsaction attribute.  This allows us to execute global event handlers with the
+ * appropriate event type (including a11y clicks and custom events).
+ * The declare portion of this interface creates a set of externs that make sure
+ * renaming doesn't happen for EventInfo. This is important since EventInfo
+ * is shared across multiple binaries.
+ */
+declare interface EventInfo {
+    eventType: string;
+    event: Event;
+    targetElement: Element;
+    /** The element that is the container for this Event. */
+    eic: Element;
+    timeStamp: number;
+    /**
+     * The action parsed from the JSAction element.
+     */
+    eia?: ActionInfoInternal;
+    /**
+     * Whether this `Event` is a replay event, meaning no dispatcher was
+     * installed when this `Event` was originally dispatched.
+     */
+    eirp?: boolean;
+    /**
+     * Whether this `Event` represents a `keydown` event that should be processed
+     * as a `click`. Only used when a11y click events is on.
+     */
+    eiack?: boolean;
+    /** Whether action resolution has already run on this `EventInfo`. */
+    eir?: boolean;
+}
+/**
+ * Utility class around an `EventInfo`.
  *
  * This should be used in compilation units that are less sensitive to code
  * size.
  */
-declare function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }: {
-    eventType: string;
-    event: Event;
-    targetElement: Element;
-    container: Element;
-    timestamp: number;
-    action?: ActionInfo;
-    isReplay?: boolean;
-    a11yClickKey?: boolean;
-}): EventInfo;
+declare class EventInfoWrapper {
+    readonly eventInfo: EventInfo;
+    constructor(eventInfo: EventInfo);
+    getEventType(): string;
+    setEventType(eventType: string): void;
+    getEvent(): Event;
+    setEvent(event: Event): void;
+    getTargetElement(): Element;
+    setTargetElement(targetElement: Element): void;
+    getContainer(): Element;
+    setContainer(container: Element): void;
+    getTimestamp(): number;
+    setTimestamp(timestamp: number): void;
+    getAction(): {
+        name: string;
+        element: Element;
+    } | undefined;
+    setAction(action: ActionInfo | undefined): void;
+    getIsReplay(): boolean | undefined;
+    setIsReplay(replay: boolean): void;
+    getResolved(): boolean | undefined;
+    setResolved(resolved: boolean): void;
+    clone(): EventInfoWrapper;
+}
 
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This can be used from code-size sensitive compilation units, as taking
- * parameters vs. an `Object` literal reduces code size.
- */
-declare function createEventInfoFromParameters(eventType: string, event: Event, targetElement: Element, container: Element, timestamp: number, action?: ActionInfoInternal, isReplay?: boolean, a11yClickKey?: boolean): EventInfo;
-
-/** A function that is called to handle events captured by the EventContract. */
-declare type Dispatcher = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
-
+declare interface EarlyJsactionDataContainer {
+    _ejsa?: EarlyJsactionData;
+    _ejsas?: {
+        [appId: string]: EarlyJsactionData | undefined;
+    };
+}
+declare global {
+    interface Window {
+        _ejsa?: EarlyJsactionData;
+        _ejsas?: {
+            [appId: string]: EarlyJsactionData | undefined;
+        };
+    }
+}
 /**
  * Defines the early jsaction data types.
  */
@@ -91,13 +140,92 @@ declare interface EarlyJsactionData {
     c: HTMLElement;
 }
 
-export declare interface EarlyJsactionDataContainer {
-    _ejsa?: EarlyJsactionData;
-    _ejsas?: {
-        [appId: string]: EarlyJsactionData | undefined;
-    };
+/**
+ * An `EventContractContainerManager` provides the common interface for managing
+ * containers.
+ */
+interface EventContractContainerManager {
+    addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void, passive?: boolean): void;
+    cleanUp(): void;
+}
+/**
+ * A class representing a container node and all the event handlers
+ * installed on it. Used so that handlers can be cleaned up if the
+ * container is removed from the contract.
+ */
+declare class EventContractContainer implements EventContractContainerManager {
+    readonly element: Element;
+    /**
+     * Array of event handlers and their corresponding event types that are
+     * installed on this container.
+     *
+     */
+    private handlerInfos;
+    /**
+     * @param element The container Element.
+     */
+    constructor(element: Element);
+    /**
+     * Installs the provided installer on the element owned by this container,
+     * and maintains a reference to resulting handler in order to remove it
+     * later if desired.
+     */
+    addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void, passive?: boolean): void;
+    /**
+     * Removes all the handlers installed on this container.
+     */
+    cleanUp(): void;
 }
 
+/**
+ * @fileoverview An enum to control who can call certain jsaction APIs.
+ */
+declare enum Restriction {
+    I_AM_THE_JSACTION_FRAMEWORK = 0
+}
+
+/**
+ * @fileoverview Implements the local event handling contract. This
+ * allows DOM objects in a container that enters into this contract to
+ * define event handlers which are executed in a local context.
+ *
+ * One EventContract instance can manage the contract for multiple
+ * containers, which are added using the addContainer() method.
+ *
+ * Events can be registered using the addEvent() method.
+ *
+ * A Dispatcher is added using the registerDispatcher() method. Until there is
+ * a dispatcher, events are queued. The idea is that the EventContract
+ * class is inlined in the HTML of the top level page and instantiated
+ * right after the start of <body>. The Dispatcher class is contained
+ * in the external deferred js, and instantiated and registered with
+ * EventContract when the external javascript in the page loads. The
+ * external javascript will also register the jsaction handlers, which
+ * then pick up the queued events at the time of registration.
+ *
+ * Since this class is meant to be inlined in the main page HTML, the
+ * size of the binary compiled from this file MUST be kept as small as
+ * possible and thus its dependencies to a minimum.
+ */
+
+/**
+ * The API of an EventContract that is safe to call from any compilation unit.
+ */
+declare interface UnrenamedEventContract {
+    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
+}
+/** A function that is called to handle events captured by the EventContract. */
+type Dispatcher = (eventInfo: EventInfo, globalDispatch?: boolean) => void;
+/**
+ * A function that handles an event dispatched from the browser.
+ *
+ * eventType: May differ from `event.type` if JSAction uses a
+ * short-hand name or is patching over an non-bubbling event with a bubbling
+ * variant.
+ * event: The native browser event.
+ * container: The container for this dispatch.
+ */
+type EventHandler = (eventType: string, event: Event, container: Element) => void;
 /**
  * EventContract intercepts events in the bubbling phase at the
  * boundary of a container element, and maps them to generic actions
@@ -112,7 +240,7 @@ export declare interface EarlyJsactionDataContainer {
  * events. (3) Invocation of handlers can be delayed and handlers can
  * be delay loaded in a generic way.
  */
-export declare class EventContract implements UnrenamedEventContract {
+declare class EventContract implements UnrenamedEventContract {
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
     /**
@@ -170,7 +298,7 @@ export declare class EventContract implements UnrenamedEventContract {
      * Replays all the early `EventInfo` objects, dispatching them through the normal
      * `EventContract` flow.
      */
-    replayEarlyEventInfos(earlyEventInfos: eventInfoLib.EventInfo[]): void;
+    replayEarlyEventInfos(earlyEventInfos: EventInfo[]): void;
     /**
      * Returns all JSAction event types that have been registered for a given
      * browser event type.
@@ -204,50 +332,22 @@ export declare class EventContract implements UnrenamedEventContract {
     ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
 }
 
-/**
- * A class representing a container node and all the event handlers
- * installed on it. Used so that handlers can be cleaned up if the
- * container is removed from the contract.
- */
-export declare class EventContractContainer implements EventContractContainerManager {
-    readonly element: Element;
-    /**
-     * Array of event handlers and their corresponding event types that are
-     * installed on this container.
-     *
-     */
-    private handlerInfos;
-    /**
-     * @param element The container Element.
-     */
-    constructor(element: Element);
-    /**
-     * Installs the provided installer on the element owned by this container,
-     * and maintains a reference to resulting handler in order to remove it
-     * later if desired.
-     */
-    addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void, passive?: boolean): void;
-    /**
-     * Removes all the handlers installed on this container.
-     */
-    cleanUp(): void;
+/** An internal symbol used to indicate whether propagation should be stopped or not. */
+declare const PROPAGATION_STOPPED_SYMBOL: unique symbol;
+/** Extra event phases beyond what the browser provides. */
+declare const EventPhase: {
+    REPLAY: number;
+};
+declare global {
+    interface Event {
+        [PROPAGATION_STOPPED_SYMBOL]?: boolean;
+    }
 }
-
-
-/**
- * An `EventContractContainerManager` provides the common interface for managing
- * containers.
- */
-declare interface EventContractContainerManager {
-    addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void, passive?: boolean): void;
-    cleanUp(): void;
-}
-
 /**
  * A dispatcher that uses browser-based `Event` semantics, for example bubbling, `stopPropagation`,
  * `currentTarget`, etc.
  */
-export declare class EventDispatcher {
+declare class EventDispatcher {
     private readonly dispatchDelegate;
     private readonly clickModSupport;
     private readonly actionResolver;
@@ -260,242 +360,38 @@ export declare class EventDispatcher {
     /** Internal method that does basic disaptching. */
     private dispatchToDelegate;
 }
-
 /**
- * A function that handles an event dispatched from the browser.
- *
- * eventType: May differ from `event.type` if JSAction uses a
- * short-hand name or is patching over an non-bubbling event with a bubbling
- * variant.
- * event: The native browser event.
- * container: The container for this dispatch.
+ * Registers deferred functionality for an EventContract and a Jsaction
+ * Dispatcher.
  */
-declare type EventHandler = (eventType: string, event: Event, container: Element) => void;
-
-/**
- * Records information for later handling of events. This type is
- * shared, and instances of it are passed, between the eventcontract
- * and the dispatcher jsbinary. Therefore, the fields of this type are
- * referenced by string literals rather than property literals
- * throughout the code.
- *
- * 'targetElement' is the element the action occurred on, 'actionElement'
- * is the element that has the jsaction handler.
- *
- * A null 'actionElement' identifies an EventInfo instance that didn't match a
- * jsaction attribute.  This allows us to execute global event handlers with the
- * appropriate event type (including a11y clicks and custom events).
- * The declare portion of this interface creates a set of externs that make sure
- * renaming doesn't happen for EventInfo. This is important since EventInfo
- * is shared across multiple binaries.
- */
-declare interface EventInfo {
-    eventType: string;
-    event: Event;
-    targetElement: Element;
-    /** The element that is the container for this Event. */
-    eic: Element;
-    timeStamp: number;
-    /**
-     * The action parsed from the JSAction element.
-     */
-    eia?: ActionInfoInternal;
-    /**
-     * Whether this `Event` is a replay event, meaning no dispatcher was
-     * installed when this `Event` was originally dispatched.
-     */
-    eirp?: boolean;
-    /**
-     * Whether this `Event` represents a `keydown` event that should be processed
-     * as a `click`. Only used when a11y click events is on.
-     */
-    eiack?: boolean;
-    /** Whether action resolution has already run on this `EventInfo`. */
-    eir?: boolean;
-}
-
-declare namespace eventInfoLib {
-    export {
-        getEventType,
-        setEventType,
-        getEvent,
-        setEvent,
-        getTargetElement,
-        setTargetElement,
-        getContainer,
-        setContainer,
-        getTimestamp,
-        setTimestamp,
-        getAction,
-        setAction,
-        unsetAction,
-        getActionName,
-        getActionElement,
-        getIsReplay,
-        setIsReplay,
-        getA11yClickKey,
-        setA11yClickKey,
-        getResolved,
-        setResolved,
-        cloneEventInfo,
-        createEventInfoFromParameters,
-        createEventInfo,
-        ActionInfo,
-        EventInfo,
-        EventInfoWrapper
-    }
-}
-
-/**
- * Utility class around an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-export declare class EventInfoWrapper {
-    readonly eventInfo: EventInfo;
-    constructor(eventInfo: EventInfo);
-    getEventType(): string;
-    setEventType(eventType: string): void;
-    getEvent(): Event;
-    setEvent(event: Event): void;
-    getTargetElement(): Element;
-    setTargetElement(targetElement: Element): void;
-    getContainer(): Element;
-    setContainer(container: Element): void;
-    getTimestamp(): number;
-    setTimestamp(timestamp: number): void;
-    getAction(): {
-        name: string;
-        element: Element;
-    } | undefined;
-    setAction(action: ActionInfo | undefined): void;
-    getIsReplay(): boolean | undefined;
-    setIsReplay(replay: boolean): void;
-    getResolved(): boolean | undefined;
-    setResolved(resolved: boolean): void;
-    clone(): EventInfoWrapper;
-}
-
-/** Extra event phases beyond what the browser provides. */
-export declare const EventPhase: {
-    REPLAY: number;
-};
-
-/** Added for readability when accessing stable property names. */
-declare function getA11yClickKey(eventInfo: EventInfo): boolean | undefined;
-
-/** Added for readability when accessing stable property names. */
-declare function getAction(eventInfo: EventInfo): ActionInfoInternal | undefined;
-
-/**
- * Reads the jsaction parser cache for the given DOM element. If no cache is yet present,
- * creates an empty one.
- */
-export declare function getActionCache(element: Element): {
-    [key: string]: string | undefined;
-};
-
-/** Added for readability when accessing stable property names. */
-declare function getActionElement(actionInfo: ActionInfoInternal): Element;
-
-/** Added for readability when accessing stable property names. */
-declare function getActionName(actionInfo: ActionInfoInternal): string;
-
-/** Get the queued `EventInfo` objects that were dispatched before a dispatcher was registered. */
-export declare function getAppScopedQueuedEventInfos(appId: string, dataContainer?: EarlyJsactionDataContainer): EventInfo[];
-
-/** Added for readability when accessing stable property names. */
-declare function getContainer(eventInfo: EventInfo): Element;
-
-/** Added for readability when accessing stable property names. */
-declare function getEvent(eventInfo: EventInfo): Event;
-
-/** Added for readability when accessing stable property names. */
-declare function getEventType(eventInfo: EventInfo): string;
-
-/** Added for readability when accessing stable property names. */
-declare function getIsReplay(eventInfo: EventInfo): boolean | undefined;
-
-/** Added for readability when accessing stable property names. */
-declare function getResolved(eventInfo: EventInfo): boolean | undefined;
-
-/** Added for readability when accessing stable property names. */
-declare function getTargetElement(eventInfo: EventInfo): Element;
-
-/** Added for readability when accessing stable property names. */
-declare function getTimestamp(eventInfo: EventInfo): number;
+declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
 
 /**
  * Whether or not an event type should be registered in the capture phase.
  * @param eventType
  * @returns bool
  */
-export declare const isCaptureEventType: (eventType: string) => boolean;
-
+declare const isCaptureEventType: (eventType: string) => boolean;
 /**
  * Whether or not an event type is registered in the early contract.
  */
-export declare const isEarlyEventType: (eventType: string) => boolean;
+declare const isEarlyEventType: (eventType: string) => boolean;
 
+/**
+ * Creates an `EarlyJsactionData`, adds events to it, and populates it on a nested object on
+ * the window.
+ */
+declare function bootstrapAppScopedEarlyEventContract(container: HTMLElement, appId: string, bubbleEventTypes: string[], captureEventTypes: string[], dataContainer?: EarlyJsactionDataContainer): void;
+/** Get the queued `EventInfo` objects that were dispatched before a dispatcher was registered. */
+declare function getAppScopedQueuedEventInfos(appId: string, dataContainer?: EarlyJsactionDataContainer): EventInfo[];
 /**
  * Registers a dispatcher function on the `EarlyJsactionData` present on the nested object on the
  * window.
  */
-export declare function registerAppScopedDispatcher(restriction: Restriction, appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
-
-/**
- * Registers deferred functionality for an EventContract and a Jsaction
- * Dispatcher.
- */
-export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
-
+declare function registerAppScopedDispatcher(restriction: Restriction, appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
 /** Removes all event listener handlers. */
-export declare function removeAllAppScopedEventListeners(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
+declare function removeAllAppScopedEventListeners(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
+/** Clear the early event contract. */
+declare function clearAppScopedEarlyEventContract(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
 
-
-/**
- * @fileoverview An enum to control who can call certain jsaction APIs.
- */
-declare enum Restriction {
-    I_AM_THE_JSACTION_FRAMEWORK = 0
-}
-
-/** Added for readability when accessing stable property names. */
-declare function setA11yClickKey(eventInfo: EventInfo, a11yClickKey: boolean): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setAction(eventInfo: EventInfo, actionName: string, actionElement: Element): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setContainer(eventInfo: EventInfo, container: Element): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setEvent(eventInfo: EventInfo, event: Event): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setEventType(eventInfo: EventInfo, eventType: string): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setIsReplay(eventInfo: EventInfo, replay: boolean): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setResolved(eventInfo: EventInfo, resolved: boolean): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setTargetElement(eventInfo: EventInfo, targetElement: Element): void;
-
-/** Added for readability when accessing stable property names. */
-declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
-
-/**
- * The API of an EventContract that is safe to call from any compilation unit.
- */
-declare interface UnrenamedEventContract {
-    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
-}
-
-/** Added for readability when accessing stable property names. */
-declare function unsetAction(eventInfo: EventInfo): void;
-
-export { }
+export { Attribute, type EarlyJsactionDataContainer, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapAppScopedEarlyEventContract, clearAppScopedEarlyEventContract, getDefaulted as getActionCache, getAppScopedQueuedEventInfos, isCaptureEventType, isEarlyEventType, registerAppScopedDispatcher, registerDispatcher, removeAllAppScopedEventListeners };

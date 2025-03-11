@@ -1,36 +1,30 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var compiler_host = require('./compiler_host-469692fa.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var compiler_host = require('./compiler_host-DzM2hemp.js');
 var ts = require('typescript');
-var imports = require('./imports-047fbbc8.js');
+var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
-require('./checker-f433e61e.js');
+require('./checker-DP-zos5Q.js');
 require('os');
 require('fs');
 require('module');
 require('url');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 const CORE = '@angular/core';
 const DIRECTIVE = 'Directive';
 const COMPONENT = 'Component';
 const PIPE = 'Pipe';
 function migrateFile(sourceFile, rewriteFn) {
-    const changeTracker = new compiler_host.ChangeTracker(ts__default["default"].createPrinter());
+    const changeTracker = new compiler_host.ChangeTracker(ts.createPrinter());
     // Check if there are any imports of the `AfterRenderPhase` enum.
     const coreImports = imports.getNamedImports(sourceFile, CORE);
     if (!coreImports) {
@@ -42,23 +36,23 @@ function migrateFile(sourceFile, rewriteFn) {
     if (!directive && !component && !pipe) {
         return;
     }
-    ts__default["default"].forEachChild(sourceFile, function visit(node) {
-        ts__default["default"].forEachChild(node, visit);
+    ts.forEachChild(sourceFile, function visit(node) {
+        ts.forEachChild(node, visit);
         // First we need to check for class declarations
         // Decorators will come after
-        if (!ts__default["default"].isClassDeclaration(node)) {
+        if (!ts.isClassDeclaration(node)) {
             return;
         }
-        ts__default["default"].getDecorators(node)?.forEach((decorator) => {
-            if (!ts__default["default"].isDecorator(decorator)) {
+        ts.getDecorators(node)?.forEach((decorator) => {
+            if (!ts.isDecorator(decorator)) {
                 return;
             }
             const callExpression = decorator.expression;
-            if (!ts__default["default"].isCallExpression(callExpression)) {
+            if (!ts.isCallExpression(callExpression)) {
                 return;
             }
             const decoratorIdentifier = callExpression.expression;
-            if (!ts__default["default"].isIdentifier(decoratorIdentifier)) {
+            if (!ts.isIdentifier(decoratorIdentifier)) {
                 return;
             }
             // Checking the identifier of the decorator by comparing to the import specifier
@@ -72,7 +66,7 @@ function migrateFile(sourceFile, rewriteFn) {
                     return;
             }
             const [decoratorArgument] = callExpression.arguments;
-            if (!decoratorArgument || !ts__default["default"].isObjectLiteralExpression(decoratorArgument)) {
+            if (!decoratorArgument || !ts.isObjectLiteralExpression(decoratorArgument)) {
                 return;
             }
             const properties = decoratorArgument.properties;
@@ -86,19 +80,19 @@ function migrateFile(sourceFile, rewriteFn) {
             let newProperties;
             if (!standaloneProp) {
                 if (!hasImports) {
-                    const standaloneFalseProperty = ts__default["default"].factory.createPropertyAssignment('standalone', ts__default["default"].factory.createFalse());
+                    const standaloneFalseProperty = ts.factory.createPropertyAssignment('standalone', ts.factory.createFalse());
                     newProperties = [...properties, standaloneFalseProperty];
                 }
             }
-            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword && hasImports) {
+            else if (standaloneProp.value === ts.SyntaxKind.TrueKeyword && hasImports) {
                 // To keep the migration idempotent, we'll only remove the standalone prop when there are imports
                 newProperties = properties.filter((p) => p !== standaloneProp.property);
             }
             if (newProperties) {
                 // At this point we know that we need to add standalone: false or
                 // remove an existing standalone: true property.
-                const newPropsArr = ts__default["default"].factory.createNodeArray(newProperties);
-                const newFirstArg = ts__default["default"].factory.createObjectLiteralExpression(newPropsArr, true);
+                const newPropsArr = ts.factory.createNodeArray(newProperties);
+                const newFirstArg = ts.factory.createObjectLiteralExpression(newPropsArr, true);
                 changeTracker.replaceNode(decoratorArgument, newFirstArg);
             }
         });
@@ -112,12 +106,12 @@ function migrateFile(sourceFile, rewriteFn) {
 }
 function getStandaloneProperty(properties) {
     for (const prop of properties) {
-        if (ts__default["default"].isShorthandPropertyAssignment(prop) && prop.name.text) {
+        if (ts.isShorthandPropertyAssignment(prop) && prop.name.text) {
             return { property: prop, value: prop.objectAssignmentInitializer };
         }
         if (isStandaloneProperty(prop)) {
-            if (prop.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword ||
-                prop.initializer.kind === ts__default["default"].SyntaxKind.FalseKeyword) {
+            if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+                prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
                 return { property: prop, value: prop.initializer.kind };
             }
             else {
@@ -128,15 +122,15 @@ function getStandaloneProperty(properties) {
     return undefined;
 }
 function isStandaloneProperty(prop) {
-    return (ts__default["default"].isPropertyAssignment(prop) && ts__default["default"].isIdentifier(prop.name) && prop.name.text === 'standalone');
+    return (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === 'standalone');
 }
 function decoratorHasImports(decoratorArgument) {
     for (const prop of decoratorArgument.properties) {
-        if (ts__default["default"].isPropertyAssignment(prop) &&
-            ts__default["default"].isIdentifier(prop.name) &&
+        if (ts.isPropertyAssignment(prop) &&
+            ts.isIdentifier(prop.name) &&
             prop.name.text === 'imports') {
-            if (prop.initializer.kind === ts__default["default"].SyntaxKind.ArrayLiteralExpression ||
-                prop.initializer.kind === ts__default["default"].SyntaxKind.Identifier) {
+            if (prop.initializer.kind === ts.SyntaxKind.ArrayLiteralExpression ||
+                prop.initializer.kind === ts.SyntaxKind.Identifier) {
                 return true;
             }
         }

@@ -1,23 +1,19 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var imports = require('./imports-047fbbc8.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
+var imports = require('./imports-CIX-JgAN.js');
 
 function getCallDecoratorImport(typeChecker, decorator) {
     // Note that this does not cover the edge case where decorators are called from
     // a namespace import: e.g. "@core.Component()". This is not handled by Ngtsc either.
-    if (!ts__default["default"].isCallExpression(decorator.expression) ||
-        !ts__default["default"].isIdentifier(decorator.expression.expression)) {
+    if (!ts.isCallExpression(decorator.expression) ||
+        !ts.isIdentifier(decorator.expression.expression)) {
         return null;
     }
     const identifier = decorator.expression.expression;

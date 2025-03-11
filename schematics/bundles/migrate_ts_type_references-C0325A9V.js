@@ -1,25 +1,20 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-f433e61e.js');
+var checker = require('./checker-DP-zos5Q.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-abca8754.js');
-var project_paths = require('./project_paths-3532bf90.js');
-var leading_space = require('./leading_space-f8944434.js');
-require('./program-76508a6d.js');
+var index = require('./index-CEdDCtp8.js');
+var project_paths = require('./project_paths-BoRVJPjW.js');
+var leading_space = require('./leading_space-D9nQ8UQC.js');
+require('./program-CRYsSwIq.js');
 require('path');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
 
 /**
  * Reasons why a field cannot be migrated.
@@ -555,11 +550,11 @@ class SpyOnFieldPattern {
         this.fields = fields;
     }
     detect(node) {
-        if (ts__default["default"].isCallExpression(node) &&
-            ts__default["default"].isIdentifier(node.expression) &&
+        if (ts.isCallExpression(node) &&
+            ts.isIdentifier(node.expression) &&
             node.expression.text === 'spyOn' &&
             node.arguments.length === 2 &&
-            ts__default["default"].isStringLiteralLike(node.arguments[1])) {
+            ts.isStringLiteralLike(node.arguments[1])) {
             const spyTargetType = this.checker.getTypeAtLocation(node.arguments[0]);
             const spyProperty = spyTargetType.getProperty(node.arguments[1].text);
             if (spyProperty === undefined) {
@@ -591,19 +586,19 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
     const inputClassSymbolsToClass = new Map();
     for (const knownFieldClass of getAllClassesWithKnownFields()) {
         const classSymbol = checker$1.getTypeAtLocation(knownFieldClass).symbol;
-        assert__default["default"](classSymbol != null, 'Expected a symbol to exist for the container of known field class.');
-        assert__default["default"](classSymbol.valueDeclaration !== undefined, 'Expected declaration to exist for known field class.');
-        assert__default["default"](ts__default["default"].isClassDeclaration(classSymbol.valueDeclaration), 'Expected declaration to be a class.');
+        assert(classSymbol != null, 'Expected a symbol to exist for the container of known field class.');
+        assert(classSymbol.valueDeclaration !== undefined, 'Expected declaration to exist for known field class.');
+        assert(ts.isClassDeclaration(classSymbol.valueDeclaration), 'Expected declaration to be a class.');
         // track class symbol for derived class checks.
         inputClassSymbolsToClass.set(classSymbol, classSymbol.valueDeclaration);
     }
     const spyOnPattern = new SpyOnFieldPattern(checker$1, fields);
     const visitor = (node) => {
         // Check for manual class instantiations.
-        if (ts__default["default"].isNewExpression(node) && ts__default["default"].isIdentifier(checker.unwrapExpression(node.expression))) {
+        if (ts.isNewExpression(node) && ts.isIdentifier(checker.unwrapExpression(node.expression))) {
             let newTarget = checker$1.getSymbolAtLocation(checker.unwrapExpression(node.expression));
             // Plain identifier references can point to alias symbols (e.g. imports).
-            if (newTarget !== undefined && newTarget.flags & ts__default["default"].SymbolFlags.Alias) {
+            if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
                 newTarget = checker$1.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
@@ -618,11 +613,11 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
         // class inherits a non-input member with the same name.
         // Suddenly the derived class changes its signature, but the base class may not.
         problematicReferencesCheck: if (insidePropertyDeclaration !== null &&
-            ts__default["default"].isIdentifier(node) &&
+            ts.isIdentifier(node) &&
             insidePropertyDeclaration.parent.heritageClauses !== undefined) {
             let newTarget = checker$1.getSymbolAtLocation(checker.unwrapExpression(node));
             // Plain identifier references can point to alias symbols (e.g. imports).
-            if (newTarget !== undefined && newTarget.flags & ts__default["default"].SymbolFlags.Alias) {
+            if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
                 newTarget = checker$1.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
@@ -748,19 +743,19 @@ class InheritanceGraph {
     expensivePopulate(files) {
         for (const file of files) {
             const visitor = (node) => {
-                if ((ts__default["default"].isClassLike(node) || ts__default["default"].isInterfaceDeclaration(node)) &&
+                if ((ts.isClassLike(node) || ts.isInterfaceDeclaration(node)) &&
                     node.heritageClauses !== undefined) {
                     const heritageTypes = getInheritedTypes(node, this.checker);
                     const parents = heritageTypes
                         // Interfaces participate in the graph and are not "value declarations".
                         // Also, symbol may be undefined for unresolvable nodes.
                         .map((t) => (t.symbol ? t.symbol.declarations?.[0] : undefined))
-                        .filter((d) => d !== undefined && (ts__default["default"].isClassLike(d) || ts__default["default"].isInterfaceDeclaration(d)));
+                        .filter((d) => d !== undefined && (ts.isClassLike(d) || ts.isInterfaceDeclaration(d)));
                     this.registerClass(node, parents);
                 }
-                ts__default["default"].forEachChild(node, visitor);
+                ts.forEachChild(node, visitor);
             };
-            ts__default["default"].forEachChild(file, visitor);
+            ts.forEachChild(file, visitor);
         }
         return this;
     }
@@ -794,17 +789,17 @@ class GroupedTsAstVisitor {
             for (const v of this.visitors) {
                 v(node);
             }
-            if (ts__default["default"].isPropertyDeclaration(node)) {
+            if (ts.isPropertyDeclaration(node)) {
                 this.state.insidePropertyDeclaration = node;
-                ts__default["default"].forEachChild(node, visitor);
+                ts.forEachChild(node, visitor);
                 this.state.insidePropertyDeclaration = null;
             }
             else {
-                ts__default["default"].forEachChild(node, visitor);
+                ts.forEachChild(node, visitor);
             }
         };
         for (const file of this.files) {
-            ts__default["default"].forEachChild(file, visitor);
+            ts.forEachChild(file, visitor);
         }
         for (const doneFn of this.doneFns) {
             doneFn();
@@ -834,13 +829,13 @@ class GroupedTsAstVisitor {
  * would then have other derived classes as well, it would propagate the status.
  */
 function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, opts) {
-    const allInputClasses = Array.from(inheritanceGraph.allClassesInInheritance).filter((t) => ts__default["default"].isClassDeclaration(t) && opts.isClassWithKnownFields(t));
+    const allInputClasses = Array.from(inheritanceGraph.allClassesInInheritance).filter((t) => ts.isClassDeclaration(t) && opts.isClassWithKnownFields(t));
     for (const inputClass of allInputClasses) {
         // Note: Class parents of `inputClass` were already checked by
         // the previous iterations (given the reverse topological sort)—
         // hence it's safe to assume that incompatibility of parent classes will
         // not change again, at a later time.
-        assert__default["default"](ts__default["default"].isClassDeclaration(inputClass), 'Expected input graph node to be always a class.');
+        assert(ts.isClassDeclaration(inputClass), 'Expected input graph node to be always a class.');
         const classFields = opts.getFieldsForClass(inputClass);
         const inputFieldNamesFromMetadataArray = new Set();
         // Iterate through derived class chains and determine all inputs that are overridden
@@ -848,7 +843,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         // potential similar class input as incompatible— because those cannot be migrated.
         if (metaRegistry !== null) {
             for (const derivedClasses of inheritanceGraph.traceDerivedClasses(inputClass)) {
-                const derivedMeta = ts__default["default"].isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
+                const derivedMeta = ts.isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
                     ? metaRegistry.getDirectiveMetadata(new checker.Reference(derivedClasses))
                     : null;
                 if (derivedMeta !== null && derivedMeta.inputFieldNamesFromMetadataArray !== null) {
@@ -863,7 +858,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
             // If we discover a derived, input re-declared via class metadata, then it
             // will cause conflicts as we cannot migrate it/ nor mark it as signal-based.
             if (fieldDescr.node.name !== undefined &&
-                (ts__default["default"].isIdentifier(fieldDescr.node.name) || ts__default["default"].isStringLiteralLike(fieldDescr.node.name)) &&
+                (ts.isIdentifier(fieldDescr.node.name) || ts.isStringLiteralLike(fieldDescr.node.name)) &&
                 inputFieldNamesFromMetadataArray.has(fieldDescr.node.name.text)) {
                 fields.captureUnknownDerivedField(fieldDescr);
             }
@@ -904,7 +899,7 @@ function removeFromUnionIfPossible(union, filter) {
     if (filtered.length === 1) {
         return filtered[0];
     }
-    return ts__default["default"].factory.updateUnionTypeNode(union, ts__default["default"].factory.createNodeArray(filtered));
+    return ts.factory.updateUnionTypeNode(union, ts.factory.createNodeArray(filtered));
 }
 
 /**
@@ -1107,7 +1102,7 @@ const ReservedMarker = Symbol();
  */
 function isIdentifierFreeInScope(name, location) {
     const startContainer = findClosestParentLocalsContainer(location);
-    assert__default["default"](startContainer !== undefined, 'Expecting a locals container.');
+    assert(startContainer !== undefined, 'Expecting a locals container.');
     // Traverse up and check for potential collisions.
     let container = startContainer;
     let firstNextContainer = undefined;
@@ -1134,7 +1129,7 @@ function isIdentifierFreeInScope(name, location) {
 }
 /** Finds the closest parent locals container. */
 function findClosestParentLocalsContainer(node) {
-    return ts__default["default"].findAncestor(node, isLocalsContainer);
+    return ts.findAncestor(node, isLocalsContainer);
 }
 /** Whether the given identifier is free in the given locals container. */
 function isIdentifierFreeInContainer(name, container) {
@@ -1146,7 +1141,7 @@ function isIdentifierFreeInContainer(name, container) {
     // typescript/stable/src/compiler/emitter.ts;l=5436;rcl=651008033
     const local = container.locals.get(name);
     return (local !== ReservedMarker &&
-        !(local.flags & (ts__default["default"].SymbolFlags.Value | ts__default["default"].SymbolFlags.ExportValue | ts__default["default"].SymbolFlags.Alias)));
+        !(local.flags & (ts.SymbolFlags.Value | ts.SymbolFlags.ExportValue | ts.SymbolFlags.Alias)));
 }
 /**
  * Whether the given node can contain local variables.
@@ -1156,36 +1151,36 @@ function isIdentifierFreeInContainer(name, container) {
  */
 function isLocalsContainer(node) {
     switch (node.kind) {
-        case ts__default["default"].SyntaxKind.ArrowFunction:
-        case ts__default["default"].SyntaxKind.Block:
-        case ts__default["default"].SyntaxKind.CallSignature:
-        case ts__default["default"].SyntaxKind.CaseBlock:
-        case ts__default["default"].SyntaxKind.CatchClause:
-        case ts__default["default"].SyntaxKind.ClassStaticBlockDeclaration:
-        case ts__default["default"].SyntaxKind.ConditionalType:
-        case ts__default["default"].SyntaxKind.Constructor:
-        case ts__default["default"].SyntaxKind.ConstructorType:
-        case ts__default["default"].SyntaxKind.ConstructSignature:
-        case ts__default["default"].SyntaxKind.ForStatement:
-        case ts__default["default"].SyntaxKind.ForInStatement:
-        case ts__default["default"].SyntaxKind.ForOfStatement:
-        case ts__default["default"].SyntaxKind.FunctionDeclaration:
-        case ts__default["default"].SyntaxKind.FunctionExpression:
-        case ts__default["default"].SyntaxKind.FunctionType:
-        case ts__default["default"].SyntaxKind.GetAccessor:
-        case ts__default["default"].SyntaxKind.IndexSignature:
-        case ts__default["default"].SyntaxKind.JSDocCallbackTag:
-        case ts__default["default"].SyntaxKind.JSDocEnumTag:
-        case ts__default["default"].SyntaxKind.JSDocFunctionType:
-        case ts__default["default"].SyntaxKind.JSDocSignature:
-        case ts__default["default"].SyntaxKind.JSDocTypedefTag:
-        case ts__default["default"].SyntaxKind.MappedType:
-        case ts__default["default"].SyntaxKind.MethodDeclaration:
-        case ts__default["default"].SyntaxKind.MethodSignature:
-        case ts__default["default"].SyntaxKind.ModuleDeclaration:
-        case ts__default["default"].SyntaxKind.SetAccessor:
-        case ts__default["default"].SyntaxKind.SourceFile:
-        case ts__default["default"].SyntaxKind.TypeAliasDeclaration:
+        case ts.SyntaxKind.ArrowFunction:
+        case ts.SyntaxKind.Block:
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.CaseBlock:
+        case ts.SyntaxKind.CatchClause:
+        case ts.SyntaxKind.ClassStaticBlockDeclaration:
+        case ts.SyntaxKind.ConditionalType:
+        case ts.SyntaxKind.Constructor:
+        case ts.SyntaxKind.ConstructorType:
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.FunctionType:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.IndexSignature:
+        case ts.SyntaxKind.JSDocCallbackTag:
+        case ts.SyntaxKind.JSDocEnumTag:
+        case ts.SyntaxKind.JSDocFunctionType:
+        case ts.SyntaxKind.JSDocSignature:
+        case ts.SyntaxKind.JSDocTypedefTag:
+        case ts.SyntaxKind.MappedType:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.ModuleDeclaration:
+        case ts.SyntaxKind.SetAccessor:
+        case ts.SyntaxKind.SourceFile:
+        case ts.SyntaxKind.TypeAliasDeclaration:
             return true;
         default:
             return false;
@@ -1250,8 +1245,8 @@ function createNewBlockToInsertVariable(node, file, toInsert) {
     // For indentation, we traverse up and find the earliest statement.
     // This node is most of the time a good candidate for acceptable
     // indentation of a new block.
-    const spacingNode = ts__default["default"].findAncestor(node, ts__default["default"].isStatement) ?? node.parent;
-    const { character } = ts__default["default"].getLineAndCharacterOfPosition(sf, spacingNode.getStart());
+    const spacingNode = ts.findAncestor(node, ts.isStatement) ?? node.parent;
+    const { character } = ts.getLineAndCharacterOfPosition(sf, spacingNode.getStart());
     const blockSpace = ' '.repeat(character);
     const contentSpace = ' '.repeat(character + 2);
     return [
@@ -1301,17 +1296,17 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
         const sourceFile = bindingElement.getSourceFile();
         const file = project_paths.projectFile(sourceFile, info);
         const inputFieldName = bindingElement.propertyName ?? bindingElement.name;
-        assert__default["default"](!ts__default["default"].isObjectBindingPattern(inputFieldName) && !ts__default["default"].isArrayBindingPattern(inputFieldName), 'Property of binding element cannot be another pattern.');
+        assert(!ts.isObjectBindingPattern(inputFieldName) && !ts.isArrayBindingPattern(inputFieldName), 'Property of binding element cannot be another pattern.');
         const tmpName = nameGenerator.generate(reference.text, bindingElement);
         // Only use the temporary name, if really needed. A temporary name is needed if
         // the input field simply aliased via the binding element, or if the exposed identifier
         // is a string-literal like.
-        const useTmpNameForInputField = !ts__default["default"].isObjectBindingPattern(bindingElement.name) || !ts__default["default"].isIdentifier(inputFieldName);
+        const useTmpNameForInputField = !ts.isObjectBindingPattern(bindingElement.name) || !ts.isIdentifier(inputFieldName);
         const propertyName = useTmpNameForInputField ? inputFieldName : undefined;
         const exposedName = useTmpNameForInputField
-            ? ts__default["default"].factory.createIdentifier(tmpName)
+            ? ts.factory.createIdentifier(tmpName)
             : inputFieldName;
-        const newBindingToAccessInputField = ts__default["default"].factory.updateBindingElement(bindingElement, bindingElement.dotDotDotToken, propertyName, exposedName, bindingElement.initializer);
+        const newBindingToAccessInputField = ts.factory.updateBindingElement(bindingElement, bindingElement.dotDotDotToken, propertyName, exposedName, bindingElement.initializer);
         const temporaryVariableReplacements = insertTemporaryVariableForBindingElement(bindingDecl, file, `const ${bindingElement.name.getText()} = ${exposedName.text}();`);
         if (temporaryVariableReplacements === null) {
             console.error(`Could not migrate reference ${reference.text} in ${file.rootRelativePath}`);
@@ -1320,7 +1315,7 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
         replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
             position: bindingElement.getStart(),
             end: bindingElement.getEnd(),
-            toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, newBindingToAccessInputField, sourceFile),
+            toInsert: printer.printNode(ts.EmitHint.Unspecified, newBindingToAccessInputField, sourceFile),
         })), ...temporaryVariableReplacements);
     }
 }
@@ -1337,8 +1332,8 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
     // The snippet is simply inserted after the variable declaration.
     // The other case of a variable declaration inside a catch clause is handled
     // below.
-    if (ts__default["default"].isVariableDeclaration(expansionDecl) && ts__default["default"].isVariableDeclarationList(parent)) {
-        const leadingSpaceCount = ts__default["default"].getLineAndCharacterOfPosition(sf, parent.getStart()).character;
+    if (ts.isVariableDeclaration(expansionDecl) && ts.isVariableDeclarationList(parent)) {
+        const leadingSpaceCount = ts.getLineAndCharacterOfPosition(sf, parent.getStart()).character;
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         const statement = parent.parent;
         return [
@@ -1357,7 +1352,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const firstElementInBlock = bodyBlock.statements[0];
         const spaceReferenceNode = firstElementInBlock ?? bodyBlock;
         const spaceOffset = firstElementInBlock !== undefined ? 0 : 2;
-        const leadingSpaceCount = ts__default["default"].getLineAndCharacterOfPosition(sf, spaceReferenceNode.getStart()).character + spaceOffset;
+        const leadingSpaceCount = ts.getLineAndCharacterOfPosition(sf, spaceReferenceNode.getStart()).character + spaceOffset;
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         return [
             new project_paths.Replacement(file, new project_paths.TextUpdate({
@@ -1369,23 +1364,23 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
     }
     // Other cases where we see an arrow function without a block.
     // We need to create one now.
-    if (ts__default["default"].isArrowFunction(parent) && !ts__default["default"].isBlock(parent.body)) {
+    if (ts.isArrowFunction(parent) && !ts.isBlock(parent.body)) {
         return createNewBlockToInsertVariable(parent, file, toInsert);
     }
     return null;
 }
 /** Gets the body block of a given node, if available. */
 function getBodyBlockOfNode(node) {
-    if ((ts__default["default"].isMethodDeclaration(node) ||
-        ts__default["default"].isFunctionDeclaration(node) ||
-        ts__default["default"].isGetAccessorDeclaration(node) ||
-        ts__default["default"].isConstructorDeclaration(node) ||
-        ts__default["default"].isArrowFunction(node)) &&
+    if ((ts.isMethodDeclaration(node) ||
+        ts.isFunctionDeclaration(node) ||
+        ts.isGetAccessorDeclaration(node) ||
+        ts.isConstructorDeclaration(node) ||
+        ts.isArrowFunction(node)) &&
         node.body !== undefined &&
-        ts__default["default"].isBlock(node.body)) {
+        ts.isBlock(node.body)) {
         return node.body;
     }
-    if (ts__default["default"].isCatchClause(node.parent)) {
+    if (ts.isCatchClause(node.parent)) {
         return node.parent.block;
     }
     return null;
@@ -1396,25 +1391,25 @@ function getBodyBlockOfNode(node) {
  * E.g. variables cannot be narrowed when descending into children of `node`.
  */
 function isControlFlowBoundary(node) {
-    return ((ts__default["default"].isFunctionLike(node) && !getImmediatelyInvokedFunctionExpression(node)) ||
-        node.kind === ts__default["default"].SyntaxKind.ModuleBlock ||
-        node.kind === ts__default["default"].SyntaxKind.SourceFile ||
-        node.kind === ts__default["default"].SyntaxKind.PropertyDeclaration);
+    return ((ts.isFunctionLike(node) && !getImmediatelyInvokedFunctionExpression(node)) ||
+        node.kind === ts.SyntaxKind.ModuleBlock ||
+        node.kind === ts.SyntaxKind.SourceFile ||
+        node.kind === ts.SyntaxKind.PropertyDeclaration);
 }
 /** Determines the current flow container of a given node. */
 function getControlFlowContainer(node) {
-    return ts__default["default"].findAncestor(node.parent, (node) => isControlFlowBoundary(node));
+    return ts.findAncestor(node.parent, (node) => isControlFlowBoundary(node));
 }
 /** Checks whether the given node refers to an IIFE declaration. */
 function getImmediatelyInvokedFunctionExpression(func) {
-    if (func.kind === ts__default["default"].SyntaxKind.FunctionExpression || func.kind === ts__default["default"].SyntaxKind.ArrowFunction) {
+    if (func.kind === ts.SyntaxKind.FunctionExpression || func.kind === ts.SyntaxKind.ArrowFunction) {
         let prev = func;
         let parent = func.parent;
-        while (parent.kind === ts__default["default"].SyntaxKind.ParenthesizedExpression) {
+        while (parent.kind === ts.SyntaxKind.ParenthesizedExpression) {
             prev = parent;
             parent = parent.parent;
         }
-        if (parent.kind === ts__default["default"].SyntaxKind.CallExpression &&
+        if (parent.kind === ts.SyntaxKind.CallExpression &&
             parent.expression === prev) {
             return parent;
         }
@@ -1469,10 +1464,10 @@ function traverseFlowForInterestingNodes(flow) {
         if (flags & FlowFlags.Assignment) {
             const assignment = flow;
             queue.add(assignment.antecedent);
-            if (ts__default["default"].isVariableDeclaration(assignment.node)) {
+            if (ts.isVariableDeclaration(assignment.node)) {
                 interestingNodes.push(assignment.node.name);
             }
-            else if (ts__default["default"].isBindingElement(assignment.node)) {
+            else if (ts.isBindingElement(assignment.node)) {
                 interestingNodes.push(assignment.node.name);
             }
             else {
@@ -1592,7 +1587,7 @@ function analyzeControlFlow(entries, checker) {
     for (const entry of entries) {
         const { flowContainer, resultIndex } = referenceToMetadata.get(entry);
         const flowPathInterestingNodes = traverseFlowForInterestingNodes(getFlowNode(entry));
-        assert__default["default"](flowContainer !== null && flowPathInterestingNodes !== null, 'Expected a flow container to exist.');
+        assert(flowContainer !== null && flowPathInterestingNodes !== null, 'Expected a flow container to exist.');
         const narrowPartners = getAllMatchingReferencesInFlowPath(flowPathInterestingNodes, entry, referenceToMetadata, flowContainer, checker);
         if (narrowPartners.length !== 0) {
             connectSharedReferences(result, narrowPartners, resultIndex);
@@ -1618,8 +1613,8 @@ function connectSharedReferences(result, flowPartners, refId) {
             earliestPartnerId = partnerId;
         }
     }
-    assert__default["default"](earliestPartner !== null, 'Expected an earliest partner to be found.');
-    assert__default["default"](earliestPartnerId !== null, 'Expected an earliest partner to be found.');
+    assert(earliestPartner !== null, 'Expected an earliest partner to be found.');
+    assert(earliestPartnerId !== null, 'Expected an earliest partner to be found.');
     // Earliest partner ID could be higher than `refId` in cyclic
     // situations like `loop` flow nodes. We need to find the minimum
     // and maximum to iterate through partners in between.
@@ -1660,14 +1655,14 @@ function connectSharedReferences(result, flowPartners, refId) {
     if (!highestBlock) {
         console.error(earliestPartnerId, refId, refFlowContainer.getText(), seenBlocks);
     }
-    assert__default["default"](highestBlock, 'Expected a block anchor to be found');
+    assert(highestBlock, 'Expected a block anchor to be found');
     result[earliestPartnerId].recommendedNode = highestBlock;
 }
 function isPotentialInsertionAncestor(node) {
     // Note: Arrow functions may not have a block, but instead use an expression
     // directly. This still signifies a "block" as we can convert the concise body
     // to a block.
-    return (ts__default["default"].isSourceFile(node) || ts__default["default"].isBlock(node) || ts__default["default"].isArrowFunction(node) || ts__default["default"].isClassLike(node));
+    return (ts.isSourceFile(node) || ts.isBlock(node) || ts.isArrowFunction(node) || ts.isClassLike(node));
 }
 /**
  * Looks through the flow path and interesting nodes to determine which
@@ -1696,7 +1691,7 @@ function getAllMatchingReferencesInFlowPath(flowPathInterestingNodes, reference,
  * matches the given reference. If so, returns its flow ID.
  */
 function findSimilarReferenceNode(start, reference, referenceToMetadata, restrainingFlowContainer, checker) {
-    return (ts__default["default"].forEachChild(start, function visitChild(node) {
+    return (ts.forEachChild(start, function visitChild(node) {
         // do not descend into control flow boundaries.
         // only references sharing the same container are relevant.
         // This is a performance optimization.
@@ -1704,9 +1699,9 @@ function findSimilarReferenceNode(start, reference, referenceToMetadata, restrai
             return;
         }
         // If this is not a potential matching identifier, check its children.
-        if (!ts__default["default"].isIdentifier(node) ||
+        if (!ts.isIdentifier(node) ||
             referenceToMetadata.get(node)?.flowContainer !== restrainingFlowContainer) {
-            return ts__default["default"].forEachChild(node, visitChild);
+            return ts.forEachChild(node, visitChild);
         }
         // If this refers to a different instantiation of the input reference,
         // continue looking.
@@ -1724,7 +1719,7 @@ function isLexicalSameReference(checker, sharePartner, reference) {
     const aParent = index.unwrapParent(reference.parent);
     // If the reference is not part a property access, return true. The references
     // are guaranteed symbol matches.
-    if (!ts__default["default"].isPropertyAccessExpression(aParent) && !ts__default["default"].isElementAccessExpression(aParent)) {
+    if (!ts.isPropertyAccessExpression(aParent) && !ts.isElementAccessExpression(aParent)) {
         return sharePartner.text === reference.text;
     }
     // If reference parent is part of a property expression, but the share
@@ -1774,7 +1769,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 // Extract the shared field name.
                 const toInsert = idToSharedField.get(recommendedNode);
                 const replaceNode = index.traverseAccess(originalNode);
-                assert__default["default"](toInsert, 'no shared variable yet available');
+                assert(toInsert, 'no shared variable yet available');
                 replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                     position: replaceNode.getStart(),
                     end: replaceNode.getEnd(),
@@ -1800,7 +1795,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
             let sharedValueAccessExpr;
             let temporaryVariableStr;
-            if (ts__default["default"].isClassLike(recommendedNode)) {
+            if (ts.isClassLike(recommendedNode)) {
                 sharedValueAccessExpr = `this.${fieldName}`;
                 temporaryVariableStr = `private readonly ${fieldName} = ${initializer};`;
             }
@@ -1812,11 +1807,11 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // If the common ancestor block of all shared references is an arrow function
             // without a block, convert the arrow function to a block and insert the temporary
             // variable at the beginning.
-            if (ts__default["default"].isArrowFunction(parent) && !ts__default["default"].isBlock(parent.body)) {
+            if (ts.isArrowFunction(parent) && !ts.isBlock(parent.body)) {
                 replacements.push(...createNewBlockToInsertVariable(parent, filePath, temporaryVariableStr));
             }
             else {
-                const leadingSpace = ts__default["default"].getLineAndCharacterOfPosition(sf, referenceNodeInBlock.getStart());
+                const leadingSpace = ts.getLineAndCharacterOfPosition(sf, referenceNodeInBlock.getStart());
                 replacements.push(new project_paths.Replacement(filePath, new project_paths.TextUpdate({
                     position: referenceNodeInBlock.getStart(),
                     end: referenceNodeInBlock.getStart(),
@@ -1919,8 +1914,8 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
         }
         seenTypeNodes.add(reference.from.node);
         if (reference.isPartialReference && reference.isPartOfCatalystFile) {
-            assert__default["default"](reference.from.node.typeArguments, 'Expected type arguments for partial reference.');
-            assert__default["default"](reference.from.node.typeArguments.length === 1, 'Expected an argument for reference.');
+            assert(reference.from.node.typeArguments, 'Expected type arguments for partial reference.');
+            assert(reference.from.node.typeArguments.length === 1, 'Expected an argument for reference.');
             const firstArg = reference.from.node.typeArguments[0];
             const sf = firstArg.getSourceFile();
             // Naive detection of the import. Sufficient for this test file migration.
@@ -1935,7 +1930,7 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
             host.replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
                 position: firstArg.getStart(),
                 end: firstArg.getStart(),
-                toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
+                toInsert: `${host.printer.printNode(ts.EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
             })));
             host.replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
         }

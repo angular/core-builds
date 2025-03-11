@@ -1,36 +1,30 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var project_paths = require('./project_paths-3532bf90.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_paths = require('./project_paths-BoRVJPjW.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-f433e61e.js');
-var program = require('./program-76508a6d.js');
+var checker = require('./checker-DP-zos5Q.js');
+var program = require('./program-CRYsSwIq.js');
 require('path');
-require('./index-91900e3f.js');
-var apply_import_manager = require('./apply_import_manager-bbce12b7.js');
+require('./index-CrKEaRj_.js');
+var apply_import_manager = require('./apply_import_manager-C8MABThs.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 /** Migration that cleans up unused imports from a project. */
 class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
-    printer = ts__default["default"].createPrinter();
+    printer = ts.createPrinter();
     createProgram(tsconfigAbsPath, fs) {
         return super.createProgram(tsconfigAbsPath, fs, {
             extendedDiagnostics: {
@@ -133,7 +127,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             allRemovedIdentifiers: new Set(),
         };
         const walk = (node) => {
-            if (!ts__default["default"].isIdentifier(node)) {
+            if (!ts.isIdentifier(node)) {
                 node.forEachChild(walk);
                 return;
             }
@@ -145,17 +139,17 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             if (locations.has(this.getNodeID(node.getStart(), node.getWidth()))) {
                 // When the entire array needs to be cleared, the diagnostic is
                 // reported on the property assignment, rather than an array element.
-                if (ts__default["default"].isPropertyAssignment(parent) &&
+                if (ts.isPropertyAssignment(parent) &&
                     parent.name === node &&
-                    ts__default["default"].isArrayLiteralExpression(parent.initializer)) {
+                    ts.isArrayLiteralExpression(parent.initializer)) {
                     result.fullRemovals.add(parent.initializer);
                     parent.initializer.elements.forEach((element) => {
-                        if (ts__default["default"].isIdentifier(element)) {
+                        if (ts.isIdentifier(element)) {
                             result.allRemovedIdentifiers.add(element);
                         }
                     });
                 }
-                else if (ts__default["default"].isArrayLiteralExpression(parent)) {
+                else if (ts.isArrayLiteralExpression(parent)) {
                     if (!result.partialRemovals.has(parent)) {
                         result.partialRemovals.set(parent, new Set());
                     }
@@ -179,24 +173,24 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             identifierCounts: new Map(),
         };
         const walk = (node) => {
-            if (ts__default["default"].isIdentifier(node) &&
+            if (ts.isIdentifier(node) &&
                 node.parent &&
                 // Don't track individual identifiers marked for removal.
-                (!ts__default["default"].isArrayLiteralExpression(node.parent) ||
+                (!ts.isArrayLiteralExpression(node.parent) ||
                     !partialRemovals.has(node.parent) ||
                     !partialRemovals.get(node.parent).has(node))) {
                 result.identifierCounts.set(node.text, (result.identifierCounts.get(node.text) ?? 0) + 1);
             }
             // Don't track identifiers in array literals that are about to be removed.
-            if (ts__default["default"].isArrayLiteralExpression(node) && fullRemovals.has(node)) {
+            if (ts.isArrayLiteralExpression(node) && fullRemovals.has(node)) {
                 return;
             }
-            if (ts__default["default"].isImportDeclaration(node)) {
+            if (ts.isImportDeclaration(node)) {
                 const namedBindings = node.importClause?.namedBindings;
-                const moduleName = ts__default["default"].isStringLiteral(node.moduleSpecifier)
+                const moduleName = ts.isStringLiteral(node.moduleSpecifier)
                     ? node.moduleSpecifier.text
                     : null;
-                if (namedBindings && ts__default["default"].isNamedImports(namedBindings) && moduleName !== null) {
+                if (namedBindings && ts.isNamedImports(namedBindings) && moduleName !== null) {
                     namedBindings.elements.forEach((imp) => {
                         if (!result.importedSymbols.has(moduleName)) {
                             result.importedSymbols.set(moduleName, new Map());
@@ -237,11 +231,11 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         });
         // Filter out the unused identifiers from an array.
         partialRemovals.forEach((toRemove, node) => {
-            const newNode = ts__default["default"].factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
+            const newNode = ts.factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
             replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
-                toInsert: this.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, sourceFile),
+                toInsert: this.printer.printNode(ts.EmitHint.Unspecified, newNode, sourceFile),
             })));
         });
         // Attempt to clean up unused import declarations. Note that this isn't foolproof, because we

@@ -1,53 +1,8 @@
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
-
-
-export declare function getCurrentInjector(): Injector | undefined | null;
-
-/**
- * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
- *
- * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
- * `InjectorDef`-based `StaticInjector`.
- *
- * @publicApi
- */
-export declare interface InjectionToken<T> extends Type<T> {
-    ɵprov: ɵɵInjectableDeclaration<T>;
-}
-
-export declare interface Injector {
-    retrieve<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
-}
-
-/**
- * Type guard for checking if an unknown value is a NotFound.
- */
-export declare function isNotFound(e: unknown): e is NotFound;
-
-/**
- * Value returned if the key-value pair couldn't be found in the context
- * hierarchy.
- */
-export declare const NOT_FOUND: unique symbol;
-
-/**
- * Type union of NotFound and NotFoundError.
- */
-export declare type NotFound = typeof NOT_FOUND | NotFoundError;
-
-/**
- * Error thrown when the key-value pair couldn't be found in the context
- * hierarchy. Context can be attached below.
- */
-export declare class NotFoundError extends Error {
-    constructor(message: string);
-}
-
-export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 
 /**
  * @description
@@ -60,8 +15,7 @@ export declare function setCurrentInjector(injector: Injector | null | undefined
  * @publicApi
  */
 declare const Type: FunctionConstructor;
-
-declare interface Type<T> extends Function {
+interface Type<T> extends Function {
     new (...args: any[]): T;
 }
 
@@ -75,7 +29,7 @@ declare interface Type<T> extends Function {
  * `Injector`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  */
-export declare interface ɵɵInjectableDeclaration<T> {
+interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      */
@@ -95,5 +49,43 @@ export declare interface ɵɵInjectableDeclaration<T> {
      */
     value: T | undefined;
 }
+/**
+ * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
+ *
+ * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
+ * `InjectorDef`-based `StaticInjector`.
+ *
+ * @publicApi
+ */
+interface InjectionToken<T> extends Type<T> {
+    ɵprov: ɵɵInjectableDeclaration<T>;
+}
 
-export { }
+/**
+ * Value returned if the key-value pair couldn't be found in the context
+ * hierarchy.
+ */
+declare const NOT_FOUND: unique symbol;
+/**
+ * Error thrown when the key-value pair couldn't be found in the context
+ * hierarchy. Context can be attached below.
+ */
+declare class NotFoundError extends Error {
+    constructor(message: string);
+}
+/**
+ * Type guard for checking if an unknown value is a NotFound.
+ */
+declare function isNotFound(e: unknown): e is NotFound;
+/**
+ * Type union of NotFound and NotFoundError.
+ */
+type NotFound = typeof NOT_FOUND | NotFoundError;
+
+interface Injector {
+    retrieve<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
+}
+declare function getCurrentInjector(): Injector | undefined | null;
+declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+export { type InjectionToken, type Injector, NOT_FOUND, type NotFound, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector, type ɵɵInjectableDeclaration };

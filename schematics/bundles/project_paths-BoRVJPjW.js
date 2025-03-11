@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,11 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-f433e61e.js');
-var program = require('./program-76508a6d.js');
+var checker = require('./checker-DP-zos5Q.js');
+var program = require('./program-CRYsSwIq.js');
 require('path');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
+function _interopNamespaceDefault(e) {
     var n = Object.create(null);
     if (e) {
         Object.keys(e).forEach(function (k) {
@@ -30,13 +27,12 @@ function _interopNamespace(e) {
             }
         });
     }
-    n["default"] = e;
+    n.default = e;
     return Object.freeze(n);
 }
 
-var posixPath__namespace = /*#__PURE__*/_interopNamespace(posixPath);
-var os__namespace = /*#__PURE__*/_interopNamespace(os);
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
+var posixPath__namespace = /*#__PURE__*/_interopNamespaceDefault(posixPath);
+var os__namespace = /*#__PURE__*/_interopNamespaceDefault(os);
 
 /// <reference types="node" />
 class NgtscCompilerHost {
@@ -49,11 +45,11 @@ class NgtscCompilerHost {
     getSourceFile(fileName, languageVersion) {
         const text = this.readFile(fileName);
         return text !== undefined
-            ? ts__default["default"].createSourceFile(fileName, text, languageVersion, true)
+            ? ts.createSourceFile(fileName, text, languageVersion, true)
             : undefined;
     }
     getDefaultLibFileName(options) {
-        return this.fs.join(this.getDefaultLibLocation(), ts__default["default"].getDefaultLibFileName(options));
+        return this.fs.join(this.getDefaultLibLocation(), ts.getDefaultLibFileName(options));
     }
     getDefaultLibLocation() {
         return this.fs.getDefaultLibLocation();
@@ -74,9 +70,9 @@ class NgtscCompilerHost {
     }
     getNewLine() {
         switch (this.options.newLine) {
-            case ts__default["default"].NewLineKind.CarriageReturnLineFeed:
+            case ts.NewLineKind.CarriageReturnLineFeed:
                 return '\r\n';
-            case ts__default["default"].NewLineKind.LineFeed:
+            case ts.NewLineKind.LineFeed:
                 return '\n';
             default:
                 return os__namespace.EOL;
@@ -99,17 +95,23 @@ class NgtscCompilerHost {
 }
 
 // We use TypeScript's native `ts.matchFiles` utility for the virtual file systems
+// and their TypeScript compiler host `readDirectory` implementation. TypeScript's
+// function implements complex logic for matching files with respect to root
+// directory, extensions, excludes, includes etc. The function is currently
+// internal but we can use it as the API most likely will not change any time soon,
+// nor does it seem like this is being made public any time soon.
+// Related issue for tracking: https://github.com/microsoft/TypeScript/issues/13793.
 /**
  * Creates a {@link ts.CompilerHost#readDirectory} implementation function,
  * that leverages the specified file system (that may be e.g. virtual).
  */
 function createFileSystemTsReadDirectoryFn(fs) {
-    if (ts__default["default"].matchFiles === undefined) {
+    if (ts.matchFiles === undefined) {
         throw Error('Unable to read directory in configured file system. This means that ' +
             'TypeScript changed its file matching internals.\n\nPlease consider downgrading your ' +
             'TypeScript version, and report an issue in the Angular framework repository.');
     }
-    const matchFilesFn = ts__default["default"].matchFiles.bind(ts__default["default"]);
+    const matchFilesFn = ts.matchFiles.bind(ts);
     return (rootDir, extensions, excludes, includes, depth) => {
         const directoryExists = (p) => {
             const resolvedPath = fs.resolve(p);
@@ -148,7 +150,7 @@ function calcProjectFileAndBasePath(project, host = checker.getFileSystem()) {
 function readConfiguration(project, existingOptions, host = checker.getFileSystem()) {
     try {
         const fs = checker.getFileSystem();
-        const readConfigFile = (configFile) => ts__default["default"].readConfigFile(configFile, (file) => host.readFile(host.resolve(file)));
+        const readConfigFile = (configFile) => ts.readConfigFile(configFile, (file) => host.readFile(host.resolve(file)));
         const readAngularCompilerOptions = (configFile, parentOptions = {}) => {
             const { config, error } = readConfigFile(configFile);
             if (error) {
@@ -195,7 +197,7 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
             ...existingOptions,
         };
         const parseConfigHost = createParseConfigHost(host, fs);
-        const { options, errors, fileNames: rootNames, projectReferences, } = ts__default["default"].parseJsonConfigFileContent(config, parseConfigHost, basePath, existingCompilerOptions, configFileName);
+        const { options, errors, fileNames: rootNames, projectReferences, } = ts.parseJsonConfigFileContent(config, parseConfigHost, basePath, existingCompilerOptions, configFileName);
         let emitFlags = program.EmitFlags.Default;
         if (!(options['skipMetadataEmit'] || options['flatModuleOutFile'])) {
             emitFlags |= program.EmitFlags.Metadata;
@@ -208,7 +210,7 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
     catch (e) {
         const errors = [
             {
-                category: ts__default["default"].DiagnosticCategory.Error,
+                category: ts.DiagnosticCategory.Error,
                 messageText: e.stack ?? e.message,
                 file: undefined,
                 start: undefined,
@@ -248,7 +250,7 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
     else {
         const parseConfigHost = createParseConfigHost(host, fs);
         // Path isn't a rooted or relative path, resolve like a module.
-        const { resolvedModule } = ts__default["default"].nodeModuleNameResolver(extendsValue, configFile, { moduleResolution: ts__default["default"].ModuleResolutionKind.Node10, resolveJsonModule: true }, parseConfigHost);
+        const { resolvedModule } = ts.nodeModuleNameResolver(extendsValue, configFile, { moduleResolution: ts.ModuleResolutionKind.Node10, resolveJsonModule: true }, parseConfigHost);
         if (resolvedModule) {
             return checker.absoluteFrom(resolvedModule.resolvedFileName);
         }
@@ -464,7 +466,7 @@ const defaultMigrationTsOptions = {
  * Creates an instance of a TypeScript program for the given project.
  */
 function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
-    const program = ts__default["default"].createProgram({
+    const program = ts.createProgram({
         rootNames: tsconfig.rootNames,
         options: {
             ...tsconfig.options,
@@ -493,7 +495,7 @@ function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
     }, tsHost);
     // Expose an easy way to debug-print ng semantic diagnostics.
     if (process.env['DEBUG_NG_SEMANTIC_DIAGNOSTICS'] === '1') {
-        console.error(ts__default["default"].formatDiagnosticsWithColorAndContext(ngtscProgram.getNgSemanticDiagnostics(), tsHost));
+        console.error(ts.formatDiagnosticsWithColorAndContext(ngtscProgram.getNgSemanticDiagnostics(), tsHost));
     }
     return {
         ngCompiler: ngtscProgram.compiler,

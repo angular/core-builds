@@ -1,30 +1,24 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-469692fa.js');
+var compiler_host = require('./compiler_host-DzM2hemp.js');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-b0d8b324.js');
-var imports = require('./imports-047fbbc8.js');
-var nodes = require('./nodes-7758dbf6.js');
-var leading_space = require('./leading_space-f8944434.js');
-require('./checker-f433e61e.js');
+var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
+var imports = require('./imports-CIX-JgAN.js');
+var nodes = require('./nodes-B16H9JUd.js');
+var leading_space = require('./leading_space-D9nQ8UQC.js');
+require('./checker-DP-zos5Q.js');
 require('os');
 require('fs');
 require('module');
 require('url');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 /*!
  * @license
@@ -53,12 +47,12 @@ const DI_PARAM_SYMBOLS = new Set([
 ]);
 /** Kinds of nodes which aren't injectable when set as a type of a parameter. */
 const UNINJECTABLE_TYPE_KINDS = new Set([
-    ts__default["default"].SyntaxKind.TrueKeyword,
-    ts__default["default"].SyntaxKind.FalseKeyword,
-    ts__default["default"].SyntaxKind.NumberKeyword,
-    ts__default["default"].SyntaxKind.StringKeyword,
-    ts__default["default"].SyntaxKind.NullKeyword,
-    ts__default["default"].SyntaxKind.VoidKeyword,
+    ts.SyntaxKind.TrueKeyword,
+    ts.SyntaxKind.FalseKeyword,
+    ts.SyntaxKind.NumberKeyword,
+    ts.SyntaxKind.StringKeyword,
+    ts.SyntaxKind.NullKeyword,
+    ts.SyntaxKind.VoidKeyword,
 ]);
 /**
  * Finds the necessary information for the `inject` migration in a file.
@@ -83,11 +77,11 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
     sourceFile.forEachChild(function walk(node) {
         // Skip import declarations since they can throw off the identifier
         // could below and we don't care about them in this migration.
-        if (ts__default["default"].isImportDeclaration(node)) {
+        if (ts.isImportDeclaration(node)) {
             return;
         }
-        if (ts__default["default"].isParameter(node)) {
-            const closestConstructor = nodes.closestNode(node, ts__default["default"].isConstructorDeclaration);
+        if (ts.isParameter(node)) {
+            const closestConstructor = nodes.closestNode(node, ts.isConstructorDeclaration);
             // Visiting the same parameters that we're about to remove can throw off the reference
             // counting logic below. If we run into an initializer, we always visit its initializer
             // and optionally visit the modifiers/decorators if it's not due to be deleted. Note that
@@ -105,7 +99,7 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
             }
             return;
         }
-        if (ts__default["default"].isIdentifier(node) && importsToSpecifiers.size > 0) {
+        if (ts.isIdentifier(node) && importsToSpecifiers.size > 0) {
             let symbol;
             for (const [name, specifier] of importsToSpecifiers) {
                 const localName = (specifier.propertyName || specifier.name).text;
@@ -125,11 +119,11 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
                 }
             }
         }
-        else if (ts__default["default"].isClassDeclaration(node)) {
-            const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
-            const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
+        else if (ts.isClassDeclaration(node)) {
+            const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts.getDecorators(node) || []);
+            const isAbstract = !!node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AbstractKeyword);
             const supportsDI = decorators.some((dec) => DECORATORS_SUPPORTING_DI.has(dec.name));
-            const constructorNode = node.members.find((member) => ts__default["default"].isConstructorDeclaration(member) &&
+            const constructorNode = node.members.find((member) => ts.isConstructorDeclaration(member) &&
                 member.body != null &&
                 member.parameters.length > 0);
             // Basic check to determine if all parameters are injectable. This isn't exhaustive, but it
@@ -139,7 +133,7 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
                 if (!param.type || !UNINJECTABLE_TYPE_KINDS.has(param.type.kind)) {
                     return true;
                 }
-                return ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []).some((dec) => dec.name === 'Inject' || dec.name === 'Attribute');
+                return ng_decorators.getAngularDecorators(localTypeChecker, ts.getDecorators(param) || []).some((dec) => dec.name === 'Inject' || dec.name === 'Attribute');
             });
             // Don't migrate abstract classes by default, because
             // their parameters aren't guaranteed to be injectable.
@@ -171,7 +165,7 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
     const unusedParams = new Set();
     // Prepare the parameters for quicker checks further down.
     for (const param of declaration.parameters) {
-        if (ts__default["default"].isIdentifier(param.name)) {
+        if (ts.isIdentifier(param.name)) {
             topLevelParameters.add(param);
             topLevelParameterNames.add(param.name.text);
         }
@@ -181,10 +175,10 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
     }
     const analyze = (node) => {
         // Don't descend into statements that were removed already.
-        if (ts__default["default"].isStatement(node) && removedStatements.has(node)) {
+        if (ts.isStatement(node) && removedStatements.has(node)) {
             return;
         }
-        if (!ts__default["default"].isIdentifier(node) || !topLevelParameterNames.has(node.text)) {
+        if (!ts.isIdentifier(node) || !topLevelParameterNames.has(node.text)) {
             node.forEachChild(analyze);
             return;
         }
@@ -194,12 +188,12 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
             return;
         }
         localTypeChecker.getSymbolAtLocation(node)?.declarations?.forEach((decl) => {
-            if (ts__default["default"].isParameter(decl) && topLevelParameters.has(decl)) {
+            if (ts.isParameter(decl) && topLevelParameters.has(decl)) {
                 accessedTopLevelParameters.add(decl);
             }
-            if (ts__default["default"].isShorthandPropertyAssignment(decl)) {
+            if (ts.isShorthandPropertyAssignment(decl)) {
                 const symbol = localTypeChecker.getShorthandAssignmentValueSymbol(decl);
-                if (symbol && symbol.valueDeclaration && ts__default["default"].isParameter(symbol.valueDeclaration)) {
+                if (symbol && symbol.valueDeclaration && ts.isParameter(symbol.valueDeclaration)) {
                     accessedTopLevelParameters.add(symbol.valueDeclaration);
                 }
             }
@@ -230,15 +224,15 @@ function getSuperParameters(declaration, superCall, localTypeChecker) {
     const topLevelParameterNames = new Set();
     // Prepare the parameters for quicker checks further down.
     for (const param of declaration.parameters) {
-        if (ts__default["default"].isIdentifier(param.name)) {
+        if (ts.isIdentifier(param.name)) {
             topLevelParameters.add(param);
             topLevelParameterNames.add(param.name.text);
         }
     }
     superCall.forEachChild(function walk(node) {
-        if (ts__default["default"].isIdentifier(node) && topLevelParameterNames.has(node.text)) {
+        if (ts.isIdentifier(node) && topLevelParameterNames.has(node.text)) {
             localTypeChecker.getSymbolAtLocation(node)?.declarations?.forEach((decl) => {
-                if (ts__default["default"].isParameter(decl) && topLevelParameters.has(decl)) {
+                if (ts.isParameter(decl) && topLevelParameters.has(decl)) {
                     usedParams.add(decl);
                 }
             });
@@ -262,13 +256,13 @@ function parameterReferencesOtherParameters(param, allParameters, localTypeCheck
     }
     const paramNames = new Set();
     for (const current of allParameters) {
-        if (current !== param && ts__default["default"].isIdentifier(current.name)) {
+        if (current !== param && ts.isIdentifier(current.name)) {
             paramNames.add(current.name.text);
         }
     }
     let result = false;
     const analyze = (node) => {
-        if (ts__default["default"].isIdentifier(node) && paramNames.has(node.text) && !isAccessedViaThis(node)) {
+        if (ts.isIdentifier(node) && paramNames.has(node.text) && !isAccessedViaThis(node)) {
             const symbol = localTypeChecker.getSymbolAtLocation(node);
             const referencesOtherParam = symbol?.declarations?.some((decl) => {
                 return allParameters.includes(decl);
@@ -286,47 +280,47 @@ function parameterReferencesOtherParameters(param, allParameters, localTypeCheck
 }
 /** Checks whether a parameter node declares a property on its class. */
 function parameterDeclaresProperty(node) {
-    return !!node.modifiers?.some(({ kind }) => kind === ts__default["default"].SyntaxKind.PublicKeyword ||
-        kind === ts__default["default"].SyntaxKind.PrivateKeyword ||
-        kind === ts__default["default"].SyntaxKind.ProtectedKeyword ||
-        kind === ts__default["default"].SyntaxKind.ReadonlyKeyword);
+    return !!node.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.PublicKeyword ||
+        kind === ts.SyntaxKind.PrivateKeyword ||
+        kind === ts.SyntaxKind.ProtectedKeyword ||
+        kind === ts.SyntaxKind.ReadonlyKeyword);
 }
 /** Checks whether a type node is nullable. */
 function isNullableType(node) {
     // Apparently `foo: null` is `Parameter<TypeNode<NullKeyword>>`,
     // while `foo: undefined` is `Parameter<UndefinedKeyword>`...
-    if (node.kind === ts__default["default"].SyntaxKind.UndefinedKeyword || node.kind === ts__default["default"].SyntaxKind.VoidKeyword) {
+    if (node.kind === ts.SyntaxKind.UndefinedKeyword || node.kind === ts.SyntaxKind.VoidKeyword) {
         return true;
     }
-    if (ts__default["default"].isLiteralTypeNode(node)) {
-        return node.literal.kind === ts__default["default"].SyntaxKind.NullKeyword;
+    if (ts.isLiteralTypeNode(node)) {
+        return node.literal.kind === ts.SyntaxKind.NullKeyword;
     }
-    if (ts__default["default"].isUnionTypeNode(node)) {
+    if (ts.isUnionTypeNode(node)) {
         return node.types.some(isNullableType);
     }
     return false;
 }
 /** Checks whether a type node has generic arguments. */
 function hasGenerics(node) {
-    if (ts__default["default"].isTypeReferenceNode(node)) {
+    if (ts.isTypeReferenceNode(node)) {
         return node.typeArguments != null && node.typeArguments.length > 0;
     }
-    if (ts__default["default"].isUnionTypeNode(node)) {
+    if (ts.isUnionTypeNode(node)) {
         return node.types.some(hasGenerics);
     }
     return false;
 }
 /** Checks whether an identifier is accessed through `this`, e.g. `this.<some identifier>`. */
 function isAccessedViaThis(node) {
-    return (ts__default["default"].isPropertyAccessExpression(node.parent) &&
-        node.parent.expression.kind === ts__default["default"].SyntaxKind.ThisKeyword &&
+    return (ts.isPropertyAccessExpression(node.parent) &&
+        node.parent.expression.kind === ts.SyntaxKind.ThisKeyword &&
         node.parent.name === node);
 }
 /** Finds a `super` call inside of a specific node. */
 function findSuperCall(root) {
     let result = null;
     root.forEachChild(function find(node) {
-        if (ts__default["default"].isCallExpression(node) && node.expression.kind === ts__default["default"].SyntaxKind.SuperKeyword) {
+        if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.SuperKeyword) {
             result = node;
         }
         else if (result === null) {
@@ -367,9 +361,9 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
     let toHoist = [];
     const membersToDeclarations = new Map();
     for (const member of node.members) {
-        if (ts__default["default"].isPropertyDeclaration(member) &&
+        if (ts.isPropertyDeclaration(member) &&
             !member.initializer &&
-            !ts__default["default"].isComputedPropertyName(member.name)) {
+            !ts.isComputedPropertyName(member.name)) {
             membersToDeclarations.set(member.name.text, member);
         }
     }
@@ -449,21 +443,21 @@ function shouldCombineInInitializationOrder(toCombine, constructor) {
     // Collect the name of constructor parameters that declare new properties.
     // These can be ignored since they'll be hoisted above other properties.
     constructor.parameters.forEach((param) => {
-        if (parameterDeclaresProperty(param) && ts__default["default"].isIdentifier(param.name)) {
+        if (parameterDeclaresProperty(param) && ts.isIdentifier(param.name)) {
             injectedMemberNames.add(param.name.text);
         }
     });
     // Collect the names of the properties being combined. We should only reorder
     // the properties if at least one of them refers to another one.
     toCombine.forEach(({ declaration: { name } }) => {
-        if (ts__default["default"].isStringLiteralLike(name) || ts__default["default"].isIdentifier(name)) {
+        if (ts.isStringLiteralLike(name) || ts.isIdentifier(name)) {
             combinedMemberNames.add(name.text);
         }
     });
     // Visit all the initializers and check all the property reads in the form of `this.<name>`.
     // Skip over the ones referring to injected parameters since they're going to be hoisted.
     const walkInitializer = (node) => {
-        if (ts__default["default"].isPropertyAccessExpression(node) && node.expression.kind === ts__default["default"].SyntaxKind.ThisKeyword) {
+        if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.ThisKeyword) {
             if (combinedMemberNames.has(node.name.text)) {
                 combinedMemberReferenceCount++;
             }
@@ -500,20 +494,20 @@ function getMemberInitializers(constructor) {
     // Only look at top-level constructor statements.
     for (const node of constructor.body.statements) {
         // Only look for statements in the form of `this.<name> = <expr>;` or `this[<name>] = <expr>;`.
-        if (!ts__default["default"].isExpressionStatement(node) ||
-            !ts__default["default"].isBinaryExpression(node.expression) ||
-            node.expression.operatorToken.kind !== ts__default["default"].SyntaxKind.EqualsToken ||
-            (!ts__default["default"].isPropertyAccessExpression(node.expression.left) &&
-                !ts__default["default"].isElementAccessExpression(node.expression.left)) ||
-            node.expression.left.expression.kind !== ts__default["default"].SyntaxKind.ThisKeyword) {
+        if (!ts.isExpressionStatement(node) ||
+            !ts.isBinaryExpression(node.expression) ||
+            node.expression.operatorToken.kind !== ts.SyntaxKind.EqualsToken ||
+            (!ts.isPropertyAccessExpression(node.expression.left) &&
+                !ts.isElementAccessExpression(node.expression.left)) ||
+            node.expression.left.expression.kind !== ts.SyntaxKind.ThisKeyword) {
             continue;
         }
         let name;
-        if (ts__default["default"].isPropertyAccessExpression(node.expression.left)) {
+        if (ts.isPropertyAccessExpression(node.expression.left)) {
             name = node.expression.left.name.text;
         }
-        else if (ts__default["default"].isElementAccessExpression(node.expression.left)) {
-            name = ts__default["default"].isStringLiteralLike(node.expression.left.argumentExpression)
+        else if (ts.isElementAccessExpression(node.expression.left)) {
+            name = ts.isStringLiteralLike(node.expression.left.argumentExpression)
                 ? node.expression.left.argumentExpression.text
                 : undefined;
         }
@@ -547,7 +541,7 @@ function hasLocalReferences(root, constructor, localTypeChecker) {
         //   this.bar = this.foo.getFoo();
         // }
         // ```
-        if (ts__default["default"].isIdentifier(node) && !isAccessedViaThis(node)) {
+        if (ts.isIdentifier(node) && !isAccessedViaThis(node)) {
             const declarations = localTypeChecker.getSymbolAtLocation(node)?.declarations;
             const isReferencingLocalSymbol = declarations?.some((decl) => 
             // The source file check is a bit redundant since the type checker
@@ -579,9 +573,9 @@ function isInsideInlineFunction(startNode, boundary) {
         if (current === boundary) {
             return false;
         }
-        if (ts__default["default"].isFunctionDeclaration(current) ||
-            ts__default["default"].isFunctionExpression(current) ||
-            ts__default["default"].isArrowFunction(current)) {
+        if (ts.isFunctionDeclaration(current) ||
+            ts.isFunctionExpression(current) ||
+            ts.isArrowFunction(current)) {
             return true;
         }
         current = current.parent;
@@ -610,7 +604,7 @@ function migrateFile(sourceFile, options) {
     if (analysis === null || analysis.classes.length === 0) {
         return [];
     }
-    const printer = ts__default["default"].createPrinter();
+    const printer = ts.createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     analysis.classes.forEach(({ node, constructor, superCall }) => {
         const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
@@ -667,7 +661,7 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
     // Delete all of the constructor overloads since below we're either going to
     // remove the implementation, or we're going to delete all of the parameters.
     for (const member of node.members) {
-        if (ts__default["default"].isConstructorDeclaration(member) && member !== constructor) {
+        if (ts.isConstructorDeclaration(member) && member !== constructor) {
             removedMembers.add(member);
             tracker.removeNode(member, true);
         }
@@ -751,7 +745,7 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
  * @param afterSuper Statements to be added after the `super` call.
  */
 function migrateParameter(node, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, usesOtherParams, memberIndentation, innerIndentation, prependToConstructor, propsToAdd, afterSuper) {
-    if (!ts__default["default"].isIdentifier(node.name)) {
+    if (!ts.isIdentifier(node.name)) {
         return;
     }
     const name = node.name.text;
@@ -762,14 +756,14 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
         // We can't initialize the property if it's referenced within a `super` call or  it references
         // other parameters. See the logic further below for the initialization.
         const canInitialize = !usedInSuper && !usesOtherParams;
-        const prop = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(node.modifiers?.filter((modifier) => {
+        const prop = ts.factory.createPropertyDeclaration(cloneModifiers(node.modifiers?.filter((modifier) => {
             // Strip out the DI decorators, as well as `public` which is redundant.
-            return !ts__default["default"].isDecorator(modifier) && modifier.kind !== ts__default["default"].SyntaxKind.PublicKeyword;
+            return !ts.isDecorator(modifier) && modifier.kind !== ts.SyntaxKind.PublicKeyword;
         })), name, 
         // Don't add the question token to private properties since it won't affect interface implementation.
-        node.modifiers?.some((modifier) => modifier.kind === ts__default["default"].SyntaxKind.PrivateKeyword)
+        node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.PrivateKeyword)
             ? undefined
-            : node.questionToken, canInitialize ? undefined : node.type, canInitialize ? ts__default["default"].factory.createIdentifier(PLACEHOLDER) : undefined);
+            : node.questionToken, canInitialize ? undefined : node.type, canInitialize ? ts.factory.createIdentifier(PLACEHOLDER) : undefined);
         propsToAdd.push(memberIndentation +
             replaceNodePlaceholder(node.getSourceFile(), prop, replacementCall, printer));
     }
@@ -823,7 +817,7 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
 function createInjectReplacementCall(param, options, localTypeChecker, printer, tracker) {
     const moduleName = '@angular/core';
     const sourceFile = param.getSourceFile();
-    const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []);
+    const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts.getDecorators(param) || []);
     const literalProps = [];
     const type = param.type;
     let injectedType = '';
@@ -832,11 +826,11 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
     if (type) {
         // Remove the type arguments from generic type references, because
         // they'll be specified as type arguments to `inject()`.
-        if (ts__default["default"].isTypeReferenceNode(type) && type.typeArguments && type.typeArguments.length > 0) {
+        if (ts.isTypeReferenceNode(type) && type.typeArguments && type.typeArguments.length > 0) {
             injectedType = type.typeName.getText();
         }
-        else if (ts__default["default"].isUnionTypeNode(type)) {
-            injectedType = (type.types.find((t) => !ts__default["default"].isLiteralTypeNode(t)) || type.types[0]).getText();
+        else if (ts.isUnionTypeNode(type)) {
+            injectedType = (type.types.find((t) => !ts.isLiteralTypeNode(t)) || type.types[0]).getText();
         }
         else {
             injectedType = type.getText();
@@ -860,23 +854,23 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
             case 'Attribute':
                 if (firstArg) {
                     const constructorRef = tracker.addImport(sourceFile, 'HostAttributeToken', moduleName);
-                    const expression = ts__default["default"].factory.createNewExpression(constructorRef, undefined, [firstArg]);
-                    injectedType = printer.printNode(ts__default["default"].EmitHint.Unspecified, expression, sourceFile);
+                    const expression = ts.factory.createNewExpression(constructorRef, undefined, [firstArg]);
+                    injectedType = printer.printNode(ts.EmitHint.Unspecified, expression, sourceFile);
                     typeArguments = undefined;
                 }
                 break;
             case 'Optional':
                 hasOptionalDecorator = true;
-                literalProps.push(ts__default["default"].factory.createPropertyAssignment('optional', ts__default["default"].factory.createTrue()));
+                literalProps.push(ts.factory.createPropertyAssignment('optional', ts.factory.createTrue()));
                 break;
             case 'SkipSelf':
-                literalProps.push(ts__default["default"].factory.createPropertyAssignment('skipSelf', ts__default["default"].factory.createTrue()));
+                literalProps.push(ts.factory.createPropertyAssignment('skipSelf', ts.factory.createTrue()));
                 break;
             case 'Self':
-                literalProps.push(ts__default["default"].factory.createPropertyAssignment('self', ts__default["default"].factory.createTrue()));
+                literalProps.push(ts.factory.createPropertyAssignment('self', ts.factory.createTrue()));
                 break;
             case 'Host':
-                literalProps.push(ts__default["default"].factory.createPropertyAssignment('host', ts__default["default"].factory.createTrue()));
+                literalProps.push(ts.factory.createPropertyAssignment('host', ts.factory.createTrue()));
                 break;
         }
     }
@@ -884,22 +878,22 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
     // Since the value gets passed through directly anyway, we generate the call using a placeholder
     // which we then replace with the raw text of the `TypeNode`.
     const injectRef = tracker.addImport(param.getSourceFile(), 'inject', moduleName);
-    const args = [ts__default["default"].factory.createIdentifier(PLACEHOLDER)];
+    const args = [ts.factory.createIdentifier(PLACEHOLDER)];
     if (literalProps.length > 0) {
-        args.push(ts__default["default"].factory.createObjectLiteralExpression(literalProps));
+        args.push(ts.factory.createObjectLiteralExpression(literalProps));
     }
-    let expression = ts__default["default"].factory.createCallExpression(injectRef, typeArguments, args);
+    let expression = ts.factory.createCallExpression(injectRef, typeArguments, args);
     if (hasOptionalDecorator && options.nonNullableOptional) {
         const hasNullableType = param.questionToken != null || (param.type != null && isNullableType(param.type));
         // Only wrap the expression if the type wasn't already nullable.
         // If it was, the app was likely accounting for it already.
         if (!hasNullableType) {
-            expression = ts__default["default"].factory.createNonNullExpression(expression);
+            expression = ts.factory.createNonNullExpression(expression);
         }
     }
     // If the parameter is initialized, add the initializer as a fallback.
     if (param.initializer) {
-        expression = ts__default["default"].factory.createBinaryExpression(expression, ts__default["default"].SyntaxKind.QuestionQuestionToken, param.initializer);
+        expression = ts.factory.createBinaryExpression(expression, ts.SyntaxKind.QuestionQuestionToken, param.initializer);
     }
     return replaceNodePlaceholder(param.getSourceFile(), expression, injectedType, printer);
 }
@@ -914,12 +908,12 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
     let typeArguments = null;
     // `inject` no longer officially supports string injection so we need
     // to cast to any. We maintain the type by passing it as a generic.
-    if (ts__default["default"].isStringLiteralLike(firstArg)) {
-        typeArguments = [type || ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword)];
+    if (ts.isStringLiteralLike(firstArg)) {
+        typeArguments = [type || ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)];
         injectedType += ' as any';
     }
-    else if (ts__default["default"].isCallExpression(firstArg) &&
-        ts__default["default"].isIdentifier(firstArg.expression) &&
+    else if (ts.isCallExpression(firstArg) &&
+        ts.isIdentifier(firstArg.expression) &&
         firstArg.arguments.length === 1) {
         const callImport = imports.getImportOfIdentifier(localTypeChecker, firstArg.expression);
         const arrowFn = firstArg.arguments[0];
@@ -928,9 +922,9 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
         if (callImport !== null &&
             callImport.name === 'forwardRef' &&
             callImport.importModule === '@angular/core' &&
-            ts__default["default"].isArrowFunction(arrowFn)) {
-            if (ts__default["default"].isBlock(arrowFn.body)) {
-                const returnStatement = arrowFn.body.statements.find((stmt) => ts__default["default"].isReturnStatement(stmt));
+            ts.isArrowFunction(arrowFn)) {
+            if (ts.isBlock(arrowFn.body)) {
+                const returnStatement = arrowFn.body.statements.find((stmt) => ts.isReturnStatement(stmt));
                 if (returnStatement && returnStatement.expression) {
                     injectedType = returnStatement.expression.getText();
                 }
@@ -941,10 +935,10 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
         }
     }
     else if (type &&
-        (ts__default["default"].isTypeReferenceNode(type) ||
-            ts__default["default"].isTypeLiteralNode(type) ||
-            ts__default["default"].isTupleTypeNode(type) ||
-            (ts__default["default"].isUnionTypeNode(type) && type.types.some(ts__default["default"].isTypeReferenceNode)))) {
+        (ts.isTypeReferenceNode(type) ||
+            ts.isTypeLiteralNode(type) ||
+            ts.isTupleTypeNode(type) ||
+            (ts.isUnionTypeNode(type) && type.types.some(ts.isTypeReferenceNode)))) {
         typeArguments = [type];
     }
     return { injectedType, typeArguments };
@@ -983,9 +977,9 @@ function stripConstructorParameters(node, tracker) {
  */
 function getLocalTypeChecker(sourceFile) {
     const options = { noEmit: true, skipLibCheck: true };
-    const host = ts__default["default"].createCompilerHost(options);
+    const host = ts.createCompilerHost(options);
     host.getSourceFile = (fileName) => (fileName === sourceFile.fileName ? sourceFile : undefined);
-    const program = ts__default["default"].createProgram({
+    const program = ts.createProgram({
         rootNames: [sourceFile.fileName],
         options,
         host,
@@ -1000,7 +994,7 @@ function getLocalTypeChecker(sourceFile) {
  * @param printer Printer used to output AST nodes as strings.
  */
 function replaceNodePlaceholder(sourceFile, node, replacement, printer) {
-    const result = printer.printNode(ts__default["default"].EmitHint.Unspecified, node, sourceFile);
+    const result = printer.printNode(ts.EmitHint.Unspecified, node, sourceFile);
     return result.replace(PLACEHOLDER, replacement);
 }
 /**
@@ -1009,9 +1003,9 @@ function replaceNodePlaceholder(sourceFile, node, replacement, printer) {
  */
 function cloneModifiers(modifiers) {
     return modifiers?.map((modifier) => {
-        return ts__default["default"].isDecorator(modifier)
-            ? ts__default["default"].factory.createDecorator(modifier.expression)
-            : ts__default["default"].factory.createModifier(modifier.kind);
+        return ts.isDecorator(modifier)
+            ? ts.factory.createDecorator(modifier.expression)
+            : ts.factory.createModifier(modifier.kind);
     });
 }
 /**
@@ -1020,18 +1014,18 @@ function cloneModifiers(modifiers) {
  */
 function cloneName(node) {
     switch (node.kind) {
-        case ts__default["default"].SyntaxKind.Identifier:
-            return ts__default["default"].factory.createIdentifier(node.text);
-        case ts__default["default"].SyntaxKind.StringLiteral:
-            return ts__default["default"].factory.createStringLiteral(node.text, node.getText()[0] === `'`);
-        case ts__default["default"].SyntaxKind.NoSubstitutionTemplateLiteral:
-            return ts__default["default"].factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
-        case ts__default["default"].SyntaxKind.NumericLiteral:
-            return ts__default["default"].factory.createNumericLiteral(node.text);
-        case ts__default["default"].SyntaxKind.ComputedPropertyName:
-            return ts__default["default"].factory.createComputedPropertyName(node.expression);
-        case ts__default["default"].SyntaxKind.PrivateIdentifier:
-            return ts__default["default"].factory.createPrivateIdentifier(node.text);
+        case ts.SyntaxKind.Identifier:
+            return ts.factory.createIdentifier(node.text);
+        case ts.SyntaxKind.StringLiteral:
+            return ts.factory.createStringLiteral(node.text, node.getText()[0] === `'`);
+        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+            return ts.factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
+        case ts.SyntaxKind.NumericLiteral:
+            return ts.factory.createNumericLiteral(node.text);
+        case ts.SyntaxKind.ComputedPropertyName:
+            return ts.factory.createComputedPropertyName(node.expression);
+        case ts.SyntaxKind.PrivateIdentifier:
+            return ts.factory.createPrivateIdentifier(node.text);
         default:
             return node;
     }
@@ -1061,8 +1055,8 @@ function canRemoveConstructor(options, constructor, removedStatementCount, prepe
  * @returns
  */
 function getNextPreservedStatement(startNode, removedStatements) {
-    const body = nodes.closestNode(startNode, ts__default["default"].isBlock);
-    const closestStatement = nodes.closestNode(startNode, ts__default["default"].isStatement);
+    const body = nodes.closestNode(startNode, ts.isBlock);
+    const closestStatement = nodes.closestNode(startNode, ts.isStatement);
     if (body === null || closestStatement === null) {
         return null;
     }
@@ -1103,15 +1097,15 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
         result.toCombine.sort((a, b) => a.initializer.getStart() - b.initializer.getStart());
     }
     result.toCombine.forEach(({ declaration, initializer }) => {
-        const initializerStatement = nodes.closestNode(initializer, ts__default["default"].isStatement);
-        const newProperty = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
+        const initializerStatement = nodes.closestNode(initializer, ts.isStatement);
+        const newProperty = ts.factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
         // If the initialization order is being preserved, we have to remove the original
         // declaration and re-declare it. Otherwise we can do the replacement in-place.
         if (preserveInitOrder) {
             tracker.removeNode(declaration, true);
             removedMembers.add(declaration);
             afterInjectCalls.push(memberIndentation +
-                printer.printNode(ts__default["default"].EmitHint.Unspecified, newProperty, declaration.getSourceFile()));
+                printer.printNode(ts.EmitHint.Unspecified, newProperty, declaration.getSourceFile()));
         }
         else {
             tracker.replaceNode(declaration, newProperty);
@@ -1123,7 +1117,7 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
         }
     });
     result.toHoist.forEach((decl) => {
-        prependToClass.push(memberIndentation + printer.printNode(ts__default["default"].EmitHint.Unspecified, decl, decl.getSourceFile()));
+        prependToClass.push(memberIndentation + printer.printNode(ts.EmitHint.Unspecified, decl, decl.getSourceFile()));
         tracker.removeNode(decl, true);
         removedMembers.add(decl);
     });

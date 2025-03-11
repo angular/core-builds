@@ -1,166 +1,37 @@
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-export declare type ComputationFn<S, D> = (source: S, previous?: {
-    source: S;
-    value: D;
-}) => D;
-
-declare type ComputedGetter<T> = (() => T) & {
-    [SIGNAL]: ComputedNode<T>;
-};
+export { s as setAlternateWeakRefImpl } from '../../weak_ref.d-ttyj86RV.js';
 
 /**
- * A computation, which derives a value from a declarative reactive expression.
- *
- * `Computed`s are both producers and consumers of reactivity.
+ * A comparison function which can determine if two values are equal.
  */
-export declare interface ComputedNode<T> extends ReactiveNode {
-    /**
-     * Current value of the computation, or one of the sentinel values above (`UNSET`, `COMPUTING`,
-     * `ERROR`).
-     */
-    value: T;
-    /**
-     * If `value` is `ERRORED`, the error caught from the last computation attempt which will
-     * be re-thrown.
-     */
-    error: unknown;
-    /**
-     * The computation function which will produce a new value.
-     */
-    computation: () => T;
-    equal: ValueEqualityFn<T>;
-}
-
-/**
- * Finalize this consumer's state after a reactive computation has run.
- *
- * Must be called by subclasses which represent reactive computations, after those computations
- * have finished.
- */
-export declare function consumerAfterComputation(node: ReactiveNode | null, prevConsumer: ReactiveNode | null): void;
-
-/**
- * Prepare this consumer to run a computation in its reactive context.
- *
- * Must be called by subclasses which represent reactive computations, before those computations
- * begin.
- */
-export declare function consumerBeforeComputation(node: ReactiveNode | null): ReactiveNode | null;
-
-/**
- * Disconnect this consumer from the graph.
- */
-export declare function consumerDestroy(node: ReactiveNode): void;
-
-export declare function consumerMarkDirty(node: ReactiveNode): void;
-
-/**
- * Determine whether this consumer has any dependencies which have changed since the last time
- * they were read.
- */
-export declare function consumerPollProducersForChange(node: ReactiveNode): boolean;
-
-/**
- * Create a computed signal which derives a reactive value from an expression.
- */
-export declare function createComputed<T>(computation: () => T): ComputedGetter<T>;
-
-export declare function createLinkedSignal<S, D>(sourceFn: () => S, computationFn: ComputationFn<S, D>, equalityFn?: ValueEqualityFn<D>): LinkedSignalGetter<S, D>;
-
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-export declare function createSignal<T>(initialValue: T): SignalGetter<T>;
-
-export declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, schedule: (watch: Watch) => void, allowSignalWrites: boolean): Watch;
-
+type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 /**
  * The default equality function used for `signal` and `computed`, which uses referential equality.
  */
-export declare function defaultEquals<T>(a: T, b: T): boolean;
+declare function defaultEquals<T>(a: T, b: T): boolean;
 
-export declare function getActiveConsumer(): ReactiveNode | null;
-
-export declare function isInNotificationPhase(): boolean;
-
-export declare function isReactive(value: unknown): value is Reactive;
-
-export declare type LinkedSignalGetter<S, D> = (() => D) & {
-    [SIGNAL]: LinkedSignalNode<S, D>;
+type Version = number & {
+    __brand: 'Version';
 };
-
-export declare interface LinkedSignalNode<S, D> extends ReactiveNode {
-    /**
-     * Value of the source signal that was used to derive the computed value.
-     */
-    sourceValue: S;
-    /**
-     * Current state value, or one of the sentinel values (`UNSET`, `COMPUTING`,
-     * `ERROR`).
-     */
-    value: D;
-    /**
-     * If `value` is `ERRORED`, the error caught from the last computation attempt which will
-     * be re-thrown.
-     */
-    error: unknown;
-    /**
-     * The source function represents reactive dependency based on which the linked state is reset.
-     */
-    source: () => S;
-    /**
-     * The computation function which will produce a new value based on the source and, optionally - previous values.
-     */
-    computation: ComputationFn<S, D>;
-    equal: ValueEqualityFn<D>;
-}
-
-export declare function linkedSignalSetFn<S, D>(node: LinkedSignalNode<S, D>, newValue: D): void;
-
-export declare function linkedSignalUpdateFn<S, D>(node: LinkedSignalNode<S, D>, updater: (value: D) => D): void;
-
 /**
- * Called by implementations when a producer's signal is read.
- */
-export declare function producerAccessed(node: ReactiveNode): void;
-
-/**
- * Increment the global epoch counter.
+ * Symbol used to tell `Signal`s apart from other functions.
  *
- * Called by source producers (that is, not computeds) whenever their values change.
+ * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
  */
-export declare function producerIncrementEpoch(): void;
-
-export declare function producerMarkClean(node: ReactiveNode): void;
-
-/**
- * Propagate a dirty notification to live consumers of this producer.
- */
-export declare function producerNotifyConsumers(node: ReactiveNode): void;
-
-/**
- * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
- * based on the current consumer context.
- */
-export declare function producerUpdatesAllowed(): boolean;
-
-/**
- * Ensure this producer's `version` is up-to-date.
- */
-export declare function producerUpdateValueVersion(node: ReactiveNode): void;
-
-export declare interface Reactive {
+declare const SIGNAL: unique symbol;
+declare function setActiveConsumer(consumer: ReactiveNode | null): ReactiveNode | null;
+declare function getActiveConsumer(): ReactiveNode | null;
+declare function isInNotificationPhase(): boolean;
+interface Reactive {
     [SIGNAL]: ReactiveNode;
 }
-
-export declare const REACTIVE_NODE: ReactiveNode;
-
+declare function isReactive(value: unknown): value is Reactive;
+declare const REACTIVE_NODE: ReactiveNode;
 /**
  * A producer and/or consumer which participates in the reactive graph.
  *
@@ -173,7 +44,7 @@ export declare const REACTIVE_NODE: ReactiveNode;
  *
  * A `ReactiveNode` may be both a producer and consumer.
  */
-export declare interface ReactiveNode {
+interface ReactiveNode {
     /**
      * Version of the value that this node produces.
      *
@@ -270,63 +141,153 @@ export declare interface ReactiveNode {
      */
     kind: string;
 }
-
-export declare function runPostSignalSetFn(): void;
-
-export declare function setActiveConsumer(consumer: ReactiveNode | null): ReactiveNode | null;
-
-
-export declare function setAlternateWeakRefImpl(impl: unknown): void;
-
-export declare function setPostSignalSetFn(fn: (() => void) | null): (() => void) | null;
-
-export declare function setThrowInvalidWriteToSignalError(fn: <T>(node: SignalNode<T>) => never): void;
+/**
+ * Called by implementations when a producer's signal is read.
+ */
+declare function producerAccessed(node: ReactiveNode): void;
+/**
+ * Increment the global epoch counter.
+ *
+ * Called by source producers (that is, not computeds) whenever their values change.
+ */
+declare function producerIncrementEpoch(): void;
+/**
+ * Ensure this producer's `version` is up-to-date.
+ */
+declare function producerUpdateValueVersion(node: ReactiveNode): void;
+/**
+ * Propagate a dirty notification to live consumers of this producer.
+ */
+declare function producerNotifyConsumers(node: ReactiveNode): void;
+/**
+ * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
+ * based on the current consumer context.
+ */
+declare function producerUpdatesAllowed(): boolean;
+declare function consumerMarkDirty(node: ReactiveNode): void;
+declare function producerMarkClean(node: ReactiveNode): void;
+/**
+ * Prepare this consumer to run a computation in its reactive context.
+ *
+ * Must be called by subclasses which represent reactive computations, before those computations
+ * begin.
+ */
+declare function consumerBeforeComputation(node: ReactiveNode | null): ReactiveNode | null;
+/**
+ * Finalize this consumer's state after a reactive computation has run.
+ *
+ * Must be called by subclasses which represent reactive computations, after those computations
+ * have finished.
+ */
+declare function consumerAfterComputation(node: ReactiveNode | null, prevConsumer: ReactiveNode | null): void;
+/**
+ * Determine whether this consumer has any dependencies which have changed since the last time
+ * they were read.
+ */
+declare function consumerPollProducersForChange(node: ReactiveNode): boolean;
+/**
+ * Disconnect this consumer from the graph.
+ */
+declare function consumerDestroy(node: ReactiveNode): void;
 
 /**
- * Symbol used to tell `Signal`s apart from other functions.
+ * A computation, which derives a value from a declarative reactive expression.
  *
- * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
+ * `Computed`s are both producers and consumers of reactivity.
  */
-export declare const SIGNAL: unique symbol;
-
-export declare const SIGNAL_NODE: SignalNode<unknown>;
-
-declare type SignalBaseGetter<T> = (() => T) & {
-    readonly [SIGNAL]: unknown;
-};
-
-export declare interface SignalGetter<T> extends SignalBaseGetter<T> {
-    readonly [SIGNAL]: SignalNode<T>;
+interface ComputedNode<T> extends ReactiveNode {
+    /**
+     * Current value of the computation, or one of the sentinel values above (`UNSET`, `COMPUTING`,
+     * `ERROR`).
+     */
+    value: T;
+    /**
+     * If `value` is `ERRORED`, the error caught from the last computation attempt which will
+     * be re-thrown.
+     */
+    error: unknown;
+    /**
+     * The computation function which will produce a new value.
+     */
+    computation: () => T;
+    equal: ValueEqualityFn<T>;
 }
+type ComputedGetter<T> = (() => T) & {
+    [SIGNAL]: ComputedNode<T>;
+};
+/**
+ * Create a computed signal which derives a reactive value from an expression.
+ */
+declare function createComputed<T>(computation: () => T): ComputedGetter<T>;
 
-export declare interface SignalNode<T> extends ReactiveNode {
+type ComputationFn<S, D> = (source: S, previous?: {
+    source: S;
+    value: D;
+}) => D;
+interface LinkedSignalNode<S, D> extends ReactiveNode {
+    /**
+     * Value of the source signal that was used to derive the computed value.
+     */
+    sourceValue: S;
+    /**
+     * Current state value, or one of the sentinel values (`UNSET`, `COMPUTING`,
+     * `ERROR`).
+     */
+    value: D;
+    /**
+     * If `value` is `ERRORED`, the error caught from the last computation attempt which will
+     * be re-thrown.
+     */
+    error: unknown;
+    /**
+     * The source function represents reactive dependency based on which the linked state is reset.
+     */
+    source: () => S;
+    /**
+     * The computation function which will produce a new value based on the source and, optionally - previous values.
+     */
+    computation: ComputationFn<S, D>;
+    equal: ValueEqualityFn<D>;
+}
+type LinkedSignalGetter<S, D> = (() => D) & {
+    [SIGNAL]: LinkedSignalNode<S, D>;
+};
+declare function createLinkedSignal<S, D>(sourceFn: () => S, computationFn: ComputationFn<S, D>, equalityFn?: ValueEqualityFn<D>): LinkedSignalGetter<S, D>;
+declare function linkedSignalSetFn<S, D>(node: LinkedSignalNode<S, D>, newValue: D): void;
+declare function linkedSignalUpdateFn<S, D>(node: LinkedSignalNode<S, D>, updater: (value: D) => D): void;
+
+interface SignalNode<T> extends ReactiveNode {
     value: T;
     equal: ValueEqualityFn<T>;
 }
-
-export declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
-
-export declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
-
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-export declare function untracked<T>(nonReactiveReadsFn: () => T): T;
-
-
-/**
- * A comparison function which can determine if two values are equal.
- */
-export declare type ValueEqualityFn<T> = (a: T, b: T) => boolean;
-
-
-declare type Version = number & {
-    __brand: 'Version';
+type SignalBaseGetter<T> = (() => T) & {
+    readonly [SIGNAL]: unknown;
 };
+interface SignalGetter<T> extends SignalBaseGetter<T> {
+    readonly [SIGNAL]: SignalNode<T>;
+}
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+declare function createSignal<T>(initialValue: T): SignalGetter<T>;
+declare function setPostSignalSetFn(fn: (() => void) | null): (() => void) | null;
+declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
+declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
+declare function runPostSignalSetFn(): void;
+declare const SIGNAL_NODE: SignalNode<unknown>;
 
-export declare interface Watch {
+declare function setThrowInvalidWriteToSignalError(fn: <T>(node: SignalNode<T>) => never): void;
+
+/**
+ * A cleanup function that can be optionally registered from the watch logic. If registered, the
+ * cleanup logic runs before the next watch execution.
+ */
+type WatchCleanupFn = () => void;
+/**
+ * A callback passed to the watch function that makes it possible to register cleanup logic.
+ */
+type WatchCleanupRegisterFn = (cleanupFn: WatchCleanupFn) => void;
+interface Watch {
     notify(): void;
     /**
      * Execute the reactive expression in the context of this `Watch` consumer.
@@ -344,24 +305,19 @@ export declare interface Watch {
     destroy(): void;
     [SIGNAL]: WatchNode;
 }
-
-/**
- * A cleanup function that can be optionally registered from the watch logic. If registered, the
- * cleanup logic runs before the next watch execution.
- */
-export declare type WatchCleanupFn = () => void;
-
-/**
- * A callback passed to the watch function that makes it possible to register cleanup logic.
- */
-export declare type WatchCleanupRegisterFn = (cleanupFn: WatchCleanupFn) => void;
-
-declare interface WatchNode extends ReactiveNode {
+interface WatchNode extends ReactiveNode {
     hasRun: boolean;
     fn: ((onCleanup: WatchCleanupRegisterFn) => void) | null;
     schedule: ((watch: Watch) => void) | null;
     cleanupFn: WatchCleanupFn;
     ref: Watch;
 }
+declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, schedule: (watch: Watch) => void, allowSignalWrites: boolean): Watch;
 
-export { }
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+declare function untracked<T>(nonReactiveReadsFn: () => T): T;
+
+export { type ComputationFn, type ComputedNode, type LinkedSignalGetter, type LinkedSignalNode, REACTIVE_NODE, type Reactive, type ReactiveNode, SIGNAL, SIGNAL_NODE, type SignalGetter, type SignalNode, type ValueEqualityFn, type Watch, type WatchCleanupFn, type WatchCleanupRegisterFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };

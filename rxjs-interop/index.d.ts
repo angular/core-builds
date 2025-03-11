@@ -1,21 +1,11 @@
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-import { BaseResourceOptions } from '@angular/core';
-import { DestroyRef } from '@angular/core';
-import { Injector } from '@angular/core';
-import { MonoTypeOperatorFunction } from 'rxjs';
-import { Observable } from 'rxjs';
-import { OutputOptions } from '@angular/core';
-import { OutputRef } from '@angular/core';
-import { ResourceLoaderParams } from '@angular/core';
-import { ResourceRef } from '@angular/core';
-import { Signal } from '@angular/core';
-import { Subscribable } from 'rxjs';
+import { OutputOptions, OutputRef, DestroyRef, Signal, Injector, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '@angular/core';
+import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { ValueEqualityFn } from '@angular/core/primitives/signals';
 
 /**
@@ -42,7 +32,7 @@ import { ValueEqualityFn } from '@angular/core/primitives/signals';
  *
  * @publicApi
  */
-export declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
+declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
 
 /**
  * Converts an Angular output declared via `output()` or `outputFromObservable()`
@@ -52,45 +42,7 @@ export declare function outputFromObservable<T>(observable: Observable<T>, opts?
  *
  * @publicApi
  */
-export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
-
-/**
- * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
- *
- * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
- *
- * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
- *
- * @experimental
- */
-export declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
-
-/**
- * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
- * resource's value.
- *
- * @experimental
- */
-export declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
-    defaultValue: NoInfer<T>;
-}): ResourceRef<T>;
-
-/**
- * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
- * resource's value.
- *
- * @experimental
- */
-export declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
-
-/**
- * Like `ResourceOptions` but uses an RxJS-based `loader`.
- *
- * @experimental
- */
-export declare interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
-    loader: (params: ResourceLoaderParams<R>) => Observable<T>;
-}
+declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -102,8 +54,22 @@ export declare interface RxResourceOptions<T, R> extends BaseResourceOptions<T, 
  *
  * @publicApi
  */
-export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
+declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
 
+/**
+ * Options for `toObservable`.
+ *
+ * @developerPreview
+ */
+interface ToObservableOptions {
+    /**
+     * The `Injector` to use when creating the underlying `effect` which watches the signal.
+     *
+     * If this isn't specified, the current [injection context](guide/di/dependency-injection-context)
+     * will be used.
+     */
+    injector?: Injector;
+}
 /**
  * Exposes the value of an Angular `Signal` as an RxJS `Observable`.
  *
@@ -113,51 +79,15 @@ export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoType
  *
  * @developerPreview
  */
-export declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
-
-/**
- * Options for `toObservable`.
- *
- * @developerPreview
- */
-export declare interface ToObservableOptions {
-    /**
-     * The `Injector` to use when creating the underlying `effect` which watches the signal.
-     *
-     * If this isn't specified, the current [injection context](guide/di/dependency-injection-context)
-     * will be used.
-     */
-    injector?: Injector;
-}
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | undefined>> & {
-    initialValue?: undefined;
-    requireSync?: false;
-}): Signal<T | undefined>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | null>> & {
-    initialValue?: null;
-    requireSync?: false;
-}): Signal<T | null>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T>> & {
-    initialValue?: undefined;
-    requireSync: true;
-}): Signal<T>;
-
-export declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | U>> & {
-    initialValue: U;
-    requireSync?: false;
-}): Signal<T | U>;
+declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
+declare function toObservableMicrotask<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
 /**
  * Options for `toSignal`.
  *
  * @publicApi
  */
-export declare interface ToSignalOptions<T> {
+interface ToSignalOptions<T> {
     /**
      * Initial value for the signal produced by `toSignal`.
      *
@@ -204,7 +134,58 @@ export declare interface ToSignalOptions<T> {
      */
     equal?: ValueEqualityFn<T>;
 }
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | undefined>> & {
+    initialValue?: undefined;
+    requireSync?: false;
+}): Signal<T | undefined>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | null>> & {
+    initialValue?: null;
+    requireSync?: false;
+}): Signal<T | null>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T>> & {
+    initialValue?: undefined;
+    requireSync: true;
+}): Signal<T>;
+declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | U>> & {
+    initialValue: U;
+    requireSync?: false;
+}): Signal<T | U>;
 
-export declare function ɵtoObservableMicrotask<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
+/**
+ * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
+ *
+ * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
+ *
+ * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
+ *
+ * @experimental
+ */
+declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
 
-export { }
+/**
+ * Like `ResourceOptions` but uses an RxJS-based `loader`.
+ *
+ * @experimental
+ */
+interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
+    loader: (params: ResourceLoaderParams<R>) => Observable<T>;
+}
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value.
+ *
+ * @experimental
+ */
+declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
+    defaultValue: NoInfer<T>;
+}): ResourceRef<T>;
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value.
+ *
+ * @experimental
+ */
+declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
+
+export { type RxResourceOptions, type ToObservableOptions, type ToSignalOptions, outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };

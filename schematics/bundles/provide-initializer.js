@@ -1,32 +1,26 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var compiler_host = require('./compiler_host-469692fa.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var compiler_host = require('./compiler_host-DzM2hemp.js');
 var ts = require('typescript');
-var imports = require('./imports-047fbbc8.js');
+var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
-require('./checker-f433e61e.js');
+require('./checker-DP-zos5Q.js');
 require('os');
 require('fs');
 require('module');
 require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 function migrateFile(sourceFile, rewriteFn) {
-    const changeTracker = new compiler_host.ChangeTracker(ts__default["default"].createPrinter());
+    const changeTracker = new compiler_host.ChangeTracker(ts.createPrinter());
     const visitNode = (node) => {
         const provider = tryParseProviderExpression(node);
         if (provider) {
@@ -38,9 +32,9 @@ function migrateFile(sourceFile, rewriteFn) {
             });
             return;
         }
-        ts__default["default"].forEachChild(node, visitNode);
+        ts.forEachChild(node, visitNode);
     };
-    ts__default["default"].forEachChild(sourceFile, visitNode);
+    ts.forEachChild(sourceFile, visitNode);
     for (const change of changeTracker.recordChanges().get(sourceFile)?.values() ?? []) {
         rewriteFn(change.start, change.removeLength ?? 0, change.text);
     }
@@ -64,7 +58,7 @@ function replaceProviderWithNewApi({ sourceFile, node, provider, changeTracker, 
     changeTracker.addImport(sourceFile, provideInitializerFunctionName, angularCoreModule);
 }
 function tryParseProviderExpression(node) {
-    if (!ts__default["default"].isObjectLiteralExpression(node)) {
+    if (!ts.isObjectLiteralExpression(node)) {
         return;
     }
     let deps = [];
@@ -74,10 +68,10 @@ function tryParseProviderExpression(node) {
     let useValue;
     let multi = false;
     for (const property of node.properties) {
-        if (ts__default["default"].isPropertyAssignment(property) && ts__default["default"].isIdentifier(property.name)) {
+        if (ts.isPropertyAssignment(property) && ts.isIdentifier(property.name)) {
             switch (property.name.text) {
                 case 'deps':
-                    if (ts__default["default"].isArrayLiteralExpression(property.initializer)) {
+                    if (ts.isArrayLiteralExpression(property.initializer)) {
                         deps = property.initializer.elements.map((el) => el.getText());
                     }
                     break;
@@ -94,12 +88,12 @@ function tryParseProviderExpression(node) {
                     useValue = property.initializer;
                     break;
                 case 'multi':
-                    multi = property.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword;
+                    multi = property.initializer.kind === ts.SyntaxKind.TrueKeyword;
                     break;
             }
         }
         // Handle the `useFactory() {}` shorthand case.
-        if (ts__default["default"].isMethodDeclaration(property) && property.name.getText() === 'useFactory') {
+        if (ts.isMethodDeclaration(property) && property.name.getText() === 'useFactory') {
             const params = property.parameters.map((param) => param.getText()).join(', ');
             useFactoryCode = `(${params}) => ${property.body?.getText()}`;
         }

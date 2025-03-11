@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,23 +8,19 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-f433e61e.js');
-var program = require('./program-76508a6d.js');
+var checker = require('./checker-DP-zos5Q.js');
+var program = require('./program-CRYsSwIq.js');
 require('path');
-var project_paths = require('./project_paths-3532bf90.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
+var project_paths = require('./project_paths-BoRVJPjW.js');
 
 function getMemberName(member) {
     if (member.name === undefined) {
         return null;
     }
-    if (ts__default["default"].isIdentifier(member.name) || ts__default["default"].isStringLiteralLike(member.name)) {
+    if (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) {
         return member.name.text;
     }
-    if (ts__default["default"].isPrivateIdentifier(member.name)) {
+    if (ts.isPrivateIdentifier(member.name)) {
         return `#${member.name.text}`;
     }
     return null;
@@ -32,8 +28,8 @@ function getMemberName(member) {
 
 /** Checks whether the given node can be an `@Input()` declaration node. */
 function isInputContainerNode(node) {
-    return (((ts__default["default"].isAccessor(node) && ts__default["default"].isClassDeclaration(node.parent)) ||
-        ts__default["default"].isPropertyDeclaration(node)) &&
+    return (((ts.isAccessor(node) && ts.isClassDeclaration(node.parent)) ||
+        ts.isPropertyDeclaration(node)) &&
         getMemberName(node) !== null);
 }
 
@@ -56,17 +52,17 @@ class DebugElementComponentInstance {
         if (this.cache.has(node)) {
             return this.cache.get(node);
         }
-        if (!ts__default["default"].isPropertyAccessExpression(node)) {
+        if (!ts.isPropertyAccessExpression(node)) {
             return null;
         }
         // Check for `<>.componentInstance`.
-        if (!ts__default["default"].isIdentifier(node.name) || node.name.text !== 'componentInstance') {
+        if (!ts.isIdentifier(node.name) || node.name.text !== 'componentInstance') {
             return null;
         }
         // Check for `<>.query(..).<>`.
-        if (!ts__default["default"].isCallExpression(node.expression) ||
-            !ts__default["default"].isPropertyAccessExpression(node.expression.expression) ||
-            !ts__default["default"].isIdentifier(node.expression.expression.name) ||
+        if (!ts.isCallExpression(node.expression) ||
+            !ts.isPropertyAccessExpression(node.expression.expression) ||
+            !ts.isIdentifier(node.expression.expression.name) ||
             node.expression.expression.name.text !== 'query') {
             return null;
         }
@@ -76,13 +72,13 @@ class DebugElementComponentInstance {
         }
         const queryArg = queryCall.arguments[0];
         let typeExpr;
-        if (ts__default["default"].isCallExpression(queryArg) &&
+        if (ts.isCallExpression(queryArg) &&
             queryArg.arguments.length === 1 &&
-            ts__default["default"].isIdentifier(queryArg.arguments[0])) {
+            ts.isIdentifier(queryArg.arguments[0])) {
             // Detect references, like: `query(By.directive(T))`.
             typeExpr = queryArg.arguments[0];
         }
-        else if (ts__default["default"].isIdentifier(queryArg)) {
+        else if (ts.isIdentifier(queryArg)) {
             // Detect references, like: `harness.query(T)`.
             typeExpr = queryArg;
         }
@@ -91,7 +87,7 @@ class DebugElementComponentInstance {
         }
         const symbol = this.checker.getSymbolAtLocation(typeExpr);
         if (symbol?.valueDeclaration === undefined ||
-            !ts__default["default"].isClassDeclaration(symbol?.valueDeclaration)) {
+            !ts.isClassDeclaration(symbol?.valueDeclaration)) {
             // Cache this as we use the expensive type checker.
             this.cache.set(node, null);
             return null;
@@ -123,8 +119,8 @@ class PartialDirectiveTypeInCatalystTests {
     }
     detect(node) {
         // Detect `Partial<...>`
-        if (!ts__default["default"].isTypeReferenceNode(node) ||
-            !ts__default["default"].isIdentifier(node.typeName) ||
+        if (!ts.isTypeReferenceNode(node) ||
+            !ts.isIdentifier(node.typeName) ||
             node.typeName.text !== 'Partial') {
             return null;
         }
@@ -135,8 +131,8 @@ class PartialDirectiveTypeInCatalystTests {
         // Extract T of `Partial<T>`.
         const cmpTypeArg = node.typeArguments?.[0];
         if (!cmpTypeArg ||
-            !ts__default["default"].isTypeReferenceNode(cmpTypeArg) ||
-            !ts__default["default"].isIdentifier(cmpTypeArg.typeName)) {
+            !ts.isTypeReferenceNode(cmpTypeArg) ||
+            !ts.isIdentifier(cmpTypeArg.typeName)) {
             return null;
         }
         const cmpType = cmpTypeArg.typeName;
@@ -144,7 +140,7 @@ class PartialDirectiveTypeInCatalystTests {
         // Note: Technically the class might be derived of an input-containing class,
         // but this is out of scope for now. We can expand if we see it's a common case.
         if (symbol?.valueDeclaration === undefined ||
-            !ts__default["default"].isClassDeclaration(symbol.valueDeclaration) ||
+            !ts.isClassDeclaration(symbol.valueDeclaration) ||
             !this.knownFields.shouldTrackClassReference(symbol.valueDeclaration)) {
             return null;
         }
@@ -320,7 +316,7 @@ class TemplateReferenceVisitor extends checker.RecursiveVisitor$1 {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor$1 {
+class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
     typeChecker;
     templateTypeChecker;
     componentClass;
@@ -547,7 +543,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
         return;
     }
     const metadataNode = checker.unwrapExpression(ngDecorator.args[0]);
-    if (!ts__default["default"].isObjectLiteralExpression(metadataNode)) {
+    if (!ts.isObjectLiteralExpression(metadataNode)) {
         return;
     }
     const metadata = checker.reflectObjectLiteral(metadataNode);
@@ -557,26 +553,26 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
     let hostField = checker.unwrapExpression(metadata.get('host'));
     // Special-case in case host bindings are shared via a variable.
     // e.g. Material button shares host bindings as a constant in the same target.
-    if (ts__default["default"].isIdentifier(hostField)) {
+    if (ts.isIdentifier(hostField)) {
         let symbol = checker$1.getSymbolAtLocation(hostField);
         // Plain identifier references can point to alias symbols (e.g. imports).
-        if (symbol !== undefined && symbol.flags & ts__default["default"].SymbolFlags.Alias) {
+        if (symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias) {
             symbol = checker$1.getAliasedSymbol(symbol);
         }
         if (symbol !== undefined &&
             symbol.valueDeclaration !== undefined &&
-            ts__default["default"].isVariableDeclaration(symbol.valueDeclaration)) {
+            ts.isVariableDeclaration(symbol.valueDeclaration)) {
             hostField = symbol?.valueDeclaration.initializer;
         }
     }
-    if (hostField === undefined || !ts__default["default"].isObjectLiteralExpression(hostField)) {
+    if (hostField === undefined || !ts.isObjectLiteralExpression(hostField)) {
         return;
     }
     const hostMap = checker.reflectObjectLiteral(hostField);
     const expressionResult = [];
     const expressionVisitor = new TemplateExpressionReferenceVisitor(checker$1, null, node, knownFields, fieldNamesToConsiderForReferenceLookup);
     for (const [rawName, expression] of hostMap.entries()) {
-        if (!ts__default["default"].isStringLiteralLike(expression)) {
+        if (!ts.isStringLiteralLike(expression)) {
             continue;
         }
         const isEventBinding = rawName.startsWith('(');
@@ -639,7 +635,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
     if (ngDecorators.length === 0 ||
         ngDecorators[0].args === null ||
         ngDecorators[0].args.length === 0 ||
-        !ts__default["default"].isObjectLiteralExpression(ngDecorators[0].args[0])) {
+        !ts.isObjectLiteralExpression(ngDecorators[0].args[0])) {
         return null;
     }
     const properties = checker.reflectObjectLiteral(ngDecorators[0].args[0]);
@@ -755,7 +751,7 @@ function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, reso
 function resolveBindingElement(node) {
     const name = node.propertyName ?? node.name;
     // If we are discovering a non-analyzable element in the path, abort.
-    if (!ts__default["default"].isStringLiteralLike(name) && !ts__default["default"].isIdentifier(name)) {
+    if (!ts.isStringLiteralLike(name) && !ts.isIdentifier(name)) {
         return null;
     }
     return {
@@ -766,7 +762,7 @@ function resolveBindingElement(node) {
 /** Gets the declaration node of the given binding element. */
 function getBindingElementDeclaration(node) {
     while (true) {
-        if (ts__default["default"].isBindingElement(node.parent.parent)) {
+        if (ts.isBindingElement(node.parent.parent)) {
             node = node.parent.parent;
         }
         else {
@@ -786,10 +782,10 @@ function getBindingElementDeclaration(node) {
  * variable for narrowing. Replacing just the identifier is wrong.
  */
 function traverseAccess(access) {
-    if (ts__default["default"].isPropertyAccessExpression(access.parent) && access.parent.name === access) {
+    if (ts.isPropertyAccessExpression(access.parent) && access.parent.name === access) {
         return access.parent;
     }
-    else if (ts__default["default"].isElementAccessExpression(access.parent) &&
+    else if (ts.isElementAccessExpression(access.parent) &&
         access.parent.argumentExpression === access) {
         return access.parent;
     }
@@ -801,10 +797,10 @@ function traverseAccess(access) {
  * parenthesized expression or `as` expression.
  */
 function unwrapParent(node) {
-    if (ts__default["default"].isParenthesizedExpression(node.parent)) {
+    if (ts.isParenthesizedExpression(node.parent)) {
         return unwrapParent(node.parent);
     }
-    else if (ts__default["default"].isAsExpression(node.parent)) {
+    else if (ts.isAsExpression(node.parent)) {
         return unwrapParent(node.parent);
     }
     return node;
@@ -817,18 +813,18 @@ function unwrapParent(node) {
  * something or not.
  */
 const writeBinaryOperators = [
-    ts__default["default"].SyntaxKind.EqualsToken,
-    ts__default["default"].SyntaxKind.BarBarEqualsToken,
-    ts__default["default"].SyntaxKind.BarEqualsToken,
-    ts__default["default"].SyntaxKind.AmpersandEqualsToken,
-    ts__default["default"].SyntaxKind.AmpersandAmpersandEqualsToken,
-    ts__default["default"].SyntaxKind.SlashEqualsToken,
-    ts__default["default"].SyntaxKind.MinusEqualsToken,
-    ts__default["default"].SyntaxKind.PlusEqualsToken,
-    ts__default["default"].SyntaxKind.CaretEqualsToken,
-    ts__default["default"].SyntaxKind.PercentEqualsToken,
-    ts__default["default"].SyntaxKind.AsteriskEqualsToken,
-    ts__default["default"].SyntaxKind.ExclamationEqualsToken,
+    ts.SyntaxKind.EqualsToken,
+    ts.SyntaxKind.BarBarEqualsToken,
+    ts.SyntaxKind.BarEqualsToken,
+    ts.SyntaxKind.AmpersandEqualsToken,
+    ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+    ts.SyntaxKind.SlashEqualsToken,
+    ts.SyntaxKind.MinusEqualsToken,
+    ts.SyntaxKind.PlusEqualsToken,
+    ts.SyntaxKind.CaretEqualsToken,
+    ts.SyntaxKind.PercentEqualsToken,
+    ts.SyntaxKind.AsteriskEqualsToken,
+    ts.SyntaxKind.ExclamationEqualsToken,
 ];
 
 /**
@@ -849,7 +845,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
     let target = undefined;
     // Resolve binding elements to their declaration symbol.
     // Commonly inputs are accessed via object expansion. e.g. `const {input} = this;`.
-    if (ts__default["default"].isBindingElement(node.parent)) {
+    if (ts.isBindingElement(node.parent)) {
         // Skip binding elements that are using spread.
         if (node.parent.dotDotDotToken !== undefined) {
             return;
@@ -867,11 +863,11 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
         target = checker.getSymbolAtLocation(node);
     }
     noTargetSymbolCheck: if (target === undefined) {
-        if (ts__default["default"].isPropertyAccessExpression(node.parent) && node.parent.name === node) {
+        if (ts.isPropertyAccessExpression(node.parent) && node.parent.name === node) {
             const propAccessSymbol = checker.getSymbolAtLocation(node.parent.expression);
             if (propAccessSymbol !== undefined &&
                 propAccessSymbol.valueDeclaration !== undefined &&
-                ts__default["default"].isVariableDeclaration(propAccessSymbol.valueDeclaration) &&
+                ts.isVariableDeclaration(propAccessSymbol.valueDeclaration) &&
                 propAccessSymbol.valueDeclaration.initializer !== undefined) {
                 target = advisors.debugElComponentInstanceTracker
                     .detect(propAccessSymbol.valueDeclaration.initializer)
@@ -890,7 +886,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
     }
     const access = unwrapParent(traverseAccess(node));
     const accessParent = access.parent;
-    const isWriteReference = ts__default["default"].isBinaryExpression(accessParent) &&
+    const isWriteReference = ts.isBinaryExpression(accessParent) &&
         accessParent.left === access &&
         writeBinaryOperators.includes(accessParent.operatorToken.kind);
     // track accesses from source files to known fields.
@@ -900,7 +896,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
             node,
             file: project_paths.projectFile(node.getSourceFile(), programInfo),
             isWrite: isWriteReference,
-            isPartOfElementBinding: ts__default["default"].isBindingElement(node.parent),
+            isPartOfElementBinding: ts.isBindingElement(node.parent),
         },
         target: targetInput,
     });
@@ -935,7 +931,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
         let lastTime = currentTimeInMs();
         // Note: If there is no template type checker and resource loader, we aren't processing
         // an Angular program, and can skip template detection.
-        if (ts__default["default"].isClassDeclaration(node) && templateTypeChecker !== null && resourceLoader !== null) {
+        if (ts.isClassDeclaration(node) && templateTypeChecker !== null && resourceLoader !== null) {
             identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, programInfo.userOptions, result, knownFields, fieldNamesToConsiderForReferenceLookup);
             perfCounters.template += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
@@ -945,7 +941,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
         }
         lastTime = currentTimeInMs();
         // find references, but do not capture input declarations itself.
-        if (ts__default["default"].isIdentifier(node) &&
+        if (ts.isIdentifier(node) &&
             !(isInputContainerNode(node.parent) && node.parent.name === node)) {
             identifyPotentialTypeScriptReference(node, programInfo, checker, knownFields, result, fieldNamesToConsiderForReferenceLookup, {
                 debugElComponentInstanceTracker,

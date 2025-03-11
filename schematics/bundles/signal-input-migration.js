@@ -1,36 +1,29 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-3e5beec7.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-C0325A9V.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-f433e61e.js');
-var program = require('./program-76508a6d.js');
+var checker = require('./checker-DP-zos5Q.js');
+var program = require('./program-CRYsSwIq.js');
 require('path');
-var project_paths = require('./project_paths-3532bf90.js');
-var index = require('./index-abca8754.js');
+var project_paths = require('./project_paths-BoRVJPjW.js');
+var index = require('./index-CEdDCtp8.js');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-bbce12b7.js');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-require('./leading_space-f8944434.js');
+var apply_import_manager = require('./apply_import_manager-C8MABThs.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+require('./leading_space-D9nQ8UQC.js');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/core');
 require('node:path/posix');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
 
 /**
  * Class that holds information about a given directive and its input fields.
@@ -102,7 +95,7 @@ class MigrationHost {
 
 function getInputDescriptor(hostOrInfo, node) {
     let className;
-    if (ts__default["default"].isAccessor(node)) {
+    if (ts.isAccessor(node)) {
         className = node.parent.name?.text || '<anonymous>';
     }
     else {
@@ -307,7 +300,7 @@ function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
  *    - imports that may need to be updated.
  */
 class MigrationResult {
-    printer = ts__default["default"].createPrinter({ newLine: ts__default["default"].NewLineKind.LineFeed });
+    printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
     // May be `null` if the input cannot be converted. This is also
     // signified by an incompatibility- but the input is tracked here as it
     // still is a "source input".
@@ -329,14 +322,14 @@ function extractDecoratorInput(node, host, reflector, metadataReader, evaluator)
  */
 function extractDtsInput(node, metadataReader) {
     if (!index.isInputContainerNode(node) ||
-        !ts__default["default"].isIdentifier(node.name) ||
+        !ts.isIdentifier(node.name) ||
         !node.getSourceFile().isDeclarationFile) {
         return null;
     }
     // If the potential node is not part of a valid input class, skip.
-    if (!ts__default["default"].isClassDeclaration(node.parent) ||
+    if (!ts.isClassDeclaration(node.parent) ||
         node.parent.name === undefined ||
-        !ts__default["default"].isIdentifier(node.parent.name)) {
+        !ts.isIdentifier(node.parent.name)) {
         return null;
     }
     let directiveMetadata = null;
@@ -372,7 +365,7 @@ function extractDtsInput(node, metadataReader) {
  */
 function extractSourceCodeInput(node, host, reflector, evaluator) {
     if (!index.isInputContainerNode(node) ||
-        !ts__default["default"].isIdentifier(node.name) ||
+        !ts.isIdentifier(node.name) ||
         node.getSourceFile().isDeclarationFile) {
         return null;
     }
@@ -440,7 +433,7 @@ function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
         },
     ]);
     try {
-        return program.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, noopRefEmitter, checker.CompilationMode.FULL);
+        return checker.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, noopRefEmitter, checker.CompilationMode.FULL);
     }
     catch (e) {
         if (!(e instanceof checker.FatalDiagnosticError)) {
@@ -464,16 +457,16 @@ function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
  */
 function prepareAndCheckForConversion(node, metadata, checker, options) {
     // Accessor inputs cannot be migrated right now.
-    if (ts__default["default"].isAccessor(node)) {
+    if (ts.isAccessor(node)) {
         return {
             context: node,
             reason: migrate_ts_type_references.FieldIncompatibilityReason.Accessor,
         };
     }
-    assert__default["default"](metadata.inputDecorator !== null, 'Expected an input decorator for inputs that are being migrated.');
+    assert(metadata.inputDecorator !== null, 'Expected an input decorator for inputs that are being migrated.');
     let initialValue = node.initializer;
     let isUndefinedInitialValue = node.initializer === undefined ||
-        (ts__default["default"].isIdentifier(node.initializer) && node.initializer.text === 'undefined');
+        (ts.isIdentifier(node.initializer) && node.initializer.text === 'undefined');
     const strictNullChecksEnabled = options.strict === true || options.strictNullChecks === true;
     const strictPropertyInitialization = options.strict === true || options.strictPropertyInitialization === true;
     // Shorthand should never be used, as would expand the type of `T` to be `T|undefined`.
@@ -515,9 +508,9 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
             };
         }
         if (!checker.isTypeAssignableTo(checker.getUndefinedType(), checker.getTypeFromTypeNode(typeToAdd))) {
-            typeToAdd = ts__default["default"].factory.createUnionTypeNode([
+            typeToAdd = ts.factory.createUnionTypeNode([
                 typeToAdd,
-                ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UndefinedKeyword),
+                ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
             ]);
         }
     }
@@ -538,7 +531,7 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
             'Input is initialized to `undefined` but type does not allow this value. ' +
                 'This worked with `@Input` because your project uses `--strictPropertyInitialization=false`.';
         isUndefinedInitialValue = false;
-        initialValue = ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createIdentifier('undefined'));
+        initialValue = ts.factory.createNonNullExpression(ts.factory.createIdentifier('undefined'));
     }
     // Attempt to extract type from input initial value. No explicit type, but input is required.
     // Hence we need an explicit type, or fall back to `typeof`.
@@ -572,28 +565,28 @@ function inferImportableTypeForInput(checker, node, initialValue) {
     // return a type node fully derived from the resolved type.
     if (isPrimitiveImportableTypeNode(propertyType) ||
         (propertyType.isUnion() && propertyType.types.every(isPrimitiveImportableTypeNode))) {
-        return checker.typeToTypeNode(propertyType, node, ts__default["default"].NodeBuilderFlags.NoTypeReduction) ?? null;
+        return checker.typeToTypeNode(propertyType, node, ts.NodeBuilderFlags.NoTypeReduction) ?? null;
     }
     // Alternatively, try to infer a simple importable type from\
     // the initializer.
-    if (ts__default["default"].isIdentifier(initialValue)) {
+    if (ts.isIdentifier(initialValue)) {
         // @Input({required: true}) bla = SOME_DEFAULT;
-        return ts__default["default"].factory.createTypeQueryNode(initialValue);
+        return ts.factory.createTypeQueryNode(initialValue);
     }
-    else if (ts__default["default"].isPropertyAccessExpression(initialValue) &&
-        ts__default["default"].isIdentifier(initialValue.name) &&
-        ts__default["default"].isIdentifier(initialValue.expression)) {
+    else if (ts.isPropertyAccessExpression(initialValue) &&
+        ts.isIdentifier(initialValue.name) &&
+        ts.isIdentifier(initialValue.expression)) {
         // @Input({required: true}) bla = prop.SOME_DEFAULT;
-        return ts__default["default"].factory.createTypeQueryNode(ts__default["default"].factory.createQualifiedName(initialValue.name, initialValue.expression));
+        return ts.factory.createTypeQueryNode(ts.factory.createQualifiedName(initialValue.name, initialValue.expression));
     }
     return null;
 }
 function isPrimitiveImportableTypeNode(type) {
-    return !!(type.flags & ts__default["default"].TypeFlags.BooleanLike ||
-        type.flags & ts__default["default"].TypeFlags.StringLike ||
-        type.flags & ts__default["default"].TypeFlags.NumberLike ||
-        type.flags & ts__default["default"].TypeFlags.Undefined ||
-        type.flags & ts__default["default"].TypeFlags.Null);
+    return !!(type.flags & ts.TypeFlags.BooleanLike ||
+        type.flags & ts.TypeFlags.StringLike ||
+        type.flags & ts.TypeFlags.NumberLike ||
+        type.flags & ts.TypeFlags.Undefined ||
+        type.flags & ts.TypeFlags.Null);
 }
 
 /**
@@ -604,7 +597,7 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
     const visitor = (node) => {
         const decoratorInput = extractDecoratorInput(node, host, reflector, dtsMetadataReader, evaluator);
         if (decoratorInput !== null) {
-            assert__default["default"](index.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
+            assert(index.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
             const inputDescr = getInputDescriptor(host, node);
             // track all inputs, even from declarations for reference resolution.
             knownDecoratorInputs.register({ descriptor: inputDescr, metadata: decoratorInput, node });
@@ -623,10 +616,10 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
         }
         // track all imports to `Input` or `input`.
         let importName = null;
-        if (ts__default["default"].isImportSpecifier(node) &&
+        if (ts.isImportSpecifier(node) &&
             ((importName = (node.propertyName ?? node.name).text) === 'Input' ||
                 importName === 'input') &&
-            ts__default["default"].isStringLiteral(node.parent.parent.parent.moduleSpecifier) &&
+            ts.isStringLiteral(node.parent.parent.parent.moduleSpecifier) &&
             (host.isMigratingCore || node.parent.parent.parent.moduleSpecifier.text === '@angular/core')) {
             if (!result.inputDecoratorSpecifiers.has(sf)) {
                 result.inputDecoratorSpecifiers.set(sf, []);
@@ -636,9 +629,9 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
                 node,
             });
         }
-        ts__default["default"].forEachChild(node, visitor);
+        ts.forEachChild(node, visitor);
     };
-    ts__default["default"].forEachChild(sf, visitor);
+    ts.forEachChild(sf, visitor);
 }
 
 /**
@@ -767,7 +760,7 @@ function pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownIn
         isClassWithKnownFields: (clazz) => knownInputs.isInputContainingClass(clazz),
         getFieldsForClass: (clazz) => {
             const directiveInfo = knownInputs.getDirectiveInfoForClass(clazz);
-            assert__default["default"](directiveInfo !== undefined, 'Expected directive info to exist for input.');
+            assert(directiveInfo !== undefined, 'Expected directive info to exist for input.');
             return Array.from(directiveInfo.inputFields.values()).map((i) => i.descriptor);
         },
     });
@@ -974,7 +967,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (metadata.bindingPropertyName !== metadata.classPropertyName || metadata.transform !== null) {
         const properties = [];
         if (metadata.bindingPropertyName !== metadata.classPropertyName) {
-            properties.push(ts__default["default"].factory.createPropertyAssignment('alias', ts__default["default"].factory.createStringLiteral(metadata.bindingPropertyName)));
+            properties.push(ts.factory.createPropertyAssignment('alias', ts.factory.createStringLiteral(metadata.bindingPropertyName)));
         }
         if (metadata.transform !== null) {
             const transformRes = extractTransformOfInput(metadata.transform, resolvedType, checker);
@@ -985,7 +978,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
                     (leadingTodoText ? `${leadingTodoText} ` : '') + transformRes.leadingTodoText;
             }
         }
-        optionsLiteral = ts__default["default"].factory.createObjectLiteralExpression(properties);
+        optionsLiteral = ts.factory.createObjectLiteralExpression(properties);
     }
     // The initial value is `undefined` or none is present:
     //    - We may be able to use the `input()` shorthand
@@ -993,14 +986,14 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (initialValue === undefined) {
         // Shorthand not possible, so explicitly add `undefined`.
         if (preferShorthandIfPossible === null) {
-            initialValue = ts__default["default"].factory.createIdentifier('undefined');
+            initialValue = ts.factory.createIdentifier('undefined');
         }
         else {
             resolvedType = preferShorthandIfPossible.originalType;
             // When using the `input()` shorthand, try cutting of `undefined` from potential
             // union types. `undefined` will be automatically included in the type.
-            if (ts__default["default"].isUnionTypeNode(resolvedType)) {
-                resolvedType = migrate_ts_type_references.removeFromUnionIfPossible(resolvedType, (t) => t.kind !== ts__default["default"].SyntaxKind.UndefinedKeyword);
+            if (ts.isUnionTypeNode(resolvedType)) {
+                resolvedType = migrate_ts_type_references.removeFromUnionIfPossible(resolvedType, (t) => t.kind !== ts.SyntaxKind.UndefinedKeyword);
             }
         }
     }
@@ -1011,13 +1004,13 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
         if (metadata.transform !== null) {
             // Note: The TCB code generation may use the same type node and attach
             // synthetic comments for error reporting. We remove those explicitly here.
-            typeArguments.push(ts__default["default"].setSyntheticTrailingComments(metadata.transform.type.node, undefined));
+            typeArguments.push(ts.setSyntheticTrailingComments(metadata.transform.type.node, undefined));
         }
     }
     // Always add an initial value when the input is optional, and we have one, or we need one
     // to be able to pass options as the second argument.
     if (!metadata.required && (initialValue !== undefined || optionsLiteral !== null)) {
-        inputArgs.push(initialValue ?? ts__default["default"].factory.createIdentifier('undefined'));
+        inputArgs.push(initialValue ?? ts.factory.createIdentifier('undefined'));
     }
     if (optionsLiteral !== null) {
         inputArgs.push(optionsLiteral);
@@ -1028,16 +1021,16 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
         requestedFile: node.getSourceFile(),
     });
     const inputInitializerFn = metadata.required
-        ? ts__default["default"].factory.createPropertyAccessExpression(inputFnRef, 'required')
+        ? ts.factory.createPropertyAccessExpression(inputFnRef, 'required')
         : inputFnRef;
-    const inputInitializer = ts__default["default"].factory.createCallExpression(inputInitializerFn, typeArguments, inputArgs);
+    const inputInitializer = ts.factory.createCallExpression(inputInitializerFn, typeArguments, inputArgs);
     let modifiersWithoutInputDecorator = node.modifiers?.filter((m) => m !== originalInputDecorator.node) ?? [];
     // Add `readonly` to all new signal input declarations.
-    if (!modifiersWithoutInputDecorator?.some((s) => s.kind === ts__default["default"].SyntaxKind.ReadonlyKeyword)) {
-        modifiersWithoutInputDecorator.push(ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword));
+    if (!modifiersWithoutInputDecorator?.some((s) => s.kind === ts.SyntaxKind.ReadonlyKeyword)) {
+        modifiersWithoutInputDecorator.push(ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword));
     }
-    const newNode = ts__default["default"].factory.createPropertyDeclaration(modifiersWithoutInputDecorator, node.name, undefined, undefined, inputInitializer);
-    const newPropertyText = result.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, node.getSourceFile());
+    const newNode = ts.factory.createPropertyDeclaration(modifiersWithoutInputDecorator, node.name, undefined, undefined, inputInitializer);
+    const newPropertyText = result.printer.printNode(ts.EmitHint.Unspecified, newNode, node.getSourceFile());
     const replacements = [];
     if (leadingTodoText !== null) {
         replacements.push(migrate_ts_type_references.insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...migrate_ts_type_references.cutStringToLineLimit(leadingTodoText, 70).map((line) => migrate_ts_type_references.insertPrecedingLine(node, info, `//  ${line}`)));
@@ -1054,29 +1047,29 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
  * that works for the new signal `input()` API.
  */
 function extractTransformOfInput(transform, resolvedType, checker) {
-    assert__default["default"](ts__default["default"].isExpression(transform.node), `Expected transform to be an expression.`);
+    assert(ts.isExpression(transform.node), `Expected transform to be an expression.`);
     let transformFn = transform.node;
     let leadingTodoText = null;
     // If there is an explicit type, check if the transform return type actually works.
     // In some cases, the transform function is not compatible because with decorator inputs,
     // those were not checked. We cast the transform to `any` and add a TODO.
     // TODO: Capture this in the design doc.
-    if (resolvedType !== undefined && !ts__default["default"].isSyntheticExpression(resolvedType)) {
+    if (resolvedType !== undefined && !ts.isSyntheticExpression(resolvedType)) {
         // Note: If the type is synthetic, we cannot check, and we accept that in the worst case
         // we will create code that is not necessarily compiling. This is unlikely, but notably
         // the errors would be correct and valuable.
         const transformType = checker.getTypeAtLocation(transform.node);
         const transformSignature = transformType.getCallSignatures()[0];
-        assert__default["default"](transformSignature !== undefined, 'Expected transform to be an invoke-able.');
+        assert(transformSignature !== undefined, 'Expected transform to be an invoke-able.');
         if (!checker.isTypeAssignableTo(checker.getReturnTypeOfSignature(transformSignature), checker.getTypeFromTypeNode(resolvedType))) {
             leadingTodoText =
                 'Input type is incompatible with transform. The migration added an `any` cast. ' +
                     'This worked previously because Angular was unable to check transforms.';
-            transformFn = ts__default["default"].factory.createAsExpression(ts__default["default"].factory.createParenthesizedExpression(transformFn), ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+            transformFn = ts.factory.createAsExpression(ts.factory.createParenthesizedExpression(transformFn), ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
         }
     }
     return {
-        node: ts__default["default"].factory.createPropertyAssignment('transform', transformFn),
+        node: ts.factory.createPropertyAssignment('transform', transformFn),
         leadingTodoText,
     };
 }
@@ -1104,8 +1097,8 @@ function pass6__migrateInputDeclarations(host, checker, result, knownInputs, imp
             filesWithIncompatibleInputs.add(sf);
             continue;
         }
-        assert__default["default"](metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
-        assert__default["default"](!ts__default["default"].isAccessor(input.node), 'Accessor inputs are incompatible.');
+        assert(metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
+        assert(!ts.isAccessor(input.node), 'Accessor inputs are incompatible.');
         filesWithMigratedInputs.add(sf);
         result.replacements.push(...convertToSignalInput(input.node, metadata, info, checker, importManager, result));
     }

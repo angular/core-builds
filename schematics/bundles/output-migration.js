@@ -1,43 +1,37 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-56b551d
+ * @license Angular v19.2.1+sha-044dac9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var project_paths = require('./project_paths-3532bf90.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_paths = require('./project_paths-BoRVJPjW.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-f433e61e.js');
-var program = require('./program-76508a6d.js');
+var checker = require('./checker-DP-zos5Q.js');
+var program = require('./program-CRYsSwIq.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-bbce12b7.js');
-var index = require('./index-abca8754.js');
+var apply_import_manager = require('./apply_import_manager-C8MABThs.js');
+var index = require('./index-CEdDCtp8.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
-        ts__default["default"].isNewExpression(node.initializer) &&
-        ts__default["default"].isIdentifier(node.initializer.expression) &&
+        ts.isNewExpression(node.initializer) &&
+        ts.isIdentifier(node.initializer.expression) &&
         node.initializer.expression.text === 'EventEmitter');
 }
 function isPotentialOutputCallUsage(node, name) {
-    if (ts__default["default"].isCallExpression(node) &&
-        ts__default["default"].isPropertyAccessExpression(node.expression) &&
-        ts__default["default"].isIdentifier(node.expression.name)) {
+    if (ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.name)) {
         return node.expression?.name.text === name;
     }
     else {
@@ -68,8 +62,8 @@ function isTargetOutputDeclaration(node, checker, reflector, dtsReader) {
 function isOutputDeclaration(node, reflector, dtsReader) {
     // `.d.ts` file, so we check the `static ecmp` metadata on the `declare class`.
     if (node.getSourceFile().isDeclarationFile) {
-        if (!ts__default["default"].isIdentifier(node.name) ||
-            !ts__default["default"].isClassDeclaration(node.parent) ||
+        if (!ts.isIdentifier(node.name) ||
+            !ts.isClassDeclaration(node.parent) ||
             node.parent.name === undefined) {
             return false;
         }
@@ -82,7 +76,7 @@ function isOutputDeclaration(node, reflector, dtsReader) {
 }
 function getTargetPropertyDeclaration(targetSymbol) {
     const valDeclaration = targetSymbol.valueDeclaration;
-    if (valDeclaration !== undefined && ts__default["default"].isPropertyDeclaration(valDeclaration)) {
+    if (valDeclaration !== undefined && ts.isPropertyDeclaration(valDeclaration)) {
         return valDeclaration;
     }
     return null;
@@ -101,7 +95,7 @@ function getUniqueIdForProperty(info, prop) {
     return `${id}@@${prop.parent.name ?? 'unknown-class'}@@${prop.name.getText()}`;
 }
 function isTestRunnerImport(node) {
-    if (ts__default["default"].isImportDeclaration(node)) {
+    if (ts.isImportDeclaration(node)) {
         const moduleSpecifier = node.moduleSpecifier.getText();
         return moduleSpecifier.includes('jasmine') || moduleSpecifier.includes('catalyst');
     }
@@ -147,27 +141,27 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
     return potentialRead;
 }
 
-const printer = ts__default["default"].createPrinter();
+const printer = ts.createPrinter();
 function calculateDeclarationReplacement(info, node, aliasParam) {
     const sf = node.getSourceFile();
-    const payloadTypes = node.initializer !== undefined && ts__default["default"].isNewExpression(node.initializer)
+    const payloadTypes = node.initializer !== undefined && ts.isNewExpression(node.initializer)
         ? node.initializer?.typeArguments
         : undefined;
-    const outputCall = ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createIdentifier('output'), payloadTypes, aliasParam !== undefined
+    const outputCall = ts.factory.createCallExpression(ts.factory.createIdentifier('output'), payloadTypes, aliasParam !== undefined
         ? [
-            ts__default["default"].factory.createObjectLiteralExpression([
-                ts__default["default"].factory.createPropertyAssignment('alias', ts__default["default"].factory.createStringLiteral(aliasParam, true)),
+            ts.factory.createObjectLiteralExpression([
+                ts.factory.createPropertyAssignment('alias', ts.factory.createStringLiteral(aliasParam, true)),
             ], false),
         ]
         : []);
-    const existingModifiers = (node.modifiers ?? []).filter((modifier) => !ts__default["default"].isDecorator(modifier) && modifier.kind !== ts__default["default"].SyntaxKind.ReadonlyKeyword);
-    const updatedOutputDeclaration = ts__default["default"].factory.createPropertyDeclaration(
+    const existingModifiers = (node.modifiers ?? []).filter((modifier) => !ts.isDecorator(modifier) && modifier.kind !== ts.SyntaxKind.ReadonlyKeyword);
+    const updatedOutputDeclaration = ts.factory.createPropertyDeclaration(
     // Think: this logic of dealing with modifiers is applicable to all signal-based migrations
-    ts__default["default"].factory.createNodeArray([
+    ts.factory.createNodeArray([
         ...existingModifiers,
-        ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword),
+        ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword),
     ]), node.name, undefined, undefined, outputCall);
-    return prepareTextReplacementForNode(info, node, printer.printNode(ts__default["default"].EmitHint.Unspecified, updatedOutputDeclaration, sf));
+    return prepareTextReplacementForNode(info, node, printer.printNode(ts.EmitHint.Unspecified, updatedOutputDeclaration, sf));
 }
 function calculateImportReplacements(info, sourceFiles) {
     const importReplacements = {};
@@ -205,7 +199,7 @@ function calculateCompleteCallReplacement(info, node) {
     return prepareTextReplacementForNode(info, node, '', node.getFullStart());
 }
 function calculatePipeCallReplacement(info, node) {
-    if (ts__default["default"].isPropertyAccessExpression(node.expression)) {
+    if (ts.isPropertyAccessExpression(node.expression)) {
         const sf = node.getSourceFile();
         const importManager = new checker.ImportManager();
         const outputToObservableIdent = importManager.addImport({
@@ -213,13 +207,13 @@ function calculatePipeCallReplacement(info, node) {
             exportModuleSpecifier: '@angular/core/rxjs-interop',
             exportSymbolName: 'outputToObservable',
         });
-        const toObsCallExp = ts__default["default"].factory.createCallExpression(outputToObservableIdent, undefined, [
+        const toObsCallExp = ts.factory.createCallExpression(outputToObservableIdent, undefined, [
             node.expression.expression,
         ]);
-        const pipePropAccessExp = ts__default["default"].factory.updatePropertyAccessExpression(node.expression, toObsCallExp, node.expression.name);
-        const pipeCallExp = ts__default["default"].factory.updateCallExpression(node, pipePropAccessExp, [], node.arguments);
+        const pipePropAccessExp = ts.factory.updatePropertyAccessExpression(node.expression, toObsCallExp, node.expression.name);
+        const pipeCallExp = ts.factory.updateCallExpression(node, pipePropAccessExp, [], node.arguments);
         const replacements = [
-            prepareTextReplacementForNode(info, node, printer.printNode(ts__default["default"].EmitHint.Unspecified, pipeCallExp, sf)),
+            prepareTextReplacementForNode(info, node, printer.printNode(ts.EmitHint.Unspecified, pipeCallExp, sf)),
         ];
         apply_import_manager.applyImportManagerChanges(importManager, replacements, [sf], info);
         return replacements;
@@ -288,7 +282,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         let isTestFile = false;
         const outputMigrationVisitor = (node) => {
             // detect output declarations
-            if (ts__default["default"].isPropertyDeclaration(node)) {
+            if (ts.isPropertyDeclaration(node)) {
                 const outputDecorator = getOutputDecorator(node, reflector);
                 if (outputDecorator !== null) {
                     if (isOutputDeclarationEligibleForMigration(node)) {
@@ -320,7 +314,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 }
             }
             // detect .next usages that should be migrated to .emit
-            if (isPotentialNextCallUsage(node) && ts__default["default"].isPropertyAccessExpression(node.expression)) {
+            if (isPotentialNextCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
@@ -329,12 +323,12 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 }
             }
             // detect .complete usages that should be removed
-            if (isPotentialCompleteCallUsage(node) && ts__default["default"].isPropertyAccessExpression(node.expression)) {
+            if (isPotentialCompleteCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     const outputFile = project_paths.projectFile(node.getSourceFile(), info);
-                    if (ts__default["default"].isExpressionStatement(node.parent)) {
+                    if (ts.isExpressionStatement(node.parent)) {
                         addOutputReplacement(outputFieldReplacements, id, outputFile, calculateCompleteCallReplacement(info, node.parent));
                     }
                     else {
@@ -347,7 +341,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 isTestFile = true;
             }
             // detect unsafe access of the output property
-            if (isPotentialPipeCallUsage(node) && ts__default["default"].isPropertyAccessExpression(node.expression)) {
+            if (isPotentialPipeCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
@@ -360,12 +354,12 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                     }
                 }
             }
-            ts__default["default"].forEachChild(node, outputMigrationVisitor);
+            ts.forEachChild(node, outputMigrationVisitor);
         };
         // calculate output migration replacements
         for (const sf of sourceFiles) {
             isTestFile = false;
-            ts__default["default"].forEachChild(sf, outputMigrationVisitor);
+            ts.forEachChild(sf, outputMigrationVisitor);
         }
         // take care of the references in templates and host bindings
         const referenceResult = { references: [] };
@@ -373,7 +367,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         referenceResult);
         // calculate template / host binding replacements
         for (const sf of sourceFiles) {
-            ts__default["default"].forEachChild(sf, templateHostRefVisitor);
+            ts.forEachChild(sf, templateHostRefVisitor);
         }
         for (const ref of referenceResult.references) {
             // detect .next usages that should be migrated to .emit in template and host binding expressions
