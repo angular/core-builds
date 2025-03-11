@@ -1,29 +1,23 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var compiler_host = require('./compiler_host-dc30551e.js');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
+var compiler_host = require('./compiler_host-Da636uJ8.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
 var ts = require('typescript');
-var checker = require('./checker-febe8b3a.js');
-var property_name = require('./property_name-ac18447e.js');
+var checker = require('./checker-DF8ZaFW5.js');
+var property_name = require('./property_name-BBwFuqMe.js');
 require('os');
 require('@angular-devkit/core');
 require('module');
 require('url');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 /**
  * Finds the class declaration that is being referred to by a node.
@@ -34,7 +28,7 @@ function findClassDeclaration(reference, typeChecker) {
     return (typeChecker
         .getTypeAtLocation(reference)
         .getSymbol()
-        ?.declarations?.find(ts__default["default"].isClassDeclaration) || null);
+        ?.declarations?.find(ts.isClassDeclaration) || null);
 }
 
 /*!
@@ -59,7 +53,7 @@ function isStandaloneComponent(node, reflector) {
         return false;
     }
     const arg = decorator.args[0];
-    if (ts__default["default"].isObjectLiteralExpression(arg)) {
+    if (ts.isObjectLiteralExpression(arg)) {
         const property = property_name.findLiteralProperty(arg, 'standalone');
         if (property) {
             return property.initializer.getText() === 'true';
@@ -76,7 +70,7 @@ function isStandaloneComponent(node, reflector) {
  * @param typeChecker
  */
 function isAngularRoutesArray(node, typeChecker) {
-    if (ts__default["default"].isVariableDeclaration(node)) {
+    if (ts.isVariableDeclaration(node)) {
         const type = typeChecker.getTypeAtLocation(node);
         if (type && typeChecker.isArrayType(type)) {
             // Route[] is an array type
@@ -97,7 +91,7 @@ function isAngularRoutesArray(node, typeChecker) {
  * - RouterModule.forChild(routes)
  */
 function isRouterModuleCallExpression(node, typeChecker) {
-    if (ts__default["default"].isPropertyAccessExpression(node.expression)) {
+    if (ts.isPropertyAccessExpression(node.expression)) {
         const propAccess = node.expression;
         const moduleSymbol = typeChecker.getSymbolAtLocation(propAccess.expression);
         return (moduleSymbol?.name === 'RouterModule' &&
@@ -110,8 +104,8 @@ function isRouterModuleCallExpression(node, typeChecker) {
  * Example: this.router.resetConfig(routes)
  */
 function isRouterCallExpression(node, typeChecker) {
-    if (ts__default["default"].isCallExpression(node) &&
-        ts__default["default"].isPropertyAccessExpression(node.expression) &&
+    if (ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
         node.expression.name.text === 'resetConfig') {
         const calleeExpression = node.expression.expression;
         const symbol = typeChecker.getSymbolAtLocation(calleeExpression);
@@ -128,7 +122,7 @@ function isRouterCallExpression(node, typeChecker) {
  * Example: provideRoutes(routes)
  */
 function isRouterProviderCallExpression(node, typeChecker) {
-    if (ts__default["default"].isIdentifier(node.expression)) {
+    if (ts.isIdentifier(node.expression)) {
         const moduleSymbol = typeChecker.getSymbolAtLocation(node.expression);
         return moduleSymbol && moduleSymbol.name === 'provideRoutes';
     }
@@ -139,7 +133,7 @@ function isRouterProviderCallExpression(node, typeChecker) {
  * Example: provideRouter(routes)
  */
 function isProvideRoutesCallExpression(node, typeChecker) {
-    if (ts__default["default"].isIdentifier(node.expression)) {
+    if (ts.isIdentifier(node.expression)) {
         const moduleSymbol = typeChecker.getSymbolAtLocation(node.expression);
         return moduleSymbol && moduleSymbol.name === 'provideRouter';
     }
@@ -161,7 +155,7 @@ function isProvideRoutesCallExpression(node, typeChecker) {
 function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
-    const printer = ts__default["default"].createPrinter();
+    const printer = ts.createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
     if (routeArraysToMigrate.length === 0) {
@@ -178,14 +172,14 @@ function migrateFileToLazyRoutes(sourceFile, program) {
 function findRoutesArrayToMigrate(sourceFile, typeChecker) {
     const routesArrays = [];
     sourceFile.forEachChild(function walk(node) {
-        if (ts__default["default"].isCallExpression(node)) {
+        if (ts.isCallExpression(node)) {
             if (isRouterModuleCallExpression(node, typeChecker) ||
                 isRouterProviderCallExpression(node, typeChecker) ||
                 isRouterCallExpression(node, typeChecker) ||
                 isProvideRoutesCallExpression(node, typeChecker)) {
                 const arg = node.arguments[0]; // ex: RouterModule.forRoot(routes) or provideRouter(routes)
-                const routeFileImports = sourceFile.statements.filter(ts__default["default"].isImportDeclaration);
-                if (ts__default["default"].isArrayLiteralExpression(arg) && arg.elements.length > 0) {
+                const routeFileImports = sourceFile.statements.filter(ts.isImportDeclaration);
+                if (ts.isArrayLiteralExpression(arg) && arg.elements.length > 0) {
                     // ex: inline routes array: RouterModule.forRoot([{ path: 'test', component: TestComponent }])
                     routesArrays.push({
                         routeFilePath: sourceFile.fileName,
@@ -193,16 +187,16 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                         routeFileImports,
                     });
                 }
-                else if (ts__default["default"].isIdentifier(arg)) {
+                else if (ts.isIdentifier(arg)) {
                     // ex: reference to routes array: RouterModule.forRoot(routes)
                     // RouterModule.forRoot(routes), provideRouter(routes), provideRoutes(routes)
                     const symbol = typeChecker.getSymbolAtLocation(arg);
                     if (!symbol?.declarations)
                         return;
                     for (const declaration of symbol.declarations) {
-                        if (ts__default["default"].isVariableDeclaration(declaration)) {
+                        if (ts.isVariableDeclaration(declaration)) {
                             const initializer = declaration.initializer;
-                            if (initializer && ts__default["default"].isArrayLiteralExpression(initializer)) {
+                            if (initializer && ts.isArrayLiteralExpression(initializer)) {
                                 // ex: const routes = [{ path: 'test', component: TestComponent }];
                                 routesArrays.push({
                                     routeFilePath: sourceFile.fileName,
@@ -215,11 +209,11 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                 }
             }
         }
-        if (ts__default["default"].isVariableDeclaration(node)) {
+        if (ts.isVariableDeclaration(node)) {
             if (isAngularRoutesArray(node, typeChecker)) {
                 const initializer = node.initializer;
                 if (initializer &&
-                    ts__default["default"].isArrayLiteralExpression(initializer) &&
+                    ts.isArrayLiteralExpression(initializer) &&
                     initializer.elements.length > 0) {
                     // ex: const routes: Routes = [{ path: 'test', component: TestComponent }];
                     if (routesArrays.find((x) => x.array === initializer)) {
@@ -229,7 +223,7 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                     routesArrays.push({
                         routeFilePath: sourceFile.fileName,
                         array: initializer,
-                        routeFileImports: sourceFile.statements.filter(ts__default["default"].isImportDeclaration),
+                        routeFileImports: sourceFile.statements.filter(ts.isImportDeclaration),
                     });
                 }
             }
@@ -245,7 +239,7 @@ function migrateRoutesArray(routesArray, typeChecker, reflector, tracker) {
     const importsToRemove = [];
     for (const route of routesArray) {
         route.array.elements.forEach((element) => {
-            if (ts__default["default"].isObjectLiteralExpression(element)) {
+            if (ts.isObjectLiteralExpression(element)) {
                 const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(element, route, typeChecker, reflector, tracker);
                 migratedRoutes.push(...migrated);
                 skippedRoutes.push(...toBeSkipped);
@@ -271,9 +265,9 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
     const routePath = property_name.findLiteralProperty(element, 'path')?.getText() ?? '';
     const children = property_name.findLiteralProperty(element, 'children');
     // recursively migrate children routes first if they exist
-    if (children && ts__default["default"].isArrayLiteralExpression(children.initializer)) {
+    if (children && ts.isArrayLiteralExpression(children.initializer)) {
         for (const childRoute of children.initializer.elements) {
-            if (ts__default["default"].isObjectLiteralExpression(childRoute)) {
+            if (ts.isObjectLiteralExpression(childRoute)) {
                 const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(childRoute, route, typeChecker, reflector, tracker);
                 migratedRoutes.push(...migrated);
                 skippedRoutes.push(...toBeSkipped);
@@ -294,7 +288,7 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
         skippedRoutes.push({ path: routePath, file: route.routeFilePath });
         return routeMigrationResults;
     }
-    const componentClassName = componentDeclaration.name && ts__default["default"].isIdentifier(componentDeclaration.name)
+    const componentClassName = componentDeclaration.name && ts.isIdentifier(componentDeclaration.name)
         ? componentDeclaration.name.text
         : null;
     if (!componentClassName) {
@@ -306,7 +300,7 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
     }
     const componentImport = route.routeFileImports.find((importDecl) => importDecl.importClause?.getText().includes(componentClassName));
     // remove single and double quotes from the import path
-    let componentImportPath = ts__default["default"].isStringLiteral(componentImport?.moduleSpecifier)
+    let componentImportPath = ts.isStringLiteral(componentImport?.moduleSpecifier)
         ? componentImport.moduleSpecifier.text
         : null;
     // if the import path is not a string literal, skip it
@@ -314,7 +308,7 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
         skippedRoutes.push({ path: routePath, file: route.routeFilePath });
         return routeMigrationResults;
     }
-    const isDefaultExport = componentDeclaration.modifiers?.some((x) => x.kind === ts__default["default"].SyntaxKind.DefaultKeyword) ?? false;
+    const isDefaultExport = componentDeclaration.modifiers?.some((x) => x.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
     const loadComponent = createLoadComponentPropertyAssignment(componentImportPath, componentClassName, isDefaultExport);
     tracker.replaceNode(component, loadComponent);
     // Add the import statement for the standalone component
@@ -334,18 +328,18 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
  * loadComponent: () => import('./path') // when isDefaultExport is true
  */
 function createLoadComponentPropertyAssignment(componentImportPath, componentDeclarationName, isDefaultExport) {
-    return ts__default["default"].factory.createPropertyAssignment('loadComponent', ts__default["default"].factory.createArrowFunction(undefined, undefined, [], undefined, ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.EqualsGreaterThanToken), isDefaultExport
+    return ts.factory.createPropertyAssignment('loadComponent', ts.factory.createArrowFunction(undefined, undefined, [], undefined, ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken), isDefaultExport
         ? createImportCallExpression(componentImportPath) // will generate import('./path) and will skip the then() call
-        : ts__default["default"].factory.createCallExpression(
+        : ts.factory.createCallExpression(
         // will generate import('./path).then(m => m.componentName)
-        ts__default["default"].factory.createPropertyAccessExpression(createImportCallExpression(componentImportPath), 'then'), undefined, [createImportThenCallExpression(componentDeclarationName)])));
+        ts.factory.createPropertyAccessExpression(createImportCallExpression(componentImportPath), 'then'), undefined, [createImportThenCallExpression(componentDeclarationName)])));
 }
 // import('./path)
-const createImportCallExpression = (componentImportPath) => ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createIdentifier('import'), undefined, [
-    ts__default["default"].factory.createStringLiteral(componentImportPath, true),
+const createImportCallExpression = (componentImportPath) => ts.factory.createCallExpression(ts.factory.createIdentifier('import'), undefined, [
+    ts.factory.createStringLiteral(componentImportPath, true),
 ]);
 // m => m.componentName
-const createImportThenCallExpression = (componentDeclarationName) => ts__default["default"].factory.createArrowFunction(undefined, undefined, [ts__default["default"].factory.createParameterDeclaration(undefined, undefined, 'm', undefined, undefined)], undefined, ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.EqualsGreaterThanToken), ts__default["default"].factory.createPropertyAccessExpression(ts__default["default"].factory.createIdentifier('m'), componentDeclarationName));
+const createImportThenCallExpression = (componentDeclarationName) => ts.factory.createArrowFunction(undefined, undefined, [ts.factory.createParameterDeclaration(undefined, undefined, 'm', undefined, undefined)], undefined, ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken), ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('m'), componentDeclarationName));
 
 function migrate(options) {
     return async (tree, context) => {

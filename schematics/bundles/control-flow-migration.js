@@ -1,34 +1,28 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-dc30551e.js');
-var checker = require('./checker-febe8b3a.js');
+var compiler_host = require('./compiler_host-Da636uJ8.js');
+var checker = require('./checker-DF8ZaFW5.js');
 var ts = require('typescript');
 require('os');
 require('fs');
 require('module');
 require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 function lookupIdentifiersInSourceFile(sourceFile, names) {
     const results = new Set();
     const visit = (node) => {
-        if (ts__default["default"].isIdentifier(node) && names.includes(node.text)) {
+        if (ts.isIdentifier(node) && names.includes(node.text)) {
             results.add(node);
         }
-        ts__default["default"].forEachChild(node, visit);
+        ts.forEachChild(node, visit);
     };
     visit(sourceFile);
     return results;
@@ -421,7 +415,7 @@ const replaceMarkerRegex = new RegExp(`${startMarker}|${endMarker}`, 'gm');
  */
 function analyze(sourceFile, analyzedFiles) {
     forEachClass(sourceFile, (node) => {
-        if (ts__default["default"].isClassDeclaration(node)) {
+        if (ts.isClassDeclaration(node)) {
             analyzeDecorators(node, sourceFile, analyzedFiles);
         }
         else {
@@ -440,7 +434,7 @@ function checkIfShouldChange(decl, file) {
     const clause = decl.getChildAt(1);
     return !(!file.removeCommonModule &&
         clause.namedBindings &&
-        ts__default["default"].isNamedImports(clause.namedBindings) &&
+        ts.isNamedImports(clause.namedBindings) &&
         clause.namedBindings.elements.length === 1 &&
         clause.namedBindings.elements[0].getText() === 'CommonModule');
 }
@@ -454,46 +448,46 @@ function updateImportDeclaration(decl, removeCommonModule) {
     // when the import declaration is at the top of the file, but right after a comment
     // without this, the comment gets duplicated when the declaration is updated.
     // the typescript AST includes that preceding comment as part of the import declaration full text.
-    const printer = ts__default["default"].createPrinter({
+    const printer = ts.createPrinter({
         removeComments: true,
     });
-    const updated = ts__default["default"].factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, undefined);
-    return printer.printNode(ts__default["default"].EmitHint.Unspecified, updated, clause.getSourceFile());
+    const updated = ts.factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, undefined);
+    return printer.printNode(ts.EmitHint.Unspecified, updated, clause.getSourceFile());
 }
 function updateImportClause(clause, removeCommonModule) {
-    if (clause.namedBindings && ts__default["default"].isNamedImports(clause.namedBindings)) {
+    if (clause.namedBindings && ts.isNamedImports(clause.namedBindings)) {
         const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
         const elements = clause.namedBindings.elements.filter((el) => !removals.includes(el.getText()));
         if (elements.length === 0) {
             return null;
         }
-        clause = ts__default["default"].factory.updateImportClause(clause, clause.isTypeOnly, clause.name, ts__default["default"].factory.createNamedImports(elements));
+        clause = ts.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, ts.factory.createNamedImports(elements));
     }
     return clause;
 }
 function updateClassImports(propAssignment, removeCommonModule) {
-    const printer = ts__default["default"].createPrinter();
+    const printer = ts.createPrinter();
     const importList = propAssignment.initializer;
     // Can't change non-array literals.
-    if (!ts__default["default"].isArrayLiteralExpression(importList)) {
+    if (!ts.isArrayLiteralExpression(importList)) {
         return null;
     }
     const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
-    const elements = importList.elements.filter((el) => !ts__default["default"].isIdentifier(el) || !removals.includes(el.text));
+    const elements = importList.elements.filter((el) => !ts.isIdentifier(el) || !removals.includes(el.text));
     if (elements.length === importList.elements.length) {
         // nothing changed
         return null;
     }
-    const updatedElements = ts__default["default"].factory.updateArrayLiteralExpression(importList, elements);
-    const updatedAssignment = ts__default["default"].factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
-    return printer.printNode(ts__default["default"].EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
+    const updatedElements = ts.factory.updateArrayLiteralExpression(importList, elements);
+    const updatedAssignment = ts.factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
+    return printer.printNode(ts.EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
 }
 function analyzeImportDeclarations(node, sourceFile, analyzedFiles) {
     if (node.getText().indexOf('@angular/common') === -1) {
         return;
     }
     const clause = node.getChildAt(1);
-    if (clause.namedBindings && ts__default["default"].isNamedImports(clause.namedBindings)) {
+    if (clause.namedBindings && ts.isNamedImports(clause.namedBindings)) {
         const elements = clause.namedBindings.elements.filter((el) => importWithCommonRemovals.includes(el.getText()));
         if (elements.length > 0) {
             AnalyzedFile.addRange(sourceFile.fileName, sourceFile, analyzedFiles, {
@@ -510,14 +504,14 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
     // Note: we have a utility to resolve the Angular decorators from a class declaration already.
     // We don't use it here, because it requires access to the type checker which makes it more
     // time-consuming to run internally.
-    const decorator = ts__default["default"].getDecorators(node)?.find((dec) => {
-        return (ts__default["default"].isCallExpression(dec.expression) &&
-            ts__default["default"].isIdentifier(dec.expression.expression) &&
+    const decorator = ts.getDecorators(node)?.find((dec) => {
+        return (ts.isCallExpression(dec.expression) &&
+            ts.isIdentifier(dec.expression.expression) &&
             dec.expression.expression.text === 'Component');
     });
     const metadata = decorator &&
         decorator.expression.arguments.length > 0 &&
-        ts__default["default"].isObjectLiteralExpression(decorator.expression.arguments[0])
+        ts.isObjectLiteralExpression(decorator.expression.arguments[0])
         ? decorator.expression.arguments[0]
         : null;
     if (!metadata) {
@@ -526,8 +520,8 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
     for (const prop of metadata.properties) {
         // All the properties we care about should have static
         // names and be initialized to a static string.
-        if (!ts__default["default"].isPropertyAssignment(prop) ||
-            (!ts__default["default"].isIdentifier(prop.name) && !ts__default["default"].isStringLiteralLike(prop.name))) {
+        if (!ts.isPropertyAssignment(prop) ||
+            (!ts.isIdentifier(prop.name) && !ts.isStringLiteralLike(prop.name))) {
             continue;
         }
         switch (prop.name.text) {
@@ -552,7 +546,7 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
                 break;
             case 'templateUrl':
                 // Leave the end as undefined which means that the range is until the end of the file.
-                if (ts__default["default"].isStringLiteralLike(prop.initializer)) {
+                if (ts.isStringLiteralLike(prop.initializer)) {
                     const path = p.join(p.dirname(sourceFile.fileName), prop.initializer.text);
                     AnalyzedFile.addRange(path, sourceFile, analyzedFiles, {
                         start: 0,
@@ -812,18 +806,18 @@ function processNgTemplates(template, sourceFile) {
 function getViewChildOrViewChildrenNames(sourceFile) {
     const names = [];
     function visit(node) {
-        if (ts__default["default"].isDecorator(node) && ts__default["default"].isCallExpression(node.expression)) {
+        if (ts.isDecorator(node) && ts.isCallExpression(node.expression)) {
             const expr = node.expression;
-            if (ts__default["default"].isIdentifier(expr.expression) &&
+            if (ts.isIdentifier(expr.expression) &&
                 (expr.expression.text === 'ViewChild' || expr.expression.text === 'ViewChildren')) {
                 const firstArg = expr.arguments[0];
-                if (firstArg && ts__default["default"].isStringLiteral(firstArg)) {
+                if (firstArg && ts.isStringLiteral(firstArg)) {
                     names.push(firstArg.text);
                 }
                 return;
             }
         }
-        ts__default["default"].forEachChild(node, visit);
+        ts.forEachChild(node, visit);
     }
     visit(sourceFile);
     return names;
@@ -877,11 +871,11 @@ function canRemoveCommonModule(template) {
  * removes imports from template imports and import declarations
  */
 function removeImports(template, node, file) {
-    if (template.startsWith('imports') && ts__default["default"].isPropertyAssignment(node)) {
+    if (template.startsWith('imports') && ts.isPropertyAssignment(node)) {
         const updatedImport = updateClassImports(node, file.removeCommonModule);
         return updatedImport ?? template;
     }
-    else if (ts__default["default"].isImportDeclaration(node) && checkIfShouldChange(node, file)) {
+    else if (ts.isImportDeclaration(node) && checkIfShouldChange(node, file)) {
         return updateImportDeclaration(node, file.removeCommonModule);
     }
     return template;
@@ -1168,7 +1162,7 @@ function formatTemplate(tmpl, templateType) {
 /** Executes a callback on each class declaration in a file. */
 function forEachClass(sourceFile, callback) {
     sourceFile.forEachChild(function walk(node) {
-        if (ts__default["default"].isClassDeclaration(node) || ts__default["default"].isImportDeclaration(node)) {
+        if (ts.isClassDeclaration(node) || ts.isImportDeclaration(node)) {
             callback(node);
         }
         node.forEachChild(walk);

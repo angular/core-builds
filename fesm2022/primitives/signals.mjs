@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-export { s as setAlternateWeakRefImpl } from '../weak_ref-101188f1.mjs';
+export { s as setAlternateWeakRefImpl } from '../weak_ref-DrMdAIDh.mjs';
 
 /**
  * The default equality function used for `signal` and `computed`, which uses referential equality.

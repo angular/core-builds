@@ -1,20 +1,17 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var checker = require('./checker-febe8b3a.js');
+var checker = require('./checker-DF8ZaFW5.js');
 require('os');
 var p = require('path');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
+function _interopNamespaceDefault(e) {
     var n = Object.create(null);
     if (e) {
         Object.keys(e).forEach(function (k) {
@@ -27,12 +24,11 @@ function _interopNamespace(e) {
             }
         });
     }
-    n["default"] = e;
+    n.default = e;
     return Object.freeze(n);
 }
 
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var p__namespace = /*#__PURE__*/_interopNamespace(p);
+var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
 
 /** Tracks changes that have to be made for specific files. */
 class ChangeTracker {
@@ -76,7 +72,7 @@ class ChangeTracker {
      * when copying nodes from one file to another, because TypeScript might not output literal nodes
      * without it.
      */
-    replaceNode(oldNode, newNode, emitHint = ts__default["default"].EmitHint.Unspecified, sourceFileWhenPrinting) {
+    replaceNode(oldNode, newNode, emitHint = ts.EmitHint.Unspecified, sourceFileWhenPrinting) {
         const sourceFile = oldNode.getSourceFile();
         this.replaceText(sourceFile, oldNode.getStart(), oldNode.getWidth(), this._printer.printNode(emitHint, newNode, sourceFileWhenPrinting || sourceFile));
     }
@@ -179,7 +175,7 @@ class ChangeTracker {
         }
         let kind = 0 /* QuoteKind.SINGLE */;
         for (const statement of sourceFile.statements) {
-            if (ts__default["default"].isImportDeclaration(statement) && ts__default["default"].isStringLiteral(statement.moduleSpecifier)) {
+            if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
                 kind = statement.moduleSpecifier.getText()[0] === '"' ? 1 /* QuoteKind.DOUBLE */ : 0 /* QuoteKind.SINGLE */;
                 this._quotesCache.set(sourceFile, kind);
                 break;
@@ -204,12 +200,12 @@ class ChangeTracker {
             const importLines = [];
             let lastImport = null;
             for (const statement of sourceFile.statements) {
-                if (ts__default["default"].isImportDeclaration(statement)) {
+                if (ts.isImportDeclaration(statement)) {
                     lastImport = statement;
                 }
             }
             for (const decl of importsToAdd) {
-                importLines.push(this._printer.printNode(ts__default["default"].EmitHint.Unspecified, decl, sourceFile));
+                importLines.push(this._printer.printNode(ts.EmitHint.Unspecified, decl, sourceFile));
             }
             this.insertText(sourceFile, lastImport ? lastImport.getEnd() : 0, (lastImport ? '\n' : '') + importLines.join('\n'));
         }
@@ -221,12 +217,12 @@ function normalizePath(path) {
 }
 
 function parseTsconfigFile(tsconfigPath, basePath) {
-    const { config } = ts__default["default"].readConfigFile(tsconfigPath, ts__default["default"].sys.readFile);
+    const { config } = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
     const parseConfigHost = {
-        useCaseSensitiveFileNames: ts__default["default"].sys.useCaseSensitiveFileNames,
-        fileExists: ts__default["default"].sys.fileExists,
-        readDirectory: ts__default["default"].sys.readDirectory,
-        readFile: ts__default["default"].sys.readFile,
+        useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames,
+        fileExists: ts.sys.fileExists,
+        readDirectory: ts.sys.readDirectory,
+        readFile: ts.sys.readFile,
     };
     // Throw if incorrect arguments are passed to this function. Passing relative base paths
     // results in root directories not being resolved and in later type checking runtime errors.
@@ -234,7 +230,7 @@ function parseTsconfigFile(tsconfigPath, basePath) {
     if (!p__namespace.isAbsolute(basePath)) {
         throw Error('Unexpected relative base path has been specified.');
     }
-    return ts__default["default"].parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
+    return ts.parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
 }
 
 /**
@@ -248,8 +244,8 @@ function parseTsconfigFile(tsconfigPath, basePath) {
  * @param additionalFiles Additional file paths that should be added to the program.
  */
 function createMigrationProgram(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
-    const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles);
-    return ts__default["default"].createProgram(rootNames, options, host);
+    const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead);
+    return ts.createProgram(rootNames, options, host);
 }
 /**
  * Creates the options necessary to instantiate a TypeScript program.
@@ -269,10 +265,10 @@ function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additi
     const parsed = parseTsconfigFile(tsconfigPath, p.dirname(tsconfigPath));
     const options = optionOverrides ? { ...parsed.options, ...optionOverrides } : parsed.options;
     const host = createMigrationCompilerHost(tree, options, basePath, fakeFileRead);
-    return { rootNames: parsed.fileNames.concat(additionalFiles || []), options, host };
+    return { rootNames: parsed.fileNames.concat([]), options, host };
 }
 function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
-    const host = ts__default["default"].createCompilerHost(options, true);
+    const host = ts.createCompilerHost(options, true);
     const defaultReadFile = host.readFile;
     // We need to overwrite the host "readFile" method, as we want the TypeScript
     // program to be based on the file contents in the virtual file tree. Otherwise

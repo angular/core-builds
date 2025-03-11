@@ -1,16 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 /** Gets import information about the specified identifier by using the Type checker. */
 function getImportOfIdentifier(typeChecker, node) {
@@ -19,11 +15,11 @@ function getImportOfIdentifier(typeChecker, node) {
         return null;
     }
     const decl = symbol.declarations[0];
-    if (!ts__default["default"].isImportSpecifier(decl)) {
+    if (!ts.isImportSpecifier(decl)) {
         return null;
     }
     const importDecl = decl.parent.parent.parent;
-    if (!ts__default["default"].isImportDeclaration(importDecl) || !ts__default["default"].isStringLiteral(importDecl.moduleSpecifier)) {
+    if (!ts.isImportDeclaration(importDecl) || !ts.isStringLiteral(importDecl.moduleSpecifier)) {
         return null;
     }
     return {
@@ -56,14 +52,14 @@ function getImportSpecifier(sourceFile, moduleName, specifierName) {
 function getImportSpecifiers(sourceFile, moduleName, specifierOrSpecifiers) {
     const matches = [];
     for (const node of sourceFile.statements) {
-        if (!ts__default["default"].isImportDeclaration(node) || !ts__default["default"].isStringLiteral(node.moduleSpecifier)) {
+        if (!ts.isImportDeclaration(node) || !ts.isStringLiteral(node.moduleSpecifier)) {
             continue;
         }
         const namedBindings = node.importClause?.namedBindings;
         const isMatch = typeof moduleName === 'string'
             ? node.moduleSpecifier.text === moduleName
             : moduleName.test(node.moduleSpecifier.text);
-        if (!isMatch || !namedBindings || !ts__default["default"].isNamedImports(namedBindings)) {
+        if (!isMatch || !namedBindings || !ts.isNamedImports(namedBindings)) {
             continue;
         }
         if (typeof specifierOrSpecifiers === 'string') {
@@ -85,12 +81,11 @@ function getImportSpecifiers(sourceFile, moduleName, specifierOrSpecifiers) {
 }
 function getNamedImports(sourceFile, moduleName) {
     for (const node of sourceFile.statements) {
-        if (ts__default["default"].isImportDeclaration(node) && ts__default["default"].isStringLiteral(node.moduleSpecifier)) {
-            const isMatch = typeof moduleName === 'string'
-                ? node.moduleSpecifier.text === moduleName
-                : moduleName.test(node.moduleSpecifier.text);
+        if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+            const isMatch = node.moduleSpecifier.text === moduleName
+                ;
             const namedBindings = node.importClause?.namedBindings;
-            if (isMatch && namedBindings && ts__default["default"].isNamedImports(namedBindings)) {
+            if (isMatch && namedBindings && ts.isNamedImports(namedBindings)) {
                 return namedBindings;
             }
         }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ export { setCurrentInjector as ɵsetCurrentInjector } from '@angular/core/primit
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, EventPhase, isEarlyEventType, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
 import { map } from 'rxjs/operators';
-export { s as ɵsetAlternateWeakRefImpl } from './weak_ref-101188f1.mjs';
+export { s as ɵsetAlternateWeakRefImpl } from './weak_ref-DrMdAIDh.mjs';
 
 /**
  * Base URL for the error details page.
@@ -24,7 +24,7 @@ const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.dev/errors';
 /**
  * URL for the XSS security documentation.
  */
-const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
+const XSS_SECURITY_URL = 'https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss';
 
 /**
  * Class that represents a runtime error.
@@ -148,8 +148,6 @@ function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
                     ? cls[ANNOTATIONS]
                     : Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
                 annotations.push(annotationInstance);
-                if (additionalProcessing)
-                    additionalProcessing(cls);
                 return cls;
             };
         }
@@ -197,9 +195,6 @@ function makeParamDecorator(name, props, parentClass) {
                 return cls;
             }
         }
-        if (parentClass) {
-            ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
-        }
         ParamDecoratorFactory.prototype.ngMetadataName = name;
         ParamDecoratorFactory.annotationCls = ParamDecoratorFactory;
         return ParamDecoratorFactory;
@@ -228,8 +223,6 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
                     : Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
                 meta[name] = (meta.hasOwnProperty(name) && meta[name]) || [];
                 meta[name].unshift(decoratorInstance);
-                if (additionalProcessing)
-                    additionalProcessing(target, name, ...args);
             }
             return PropDecorator;
         }
@@ -451,6 +444,8 @@ function isForwardRef(fn) {
 }
 
 // The functions in this file verify that the assumptions we are making
+// about state in an instruction are correct before implementing any logic.
+// They are meant only to be called in dev mode as sanity checks.
 function assertNumber(actual, msg) {
     if (!(typeof actual === 'number')) {
         throwError(msg, typeof actual, 'number', '===');
@@ -2978,7 +2973,7 @@ function assertFirstCreatePass(tView, errMessage) {
     assertEqual(tView.firstCreatePass, true, errMessage || 'Should only be called in first create pass.');
 }
 function assertFirstUpdatePass(tView, errMessage) {
-    assertEqual(tView.firstUpdatePass, true, errMessage || 'Should only be called in first update pass.');
+    assertEqual(tView.firstUpdatePass, true, 'Should only be called in first update pass.');
 }
 /**
  * This is a basic sanity check that an object is probably a directive def. DirectiveDef is
@@ -3003,11 +2998,10 @@ function assertBetween(lower, upper, index) {
 }
 function assertProjectionSlots(lView, errMessage) {
     assertDefined(lView[DECLARATION_COMPONENT_VIEW], 'Component views should exist.');
-    assertDefined(lView[DECLARATION_COMPONENT_VIEW][T_HOST].projection, errMessage ||
-        'Components with projection nodes (<ng-content>) must have projection slots defined.');
+    assertDefined(lView[DECLARATION_COMPONENT_VIEW][T_HOST].projection, 'Components with projection nodes (<ng-content>) must have projection slots defined.');
 }
 function assertParentView(lView, errMessage) {
-    assertDefined(lView, errMessage || "Component views should always have a parent view (component's host view)");
+    assertDefined(lView, "Component views should always have a parent view (component's host view)");
 }
 /**
  * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
@@ -4686,21 +4680,15 @@ function mergeHostAttribute(dst, marker, key1, key2, value) {
         }
         else if (item === key1) {
             // We already have same token
-            if (key2 === null) {
+            {
                 if (value !== null) {
                     dst[i + 1] = value;
                 }
                 return;
             }
-            else if (key2 === dst[i + 1]) {
-                dst[i + 2] = value;
-                return;
-            }
         }
         // Increment counter.
         i++;
-        if (key2 !== null)
-            i++;
         if (value !== null)
             i++;
     }
@@ -4710,9 +4698,6 @@ function mergeHostAttribute(dst, marker, key1, key2, value) {
         i = markerInsertPosition + 1;
     }
     dst.splice(i++, 0, key1);
-    if (key2 !== null) {
-        dst.splice(i++, 0, key2);
-    }
     if (value !== null) {
         dst.splice(i++, 0, value);
     }
@@ -12922,7 +12907,7 @@ function renderView(tView, lView, context) {
         throw error;
     }
     finally {
-        lView[FLAGS] &= ~4 /* LViewFlags.CreationMode */;
+        lView[FLAGS] &= -5 /* LViewFlags.CreationMode */;
         leaveView();
     }
 }
@@ -14266,7 +14251,7 @@ function detectChangesInView(lView, mode) {
     if (consumer) {
         consumer.dirty = false;
     }
-    lView[FLAGS] &= ~(8192 /* LViewFlags.HasChildViewsToRefresh */ | 1024 /* LViewFlags.RefreshView */);
+    lView[FLAGS] &= -9217;
     if (shouldRefreshView) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
@@ -14462,7 +14447,7 @@ function detachView(lContainer, removeIndex) {
         viewToDetach[PARENT] = null;
         viewToDetach[NEXT] = null;
         // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~128 /* LViewFlags.Attached */;
+        viewToDetach[FLAGS] &= -129 /* LViewFlags.Attached */;
     }
     return viewToDetach;
 }
@@ -14544,7 +14529,7 @@ function trackMovedView(declarationContainer, lView) {
     }
 }
 
-class ViewRef$1 {
+let ViewRef$1 = class ViewRef {
     _lView;
     _cdRefInjectingView;
     _appRef = null;
@@ -14707,7 +14692,7 @@ class ViewRef$1 {
      * ```
      */
     detach() {
-        this._lView[FLAGS] &= ~128 /* LViewFlags.Attached */;
+        this._lView[FLAGS] &= -129 /* LViewFlags.Attached */;
     }
     /**
      * Re-attaches a view to the change detection tree.
@@ -14837,7 +14822,7 @@ class ViewRef$1 {
         }
         updateAncestorTraversalFlagsOnAttach(this._lView);
     }
-}
+};
 /**
  * Reports whether the given view is considered dirty according to the different marking mechanisms.
  */
@@ -16822,8 +16807,8 @@ function findMatchingDehydratedView(lContainer, template) {
  *
  * @publicApi
  */
-class ComponentRef$1 {
-}
+let ComponentRef$1 = class ComponentRef {
+};
 /**
  * Base class for a factory that can create a component dynamically.
  * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
@@ -16834,8 +16819,8 @@ class ComponentRef$1 {
  * @deprecated Angular no longer requires Component factories. Please use other APIs where
  *     Component class can be used directly.
  */
-class ComponentFactory$1 {
-}
+let ComponentFactory$1 = class ComponentFactory {
+};
 
 class _NullComponentFactoryResolver {
     resolveComponentFactory(component) {
@@ -16857,9 +16842,9 @@ class _NullComponentFactoryResolver {
  * @deprecated Angular no longer requires Component factories. Please use other APIs where
  *     Component class can be used directly.
  */
-class ComponentFactoryResolver$1 {
+let ComponentFactoryResolver$1 = class ComponentFactoryResolver {
     static NULL = new _NullComponentFactoryResolver();
-}
+};
 
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
@@ -18491,7 +18476,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-8be6e38']
+        ? ['ng-version', '20.0.0-next.1+sha-4fa5d18']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -20084,8 +20069,8 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
  *
  * @publicApi
  */
-class NgModuleRef$1 {
-}
+let NgModuleRef$1 = class NgModuleRef {
+};
 /**
  * @publicApi
  *
@@ -20096,8 +20081,8 @@ class NgModuleRef$1 {
  * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
  */
-class NgModuleFactory$1 {
-}
+let NgModuleFactory$1 = class NgModuleFactory {
+};
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
@@ -23937,12 +23922,15 @@ class ApplicationRef {
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
         const initStatus = this._injector.get(ApplicationInitStatus);
         if (!initStatus.done) {
-            const standalone = !isComponentFactory && isStandalone(componentOrFactory);
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) &&
-                'Cannot bootstrap as there are still asynchronous initializers running.' +
-                    (standalone
-                        ? ''
-                        : ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            let errorMessage = '';
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                const standalone = !isComponentFactory && isStandalone(componentOrFactory);
+                errorMessage =
+                    'Cannot bootstrap as there are still asynchronous initializers running.' +
+                        (standalone
+                            ? ''
+                            : ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            }
             throw new RuntimeError(405 /* RuntimeErrorCode.ASYNC_INITIALIZERS_STILL_RUNNING */, errorMessage);
         }
         let componentFactory;
@@ -24056,7 +24044,7 @@ class ApplicationRef {
     synchronizeOnce() {
         // First, process any dirty root effects.
         if (this.dirtyFlags & 16 /* ApplicationRefDirtyFlags.RootEffects */) {
-            this.dirtyFlags &= ~16 /* ApplicationRefDirtyFlags.RootEffects */;
+            this.dirtyFlags &= -17 /* ApplicationRefDirtyFlags.RootEffects */;
             this.rootEffectScheduler.flush();
         }
         // First check dirty views, if there are any.
@@ -24066,7 +24054,7 @@ class ApplicationRef {
             // `ApplicationRef.tick()` and the `NgZone` integration.
             const useGlobalCheck = Boolean(this.dirtyFlags & 1 /* ApplicationRefDirtyFlags.ViewTreeGlobal */);
             // Clear the view-related dirty flags.
-            this.dirtyFlags &= ~7 /* ApplicationRefDirtyFlags.ViewTreeAny */;
+            this.dirtyFlags &= -8 /* ApplicationRefDirtyFlags.ViewTreeAny */;
             // Set the AfterRender bit, as we're checking views and will need to run afterRender hooks.
             this.dirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
             // Check all potentially dirty views.
@@ -24076,7 +24064,7 @@ class ApplicationRef {
             // If `markForCheck()` was called during view checking, it will have set the `ViewTreeCheck`
             // flag. We clear the flag here because, for backwards compatibility, `markForCheck()`
             // during view checking doesn't cause the view to be re-checked.
-            this.dirtyFlags &= ~4 /* ApplicationRefDirtyFlags.ViewTreeCheck */;
+            this.dirtyFlags &= -5 /* ApplicationRefDirtyFlags.ViewTreeCheck */;
             // Check if any views are still dirty after checking and we need to loop back.
             this.syncDirtyFlagsWithViews();
             if (this.dirtyFlags &
@@ -24094,7 +24082,7 @@ class ApplicationRef {
         }
         // Even if there were no dirty views, afterRender hooks might still be dirty.
         if (this.dirtyFlags & 8 /* ApplicationRefDirtyFlags.AfterRender */) {
-            this.dirtyFlags &= ~8 /* ApplicationRefDirtyFlags.AfterRender */;
+            this.dirtyFlags &= -9 /* ApplicationRefDirtyFlags.AfterRender */;
             this.afterRenderManager.execute();
             // afterRender hooks might influence dirty flags.
         }
@@ -24123,7 +24111,7 @@ class ApplicationRef {
         else {
             // Even though this flag may be set, none of _our_ views require traversal, and so the
             // `ApplicationRef` doesn't require any repeated checking.
-            this.dirtyFlags &= ~7 /* ApplicationRefDirtyFlags.ViewTreeAny */;
+            this.dirtyFlags &= -8 /* ApplicationRefDirtyFlags.ViewTreeAny */;
         }
     }
     /**
@@ -25945,7 +25933,7 @@ function getTStylingRangePrevDuplicate(tStylingRange) {
 function setTStylingRangePrev(tStylingRange, previous) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
     ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & ~4294836224 /* StylingRange.PREV_MASK */) |
+    return ((tStylingRange & 131071 /* StylingRange.PREV_MASK */) |
         (previous << 17 /* StylingRange.PREV_SHIFT */));
 }
 function setTStylingRangePrevDuplicate(tStylingRange) {
@@ -25959,7 +25947,7 @@ function getTStylingRangeNext(tStylingRange) {
 function setTStylingRangeNext(tStylingRange, next) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
     ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & ~131068 /* StylingRange.NEXT_MASK */) | //
+    return ((tStylingRange & -131069 /* StylingRange.NEXT_MASK */) | //
         (next << 2 /* StylingRange.NEXT_SHIFT */));
 }
 function getTStylingRangeNextDuplicate(tStylingRange) {
@@ -33595,7 +33583,7 @@ function resetProjectionState(tNode) {
             if (isTNodeShape(current)) {
                 // Reset `projectionNext` since it can affect the traversal order during projection.
                 current.projectionNext = null;
-                current.flags &= ~2 /* TNodeFlags.isProjected */;
+                current.flags &= -3 /* TNodeFlags.isProjected */;
             }
         }
         tNode.projection = null;
@@ -34826,7 +34814,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-8be6e38');
+const VERSION = new Version('20.0.0-next.1+sha-4fa5d18');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38649,7 +38637,7 @@ function annotateForHydration(appRef, doc) {
         capture: new Set(),
     };
     const deferBlocks = new Map();
-    const appId = appRef.injector.get(APP_ID);
+    appRef.injector.get(APP_ID);
     for (const viewRef of viewRefs) {
         const lNode = getLNodeForHydration(viewRef);
         // An `lView` might be `null` if a `ViewRef` represents
@@ -38663,7 +38651,6 @@ function annotateForHydration(appRef, doc) {
                 i18nChildren: new Map(),
                 eventTypesToReplay,
                 shouldReplayEvents,
-                appId,
                 deferBlocks,
             };
             if (isLContainer(lNode)) {

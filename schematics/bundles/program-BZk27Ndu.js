@@ -1,20 +1,17 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-febe8b3a.js');
+var checker = require('./checker-DF8ZaFW5.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
+function _interopNamespaceDefault(e) {
     var n = Object.create(null);
     if (e) {
         Object.keys(e).forEach(function (k) {
@@ -27,12 +24,11 @@ function _interopNamespace(e) {
             }
         });
     }
-    n["default"] = e;
+    n.default = e;
     return Object.freeze(n);
 }
 
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var p__namespace = /*#__PURE__*/_interopNamespace(p);
+var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
 
 class XmlTagDefinition {
     closedByParent = false;
@@ -149,7 +145,7 @@ class Xliff extends checker.Serializer {
         return checker.digest(message);
     }
 }
-class _WriteVisitor$1 {
+let _WriteVisitor$1 = class _WriteVisitor {
     visitText(text, context) {
         return [new checker.Text$1(text.value)];
     }
@@ -208,7 +204,7 @@ class _WriteVisitor$1 {
     serialize(nodes) {
         return [].concat(...nodes.map((node) => node.visit(this)));
     }
-}
+};
 // TODO(vicb): add error management (structure)
 // Extract messages as xml nodes from the xliff file
 class XliffParser {
@@ -291,7 +287,7 @@ class XliffParser {
     }
 }
 // Convert ml nodes (xliff syntax) to i18n nodes
-class XmlToI18n$1 {
+let XmlToI18n$1 = class XmlToI18n {
     // using non-null assertion because it's re(set) by convert()
     _errors;
     convert(message, url) {
@@ -344,7 +340,7 @@ class XmlToI18n$1 {
     _addError(node, message) {
         this._errors.push(new checker.I18nError(node.sourceSpan, message));
     }
-}
+};
 function getCtypeForTag(tag) {
     switch (tag.toLowerCase()) {
         case 'br':
@@ -874,7 +870,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -892,7 +888,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -987,7 +983,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1403,7 +1399,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1438,7 +1434,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1489,7 +1485,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1522,7 +1518,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1573,7 +1569,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-8be6e38'));
+    definitionMap.set('version', checker.literal('20.0.0-next.1+sha-4fa5d18'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -2014,7 +2010,7 @@ class DeferredSymbolTracker {
         }
         if (importDecl.importClause.namedBindings !== undefined) {
             const bindings = importDecl.importClause.namedBindings;
-            if (ts__default["default"].isNamedImports(bindings)) {
+            if (ts.isNamedImports(bindings)) {
                 // Case 1: `import {a, b as B} from 'a'`
                 for (const element of bindings.elements) {
                     if (!element.isTypeOnly) {
@@ -2125,10 +2121,10 @@ class DeferredSymbolTracker {
         const visit = (node) => {
             // Don't record references from the declaration itself or inside
             // type nodes which will be stripped from the JS output.
-            if (node === importDecl || ts__default["default"].isTypeNode(node)) {
+            if (node === importDecl || ts.isTypeNode(node)) {
                 return;
             }
-            if (ts__default["default"].isIdentifier(node) && node.text === name) {
+            if (ts.isIdentifier(node) && node.text === name) {
                 // Is `node` actually a reference to this symbol?
                 const sym = this.typeChecker.getSymbolAtLocation(node);
                 if (sym === undefined) {
@@ -2146,7 +2142,7 @@ class DeferredSymbolTracker {
                 // `node` *is* a reference to the same import.
                 results.add(node);
             }
-            ts__default["default"].forEachChild(node, visit);
+            ts.forEachChild(node, visit);
         };
         visit(importDecl.getSourceFile());
         return results;
@@ -2231,13 +2227,13 @@ class ImportedSymbolsTracker {
         this.fileToNamespaceImports.set(sourceFile, namespaceImports);
         // Only check top-level imports.
         for (const stmt of sourceFile.statements) {
-            if (!ts__default["default"].isImportDeclaration(stmt) ||
-                !ts__default["default"].isStringLiteralLike(stmt.moduleSpecifier) ||
+            if (!ts.isImportDeclaration(stmt) ||
+                !ts.isStringLiteralLike(stmt.moduleSpecifier) ||
                 stmt.importClause?.namedBindings === undefined) {
                 continue;
             }
             const moduleName = stmt.moduleSpecifier.text;
-            if (ts__default["default"].isNamespaceImport(stmt.importClause.namedBindings)) {
+            if (ts.isNamespaceImport(stmt.importClause.namedBindings)) {
                 // import * as foo from 'module'
                 if (!namespaceImports.has(moduleName)) {
                     namespaceImports.set(moduleName, new Set());
@@ -2327,10 +2323,10 @@ class LocalCompilationExtraImportsTracker {
      */
     addGlobalImportFromIdentifier(node) {
         let identifier = null;
-        if (ts__default["default"].isIdentifier(node)) {
+        if (ts.isIdentifier(node)) {
             identifier = node;
         }
-        else if (ts__default["default"].isPropertyAccessExpression(node) && ts__default["default"].isIdentifier(node.expression)) {
+        else if (ts.isPropertyAccessExpression(node) && ts.isIdentifier(node.expression)) {
             identifier = node.expression;
         }
         if (identifier === null) {
@@ -2386,332 +2382,6 @@ class ModuleResolver {
     }
 }
 
-function getConstructorDependencies(clazz, reflector, isCore) {
-    const deps = [];
-    const errors = [];
-    let ctorParams = reflector.getConstructorParameters(clazz);
-    if (ctorParams === null) {
-        if (reflector.hasBaseClass(clazz)) {
-            return null;
-        }
-        else {
-            ctorParams = [];
-        }
-    }
-    ctorParams.forEach((param, idx) => {
-        let token = checker.valueReferenceToExpression(param.typeValueReference);
-        let attributeNameType = null;
-        let optional = false, self = false, skipSelf = false, host = false;
-        (param.decorators || [])
-            .filter((dec) => isCore || checker.isAngularCore(dec))
-            .forEach((dec) => {
-            const name = isCore || dec.import === null ? dec.name : dec.import.name;
-            if (name === 'Inject') {
-                if (dec.args === null || dec.args.length !== 1) {
-                    throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, dec.node, `Unexpected number of arguments to @Inject().`);
-                }
-                token = new checker.WrappedNodeExpr(dec.args[0]);
-            }
-            else if (name === 'Optional') {
-                optional = true;
-            }
-            else if (name === 'SkipSelf') {
-                skipSelf = true;
-            }
-            else if (name === 'Self') {
-                self = true;
-            }
-            else if (name === 'Host') {
-                host = true;
-            }
-            else if (name === 'Attribute') {
-                if (dec.args === null || dec.args.length !== 1) {
-                    throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, dec.node, `Unexpected number of arguments to @Attribute().`);
-                }
-                const attributeName = dec.args[0];
-                token = new checker.WrappedNodeExpr(attributeName);
-                if (ts__default["default"].isStringLiteralLike(attributeName)) {
-                    attributeNameType = new checker.LiteralExpr(attributeName.text);
-                }
-                else {
-                    attributeNameType = new checker.WrappedNodeExpr(ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UnknownKeyword));
-                }
-            }
-            else {
-                throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_UNEXPECTED, dec.node, `Unexpected decorator ${name} on parameter.`);
-            }
-        });
-        if (token === null) {
-            if (param.typeValueReference.kind !== 2 /* TypeValueReferenceKind.UNAVAILABLE */) {
-                throw new Error('Illegal state: expected value reference to be unavailable if no token is present');
-            }
-            errors.push({
-                index: idx,
-                param,
-                reason: param.typeValueReference.reason,
-            });
-        }
-        else {
-            deps.push({ token, attributeNameType, optional, self, skipSelf, host });
-        }
-    });
-    if (errors.length === 0) {
-        return { deps };
-    }
-    else {
-        return { deps: null, errors };
-    }
-}
-/**
- * Convert `ConstructorDeps` into the `R3DependencyMetadata` array for those deps if they're valid,
- * or into an `'invalid'` signal if they're not.
- *
- * This is a companion function to `validateConstructorDependencies` which accepts invalid deps.
- */
-function unwrapConstructorDependencies(deps) {
-    if (deps === null) {
-        return null;
-    }
-    else if (deps.deps !== null) {
-        // These constructor dependencies are valid.
-        return deps.deps;
-    }
-    else {
-        // These deps are invalid.
-        return 'invalid';
-    }
-}
-function getValidConstructorDependencies(clazz, reflector, isCore) {
-    return validateConstructorDependencies(clazz, getConstructorDependencies(clazz, reflector, isCore));
-}
-/**
- * Validate that `ConstructorDeps` does not have any invalid dependencies and convert them into the
- * `R3DependencyMetadata` array if so, or raise a diagnostic if some deps are invalid.
- *
- * This is a companion function to `unwrapConstructorDependencies` which does not accept invalid
- * deps.
- */
-function validateConstructorDependencies(clazz, deps) {
-    if (deps === null) {
-        return null;
-    }
-    else if (deps.deps !== null) {
-        return deps.deps;
-    }
-    else {
-        // There is at least one error.
-        const error = deps.errors[0];
-        throw createUnsuitableInjectionTokenError(clazz, error);
-    }
-}
-/**
- * Creates a fatal error with diagnostic for an invalid injection token.
- * @param clazz The class for which the injection token was unavailable.
- * @param error The reason why no valid injection token is available.
- */
-function createUnsuitableInjectionTokenError(clazz, error) {
-    const { param, index, reason } = error;
-    let chainMessage = undefined;
-    let hints = undefined;
-    switch (reason.kind) {
-        case 5 /* ValueUnavailableKind.UNSUPPORTED */:
-            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
-            hints = [
-                checker.makeRelatedInformation(reason.typeNode, 'This type is not supported as injection token.'),
-            ];
-            break;
-        case 1 /* ValueUnavailableKind.NO_VALUE_DECLARATION */:
-            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
-            hints = [
-                checker.makeRelatedInformation(reason.typeNode, 'This type does not have a value, so it cannot be used as injection token.'),
-            ];
-            if (reason.decl !== null) {
-                hints.push(checker.makeRelatedInformation(reason.decl, 'The type is declared here.'));
-            }
-            break;
-        case 2 /* ValueUnavailableKind.TYPE_ONLY_IMPORT */:
-            chainMessage =
-                'Consider changing the type-only import to a regular import, or use the @Inject decorator to specify an injection token.';
-            hints = [
-                checker.makeRelatedInformation(reason.typeNode, 'This type is imported using a type-only import, which prevents it from being usable as an injection token.'),
-                checker.makeRelatedInformation(reason.node, 'The type-only import occurs here.'),
-            ];
-            break;
-        case 4 /* ValueUnavailableKind.NAMESPACE */:
-            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
-            hints = [
-                checker.makeRelatedInformation(reason.typeNode, 'This type corresponds with a namespace, which cannot be used as injection token.'),
-                checker.makeRelatedInformation(reason.importClause, 'The namespace import occurs here.'),
-            ];
-            break;
-        case 3 /* ValueUnavailableKind.UNKNOWN_REFERENCE */:
-            chainMessage = 'The type should reference a known declaration.';
-            hints = [checker.makeRelatedInformation(reason.typeNode, 'This type could not be resolved.')];
-            break;
-        case 0 /* ValueUnavailableKind.MISSING_TYPE */:
-            chainMessage =
-                'Consider adding a type to the parameter or use the @Inject decorator to specify an injection token.';
-            break;
-    }
-    const chain = {
-        messageText: `No suitable injection token for parameter '${param.name || index}' of class '${clazz.name.text}'.`,
-        category: ts__default["default"].DiagnosticCategory.Error,
-        code: 0,
-        next: [
-            {
-                messageText: chainMessage,
-                category: ts__default["default"].DiagnosticCategory.Message,
-                code: 0,
-            },
-        ],
-    };
-    return new checker.FatalDiagnosticError(checker.ErrorCode.PARAM_MISSING_TOKEN, param.nameNode, chain, hints);
-}
-
-/**
- * A mapping of component property and template binding property names, for example containing the
- * inputs of a particular directive or component.
- *
- * A single component property has exactly one input/output annotation (and therefore one binding
- * property name) associated with it, but the same binding property name may be shared across many
- * component property names.
- *
- * Allows bidirectional querying of the mapping - looking up all inputs/outputs with a given
- * property name, or mapping from a specific class property to its binding property name.
- */
-class ClassPropertyMapping {
-    /**
-     * Mapping from class property names to the single `InputOrOutput` for that class property.
-     */
-    forwardMap;
-    /**
-     * Mapping from property names to one or more `InputOrOutput`s which share that name.
-     */
-    reverseMap;
-    constructor(forwardMap) {
-        this.forwardMap = forwardMap;
-        this.reverseMap = reverseMapFromForwardMap(forwardMap);
-    }
-    /**
-     * Construct a `ClassPropertyMapping` with no entries.
-     */
-    static empty() {
-        return new ClassPropertyMapping(new Map());
-    }
-    /**
-     * Construct a `ClassPropertyMapping` from a primitive JS object which maps class property names
-     * to either binding property names or an array that contains both names, which is used in on-disk
-     * metadata formats (e.g. in .d.ts files).
-     */
-    static fromMappedObject(obj) {
-        const forwardMap = new Map();
-        for (const classPropertyName of Object.keys(obj)) {
-            const value = obj[classPropertyName];
-            let inputOrOutput;
-            if (typeof value === 'string') {
-                inputOrOutput = {
-                    classPropertyName,
-                    bindingPropertyName: value,
-                    // Inputs/outputs not captured via an explicit `InputOrOutput` mapping
-                    // value are always considered non-signal. This is the string shorthand.
-                    isSignal: false,
-                };
-            }
-            else {
-                inputOrOutput = value;
-            }
-            forwardMap.set(classPropertyName, inputOrOutput);
-        }
-        return new ClassPropertyMapping(forwardMap);
-    }
-    /**
-     * Merge two mappings into one, with class properties from `b` taking precedence over class
-     * properties from `a`.
-     */
-    static merge(a, b) {
-        const forwardMap = new Map(a.forwardMap.entries());
-        for (const [classPropertyName, inputOrOutput] of b.forwardMap) {
-            forwardMap.set(classPropertyName, inputOrOutput);
-        }
-        return new ClassPropertyMapping(forwardMap);
-    }
-    /**
-     * All class property names mapped in this mapping.
-     */
-    get classPropertyNames() {
-        return Array.from(this.forwardMap.keys());
-    }
-    /**
-     * All binding property names mapped in this mapping.
-     */
-    get propertyNames() {
-        return Array.from(this.reverseMap.keys());
-    }
-    /**
-     * Check whether a mapping for the given property name exists.
-     */
-    hasBindingPropertyName(propertyName) {
-        return this.reverseMap.has(propertyName);
-    }
-    /**
-     * Lookup all `InputOrOutput`s that use this `propertyName`.
-     */
-    getByBindingPropertyName(propertyName) {
-        return this.reverseMap.has(propertyName) ? this.reverseMap.get(propertyName) : null;
-    }
-    /**
-     * Lookup the `InputOrOutput` associated with a `classPropertyName`.
-     */
-    getByClassPropertyName(classPropertyName) {
-        return this.forwardMap.has(classPropertyName) ? this.forwardMap.get(classPropertyName) : null;
-    }
-    /**
-     * Convert this mapping to a primitive JS object which maps each class property directly to the
-     * binding property name associated with it.
-     */
-    toDirectMappedObject() {
-        const obj = {};
-        for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
-            obj[classPropertyName] = inputOrOutput.bindingPropertyName;
-        }
-        return obj;
-    }
-    /**
-     * Convert this mapping to a primitive JS object which maps each class property either to itself
-     * (for cases where the binding property name is the same) or to an array which contains both
-     * names if they differ.
-     *
-     * This object format is used when mappings are serialized (for example into .d.ts files).
-     * @param transform Function used to transform the values of the generated map.
-     */
-    toJointMappedObject(transform) {
-        const obj = {};
-        for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
-            obj[classPropertyName] = transform(inputOrOutput);
-        }
-        return obj;
-    }
-    /**
-     * Implement the iterator protocol and return entry objects which contain the class and binding
-     * property names (and are useful for destructuring).
-     */
-    *[Symbol.iterator]() {
-        for (const inputOrOutput of this.forwardMap.values()) {
-            yield inputOrOutput;
-        }
-    }
-}
-function reverseMapFromForwardMap(forwardMap) {
-    const reverseMap = new Map();
-    for (const [_, inputOrOutput] of forwardMap) {
-        if (!reverseMap.has(inputOrOutput.bindingPropertyName)) {
-            reverseMap.set(inputOrOutput.bindingPropertyName, []);
-        }
-        reverseMap.get(inputOrOutput.bindingPropertyName).push(inputOrOutput);
-    }
-    return reverseMap;
-}
-
 /**
  * A `MetadataReader` that can read metadata from `.d.ts` files, which have static Ivy properties
  * from an upstream compilation already.
@@ -2742,7 +2412,7 @@ class DtsMetadataReader {
         else if (
         // Validate that the shape of the ngModuleDef type is correct.
         ngModuleDef.type === null ||
-            !ts__default["default"].isTypeReferenceNode(ngModuleDef.type) ||
+            !ts.isTypeReferenceNode(ngModuleDef.type) ||
             ngModuleDef.type.typeArguments === undefined ||
             ngModuleDef.type.typeArguments.length !== 4) {
             return null;
@@ -2787,7 +2457,7 @@ class DtsMetadataReader {
             return null;
         }
         else if (def.type === null ||
-            !ts__default["default"].isTypeReferenceNode(def.type) ||
+            !ts.isTypeReferenceNode(def.type) ||
             def.type.typeArguments === undefined ||
             def.type.typeArguments.length < 2) {
             // The type metadata was the wrong shape.
@@ -2809,8 +2479,8 @@ class DtsMetadataReader {
         // Note: the default value is still `false` here, because only legacy .d.ts files written before
         // we had so many arguments use this default.
         const isStandalone = def.type.typeArguments.length > 7 && (checker.readBooleanType(def.type.typeArguments[7]) ?? false);
-        const inputs = ClassPropertyMapping.fromMappedObject(readInputsType(def.type.typeArguments[3]));
-        const outputs = ClassPropertyMapping.fromMappedObject(checker.readMapType(def.type.typeArguments[4], checker.readStringType));
+        const inputs = checker.ClassPropertyMapping.fromMappedObject(readInputsType(def.type.typeArguments[3]));
+        const outputs = checker.ClassPropertyMapping.fromMappedObject(checker.readMapType(def.type.typeArguments[4], checker.readStringType));
         const hostDirectives = def.type.typeArguments.length > 8
             ? readHostDirectivesType(this.checker, def.type.typeArguments[8], ref.bestGuessOwningModule)
             : null;
@@ -2871,14 +2541,14 @@ class DtsMetadataReader {
             return null;
         }
         else if (def.type === null ||
-            !ts__default["default"].isTypeReferenceNode(def.type) ||
+            !ts.isTypeReferenceNode(def.type) ||
             def.type.typeArguments === undefined ||
             def.type.typeArguments.length < 2) {
             // The type metadata was the wrong shape.
             return null;
         }
         const type = def.type.typeArguments[1];
-        if (!ts__default["default"].isLiteralTypeNode(type) || !ts__default["default"].isStringLiteral(type.literal)) {
+        if (!ts.isLiteralTypeNode(type) || !ts.isStringLiteral(type.literal)) {
             // The type metadata was the wrong type.
             return null;
         }
@@ -2897,12 +2567,12 @@ class DtsMetadataReader {
 }
 function readInputsType(type) {
     const inputsMap = {};
-    if (ts__default["default"].isTypeLiteralNode(type)) {
+    if (ts.isTypeLiteralNode(type)) {
         for (const member of type.members) {
-            if (!ts__default["default"].isPropertySignature(member) ||
+            if (!ts.isPropertySignature(member) ||
                 member.type === undefined ||
                 member.name === undefined ||
-                (!ts__default["default"].isStringLiteral(member.name) && !ts__default["default"].isIdentifier(member.name))) {
+                (!ts.isStringLiteral(member.name) && !ts.isIdentifier(member.name))) {
                 continue;
             }
             const stringValue = checker.readStringType(member.type);
@@ -2949,13 +2619,13 @@ function readBaseClass(clazz, checker$1, reflector) {
     }
     if (clazz.heritageClauses !== undefined) {
         for (const clause of clazz.heritageClauses) {
-            if (clause.token === ts__default["default"].SyntaxKind.ExtendsKeyword) {
+            if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
                 const baseExpr = clause.types[0].expression;
                 let symbol = checker$1.getSymbolAtLocation(baseExpr);
                 if (symbol === undefined) {
                     return 'dynamic';
                 }
-                else if (symbol.flags & ts__default["default"].SymbolFlags.Alias) {
+                else if (symbol.flags & ts.SymbolFlags.Alias) {
                     symbol = checker$1.getAliasedSymbol(symbol);
                 }
                 if (symbol.valueDeclaration !== undefined &&
@@ -2971,7 +2641,7 @@ function readBaseClass(clazz, checker$1, reflector) {
     return null;
 }
 function readHostDirectivesType(checker$1, type, bestGuessOwningModule) {
-    if (!ts__default["default"].isTupleTypeNode(type) || type.elements.length === 0) {
+    if (!ts.isTupleTypeNode(type) || type.elements.length === 0) {
         return null;
     }
     const result = [];
@@ -2979,7 +2649,7 @@ function readHostDirectivesType(checker$1, type, bestGuessOwningModule) {
     for (const hostDirectiveType of type.elements) {
         const { directive, inputs, outputs } = checker.readMapType(hostDirectiveType, (type) => type);
         if (directive) {
-            if (!ts__default["default"].isTypeQueryNode(directive)) {
+            if (!ts.isTypeQueryNode(directive)) {
                 throw new Error(`Expected TypeQueryNode: ${checker.nodeDebugInfo(directive)}`);
             }
             const ref = checker.extraReferenceFromTypeQuery(checker$1, directive, type, bestGuessOwningModule);
@@ -2996,80 +2666,6 @@ function readHostDirectivesType(checker$1, type, bestGuessOwningModule) {
         }
     }
     return result.length > 0 ? { result, isIncomplete } : null;
-}
-
-/**
- * Given a reference to a directive, return a flattened version of its `DirectiveMeta` metadata
- * which includes metadata from its entire inheritance chain.
- *
- * The returned `DirectiveMeta` will either have `baseClass: null` if the inheritance chain could be
- * fully resolved, or `baseClass: 'dynamic'` if the inheritance chain could not be completely
- * followed.
- */
-function flattenInheritedDirectiveMetadata(reader, dir) {
-    const topMeta = reader.getDirectiveMetadata(dir);
-    if (topMeta === null) {
-        return null;
-    }
-    if (topMeta.baseClass === null) {
-        return topMeta;
-    }
-    const coercedInputFields = new Set();
-    const undeclaredInputFields = new Set();
-    const restrictedInputFields = new Set();
-    const stringLiteralInputFields = new Set();
-    let hostDirectives = null;
-    let isDynamic = false;
-    let inputs = ClassPropertyMapping.empty();
-    let outputs = ClassPropertyMapping.empty();
-    let isStructural = false;
-    const addMetadata = (meta) => {
-        if (meta.baseClass === 'dynamic') {
-            isDynamic = true;
-        }
-        else if (meta.baseClass !== null) {
-            const baseMeta = reader.getDirectiveMetadata(meta.baseClass);
-            if (baseMeta !== null) {
-                addMetadata(baseMeta);
-            }
-            else {
-                // Missing metadata for the base class means it's effectively dynamic.
-                isDynamic = true;
-            }
-        }
-        isStructural = isStructural || meta.isStructural;
-        inputs = ClassPropertyMapping.merge(inputs, meta.inputs);
-        outputs = ClassPropertyMapping.merge(outputs, meta.outputs);
-        for (const coercedInputField of meta.coercedInputFields) {
-            coercedInputFields.add(coercedInputField);
-        }
-        for (const undeclaredInputField of meta.undeclaredInputFields) {
-            undeclaredInputFields.add(undeclaredInputField);
-        }
-        for (const restrictedInputField of meta.restrictedInputFields) {
-            restrictedInputFields.add(restrictedInputField);
-        }
-        for (const field of meta.stringLiteralInputFields) {
-            stringLiteralInputFields.add(field);
-        }
-        if (meta.hostDirectives !== null && meta.hostDirectives.length > 0) {
-            hostDirectives ??= [];
-            hostDirectives.push(...meta.hostDirectives);
-        }
-    };
-    addMetadata(topMeta);
-    return {
-        ...topMeta,
-        inputs,
-        outputs,
-        coercedInputFields,
-        undeclaredInputFields,
-        restrictedInputFields,
-        stringLiteralInputFields,
-        baseClass: isDynamic ? 'dynamic' : null,
-        isStructural,
-        hostDirectives,
-    };
 }
 
 /**
@@ -3315,7 +2911,7 @@ class HostDirectivesResolver {
             if (!checker.isHostDirectiveMetaForGlobalMode(current)) {
                 throw new Error('Impossible state: resolving code path in local compilation mode');
             }
-            const hostMeta = flattenInheritedDirectiveMetadata(this.metaReader, current.directive);
+            const hostMeta = checker.flattenInheritedDirectiveMetadata(this.metaReader, current.directive);
             // This case has been checked for already and produces a diagnostic
             if (hostMeta === null) {
                 continue;
@@ -3326,8 +2922,8 @@ class HostDirectivesResolver {
             results.push({
                 ...hostMeta,
                 matchSource: checker.MatchSource.HostDirective,
-                inputs: ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.inputs, current.inputs, resolveInput)),
-                outputs: ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.outputs, current.outputs, resolveOutput)),
+                inputs: checker.ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.inputs, current.inputs, resolveInput)),
+                outputs: checker.ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.outputs, current.outputs, resolveOutput)),
             });
         }
         return results;
@@ -3368,175 +2964,6 @@ function resolveOutput(bindingName) {
     return bindingName;
 }
 
-/**
- * Derives a type representation from a resolved value to be reported in a diagnostic.
- *
- * @param value The resolved value for which a type representation should be derived.
- * @param maxDepth The maximum nesting depth of objects and arrays, defaults to 1 level.
- */
-function describeResolvedType(value, maxDepth = 1) {
-    if (value === null) {
-        return 'null';
-    }
-    else if (value === undefined) {
-        return 'undefined';
-    }
-    else if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'string') {
-        return typeof value;
-    }
-    else if (value instanceof Map) {
-        if (maxDepth === 0) {
-            return 'object';
-        }
-        const entries = Array.from(value.entries()).map(([key, v]) => {
-            return `${quoteKey(key)}: ${describeResolvedType(v, maxDepth - 1)}`;
-        });
-        return entries.length > 0 ? `{ ${entries.join('; ')} }` : '{}';
-    }
-    else if (value instanceof checker.ResolvedModule) {
-        return '(module)';
-    }
-    else if (value instanceof checker.EnumValue) {
-        return value.enumRef.debugName ?? '(anonymous)';
-    }
-    else if (value instanceof checker.Reference) {
-        return value.debugName ?? '(anonymous)';
-    }
-    else if (Array.isArray(value)) {
-        if (maxDepth === 0) {
-            return 'Array';
-        }
-        return `[${value.map((v) => describeResolvedType(v, maxDepth - 1)).join(', ')}]`;
-    }
-    else if (value instanceof checker.DynamicValue) {
-        return '(not statically analyzable)';
-    }
-    else if (value instanceof checker.KnownFn) {
-        return 'Function';
-    }
-    else {
-        return 'unknown';
-    }
-}
-function quoteKey(key) {
-    if (/^[a-z0-9_]+$/i.test(key)) {
-        return key;
-    }
-    else {
-        return `'${key.replace(/'/g, "\\'")}'`;
-    }
-}
-/**
- * Creates an array of related information diagnostics for a `DynamicValue` that describe the trace
- * of why an expression was evaluated as dynamic.
- *
- * @param node The node for which a `ts.Diagnostic` is to be created with the trace.
- * @param value The dynamic value for which a trace should be created.
- */
-function traceDynamicValue(node, value) {
-    return value.accept(new TraceDynamicValueVisitor(node));
-}
-class TraceDynamicValueVisitor {
-    node;
-    currentContainerNode = null;
-    constructor(node) {
-        this.node = node;
-    }
-    visitDynamicInput(value) {
-        const trace = value.reason.accept(this);
-        if (this.shouldTrace(value.node)) {
-            const info = checker.makeRelatedInformation(value.node, 'Unable to evaluate this expression statically.');
-            trace.unshift(info);
-        }
-        return trace;
-    }
-    visitSyntheticInput(value) {
-        return [checker.makeRelatedInformation(value.node, 'Unable to evaluate this expression further.')];
-    }
-    visitDynamicString(value) {
-        return [
-            checker.makeRelatedInformation(value.node, 'A string value could not be determined statically.'),
-        ];
-    }
-    visitExternalReference(value) {
-        const name = value.reason.debugName;
-        const description = name !== null ? `'${name}'` : 'an anonymous declaration';
-        return [
-            checker.makeRelatedInformation(value.node, `A value for ${description} cannot be determined statically, as it is an external declaration.`),
-        ];
-    }
-    visitComplexFunctionCall(value) {
-        return [
-            checker.makeRelatedInformation(value.node, 'Unable to evaluate function call of complex function. A function must have exactly one return statement.'),
-            checker.makeRelatedInformation(value.reason.node, 'Function is declared here.'),
-        ];
-    }
-    visitInvalidExpressionType(value) {
-        return [checker.makeRelatedInformation(value.node, 'Unable to evaluate an invalid expression.')];
-    }
-    visitUnknown(value) {
-        return [checker.makeRelatedInformation(value.node, 'Unable to evaluate statically.')];
-    }
-    visitUnknownIdentifier(value) {
-        return [checker.makeRelatedInformation(value.node, 'Unknown reference.')];
-    }
-    visitDynamicType(value) {
-        return [checker.makeRelatedInformation(value.node, 'Dynamic type.')];
-    }
-    visitUnsupportedSyntax(value) {
-        return [checker.makeRelatedInformation(value.node, 'This syntax is not supported.')];
-    }
-    /**
-     * Determines whether the dynamic value reported for the node should be traced, i.e. if it is not
-     * part of the container for which the most recent trace was created.
-     */
-    shouldTrace(node) {
-        if (node === this.node) {
-            // Do not include a dynamic value for the origin node, as the main diagnostic is already
-            // reported on that node.
-            return false;
-        }
-        const container = getContainerNode(node);
-        if (container === this.currentContainerNode) {
-            // The node is part of the same container as the previous trace entry, so this dynamic value
-            // should not become part of the trace.
-            return false;
-        }
-        this.currentContainerNode = container;
-        return true;
-    }
-}
-/**
- * Determines the closest parent node that is to be considered as container, which is used to reduce
- * the granularity of tracing the dynamic values to a single entry per container. Currently, full
- * statements and destructuring patterns are considered as container.
- */
-function getContainerNode(node) {
-    let currentNode = node;
-    while (currentNode !== undefined) {
-        switch (currentNode.kind) {
-            case ts__default["default"].SyntaxKind.ExpressionStatement:
-            case ts__default["default"].SyntaxKind.VariableStatement:
-            case ts__default["default"].SyntaxKind.ReturnStatement:
-            case ts__default["default"].SyntaxKind.IfStatement:
-            case ts__default["default"].SyntaxKind.SwitchStatement:
-            case ts__default["default"].SyntaxKind.DoStatement:
-            case ts__default["default"].SyntaxKind.WhileStatement:
-            case ts__default["default"].SyntaxKind.ForStatement:
-            case ts__default["default"].SyntaxKind.ForInStatement:
-            case ts__default["default"].SyntaxKind.ForOfStatement:
-            case ts__default["default"].SyntaxKind.ContinueStatement:
-            case ts__default["default"].SyntaxKind.BreakStatement:
-            case ts__default["default"].SyntaxKind.ThrowStatement:
-            case ts__default["default"].SyntaxKind.ObjectBindingPattern:
-            case ts__default["default"].SyntaxKind.ArrayBindingPattern:
-                return currentNode;
-        }
-        currentNode = currentNode.parent;
-    }
-    return node.getSourceFile();
-}
-
 class PartialEvaluator {
     host;
     checker;
@@ -3562,21 +2989,21 @@ class PartialEvaluator {
 function aliasTransformFactory(exportStatements) {
     return () => {
         return (file) => {
-            if (ts__default["default"].isBundle(file) || !exportStatements.has(file.fileName)) {
+            if (ts.isBundle(file) || !exportStatements.has(file.fileName)) {
                 return file;
             }
             const statements = [...file.statements];
             exportStatements.get(file.fileName).forEach(([moduleName, symbolName], aliasName) => {
-                const stmt = ts__default["default"].factory.createExportDeclaration(
+                const stmt = ts.factory.createExportDeclaration(
                 /* modifiers */ undefined, 
                 /* isTypeOnly */ false, 
-                /* exportClause */ ts__default["default"].factory.createNamedExports([
-                    ts__default["default"].factory.createExportSpecifier(false, symbolName, aliasName),
+                /* exportClause */ ts.factory.createNamedExports([
+                    ts.factory.createExportSpecifier(false, symbolName, aliasName),
                 ]), 
-                /* moduleSpecifier */ ts__default["default"].factory.createStringLiteral(moduleName));
+                /* moduleSpecifier */ ts.factory.createStringLiteral(moduleName));
                 statements.push(stmt);
             });
-            return ts__default["default"].factory.updateSourceFile(file, statements);
+            return ts.factory.updateSourceFile(file, statements);
         };
     };
 }
@@ -3802,7 +3229,7 @@ class TraitCompiler {
             if (this.reflector.isClass(node)) {
                 this.analyzeClass(node, preanalyze ? promises : null);
             }
-            ts__default["default"].forEachChild(node, visit);
+            ts.forEachChild(node, visit);
         };
         visit(sf);
         if (!this.fileToClasses.has(sf)) {
@@ -3945,7 +3372,7 @@ class TraitCompiler {
                     // The class already has a PRIMARY handler, and another one just matched.
                     record.metaDiagnostics = [
                         {
-                            category: ts__default["default"].DiagnosticCategory.Error,
+                            category: ts.DiagnosticCategory.Error,
                             code: Number('-99' + checker.ErrorCode.DECORATOR_COLLISION),
                             file: checker.getSourceFile(clazz),
                             start: clazz.getStart(undefined, false),
@@ -3969,7 +3396,7 @@ class TraitCompiler {
             // Custom decorators found in local compilation mode! In this mode we don't support custom
             // decorators yet. But will eventually do (b/320536434). For now a temporary error is thrown.
             record.metaDiagnostics = [...nonNgDecoratorsInLocalMode].map((decorator) => ({
-                category: ts__default["default"].DiagnosticCategory.Error,
+                category: ts.DiagnosticCategory.Error,
                 code: Number('-99' + checker.ErrorCode.DECORATOR_UNEXPECTED),
                 file: checker.getSourceFile(clazz),
                 start: decorator.node.getStart(),
@@ -4200,7 +3627,7 @@ class TraitCompiler {
         }
     }
     compile(clazz, constantPool) {
-        const original = ts__default["default"].getOriginalNode(clazz);
+        const original = ts.getOriginalNode(clazz);
         if (!this.reflector.isClass(clazz) ||
             !this.reflector.isClass(original) ||
             !this.classes.has(original)) {
@@ -4255,7 +3682,7 @@ class TraitCompiler {
         return res.length > 0 ? res : null;
     }
     compileHmrUpdateCallback(clazz) {
-        const original = ts__default["default"].getOriginalNode(clazz);
+        const original = ts.getOriginalNode(clazz);
         if (!this.reflector.isClass(clazz) ||
             !this.reflector.isClass(original) ||
             !this.classes.has(original)) {
@@ -4274,7 +3701,7 @@ class TraitCompiler {
         return null;
     }
     decoratorsFor(node) {
-        const original = ts__default["default"].getOriginalNode(node);
+        const original = ts.getOriginalNode(node);
         if (!this.reflector.isClass(original) || !this.classes.has(original)) {
             return [];
         }
@@ -4285,7 +3712,7 @@ class TraitCompiler {
             if (this.compilationMode !== checker.CompilationMode.LOCAL && trait.state !== checker.TraitState.Resolved) {
                 continue;
             }
-            if (trait.detected.trigger !== null && ts__default["default"].isDecorator(trait.detected.trigger)) {
+            if (trait.detected.trigger !== null && ts.isDecorator(trait.detected.trigger)) {
                 decorators.push(trait.detected.trigger);
             }
         }
@@ -4316,7 +3743,7 @@ class TraitCompiler {
 }
 function containsErrors(diagnostics) {
     return (diagnostics !== null &&
-        diagnostics.some((diag) => diag.category === ts__default["default"].DiagnosticCategory.Error));
+        diagnostics.some((diag) => diag.category === ts.DiagnosticCategory.Error));
 }
 
 /**
@@ -4343,7 +3770,7 @@ class DtsTransformRegistry {
         if (!sf.isDeclarationFile) {
             return null;
         }
-        const originalSf = ts__default["default"].getOriginalNode(sf);
+        const originalSf = ts.getOriginalNode(sf);
         let transforms = null;
         if (this.ivyDeclarationTransforms.has(originalSf)) {
             transforms = [];
@@ -4356,7 +3783,7 @@ function declarationTransformFactory(transformRegistry, reflector, refEmitter, i
     return (context) => {
         const transformer = new DtsTransformer(context, reflector, refEmitter, importRewriter);
         return (fileOrBundle) => {
-            if (ts__default["default"].isBundle(fileOrBundle)) {
+            if (ts.isBundle(fileOrBundle)) {
                 // Only attempt to transform source files.
                 return fileOrBundle;
             }
@@ -4391,19 +3818,19 @@ class DtsTransformer {
             rewriter: this.importRewriter,
         });
         const visitor = (node) => {
-            if (ts__default["default"].isClassDeclaration(node)) {
+            if (ts.isClassDeclaration(node)) {
                 return this.transformClassDeclaration(node, transforms, imports);
             }
-            else if (ts__default["default"].isFunctionDeclaration(node)) {
+            else if (ts.isFunctionDeclaration(node)) {
                 return this.transformFunctionDeclaration(node, transforms, imports);
             }
             else {
                 // Otherwise return node as is.
-                return ts__default["default"].visitEachChild(node, visitor, this.ctx);
+                return ts.visitEachChild(node, visitor, this.ctx);
             }
         };
         // Recursively scan through the AST and process all nodes as desired.
-        sf = ts__default["default"].visitNode(sf, visitor, ts__default["default"].isSourceFile) || sf;
+        sf = ts.visitNode(sf, visitor, ts.isSourceFile) || sf;
         // Update/insert needed imports.
         return imports.transformTsFile(this.ctx, sf);
     }
@@ -4436,7 +3863,7 @@ class DtsTransformer {
         // If some elements have been transformed but the class itself has not been transformed, create
         // an updated class declaration with the updated elements.
         if (elementsChanged && clazz === newClazz) {
-            newClazz = ts__default["default"].factory.updateClassDeclaration(
+            newClazz = ts.factory.updateClassDeclaration(
             /* node */ clazz, 
             /* modifiers */ clazz.modifiers, 
             /* name */ clazz.name, 
@@ -4462,23 +3889,23 @@ class IvyDeclarationDtsTransform {
         this.declarationFields.set(decl, fields);
     }
     transformClass(clazz, members, reflector, refEmitter, imports) {
-        const original = ts__default["default"].getOriginalNode(clazz);
+        const original = ts.getOriginalNode(clazz);
         if (!this.declarationFields.has(original)) {
             return clazz;
         }
         const fields = this.declarationFields.get(original);
         const newMembers = fields.map((decl) => {
-            const modifiers = [ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.StaticKeyword)];
+            const modifiers = [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)];
             const typeRef = checker.translateType(decl.type, original.getSourceFile(), reflector, refEmitter, imports);
             markForEmitAsSingleLine(typeRef);
-            return ts__default["default"].factory.createPropertyDeclaration(
+            return ts.factory.createPropertyDeclaration(
             /* modifiers */ modifiers, 
             /* name */ decl.name, 
             /* questionOrExclamationToken */ undefined, 
             /* type */ typeRef, 
             /* initializer */ undefined);
         });
-        return ts__default["default"].factory.updateClassDeclaration(
+        return ts.factory.updateClassDeclaration(
         /* node */ clazz, 
         /* modifiers */ clazz.modifiers, 
         /* name */ clazz.name, 
@@ -4488,8 +3915,8 @@ class IvyDeclarationDtsTransform {
     }
 }
 function markForEmitAsSingleLine(node) {
-    ts__default["default"].setEmitFlags(node, ts__default["default"].EmitFlags.SingleLine);
-    ts__default["default"].forEachChild(node, markForEmitAsSingleLine);
+    ts.setEmitFlags(node, ts.EmitFlags.SingleLine);
+    ts.forEachChild(node, markForEmitAsSingleLine);
 }
 
 /**
@@ -4537,8 +3964,8 @@ class Visitor {
         // First, visit the node. visitedNode starts off as `null` but should be set after visiting
         // is completed.
         let visitedNode = null;
-        node = ts__default["default"].visitEachChild(node, (child) => child && this._visit(child, context), context);
-        if (ts__default["default"].isClassDeclaration(node)) {
+        node = ts.visitEachChild(node, (child) => child && this._visit(child, context), context);
+        if (ts.isClassDeclaration(node)) {
             visitedNode = this._visitListEntryNode(node, (node) => this.visitClassDeclaration(node));
         }
         else {
@@ -4546,7 +3973,7 @@ class Visitor {
         }
         // If the visited node has a `statements` array then process them, maybe replacing the visited
         // node and adding additional statements.
-        if (visitedNode && (ts__default["default"].isBlock(visitedNode) || ts__default["default"].isSourceFile(visitedNode))) {
+        if (visitedNode && (ts.isBlock(visitedNode) || ts.isSourceFile(visitedNode))) {
             visitedNode = this._maybeProcessStatements(visitedNode);
         }
         return visitedNode;
@@ -4570,12 +3997,12 @@ class Visitor {
                 this._after.delete(stmt);
             }
         });
-        const statementsArray = ts__default["default"].factory.createNodeArray(newStatements, node.statements.hasTrailingComma);
-        if (ts__default["default"].isBlock(node)) {
-            return ts__default["default"].factory.updateBlock(node, statementsArray);
+        const statementsArray = ts.factory.createNodeArray(newStatements, node.statements.hasTrailingComma);
+        if (ts.isBlock(node)) {
+            return ts.factory.updateBlock(node, statementsArray);
         }
         else {
-            return ts__default["default"].factory.updateSourceFile(node, statementsArray, node.isDeclarationFile, node.referencedFiles, node.typeReferenceDirectives, node.hasNoDefaultLib, node.libReferenceDirectives);
+            return ts.factory.updateSourceFile(node, statementsArray, node.isDeclarationFile, node.referencedFiles, node.typeReferenceDirectives, node.hasNoDefaultLib, node.libReferenceDirectives);
         }
     }
 }
@@ -4662,7 +4089,7 @@ class IvyTransformationVisitor extends Visitor {
         const members = [...node.members];
         // Note: Class may be already transformed by e.g. Tsickle and
         // not have a direct reference to the source file.
-        const sourceFile = ts__default["default"].getOriginalNode(node).getSourceFile();
+        const sourceFile = ts.getOriginalNode(node).getSourceFile();
         for (const field of this.classCompilationMap.get(node)) {
             // Type-only member.
             if (field.initializer === null) {
@@ -4671,13 +4098,13 @@ class IvyTransformationVisitor extends Visitor {
             // Translate the initializer for the field into TS nodes.
             const exprNode = checker.translateExpression(sourceFile, field.initializer, this.importManager, translateOptions);
             // Create a static property declaration for the new field.
-            const property = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.StaticKeyword)], field.name, undefined, undefined, exprNode);
+            const property = ts.factory.createPropertyDeclaration([ts.factory.createToken(ts.SyntaxKind.StaticKeyword)], field.name, undefined, undefined, exprNode);
             if (this.isClosureCompilerEnabled) {
                 // Closure compiler transforms the form `Service.ɵprov = X` into `Service$ɵprov = X`. To
                 // prevent this transformation, such assignments need to be annotated with @nocollapse.
                 // Note that tsickle is typically responsible for adding such annotations, however it
                 // doesn't yet handle synthetic fields added during other transformations.
-                ts__default["default"].addSyntheticLeadingComment(property, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, '* @nocollapse ', 
+                ts.addSyntheticLeadingComment(property, ts.SyntaxKind.MultiLineCommentTrivia, '* @nocollapse ', 
                 /* hasTrailingNewLine */ false);
             }
             field.statements
@@ -4687,20 +4114,20 @@ class IvyTransformationVisitor extends Visitor {
         }
         const filteredDecorators = 
         // Remove the decorator which triggered this compilation, leaving the others alone.
-        maybeFilterDecorator(ts__default["default"].getDecorators(node), this.compilation.decoratorsFor(node));
-        const nodeModifiers = ts__default["default"].getModifiers(node);
+        maybeFilterDecorator(ts.getDecorators(node), this.compilation.decoratorsFor(node));
+        const nodeModifiers = ts.getModifiers(node);
         let updatedModifiers;
         if (filteredDecorators?.length || nodeModifiers?.length) {
             updatedModifiers = [...(filteredDecorators || []), ...(nodeModifiers || [])];
         }
         // Replace the class declaration with an updated version.
-        node = ts__default["default"].factory.updateClassDeclaration(node, updatedModifiers, node.name, node.typeParameters, node.heritageClauses || [], 
+        node = ts.factory.updateClassDeclaration(node, updatedModifiers, node.name, node.typeParameters, node.heritageClauses || [], 
         // Map over the class members and remove any Angular decorators from them.
         members.map((member) => this._stripAngularDecorators(member)));
         return { node, after: statements };
     }
     visitOtherNode(node) {
-        if (ts__default["default"].isImportDeclaration(node) && this.deferrableImports.has(node)) {
+        if (ts.isImportDeclaration(node) && this.deferrableImports.has(node)) {
             // Return `null` as an indication that this node should not be present
             // in the final AST. Symbols from this import would be imported via
             // dynamic imports.
@@ -4728,7 +4155,7 @@ class IvyTransformationVisitor extends Visitor {
         }
     }
     _nonCoreDecoratorsOnly(node) {
-        const decorators = ts__default["default"].getDecorators(node);
+        const decorators = ts.getDecorators(node);
         // Shortcut if the node has no decorators.
         if (decorators === undefined) {
             return undefined;
@@ -4760,35 +4187,35 @@ class IvyTransformationVisitor extends Visitor {
      * as parameters of constructors.
      */
     _stripAngularDecorators(node) {
-        const modifiers = ts__default["default"].canHaveModifiers(node) ? ts__default["default"].getModifiers(node) : undefined;
-        const nonCoreDecorators = ts__default["default"].canHaveDecorators(node)
+        const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
+        const nonCoreDecorators = ts.canHaveDecorators(node)
             ? this._nonCoreDecoratorsOnly(node)
             : undefined;
         const combinedModifiers = [...(nonCoreDecorators || []), ...(modifiers || [])];
-        if (ts__default["default"].isParameter(node)) {
+        if (ts.isParameter(node)) {
             // Strip decorators from parameters (probably of the constructor).
-            node = ts__default["default"].factory.updateParameterDeclaration(node, combinedModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
+            node = ts.factory.updateParameterDeclaration(node, combinedModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
         }
-        else if (ts__default["default"].isMethodDeclaration(node)) {
+        else if (ts.isMethodDeclaration(node)) {
             // Strip decorators of methods.
-            node = ts__default["default"].factory.updateMethodDeclaration(node, combinedModifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
+            node = ts.factory.updateMethodDeclaration(node, combinedModifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
         }
-        else if (ts__default["default"].isPropertyDeclaration(node)) {
+        else if (ts.isPropertyDeclaration(node)) {
             // Strip decorators of properties.
-            node = ts__default["default"].factory.updatePropertyDeclaration(node, combinedModifiers, node.name, node.questionToken, node.type, node.initializer);
+            node = ts.factory.updatePropertyDeclaration(node, combinedModifiers, node.name, node.questionToken, node.type, node.initializer);
         }
-        else if (ts__default["default"].isGetAccessor(node)) {
+        else if (ts.isGetAccessor(node)) {
             // Strip decorators of getters.
-            node = ts__default["default"].factory.updateGetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.type, node.body);
+            node = ts.factory.updateGetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.type, node.body);
         }
-        else if (ts__default["default"].isSetAccessor(node)) {
+        else if (ts.isSetAccessor(node)) {
             // Strip decorators of setters.
-            node = ts__default["default"].factory.updateSetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.body);
+            node = ts.factory.updateSetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.body);
         }
-        else if (ts__default["default"].isConstructorDeclaration(node)) {
+        else if (ts.isConstructorDeclaration(node)) {
             // For constructors, strip decorators of the parameters.
             const parameters = node.parameters.map((param) => this._stripAngularDecorators(param));
-            node = ts__default["default"].factory.updateConstructorDeclaration(node, modifiers, parameters, node.body);
+            node = ts.factory.updateConstructorDeclaration(node, modifiers, parameters, node.body);
         }
         return node;
     }
@@ -4820,7 +4247,7 @@ function transformIvySourceFile(compilation, context, reflector, importRewriter,
     let sf = visit(file, transformationVisitor, context);
     // Generate the constant statements first, as they may involve adding additional imports
     // to the ImportManager.
-    const downlevelTranslatedCode = getLocalizeCompileTarget(context) < ts__default["default"].ScriptTarget.ES2015;
+    const downlevelTranslatedCode = getLocalizeCompileTarget(context) < ts.ScriptTarget.ES2015;
     const constants = constantPool.statements.map((stmt) => checker.translateStatement(file, stmt, importManager, {
         recordWrappedNode,
         downlevelTaggedTemplates: downlevelTranslatedCode,
@@ -4854,20 +4281,20 @@ function transformIvySourceFile(compilation, context, reflector, importRewriter,
  * downleveling for us.
  */
 function getLocalizeCompileTarget(context) {
-    const target = context.getCompilerOptions().target || ts__default["default"].ScriptTarget.ES2015;
-    return target !== ts__default["default"].ScriptTarget.JSON ? target : ts__default["default"].ScriptTarget.ES2015;
+    const target = context.getCompilerOptions().target || ts.ScriptTarget.ES2015;
+    return target !== ts.ScriptTarget.JSON ? target : ts.ScriptTarget.ES2015;
 }
 function getFileOverviewComment(statements) {
     if (statements.length > 0) {
         const host = statements[0];
         let trailing = false;
-        let comments = ts__default["default"].getSyntheticLeadingComments(host);
+        let comments = ts.getSyntheticLeadingComments(host);
         // If @fileoverview tag is not found in source file, tsickle produces fake node with trailing
         // comment and inject it at the very beginning of the generated file. So we need to check for
         // leading as well as trailing comments.
         if (!comments || comments.length === 0) {
             trailing = true;
-            comments = ts__default["default"].getSyntheticTrailingComments(host);
+            comments = ts.getSyntheticTrailingComments(host);
         }
         if (comments && comments.length > 0 && CLOSURE_FILE_OVERVIEW_REGEXP.test(comments[0].text)) {
             return { comments, host, trailing };
@@ -4882,16 +4309,16 @@ function insertFileOverviewComment(sf, fileoverview) {
     // that hosted it.
     if (sf.statements.length > 0 && host !== sf.statements[0]) {
         if (trailing) {
-            ts__default["default"].setSyntheticTrailingComments(host, undefined);
+            ts.setSyntheticTrailingComments(host, undefined);
         }
         else {
-            ts__default["default"].setSyntheticLeadingComments(host, undefined);
+            ts.setSyntheticLeadingComments(host, undefined);
         }
         // Note: Do not use the first statement as it may be elided at runtime.
         // E.g. an import declaration that is type only.
-        const commentNode = ts__default["default"].factory.createNotEmittedStatement(sf);
-        ts__default["default"].setSyntheticLeadingComments(commentNode, comments);
-        return ts__default["default"].factory.updateSourceFile(sf, [commentNode, ...sf.statements], sf.isDeclarationFile, sf.referencedFiles, sf.typeReferenceDirectives, sf.hasNoDefaultLib, sf.libReferenceDirectives);
+        const commentNode = ts.factory.createNotEmittedStatement(sf);
+        ts.setSyntheticLeadingComments(commentNode, comments);
+        return ts.factory.updateSourceFile(sf, [commentNode, ...sf.statements], sf.isDeclarationFile, sf.referencedFiles, sf.typeReferenceDirectives, sf.hasNoDefaultLib, sf.libReferenceDirectives);
     }
     return sf;
 }
@@ -4899,11 +4326,11 @@ function maybeFilterDecorator(decorators, toRemove) {
     if (decorators === undefined) {
         return undefined;
     }
-    const filtered = decorators.filter((dec) => toRemove.find((decToRemove) => ts__default["default"].getOriginalNode(dec) === decToRemove) === undefined);
+    const filtered = decorators.filter((dec) => toRemove.find((decToRemove) => ts.getOriginalNode(dec) === decToRemove) === undefined);
     if (filtered.length === 0) {
         return undefined;
     }
-    return ts__default["default"].factory.createNodeArray(filtered);
+    return ts.factory.createNodeArray(filtered);
 }
 function isFromAngularCore(decorator) {
     return decorator.import !== null && decorator.import.from === '@angular/core';
@@ -4918,294 +4345,12 @@ function createRecorderFn(defaultImportTracker) {
 }
 /** Creates a `NodeArray` with the correct offsets from an array of decorators. */
 function nodeArrayFromDecoratorsArray(decorators) {
-    const array = ts__default["default"].factory.createNodeArray(decorators);
+    const array = ts.factory.createNodeArray(decorators);
     if (array.length > 0) {
         array.pos = decorators[0].pos;
         array.end = decorators[decorators.length - 1].end;
     }
     return array;
-}
-
-/**
- * Create a `ts.Diagnostic` which indicates the given class is part of the declarations of two or
- * more NgModules.
- *
- * The resulting `ts.Diagnostic` will have a context entry for each NgModule showing the point where
- * the directive/pipe exists in its `declarations` (if possible).
- */
-function makeDuplicateDeclarationError(node, data, kind) {
-    const context = [];
-    for (const decl of data) {
-        if (decl.rawDeclarations === null) {
-            continue;
-        }
-        // Try to find the reference to the declaration within the declarations array, to hang the
-        // error there. If it can't be found, fall back on using the NgModule's name.
-        const contextNode = decl.ref.getOriginForDiagnostics(decl.rawDeclarations, decl.ngModule.name);
-        context.push(checker.makeRelatedInformation(contextNode, `'${node.name.text}' is listed in the declarations of the NgModule '${decl.ngModule.name.text}'.`));
-    }
-    // Finally, produce the diagnostic.
-    return checker.makeDiagnostic(checker.ErrorCode.NGMODULE_DECLARATION_NOT_UNIQUE, node.name, `The ${kind} '${node.name.text}' is declared by more than one NgModule.`, context);
-}
-/**
- * Creates a `FatalDiagnosticError` for a node that did not evaluate to the expected type. The
- * diagnostic that is created will include details on why the value is incorrect, i.e. it includes
- * a representation of the actual type that was unsupported, or in the case of a dynamic value the
- * trace to the node where the dynamic value originated.
- *
- * @param node The node for which the diagnostic should be produced.
- * @param value The evaluated value that has the wrong type.
- * @param messageText The message text of the error.
- */
-function createValueHasWrongTypeError(node, value, messageText) {
-    let chainedMessage;
-    let relatedInformation;
-    if (value instanceof checker.DynamicValue) {
-        chainedMessage = 'Value could not be determined statically.';
-        relatedInformation = traceDynamicValue(node, value);
-    }
-    else if (value instanceof checker.Reference) {
-        const target = value.debugName !== null ? `'${value.debugName}'` : 'an anonymous declaration';
-        chainedMessage = `Value is a reference to ${target}.`;
-        const referenceNode = checker.identifierOfNode(value.node) ?? value.node;
-        relatedInformation = [checker.makeRelatedInformation(referenceNode, 'Reference is declared here.')];
-    }
-    else {
-        chainedMessage = `Value is of type '${describeResolvedType(value)}'.`;
-    }
-    const chain = {
-        messageText,
-        category: ts__default["default"].DiagnosticCategory.Error,
-        code: 0,
-        next: [
-            {
-                messageText: chainedMessage,
-                category: ts__default["default"].DiagnosticCategory.Message,
-                code: 0,
-            },
-        ],
-    };
-    return new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_HAS_WRONG_TYPE, node, chain, relatedInformation);
-}
-/**
- * Gets the diagnostics for a set of provider classes.
- * @param providerClasses Classes that should be checked.
- * @param providersDeclaration Node that declares the providers array.
- * @param registry Registry that keeps track of the registered injectable classes.
- */
-function getProviderDiagnostics(providerClasses, providersDeclaration, registry) {
-    const diagnostics = [];
-    for (const provider of providerClasses) {
-        const injectableMeta = registry.getInjectableMeta(provider.node);
-        if (injectableMeta !== null) {
-            // The provided type is recognized as injectable, so we don't report a diagnostic for this
-            // provider.
-            continue;
-        }
-        const contextNode = provider.getOriginForDiagnostics(providersDeclaration);
-        diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.UNDECORATED_PROVIDER, contextNode, `The class '${provider.node.name.text}' cannot be created via dependency injection, as it does not have an Angular decorator. This will result in an error at runtime.
-
-Either add the @Injectable() decorator to '${provider.node.name.text}', or configure a different provider (such as a provider with 'useFactory').
-`, [checker.makeRelatedInformation(provider.node, `'${provider.node.name.text}' is declared here.`)]));
-    }
-    return diagnostics;
-}
-function getDirectiveDiagnostics(node, injectableRegistry, evaluator, reflector, scopeRegistry, strictInjectionParameters, kind) {
-    let diagnostics = [];
-    const addDiagnostics = (more) => {
-        if (more === null) {
-            return;
-        }
-        else if (diagnostics === null) {
-            diagnostics = Array.isArray(more) ? more : [more];
-        }
-        else if (Array.isArray(more)) {
-            diagnostics.push(...more);
-        }
-        else {
-            diagnostics.push(more);
-        }
-    };
-    const duplicateDeclarations = scopeRegistry.getDuplicateDeclarations(node);
-    if (duplicateDeclarations !== null) {
-        addDiagnostics(makeDuplicateDeclarationError(node, duplicateDeclarations, kind));
-    }
-    addDiagnostics(checkInheritanceOfInjectable(node, injectableRegistry, reflector, evaluator, strictInjectionParameters, kind));
-    return diagnostics;
-}
-function validateHostDirectives(origin, hostDirectives, metaReader) {
-    const diagnostics = [];
-    for (const current of hostDirectives) {
-        if (!checker.isHostDirectiveMetaForGlobalMode(current)) {
-            throw new Error('Impossible state: diagnostics code path for local compilation');
-        }
-        const hostMeta = flattenInheritedDirectiveMetadata(metaReader, current.directive);
-        if (hostMeta === null) {
-            diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_INVALID, current.directive.getOriginForDiagnostics(origin), `${current.directive.debugName} must be a standalone directive to be used as a host directive`));
-            continue;
-        }
-        if (!hostMeta.isStandalone) {
-            diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_NOT_STANDALONE, current.directive.getOriginForDiagnostics(origin), `Host directive ${hostMeta.name} must be standalone`));
-        }
-        if (hostMeta.isComponent) {
-            diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_COMPONENT, current.directive.getOriginForDiagnostics(origin), `Host directive ${hostMeta.name} cannot be a component`));
-        }
-        const requiredInputNames = Array.from(hostMeta.inputs)
-            .filter((input) => input.required)
-            .map((input) => input.classPropertyName);
-        validateHostDirectiveMappings('input', current, hostMeta, origin, diagnostics, requiredInputNames.length > 0 ? new Set(requiredInputNames) : null);
-        validateHostDirectiveMappings('output', current, hostMeta, origin, diagnostics, null);
-    }
-    return diagnostics;
-}
-function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, origin, diagnostics, requiredBindings) {
-    if (!checker.isHostDirectiveMetaForGlobalMode(hostDirectiveMeta)) {
-        throw new Error('Impossible state: diagnostics code path for local compilation');
-    }
-    const className = meta.name;
-    const hostDirectiveMappings = bindingType === 'input' ? hostDirectiveMeta.inputs : hostDirectiveMeta.outputs;
-    const existingBindings = bindingType === 'input' ? meta.inputs : meta.outputs;
-    const exposedRequiredBindings = new Set();
-    for (const publicName in hostDirectiveMappings) {
-        if (hostDirectiveMappings.hasOwnProperty(publicName)) {
-            const bindings = existingBindings.getByBindingPropertyName(publicName);
-            if (bindings === null) {
-                diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`));
-            }
-            else if (requiredBindings !== null) {
-                for (const field of bindings) {
-                    if (requiredBindings.has(field.classPropertyName)) {
-                        exposedRequiredBindings.add(field.classPropertyName);
-                    }
-                }
-            }
-            const remappedPublicName = hostDirectiveMappings[publicName];
-            const bindingsForPublicName = existingBindings.getByBindingPropertyName(remappedPublicName);
-            if (bindingsForPublicName !== null) {
-                for (const binding of bindingsForPublicName) {
-                    if (binding.bindingPropertyName !== publicName) {
-                        diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_CONFLICTING_ALIAS, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`));
-                    }
-                }
-            }
-        }
-    }
-    if (requiredBindings !== null && requiredBindings.size !== exposedRequiredBindings.size) {
-        const missingBindings = [];
-        for (const publicName of requiredBindings) {
-            if (!exposedRequiredBindings.has(publicName)) {
-                const name = existingBindings.getByClassPropertyName(publicName);
-                if (name) {
-                    missingBindings.push(`'${name.bindingPropertyName}'`);
-                }
-            }
-        }
-        diagnostics.push(checker.makeDiagnostic(checker.ErrorCode.HOST_DIRECTIVE_MISSING_REQUIRED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Required ${bindingType}${missingBindings.length === 1 ? '' : 's'} ${missingBindings.join(', ')} from host directive ${className} must be exposed.`));
-    }
-}
-function getUndecoratedClassWithAngularFeaturesDiagnostic(node) {
-    return checker.makeDiagnostic(checker.ErrorCode.UNDECORATED_CLASS_USING_ANGULAR_FEATURES, node.name, `Class is using Angular features but is not decorated. Please add an explicit ` +
-        `Angular decorator.`);
-}
-function checkInheritanceOfInjectable(node, injectableRegistry, reflector, evaluator, strictInjectionParameters, kind) {
-    const classWithCtor = findInheritedCtor(node, injectableRegistry, reflector, evaluator);
-    if (classWithCtor === null || classWithCtor.isCtorValid) {
-        // The class does not inherit a constructor, or the inherited constructor is compatible
-        // with DI; no need to report a diagnostic.
-        return null;
-    }
-    if (!classWithCtor.isDecorated) {
-        // The inherited constructor exists in a class that does not have an Angular decorator.
-        // This is an error, as there won't be a factory definition available for DI to invoke
-        // the constructor.
-        return getInheritedUndecoratedCtorDiagnostic(node, classWithCtor.ref, kind);
-    }
-    if (checker.isFromDtsFile(classWithCtor.ref.node)) {
-        // The inherited class is declared in a declaration file, in which case there is not enough
-        // information to detect invalid constructors as `@Inject()` metadata is not present in the
-        // declaration file. Consequently, we have to accept such occurrences, although they might
-        // still fail at runtime.
-        return null;
-    }
-    if (!strictInjectionParameters || checker.isAbstractClassDeclaration(node)) {
-        // An invalid constructor is only reported as error under `strictInjectionParameters` and
-        // only for concrete classes; follow the same exclusions for derived types.
-        return null;
-    }
-    return getInheritedInvalidCtorDiagnostic(node, classWithCtor.ref, kind);
-}
-function findInheritedCtor(node, injectableRegistry, reflector, evaluator) {
-    if (!reflector.isClass(node) || reflector.getConstructorParameters(node) !== null) {
-        // We should skip nodes that aren't classes. If a constructor exists, then no base class
-        // definition is required on the runtime side - it's legal to inherit from any class.
-        return null;
-    }
-    // The extends clause is an expression which can be as dynamic as the user wants. Try to
-    // evaluate it, but fall back on ignoring the clause if it can't be understood. This is a View
-    // Engine compatibility hack: View Engine ignores 'extends' expressions that it cannot understand.
-    let baseClass = checker.readBaseClass(node, reflector, evaluator);
-    while (baseClass !== null) {
-        if (baseClass === 'dynamic') {
-            return null;
-        }
-        const injectableMeta = injectableRegistry.getInjectableMeta(baseClass.node);
-        if (injectableMeta !== null) {
-            if (injectableMeta.ctorDeps !== null) {
-                // The class has an Angular decorator with a constructor.
-                return {
-                    ref: baseClass,
-                    isCtorValid: injectableMeta.ctorDeps !== 'invalid',
-                    isDecorated: true,
-                };
-            }
-        }
-        else {
-            const baseClassConstructorParams = reflector.getConstructorParameters(baseClass.node);
-            if (baseClassConstructorParams !== null) {
-                // The class is not decorated, but it does have constructor. An undecorated class is only
-                // allowed to have a constructor without parameters, otherwise it is invalid.
-                return {
-                    ref: baseClass,
-                    isCtorValid: baseClassConstructorParams.length === 0,
-                    isDecorated: false,
-                };
-            }
-        }
-        // Go up the chain and continue
-        baseClass = checker.readBaseClass(baseClass.node, reflector, evaluator);
-    }
-    return null;
-}
-function getInheritedInvalidCtorDiagnostic(node, baseClass, kind) {
-    const baseClassName = baseClass.debugName;
-    return checker.makeDiagnostic(checker.ErrorCode.INJECTABLE_INHERITS_INVALID_CONSTRUCTOR, node.name, `The ${kind.toLowerCase()} ${node.name.text} inherits its constructor from ${baseClassName}, ` +
-        `but the latter has a constructor parameter that is not compatible with dependency injection. ` +
-        `Either add an explicit constructor to ${node.name.text} or change ${baseClassName}'s constructor to ` +
-        `use parameters that are valid for DI.`);
-}
-function getInheritedUndecoratedCtorDiagnostic(node, baseClass, kind) {
-    const baseClassName = baseClass.debugName;
-    const baseNeedsDecorator = kind === 'Component' || kind === 'Directive' ? 'Directive' : 'Injectable';
-    return checker.makeDiagnostic(checker.ErrorCode.DIRECTIVE_INHERITS_UNDECORATED_CTOR, node.name, `The ${kind.toLowerCase()} ${node.name.text} inherits its constructor from ${baseClassName}, ` +
-        `but the latter does not have an Angular decorator of its own. Dependency injection will not be able to ` +
-        `resolve the parameters of ${baseClassName}'s constructor. Either add a @${baseNeedsDecorator} decorator ` +
-        `to ${baseClassName}, or add an explicit constructor to ${node.name.text}.`);
-}
-/**
- * Throws `FatalDiagnosticError` with error code `LOCAL_COMPILATION_UNRESOLVED_CONST`
- * if the compilation mode is local and the value is not resolved due to being imported
- * from external files. This is a common scenario for errors in local compilation mode,
- * and so this helper can be used to quickly generate the relevant errors.
- *
- * @param nodeToHighlight Node to be highlighted in teh error message.
- * Will default to value.node if not provided.
- */
-function assertLocalCompilationUnresolvedConst(compilationMode, value, nodeToHighlight, errorMessage) {
-    if (compilationMode === checker.CompilationMode.LOCAL &&
-        value instanceof checker.DynamicValue &&
-        value.isFromUnknownIdentifier()) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.LOCAL_COMPILATION_UNRESOLVED_CONST, nodeToHighlight ?? value.node, errorMessage);
-    }
 }
 
 function resolveEnumValue(evaluator, metadata, field, enumSymbolName, isCore) {
@@ -5214,11 +4359,11 @@ function resolveEnumValue(evaluator, metadata, field, enumSymbolName, isCore) {
         const expr = metadata.get(field);
         const value = evaluator.evaluate(expr);
         if (value instanceof checker.EnumValue &&
-            checker.isAngularCoreReference(value.enumRef, enumSymbolName, isCore)) {
+            checker.isAngularCoreReferenceWithPotentialAliasing(value.enumRef, enumSymbolName, isCore)) {
             resolved = value.resolved;
         }
         else {
-            throw createValueHasWrongTypeError(expr, value, `${field} must be a member of ${enumSymbolName} enum from @angular/core`);
+            throw checker.createValueHasWrongTypeError(expr, value, `${field} must be a member of ${enumSymbolName} enum from @angular/core`);
         }
     }
     return resolved;
@@ -5261,7 +4406,7 @@ function resolveLiteral(decorator, literalCache) {
         throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `Incorrect number of arguments to @${decorator.name} decorator`);
     }
     const meta = checker.unwrapExpression(decorator.args[0]);
-    if (!ts__default["default"].isObjectLiteralExpression(meta)) {
+    if (!ts.isObjectLiteralExpression(meta)) {
         throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, `Decorator argument must be literal.`);
     }
     literalCache.set(decorator, meta);
@@ -5314,9 +4459,9 @@ class InjectableClassRegistry {
         if (!checker.hasInjectableFields(declaration, this.host)) {
             return null;
         }
-        const ctorDeps = getConstructorDependencies(declaration, this.host, this.isCore);
+        const ctorDeps = checker.getConstructorDependencies(declaration, this.host, this.isCore);
         const meta = {
-            ctorDeps: unwrapConstructorDependencies(ctorDeps),
+            ctorDeps: checker.unwrapConstructorDependencies(ctorDeps),
         };
         this.classes.set(declaration, meta);
         return meta;
@@ -5354,7 +4499,7 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
     if (ngClassDecorators.length === 0) {
         return null;
     }
-    const metaDecorators = new checker.WrappedNodeExpr(ts__default["default"].factory.createArrayLiteralExpression(ngClassDecorators));
+    const metaDecorators = new checker.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngClassDecorators));
     // Convert the constructor parameters to metadata, passing null if none are present.
     let metaCtorParameters = null;
     const classCtorParameters = reflection.getConstructorParameters(clazz);
@@ -5379,7 +4524,7 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
     }
     const decoratedMembers = classMembers.map((member) => classMemberToMetadata(member.nameNode ?? member.name, member.decorators, isCore));
     if (decoratedMembers.length > 0) {
-        metaPropDecorators = new checker.WrappedNodeExpr(ts__default["default"].factory.createObjectLiteralExpression(decoratedMembers));
+        metaPropDecorators = new checker.WrappedNodeExpr(ts.factory.createObjectLiteralExpression(decoratedMembers));
     }
     return {
         type: new checker.WrappedNodeExpr(id),
@@ -5405,7 +4550,7 @@ function ctorParameterToMetadata(param, isCore) {
         const ngDecorators = param.decorators
             .filter((dec) => isAngularDecorator$1(dec, isCore))
             .map((decorator) => decoratorToMetadata(decorator));
-        const value = new checker.WrappedNodeExpr(ts__default["default"].factory.createArrayLiteralExpression(ngDecorators));
+        const value = new checker.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngDecorators));
         mapEntries.push({ key: 'decorators', value, quoted: false });
     }
     return checker.literalMap(mapEntries);
@@ -5417,8 +4562,8 @@ function classMemberToMetadata(name, decorators, isCore) {
     const ngDecorators = decorators
         .filter((dec) => isAngularDecorator$1(dec, isCore))
         .map((decorator) => decoratorToMetadata(decorator));
-    const decoratorMeta = ts__default["default"].factory.createArrayLiteralExpression(ngDecorators);
-    return ts__default["default"].factory.createPropertyAssignment(name, decoratorMeta);
+    const decoratorMeta = ts.factory.createArrayLiteralExpression(ngDecorators);
+    return ts.factory.createPropertyAssignment(name, decoratorMeta);
 }
 /**
  * Convert a reflected decorator to metadata.
@@ -5429,16 +4574,16 @@ function decoratorToMetadata(decorator, wrapFunctionsInParens) {
     }
     // Decorators have a type.
     const properties = [
-        ts__default["default"].factory.createPropertyAssignment('type', decorator.identifier),
+        ts.factory.createPropertyAssignment('type', decorator.identifier),
     ];
     // Sometimes they have arguments.
     if (decorator.args !== null && decorator.args.length > 0) {
         const args = decorator.args.map((arg) => {
             return wrapFunctionsInParens ? checker.wrapFunctionExpressionsInParens(arg) : arg;
         });
-        properties.push(ts__default["default"].factory.createPropertyAssignment('args', ts__default["default"].factory.createArrayLiteralExpression(args)));
+        properties.push(ts.factory.createPropertyAssignment('args', ts.factory.createArrayLiteralExpression(args)));
     }
-    return ts__default["default"].factory.createObjectLiteralExpression(properties, true);
+    return ts.factory.createObjectLiteralExpression(properties, true);
 }
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -5454,12 +4599,12 @@ function isAngularDecorator$1(decorator, isCore) {
  * taken from one place any emitted to another one exactly as it has been written.
  */
 function removeIdentifierReferences(node, names) {
-    const result = ts__default["default"].transform(node, [
-        (context) => (root) => ts__default["default"].visitNode(root, function walk(current) {
-            return (ts__default["default"].isIdentifier(current) &&
+    const result = ts.transform(node, [
+        (context) => (root) => ts.visitNode(root, function walk(current) {
+            return (ts.isIdentifier(current) &&
                 (typeof names === 'string' ? current.text === names : names.has(current.text))
-                ? ts__default["default"].factory.createIdentifier(current.text)
-                : ts__default["default"].visitEachChild(current, walk, context));
+                ? ts.factory.createIdentifier(current.text)
+                : ts.visitEachChild(current, walk, context));
         }),
     ]);
     return result.transformed[0];
@@ -5491,15 +4636,15 @@ function extractSchemas(rawExpr, evaluator, context) {
     const schemas = [];
     const result = evaluator.evaluate(rawExpr);
     if (!Array.isArray(result)) {
-        throw createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array`);
+        throw checker.createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array`);
     }
     for (const schemaRef of result) {
         if (!(schemaRef instanceof checker.Reference)) {
-            throw createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array of schemas`);
+            throw checker.createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array of schemas`);
         }
         const id = schemaRef.getIdentityIn(schemaRef.node.getSourceFile());
         if (id === null || schemaRef.ownedByModuleGuess !== '@angular/core') {
-            throw createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array of schemas`);
+            throw checker.createValueHasWrongTypeError(rawExpr, result, `${context}.schemas must be an array of schemas`);
         }
         // Since `id` is the `ts.Identifier` within the schema ref's declaration file, it's safe to
         // use `id.text` here to figure out which schema is in use. Even if the actual reference was
@@ -5512,7 +4657,7 @@ function extractSchemas(rawExpr, evaluator, context) {
                 schemas.push(checker.NO_ERRORS_SCHEMA);
                 break;
             default:
-                throw createValueHasWrongTypeError(rawExpr, schemaRef, `'${schemaRef.debugName}' is not a valid ${context} schema`);
+                throw checker.createValueHasWrongTypeError(rawExpr, schemaRef, `'${schemaRef.debugName}' is not a valid ${context} schema`);
         }
     }
     return schemas;
@@ -5585,7 +4730,7 @@ class SemanticSymbol {
     }
 }
 function getSymbolIdentifier(decl) {
-    if (!ts__default["default"].isSourceFile(decl.parent)) {
+    if (!ts.isSourceFile(decl.parent)) {
         return null;
     }
     // If this is a top-level class declaration, the class name is used as unique identifier.
@@ -5899,7 +5044,7 @@ function isSetEqual(a, b, equalityTester = referenceEquality) {
  * does not have any type parameters, then `null` is returned.
  */
 function extractSemanticTypeParameters(node) {
-    if (!ts__default["default"].isClassDeclaration(node) || node.typeParameters === undefined) {
+    if (!ts.isClassDeclaration(node) || node.typeParameters === undefined) {
         return null;
     }
     return node.typeParameters.map((typeParam) => ({
@@ -6543,7 +5688,7 @@ class LocalModuleScopeRegistry {
     getExportedScope(ref, diagnostics, ownerForErrors, type) {
         if (ref.node.getSourceFile().isDeclarationFile) {
             // The NgModule is declared in a .d.ts file. Resolve it with the `DependencyScopeReader`.
-            if (!ts__default["default"].isClassDeclaration(ref.node)) {
+            if (!ts.isClassDeclaration(ref.node)) {
                 // The NgModule is in a .d.ts file but is not declared as a ts.ClassDeclaration. This is an
                 // error in the .d.ts metadata.
                 const code = type === 'import' ? checker.ErrorCode.NGMODULE_INVALID_IMPORT : checker.ErrorCode.NGMODULE_INVALID_EXPORT;
@@ -6775,8 +5920,8 @@ class TypeCheckScopeRegistry {
                 directives.push(directiveMeta);
             }
             else if (meta.kind === checker.MetaKind.Pipe) {
-                if (!ts__default["default"].isClassDeclaration(meta.ref.node)) {
-                    throw new Error(`Unexpected non-class declaration ${ts__default["default"].SyntaxKind[meta.ref.node.kind]} for pipe ${meta.ref.debugName}`);
+                if (!ts.isClassDeclaration(meta.ref.node)) {
+                    throw new Error(`Unexpected non-class declaration ${ts.SyntaxKind[meta.ref.node.kind]} for pipe ${meta.ref.debugName}`);
                 }
                 pipes.set(meta.name, meta);
             }
@@ -6798,7 +5943,7 @@ class TypeCheckScopeRegistry {
         if (this.flattenedDirectiveMetaCache.has(clazz)) {
             return this.flattenedDirectiveMetaCache.get(clazz);
         }
-        const meta = flattenInheritedDirectiveMetadata(this.metaReader, ref);
+        const meta = checker.flattenInheritedDirectiveMetadata(this.metaReader, ref);
         if (meta === null) {
             return null;
         }
@@ -6808,1014 +5953,6 @@ class TypeCheckScopeRegistry {
     applyExplicitlyDeferredFlag(meta, isExplicitlyDeferred) {
         return isExplicitlyDeferred === true ? { ...meta, isExplicitlyDeferred } : meta;
     }
-}
-
-const EMPTY_OBJECT = {};
-const queryDecoratorNames = [
-    'ViewChild',
-    'ViewChildren',
-    'ContentChild',
-    'ContentChildren',
-];
-const QUERY_TYPES = new Set(queryDecoratorNames);
-/**
- * Helper function to extract metadata from a `Directive` or `Component`. `Directive`s without a
- * selector are allowed to be used for abstract base classes. These abstract directives should not
- * appear in the declarations of an `NgModule` and additional verification is done when processing
- * the module.
- */
-function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone, implicitStandaloneValue) {
-    let directive;
-    if (decorator.args === null || decorator.args.length === 0) {
-        directive = new Map();
-    }
-    else if (decorator.args.length !== 1) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `Incorrect number of arguments to @${decorator.name} decorator`);
-    }
-    else {
-        const meta = checker.unwrapExpression(decorator.args[0]);
-        if (!ts__default["default"].isObjectLiteralExpression(meta)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, `@${decorator.name} argument must be an object literal`);
-        }
-        directive = checker.reflectObjectLiteral(meta);
-    }
-    if (directive.has('jit')) {
-        // The only allowed value is true, so there's no need to expand further.
-        return { jitForced: true };
-    }
-    const members = reflector.getMembersOfClass(clazz);
-    // Precompute a list of ts.ClassElements that have decorators. This includes things like @Input,
-    // @Output, @HostBinding, etc.
-    const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
-    const coreModule = isCore ? undefined : '@angular/core';
-    // Construct the map of inputs both from the @Directive/@Component
-    // decorator, and the decorated fields.
-    const inputsFromMeta = parseInputsArray(clazz, directive, evaluator, reflector, refEmitter, compilationMode);
-    const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromMeta, decorator);
-    const inputs = ClassPropertyMapping.fromMappedObject({ ...inputsFromMeta, ...inputsFromFields });
-    // And outputs.
-    const outputsFromMeta = parseOutputsArray(directive, evaluator);
-    const outputsFromFields = parseOutputFields(clazz, decorator, members, isCore, reflector, importTracker, evaluator, outputsFromMeta);
-    const outputs = ClassPropertyMapping.fromMappedObject({ ...outputsFromMeta, ...outputsFromFields });
-    // Parse queries of fields.
-    const { viewQueries, contentQueries } = parseQueriesOfClassFields(members, reflector, importTracker, evaluator, isCore);
-    if (directive.has('queries')) {
-        const signalQueryFields = new Set([...viewQueries, ...contentQueries].filter((q) => q.isSignal).map((q) => q.propertyName));
-        const queriesFromDecorator = extractQueriesFromDecorator(directive.get('queries'), reflector, evaluator, isCore);
-        // Checks if the query is already declared/reserved via class members declaration.
-        // If so, we throw a fatal diagnostic error to prevent this unintentional pattern.
-        const checkAndUnwrapQuery = (q) => {
-            if (signalQueryFields.has(q.metadata.propertyName)) {
-                throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, q.expr, `Query is declared multiple times. "@${decorator.name}" declares a query for the same property.`);
-            }
-            return q.metadata;
-        };
-        contentQueries.push(...queriesFromDecorator.content.map((q) => checkAndUnwrapQuery(q)));
-        viewQueries.push(...queriesFromDecorator.view.map((q) => checkAndUnwrapQuery(q)));
-    }
-    // Parse the selector.
-    let selector = defaultSelector;
-    if (directive.has('selector')) {
-        const expr = directive.get('selector');
-        const resolved = evaluator.evaluate(expr);
-        assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, 'Unresolved identifier found for @Component.selector field! Did you ' +
-            'import this identifier from a file outside of the compilation unit? ' +
-            'This is not allowed when Angular compiler runs in local mode. Possible ' +
-            'solutions: 1) Move the declarations into a file within the compilation ' +
-            'unit, 2) Inline the selector');
-        if (typeof resolved !== 'string') {
-            throw createValueHasWrongTypeError(expr, resolved, `selector must be a string`);
-        }
-        // use default selector in case selector is an empty string
-        selector = resolved === '' ? defaultSelector : resolved;
-        if (!selector) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DIRECTIVE_MISSING_SELECTOR, expr, `Directive ${clazz.name.text} has no selector, please add it!`);
-        }
-    }
-    const host = extractHostBindings(decoratedElements, evaluator, coreModule, compilationMode, directive);
-    const providers = directive.has('providers')
-        ? new checker.WrappedNodeExpr(annotateForClosureCompiler
-            ? checker.wrapFunctionExpressionsInParens(directive.get('providers'))
-            : directive.get('providers'))
-        : null;
-    // Determine if `ngOnChanges` is a lifecycle hook defined on the component.
-    const usesOnChanges = members.some((member) => !member.isStatic && member.kind === checker.ClassMemberKind.Method && member.name === 'ngOnChanges');
-    // Parse exportAs.
-    let exportAs = null;
-    if (directive.has('exportAs')) {
-        const expr = directive.get('exportAs');
-        const resolved = evaluator.evaluate(expr);
-        assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, 'Unresolved identifier found for exportAs field! Did you import this ' +
-            'identifier from a file outside of the compilation unit? This is not ' +
-            'allowed when Angular compiler runs in local mode. Possible solutions: ' +
-            '1) Move the declarations into a file within the compilation unit, ' +
-            '2) Inline the selector');
-        if (typeof resolved !== 'string') {
-            throw createValueHasWrongTypeError(expr, resolved, `exportAs must be a string`);
-        }
-        exportAs = resolved.split(',').map((part) => part.trim());
-    }
-    const rawCtorDeps = getConstructorDependencies(clazz, reflector, isCore);
-    // Non-abstract directives (those with a selector) require valid constructor dependencies, whereas
-    // abstract directives are allowed to have invalid dependencies, given that a subclass may call
-    // the constructor explicitly.
-    const ctorDeps = selector !== null
-        ? validateConstructorDependencies(clazz, rawCtorDeps)
-        : unwrapConstructorDependencies(rawCtorDeps);
-    // Structural directives must have a `TemplateRef` dependency.
-    const isStructural = ctorDeps !== null &&
-        ctorDeps !== 'invalid' &&
-        ctorDeps.some((dep) => dep.token instanceof checker.ExternalExpr &&
-            dep.token.value.moduleName === '@angular/core' &&
-            dep.token.value.name === 'TemplateRef');
-    let isStandalone = implicitStandaloneValue;
-    if (directive.has('standalone')) {
-        const expr = directive.get('standalone');
-        const resolved = evaluator.evaluate(expr);
-        if (typeof resolved !== 'boolean') {
-            throw createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
-        }
-        isStandalone = resolved;
-        if (!isStandalone && strictStandalone) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.NON_STANDALONE_NOT_ALLOWED, expr, `Only standalone components/directives are allowed when 'strictStandalone' is enabled.`);
-        }
-    }
-    let isSignal = false;
-    if (directive.has('signals')) {
-        const expr = directive.get('signals');
-        const resolved = evaluator.evaluate(expr);
-        if (typeof resolved !== 'boolean') {
-            throw createValueHasWrongTypeError(expr, resolved, `signals flag must be a boolean`);
-        }
-        isSignal = resolved;
-    }
-    // Detect if the component inherits from another class
-    const usesInheritance = reflector.hasBaseClass(clazz);
-    const sourceFile = clazz.getSourceFile();
-    const type = checker.wrapTypeReference(reflector, clazz);
-    const rawHostDirectives = directive.get('hostDirectives') || null;
-    const hostDirectives = rawHostDirectives === null
-        ? null
-        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, checker.createForwardRefResolver(isCore));
-    if (compilationMode !== checker.CompilationMode.LOCAL && hostDirectives !== null) {
-        // In global compilation mode where we do type checking, the template type-checker will need to
-        // import host directive types, so add them as referenced by `clazz`. This will ensure that
-        // libraries are required to export host directives which are visible from publicly exported
-        // components.
-        referencesRegistry.add(clazz, ...hostDirectives.map((hostDir) => {
-            if (!checker.isHostDirectiveMetaForGlobalMode(hostDir)) {
-                throw new Error('Impossible state');
-            }
-            return hostDir.directive;
-        }));
-    }
-    const metadata = {
-        name: clazz.name.text,
-        deps: ctorDeps,
-        host: {
-            ...host,
-        },
-        lifecycle: {
-            usesOnChanges,
-        },
-        inputs: inputs.toJointMappedObject(toR3InputMetadata),
-        outputs: outputs.toDirectMappedObject(),
-        queries: contentQueries,
-        viewQueries,
-        selector,
-        fullInheritance: false,
-        type,
-        typeArgumentCount: reflector.getGenericArityOfClass(clazz) || 0,
-        typeSourceSpan: checker.createSourceSpan(clazz.name),
-        usesInheritance,
-        exportAs,
-        providers,
-        isStandalone,
-        isSignal,
-        hostDirectives: hostDirectives?.map((hostDir) => toHostDirectiveMetadata(hostDir, sourceFile, refEmitter)) ||
-            null,
-    };
-    return {
-        jitForced: false,
-        decorator: directive,
-        metadata,
-        inputs,
-        outputs,
-        isStructural,
-        hostDirectives,
-        rawHostDirectives,
-        // Track inputs from class metadata. This is useful for migration efforts.
-        inputFieldNamesFromMetadataArray: new Set(Object.values(inputsFromMeta).map((i) => i.classPropertyName)),
-    };
-}
-function extractDecoratorQueryMetadata(exprNode, name, args, propertyName, reflector, evaluator) {
-    if (args.length === 0) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, exprNode, `@${name} must have arguments`);
-    }
-    const first = name === 'ViewChild' || name === 'ContentChild';
-    const forwardReferenceTarget = checker.tryUnwrapForwardRef(args[0], reflector);
-    const node = forwardReferenceTarget ?? args[0];
-    const arg = evaluator.evaluate(node);
-    /** Whether or not this query should collect only static results (see view/api.ts)  */
-    let isStatic = false;
-    // Extract the predicate
-    let predicate = null;
-    if (arg instanceof checker.Reference || arg instanceof checker.DynamicValue) {
-        // References and predicates that could not be evaluated statically are emitted as is.
-        predicate = checker.createMayBeForwardRefExpression(new checker.WrappedNodeExpr(node), forwardReferenceTarget !== null ? 2 /* ForwardRefHandling.Unwrapped */ : 0 /* ForwardRefHandling.None */);
-    }
-    else if (typeof arg === 'string') {
-        predicate = [arg];
-    }
-    else if (isStringArrayOrDie(arg, `@${name} predicate`, node)) {
-        predicate = arg;
-    }
-    else {
-        throw createValueHasWrongTypeError(node, arg, `@${name} predicate cannot be interpreted`);
-    }
-    // Extract the read and descendants options.
-    let read = null;
-    // The default value for descendants is true for every decorator except @ContentChildren.
-    let descendants = name !== 'ContentChildren';
-    let emitDistinctChangesOnly = checker.emitDistinctChangesOnlyDefaultValue;
-    if (args.length === 2) {
-        const optionsExpr = checker.unwrapExpression(args[1]);
-        if (!ts__default["default"].isObjectLiteralExpression(optionsExpr)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, optionsExpr, `@${name} options must be an object literal`);
-        }
-        const options = checker.reflectObjectLiteral(optionsExpr);
-        if (options.has('read')) {
-            read = new checker.WrappedNodeExpr(options.get('read'));
-        }
-        if (options.has('descendants')) {
-            const descendantsExpr = options.get('descendants');
-            const descendantsValue = evaluator.evaluate(descendantsExpr);
-            if (typeof descendantsValue !== 'boolean') {
-                throw createValueHasWrongTypeError(descendantsExpr, descendantsValue, `@${name} options.descendants must be a boolean`);
-            }
-            descendants = descendantsValue;
-        }
-        if (options.has('emitDistinctChangesOnly')) {
-            const emitDistinctChangesOnlyExpr = options.get('emitDistinctChangesOnly');
-            const emitDistinctChangesOnlyValue = evaluator.evaluate(emitDistinctChangesOnlyExpr);
-            if (typeof emitDistinctChangesOnlyValue !== 'boolean') {
-                throw createValueHasWrongTypeError(emitDistinctChangesOnlyExpr, emitDistinctChangesOnlyValue, `@${name} options.emitDistinctChangesOnly must be a boolean`);
-            }
-            emitDistinctChangesOnly = emitDistinctChangesOnlyValue;
-        }
-        if (options.has('static')) {
-            const staticValue = evaluator.evaluate(options.get('static'));
-            if (typeof staticValue !== 'boolean') {
-                throw createValueHasWrongTypeError(node, staticValue, `@${name} options.static must be a boolean`);
-            }
-            isStatic = staticValue;
-        }
-    }
-    else if (args.length > 2) {
-        // Too many arguments.
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, node, `@${name} has too many arguments`);
-    }
-    return {
-        isSignal: false,
-        propertyName,
-        predicate,
-        first,
-        descendants,
-        read,
-        static: isStatic,
-        emitDistinctChangesOnly,
-    };
-}
-function extractHostBindings(members, evaluator, coreModule, compilationMode, metadata) {
-    let bindings;
-    if (metadata && metadata.has('host')) {
-        bindings = evaluateHostExpressionBindings(metadata.get('host'), evaluator);
-    }
-    else {
-        bindings = checker.parseHostBindings({});
-    }
-    checker.filterToMembersWithDecorator(members, 'HostBinding', coreModule).forEach(({ member, decorators }) => {
-        decorators.forEach((decorator) => {
-            let hostPropertyName = member.name;
-            if (decorator.args !== null && decorator.args.length > 0) {
-                if (decorator.args.length !== 1) {
-                    throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@HostBinding can have at most one argument, got ${decorator.args.length} argument(s)`);
-                }
-                const resolved = evaluator.evaluate(decorator.args[0]);
-                // Specific error for local compilation mode if the argument cannot be resolved
-                assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, "Unresolved identifier found for @HostBinding's argument! Did " +
-                    'you import this identifier from a file outside of the compilation ' +
-                    'unit? This is not allowed when Angular compiler runs in local mode. ' +
-                    'Possible solutions: 1) Move the declaration into a file within ' +
-                    'the compilation unit, 2) Inline the argument');
-                if (typeof resolved !== 'string') {
-                    throw createValueHasWrongTypeError(decorator.node, resolved, `@HostBinding's argument must be a string`);
-                }
-                hostPropertyName = resolved;
-            }
-            // Since this is a decorator, we know that the value is a class member. Always access it
-            // through `this` so that further down the line it can't be confused for a literal value
-            // (e.g. if there's a property called `true`). There is no size penalty, because all
-            // values (except literals) are converted to `ctx.propName` eventually.
-            bindings.properties[hostPropertyName] = checker.getSafePropertyAccessString('this', member.name);
-        });
-    });
-    checker.filterToMembersWithDecorator(members, 'HostListener', coreModule).forEach(({ member, decorators }) => {
-        decorators.forEach((decorator) => {
-            let eventName = member.name;
-            let args = [];
-            if (decorator.args !== null && decorator.args.length > 0) {
-                if (decorator.args.length > 2) {
-                    throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.args[2], `@HostListener can have at most two arguments`);
-                }
-                const resolved = evaluator.evaluate(decorator.args[0]);
-                // Specific error for local compilation mode if the event name cannot be resolved
-                assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, "Unresolved identifier found for @HostListener's event name " +
-                    'argument! Did you import this identifier from a file outside of ' +
-                    'the compilation unit? This is not allowed when Angular compiler ' +
-                    'runs in local mode. Possible solutions: 1) Move the declaration ' +
-                    'into a file within the compilation unit, 2) Inline the argument');
-                if (typeof resolved !== 'string') {
-                    throw createValueHasWrongTypeError(decorator.args[0], resolved, `@HostListener's event name argument must be a string`);
-                }
-                eventName = resolved;
-                if (decorator.args.length === 2) {
-                    const expression = decorator.args[1];
-                    const resolvedArgs = evaluator.evaluate(decorator.args[1]);
-                    if (!isStringArrayOrDie(resolvedArgs, '@HostListener.args', expression)) {
-                        throw createValueHasWrongTypeError(decorator.args[1], resolvedArgs, `@HostListener's second argument must be a string array`);
-                    }
-                    args = resolvedArgs;
-                }
-            }
-            bindings.listeners[eventName] = `${member.name}(${args.join(',')})`;
-        });
-    });
-    return bindings;
-}
-function extractQueriesFromDecorator(queryData, reflector, evaluator, isCore) {
-    const content = [];
-    const view = [];
-    if (!ts__default["default"].isObjectLiteralExpression(queryData)) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator queries metadata must be an object literal');
-    }
-    checker.reflectObjectLiteral(queryData).forEach((queryExpr, propertyName) => {
-        queryExpr = checker.unwrapExpression(queryExpr);
-        if (!ts__default["default"].isNewExpression(queryExpr)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
-        }
-        const queryType = ts__default["default"].isPropertyAccessExpression(queryExpr.expression)
-            ? queryExpr.expression.name
-            : queryExpr.expression;
-        if (!ts__default["default"].isIdentifier(queryType)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
-        }
-        const type = reflector.getImportOfIdentifier(queryType);
-        if (type === null ||
-            (!isCore && type.from !== '@angular/core') ||
-            !QUERY_TYPES.has(type.name)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
-        }
-        const query = extractDecoratorQueryMetadata(queryExpr, type.name, queryExpr.arguments || [], propertyName, reflector, evaluator);
-        if (type.name.startsWith('Content')) {
-            content.push({ expr: queryExpr, metadata: query });
-        }
-        else {
-            view.push({ expr: queryExpr, metadata: query });
-        }
-    });
-    return { content, view };
-}
-function parseDirectiveStyles(directive, evaluator, compilationMode) {
-    const expression = directive.get('styles');
-    if (!expression) {
-        return null;
-    }
-    const evaluated = evaluator.evaluate(expression);
-    const value = typeof evaluated === 'string' ? [evaluated] : evaluated;
-    // Check if the identifier used for @Component.styles cannot be resolved in local compilation
-    // mode. if the case, an error specific to this situation is generated.
-    if (compilationMode === checker.CompilationMode.LOCAL) {
-        let unresolvedNode = null;
-        if (Array.isArray(value)) {
-            const entry = value.find((e) => e instanceof checker.DynamicValue && e.isFromUnknownIdentifier());
-            unresolvedNode = entry?.node ?? null;
-        }
-        else if (value instanceof checker.DynamicValue && value.isFromUnknownIdentifier()) {
-            unresolvedNode = value.node;
-        }
-        if (unresolvedNode !== null) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.LOCAL_COMPILATION_UNRESOLVED_CONST, unresolvedNode, 'Unresolved identifier found for @Component.styles field! Did you import ' +
-                'this identifier from a file outside of the compilation unit? This is ' +
-                'not allowed when Angular compiler runs in local mode. Possible ' +
-                'solutions: 1) Move the declarations into a file within the compilation ' +
-                'unit, 2) Inline the styles, 3) Move the styles into separate files and ' +
-                'include it using @Component.styleUrls');
-        }
-    }
-    if (!isStringArrayOrDie(value, 'styles', expression)) {
-        throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Component.styles to a string or an array of strings`);
-    }
-    return value;
-}
-function parseFieldStringArrayValue(directive, field, evaluator) {
-    if (!directive.has(field)) {
-        return null;
-    }
-    // Resolve the field of interest from the directive metadata to a string[].
-    const expression = directive.get(field);
-    const value = evaluator.evaluate(expression);
-    if (!isStringArrayOrDie(value, field, expression)) {
-        throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Directive.${field} to a string array`);
-    }
-    return value;
-}
-function isStringArrayOrDie(value, name, node) {
-    if (!Array.isArray(value)) {
-        return false;
-    }
-    for (let i = 0; i < value.length; i++) {
-        if (typeof value[i] !== 'string') {
-            throw createValueHasWrongTypeError(node, value[i], `Failed to resolve ${name} at position ${i} to a string`);
-        }
-    }
-    return true;
-}
-function tryGetQueryFromFieldDecorator(member, reflector, evaluator, isCore) {
-    const decorators = member.decorators;
-    if (decorators === null) {
-        return null;
-    }
-    const queryDecorators = checker.getAngularDecorators(decorators, queryDecoratorNames, isCore);
-    if (queryDecorators.length === 0) {
-        return null;
-    }
-    if (queryDecorators.length !== 1) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_COLLISION, member.node ?? queryDecorators[0].node, 'Cannot combine multiple query decorators.');
-    }
-    const decorator = queryDecorators[0];
-    const node = member.node || decorator.node;
-    // Throw in case of `@Input() @ContentChild('foo') foo: any`, which is not supported in Ivy
-    if (decorators.some((v) => v.name === 'Input')) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_COLLISION, node, 'Cannot combine @Input decorators with query decorators');
-    }
-    if (!isPropertyTypeMember(member)) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_UNEXPECTED, node, 'Query decorator must go on a property-type member');
-    }
-    // Either the decorator was aliased, or is referenced directly with
-    // the proper query name.
-    const name = (decorator.import?.name ?? decorator.name);
-    return {
-        name,
-        decorator,
-        metadata: extractDecoratorQueryMetadata(node, name, decorator.args || [], member.name, reflector, evaluator),
-    };
-}
-function isPropertyTypeMember(member) {
-    return (member.kind === checker.ClassMemberKind.Getter ||
-        member.kind === checker.ClassMemberKind.Setter ||
-        member.kind === checker.ClassMemberKind.Property);
-}
-function parseMappingStringArray(values) {
-    return values.reduce((results, value) => {
-        if (typeof value !== 'string') {
-            throw new Error('Mapping value must be a string');
-        }
-        const [bindingPropertyName, fieldName] = parseMappingString(value);
-        results[fieldName] = bindingPropertyName;
-        return results;
-    }, {});
-}
-function parseMappingString(value) {
-    // Either the value is 'field' or 'field: property'. In the first case, `property` will
-    // be undefined, in which case the field name should also be used as the property name.
-    const [fieldName, bindingPropertyName] = value.split(':', 2).map((str) => str.trim());
-    return [bindingPropertyName ?? fieldName, fieldName];
-}
-/** Parses the `inputs` array of a directive/component decorator. */
-function parseInputsArray(clazz, decoratorMetadata, evaluator, reflector, refEmitter, compilationMode) {
-    const inputsField = decoratorMetadata.get('inputs');
-    if (inputsField === undefined) {
-        return {};
-    }
-    const inputs = {};
-    const inputsArray = evaluator.evaluate(inputsField);
-    if (!Array.isArray(inputsArray)) {
-        throw createValueHasWrongTypeError(inputsField, inputsArray, `Failed to resolve @Directive.inputs to an array`);
-    }
-    for (let i = 0; i < inputsArray.length; i++) {
-        const value = inputsArray[i];
-        if (typeof value === 'string') {
-            // If the value is a string, we treat it as a mapping string.
-            const [bindingPropertyName, classPropertyName] = parseMappingString(value);
-            inputs[classPropertyName] = {
-                bindingPropertyName,
-                classPropertyName,
-                required: false,
-                transform: null,
-                // Note: Signal inputs are not allowed with the array form.
-                isSignal: false,
-            };
-        }
-        else if (value instanceof Map) {
-            // If it's a map, we treat it as a config object.
-            const name = value.get('name');
-            const alias = value.get('alias');
-            const required = value.get('required');
-            let transform = null;
-            if (typeof name !== 'string') {
-                throw createValueHasWrongTypeError(inputsField, name, `Value at position ${i} of @Directive.inputs array must have a "name" property`);
-            }
-            if (value.has('transform')) {
-                const transformValue = value.get('transform');
-                if (!(transformValue instanceof checker.DynamicValue) && !(transformValue instanceof checker.Reference)) {
-                    throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
-                }
-                transform = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter, compilationMode);
-            }
-            inputs[name] = {
-                classPropertyName: name,
-                bindingPropertyName: typeof alias === 'string' ? alias : name,
-                required: required === true,
-                // Note: Signal inputs are not allowed with the array form.
-                isSignal: false,
-                transform,
-            };
-        }
-        else {
-            throw createValueHasWrongTypeError(inputsField, value, `@Directive.inputs array can only contain strings or object literals`);
-        }
-    }
-    return inputs;
-}
-/** Attempts to find a given Angular decorator on the class member. */
-function tryGetDecoratorOnMember(member, decoratorName, isCore) {
-    if (member.decorators === null) {
-        return null;
-    }
-    for (const decorator of member.decorators) {
-        if (checker.isAngularDecorator(decorator, decoratorName, isCore)) {
-            return decorator;
-        }
-    }
-    return null;
-}
-function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode) {
-    const classPropertyName = member.name;
-    const decorator = tryGetDecoratorOnMember(member, 'Input', isCore);
-    const signalInputMapping = checker.tryParseSignalInputMapping(member, reflector, importTracker);
-    const modelInputMapping = checker.tryParseSignalModelMapping(member, reflector, importTracker);
-    if (decorator !== null && signalInputMapping !== null) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decorator.node, `Using @Input with a signal input is not allowed.`);
-    }
-    if (decorator !== null && modelInputMapping !== null) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decorator.node, `Using @Input with a model input is not allowed.`);
-    }
-    // Check `@Input` case.
-    if (decorator !== null) {
-        if (decorator.args !== null && decorator.args.length > 1) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@${decorator.name} can have at most one argument, got ${decorator.args.length} argument(s)`);
-        }
-        const optionsNode = decorator.args !== null && decorator.args.length === 1 ? decorator.args[0] : undefined;
-        const options = optionsNode !== undefined ? evaluator.evaluate(optionsNode) : null;
-        const required = options instanceof Map ? options.get('required') === true : false;
-        // To preserve old behavior: Even though TypeScript types ensure proper options are
-        // passed, we sanity check for unsupported values here again.
-        if (options !== null && typeof options !== 'string' && !(options instanceof Map)) {
-            throw createValueHasWrongTypeError(decorator.node, options, `@${decorator.name} decorator argument must resolve to a string or an object literal`);
-        }
-        let alias = null;
-        if (typeof options === 'string') {
-            alias = options;
-        }
-        else if (options instanceof Map && typeof options.get('alias') === 'string') {
-            alias = options.get('alias');
-        }
-        const publicInputName = alias ?? classPropertyName;
-        let transform = null;
-        if (options instanceof Map && options.has('transform')) {
-            const transformValue = options.get('transform');
-            if (!(transformValue instanceof checker.DynamicValue) && !(transformValue instanceof checker.Reference)) {
-                throw createValueHasWrongTypeError(optionsNode, transformValue, `Input transform must be a function`);
-            }
-            transform = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter, compilationMode);
-        }
-        return {
-            isSignal: false,
-            classPropertyName,
-            bindingPropertyName: publicInputName,
-            transform,
-            required,
-        };
-    }
-    // Look for signal inputs. e.g. `memberName = input()`
-    if (signalInputMapping !== null) {
-        return signalInputMapping;
-    }
-    if (modelInputMapping !== null) {
-        return modelInputMapping.input;
-    }
-    return null;
-}
-/** Parses the class members that declare inputs (via decorator or initializer). */
-function parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromClassDecorator, classDecorator) {
-    const inputs = {};
-    for (const member of members) {
-        const classPropertyName = member.name;
-        const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode);
-        if (inputMapping === null) {
-            continue;
-        }
-        if (member.isStatic) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, member.node ?? clazz, `Input "${member.name}" is incorrectly declared as static member of "${clazz.name.text}".`);
-        }
-        // Validate that signal inputs are not accidentally declared in the `inputs` metadata.
-        if (inputMapping.isSignal && inputsFromClassDecorator.hasOwnProperty(classPropertyName)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, member.node ?? clazz, `Input "${member.name}" is also declared as non-signal in @${classDecorator.name}.`);
-        }
-        inputs[classPropertyName] = inputMapping;
-    }
-    return inputs;
-}
-/**
- * Parses the `transform` function and its type for a decorator `@Input`.
- *
- * This logic verifies feasibility of extracting the transform write type
- * into a different place, so that the input write type can be captured at
- * a later point in a static acceptance member.
- *
- * Note: This is not needed for signal inputs where the transform type is
- * automatically captured in the type of the `InputSignal`.
- *
- */
-function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter, compilationMode) {
-    // In local compilation mode we can skip type checking the function args. This is because usually
-    // the type check is done in a separate build which runs in full compilation mode. So here we skip
-    // all the diagnostics.
-    if (compilationMode === checker.CompilationMode.LOCAL) {
-        const node = value instanceof checker.Reference ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
-        // This should never be null since we know the reference originates
-        // from the same file, but we null check it just in case.
-        if (node === null) {
-            throw createValueHasWrongTypeError(value.node, value, 'Input transform function could not be referenced');
-        }
-        return {
-            node,
-            type: new checker.Reference(ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UnknownKeyword)),
-        };
-    }
-    const definition = reflector.getDefinitionOfFunction(value.node);
-    if (definition === null) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform must be a function');
-    }
-    if (definition.typeParameters !== null && definition.typeParameters.length > 0) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform function cannot be generic');
-    }
-    if (definition.signatureCount > 1) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform function cannot have multiple signatures');
-    }
-    const members = reflector.getMembersOfClass(clazz);
-    for (const member of members) {
-        const conflictingName = `ngAcceptInputType_${classPropertyName}`;
-        if (member.name === conflictingName && member.isStatic) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.CONFLICTING_INPUT_TRANSFORM, value.node, `Class cannot have both a transform function on Input ${classPropertyName} and a static member called ${conflictingName}`);
-        }
-    }
-    const node = value instanceof checker.Reference ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
-    // This should never be null since we know the reference originates
-    // from the same file, but we null check it just in case.
-    if (node === null) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform function could not be referenced');
-    }
-    // Skip over `this` parameters since they're typing the context, not the actual parameter.
-    // `this` parameters are guaranteed to be first if they exist, and the only to distinguish them
-    // is using the name, TS doesn't have a special AST for them.
-    const firstParam = definition.parameters[0]?.name === 'this' ? definition.parameters[1] : definition.parameters[0];
-    // Treat functions with no arguments as `unknown` since returning
-    // the same value from the transform function is valid.
-    if (!firstParam) {
-        return {
-            node,
-            type: new checker.Reference(ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UnknownKeyword)),
-        };
-    }
-    // This should be caught by `noImplicitAny` already, but null check it just in case.
-    if (!firstParam.type) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform function first parameter must have a type');
-    }
-    if (firstParam.node.dotDotDotToken) {
-        throw createValueHasWrongTypeError(value.node, value, 'Input transform function first parameter cannot be a spread parameter');
-    }
-    assertEmittableInputType(firstParam.type, clazz.getSourceFile(), reflector, refEmitter);
-    const viaModule = value instanceof checker.Reference ? value.bestGuessOwningModule : null;
-    return { node, type: new checker.Reference(firstParam.type, viaModule) };
-}
-/**
- * Verifies that a type and all types contained within
- * it can be referenced in a specific context file.
- */
-function assertEmittableInputType(type, contextFile, reflector, refEmitter) {
-    (function walk(node) {
-        if (ts__default["default"].isTypeReferenceNode(node) && ts__default["default"].isIdentifier(node.typeName)) {
-            const declaration = reflector.getDeclarationOfIdentifier(node.typeName);
-            if (declaration !== null) {
-                // If the type is declared in a different file, we have to check that it can be imported
-                // into the context file. If they're in the same file, we need to verify that they're
-                // exported, otherwise TS won't emit it to the .d.ts.
-                if (declaration.node.getSourceFile() !== contextFile) {
-                    const emittedType = refEmitter.emit(new checker.Reference(declaration.node, declaration.viaModule === checker.AmbientImport ? checker.AmbientImport : null), contextFile, checker.ImportFlags.NoAliasing |
-                        checker.ImportFlags.AllowTypeImports |
-                        checker.ImportFlags.AllowRelativeDtsImports |
-                        checker.ImportFlags.AllowAmbientReferences);
-                    checker.assertSuccessfulReferenceEmit(emittedType, node, 'type');
-                }
-                else if (!reflector.isStaticallyExported(declaration.node)) {
-                    throw new checker.FatalDiagnosticError(checker.ErrorCode.SYMBOL_NOT_EXPORTED, type, `Symbol must be exported in order to be used as the type of an Input transform function`, [checker.makeRelatedInformation(declaration.node, `The symbol is declared here.`)]);
-                }
-            }
-        }
-        node.forEachChild(walk);
-    })(type);
-}
-/**
- * Iterates through all specified class members and attempts to detect
- * view and content queries defined.
- *
- * Queries may be either defined via decorators, or through class member
- * initializers for signal-based queries.
- */
-function parseQueriesOfClassFields(members, reflector, importTracker, evaluator, isCore) {
-    const viewQueries = [];
-    const contentQueries = [];
-    // For backwards compatibility, decorator-based queries are grouped and
-    // ordered in a specific way. The order needs to match with what we had in:
-    // https://github.com/angular/angular/blob/8737544d6963bf664f752de273e919575cca08ac/packages/compiler-cli/src/ngtsc/annotations/directive/src/shared.ts#L94-L111.
-    const decoratorViewChild = [];
-    const decoratorViewChildren = [];
-    const decoratorContentChild = [];
-    const decoratorContentChildren = [];
-    for (const member of members) {
-        const decoratorQuery = tryGetQueryFromFieldDecorator(member, reflector, evaluator, isCore);
-        const signalQuery = checker.tryParseSignalQueryFromInitializer(member, reflector, importTracker);
-        if (decoratorQuery !== null && signalQuery !== null) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorQuery.decorator.node, `Using @${decoratorQuery.name} with a signal-based query is not allowed.`);
-        }
-        const queryNode = decoratorQuery?.decorator.node ?? signalQuery?.call;
-        if (queryNode !== undefined && member.isStatic) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, queryNode, `Query is incorrectly declared on a static class member.`);
-        }
-        if (decoratorQuery !== null) {
-            switch (decoratorQuery.name) {
-                case 'ViewChild':
-                    decoratorViewChild.push(decoratorQuery.metadata);
-                    break;
-                case 'ViewChildren':
-                    decoratorViewChildren.push(decoratorQuery.metadata);
-                    break;
-                case 'ContentChild':
-                    decoratorContentChild.push(decoratorQuery.metadata);
-                    break;
-                case 'ContentChildren':
-                    decoratorContentChildren.push(decoratorQuery.metadata);
-                    break;
-            }
-        }
-        else if (signalQuery !== null) {
-            switch (signalQuery.name) {
-                case 'viewChild':
-                case 'viewChildren':
-                    viewQueries.push(signalQuery.metadata);
-                    break;
-                case 'contentChild':
-                case 'contentChildren':
-                    contentQueries.push(signalQuery.metadata);
-                    break;
-            }
-        }
-    }
-    return {
-        viewQueries: [...viewQueries, ...decoratorViewChild, ...decoratorViewChildren],
-        contentQueries: [...contentQueries, ...decoratorContentChild, ...decoratorContentChildren],
-    };
-}
-/** Parses the `outputs` array of a directive/component. */
-function parseOutputsArray(directive, evaluator) {
-    const metaValues = parseFieldStringArrayValue(directive, 'outputs', evaluator);
-    return metaValues ? parseMappingStringArray(metaValues) : EMPTY_OBJECT;
-}
-/** Parses the class members that are outputs. */
-function parseOutputFields(clazz, classDecorator, members, isCore, reflector, importTracker, evaluator, outputsFromMeta) {
-    const outputs = {};
-    for (const member of members) {
-        const decoratorOutput = tryParseDecoratorOutput(member, evaluator, isCore);
-        const initializerOutput = checker.tryParseInitializerBasedOutput(member, reflector, importTracker);
-        const modelMapping = checker.tryParseSignalModelMapping(member, reflector, importTracker);
-        if (decoratorOutput !== null && initializerOutput !== null) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorOutput.decorator.node, `Using "@Output" with "output()" is not allowed.`);
-        }
-        if (decoratorOutput !== null && modelMapping !== null) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorOutput.decorator.node, `Using @Output with a model input is not allowed.`);
-        }
-        const queryNode = decoratorOutput?.decorator.node ?? initializerOutput?.call ?? modelMapping?.call;
-        if (queryNode !== undefined && member.isStatic) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, queryNode, `Output is incorrectly declared on a static class member.`);
-        }
-        let bindingPropertyName;
-        if (decoratorOutput !== null) {
-            bindingPropertyName = decoratorOutput.metadata.bindingPropertyName;
-        }
-        else if (initializerOutput !== null) {
-            bindingPropertyName = initializerOutput.metadata.bindingPropertyName;
-        }
-        else if (modelMapping !== null) {
-            bindingPropertyName = modelMapping.output.bindingPropertyName;
-        }
-        else {
-            continue;
-        }
-        // Validate that initializer-based outputs are not accidentally declared
-        // in the `outputs` class metadata.
-        if ((initializerOutput !== null || modelMapping !== null) &&
-            outputsFromMeta.hasOwnProperty(member.name)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, member.node ?? clazz, `Output "${member.name}" is unexpectedly declared in @${classDecorator.name} as well.`);
-        }
-        outputs[member.name] = bindingPropertyName;
-    }
-    return outputs;
-}
-/** Attempts to parse a decorator-based @Output. */
-function tryParseDecoratorOutput(member, evaluator, isCore) {
-    const decorator = tryGetDecoratorOnMember(member, 'Output', isCore);
-    if (decorator === null) {
-        return null;
-    }
-    if (decorator.args !== null && decorator.args.length > 1) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@Output can have at most one argument, got ${decorator.args.length} argument(s)`);
-    }
-    const classPropertyName = member.name;
-    let alias = null;
-    if (decorator.args?.length === 1) {
-        const resolvedAlias = evaluator.evaluate(decorator.args[0]);
-        if (typeof resolvedAlias !== 'string') {
-            throw createValueHasWrongTypeError(decorator.node, resolvedAlias, `@Output decorator argument must resolve to a string`);
-        }
-        alias = resolvedAlias;
-    }
-    return {
-        decorator,
-        metadata: {
-            isSignal: false,
-            classPropertyName,
-            bindingPropertyName: alias ?? classPropertyName,
-        },
-    };
-}
-function evaluateHostExpressionBindings(hostExpr, evaluator) {
-    const hostMetaMap = evaluator.evaluate(hostExpr);
-    if (!(hostMetaMap instanceof Map)) {
-        throw createValueHasWrongTypeError(hostExpr, hostMetaMap, `Decorator host metadata must be an object`);
-    }
-    const hostMetadata = {};
-    hostMetaMap.forEach((value, key) => {
-        // Resolve Enum references to their declared value.
-        if (value instanceof checker.EnumValue) {
-            value = value.resolved;
-        }
-        if (typeof key !== 'string') {
-            throw createValueHasWrongTypeError(hostExpr, key, `Decorator host metadata must be a string -> string object, but found unparseable key`);
-        }
-        if (typeof value == 'string') {
-            hostMetadata[key] = value;
-        }
-        else if (value instanceof checker.DynamicValue) {
-            hostMetadata[key] = new checker.WrappedNodeExpr(value.node);
-        }
-        else {
-            throw createValueHasWrongTypeError(hostExpr, value, `Decorator host metadata must be a string -> string object, but found unparseable value`);
-        }
-    });
-    const bindings = checker.parseHostBindings(hostMetadata);
-    const errors = checker.verifyHostBindings(bindings, checker.createSourceSpan(hostExpr));
-    if (errors.length > 0) {
-        throw new checker.FatalDiagnosticError(checker.ErrorCode.HOST_BINDING_PARSE_ERROR, getHostBindingErrorNode(errors[0], hostExpr), errors.map((error) => error.msg).join('\n'));
-    }
-    return bindings;
-}
-/**
- * Attempts to match a parser error to the host binding expression that caused it.
- * @param error Error to match.
- * @param hostExpr Expression declaring the host bindings.
- */
-function getHostBindingErrorNode(error, hostExpr) {
-    // In the most common case the `host` object is an object literal with string values. We can
-    // confidently match the error to its expression by looking at the string value that the parser
-    // failed to parse and the initializers for each of the properties. If we fail to match, we fall
-    // back to the old behavior where the error is reported on the entire `host` object.
-    if (ts__default["default"].isObjectLiteralExpression(hostExpr) && error.relatedError instanceof checker.ParserError) {
-        for (const prop of hostExpr.properties) {
-            if (ts__default["default"].isPropertyAssignment(prop) &&
-                ts__default["default"].isStringLiteralLike(prop.initializer) &&
-                prop.initializer.text === error.relatedError.input) {
-                return prop.initializer;
-            }
-        }
-    }
-    return hostExpr;
-}
-/**
- * Extracts and prepares the host directives metadata from an array literal expression.
- * @param rawHostDirectives Expression that defined the `hostDirectives`.
- */
-function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver) {
-    const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
-    if (!Array.isArray(resolved)) {
-        throw createValueHasWrongTypeError(rawHostDirectives, resolved, 'hostDirectives must be an array');
-    }
-    return resolved.map((value) => {
-        const hostReference = value instanceof Map ? value.get('directive') : value;
-        // Diagnostics
-        if (compilationMode !== checker.CompilationMode.LOCAL) {
-            if (!(hostReference instanceof checker.Reference)) {
-                throw createValueHasWrongTypeError(rawHostDirectives, hostReference, 'Host directive must be a reference');
-            }
-            if (!checker.isNamedClassDeclaration(hostReference.node)) {
-                throw createValueHasWrongTypeError(rawHostDirectives, hostReference, 'Host directive reference must be a class');
-            }
-        }
-        let directive;
-        let nameForErrors = (fieldName) => '@Directive.hostDirectives';
-        if (compilationMode === checker.CompilationMode.LOCAL && hostReference instanceof checker.DynamicValue) {
-            // At the moment in local compilation we only support simple array for host directives, i.e.,
-            // an array consisting of the directive identifiers. We don't support forward refs or other
-            // expressions applied on externally imported directives. The main reason is simplicity, and
-            // that almost nobody wants to use host directives this way (e.g., what would be the point of
-            // forward ref for imported symbols?!)
-            if (!ts__default["default"].isIdentifier(hostReference.node) &&
-                !ts__default["default"].isPropertyAccessExpression(hostReference.node)) {
-                throw new checker.FatalDiagnosticError(checker.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
-            }
-            directive = new checker.WrappedNodeExpr(hostReference.node);
-        }
-        else if (hostReference instanceof checker.Reference) {
-            directive = hostReference;
-            nameForErrors = (fieldName) => `@Directive.hostDirectives.${directive.node.name.text}.${fieldName}`;
-        }
-        else {
-            throw new Error('Impossible state');
-        }
-        const meta = {
-            directive,
-            isForwardReference: hostReference instanceof checker.Reference && hostReference.synthetic,
-            inputs: parseHostDirectivesMapping('inputs', value, nameForErrors('input'), rawHostDirectives),
-            outputs: parseHostDirectivesMapping('outputs', value, nameForErrors('output'), rawHostDirectives),
-        };
-        return meta;
-    });
-}
-/**
- * Parses the expression that defines the `inputs` or `outputs` of a host directive.
- * @param field Name of the field that is being parsed.
- * @param resolvedValue Evaluated value of the expression that defined the field.
- * @param classReference Reference to the host directive class.
- * @param sourceExpression Expression that the host directive is referenced in.
- */
-function parseHostDirectivesMapping(field, resolvedValue, nameForErrors, sourceExpression) {
-    if (resolvedValue instanceof Map && resolvedValue.has(field)) {
-        const rawInputs = resolvedValue.get(field);
-        if (isStringArrayOrDie(rawInputs, nameForErrors, sourceExpression)) {
-            return parseMappingStringArray(rawInputs);
-        }
-    }
-    return null;
-}
-/** Converts the parsed host directive information into metadata. */
-function toHostDirectiveMetadata(hostDirective, context, refEmitter) {
-    let directive;
-    if (hostDirective.directive instanceof checker.Reference) {
-        directive = checker.toR3Reference(hostDirective.directive.node, hostDirective.directive, context, refEmitter);
-    }
-    else {
-        directive = {
-            value: hostDirective.directive,
-            type: hostDirective.directive,
-        };
-    }
-    return {
-        directive,
-        isForwardReference: hostDirective.isForwardReference,
-        inputs: hostDirective.inputs || null,
-        outputs: hostDirective.outputs || null,
-    };
-}
-/** Converts the parsed input information into metadata. */
-function toR3InputMetadata(mapping) {
-    return {
-        classPropertyName: mapping.classPropertyName,
-        bindingPropertyName: mapping.bindingPropertyName,
-        required: mapping.required,
-        transformFunction: mapping.transform !== null ? new checker.WrappedNodeExpr(mapping.transform.node) : null,
-        isSignal: mapping.isSignal,
-    };
 }
 
 /**
@@ -8024,10 +6161,10 @@ class DirectiveDecoratorHandler {
             if (this.isCore) {
                 return {};
             }
-            return { diagnostics: [getUndecoratedClassWithAngularFeaturesDiagnostic(node)] };
+            return { diagnostics: [checker.getUndecoratedClassWithAngularFeaturesDiagnostic(node)] };
         }
         this.perf.eventCount(checker.PerfEvent.AnalyzeDirective);
-        const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, 
+        const directiveResult = checker.extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, 
         /* defaultSelector */ null, this.strictStandalone, this.implicitStandaloneValue);
         // `extractDirectiveMetadata` returns `jitForced = true` when the `@Directive` has
         // set `jit: true`. In this case, compilation of the decorator is skipped. Returning
@@ -8115,15 +6252,15 @@ class DirectiveDecoratorHandler {
         const diagnostics = [];
         if (analysis.providersRequiringFactory !== null &&
             analysis.meta.providers instanceof checker.WrappedNodeExpr) {
-            const providerDiagnostics = getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
+            const providerDiagnostics = checker.getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
             diagnostics.push(...providerDiagnostics);
         }
-        const directiveDiagnostics = getDirectiveDiagnostics(node, this.injectableRegistry, this.evaluator, this.reflector, this.scopeRegistry, this.strictCtorDeps, 'Directive');
+        const directiveDiagnostics = checker.getDirectiveDiagnostics(node, this.injectableRegistry, this.evaluator, this.reflector, this.scopeRegistry, this.strictCtorDeps, 'Directive');
         if (directiveDiagnostics !== null) {
             diagnostics.push(...directiveDiagnostics);
         }
         const hostDirectivesDiagnotics = analysis.hostDirectives && analysis.rawHostDirectives
-            ? validateHostDirectives(analysis.rawHostDirectives, analysis.hostDirectives, this.metaReader)
+            ? checker.validateHostDirectives(analysis.rawHostDirectives, analysis.hostDirectives, this.metaReader)
             : null;
         if (hostDirectivesDiagnotics !== null) {
             diagnostics.push(...hostDirectivesDiagnotics);
@@ -8195,12 +6332,12 @@ function createModuleWithProvidersResolver(reflector, isCore) {
      */
     function _reflectModuleFromTypeParam(type, node) {
         // Examine the type of the function to see if it's a ModuleWithProviders reference.
-        if (!ts__default["default"].isTypeReferenceNode(type)) {
+        if (!ts.isTypeReferenceNode(type)) {
             return null;
         }
         const typeName = (type &&
-            ((ts__default["default"].isIdentifier(type.typeName) && type.typeName) ||
-                (ts__default["default"].isQualifiedName(type.typeName) && type.typeName.right))) ||
+            ((ts.isIdentifier(type.typeName) && type.typeName) ||
+                (ts.isQualifiedName(type.typeName) && type.typeName.right))) ||
             null;
         if (typeName === null) {
             return null;
@@ -8217,7 +6354,7 @@ function createModuleWithProvidersResolver(reflector, isCore) {
         }
         // If there's no type parameter specified, bail.
         if (type.typeArguments === undefined || type.typeArguments.length !== 1) {
-            const parent = ts__default["default"].isMethodDeclaration(node) && ts__default["default"].isClassDeclaration(node.parent) ? node.parent : null;
+            const parent = ts.isMethodDeclaration(node) && ts.isClassDeclaration(node.parent) ? node.parent : null;
             const symbolName = (parent && parent.name ? parent.name.getText() + '.' : '') +
                 (node.name ? node.name.getText() : 'anonymous');
             throw new checker.FatalDiagnosticError(checker.ErrorCode.NGMODULE_MODULE_WITH_PROVIDERS_MISSING_GENERIC, type, `${symbolName} returns a ModuleWithProviders type without a generic type argument. ` +
@@ -8234,20 +6371,20 @@ function createModuleWithProvidersResolver(reflector, isCore) {
      * @returns the identifier of the NgModule type if found, or null otherwise.
      */
     function _reflectModuleFromLiteralType(type) {
-        if (!ts__default["default"].isIntersectionTypeNode(type)) {
+        if (!ts.isIntersectionTypeNode(type)) {
             return null;
         }
         for (const t of type.types) {
-            if (ts__default["default"].isTypeLiteralNode(t)) {
+            if (ts.isTypeLiteralNode(t)) {
                 for (const m of t.members) {
-                    const ngModuleType = (ts__default["default"].isPropertySignature(m) &&
-                        ts__default["default"].isIdentifier(m.name) &&
+                    const ngModuleType = (ts.isPropertySignature(m) &&
+                        ts.isIdentifier(m.name) &&
                         m.name.text === 'ngModule' &&
                         m.type) ||
                         null;
                     let ngModuleExpression = null;
                     // Handle `: typeof X` or `: X` cases.
-                    if (ngModuleType !== null && ts__default["default"].isTypeQueryNode(ngModuleType)) {
+                    if (ngModuleType !== null && ts.isTypeQueryNode(ngModuleType)) {
                         ngModuleExpression = checker.entityNameToValue(ngModuleType.exprName);
                     }
                     else if (ngModuleType !== null) {
@@ -8448,8 +6585,8 @@ class NgModuleDecoratorHandler {
         // literal was specified. This simplifies the code below.
         const meta = decorator.args.length === 1
             ? checker.unwrapExpression(decorator.args[0])
-            : ts__default["default"].factory.createObjectLiteralExpression([]);
-        if (!ts__default["default"].isObjectLiteralExpression(meta)) {
+            : ts.factory.createObjectLiteralExpression([]);
+        if (!ts.isObjectLiteralExpression(meta)) {
             throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, '@NgModule argument must be an object literal');
         }
         const ngModule = checker.reflectObjectLiteral(meta);
@@ -8538,7 +6675,7 @@ class NgModuleDecoratorHandler {
             }
             else {
                 const diag = checker.makeDiagnostic(checker.ErrorCode.WARN_NGMODULE_ID_UNNECESSARY, idExpr, `Using 'module.id' for NgModule.id is a common anti-pattern that is ignored by the Angular compiler.`);
-                diag.category = ts__default["default"].DiagnosticCategory.Warning;
+                diag.category = ts.DiagnosticCategory.Warning;
                 diagnostics.push(diag);
             }
         }
@@ -8607,7 +6744,7 @@ class NgModuleDecoratorHandler {
         // In most cases the providers will be an array literal. Check if it has any elements
         // and don't include the providers if it doesn't which saves us a few bytes.
         if (rawProviders !== null &&
-            (!ts__default["default"].isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
+            (!ts.isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
             wrappedProviders = new checker.WrappedNodeExpr(this.annotateForClosureCompiler
                 ? checker.wrapFunctionExpressionsInParens(rawProviders)
                 : rawProviders);
@@ -8616,9 +6753,9 @@ class NgModuleDecoratorHandler {
         if (this.compilationMode !== checker.CompilationMode.LOCAL && ngModule.has('imports')) {
             const rawImports = checker.unwrapExpression(ngModule.get('imports'));
             let topLevelExpressions = [];
-            if (ts__default["default"].isArrayLiteralExpression(rawImports)) {
+            if (ts.isArrayLiteralExpression(rawImports)) {
                 for (const element of rawImports.elements) {
-                    if (ts__default["default"].isSpreadElement(element)) {
+                    if (ts.isSpreadElement(element)) {
                         // Because `imports` allows nested arrays anyway, a spread expression (`...foo`) can be
                         // treated the same as a direct reference to `foo`.
                         topLevelExpressions.push(element.expression);
@@ -8657,7 +6794,7 @@ class NgModuleDecoratorHandler {
                 if (exp === null) {
                     continue;
                 }
-                if (ts__default["default"].isArrayLiteralExpression(exp)) {
+                if (ts.isArrayLiteralExpression(exp)) {
                     // If array expression then add it entry-by-entry to the injector imports
                     if (exp.elements) {
                         injectorMetadata.imports.push(...exp.elements.map((n) => new checker.WrappedNodeExpr(n)));
@@ -8673,7 +6810,7 @@ class NgModuleDecoratorHandler {
             name,
             type,
             typeArgumentCount: 0,
-            deps: getValidConstructorDependencies(node, this.reflector, this.isCore),
+            deps: checker.getValidConstructorDependencies(node, this.reflector, this.isCore),
             target: checker.FactoryTarget.NgModule,
         };
         // Remote scoping is used when adding imports to a component file would create a cycle. In such
@@ -8762,7 +6899,7 @@ class NgModuleDecoratorHandler {
             diagnostics.push(...scopeDiagnostics);
         }
         if (analysis.providersRequiringFactory !== null) {
-            const providerDiagnostics = getProviderDiagnostics(analysis.providersRequiringFactory, analysis.providers, this.injectableRegistry);
+            const providerDiagnostics = checker.getProviderDiagnostics(analysis.providersRequiringFactory, analysis.providers, this.injectableRegistry);
             diagnostics.push(...providerDiagnostics);
         }
         const data = {
@@ -9002,7 +7139,7 @@ class NgModuleDecoratorHandler {
                     dynamicValues: [],
                 };
             }
-            throw createValueHasWrongTypeError(expr, resolvedList, `Expected array when reading the NgModule.${arrayName} of ${className}`);
+            throw checker.createValueHasWrongTypeError(expr, resolvedList, `Expected array when reading the NgModule.${arrayName} of ${className}`);
         }
         for (let idx = 0; idx < resolvedList.length; idx++) {
             let entry = resolvedList[idx];
@@ -9028,7 +7165,7 @@ class NgModuleDecoratorHandler {
             }
             else if (entry instanceof checker.Reference) {
                 if (!this.isClassDeclarationReference(entry)) {
-                    throw createValueHasWrongTypeError(entry.node, entry, `Value at position ${absoluteIndex} in the NgModule.${arrayName} of ${className} is not a class`);
+                    throw checker.createValueHasWrongTypeError(entry.node, entry, `Value at position ${absoluteIndex} in the NgModule.${arrayName} of ${className} is not a class`);
                 }
                 refList.push(entry);
                 absoluteIndex += 1;
@@ -9039,7 +7176,7 @@ class NgModuleDecoratorHandler {
             }
             else {
                 // TODO(alxhub): Produce a better diagnostic here - the array index may be an inner array.
-                throw createValueHasWrongTypeError(expr, entry, `Value at position ${absoluteIndex} in the NgModule.${arrayName} of ${className} is not a reference`);
+                throw checker.createValueHasWrongTypeError(expr, entry, `Value at position ${absoluteIndex} in the NgModule.${arrayName} of ${className} is not a reference`);
             }
         }
         return {
@@ -9056,8 +7193,8 @@ function isNgModule(node, compilation) {
  * Checks whether the given `ts.Expression` is the expression `module.id`.
  */
 function isModuleIdExpression(expr) {
-    return (ts__default["default"].isPropertyAccessExpression(expr) &&
-        ts__default["default"].isIdentifier(expr.expression) &&
+    return (ts.isPropertyAccessExpression(expr) &&
+        ts.isIdentifier(expr.expression) &&
         expr.expression.text === 'module' &&
         expr.name.text === 'id');
 }
@@ -9129,8 +7266,8 @@ function extractTemplate(node, template, evaluator, depTracker, resourceLoader, 
         let escapedString = false;
         let sourceMapUrl;
         // We only support SourceMaps for inline templates that are simple string literals.
-        if (ts__default["default"].isStringLiteral(template.expression) ||
-            ts__default["default"].isNoSubstitutionTemplateLiteral(template.expression)) {
+        if (ts.isStringLiteral(template.expression) ||
+            ts.isNoSubstitutionTemplateLiteral(template.expression)) {
             // the start and end of the `templateExpr` node includes the quotation marks, which we must
             // strip
             sourceParseRange = getTemplateRange(template.expression);
@@ -9146,14 +7283,14 @@ function extractTemplate(node, template, evaluator, depTracker, resourceLoader, 
         else {
             const resolvedTemplate = evaluator.evaluate(template.expression);
             // The identifier used for @Component.template cannot be resolved in local compilation mode. An error specific to this situation is generated.
-            assertLocalCompilationUnresolvedConst(compilationMode, resolvedTemplate, template.expression, 'Unresolved identifier found for @Component.template field! ' +
+            checker.assertLocalCompilationUnresolvedConst(compilationMode, resolvedTemplate, template.expression, 'Unresolved identifier found for @Component.template field! ' +
                 'Did you import this identifier from a file outside of the compilation unit? ' +
                 'This is not allowed when Angular compiler runs in local mode. ' +
                 'Possible solutions: 1) Move the declaration into a file within the ' +
                 'compilation unit, 2) Inline the template, 3) Move the template into ' +
                 'a separate .html file and include it using @Component.templateUrl');
             if (typeof resolvedTemplate !== 'string') {
-                throw createValueHasWrongTypeError(template.expression, resolvedTemplate, 'template must be a string');
+                throw checker.createValueHasWrongTypeError(template.expression, resolvedTemplate, 'template must be a string');
             }
             // We do not parse the template directly from the source file using a lexer range, so
             // the template source and content are set to the statically resolved template.
@@ -9291,7 +7428,7 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
         const expr = component.get('preserveWhitespaces');
         const value = evaluator.evaluate(expr);
         if (typeof value !== 'boolean') {
-            throw createValueHasWrongTypeError(expr, value, 'preserveWhitespaces must be a boolean');
+            throw checker.createValueHasWrongTypeError(expr, value, 'preserveWhitespaces must be a boolean');
         }
         preserveWhitespaces = value;
     }
@@ -9302,7 +7439,7 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
         if (!Array.isArray(value) ||
             value.length !== 2 ||
             !value.every((element) => typeof element === 'string')) {
-            throw createValueHasWrongTypeError(expr, value, 'interpolation must be an array with 2 elements of string type');
+            throw checker.createValueHasWrongTypeError(expr, value, 'interpolation must be an array with 2 elements of string type');
         }
         interpolationConfig = checker.InterpolationConfig.fromArray(value);
     }
@@ -9310,7 +7447,7 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
         const templateUrlExpr = component.get('templateUrl');
         const templateUrl = evaluator.evaluate(templateUrlExpr);
         if (typeof templateUrl !== 'string') {
-            throw createValueHasWrongTypeError(templateUrlExpr, templateUrl, 'templateUrl must be a string');
+            throw checker.createValueHasWrongTypeError(templateUrlExpr, templateUrl, 'templateUrl must be a string');
         }
         try {
             const resourceUrl = resourceLoader.resolve(templateUrl, containingFile);
@@ -9352,7 +7489,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
         const templateUrlExpr = component.get('templateUrl');
         const templateUrl = evaluator.evaluate(templateUrlExpr);
         if (typeof templateUrl !== 'string') {
-            throw createValueHasWrongTypeError(templateUrlExpr, templateUrl, 'templateUrl must be a string');
+            throw checker.createValueHasWrongTypeError(templateUrlExpr, templateUrl, 'templateUrl must be a string');
         }
         try {
             const resourceUrl = resourceLoader.resolve(templateUrl, containingFile);
@@ -9393,7 +7530,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
 }
 function getTemplateRange(templateExpr) {
     const startPos = templateExpr.getStart() + 1;
-    const { line, character } = ts__default["default"].getLineAndCharacterOfPosition(templateExpr.getSourceFile(), startPos);
+    const { line, character } = ts.getLineAndCharacterOfPosition(templateExpr.getSourceFile(), startPos);
     return {
         startPos,
         startLine: line,
@@ -9444,7 +7581,7 @@ function transformDecoratorResources(dec, component, styles, template) {
     // Set the `template` property if the `templateUrl` property is set.
     if (metadata.has('templateUrl')) {
         metadata.delete('templateUrl');
-        metadata.set('template', ts__default["default"].factory.createStringLiteral(template.content));
+        metadata.set('template', ts.factory.createStringLiteral(template.content));
     }
     if (metadata.has('styleUrls') || metadata.has('styleUrl') || metadata.has('styles')) {
         metadata.delete('styles');
@@ -9453,22 +7590,22 @@ function transformDecoratorResources(dec, component, styles, template) {
         if (styles.length > 0) {
             const styleNodes = styles.reduce((result, style) => {
                 if (style.trim().length > 0) {
-                    result.push(ts__default["default"].factory.createStringLiteral(style));
+                    result.push(ts.factory.createStringLiteral(style));
                 }
                 return result;
             }, []);
             if (styleNodes.length > 0) {
-                metadata.set('styles', ts__default["default"].factory.createArrayLiteralExpression(styleNodes));
+                metadata.set('styles', ts.factory.createArrayLiteralExpression(styleNodes));
             }
         }
     }
     // Convert the metadata to TypeScript AST object literal element nodes.
     const newMetadataFields = [];
     for (const [name, value] of metadata.entries()) {
-        newMetadataFields.push(ts__default["default"].factory.createPropertyAssignment(name, value));
+        newMetadataFields.push(ts.factory.createPropertyAssignment(name, value));
     }
     // Return the original decorator with the overridden metadata argument.
-    return { ...dec, args: [ts__default["default"].factory.createObjectLiteralExpression(newMetadataFields)] };
+    return { ...dec, args: [ts.factory.createObjectLiteralExpression(newMetadataFields)] };
 }
 function extractComponentStyleUrls(evaluator, component) {
     const styleUrlsExpr = component.get('styleUrls');
@@ -9483,7 +7620,7 @@ function extractComponentStyleUrls(evaluator, component) {
     if (styleUrlExpr !== undefined) {
         const styleUrl = evaluator.evaluate(styleUrlExpr);
         if (typeof styleUrl !== 'string') {
-            throw createValueHasWrongTypeError(styleUrlExpr, styleUrl, 'styleUrl must be a string');
+            throw checker.createValueHasWrongTypeError(styleUrlExpr, styleUrl, 'styleUrl must be a string');
         }
         return [
             {
@@ -9497,15 +7634,15 @@ function extractComponentStyleUrls(evaluator, component) {
 }
 function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
     const styleUrls = [];
-    if (ts__default["default"].isArrayLiteralExpression(styleUrlsExpr)) {
+    if (ts.isArrayLiteralExpression(styleUrlsExpr)) {
         for (const styleUrlExpr of styleUrlsExpr.elements) {
-            if (ts__default["default"].isSpreadElement(styleUrlExpr)) {
+            if (ts.isSpreadElement(styleUrlExpr)) {
                 styleUrls.push(...extractStyleUrlsFromExpression(evaluator, styleUrlExpr.expression));
             }
             else {
                 const styleUrl = evaluator.evaluate(styleUrlExpr);
                 if (typeof styleUrl !== 'string') {
-                    throw createValueHasWrongTypeError(styleUrlExpr, styleUrl, 'styleUrl must be a string');
+                    throw checker.createValueHasWrongTypeError(styleUrlExpr, styleUrl, 'styleUrl must be a string');
                 }
                 styleUrls.push({
                     url: styleUrl,
@@ -9518,7 +7655,7 @@ function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
     else {
         const evaluatedStyleUrls = evaluator.evaluate(styleUrlsExpr);
         if (!isStringArray(evaluatedStyleUrls)) {
-            throw createValueHasWrongTypeError(styleUrlsExpr, evaluatedStyleUrls, 'styleUrls must be an array of strings');
+            throw checker.createValueHasWrongTypeError(styleUrlsExpr, evaluatedStyleUrls, 'styleUrls must be an array of strings');
         }
         for (const styleUrl of evaluatedStyleUrls) {
             styleUrls.push({
@@ -9533,16 +7670,16 @@ function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
 function extractInlineStyleResources(component) {
     const styles = new Set();
     function stringLiteralElements(array) {
-        return array.elements.filter((e) => ts__default["default"].isStringLiteralLike(e));
+        return array.elements.filter((e) => ts.isStringLiteralLike(e));
     }
     const stylesExpr = component.get('styles');
     if (stylesExpr !== undefined) {
-        if (ts__default["default"].isArrayLiteralExpression(stylesExpr)) {
+        if (ts.isArrayLiteralExpression(stylesExpr)) {
             for (const expression of stringLiteralElements(stylesExpr)) {
                 styles.add({ path: null, expression });
             }
         }
-        else if (ts__default["default"].isStringLiteralLike(stylesExpr)) {
+        else if (ts.isStringLiteralLike(stylesExpr)) {
             styles.add({ path: null, expression: stylesExpr });
         }
     }
@@ -9667,7 +7804,7 @@ function validateAndFlattenComponentImports(imports, expr, isDeferred) {
         ? `'deferredImports' must be an array of components, directives, or pipes.`
         : `'imports' must be an array of components, directives, pipes, or NgModules.`;
     if (!Array.isArray(imports)) {
-        const error = createValueHasWrongTypeError(expr, imports, errorMessage).toDiagnostic();
+        const error = checker.createValueHasWrongTypeError(expr, imports, errorMessage).toDiagnostic();
         return {
             imports: [],
             diagnostics: [error],
@@ -9685,7 +7822,7 @@ function validateAndFlattenComponentImports(imports, expr, isDeferred) {
                 flattened.push(ref);
             }
             else {
-                diagnostics.push(createValueHasWrongTypeError(ref.getOriginForDiagnostics(expr), ref, errorMessage).toDiagnostic());
+                diagnostics.push(checker.createValueHasWrongTypeError(ref.getOriginForDiagnostics(expr), ref, errorMessage).toDiagnostic());
             }
         }
         else if (isLikelyModuleWithProviders(ref)) {
@@ -9701,7 +7838,7 @@ function validateAndFlattenComponentImports(imports, expr, isDeferred) {
                 `consider importing them in the application bootstrap instead.`));
         }
         else {
-            diagnostics.push(createValueHasWrongTypeError(expr, imports, errorMessage).toDiagnostic());
+            diagnostics.push(checker.createValueHasWrongTypeError(expr, imports, errorMessage).toDiagnostic());
         }
     }
     return { imports: flattened, diagnostics };
@@ -9862,11 +7999,11 @@ class ShimAdapter {
             // .tsx.
             let baseFileName = checker.absoluteFrom(prefix + '.ts');
             // Retrieve the original file for which the shim will be generated.
-            let inputFile = this.delegate.getSourceFile(baseFileName, ts__default["default"].ScriptTarget.Latest);
+            let inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
             if (inputFile === undefined) {
                 // No .ts file by that name - try .tsx.
                 baseFileName = checker.absoluteFrom(prefix + '.tsx');
-                inputFile = this.delegate.getSourceFile(baseFileName, ts__default["default"].ScriptTarget.Latest);
+                inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
             }
             if (inputFile === undefined || checker.isShim(inputFile)) {
                 // This isn't a shim after all since there is no original file which would have triggered
@@ -9979,7 +8116,7 @@ class ShimReferenceTagger {
  * If a new method is added to `ts.CompilerHost` which is not delegated, a type error will be
  * generated for this class.
  */
-class DelegatingCompilerHost$1 {
+let DelegatingCompilerHost$1 = class DelegatingCompilerHost {
     delegate;
     createHash;
     directoryExists;
@@ -10047,7 +8184,7 @@ class DelegatingCompilerHost$1 {
             ? this.delegate[name].bind(this.delegate)
             : undefined;
     }
-}
+};
 /**
  * A `ts.CompilerHost` which augments source files.
  */
@@ -10155,7 +8292,7 @@ class TsCreateProgramDriver {
             this.sfMap.clear();
         }
         for (const [filePath, { newText, originalFile }] of contents.entries()) {
-            const sf = ts__default["default"].createSourceFile(filePath, newText, ts__default["default"].ScriptTarget.Latest, true);
+            const sf = ts.createSourceFile(filePath, newText, ts.ScriptTarget.Latest, true);
             if (originalFile !== null) {
                 sf[checker.NgOriginalFile] = originalFile;
             }
@@ -10166,7 +8303,7 @@ class TsCreateProgramDriver {
         // Retag the old program's `ts.SourceFile`s with shim tags, to allow TypeScript to reuse the
         // most data.
         checker.retagAllTsFiles(oldProgram);
-        this.program = ts__default["default"].createProgram({
+        this.program = ts.createProgram({
             host,
             rootNames: this.program.getRootFileNames(),
             options: this.options,
@@ -10197,9 +8334,9 @@ class TsCreateProgramDriver {
  * @param debugInfo Compiled `setClassDebugInfo` expression, if any.
  */
 function extractHmrDependencies(node, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator) {
-    const name = ts__default["default"].isClassDeclaration(node) && node.name ? node.name.text : null;
+    const name = ts.isClassDeclaration(node) && node.name ? node.name.text : null;
     const visitor = new PotentialTopLevelReadsVisitor();
-    const sourceFile = ts__default["default"].getOriginalNode(node).getSourceFile();
+    const sourceFile = ts.getOriginalNode(node).getSourceFile();
     // Visit all of the compiled expressions to look for potential
     // local references that would have to be retained.
     definition.expression.visitExpression(visitor, null);
@@ -10286,23 +8423,23 @@ function getTopLevelDeclarationNames(sourceFile) {
     for (const node of sourceFile.statements) {
         // Class, function and const enum declarations need to be captured since they correspond
         // to runtime code. Intentionally excludes interfaces and type declarations.
-        if (ts__default["default"].isClassDeclaration(node) ||
-            ts__default["default"].isFunctionDeclaration(node) ||
-            ts__default["default"].isEnumDeclaration(node)) {
+        if (ts.isClassDeclaration(node) ||
+            ts.isFunctionDeclaration(node) ||
+            ts.isEnumDeclaration(node)) {
             if (node.name) {
                 results.add(node.name.text);
             }
             continue;
         }
         // Variable declarations.
-        if (ts__default["default"].isVariableStatement(node)) {
+        if (ts.isVariableStatement(node)) {
             for (const decl of node.declarationList.declarations) {
                 trackBindingName(decl.name, results);
             }
             continue;
         }
         // Import declarations.
-        if (ts__default["default"].isImportDeclaration(node) && node.importClause) {
+        if (ts.isImportDeclaration(node) && node.importClause) {
             const importClause = node.importClause;
             // Skip over type-only imports since they won't be emitted to JS.
             if (importClause.isTypeOnly) {
@@ -10314,7 +8451,7 @@ function getTopLevelDeclarationNames(sourceFile) {
             }
             if (importClause.namedBindings) {
                 const namedBindings = importClause.namedBindings;
-                if (ts__default["default"].isNamespaceImport(namedBindings)) {
+                if (ts.isNamespaceImport(namedBindings)) {
                     // import * as foo from 'foo';
                     results.add(namedBindings.name.text);
                 }
@@ -10338,12 +8475,12 @@ function getTopLevelDeclarationNames(sourceFile) {
  * @param results Set to which to add the matches.
  */
 function trackBindingName(node, results) {
-    if (ts__default["default"].isIdentifier(node)) {
+    if (ts.isIdentifier(node)) {
         results.add(node.text);
     }
     else {
         for (const el of node.elements) {
-            if (!ts__default["default"].isOmittedExpression(el)) {
+            if (!ts.isOmittedExpression(el)) {
                 trackBindingName(el.name, results);
             }
         }
@@ -10354,7 +8491,7 @@ function trackBindingName(node, results) {
  * The reads are "potential", because the visitor doesn't account for local variables
  * inside functions.
  */
-class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
+class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor$1 {
     allReads = new Set();
     namespaceReads = new Set();
     visitExternalExpr(ast, context) {
@@ -10378,11 +8515,11 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
      * @param node Node from which to start the traversal.
      */
     addAllTopLevelIdentifiers = (node) => {
-        if (ts__default["default"].isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
+        if (ts.isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
             this.allReads.add(node);
         }
         else {
-            ts__default["default"].forEachChild(node, this.addAllTopLevelIdentifiers);
+            ts.forEachChild(node, this.addAllTopLevelIdentifiers);
         }
     };
     /**
@@ -10403,84 +8540,84 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
         }
         // Unwrap parenthesized identifiers, but use the closest parenthesized expression
         // as the reference node so that we can check cases like `{prop: ((value))}`.
-        if (ts__default["default"].isParenthesizedExpression(parent) && parent.expression === node) {
-            while (parent && ts__default["default"].isParenthesizedExpression(parent)) {
+        if (ts.isParenthesizedExpression(parent) && parent.expression === node) {
+            while (parent && ts.isParenthesizedExpression(parent)) {
                 node = parent;
                 parent = parent.parent;
             }
         }
         // Identifier referenced at the top level. Unlikely.
-        if (ts__default["default"].isSourceFile(parent)) {
+        if (ts.isSourceFile(parent)) {
             return true;
         }
         // Identifier used inside a call is only top-level if it's an argument.
         // This also covers decorators since their expression is usually a call.
-        if (ts__default["default"].isCallExpression(parent)) {
+        if (ts.isCallExpression(parent)) {
             return parent.expression === node || parent.arguments.includes(node);
         }
         // Identifier used in a nested expression is only top-level if it's the actual expression.
-        if (ts__default["default"].isExpressionStatement(parent) ||
-            ts__default["default"].isPropertyAccessExpression(parent) ||
-            ts__default["default"].isComputedPropertyName(parent) ||
-            ts__default["default"].isTemplateSpan(parent) ||
-            ts__default["default"].isSpreadAssignment(parent) ||
-            ts__default["default"].isSpreadElement(parent) ||
-            ts__default["default"].isAwaitExpression(parent) ||
-            ts__default["default"].isNonNullExpression(parent) ||
-            ts__default["default"].isIfStatement(parent) ||
-            ts__default["default"].isDoStatement(parent) ||
-            ts__default["default"].isWhileStatement(parent) ||
-            ts__default["default"].isSwitchStatement(parent) ||
-            ts__default["default"].isCaseClause(parent) ||
-            ts__default["default"].isThrowStatement(parent) ||
-            ts__default["default"].isNewExpression(parent)) {
+        if (ts.isExpressionStatement(parent) ||
+            ts.isPropertyAccessExpression(parent) ||
+            ts.isComputedPropertyName(parent) ||
+            ts.isTemplateSpan(parent) ||
+            ts.isSpreadAssignment(parent) ||
+            ts.isSpreadElement(parent) ||
+            ts.isAwaitExpression(parent) ||
+            ts.isNonNullExpression(parent) ||
+            ts.isIfStatement(parent) ||
+            ts.isDoStatement(parent) ||
+            ts.isWhileStatement(parent) ||
+            ts.isSwitchStatement(parent) ||
+            ts.isCaseClause(parent) ||
+            ts.isThrowStatement(parent) ||
+            ts.isNewExpression(parent)) {
             return parent.expression === node;
         }
         // Identifier used in an array is only top-level if it's one of the elements.
-        if (ts__default["default"].isArrayLiteralExpression(parent)) {
+        if (ts.isArrayLiteralExpression(parent)) {
             return parent.elements.includes(node);
         }
         // If the parent is an initialized node, the identifier is
         // at the top level if it's the initializer itself.
-        if (ts__default["default"].isPropertyAssignment(parent) ||
-            ts__default["default"].isParameter(parent) ||
-            ts__default["default"].isBindingElement(parent) ||
-            ts__default["default"].isPropertyDeclaration(parent) ||
-            ts__default["default"].isEnumMember(parent)) {
+        if (ts.isPropertyAssignment(parent) ||
+            ts.isParameter(parent) ||
+            ts.isBindingElement(parent) ||
+            ts.isPropertyDeclaration(parent) ||
+            ts.isEnumMember(parent)) {
             return parent.initializer === node;
         }
         // Identifier in a function is top level if it's either the name or the initializer.
-        if (ts__default["default"].isVariableDeclaration(parent)) {
+        if (ts.isVariableDeclaration(parent)) {
             return parent.name === node || parent.initializer === node;
         }
         // Identifier in a declaration is only top level if it's the name.
         // In shorthand assignments the name is also the value.
-        if (ts__default["default"].isClassDeclaration(parent) ||
-            ts__default["default"].isFunctionDeclaration(parent) ||
-            ts__default["default"].isShorthandPropertyAssignment(parent)) {
+        if (ts.isClassDeclaration(parent) ||
+            ts.isFunctionDeclaration(parent) ||
+            ts.isShorthandPropertyAssignment(parent)) {
             return parent.name === node;
         }
-        if (ts__default["default"].isElementAccessExpression(parent)) {
+        if (ts.isElementAccessExpression(parent)) {
             return parent.expression === node || parent.argumentExpression === node;
         }
-        if (ts__default["default"].isBinaryExpression(parent)) {
+        if (ts.isBinaryExpression(parent)) {
             return parent.left === node || parent.right === node;
         }
-        if (ts__default["default"].isForInStatement(parent) || ts__default["default"].isForOfStatement(parent)) {
+        if (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) {
             return parent.expression === node || parent.initializer === node;
         }
-        if (ts__default["default"].isForStatement(parent)) {
+        if (ts.isForStatement(parent)) {
             return (parent.condition === node || parent.initializer === node || parent.incrementor === node);
         }
-        if (ts__default["default"].isArrowFunction(parent)) {
+        if (ts.isArrowFunction(parent)) {
             return parent.body === node;
         }
         // It's unlikely that we'll run into imports/exports in this use case.
         // We handle them since it's simple and for completeness' sake.
-        if (ts__default["default"].isImportSpecifier(parent) || ts__default["default"].isExportSpecifier(parent)) {
+        if (ts.isImportSpecifier(parent) || ts.isExportSpecifier(parent)) {
             return (parent.propertyName || parent.name) === node;
         }
-        if (ts__default["default"].isConditionalExpression(parent)) {
+        if (ts.isConditionalExpression(parent)) {
             return parent.condition === node || parent.whenFalse === node || parent.whenTrue === node;
         }
         // Otherwise it's not top-level.
@@ -10498,15 +8635,15 @@ function isConstEnumReference(node, reflection) {
     const parent = node.parent;
     // Only check identifiers that are in the form of `Foo.bar` where `Foo` is the node being checked.
     if (!parent ||
-        !ts__default["default"].isPropertyAccessExpression(parent) ||
+        !ts.isPropertyAccessExpression(parent) ||
         parent.expression !== node ||
-        !ts__default["default"].isIdentifier(parent.name)) {
+        !ts.isIdentifier(parent.name)) {
         return false;
     }
     const declaration = reflection.getDeclarationOfIdentifier(node);
     return (declaration !== null &&
-        ts__default["default"].isEnumDeclaration(declaration.node) &&
-        !!declaration.node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.ConstKeyword));
+        ts.isEnumDeclaration(declaration.node) &&
+        !!declaration.node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ConstKeyword));
 }
 
 /*!
@@ -10532,7 +8669,7 @@ function extractHmrMetatadata(clazz, reflection, evaluator, compilerHost, rootDi
     if (!reflection.isClass(clazz)) {
         return null;
     }
-    const sourceFile = ts__default["default"].getOriginalNode(clazz).getSourceFile();
+    const sourceFile = ts.getOriginalNode(clazz).getSourceFile();
     const filePath = getProjectRelativePath(sourceFile.fileName, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
     const dependencies = extractHmrDependencies(clazz, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator);
@@ -10573,13 +8710,13 @@ function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, d
         rewriter: importRewriter,
     });
     const callback = compileHmrUpdateCallback(compilationResults, constantStatements, meta);
-    const sourceFile = ts__default["default"].getOriginalNode(declaration).getSourceFile();
+    const sourceFile = ts.getOriginalNode(declaration).getSourceFile();
     const node = checker.translateStatement(sourceFile, callback, importManager);
     // The output AST doesn't support modifiers so we have to emit to
     // TS and then update the declaration to add `export default`.
-    return ts__default["default"].factory.updateFunctionDeclaration(node, [
-        ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.ExportKeyword),
-        ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.DefaultKeyword),
+    return ts.factory.updateFunctionDeclaration(node, [
+        ts.factory.createToken(ts.SyntaxKind.ExportKeyword),
+        ts.factory.createToken(ts.SyntaxKind.DefaultKeyword),
     ], node.asteriskToken, node.name, node.typeParameters, node.parameters, node.type, node.body);
 }
 class HmrModuleImportRewriter {
@@ -10790,7 +8927,7 @@ class ComponentDecoratorHandler {
             let styles = null;
             // Order plus className allows inline styles to be identified per component by a preprocessor
             let orderOffset = 0;
-            const rawStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
+            const rawStyles = checker.parseDirectiveStyles(component, this.evaluator, this.compilationMode);
             if (rawStyles?.length) {
                 styles = await Promise.all(rawStyles.map((style) => this.resourceLoader.preprocessInline(style, {
                     type: 'style',
@@ -10828,7 +8965,7 @@ class ComponentDecoratorHandler {
         let isPoisoned = false;
         // @Component inherits @Directive, so begin by extracting the @Directive metadata and building
         // on it.
-        const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName(), this.strictStandalone, this.implicitStandaloneValue);
+        const directiveResult = checker.extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName(), this.strictStandalone, this.implicitStandaloneValue);
         // `extractDirectiveMetadata` returns `jitForced = true` when the `@Component` has
         // set `jit: true`. In this case, compilation of the decorator is skipped. Returning
         // an empty object signifies that no analysis was produced.
@@ -11006,7 +9143,7 @@ class ComponentDecoratorHandler {
                 path: checker.absoluteFrom(template.declaration.resolvedTemplateUrl),
                 expression: template.sourceMapping.node,
             };
-        const relativeTemplatePath = getProjectRelativePath(templateResource.path ?? ts__default["default"].getOriginalNode(node).getSourceFile().fileName, this.rootDirs, this.compilerHost);
+        const relativeTemplatePath = getProjectRelativePath(templateResource.path ?? ts.getOriginalNode(node).getSourceFile().fileName, this.rootDirs, this.compilerHost);
         // Figure out the set of styles. The ordering here is important: external resources (styleUrls)
         // precede inline styles, and styles defined in the template override styles defined in the
         // component.
@@ -11026,7 +9163,7 @@ class ComponentDecoratorHandler {
                     continue;
                 }
                 if (styleUrl.source === 2 /* ResourceTypeForDiagnostics.StylesheetFromDecorator */ &&
-                    ts__default["default"].isStringLiteralLike(styleUrl.expression)) {
+                    ts.isStringLiteralLike(styleUrl.expression)) {
                     // Only string literal values from the decorator are considered style resources
                     styleResources.add({
                         path: checker.absoluteFrom(resourceUrl),
@@ -11088,7 +9225,7 @@ class ComponentDecoratorHandler {
                 throw new Error('Inline resource processing requires asynchronous preanalyze.');
             }
             if (component.has('styles')) {
-                const litStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
+                const litStyles = checker.parseDirectiveStyles(component, this.evaluator, this.compilationMode);
                 if (litStyles !== null) {
                     inlineStyles = [...litStyles];
                     styles.push(...litStyles);
@@ -11250,7 +9387,7 @@ class ComponentDecoratorHandler {
         return null;
     }
     typeCheck(ctx, node, meta) {
-        if (this.typeCheckScopeRegistry === null || !ts__default["default"].isClassDeclaration(node)) {
+        if (this.typeCheckScopeRegistry === null || !ts.isClassDeclaration(node)) {
             return;
         }
         if (meta.isPoisoned && !this.usePoisonedData) {
@@ -11619,20 +9756,20 @@ class ComponentDecoratorHandler {
             }
             if (analysis.providersRequiringFactory !== null &&
                 analysis.meta.providers instanceof checker.WrappedNodeExpr) {
-                const providerDiagnostics = getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
+                const providerDiagnostics = checker.getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
                 diagnostics.push(...providerDiagnostics);
             }
             if (analysis.viewProvidersRequiringFactory !== null &&
                 analysis.meta.viewProviders instanceof checker.WrappedNodeExpr) {
-                const viewProviderDiagnostics = getProviderDiagnostics(analysis.viewProvidersRequiringFactory, analysis.meta.viewProviders.node, this.injectableRegistry);
+                const viewProviderDiagnostics = checker.getProviderDiagnostics(analysis.viewProvidersRequiringFactory, analysis.meta.viewProviders.node, this.injectableRegistry);
                 diagnostics.push(...viewProviderDiagnostics);
             }
-            const directiveDiagnostics = getDirectiveDiagnostics(node, this.injectableRegistry, this.evaluator, this.reflector, this.scopeRegistry, this.strictCtorDeps, 'Component');
+            const directiveDiagnostics = checker.getDirectiveDiagnostics(node, this.injectableRegistry, this.evaluator, this.reflector, this.scopeRegistry, this.strictCtorDeps, 'Component');
             if (directiveDiagnostics !== null) {
                 diagnostics.push(...directiveDiagnostics);
             }
             const hostDirectivesDiagnostics = analysis.hostDirectives && analysis.rawHostDirectives
-                ? validateHostDirectives(analysis.rawHostDirectives, analysis.hostDirectives, this.metaReader)
+                ? checker.validateHostDirectives(analysis.rawHostDirectives, analysis.hostDirectives, this.metaReader)
                 : null;
             if (hostDirectivesDiagnostics !== null) {
                 diagnostics.push(...hostDirectivesDiagnostics);
@@ -11861,12 +9998,12 @@ class ComponentDecoratorHandler {
      */
     collectExplicitlyDeferredSymbols(rawDeferredImports) {
         const deferredTypes = new Map();
-        if (!ts__default["default"].isArrayLiteralExpression(rawDeferredImports)) {
+        if (!ts.isArrayLiteralExpression(rawDeferredImports)) {
             return deferredTypes;
         }
         for (const element of rawDeferredImports.elements) {
             const node = checker.tryUnwrapForwardRef(element, this.reflector) || element;
-            if (!ts__default["default"].isIdentifier(node)) {
+            if (!ts.isIdentifier(node)) {
                 // Can't defer-load non-literal references.
                 continue;
             }
@@ -11961,12 +10098,12 @@ class ComponentDecoratorHandler {
      * candidates.
      */
     registerDeferrableCandidates(componentClassDecl, importsExpr, isDeferredImport, allDeferredDecls, eagerlyUsedDecls, resolutionData) {
-        if (!ts__default["default"].isArrayLiteralExpression(importsExpr)) {
+        if (!ts.isArrayLiteralExpression(importsExpr)) {
             return;
         }
         for (const element of importsExpr.elements) {
             const node = checker.tryUnwrapForwardRef(element, this.reflector) || element;
-            if (!ts__default["default"].isIdentifier(node)) {
+            if (!ts.isIdentifier(node)) {
                 // Can't defer-load non-literal references.
                 continue;
             }
@@ -12222,7 +10359,7 @@ class InjectableDecoratorHandler {
             return {};
         }
         if (requiresValidCtor(analysis.meta)) {
-            const diagnostic = checkInheritanceOfInjectable(node, this.injectableRegistry, this.reflector, this.evaluator, this.strictCtorDeps, 'Injectable');
+            const diagnostic = checker.checkInheritanceOfInjectable(node, this.injectableRegistry, this.reflector, this.evaluator, this.strictCtorDeps, 'Injectable');
             if (diagnostic !== null) {
                 return {
                     diagnostics: [diagnostic],
@@ -12294,7 +10431,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
         // Firstly make sure the decorator argument is an inline literal - if not, it's illegal to
         // transport references from one location to another. This is the problem that lowering
         // used to solve - if this restriction proves too undesirable we can re-implement lowering.
-        if (!ts__default["default"].isObjectLiteralExpression(metaNode)) {
+        if (!ts.isObjectLiteralExpression(metaNode)) {
             throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, metaNode, `@Injectable argument must be an object literal`);
         }
         // Resolve the fields of the literal into a map of field name to expression.
@@ -12305,7 +10442,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
         let deps = undefined;
         if ((meta.has('useClass') || meta.has('useFactory')) && meta.has('deps')) {
             const depsExpr = meta.get('deps');
-            if (!ts__default["default"].isArrayLiteralExpression(depsExpr)) {
+            if (!ts.isArrayLiteralExpression(depsExpr)) {
                 throw new checker.FatalDiagnosticError(checker.ErrorCode.VALUE_NOT_LITERAL, depsExpr, `@Injectable deps metadata must be an inline array`);
             }
             deps = depsExpr.elements.map((dep) => getDep(dep, reflector));
@@ -12357,22 +10494,22 @@ function extractInjectableCtorDeps(clazz, meta, decorator, reflector, isCore, st
         // constructor signature does not work for DI then a factory definition (ɵfac) that throws is
         // generated.
         if (strictCtorDeps && !checker.isAbstractClassDeclaration(clazz)) {
-            ctorDeps = getValidConstructorDependencies(clazz, reflector, isCore);
+            ctorDeps = checker.getValidConstructorDependencies(clazz, reflector, isCore);
         }
         else {
-            ctorDeps = unwrapConstructorDependencies(getConstructorDependencies(clazz, reflector, isCore));
+            ctorDeps = checker.unwrapConstructorDependencies(checker.getConstructorDependencies(clazz, reflector, isCore));
         }
         return ctorDeps;
     }
     else if (decorator.args.length === 1) {
-        const rawCtorDeps = getConstructorDependencies(clazz, reflector, isCore);
+        const rawCtorDeps = checker.getConstructorDependencies(clazz, reflector, isCore);
         if (strictCtorDeps && !checker.isAbstractClassDeclaration(clazz) && requiresValidCtor(meta)) {
             // Since use* was not provided for a concrete class, validate the deps according to
             // strictCtorDeps.
-            ctorDeps = validateConstructorDependencies(clazz, rawCtorDeps);
+            ctorDeps = checker.validateConstructorDependencies(clazz, rawCtorDeps);
         }
         else {
-            ctorDeps = unwrapConstructorDependencies(rawCtorDeps);
+            ctorDeps = checker.unwrapConstructorDependencies(rawCtorDeps);
         }
     }
     return ctorDeps;
@@ -12417,13 +10554,13 @@ function getDep(dep, reflector) {
         }
         return true;
     }
-    if (ts__default["default"].isArrayLiteralExpression(dep)) {
+    if (ts.isArrayLiteralExpression(dep)) {
         dep.elements.forEach((el) => {
             let isDecorator = false;
-            if (ts__default["default"].isIdentifier(el)) {
+            if (ts.isIdentifier(el)) {
                 isDecorator = maybeUpdateDecorator(el, reflector);
             }
-            else if (ts__default["default"].isNewExpression(el) && ts__default["default"].isIdentifier(el.expression)) {
+            else if (ts.isNewExpression(el) && ts.isIdentifier(el.expression)) {
                 const token = (el.arguments && el.arguments.length > 0 && el.arguments[0]) || undefined;
                 isDecorator = maybeUpdateDecorator(el.expression, reflector, token);
             }
@@ -12510,7 +10647,7 @@ class PipeDecoratorHandler {
             throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, '@Pipe must have exactly one argument');
         }
         const meta = checker.unwrapExpression(decorator.args[0]);
-        if (!ts__default["default"].isObjectLiteralExpression(meta)) {
+        if (!ts.isObjectLiteralExpression(meta)) {
             throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, '@Pipe must have a literal argument');
         }
         const pipe = checker.reflectObjectLiteral(meta);
@@ -12520,14 +10657,14 @@ class PipeDecoratorHandler {
         const pipeNameExpr = pipe.get('name');
         const pipeName = this.evaluator.evaluate(pipeNameExpr);
         if (typeof pipeName !== 'string') {
-            throw createValueHasWrongTypeError(pipeNameExpr, pipeName, `@Pipe.name must be a string`);
+            throw checker.createValueHasWrongTypeError(pipeNameExpr, pipeName, `@Pipe.name must be a string`);
         }
         let pure = true;
         if (pipe.has('pure')) {
             const expr = pipe.get('pure');
             const pureValue = this.evaluator.evaluate(expr);
             if (typeof pureValue !== 'boolean') {
-                throw createValueHasWrongTypeError(expr, pureValue, `@Pipe.pure must be a boolean`);
+                throw checker.createValueHasWrongTypeError(expr, pureValue, `@Pipe.pure must be a boolean`);
             }
             pure = pureValue;
         }
@@ -12536,7 +10673,7 @@ class PipeDecoratorHandler {
             const expr = pipe.get('standalone');
             const resolved = this.evaluator.evaluate(expr);
             if (typeof resolved !== 'boolean') {
-                throw createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
+                throw checker.createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
             }
             isStandalone = resolved;
             if (!isStandalone && this.strictStandalone) {
@@ -12550,7 +10687,7 @@ class PipeDecoratorHandler {
                     type,
                     typeArgumentCount: this.reflector.getGenericArityOfClass(clazz) || 0,
                     pipeName,
-                    deps: getValidConstructorDependencies(clazz, this.reflector, this.isCore),
+                    deps: checker.getValidConstructorDependencies(clazz, this.reflector, this.isCore),
                     pure,
                     isStandalone,
                 },
@@ -12588,7 +10725,7 @@ class PipeDecoratorHandler {
         if (duplicateDeclData !== null) {
             // This pipe was declared twice (or more).
             return {
-                diagnostics: [makeDuplicateDeclarationError(node, duplicateDeclData, 'Pipe')],
+                diagnostics: [checker.makeDuplicateDeclarationError(node, duplicateDeclData, 'Pipe')],
             };
         }
         return {};
@@ -12626,28 +10763,6 @@ class PipeDecoratorHandler {
 function isAngularDecorator(decorator, isCore) {
     return isCore || (decorator.import !== null && decorator.import.from === '@angular/core');
 }
-/*
- #####################################################################
-  Code below has been extracted from the tsickle decorator downlevel transformer
-  and a few local modifications have been applied:
-
-    1. Tsickle by default processed all decorators that had the `@Annotation` JSDoc.
-       We modified the transform to only be concerned with known Angular decorators.
-    2. Tsickle by default added `@nocollapse` to all generated `ctorParameters` properties.
-       We only do this when `annotateForClosureCompiler` is enabled.
-    3. Tsickle does not handle union types for dependency injection. i.e. if a injected type
-       is denoted with `@Optional`, the actual type could be set to `T | null`.
-       See: https://github.com/angular/angular-cli/commit/826803d0736b807867caff9f8903e508970ad5e4.
-    4. Tsickle relied on `emitDecoratorMetadata` to be set to `true`. This is due to a limitation
-       in TypeScript transformers that never has been fixed. We were able to work around this
-       limitation so that `emitDecoratorMetadata` doesn't need to be specified.
-       See: `patchAliasReferenceResolution` for more details.
-
-  Here is a link to the tsickle revision on which this transformer is based:
-  https://github.com/angular/tsickle/blob/fae06becb1570f491806060d83f29f2d50c43cdd/src/decorator_downlevel_transformer.ts
- #####################################################################
-*/
-const DECORATOR_INVOCATION_JSDOC_TYPE = '!Array<{type: !Function, args: (undefined|!Array<?>)}>';
 /**
  * Extracts the type of the decorator (the function or expression invoked), as well as all the
  * arguments passed to the decorator. Returns an AST with the form:
@@ -12659,21 +10774,21 @@ function extractMetadataFromSingleDecorator(decorator, diagnostics) {
     const metadataProperties = [];
     const expr = decorator.expression;
     switch (expr.kind) {
-        case ts__default["default"].SyntaxKind.Identifier:
+        case ts.SyntaxKind.Identifier:
             // The decorator was a plain @Foo.
-            metadataProperties.push(ts__default["default"].factory.createPropertyAssignment('type', expr));
+            metadataProperties.push(ts.factory.createPropertyAssignment('type', expr));
             break;
-        case ts__default["default"].SyntaxKind.CallExpression:
+        case ts.SyntaxKind.CallExpression:
             // The decorator was a call, like @Foo(bar).
             const call = expr;
-            metadataProperties.push(ts__default["default"].factory.createPropertyAssignment('type', call.expression));
+            metadataProperties.push(ts.factory.createPropertyAssignment('type', call.expression));
             if (call.arguments.length) {
                 const args = [];
                 for (const arg of call.arguments) {
                     args.push(arg);
                 }
-                const argsArrayLiteral = ts__default["default"].factory.createArrayLiteralExpression(ts__default["default"].factory.createNodeArray(args, true));
-                metadataProperties.push(ts__default["default"].factory.createPropertyAssignment('args', argsArrayLiteral));
+                const argsArrayLiteral = ts.factory.createArrayLiteralExpression(ts.factory.createNodeArray(args, true));
+                metadataProperties.push(ts.factory.createPropertyAssignment('args', argsArrayLiteral));
             }
             break;
         default:
@@ -12681,13 +10796,13 @@ function extractMetadataFromSingleDecorator(decorator, diagnostics) {
                 file: decorator.getSourceFile(),
                 start: decorator.getStart(),
                 length: decorator.getEnd() - decorator.getStart(),
-                messageText: `${ts__default["default"].SyntaxKind[decorator.kind]} not implemented in gathering decorator metadata.`,
-                category: ts__default["default"].DiagnosticCategory.Error,
+                messageText: `${ts.SyntaxKind[decorator.kind]} not implemented in gathering decorator metadata.`,
+                category: ts.DiagnosticCategory.Error,
                 code: 0,
             });
             break;
     }
-    return ts__default["default"].factory.createObjectLiteralExpression(metadataProperties);
+    return ts.factory.createObjectLiteralExpression(metadataProperties);
 }
 /**
  * createCtorParametersClassProperty creates a static 'ctorParameters' property containing
@@ -12706,45 +10821,26 @@ function createCtorParametersClassProperty(diagnostics, entityNameToExpression, 
     const params = [];
     for (const ctorParam of ctorParameters) {
         if (!ctorParam.type && ctorParam.decorators.length === 0) {
-            params.push(ts__default["default"].factory.createNull());
+            params.push(ts.factory.createNull());
             continue;
         }
         const paramType = ctorParam.type
             ? typeReferenceToExpression(entityNameToExpression, ctorParam.type)
             : undefined;
         const members = [
-            ts__default["default"].factory.createPropertyAssignment('type', paramType || ts__default["default"].factory.createIdentifier('undefined')),
+            ts.factory.createPropertyAssignment('type', paramType || ts.factory.createIdentifier('undefined')),
         ];
         const decorators = [];
         for (const deco of ctorParam.decorators) {
             decorators.push(extractMetadataFromSingleDecorator(deco, diagnostics));
         }
         if (decorators.length) {
-            members.push(ts__default["default"].factory.createPropertyAssignment('decorators', ts__default["default"].factory.createArrayLiteralExpression(decorators)));
+            members.push(ts.factory.createPropertyAssignment('decorators', ts.factory.createArrayLiteralExpression(decorators)));
         }
-        params.push(ts__default["default"].factory.createObjectLiteralExpression(members));
+        params.push(ts.factory.createObjectLiteralExpression(members));
     }
-    const initializer = ts__default["default"].factory.createArrowFunction(undefined, undefined, [], undefined, ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.EqualsGreaterThanToken), ts__default["default"].factory.createArrayLiteralExpression(params, true));
-    const ctorProp = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.StaticKeyword)], 'ctorParameters', undefined, undefined, initializer);
-    if (isClosureCompilerEnabled) {
-        ts__default["default"].setSyntheticLeadingComments(ctorProp, [
-            {
-                kind: ts__default["default"].SyntaxKind.MultiLineCommentTrivia,
-                text: [
-                    `*`,
-                    ` * @type {function(): !Array<(null|{`,
-                    ` *   type: ?,`,
-                    ` *   decorators: (undefined|${DECORATOR_INVOCATION_JSDOC_TYPE}),`,
-                    ` * })>}`,
-                    ` * @nocollapse`,
-                    ` `,
-                ].join('\n'),
-                pos: -1,
-                end: -1,
-                hasTrailingNewLine: true,
-            },
-        ]);
-    }
+    const initializer = ts.factory.createArrowFunction(undefined, undefined, [], undefined, ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken), ts.factory.createArrayLiteralExpression(params, true));
+    const ctorProp = ts.factory.createPropertyDeclaration([ts.factory.createToken(ts.SyntaxKind.StaticKeyword)], 'ctorParameters', undefined, undefined, initializer);
     return ctorProp;
 }
 /**
@@ -12757,36 +10853,36 @@ function createCtorParametersClassProperty(diagnostics, entityNameToExpression, 
  */
 function typeReferenceToExpression(entityNameToExpression, node) {
     let kind = node.kind;
-    if (ts__default["default"].isLiteralTypeNode(node)) {
+    if (ts.isLiteralTypeNode(node)) {
         // Treat literal types like their base type (boolean, string, number).
         kind = node.literal.kind;
     }
     switch (kind) {
-        case ts__default["default"].SyntaxKind.FunctionType:
-        case ts__default["default"].SyntaxKind.ConstructorType:
-            return ts__default["default"].factory.createIdentifier('Function');
-        case ts__default["default"].SyntaxKind.ArrayType:
-        case ts__default["default"].SyntaxKind.TupleType:
-            return ts__default["default"].factory.createIdentifier('Array');
-        case ts__default["default"].SyntaxKind.TypePredicate:
-        case ts__default["default"].SyntaxKind.TrueKeyword:
-        case ts__default["default"].SyntaxKind.FalseKeyword:
-        case ts__default["default"].SyntaxKind.BooleanKeyword:
-            return ts__default["default"].factory.createIdentifier('Boolean');
-        case ts__default["default"].SyntaxKind.StringLiteral:
-        case ts__default["default"].SyntaxKind.StringKeyword:
-            return ts__default["default"].factory.createIdentifier('String');
-        case ts__default["default"].SyntaxKind.ObjectKeyword:
-            return ts__default["default"].factory.createIdentifier('Object');
-        case ts__default["default"].SyntaxKind.NumberKeyword:
-        case ts__default["default"].SyntaxKind.NumericLiteral:
-            return ts__default["default"].factory.createIdentifier('Number');
-        case ts__default["default"].SyntaxKind.TypeReference:
+        case ts.SyntaxKind.FunctionType:
+        case ts.SyntaxKind.ConstructorType:
+            return ts.factory.createIdentifier('Function');
+        case ts.SyntaxKind.ArrayType:
+        case ts.SyntaxKind.TupleType:
+            return ts.factory.createIdentifier('Array');
+        case ts.SyntaxKind.TypePredicate:
+        case ts.SyntaxKind.TrueKeyword:
+        case ts.SyntaxKind.FalseKeyword:
+        case ts.SyntaxKind.BooleanKeyword:
+            return ts.factory.createIdentifier('Boolean');
+        case ts.SyntaxKind.StringLiteral:
+        case ts.SyntaxKind.StringKeyword:
+            return ts.factory.createIdentifier('String');
+        case ts.SyntaxKind.ObjectKeyword:
+            return ts.factory.createIdentifier('Object');
+        case ts.SyntaxKind.NumberKeyword:
+        case ts.SyntaxKind.NumericLiteral:
+            return ts.factory.createIdentifier('Number');
+        case ts.SyntaxKind.TypeReference:
             const typeRef = node;
             // Ignore any generic types, just return the base type.
             return entityNameToExpression(typeRef.typeName);
-        case ts__default["default"].SyntaxKind.UnionType:
-            const childTypeNodes = node.types.filter((t) => !(ts__default["default"].isLiteralTypeNode(t) && t.literal.kind === ts__default["default"].SyntaxKind.NullKeyword));
+        case ts.SyntaxKind.UnionType:
+            const childTypeNodes = node.types.filter((t) => !(ts.isLiteralTypeNode(t) && t.literal.kind === ts.SyntaxKind.NullKeyword));
             return childTypeNodes.length === 1
                 ? typeReferenceToExpression(entityNameToExpression, childTypeNodes[0])
                 : undefined;
@@ -12802,12 +10898,12 @@ function typeReferenceToExpression(entityNameToExpression, node) {
  * and x is now a value (the module object).
  */
 function symbolIsRuntimeValue(typeChecker, symbol) {
-    if (symbol.flags & ts__default["default"].SymbolFlags.Alias) {
+    if (symbol.flags & ts.SymbolFlags.Alias) {
         symbol = typeChecker.getAliasedSymbol(symbol);
     }
     // Note that const enums are a special case, because
     // while they have a value, they don't exist at runtime.
-    return (symbol.flags & ts__default["default"].SymbolFlags.Value & ts__default["default"].SymbolFlags.ConstEnumExcludes) !== 0;
+    return (symbol.flags & ts.SymbolFlags.Value & ts.SymbolFlags.ConstEnumExcludes) !== 0;
 }
 /**
  * Gets a transformer for downleveling Angular constructor parameter and property decorators.
@@ -12823,20 +10919,6 @@ function symbolIsRuntimeValue(typeChecker, symbol) {
  * @param shouldTransformClass Optional function to check if a given class should be transformed.
  */
 function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore, isClosureCompilerEnabled, shouldTransformClass) {
-    function addJSDocTypeAnnotation(node, jsdocType) {
-        if (!isClosureCompilerEnabled) {
-            return;
-        }
-        ts__default["default"].setSyntheticLeadingComments(node, [
-            {
-                kind: ts__default["default"].SyntaxKind.MultiLineCommentTrivia,
-                text: `* @type {${jsdocType}} `,
-                pos: -1,
-                end: -1,
-                hasTrailingNewLine: true,
-            },
-        ]);
-    }
     /**
      * createPropDecoratorsClassProperty creates a static 'propDecorators'
      * property containing type information for every property that has a
@@ -12852,11 +10934,10 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
         //  any[]}[] + `} = {\n`);
         const entries = [];
         for (const [name, decorators] of properties.entries()) {
-            entries.push(ts__default["default"].factory.createPropertyAssignment(name, ts__default["default"].factory.createArrayLiteralExpression(decorators.map((deco) => extractMetadataFromSingleDecorator(deco, diagnostics)))));
+            entries.push(ts.factory.createPropertyAssignment(name, ts.factory.createArrayLiteralExpression(decorators.map((deco) => extractMetadataFromSingleDecorator(deco, diagnostics)))));
         }
-        const initializer = ts__default["default"].factory.createObjectLiteralExpression(entries, true);
-        const prop = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.StaticKeyword)], 'propDecorators', undefined, undefined, initializer);
-        addJSDocTypeAnnotation(prop, `!Object<string, ${DECORATOR_INVOCATION_JSDOC_TYPE}>`);
+        const initializer = ts.factory.createObjectLiteralExpression(entries, true);
+        const prop = ts.factory.createPropertyDeclaration([ts.factory.createToken(ts.SyntaxKind.StaticKeyword)], 'propDecorators', undefined, undefined, initializer);
         return prop;
     }
     return (context) => {
@@ -12884,12 +10965,12 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
             }
             // If we deal with a qualified name, build up a property access expression
             // that could be used in the JavaScript output.
-            if (ts__default["default"].isQualifiedName(name)) {
+            if (ts.isQualifiedName(name)) {
                 const containerExpr = entityNameToExpression(name.left);
                 if (containerExpr === undefined) {
                     return undefined;
                 }
-                return ts__default["default"].factory.createPropertyAccessExpression(containerExpr, name.right);
+                return ts.factory.createPropertyAccessExpression(containerExpr, name.right);
             }
             const decl = symbol.declarations[0];
             // If the given entity name has been resolved to an alias import declaration,
@@ -12908,13 +10989,13 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
                 // We can help TypeScript and avoid this non-reliable resolution by using an identifier
                 // that is not type-only and is directly linked to the import alias declaration.
                 if (decl.name !== undefined) {
-                    return ts__default["default"].setOriginalNode(ts__default["default"].factory.createIdentifier(decl.name.text), decl.name);
+                    return ts.setOriginalNode(ts.factory.createIdentifier(decl.name.text), decl.name);
                 }
             }
             // Clone the original entity name identifier so that it can be used to reference
             // its value at runtime. This is used when the identifier is resolving to a file
             // local declaration (otherwise it would resolve to an alias import declaration).
-            return ts__default["default"].setOriginalNode(ts__default["default"].factory.createIdentifier(name.text), name);
+            return ts.setOriginalNode(ts.factory.createIdentifier(name.text), name);
         }
         /**
          * Transforms a class element. Returns a three tuple of name, transformed element, and
@@ -12922,7 +11003,7 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
          * element, or the element has an exotic name.
          */
         function transformClassElement(element) {
-            element = ts__default["default"].visitEachChild(element, decoratorDownlevelVisitor, context);
+            element = ts.visitEachChild(element, decoratorDownlevelVisitor, context);
             const decoratorsToKeep = [];
             const toLower = [];
             const decorators = host.getDecoratorsOfDeclaration(element) || [];
@@ -12938,7 +11019,7 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
             }
             if (!toLower.length)
                 return [undefined, element, []];
-            if (!element.name || !ts__default["default"].isIdentifier(element.name)) {
+            if (!element.name || !ts.isIdentifier(element.name)) {
                 // Method has a weird name, e.g.
                 //   [Symbol.foo]() {...}
                 diagnostics.push({
@@ -12946,15 +11027,15 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
                     start: element.getStart(),
                     length: element.getEnd() - element.getStart(),
                     messageText: `Cannot process decorators for class element with non-analyzable name.`,
-                    category: ts__default["default"].DiagnosticCategory.Error,
+                    category: ts.DiagnosticCategory.Error,
                     code: 0,
                 });
                 return [undefined, element, []];
             }
-            const elementModifiers = ts__default["default"].canHaveModifiers(element) ? ts__default["default"].getModifiers(element) : undefined;
+            const elementModifiers = ts.canHaveModifiers(element) ? ts.getModifiers(element) : undefined;
             let modifiers;
             if (decoratorsToKeep.length || elementModifiers?.length) {
-                modifiers = ts__default["default"].setTextRange(ts__default["default"].factory.createNodeArray([...decoratorsToKeep, ...(elementModifiers || [])]), element.modifiers);
+                modifiers = ts.setTextRange(ts.factory.createNodeArray([...decoratorsToKeep, ...(elementModifiers || [])]), element.modifiers);
             }
             return [element.name.text, cloneClassElementWithModifiers(element, modifiers), toLower];
         }
@@ -12963,7 +11044,7 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
          * information collected, consisting of decorators and optional type.
          */
         function transformConstructor(ctor) {
-            ctor = ts__default["default"].visitEachChild(ctor, decoratorDownlevelVisitor, context);
+            ctor = ts.visitEachChild(ctor, decoratorDownlevelVisitor, context);
             const newParameters = [];
             const oldParameters = ctor.parameters;
             const parametersInfo = [];
@@ -12991,14 +11072,14 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
                 parametersInfo.push(paramInfo);
                 // Must pass 'undefined' to avoid emitting decorator metadata.
                 let modifiers;
-                const paramModifiers = ts__default["default"].getModifiers(param);
+                const paramModifiers = ts.getModifiers(param);
                 if (decoratorsToKeep.length || paramModifiers?.length) {
                     modifiers = [...decoratorsToKeep, ...(paramModifiers || [])];
                 }
-                const newParam = ts__default["default"].factory.updateParameterDeclaration(param, modifiers, param.dotDotDotToken, param.name, param.questionToken, param.type, param.initializer);
+                const newParam = ts.factory.updateParameterDeclaration(param, modifiers, param.dotDotDotToken, param.name, param.questionToken, param.type, param.initializer);
                 newParameters.push(newParam);
             }
-            const updated = ts__default["default"].factory.updateConstructorDeclaration(ctor, ts__default["default"].getModifiers(ctor), newParameters, ctor.body);
+            const updated = ts.factory.updateConstructorDeclaration(ctor, ts.getModifiers(ctor), newParameters, ctor.body);
             return [updated, parametersInfo];
         }
         /**
@@ -13014,17 +11095,17 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
             let classParameters = null;
             for (const member of classDecl.members) {
                 switch (member.kind) {
-                    case ts__default["default"].SyntaxKind.PropertyDeclaration:
-                    case ts__default["default"].SyntaxKind.GetAccessor:
-                    case ts__default["default"].SyntaxKind.SetAccessor:
-                    case ts__default["default"].SyntaxKind.MethodDeclaration: {
+                    case ts.SyntaxKind.PropertyDeclaration:
+                    case ts.SyntaxKind.GetAccessor:
+                    case ts.SyntaxKind.SetAccessor:
+                    case ts.SyntaxKind.MethodDeclaration: {
                         const [name, newMember, decorators] = transformClassElement(member);
                         newMembers.push(newMember);
                         if (name)
                             decoratedProperties.set(name, decorators);
                         continue;
                     }
-                    case ts__default["default"].SyntaxKind.Constructor: {
+                    case ts.SyntaxKind.Constructor: {
                         const ctor = member;
                         if (!ctor.body)
                             break;
@@ -13034,7 +11115,7 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
                         continue;
                     }
                 }
-                newMembers.push(ts__default["default"].visitEachChild(member, decoratorDownlevelVisitor, context));
+                newMembers.push(ts.visitEachChild(member, decoratorDownlevelVisitor, context));
             }
             // Note: The `ReflectionHost.getDecoratorsOfDeclaration()` method will not
             // return all decorators, but only ones that could be possible Angular decorators.
@@ -13046,14 +11127,14 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
                 if (hasAngularDecorator || classParameters.some((p) => !!p.decorators.length)) {
                     // Capture constructor parameters if the class has Angular decorator applied,
                     // or if any of the parameters has decorators applied directly.
-                    newMembers.push(createCtorParametersClassProperty(diagnostics, entityNameToExpression, classParameters, isClosureCompilerEnabled));
+                    newMembers.push(createCtorParametersClassProperty(diagnostics, entityNameToExpression, classParameters));
                 }
             }
             if (decoratedProperties.size) {
                 newMembers.push(createPropDecoratorsClassProperty(diagnostics, decoratedProperties));
             }
-            const members = ts__default["default"].setTextRange(ts__default["default"].factory.createNodeArray(newMembers, classDecl.members.hasTrailingComma), classDecl.members);
-            return ts__default["default"].factory.updateClassDeclaration(classDecl, classDecl.modifiers, classDecl.name, classDecl.typeParameters, classDecl.heritageClauses, members);
+            const members = ts.setTextRange(ts.factory.createNodeArray(newMembers, classDecl.members.hasTrailingComma), classDecl.members);
+            return ts.factory.updateClassDeclaration(classDecl, classDecl.modifiers, classDecl.name, classDecl.typeParameters, classDecl.heritageClauses, members);
         }
         /**
          * Transformer visitor that looks for Angular decorators and replaces them with
@@ -13061,38 +11142,38 @@ function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore,
          * class declaration that are decorated with an Angular decorator.
          */
         function decoratorDownlevelVisitor(node) {
-            if (ts__default["default"].isClassDeclaration(node) &&
+            if (ts.isClassDeclaration(node) &&
                 (shouldTransformClass === undefined || shouldTransformClass(node))) {
                 return transformClassDeclaration(node);
             }
-            return ts__default["default"].visitEachChild(node, decoratorDownlevelVisitor, context);
+            return ts.visitEachChild(node, decoratorDownlevelVisitor, context);
         }
         return (sf) => {
             // Downlevel decorators and constructor parameter types. We will keep track of all
             // referenced constructor parameter types so that we can instruct TypeScript to
             // not elide their imports if they previously were only type-only.
-            return ts__default["default"].visitEachChild(sf, decoratorDownlevelVisitor, context);
+            return ts.visitEachChild(sf, decoratorDownlevelVisitor, context);
         };
     };
 }
 function cloneClassElementWithModifiers(node, modifiers) {
     let clone;
-    if (ts__default["default"].isMethodDeclaration(node)) {
-        clone = ts__default["default"].factory.createMethodDeclaration(modifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
+    if (ts.isMethodDeclaration(node)) {
+        clone = ts.factory.createMethodDeclaration(modifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
     }
-    else if (ts__default["default"].isPropertyDeclaration(node)) {
-        clone = ts__default["default"].factory.createPropertyDeclaration(modifiers, node.name, node.questionToken, node.type, node.initializer);
+    else if (ts.isPropertyDeclaration(node)) {
+        clone = ts.factory.createPropertyDeclaration(modifiers, node.name, node.questionToken, node.type, node.initializer);
     }
-    else if (ts__default["default"].isGetAccessor(node)) {
-        clone = ts__default["default"].factory.createGetAccessorDeclaration(modifiers, node.name, node.parameters, node.type, node.body);
+    else if (ts.isGetAccessor(node)) {
+        clone = ts.factory.createGetAccessorDeclaration(modifiers, node.name, node.parameters, node.type, node.body);
     }
-    else if (ts__default["default"].isSetAccessor(node)) {
-        clone = ts__default["default"].factory.createSetAccessorDeclaration(modifiers, node.name, node.parameters, node.body);
+    else if (ts.isSetAccessor(node)) {
+        clone = ts.factory.createSetAccessorDeclaration(modifiers, node.name, node.parameters, node.body);
     }
     else {
-        throw new Error(`Unsupported decorated member with kind ${ts__default["default"].SyntaxKind[node.kind]}`);
+        throw new Error(`Unsupported decorated member with kind ${ts.SyntaxKind[node.kind]}`);
     }
-    return ts__default["default"].setOriginalNode(clone, node);
+    return ts.setOriginalNode(clone, node);
 }
 
 /**
@@ -13102,7 +11183,7 @@ function cloneClassElementWithModifiers(node, modifiers) {
  * decorator downlevel transform.
  */
 function createSyntheticAngularCoreDecoratorAccess(factory, importManager, ngClassDecorator, sourceFile, decoratorName) {
-    const classDecoratorIdentifier = ts__default["default"].isIdentifier(ngClassDecorator.identifier)
+    const classDecoratorIdentifier = ts.isIdentifier(ngClassDecorator.identifier)
         ? ngClassDecorator.identifier
         : ngClassDecorator.identifier.expression;
     return factory.createPropertyAccessExpression(importManager.addImport({
@@ -13113,11 +11194,11 @@ function createSyntheticAngularCoreDecoratorAccess(factory, importManager, ngCla
     // The synthetic identifier may be checked later by the downlevel decorators
     // transform to resolve to an Angular import using `getSymbolAtLocation`. We trick
     // the transform to think it's not synthetic and comes from Angular core.
-    ts__default["default"].setOriginalNode(factory.createIdentifier(decoratorName), classDecoratorIdentifier));
+    ts.setOriginalNode(factory.createIdentifier(decoratorName), classDecoratorIdentifier));
 }
 /** Casts the given expression as `any`. */
 function castAsAny(factory, expr) {
-    return factory.createAsExpression(expr, factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+    return factory.createAsExpression(expr, factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
 }
 
 /**
@@ -13183,7 +11264,7 @@ const signalModelTransform = (member, sourceFile, host, factory, importTracker, 
     // Config is cast to `any` because `isSignal` will be private, and in case this
     // transform is used directly as a pre-compilation step, the decorator should
     // not fail. It is already validated now due to us parsing the input metadata.
-    factory.createAsExpression(inputConfig, factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword)), classDecorator, factory, sourceFile, importManager);
+    factory.createAsExpression(inputConfig, factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)), classDecorator, factory, sourceFile, importManager);
     const outputDecorator = createDecorator('Output', factory.createStringLiteral(modelMapping.output.bindingPropertyName), classDecorator, factory, sourceFile, importManager);
     return factory.updatePropertyDeclaration(member.node, [inputDecorator, outputDecorator, ...(member.node.modifiers ?? [])], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
@@ -13238,7 +11319,7 @@ const queryFunctionToDecorator = {
 const queryFunctionsTransforms = (member, sourceFile, host, factory, importTracker, importManager, classDecorator, isCore) => {
     const decorators = host.getDecoratorsOfDeclaration(member.node);
     // If the field already is decorated, we handle this gracefully and skip it.
-    const queryDecorators = decorators && checker.getAngularDecorators(decorators, queryDecoratorNames, isCore);
+    const queryDecorators = decorators && checker.getAngularDecorators(decorators, checker.queryDecoratorNames, isCore);
     if (queryDecorators !== null && queryDecorators.length > 0) {
         return member.node;
     }
@@ -13290,15 +11371,15 @@ function getInitializerApiJitTransform(host, importTracker, isCore, shouldTransf
     return (ctx) => {
         return (sourceFile) => {
             const importManager = new checker.ImportManager();
-            sourceFile = ts__default["default"].visitNode(sourceFile, createTransformVisitor(ctx, host, importManager, importTracker, isCore, shouldTransformClass), ts__default["default"].isSourceFile);
+            sourceFile = ts.visitNode(sourceFile, createTransformVisitor(ctx, host, importManager, importTracker, isCore, shouldTransformClass), ts.isSourceFile);
             return importManager.transformTsFile(ctx, sourceFile);
         };
     };
 }
 function createTransformVisitor(ctx, host, importManager, importTracker, isCore, shouldTransformClass) {
     const visitor = (node) => {
-        if (ts__default["default"].isClassDeclaration(node) && node.name !== undefined) {
-            const originalNode = ts__default["default"].getOriginalNode(node, ts__default["default"].isClassDeclaration);
+        if (ts.isClassDeclaration(node) && node.name !== undefined) {
+            const originalNode = ts.getOriginalNode(node, ts.isClassDeclaration);
             // Note: Attempt to detect the `angularDecorator` on the original node of the class.
             // That is because e.g. Tsickle or other transforms might have transformed the node
             // already to transform decorators.
@@ -13310,7 +11391,7 @@ function createTransformVisitor(ctx, host, importManager, importTracker, isCore,
                 let hasChanged = false;
                 const sourceFile = originalNode.getSourceFile();
                 const members = node.members.map((memberNode) => {
-                    if (!ts__default["default"].isPropertyDeclaration(memberNode)) {
+                    if (!ts.isPropertyDeclaration(memberNode)) {
                         return memberNode;
                     }
                     const member = checker.reflectClassMember(memberNode);
@@ -13332,7 +11413,7 @@ function createTransformVisitor(ctx, host, importManager, importTracker, isCore,
                 }
             }
         }
-        return ts__default["default"].visitEachChild(node, visitor, ctx);
+        return ts.visitEachChild(node, visitor, ctx);
     };
     return visitor;
 }
@@ -13520,7 +11601,7 @@ const MAX_TS_VERSION = '5.9.0';
  * The currently used version of TypeScript, which can be adjusted for testing purposes using
  * `setTypeScriptVersionForTesting` and `restoreTypeScriptVersionForTesting` below.
  */
-let tsVersion = ts__default["default"].version;
+let tsVersion = ts.version;
 /**
  * Checks whether a given version ∈ [minVersion, maxVersion[.
  * An error will be thrown when the given version ∉ [minVersion, maxVersion[.
@@ -13747,11 +11828,11 @@ class ImportGraph {
             const imports = new Set();
             // Look through the source file for import and export statements.
             for (const stmt of sf.statements) {
-                if ((!ts__default["default"].isImportDeclaration(stmt) && !ts__default["default"].isExportDeclaration(stmt)) ||
+                if ((!ts.isImportDeclaration(stmt) && !ts.isExportDeclaration(stmt)) ||
                     stmt.moduleSpecifier === undefined) {
                     continue;
                 }
-                if (ts__default["default"].isImportDeclaration(stmt) &&
+                if (ts.isImportDeclaration(stmt) &&
                     stmt.importClause !== undefined &&
                     isTypeOnlyImportClause(stmt.importClause)) {
                     // Exclude type-only imports as they are always elided, so they don't contribute to
@@ -13764,7 +11845,7 @@ class ImportGraph {
                     continue;
                 }
                 const moduleFile = symbol.valueDeclaration;
-                if (ts__default["default"].isSourceFile(moduleFile) && isLocalFile(moduleFile)) {
+                if (ts.isSourceFile(moduleFile) && isLocalFile(moduleFile)) {
                     // Record this local import.
                     imports.add(moduleFile);
                 }
@@ -13783,7 +11864,7 @@ function isTypeOnlyImportClause(node) {
     }
     // All the specifiers in the cause are type-only (e.g. `import {type a, type b} from '...'`).
     if (node.namedBindings !== undefined &&
-        ts__default["default"].isNamedImports(node.namedBindings) &&
+        ts.isNamedImports(node.namedBindings) &&
         node.namedBindings.elements.every((specifier) => specifier.isTypeOnly)) {
         return true;
     }
@@ -13886,10 +11967,10 @@ const decoratorExpression = /@(?=(Injectable|Component|Directive|Pipe|NgModule|I
 /** Gets the set of JsDoc tags applied to a node. */
 function extractJsDocTags(node) {
     const escapedNode = getEscapedNode(node);
-    return ts__default["default"].getJSDocTags(escapedNode).map((t) => {
+    return ts.getJSDocTags(escapedNode).map((t) => {
         return {
             name: t.tagName.getText(),
-            comment: unescapeAngularDecorators(ts__default["default"].getTextOfJSDocComment(t.comment) ?? ''),
+            comment: unescapeAngularDecorators(ts.getTextOfJSDocComment(t.comment) ?? ''),
         };
     });
 }
@@ -13902,11 +11983,11 @@ function extractJsDocDescription(node) {
     // If the node is a top-level statement (const, class, function, etc.), we will get
     // a `ts.JSDoc` here. If the node is a `ts.ParameterDeclaration`, we will get
     // a `ts.JSDocParameterTag`.
-    const commentOrTag = ts__default["default"].getJSDocCommentsAndTags(escapedNode).find((d) => {
-        return ts__default["default"].isJSDoc(d) || ts__default["default"].isJSDocParameterTag(d);
+    const commentOrTag = ts.getJSDocCommentsAndTags(escapedNode).find((d) => {
+        return ts.isJSDoc(d) || ts.isJSDocParameterTag(d);
     });
     const comment = commentOrTag?.comment ?? '';
-    const description = typeof comment === 'string' ? comment : (ts__default["default"].getTextOfJSDocComment(comment) ?? '');
+    const description = typeof comment === 'string' ? comment : (ts.getTextOfJSDocComment(comment) ?? '');
     return unescapeAngularDecorators(description);
 }
 /**
@@ -13915,7 +11996,7 @@ function extractJsDocDescription(node) {
  */
 function extractRawJsDoc(node) {
     // Assume that any node has at most one JsDoc block.
-    const comment = ts__default["default"].getJSDocCommentsAndTags(node).find(ts__default["default"].isJSDoc)?.getFullText() ?? '';
+    const comment = ts.getJSDocCommentsAndTags(node).find(ts.isJSDoc)?.getFullText() ?? '';
     return unescapeAngularDecorators(comment);
 }
 /**
@@ -13927,13 +12008,13 @@ function getEscapedNode(node) {
     // TODO(jelbourn): It's unclear whether we need to escape @param JsDoc, since they're unlikely
     //    to have an Angular decorator on the beginning of a line. If we do need to escape them,
     //    it will require some more complicated copying below.
-    if (ts__default["default"].isParameter(node)) {
+    if (ts.isParameter(node)) {
         return node;
     }
     const rawComment = extractRawJsDoc(node);
     const escaped = escapeAngularDecorators(rawComment);
-    const file = ts__default["default"].createSourceFile('x.ts', `${escaped}class X {}`, ts__default["default"].ScriptTarget.ES2020, true);
-    return file.statements.find((s) => ts__default["default"].isClassDeclaration(s));
+    const file = ts.createSourceFile('x.ts', `${escaped}class X {}`, ts.ScriptTarget.ES2020, true);
+    return file.statements.find((s) => ts.isClassDeclaration(s));
 }
 /** Escape the `@` character for Angular decorators. */
 function escapeAngularDecorators(comment) {
@@ -13946,7 +12027,7 @@ function unescapeAngularDecorators(comment) {
 
 /** Gets the string representation of a node's resolved type. */
 function extractResolvedTypeString(node, checker) {
-    return checker.typeToString(checker.getTypeAtLocation(node), undefined, ts__default["default"].TypeFormatFlags.NoTruncation);
+    return checker.typeToString(checker.getTypeAtLocation(node), undefined, ts.TypeFormatFlags.NoTruncation);
 }
 
 class FunctionExtractor {
@@ -13965,12 +12046,12 @@ class FunctionExtractor {
         const returnType = signature
             ? this.typeChecker.typeToString(this.typeChecker.getReturnTypeOfSignature(signature), undefined, 
             // This ensures that e.g. `T | undefined` is not reduced to `T`.
-            ts__default["default"].TypeFormatFlags.NoTypeReduction | ts__default["default"].TypeFormatFlags.NoTruncation)
+            ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation)
             : 'unknown';
         const implementation = findImplementationOfFunction(this.exportDeclaration, this.typeChecker) ??
             this.exportDeclaration;
         const type = this.typeChecker.getTypeAtLocation(this.exportDeclaration);
-        const overloads = ts__default["default"].isConstructorDeclaration(this.exportDeclaration)
+        const overloads = ts.isConstructorDeclaration(this.exportDeclaration)
             ? constructorOverloads(this.exportDeclaration, this.typeChecker)
             : extractCallSignatures(this.name, this.typeChecker, type);
         const jsdocsTags = extractJsDocTags(implementation);
@@ -13980,7 +12061,7 @@ class FunctionExtractor {
             signatures: overloads,
             implementation: {
                 params: extractAllParams(implementation.parameters, this.typeChecker),
-                isNewType: ts__default["default"].isConstructSignatureDeclaration(implementation),
+                isNewType: ts.isConstructSignatureDeclaration(implementation),
                 returnType,
                 returnDescription: jsdocsTags.find((tag) => tag.name === 'returns')?.comment,
                 generics: extractGenerics(implementation),
@@ -14000,7 +12081,7 @@ class FunctionExtractor {
 function constructorOverloads(constructorDeclaration, typeChecker) {
     const classDeclaration = constructorDeclaration.parent;
     const constructorNode = classDeclaration.members.filter((member) => {
-        return ts__default["default"].isConstructorDeclaration(member) && !member.body;
+        return ts.isConstructorDeclaration(member) && !member.body;
     });
     return constructorNode.map((n) => {
         return {
@@ -14031,10 +12112,10 @@ function filterSignatureDeclarations(signatures) {
     const result = [];
     for (const signature of signatures) {
         const decl = signature.getDeclaration();
-        if (ts__default["default"].isFunctionDeclaration(decl) ||
-            ts__default["default"].isCallSignatureDeclaration(decl) ||
-            ts__default["default"].isMethodDeclaration(decl) ||
-            ts__default["default"].isConstructSignatureDeclaration(decl)) {
+        if (ts.isFunctionDeclaration(decl) ||
+            ts.isCallSignatureDeclaration(decl) ||
+            ts.isMethodDeclaration(decl) ||
+            ts.isConstructSignatureDeclaration(decl)) {
             result.push({ signature, decl });
         }
     }
@@ -14052,7 +12133,7 @@ function extractCallSignatures(name, typeChecker, type) {
         rawComment: extractRawJsDoc(decl),
         returnType: typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature), undefined, 
         // This ensures that e.g. `T | undefined` is not reduced to `T`.
-        ts__default["default"].TypeFormatFlags.NoTypeReduction | ts__default["default"].TypeFormatFlags.NoTruncation),
+        ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation),
     }));
 }
 /** Finds the implementation of the given function declaration overload signature. */
@@ -14061,7 +12142,7 @@ function findImplementationOfFunction(node, typeChecker) {
         return node;
     }
     const symbol = typeChecker.getSymbolAtLocation(node.name);
-    const implementation = symbol?.declarations?.find((s) => ts__default["default"].isFunctionDeclaration(s) && s.body !== undefined);
+    const implementation = symbol?.declarations?.find((s) => ts.isFunctionDeclaration(s) && s.body !== undefined);
     return implementation;
 }
 
@@ -14077,7 +12158,7 @@ function isInternal(member) {
  */
 function hasLeadingInternalComment(member) {
     const memberText = member.getSourceFile().text;
-    return (ts__default["default"].reduceEachLeadingCommentRange(memberText, member.getFullStart(), (pos, end, kind, hasTrailingNewLine, containsInternal) => {
+    return (ts.reduceEachLeadingCommentRange(memberText, member.getFullStart(), (pos, end, kind, hasTrailingNewLine, containsInternal) => {
         return containsInternal || memberText.slice(pos, end).includes('@internal');
     }, 
     /* state */ false, 
@@ -14097,7 +12178,7 @@ class ClassExtractor {
         return {
             name: this.declaration.name.text,
             isAbstract: this.isAbstract(),
-            entryType: ts__default["default"].isInterfaceDeclaration(this.declaration)
+            entryType: ts.isInterfaceDeclaration(this.declaration)
                 ? EntryType.Interface
                 : EntryType.UndecoratedClass,
             members: this.extractSignatures().concat(this.extractAllClassMembers()),
@@ -14131,10 +12212,10 @@ class ClassExtractor {
             !this.hasPrivateComputedProperty(memberDeclaration)) {
             return this.extractClassProperty(memberDeclaration);
         }
-        else if (ts__default["default"].isAccessor(memberDeclaration)) {
+        else if (ts.isAccessor(memberDeclaration)) {
             return this.extractGetterSetter(memberDeclaration);
         }
-        else if (ts__default["default"].isConstructorDeclaration(memberDeclaration)) {
+        else if (ts.isConstructorDeclaration(memberDeclaration)) {
             return this.extractConstructor(memberDeclaration);
         }
         // We only expect methods, properties, and accessors. If we encounter something else,
@@ -14159,7 +12240,7 @@ class ClassExtractor {
         // No name for the function if we are dealing with call signatures.
         // For construct signatures we are using `new` as the name of the function for now.
         // TODO: Consider exposing a new entry type for signature types.
-        const functionExtractor = new FunctionExtractor(ts__default["default"].isConstructSignatureDeclaration(signature) ? 'new' : '', signature, this.typeChecker);
+        const functionExtractor = new FunctionExtractor(ts.isConstructSignatureDeclaration(signature) ? 'new' : '', signature, this.typeChecker);
         return {
             ...functionExtractor.extract(),
             memberType: MemberType.Method,
@@ -14181,7 +12262,7 @@ class ClassExtractor {
     extractGetterSetter(accessor) {
         return {
             ...this.extractClassProperty(accessor),
-            memberType: ts__default["default"].isGetAccessor(accessor) ? MemberType.Getter : MemberType.Setter,
+            memberType: ts.isGetAccessor(accessor) ? MemberType.Getter : MemberType.Setter,
         };
     }
     extractConstructor(constructorDeclaration) {
@@ -14197,7 +12278,7 @@ class ClassExtractor {
             return undefined;
         }
         for (const clause of declaration.heritageClauses) {
-            if (clause.token === ts__default["default"].SyntaxKind.ExtendsKeyword) {
+            if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
                 // We are assuming a single class can only extend one class.
                 const types = clause.types;
                 if (types.length > 0) {
@@ -14209,7 +12290,7 @@ class ClassExtractor {
         return undefined;
     }
     extractInterfaceConformance(declaration) {
-        const implementClause = declaration.heritageClauses?.find((clause) => clause.token === ts__default["default"].SyntaxKind.ImplementsKeyword);
+        const implementClause = declaration.heritageClauses?.find((clause) => clause.token === ts.SyntaxKind.ImplementsKeyword);
         return implementClause?.types.map((m) => m.getText()) ?? [];
     }
     /** Gets the tags for a member (protected, readonly, static, etc.) */
@@ -14243,7 +12324,7 @@ class ClassExtractor {
         // classes may narrow types or add method overloads.
         const type = this.typeChecker.getTypeAtLocation(this.declaration);
         const members = type.getProperties();
-        const constructor = type.getSymbol()?.members?.get(ts__default["default"].InternalSymbolName.Constructor);
+        const constructor = type.getSymbol()?.members?.get(ts.InternalSymbolName.Constructor);
         // While the properties of the declaration type represent the properties that exist
         // on a class *instance*, static members are properties on the class symbol itself.
         const typeOfConstructor = this.typeChecker.getTypeOfSymbol(type.symbol);
@@ -14264,16 +12345,16 @@ class ClassExtractor {
     filterMethodOverloads(declarations) {
         return declarations.filter((declaration, index) => {
             // Check if the declaration is a function or method
-            if (ts__default["default"].isFunctionDeclaration(declaration) ||
-                ts__default["default"].isMethodDeclaration(declaration) ||
-                ts__default["default"].isConstructorDeclaration(declaration)) {
+            if (ts.isFunctionDeclaration(declaration) ||
+                ts.isMethodDeclaration(declaration) ||
+                ts.isConstructorDeclaration(declaration)) {
                 // TypeScript ensures that all declarations for a given abstract method appear consecutively.
                 const nextDeclaration = declarations[index + 1];
                 const isNextMethodWithSameName = nextDeclaration &&
-                    ((ts__default["default"].isMethodDeclaration(nextDeclaration) &&
+                    ((ts.isMethodDeclaration(nextDeclaration) &&
                         nextDeclaration.name.getText() === declaration.name?.getText()) ||
-                        (ts__default["default"].isConstructorDeclaration(nextDeclaration) &&
-                            ts__default["default"].isConstructorDeclaration(declaration)));
+                        (ts.isConstructorDeclaration(nextDeclaration) &&
+                            ts.isConstructorDeclaration(declaration)));
                 // Return only the last occurrence of a method to avoid overload duplication.
                 // Subsequent overloads or implementations are handled separately by the function extractor.
                 return !isNextMethodWithSameName;
@@ -14295,13 +12376,13 @@ class ClassExtractor {
     /** Gets the doc tag corresponding to a class member modifier (readonly, protected, etc.). */
     getTagForMemberModifier(mod) {
         switch (mod.kind) {
-            case ts__default["default"].SyntaxKind.StaticKeyword:
+            case ts.SyntaxKind.StaticKeyword:
                 return MemberTags.Static;
-            case ts__default["default"].SyntaxKind.ReadonlyKeyword:
+            case ts.SyntaxKind.ReadonlyKeyword:
                 return MemberTags.Readonly;
-            case ts__default["default"].SyntaxKind.ProtectedKeyword:
+            case ts.SyntaxKind.ProtectedKeyword:
                 return MemberTags.Protected;
-            case ts__default["default"].SyntaxKind.AbstractKeyword:
+            case ts.SyntaxKind.AbstractKeyword:
                 return MemberTags.Abstract;
             default:
                 return undefined;
@@ -14317,14 +12398,14 @@ class ClassExtractor {
      *  - The member is marked as internal via JSDoc.
      */
     isMemberExcluded(member) {
-        if (ts__default["default"].isConstructorDeclaration(member)) {
+        if (ts.isConstructorDeclaration(member)) {
             // A constructor has no name
             return false;
         }
         return (!member.name ||
             !this.isDocumentableMember(member) ||
-            (!ts__default["default"].isCallSignatureDeclaration(member) &&
-                member.modifiers?.some((mod) => mod.kind === ts__default["default"].SyntaxKind.PrivateKeyword)) ||
+            (!ts.isCallSignatureDeclaration(member) &&
+                member.modifiers?.some((mod) => mod.kind === ts.SyntaxKind.PrivateKeyword)) ||
             member.name.getText() === 'prototype' ||
             isAngularPrivateName(member.name.getText()) ||
             isInternal(member));
@@ -14333,38 +12414,38 @@ class ClassExtractor {
     isDocumentableMember(member) {
         return (this.isMethod(member) ||
             this.isProperty(member) ||
-            ts__default["default"].isAccessor(member) ||
-            ts__default["default"].isConstructorDeclaration(member) ||
+            ts.isAccessor(member) ||
+            ts.isConstructorDeclaration(member) ||
             // Signatures are documentable if they are part of an interface.
-            ts__default["default"].isCallSignatureDeclaration(member));
+            ts.isCallSignatureDeclaration(member));
     }
     /** Check if the parameter is a constructor parameter with a public modifier */
     isPublicConstructorParameterProperty(node) {
-        if (ts__default["default"].isParameterPropertyDeclaration(node, node.parent) && node.modifiers) {
-            return node.modifiers.some((modifier) => modifier.kind === ts__default["default"].SyntaxKind.PublicKeyword);
+        if (ts.isParameterPropertyDeclaration(node, node.parent) && node.modifiers) {
+            return node.modifiers.some((modifier) => modifier.kind === ts.SyntaxKind.PublicKeyword);
         }
         return false;
     }
     /** Gets whether a member is a property. */
     isProperty(member) {
         // Classes have declarations, interface have signatures
-        return (ts__default["default"].isPropertyDeclaration(member) ||
-            ts__default["default"].isPropertySignature(member) ||
+        return (ts.isPropertyDeclaration(member) ||
+            ts.isPropertySignature(member) ||
             this.isPublicConstructorParameterProperty(member));
     }
     /** Gets whether a member is a method. */
     isMethod(member) {
         // Classes have declarations, interface have signatures
-        return ts__default["default"].isMethodDeclaration(member) || ts__default["default"].isMethodSignature(member);
+        return ts.isMethodDeclaration(member) || ts.isMethodSignature(member);
     }
     /** Gets whether the given signature declaration is documentable. */
     isDocumentableSignature(signature) {
-        return (ts__default["default"].isConstructSignatureDeclaration(signature) || ts__default["default"].isCallSignatureDeclaration(signature));
+        return (ts.isConstructSignatureDeclaration(signature) || ts.isCallSignatureDeclaration(signature));
     }
     /** Gets whether the declaration for this extractor is abstract. */
     isAbstract() {
         const modifiers = this.declaration.modifiers ?? [];
-        return modifiers.some((mod) => mod.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
+        return modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword);
     }
     /**
      * Check wether a member has a private computed property name like [ɵWRITABLE_SIGNAL]
@@ -14372,7 +12453,7 @@ class ClassExtractor {
      * This will prevent exposing private computed properties in the docs.
      */
     hasPrivateComputedProperty(property) {
-        return (ts__default["default"].isComputedPropertyName(property.name) && property.name.expression.getText().startsWith('ɵ'));
+        return (ts.isComputedPropertyName(property.name) && property.name.expression.getText().startsWith('ɵ'));
     }
 }
 /** Extractor to pull info for API reference documentation for an Angular directive. */
@@ -14532,17 +12613,17 @@ function extractLiteralPropertiesAsEnumMembers(declaration) {
     let initializer = declaration.initializer;
     // Unwrap `as` and parenthesized expressions.
     while (initializer &&
-        (ts__default["default"].isAsExpression(initializer) || ts__default["default"].isParenthesizedExpression(initializer))) {
+        (ts.isAsExpression(initializer) || ts.isParenthesizedExpression(initializer))) {
         initializer = initializer.expression;
     }
-    if (initializer === undefined || !ts__default["default"].isObjectLiteralExpression(initializer)) {
-        throw new Error(`Declaration tagged with "${LITERAL_AS_ENUM_TAG}" must be initialized to an object literal, but received ${initializer ? ts__default["default"].SyntaxKind[initializer.kind] : 'undefined'}`);
+    if (initializer === undefined || !ts.isObjectLiteralExpression(initializer)) {
+        throw new Error(`Declaration tagged with "${LITERAL_AS_ENUM_TAG}" must be initialized to an object literal, but received ${initializer ? ts.SyntaxKind[initializer.kind] : 'undefined'}`);
     }
     return initializer.properties.map((prop) => {
-        if (!ts__default["default"].isPropertyAssignment(prop) || !ts__default["default"].isIdentifier(prop.name)) {
+        if (!ts.isPropertyAssignment(prop) || !ts.isIdentifier(prop.name)) {
             throw new Error(`Property in declaration tagged with "${LITERAL_AS_ENUM_TAG}" must be a property assignment with a static name`);
         }
-        if (!ts__default["default"].isNumericLiteral(prop.initializer) && !ts__default["default"].isStringLiteralLike(prop.initializer)) {
+        if (!ts.isNumericLiteral(prop.initializer) && !ts.isStringLiteralLike(prop.initializer)) {
             throw new Error(`Property in declaration tagged with "${LITERAL_AS_ENUM_TAG}" must be initialized to a number or string literal`);
         }
         return {
@@ -14582,7 +12663,7 @@ function isDecoratorDeclaration(declaration) {
 function isDecoratorOptionsInterface(declaration) {
     return declaration
         .getSourceFile()
-        .statements.some((s) => ts__default["default"].isVariableStatement(s) &&
+        .statements.some((s) => ts.isVariableStatement(s) &&
         s.declarationList.declarations.some((d) => isDecoratorDeclaration(d) && d.name.getText() === declaration.name.getText()));
 }
 /** Gets the type of decorator, or undefined if the declaration is not a decorator. */
@@ -14604,24 +12685,24 @@ function getDecoratorOptions(declaration, typeChecker) {
     // Every decorator has an interface with its options in the same SourceFile.
     // Queries, however, are defined as a type alias pointing to an interface.
     const optionsDeclaration = declaration.getSourceFile().statements.find((node) => {
-        return ((ts__default["default"].isInterfaceDeclaration(node) || ts__default["default"].isTypeAliasDeclaration(node)) &&
+        return ((ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) &&
             node.name.getText() === name);
     });
     if (!optionsDeclaration) {
         throw new Error(`Decorator "${name}" has no corresponding options interface.`);
     }
     let optionsInterface;
-    if (ts__default["default"].isTypeAliasDeclaration(optionsDeclaration)) {
+    if (ts.isTypeAliasDeclaration(optionsDeclaration)) {
         // We hard-code the assumption that if the decorator's option type is a type alias,
         // it resolves to a single interface (this is true for all query decorators at time of
         // this writing).
         const aliasedType = typeChecker.getTypeAtLocation(optionsDeclaration.type);
-        optionsInterface = (aliasedType.getSymbol()?.getDeclarations() ?? []).find((d) => ts__default["default"].isInterfaceDeclaration(d));
+        optionsInterface = (aliasedType.getSymbol()?.getDeclarations() ?? []).find((d) => ts.isInterfaceDeclaration(d));
     }
     else {
         optionsInterface = optionsDeclaration;
     }
-    if (!optionsInterface || !ts__default["default"].isInterfaceDeclaration(optionsInterface)) {
+    if (!optionsInterface || !ts.isInterfaceDeclaration(optionsInterface)) {
         throw new Error(`Options for decorator "${name}" is not an interface.`);
     }
     // Take advantage of the interface extractor to pull the appropriate member info.
@@ -14643,17 +12724,17 @@ function getDecoratorJsDocNode(declaration) {
     // Assume the existence of an interface in the same file with the same name
     // suffixed with "Decorator".
     const decoratorInterface = declaration.getSourceFile().statements.find((s) => {
-        return ts__default["default"].isInterfaceDeclaration(s) && s.name.getText() === `${name}Decorator`;
+        return ts.isInterfaceDeclaration(s) && s.name.getText() === `${name}Decorator`;
     });
-    if (!decoratorInterface || !ts__default["default"].isInterfaceDeclaration(decoratorInterface)) {
+    if (!decoratorInterface || !ts.isInterfaceDeclaration(decoratorInterface)) {
         throw new Error(`No interface "${name}Decorator" found.`);
     }
     // The public-facing JsDoc for each decorator is on one of its interface's call signatures.
     const callSignature = decoratorInterface.members.find((node) => {
         // The description block lives on one of the call signatures for this interface.
-        return ts__default["default"].isCallSignatureDeclaration(node) && extractRawJsDoc(node);
+        return ts.isCallSignatureDeclaration(node) && extractRawJsDoc(node);
     });
-    if (!callSignature || !ts__default["default"].isCallSignatureDeclaration(callSignature)) {
+    if (!callSignature || !ts.isCallSignatureDeclaration(callSignature)) {
         throw new Error(`No call signature with JsDoc on "${name}Decorator"`);
     }
     return callSignature;
@@ -14687,11 +12768,11 @@ function getEnumMemberValue(memberNode) {
     // If the enum member has a child number literal or string literal,
     // we use that literal as the "value" of the member.
     const literal = memberNode.getChildren().find((n) => {
-        return (ts__default["default"].isNumericLiteral(n) ||
-            ts__default["default"].isStringLiteral(n) ||
-            (ts__default["default"].isPrefixUnaryExpression(n) &&
-                n.operator === ts__default["default"].SyntaxKind.MinusToken &&
-                ts__default["default"].isNumericLiteral(n.operand)));
+        return (ts.isNumericLiteral(n) ||
+            ts.isStringLiteral(n) ||
+            (ts.isPrefixUnaryExpression(n) &&
+                n.operator === ts.SyntaxKind.MinusToken &&
+                ts.isNumericLiteral(n.operand)));
     });
     return literal?.getText() ?? '';
 }
@@ -14710,20 +12791,20 @@ const initializerApiTag = 'initializerApiFunction';
 function isInitializerApiFunction(node, typeChecker) {
     // If this is matching an overload signature, resolve to the implementation
     // as it would hold the `@initializerApiFunction` tag.
-    if (ts__default["default"].isFunctionDeclaration(node) && node.name !== undefined && node.body === undefined) {
+    if (ts.isFunctionDeclaration(node) && node.name !== undefined && node.body === undefined) {
         const implementation = findImplementationOfFunction(node, typeChecker);
         if (implementation !== undefined) {
             node = implementation;
         }
     }
-    if (!ts__default["default"].isFunctionDeclaration(node) && !ts__default["default"].isVariableDeclaration(node)) {
+    if (!ts.isFunctionDeclaration(node) && !ts.isVariableDeclaration(node)) {
         return false;
     }
-    let tagContainer = ts__default["default"].isFunctionDeclaration(node) ? node : getContainerVariableStatement(node);
+    let tagContainer = ts.isFunctionDeclaration(node) ? node : getContainerVariableStatement(node);
     if (tagContainer === null) {
         return false;
     }
-    const tags = ts__default["default"].getJSDocTags(tagContainer);
+    const tags = ts.getJSDocTags(tagContainer);
     return tags.some((t) => t.tagName.text === initializerApiTag);
 }
 /**
@@ -14731,10 +12812,10 @@ function isInitializerApiFunction(node, typeChecker) {
  * a docs entry that can be rendered to represent the API function.
  */
 function extractInitializerApiFunction(node, typeChecker) {
-    if (node.name === undefined || !ts__default["default"].isIdentifier(node.name)) {
+    if (node.name === undefined || !ts.isIdentifier(node.name)) {
         throw new Error(`Initializer API: Expected literal variable name.`);
     }
-    const container = ts__default["default"].isFunctionDeclaration(node) ? node : getContainerVariableStatement(node);
+    const container = ts.isFunctionDeclaration(node) ? node : getContainerVariableStatement(node);
     if (container === null) {
         throw new Error('Initializer API: Could not find container AST node of variable.');
     }
@@ -14747,7 +12828,7 @@ function extractInitializerApiFunction(node, typeChecker) {
     for (const property of type.getProperties()) {
         const subName = property.getName();
         const subDecl = property.getDeclarations()?.[0];
-        if (subDecl === undefined || !ts__default["default"].isPropertySignature(subDecl)) {
+        if (subDecl === undefined || !ts.isPropertySignature(subDecl)) {
             throw new Error(`Initializer API: Could not resolve declaration of sub-property: ${name}.${subName}`);
         }
         const subType = typeChecker.getTypeAtLocation(subDecl);
@@ -14760,7 +12841,7 @@ function extractInitializerApiFunction(node, typeChecker) {
     // The container description describes the overall function, while
     // we allow the individual top-level call signatures to represent
     // their individual overloads.
-    if (ts__default["default"].isFunctionDeclaration(node)) {
+    if (ts.isFunctionDeclaration(node)) {
         const implementation = findImplementationOfFunction(node, typeChecker);
         if (implementation === undefined) {
             throw new Error(`Initializer API: Could not find implementation of function: ${name}`);
@@ -14819,10 +12900,10 @@ function extractInitializerApiFunction(node, typeChecker) {
  * statement.
  */
 function getContainerVariableStatement(node) {
-    if (!ts__default["default"].isVariableDeclarationList(node.parent)) {
+    if (!ts.isVariableDeclarationList(node.parent)) {
         return null;
     }
-    if (!ts__default["default"].isVariableStatement(node.parent.parent)) {
+    if (!ts.isVariableStatement(node.parent.parent)) {
         return null;
     }
     return node.parent.parent;
@@ -14869,11 +12950,11 @@ function extractTypeAlias(declaration) {
 function getImportedSymbols(sourceFile) {
     const importSpecifiers = new Map();
     function visit(node) {
-        if (ts__default["default"].isImportDeclaration(node)) {
+        if (ts.isImportDeclaration(node)) {
             let moduleSpecifier = node.moduleSpecifier.getText(sourceFile).replace(/['"]/g, '');
             if (moduleSpecifier.startsWith('@angular/')) {
                 const namedBindings = node.importClause?.namedBindings;
-                if (namedBindings && ts__default["default"].isNamedImports(namedBindings)) {
+                if (namedBindings && ts.isNamedImports(namedBindings)) {
                     namedBindings.elements.forEach((importSpecifier) => {
                         const importName = importSpecifier.name.text;
                         const importAlias = importSpecifier.propertyName
@@ -14884,7 +12965,7 @@ function getImportedSymbols(sourceFile) {
                 }
             }
         }
-        ts__default["default"].forEachChild(node, visit);
+        ts.forEachChild(node, visit);
     }
     visit(sourceFile);
     return importSpecifiers;
@@ -14944,8 +13025,8 @@ class DocsExtractor {
                 entry.source = {
                     filePath: getRelativeFilePath(realSourceFile, rootDir),
                     // Start & End are off by 1
-                    startLine: ts__default["default"].getLineAndCharacterOfPosition(realSourceFile, node.getStart()).line + 1,
-                    endLine: ts__default["default"].getLineAndCharacterOfPosition(realSourceFile, node.getEnd()).line + 1,
+                    startLine: ts.getLineAndCharacterOfPosition(realSourceFile, node.getStart()).line + 1,
+                    endLine: ts.getLineAndCharacterOfPosition(realSourceFile, node.getEnd()).line + 1,
                 };
                 // The exported name of an API may be different from its declaration name, so
                 // use the declaration name.
@@ -14963,23 +13044,23 @@ class DocsExtractor {
         if (isInitializerApiFunction(node, this.typeChecker)) {
             return extractInitializerApiFunction(node, this.typeChecker);
         }
-        if (ts__default["default"].isInterfaceDeclaration(node) && !isIgnoredInterface(node)) {
+        if (ts.isInterfaceDeclaration(node) && !isIgnoredInterface(node)) {
             return extractInterface(node, this.typeChecker);
         }
-        if (ts__default["default"].isFunctionDeclaration(node)) {
+        if (ts.isFunctionDeclaration(node)) {
             // Name is guaranteed to be set, because it's exported directly.
             const functionExtractor = new FunctionExtractor(node.name.getText(), node, this.typeChecker);
             return functionExtractor.extract();
         }
-        if (ts__default["default"].isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
+        if (ts.isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
             return isDecoratorDeclaration(node)
                 ? extractorDecorator(node, this.typeChecker)
                 : extractConstant(node, this.typeChecker);
         }
-        if (ts__default["default"].isTypeAliasDeclaration(node)) {
+        if (ts.isTypeAliasDeclaration(node)) {
             return extractTypeAlias(node);
         }
-        if (ts__default["default"].isEnumDeclaration(node)) {
+        if (ts.isEnumDeclaration(node)) {
             return extractEnum(node, this.typeChecker);
         }
         return null;
@@ -15048,7 +13129,7 @@ class FlatIndexGenerator {
 
 export * from '${relativeEntryPoint}';
 `;
-        const genFile = ts__default["default"].createSourceFile(this.flatIndexPath, contents, ts__default["default"].ScriptTarget.ES2015, true, ts__default["default"].ScriptKind.TS);
+        const genFile = ts.createSourceFile(this.flatIndexPath, contents, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
         if (this.moduleName !== null) {
             genFile.moduleName = this.moduleName;
         }
@@ -15117,7 +13198,7 @@ function checkForPrivateExports(entryPoint, checker$1, refGraph) {
     // Loop through the exported symbols, de-alias if needed, and add them to `topLevelExports`.
     // TODO(alxhub): use proper iteration when build.sh is removed. (#27762)
     exportedSymbols.forEach((symbol) => {
-        if (symbol.flags & ts__default["default"].SymbolFlags.Alias) {
+        if (symbol.flags & ts.SymbolFlags.Alias) {
             symbol = checker$1.getAliasedSymbol(symbol);
         }
         const decl = symbol.valueDeclaration;
@@ -15153,7 +13234,7 @@ function checkForPrivateExports(entryPoint, checker$1, refGraph) {
                     visibleVia = transitivePath.map((seg) => getNameOfDeclaration(seg)).join(' -> ');
                 }
                 const diagnostic = {
-                    category: ts__default["default"].DiagnosticCategory.Error,
+                    category: ts.DiagnosticCategory.Error,
                     code: checker.ngErrorCode(checker.ErrorCode.SYMBOL_NOT_EXPORTED),
                     file: transitiveReference.getSourceFile(),
                     ...getPosOfDeclaration(transitiveReference),
@@ -15173,11 +13254,11 @@ function getPosOfDeclaration(decl) {
     };
 }
 function getIdentifierOfDeclaration(decl) {
-    if ((ts__default["default"].isClassDeclaration(decl) ||
-        ts__default["default"].isVariableDeclaration(decl) ||
-        ts__default["default"].isFunctionDeclaration(decl)) &&
+    if ((ts.isClassDeclaration(decl) ||
+        ts.isVariableDeclaration(decl) ||
+        ts.isFunctionDeclaration(decl)) &&
         decl.name !== undefined &&
-        ts__default["default"].isIdentifier(decl.name)) {
+        ts.isIdentifier(decl.name)) {
         return decl.name;
     }
     else {
@@ -15190,13 +13271,13 @@ function getNameOfDeclaration(decl) {
 }
 function getDescriptorOfDeclaration(decl) {
     switch (decl.kind) {
-        case ts__default["default"].SyntaxKind.ClassDeclaration:
+        case ts.SyntaxKind.ClassDeclaration:
             return 'class';
-        case ts__default["default"].SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
             return 'function';
-        case ts__default["default"].SyntaxKind.VariableDeclaration:
+        case ts.SyntaxKind.VariableDeclaration:
             return 'variable';
-        case ts__default["default"].SyntaxKind.EnumDeclaration:
+        case ts.SyntaxKind.EnumDeclaration:
             return 'enum';
         default:
             return 'declaration';
@@ -15755,7 +13836,7 @@ class IndexingContext {
  * Visiting `text {{prop}}` will return
  * `[TopLevelIdentifier {name: 'prop', span: {start: 7, end: 11}}]`.
  */
-class ExpressionVisitor extends checker.RecursiveAstVisitor$1 {
+class ExpressionVisitor extends checker.RecursiveAstVisitor {
     expressionStr;
     absoluteOffset;
     boundTemplate;
@@ -15840,7 +13921,7 @@ class ExpressionVisitor extends checker.RecursiveAstVisitor$1 {
  * Visits the AST of a parsed Angular template. Discovers and stores
  * identifiers of interest, deferring to an `ExpressionVisitor` as needed.
  */
-class TemplateVisitor$1 extends checker.RecursiveVisitor$1 {
+let TemplateVisitor$1 = class TemplateVisitor extends checker.RecursiveVisitor$1 {
     boundTemplate;
     // Identifiers of interest found in the template.
     identifiers = new Set();
@@ -16120,7 +14201,7 @@ class TemplateVisitor$1 extends checker.RecursiveVisitor$1 {
             this.errors.push(...errors);
         }
     }
-}
+};
 /**
  * Traverses a template AST and builds identifiers discovered in it.
  *
@@ -16477,7 +14558,7 @@ class AdapterResourceLoader {
      * for the file by setting up a module resolution for it that will fail.
      */
     getResolvedCandidateLocations(url, fromFile) {
-        const failedLookup = ts__default["default"].resolveModuleName(url + RESOURCE_MARKER, fromFile, this.options, this.lookupResolutionHost);
+        const failedLookup = ts.resolveModuleName(url + RESOURCE_MARKER, fromFile, this.options, this.lookupResolutionHost);
         if (failedLookup.failedLookupLocations === undefined) {
             throw new Error(`Internal error: expected to find failedLookupLocations during resolution of resource '${url}' in context of ${fromFile}`);
         }
@@ -16662,7 +14743,7 @@ function isSignalSymbol(symbol) {
     return (declarations !== undefined &&
         declarations.some((decl) => {
             const fileName = decl.getSourceFile().fileName;
-            return ((ts__default["default"].isInterfaceDeclaration(decl) || ts__default["default"].isTypeAliasDeclaration(decl)) &&
+            return ((ts.isInterfaceDeclaration(decl) || ts.isTypeAliasDeclaration(decl)) &&
                 SIGNAL_FNS.has(decl.name.text) &&
                 (fileName.includes('@angular/core') || fileName.includes('angular2/rc/packages/core')));
         }));
@@ -16694,7 +14775,7 @@ class TemplateCheckWithVisitor {
 /**
  * Visits all nodes in a template (TmplAstNode and AST) and calls `visitNode` for each one.
  */
-class TemplateVisitor extends checker.RecursiveAstVisitor$1 {
+class TemplateVisitor extends checker.RecursiveAstVisitor {
     ctx;
     component;
     check;
@@ -17042,7 +15123,7 @@ class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
             return [];
         }
         const typeLeft = symbolLeft.tsType;
-        if (typeLeft.flags & (ts__default["default"].TypeFlags.Any | ts__default["default"].TypeFlags.Unknown)) {
+        if (typeLeft.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) {
             // We should not make assumptions about the any and unknown types; using a nullish coalescing
             // operator is acceptable for those.
             return [];
@@ -17096,7 +15177,7 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
             return [];
         }
         const typeLeft = symbolLeft.tsType;
-        if (typeLeft.flags & (ts__default["default"].TypeFlags.Any | ts__default["default"].TypeFlags.Unknown)) {
+        if (typeLeft.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) {
             // We should not make assumptions about the any and unknown types; using a nullish coalescing
             // operator is acceptable for those.
             return [];
@@ -17413,9 +15494,9 @@ class ExtendedTemplateCheckerImpl {
 function diagnosticLabelToCategory(label) {
     switch (label) {
         case exports.DiagnosticCategoryLabel.Warning:
-            return ts__default["default"].DiagnosticCategory.Warning;
+            return ts.DiagnosticCategory.Warning;
         case exports.DiagnosticCategoryLabel.Error:
-            return ts__default["default"].DiagnosticCategory.Error;
+            return ts.DiagnosticCategory.Error;
         case exports.DiagnosticCategoryLabel.Suppress:
             return null;
         default:
@@ -17477,7 +15558,7 @@ class TemplateSemanticsVisitor extends checker.RecursiveVisitor$1 {
     }
 }
 /** Visitor that verifies the semantics of the expressions within a template. */
-class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor$1 {
+class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor {
     templateTypeChecker;
     component;
     diagnostics;
@@ -17534,7 +15615,7 @@ class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor$1 {
     }
     makeIllegalTemplateVarDiagnostic(target, expressionNode, errorMessage) {
         const span = target instanceof checker.Variable ? target.valueSpan || target.sourceSpan : target.sourceSpan;
-        return this.templateTypeChecker.makeTemplateDiagnostic(this.component, expressionNode.handlerSpan, ts__default["default"].DiagnosticCategory.Error, checker.ngErrorCode(checker.ErrorCode.WRITE_TO_READ_ONLY_VARIABLE), errorMessage, [
+        return this.templateTypeChecker.makeTemplateDiagnostic(this.component, expressionNode.handlerSpan, ts.DiagnosticCategory.Error, checker.ngErrorCode(checker.ErrorCode.WRITE_TO_READ_ONLY_VARIABLE), errorMessage, [
             {
                 text: `'${target.name}' is declared here.`,
                 start: span.start.offset,
@@ -17581,15 +15662,15 @@ class InitializerApiUsageRule {
     }
     checkNode(node) {
         // We only care about call expressions.
-        if (!ts__default["default"].isCallExpression(node)) {
+        if (!ts.isCallExpression(node)) {
             return null;
         }
         // Unwrap any parenthesized and `as` expressions since they don't affect the runtime behavior.
         while (node.parent &&
-            (ts__default["default"].isParenthesizedExpression(node.parent) || ts__default["default"].isAsExpression(node.parent))) {
+            (ts.isParenthesizedExpression(node.parent) || ts.isAsExpression(node.parent))) {
             node = node.parent;
         }
-        if (!node.parent || !ts__default["default"].isCallExpression(node)) {
+        if (!node.parent || !ts.isCallExpression(node)) {
             return null;
         }
         const identifiedInitializer = checker.tryParseInitializerApi(APIS_TO_CHECK, node, this.reflector, this.importedSymbolsTracker);
@@ -17598,12 +15679,12 @@ class InitializerApiUsageRule {
         }
         const functionName = identifiedInitializer.api.functionName +
             (identifiedInitializer.isRequired ? '.required' : '');
-        if (ts__default["default"].isPropertyDeclaration(node.parent) && node.parent.initializer === node) {
+        if (ts.isPropertyDeclaration(node.parent) && node.parent.initializer === node) {
             let closestClass = node.parent;
-            while (closestClass && !ts__default["default"].isClassDeclaration(closestClass)) {
+            while (closestClass && !ts.isClassDeclaration(closestClass)) {
                 closestClass = closestClass.parent;
             }
-            if (closestClass && ts__default["default"].isClassDeclaration(closestClass)) {
+            if (closestClass && ts.isClassDeclaration(closestClass)) {
                 const decorators = this.reflector.getDecoratorsOfDeclaration(closestClass);
                 const isComponentOrDirective = decorators !== null &&
                     decorators.some((decorator) => {
@@ -17645,7 +15726,7 @@ class UnusedStandaloneImportsRule {
                 this.importedSymbolsTracker.hasNamespaceImport(sourceFile, '@angular/core')));
     }
     checkNode(node) {
-        if (!ts__default["default"].isClassDeclaration(node)) {
+        if (!ts.isClassDeclaration(node)) {
             return null;
         }
         const metadata = this.templateTypeChecker.getDirectiveMetadata(node);
@@ -17666,10 +15747,10 @@ class UnusedStandaloneImportsRule {
         if (unused === null) {
             return null;
         }
-        const propertyAssignment = closestNode(metadata.rawImports, ts__default["default"].isPropertyAssignment);
+        const propertyAssignment = closestNode(metadata.rawImports, ts.isPropertyAssignment);
         const category = this.typeCheckingConfig.unusedStandaloneImports === 'error'
-            ? ts__default["default"].DiagnosticCategory.Error
-            : ts__default["default"].DiagnosticCategory.Warning;
+            ? ts.DiagnosticCategory.Error
+            : ts.DiagnosticCategory.Warning;
         if (unused.length === metadata.imports.length && propertyAssignment !== null) {
             return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, propertyAssignment.name, 'All imports are unused', undefined, category);
         }
@@ -17727,8 +15808,8 @@ class UnusedStandaloneImportsRule {
         // entire application.
         let current = reference.getIdentityIn(rawImports.getSourceFile());
         while (current !== null) {
-            if (ts__default["default"].isVariableStatement(current)) {
-                return !!current.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.ExportKeyword);
+            if (ts.isVariableStatement(current)) {
+                return !!current.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
             }
             // `Node.parent` can be undefined, but the TS types don't reflect it.
             // Coerce to null so the value is consitent with the type.
@@ -17899,8 +15980,6 @@ function requireDebug () {
 	debug_1 = debug;
 	return debug_1;
 }
-
-re.exports;
 
 var hasRequiredRe;
 
@@ -20501,13 +18580,15 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.dev/license
  */
+// Note: semver isn't available internally so this import will be commented out.
+// When adding more dependencies here, the caretaker may have to update a patch internally.
 /**
  * Whether a version of `@angular/core` supports a specific feature.
  * @param coreVersion Current version of core.
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.1+sha-8be6e38` usually means that core is at head so it supports
+    // A version of `20.0.0-next.1+sha-4fa5d18` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -20678,7 +18759,7 @@ class NgCompiler {
         this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
         this.entryPoint =
             adapter.entryPoint !== null ? checker.getSourceFileOrNull(inputProgram, adapter.entryPoint) : null;
-        const moduleResolutionCache = ts__default["default"].createModuleResolutionCache(this.adapter.getCurrentDirectory(), 
+        const moduleResolutionCache = ts.createModuleResolutionCache(this.adapter.getCurrentDirectory(), 
         // doen't retain a reference to `this`, if other closures in the constructor here reference
         // `this` internally then a closure created here would retain them. This can cause major
         // memory leak issues since the `moduleResolutionCache` is a long-lived object and finds its
@@ -20727,7 +18808,7 @@ class NgCompiler {
             }
             for (const clazz of classesToUpdate) {
                 this.compilation.traitCompiler.updateResources(clazz);
-                if (!ts__default["default"].isClassDeclaration(clazz)) {
+                if (!ts.isClassDeclaration(clazz)) {
                     continue;
                 }
                 this.compilation.templateTypeChecker.invalidateClass(clazz);
@@ -20960,13 +19041,13 @@ class NgCompiler {
         if (compilation.supportJitMode && compilation.jitDeclarationRegistry.jitDeclarations.size > 0) {
             const { jitDeclarations } = compilation.jitDeclarationRegistry;
             const jitDeclarationsArray = Array.from(jitDeclarations);
-            const jitDeclarationOriginalNodes = new Set(jitDeclarationsArray.map((d) => ts__default["default"].getOriginalNode(d)));
+            const jitDeclarationOriginalNodes = new Set(jitDeclarationsArray.map((d) => ts.getOriginalNode(d)));
             const sourceFilesWithJit = new Set(jitDeclarationsArray.map((d) => d.getSourceFile().fileName));
             before.push((ctx) => {
                 const reflectionHost = new checker.TypeScriptReflectionHost(this.inputProgram.getTypeChecker());
                 const jitTransform = angularJitApplicationTransform(this.inputProgram, compilation.isCore, (node) => {
                     // Class may be synthetic at this point due to Ivy transform.
-                    node = ts__default["default"].getOriginalNode(node, ts__default["default"].isClassDeclaration);
+                    node = ts.getOriginalNode(node, ts.isClassDeclaration);
                     return reflectionHost.isClass(node) && jitDeclarationOriginalNodes.has(node);
                 })(ctx);
                 return (sourceFile) => {
@@ -21051,9 +19132,9 @@ class NgCompiler {
             return null;
         }
         const sourceFile = node.getSourceFile();
-        const printer = ts__default["default"].createPrinter();
-        const nodeText = printer.printNode(ts__default["default"].EmitHint.Unspecified, callback, sourceFile);
-        return ts__default["default"].transpileModule(nodeText, {
+        const printer = ts.createPrinter();
+        const nodeText = printer.printNode(ts.EmitHint.Unspecified, callback, sourceFile);
+        return ts.transpileModule(nodeText, {
             compilerOptions: this.options,
             fileName: sourceFile.fileName,
             reportDiagnostics: false,
@@ -21503,23 +19584,23 @@ function isAngularCorePackage(program) {
     // Look for the constant ITS_JUST_ANGULAR in that file.
     return r3Symbols.statements.some((stmt) => {
         // The statement must be a variable declaration statement.
-        if (!ts__default["default"].isVariableStatement(stmt)) {
+        if (!ts.isVariableStatement(stmt)) {
             return false;
         }
         // It must be exported.
-        const modifiers = ts__default["default"].getModifiers(stmt);
+        const modifiers = ts.getModifiers(stmt);
         if (modifiers === undefined ||
-            !modifiers.some((mod) => mod.kind === ts__default["default"].SyntaxKind.ExportKeyword)) {
+            !modifiers.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)) {
             return false;
         }
         // It must declare ITS_JUST_ANGULAR.
         return stmt.declarationList.declarations.some((decl) => {
             // The declaration must match the name.
-            if (!ts__default["default"].isIdentifier(decl.name) || decl.name.text !== 'ITS_JUST_ANGULAR') {
+            if (!ts.isIdentifier(decl.name) || decl.name.text !== 'ITS_JUST_ANGULAR') {
                 return false;
             }
             // It must initialize the variable to true.
-            if (decl.initializer === undefined || decl.initializer.kind !== ts__default["default"].SyntaxKind.TrueKeyword) {
+            if (decl.initializer === undefined || decl.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
                 return false;
             }
             // This definition matches.
@@ -21541,7 +19622,7 @@ function getR3SymbolsFile(program) {
 function* verifyCompatibleTypeCheckOptions(options) {
     if (options.fullTemplateTypeCheck === false && options.strictTemplates === true) {
         yield makeConfigDiagnostic({
-            category: ts__default["default"].DiagnosticCategory.Error,
+            category: ts.DiagnosticCategory.Error,
             code: checker.ErrorCode.CONFIG_STRICT_TEMPLATES_IMPLIES_FULL_TEMPLATE_TYPECHECK,
             messageText: `
 Angular compiler option "strictTemplates" is enabled, however "fullTemplateTypeCheck" is disabled.
@@ -21560,7 +19641,7 @@ https://angular.dev/tools/cli/template-typecheck
     }
     if (options.extendedDiagnostics && options.strictTemplates === false) {
         yield makeConfigDiagnostic({
-            category: ts__default["default"].DiagnosticCategory.Error,
+            category: ts.DiagnosticCategory.Error,
             code: checker.ErrorCode.CONFIG_EXTENDED_DIAGNOSTICS_IMPLIES_STRICT_TEMPLATES,
             messageText: `
 Angular compiler option "extendedDiagnostics" is configured, however "strictTemplates" is disabled.
@@ -21577,7 +19658,7 @@ One of the following actions is required:
     const defaultCategory = options.extendedDiagnostics?.defaultCategory;
     if (defaultCategory && !allowedCategoryLabels.includes(defaultCategory)) {
         yield makeConfigDiagnostic({
-            category: ts__default["default"].DiagnosticCategory.Error,
+            category: ts.DiagnosticCategory.Error,
             code: checker.ErrorCode.CONFIG_EXTENDED_DIAGNOSTICS_UNKNOWN_CATEGORY_LABEL,
             messageText: `
 Angular compiler option "extendedDiagnostics.defaultCategory" has an unknown diagnostic category: "${defaultCategory}".
@@ -21590,7 +19671,7 @@ ${allowedCategoryLabels.join('\n')}
     for (const [checkName, category] of Object.entries(options.extendedDiagnostics?.checks ?? {})) {
         if (!SUPPORTED_DIAGNOSTIC_NAMES.has(checkName)) {
             yield makeConfigDiagnostic({
-                category: ts__default["default"].DiagnosticCategory.Error,
+                category: ts.DiagnosticCategory.Error,
                 code: checker.ErrorCode.CONFIG_EXTENDED_DIAGNOSTICS_UNKNOWN_CHECK,
                 messageText: `
 Angular compiler option "extendedDiagnostics.checks" has an unknown check: "${checkName}".
@@ -21602,7 +19683,7 @@ ${Array.from(SUPPORTED_DIAGNOSTIC_NAMES).join('\n')}
         }
         if (!allowedCategoryLabels.includes(category)) {
             yield makeConfigDiagnostic({
-                category: ts__default["default"].DiagnosticCategory.Error,
+                category: ts.DiagnosticCategory.Error,
                 code: checker.ErrorCode.CONFIG_EXTENDED_DIAGNOSTICS_UNKNOWN_CATEGORY_LABEL,
                 messageText: `
 Angular compiler option "extendedDiagnostics.checks['${checkName}']" has an unknown diagnostic category: "${category}".
@@ -21633,7 +19714,7 @@ class ReferenceGraphAdapter {
         for (const { node } of references) {
             let sourceFile = node.getSourceFile();
             if (sourceFile === undefined) {
-                sourceFile = ts__default["default"].getOriginalNode(node).getSourceFile();
+                sourceFile = ts.getOriginalNode(node).getSourceFile();
             }
             // Only record local references (not references into .d.ts files).
             if (sourceFile === undefined || !checker.isDtsPath(sourceFile.fileName)) {
@@ -21851,7 +19932,7 @@ class NgCompilerHost extends DelegatingCompilerHost {
                 // The user is not informed about the "index.ts" option as this behavior is deprecated -
                 // an explicit entrypoint should always be specified.
                 diagnostics.push({
-                    category: ts__default["default"].DiagnosticCategory.Error,
+                    category: ts.DiagnosticCategory.Error,
                     code: checker.ngErrorCode(checker.ErrorCode.CONFIG_FLAT_MODULE_NO_INDEX),
                     file: undefined,
                     start: undefined,
@@ -21917,10 +19998,10 @@ class NgCompilerHost extends DelegatingCompilerHost {
         return this.fileNameToModuleName !== undefined ? this : null;
     }
     createCachedResolveModuleNamesFunction() {
-        const moduleResolutionCache = ts__default["default"].createModuleResolutionCache(this.getCurrentDirectory(), this.getCanonicalFileName.bind(this));
+        const moduleResolutionCache = ts.createModuleResolutionCache(this.getCurrentDirectory(), this.getCanonicalFileName.bind(this));
         return (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
             return moduleNames.map((moduleName) => {
-                const module = ts__default["default"].resolveModuleName(moduleName, containingFile, options, this, moduleResolutionCache, redirectedReference);
+                const module = ts.resolveModuleName(moduleName, containingFile, options, this, moduleResolutionCache, redirectedReference);
                 return module.resolvedModule;
             });
         };
@@ -21963,7 +20044,7 @@ class NgtscProgram {
             // to get the most benefit out of reuse.
             checker.retagAllTsFiles(reuseProgram);
         }
-        this.tsProgram = perfRecorder.inPhase(checker.PerfPhase.TypeScriptProgramCreate, () => ts__default["default"].createProgram(this.host.inputFiles, options, this.host, reuseProgram));
+        this.tsProgram = perfRecorder.inPhase(checker.PerfPhase.TypeScriptProgramCreate, () => ts.createProgram(this.host.inputFiles, options, this.host, reuseProgram));
         perfRecorder.phase(checker.PerfPhase.Unaccounted);
         perfRecorder.memory(checker.PerfCheckpoint.TypeScriptProgramCreate);
         this.host.postProgramCreationCleanup();
@@ -22206,7 +20287,4 @@ exports.DtsMetadataReader = DtsMetadataReader;
 exports.NgtscProgram = NgtscProgram;
 exports.PartialEvaluator = PartialEvaluator;
 exports.UNKNOWN_ERROR_CODE = UNKNOWN_ERROR_CODE;
-exports.extractDecoratorQueryMetadata = extractDecoratorQueryMetadata;
 exports.extractTemplate = extractTemplate;
-exports.parseDecoratorInputTransformFunction = parseDecoratorInputTransformFunction;
-exports.queryDecoratorNames = queryDecoratorNames;

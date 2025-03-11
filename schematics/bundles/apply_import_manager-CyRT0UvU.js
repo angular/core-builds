@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,12 +8,8 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-febe8b3a.js');
-var project_paths = require('./project_paths-88ea506b.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
+var checker = require('./checker-DF8ZaFW5.js');
+var project_paths = require('./project_paths-Jtbi76Bs.js');
 
 /**
  * Applies import manager changes, and writes them as replacements the
@@ -21,12 +17,12 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  */
 function applyImportManagerChanges(importManager, replacements, sourceFiles, info) {
     const { newImports, updatedImports, deletedImports } = importManager.finalize();
-    const printer = ts__default["default"].createPrinter({});
+    const printer = ts.createPrinter({});
     const pathToFile = new Map(sourceFiles.map((s) => [s.fileName, s]));
     // Capture new imports
     newImports.forEach((newImports, fileName) => {
         newImports.forEach((newImport) => {
-            const printedImport = printer.printNode(ts__default["default"].EmitHint.Unspecified, newImport, pathToFile.get(fileName));
+            const printedImport = printer.printNode(ts.EmitHint.Unspecified, newImport, pathToFile.get(fileName));
             replacements.push(new project_paths.Replacement(project_paths.projectFile(checker.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
         });
     });
@@ -38,16 +34,16 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
         const isMultiline = oldBindings.getText().includes('\n') ||
             (newBindings.elements.length >= 6 && oldBindings.elements.length <= 3);
         const hasSpaceBetweenBraces = oldBindings.getText().startsWith('{ ');
-        let formatFlags = ts__default["default"].ListFormat.NamedImportsOrExportsElements |
-            ts__default["default"].ListFormat.Indented |
-            ts__default["default"].ListFormat.Braces |
-            ts__default["default"].ListFormat.PreserveLines |
-            (isMultiline ? ts__default["default"].ListFormat.MultiLine : ts__default["default"].ListFormat.SingleLine);
+        let formatFlags = ts.ListFormat.NamedImportsOrExportsElements |
+            ts.ListFormat.Indented |
+            ts.ListFormat.Braces |
+            ts.ListFormat.PreserveLines |
+            (isMultiline ? ts.ListFormat.MultiLine : ts.ListFormat.SingleLine);
         if (hasSpaceBetweenBraces) {
-            formatFlags |= ts__default["default"].ListFormat.SpaceBetweenBraces;
+            formatFlags |= ts.ListFormat.SpaceBetweenBraces;
         }
         else {
-            formatFlags &= ~ts__default["default"].ListFormat.SpaceBetweenBraces;
+            formatFlags &= ~ts.ListFormat.SpaceBetweenBraces;
         }
         const printedBindings = printer.printList(formatFlags, newBindings.elements, oldBindings.getSourceFile());
         replacements.push(new project_paths.Replacement(project_paths.projectFile(oldBindings.getSourceFile(), info), new project_paths.TextUpdate({

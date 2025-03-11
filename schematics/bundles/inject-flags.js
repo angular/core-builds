@@ -1,32 +1,26 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var project_paths = require('./project_paths-88ea506b.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_paths = require('./project_paths-Jtbi76Bs.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-febe8b3a.js');
-require('./program-a87583f2.js');
+var checker = require('./checker-DF8ZaFW5.js');
+require('./program-BZk27Ndu.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-432c58c8.js');
-var imports = require('./imports-047fbbc8.js');
+var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
+var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 /** Mapping between `InjectFlag` enum members to their object literal equvalients. */
 const FLAGS_TO_FIELDS = {
@@ -58,8 +52,8 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
                 if (
                 // Note: we don't use the type checker for matching here, because
                 // the `InjectFlags` will be removed which can break the lookup.
-                ts__default["default"].isPropertyAccessExpression(node) &&
-                    ts__default["default"].isIdentifier(node.expression) &&
+                ts.isPropertyAccessExpression(node) &&
+                    ts.isIdentifier(node.expression) &&
                     node.expression.text === specifier.name.text &&
                     FLAGS_TO_FIELDS.hasOwnProperty(node.name.text)) {
                     const root = getInjectFlagsRootExpression(node);
@@ -125,7 +119,7 @@ function getNodeID(file, node) {
 function getInjectFlagsRootExpression(start) {
     let current = start;
     let parent = current?.parent;
-    while (parent && (ts__default["default"].isBinaryExpression(parent) || ts__default["default"].isParenthesizedExpression(parent))) {
+    while (parent && (ts.isBinaryExpression(parent) || ts.isParenthesizedExpression(parent))) {
         current = parent;
         parent = current.parent;
     }
@@ -133,9 +127,9 @@ function getInjectFlagsRootExpression(start) {
     // initializers which are the only officially supported usages of `InjectFlags`.
     if (current &&
         parent &&
-        ((ts__default["default"].isCallExpression(parent) && parent.arguments.includes(current)) ||
-            (ts__default["default"].isVariableDeclaration(parent) && parent.initializer === current) ||
-            (ts__default["default"].isParameter(parent) && parent.initializer === current))) {
+        ((ts.isCallExpression(parent) && parent.arguments.includes(current)) ||
+            (ts.isVariableDeclaration(parent) && parent.initializer === current) ||
+            (ts.isParameter(parent) && parent.initializer === current))) {
         return current;
     }
     return null;

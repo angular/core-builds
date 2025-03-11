@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,14 +8,10 @@
 
 var ts = require('typescript');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-
 /** Find the closest parent node of a particular kind. */
 function closestNode(node, predicate) {
     let current = node.parent;
-    while (current && !ts__default["default"].isSourceFile(current)) {
+    while (current && !ts.isSourceFile(current)) {
         if (predicate(current)) {
             return current;
         }

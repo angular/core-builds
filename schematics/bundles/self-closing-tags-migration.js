@@ -1,33 +1,27 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var project_paths = require('./project_paths-88ea506b.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_paths = require('./project_paths-Jtbi76Bs.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-febe8b3a.js');
-require('./program-a87583f2.js');
+var checker = require('./checker-DF8ZaFW5.js');
+require('./program-BZk27Ndu.js');
 require('path');
-var ng_decorators = require('./ng_decorators-b0d8b324.js');
-var property_name = require('./property_name-ac18447e.js');
+var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
+var property_name = require('./property_name-BBwFuqMe.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
-require('./imports-047fbbc8.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
+require('./imports-CIX-JgAN.js');
 
 /**
  * Unwraps a given expression TypeScript node. Expressions can be wrapped within multiple
@@ -35,7 +29,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * TypeScript node referring to the inner expression. e.g "exp".
  */
 function unwrapExpression(node) {
-    if (ts__default["default"].isParenthesizedExpression(node) || ts__default["default"].isAsExpression(node)) {
+    if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node)) {
         return unwrapExpression(node.expression);
     }
     else {
@@ -45,7 +39,7 @@ function unwrapExpression(node) {
 
 /** Extracts `@Directive` or `@Component` metadata from the given class. */
 function extractAngularClassMetadata(typeChecker, node) {
-    const decorators = ts__default["default"].getDecorators(node);
+    const decorators = ts.getDecorators(node);
     if (!decorators || !decorators.length) {
         return null;
     }
@@ -64,7 +58,7 @@ function extractAngularClassMetadata(typeChecker, node) {
     }
     const metadata = unwrapExpression(decoratorCall.arguments[0]);
     // Ensure that the metadata is an object literal expression.
-    if (!ts__default["default"].isObjectLiteralExpression(metadata)) {
+    if (!ts.isObjectLiteralExpression(metadata)) {
         return null;
     }
     return {
@@ -138,10 +132,10 @@ class NgComponentTemplateVisitor {
         this.typeChecker = typeChecker;
     }
     visitNode(node) {
-        if (node.kind === ts__default["default"].SyntaxKind.ClassDeclaration) {
+        if (node.kind === ts.SyntaxKind.ClassDeclaration) {
             this.visitClassDeclaration(node);
         }
-        ts__default["default"].forEachChild(node, (n) => this.visitNode(n));
+        ts.forEachChild(node, (n) => this.visitNode(n));
     }
     visitClassDeclaration(node) {
         const metadata = extractAngularClassMetadata(this.typeChecker, node);
@@ -153,13 +147,13 @@ class NgComponentTemplateVisitor {
         // Walk through all component metadata properties and determine the referenced
         // HTML templates (either external or inline)
         metadata.node.properties.forEach((property) => {
-            if (!ts__default["default"].isPropertyAssignment(property)) {
+            if (!ts.isPropertyAssignment(property)) {
                 return;
             }
             const propertyName = property_name.getPropertyNameText(property.name);
             // In case there is an inline template specified, ensure that the value is statically
             // analyzable by checking if the initializer is a string literal-like node.
-            if (propertyName === 'template' && ts__default["default"].isStringLiteralLike(property.initializer)) {
+            if (propertyName === 'template' && ts.isStringLiteralLike(property.initializer)) {
                 // Need to add an offset of one to the start because the template quotes are
                 // not part of the template content.
                 // The `getText()` method gives us the original raw text.
@@ -177,10 +171,10 @@ class NgComponentTemplateVisitor {
                     content,
                     inline: true,
                     start: start,
-                    getCharacterAndLineOfPosition: (pos) => ts__default["default"].getLineAndCharacterOfPosition(sourceFile, pos + start),
+                    getCharacterAndLineOfPosition: (pos) => ts.getLineAndCharacterOfPosition(sourceFile, pos + start),
                 });
             }
-            if (propertyName === 'templateUrl' && ts__default["default"].isStringLiteralLike(property.initializer)) {
+            if (propertyName === 'templateUrl' && ts.isStringLiteralLike(property.initializer)) {
                 const absolutePath = this.fs.resolve(this.fs.dirname(sourceFileName), property.initializer.text);
                 if (!this.fs.exists(absolutePath)) {
                     return;
@@ -314,9 +308,9 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         const typeChecker = program.getTypeChecker();
         const tagReplacements = [];
         for (const sf of sourceFiles) {
-            ts__default["default"].forEachChild(sf, (node) => {
+            ts.forEachChild(sf, (node) => {
                 // Skipping any non component declarations
-                if (!ts__default["default"].isClassDeclaration(node)) {
+                if (!ts.isClassDeclaration(node)) {
                     return;
                 }
                 const file = project_paths.projectFile(node.getSourceFile(), info);

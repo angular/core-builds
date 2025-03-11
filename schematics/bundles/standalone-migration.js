@@ -1,33 +1,27 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-require('./index-0dbda634.js');
+require('./index-vGJcp5M7.js');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-dc30551e.js');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var ng_decorators = require('./ng_decorators-b0d8b324.js');
-var nodes = require('./nodes-7758dbf6.js');
-var imports = require('./imports-047fbbc8.js');
-var checker = require('./checker-febe8b3a.js');
+var compiler_host = require('./compiler_host-Da636uJ8.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
+var nodes = require('./nodes-B16H9JUd.js');
+var imports = require('./imports-CIX-JgAN.js');
+var checker = require('./checker-DF8ZaFW5.js');
 require('os');
-var program = require('./program-a87583f2.js');
+var program = require('./program-BZk27Ndu.js');
 require('@angular-devkit/core');
 require('module');
 require('url');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
@@ -38,7 +32,7 @@ function isReferenceToImport(typeChecker, node, importSpecifier) {
     // If this function is called on an identifier (should be most cases), we can quickly rule out
     // non-matches by comparing the identifier's string and the local name of the import specifier
     // which saves us some calls to the type checker.
-    if (ts__default["default"].isIdentifier(node) && node.text !== importSpecifier.name.text) {
+    if (ts.isIdentifier(node) && node.text !== importSpecifier.name.text) {
         return false;
     }
     const nodeSymbol = typeChecker.getTypeAtLocation(node).getSymbol();
@@ -114,7 +108,7 @@ class ReferenceResolver {
         const results = new Map();
         for (const symbol of referencedSymbols) {
             for (const ref of symbol.references) {
-                if (!ref.isDefinition || symbol.definition.kind === ts__default["default"].ScriptElementKind.alias) {
+                if (!ref.isDefinition || symbol.definition.kind === ts.ScriptElementKind.alias) {
                     if (!results.has(ref.fileName)) {
                         results.set(ref.fileName, []);
                     }
@@ -152,7 +146,7 @@ class ReferenceResolver {
                 // the only one being passed in `getDocumentHighlight`, but we check here just in case.
                 if (file.fileName === fileName) {
                     for (const { textSpan: { start, length }, kind, } of file.highlightSpans) {
-                        if (kind !== ts__default["default"].HighlightSpanKind.none) {
+                        if (kind !== ts.HighlightSpanKind.none) {
                             results.push([start, start + length]);
                         }
                     }
@@ -183,20 +177,20 @@ class ReferenceResolver {
                     rootFileNames.push(fileName);
                 }
             });
-            this._languageService = ts__default["default"].createLanguageService({
+            this._languageService = ts.createLanguageService({
                 getCompilationSettings: () => this._program.getTsProgram().getCompilerOptions(),
                 getScriptFileNames: () => rootFileNames,
                 // The files won't change so we can return the same version.
                 getScriptVersion: () => '0',
                 getScriptSnapshot: (path) => {
                     const content = this._readFile(path);
-                    return content ? ts__default["default"].ScriptSnapshot.fromString(content) : undefined;
+                    return content ? ts.ScriptSnapshot.fromString(content) : undefined;
                 },
                 getCurrentDirectory: () => this._basePath,
-                getDefaultLibFileName: (options) => ts__default["default"].getDefaultLibFilePath(options),
+                getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
                 readFile: (path) => this._readFile(path),
                 fileExists: (path) => this._host.fileExists(path),
-            }, ts__default["default"].createDocumentRegistry(), ts__default["default"].LanguageServiceMode.PartialSemantic);
+            }, ts.createDocumentRegistry(), ts.LanguageServiceMode.PartialSemantic);
         }
         return this._languageService;
     }
@@ -240,11 +234,11 @@ function findClassDeclaration(reference, typeChecker) {
     return (typeChecker
         .getTypeAtLocation(reference)
         .getSymbol()
-        ?.declarations?.find(ts__default["default"].isClassDeclaration) || null);
+        ?.declarations?.find(ts.isClassDeclaration) || null);
 }
 /** Finds a property with a specific name in an object literal expression. */
 function findLiteralProperty(literal, name) {
-    return literal.properties.find((prop) => prop.name && ts__default["default"].isIdentifier(prop.name) && prop.name.text === name);
+    return literal.properties.find((prop) => prop.name && ts.isIdentifier(prop.name) && prop.name.text === name);
 }
 /** Gets a relative path between two files that can be used inside a TypeScript import. */
 function getRelativeImportPath(fromFile, toFile) {
@@ -282,12 +276,12 @@ function isClassReferenceInAngularModule(node, className, moduleName, typeChecke
     const externalName = `@angular/${moduleName}`;
     const internalName = `angular2/rc/packages/${moduleName}`;
     return !!symbol?.declarations?.some((decl) => {
-        const closestClass = closestOrSelf(decl, ts__default["default"].isClassDeclaration);
+        const closestClass = closestOrSelf(decl, ts.isClassDeclaration);
         const closestClassFileName = closestClass?.getSourceFile().fileName;
         if (!closestClass ||
             !closestClassFileName ||
             !closestClass.name ||
-            !ts__default["default"].isIdentifier(closestClass.name) ||
+            !ts.isIdentifier(closestClass.name) ||
             (!closestClassFileName.includes(externalName) && !closestClassFileName.includes(internalName))) {
             return false;
         }
@@ -313,18 +307,18 @@ function getTestingImports(sourceFile) {
  * @param catalystImport Import of Catalyst within the file.
  */
 function isTestCall(typeChecker, node, testBedImport, catalystImport) {
-    const isObjectLiteralCall = ts__default["default"].isCallExpression(node) &&
+    const isObjectLiteralCall = ts.isCallExpression(node) &&
         node.arguments.length > 0 &&
         // `arguments[0]` is the testing module config.
-        ts__default["default"].isObjectLiteralExpression(node.arguments[0]);
+        ts.isObjectLiteralExpression(node.arguments[0]);
     const isTestBedCall = isObjectLiteralCall &&
         testBedImport &&
-        ts__default["default"].isPropertyAccessExpression(node.expression) &&
+        ts.isPropertyAccessExpression(node.expression) &&
         node.expression.name.text === 'configureTestingModule' &&
         isReferenceToImport(typeChecker, node.expression.expression, testBedImport);
     const isCatalystCall = isObjectLiteralCall &&
         catalystImport &&
-        ts__default["default"].isIdentifier(node.expression) &&
+        ts.isIdentifier(node.expression) &&
         isReferenceToImport(typeChecker, node.expression, catalystImport);
     return !!(isTestBedCall || isCatalystCall);
 }
@@ -391,9 +385,9 @@ function convertNgModuleDeclarationToStandalone(decl, allDeclarations, tracker, 
             if (importsToAdd.length > 0) {
                 const hasTrailingComma = importsToAdd.length > 2 &&
                     !!extractMetadataLiteral(directiveMeta.decorator)?.properties.hasTrailingComma;
-                decorator = setPropertyOnAngularDecorator(decorator, 'imports', ts__default["default"].factory.createArrayLiteralExpression(
+                decorator = setPropertyOnAngularDecorator(decorator, 'imports', ts.factory.createArrayLiteralExpression(
                 // Create a multi-line array when it has a trailing comma.
-                ts__default["default"].factory.createNodeArray(importsToAdd, hasTrailingComma), hasTrailingComma));
+                ts.factory.createNodeArray(importsToAdd, hasTrailingComma), hasTrailingComma));
             }
         }
         tracker.replaceNode(directiveMeta.decorator, decorator);
@@ -446,13 +440,13 @@ function potentialImportsToExpressions(potentialImports, toFile, tracker, import
         if (importLocation.moduleSpecifier) {
             return tracker.addImport(toFile, importLocation.symbolName, importLocation.moduleSpecifier);
         }
-        const identifier = ts__default["default"].factory.createIdentifier(importLocation.symbolName);
+        const identifier = ts.factory.createIdentifier(importLocation.symbolName);
         if (!importLocation.isForwardReference) {
             return identifier;
         }
         const forwardRefExpression = tracker.addImport(toFile, 'forwardRef', '@angular/core');
-        const arrowFunction = ts__default["default"].factory.createArrowFunction(undefined, undefined, [], undefined, undefined, identifier);
-        return ts__default["default"].factory.createCallExpression(forwardRefExpression, undefined, [arrowFunction]);
+        const arrowFunction = ts.factory.createArrowFunction(undefined, undefined, [], undefined, undefined, identifier);
+        return ts.factory.createCallExpression(forwardRefExpression, undefined, [arrowFunction]);
     });
 }
 /**
@@ -487,16 +481,16 @@ function moveDeclarationsToImports(literal, allDeclarations, typeChecker, templa
     const declarationsToCopy = [];
     const properties = [];
     const importsProp = findLiteralProperty(literal, 'imports');
-    const hasAnyArrayTrailingComma = literal.properties.some((prop) => ts__default["default"].isPropertyAssignment(prop) &&
-        ts__default["default"].isArrayLiteralExpression(prop.initializer) &&
+    const hasAnyArrayTrailingComma = literal.properties.some((prop) => ts.isPropertyAssignment(prop) &&
+        ts.isArrayLiteralExpression(prop.initializer) &&
         prop.initializer.elements.hasTrailingComma);
     // Separate the declarations that we want to keep and ones we need to copy into the `imports`.
-    if (ts__default["default"].isPropertyAssignment(declarationsProp)) {
+    if (ts.isPropertyAssignment(declarationsProp)) {
         // If the declarations are an array, we can analyze it to
         // find any classes from the current migration.
-        if (ts__default["default"].isArrayLiteralExpression(declarationsProp.initializer)) {
+        if (ts.isArrayLiteralExpression(declarationsProp.initializer)) {
             for (const el of declarationsProp.initializer.elements) {
-                if (ts__default["default"].isIdentifier(el)) {
+                if (ts.isIdentifier(el)) {
                     const correspondingClass = findClassDeclaration(el, typeChecker);
                     if (!correspondingClass ||
                         // Check whether the declaration is either standalone already or is being converted
@@ -517,12 +511,12 @@ function moveDeclarationsToImports(literal, allDeclarations, typeChecker, templa
         }
         else {
             // Otherwise create a spread that will be copied into the `imports`.
-            declarationsToCopy.push(ts__default["default"].factory.createSpreadElement(declarationsProp.initializer));
+            declarationsToCopy.push(ts.factory.createSpreadElement(declarationsProp.initializer));
         }
     }
     // If there are no `imports`, create them with the declarations we want to copy.
     if (!importsProp && declarationsToCopy.length > 0) {
-        properties.push(ts__default["default"].factory.createPropertyAssignment('imports', ts__default["default"].factory.createArrayLiteralExpression(ts__default["default"].factory.createNodeArray(declarationsToCopy, hasAnyArrayTrailingComma && declarationsToCopy.length > 2))));
+        properties.push(ts.factory.createPropertyAssignment('imports', ts.factory.createArrayLiteralExpression(ts.factory.createNodeArray(declarationsToCopy, hasAnyArrayTrailingComma && declarationsToCopy.length > 2))));
     }
     for (const prop of literal.properties) {
         if (!isNamedPropertyAssignment(prop)) {
@@ -532,10 +526,10 @@ function moveDeclarationsToImports(literal, allDeclarations, typeChecker, templa
         // If we have declarations to preserve, update the existing property, otherwise drop it.
         if (prop === declarationsProp) {
             if (declarationsToPreserve.length > 0) {
-                const hasTrailingComma = ts__default["default"].isArrayLiteralExpression(prop.initializer)
+                const hasTrailingComma = ts.isArrayLiteralExpression(prop.initializer)
                     ? prop.initializer.elements.hasTrailingComma
                     : hasAnyArrayTrailingComma;
-                properties.push(ts__default["default"].factory.updatePropertyAssignment(prop, prop.name, ts__default["default"].factory.createArrayLiteralExpression(ts__default["default"].factory.createNodeArray(declarationsToPreserve, hasTrailingComma && declarationsToPreserve.length > 2))));
+                properties.push(ts.factory.updatePropertyAssignment(prop, prop.name, ts.factory.createArrayLiteralExpression(ts.factory.createNodeArray(declarationsToPreserve, hasTrailingComma && declarationsToPreserve.length > 2))));
             }
             continue;
         }
@@ -543,27 +537,27 @@ function moveDeclarationsToImports(literal, allDeclarations, typeChecker, templa
         // that should be copied, we merge the two arrays.
         if (prop === importsProp && declarationsToCopy.length > 0) {
             let initializer;
-            if (ts__default["default"].isArrayLiteralExpression(prop.initializer)) {
-                initializer = ts__default["default"].factory.updateArrayLiteralExpression(prop.initializer, ts__default["default"].factory.createNodeArray([...prop.initializer.elements, ...declarationsToCopy], prop.initializer.elements.hasTrailingComma));
+            if (ts.isArrayLiteralExpression(prop.initializer)) {
+                initializer = ts.factory.updateArrayLiteralExpression(prop.initializer, ts.factory.createNodeArray([...prop.initializer.elements, ...declarationsToCopy], prop.initializer.elements.hasTrailingComma));
             }
             else {
-                initializer = ts__default["default"].factory.createArrayLiteralExpression(ts__default["default"].factory.createNodeArray([ts__default["default"].factory.createSpreadElement(prop.initializer), ...declarationsToCopy], 
+                initializer = ts.factory.createArrayLiteralExpression(ts.factory.createNodeArray([ts.factory.createSpreadElement(prop.initializer), ...declarationsToCopy], 
                 // Expect the declarations to be greater than 1 since
                 // we have the pre-existing initializer already.
                 hasAnyArrayTrailingComma && declarationsToCopy.length > 1));
             }
-            properties.push(ts__default["default"].factory.updatePropertyAssignment(prop, prop.name, initializer));
+            properties.push(ts.factory.updatePropertyAssignment(prop, prop.name, initializer));
             continue;
         }
         // Retain any remaining properties.
         properties.push(prop);
     }
-    tracker.replaceNode(literal, ts__default["default"].factory.updateObjectLiteralExpression(literal, ts__default["default"].factory.createNodeArray(properties, literal.properties.hasTrailingComma)), ts__default["default"].EmitHint.Expression);
+    tracker.replaceNode(literal, ts.factory.updateObjectLiteralExpression(literal, ts.factory.createNodeArray(properties, literal.properties.hasTrailingComma)), ts.EmitHint.Expression);
 }
 /** Sets a decorator node to be standalone. */
 function markDecoratorAsStandalone(node) {
     const metadata = extractMetadataLiteral(node);
-    if (metadata === null || !ts__default["default"].isCallExpression(node.expression)) {
+    if (metadata === null || !ts.isCallExpression(node.expression)) {
         return node;
     }
     const standaloneProp = metadata.properties.find((prop) => {
@@ -571,14 +565,14 @@ function markDecoratorAsStandalone(node) {
     });
     // In v19 standalone is the default so don't do anything if there's no `standalone`
     // property or it's initialized to anything other than `false`.
-    if (!standaloneProp || standaloneProp.initializer.kind !== ts__default["default"].SyntaxKind.FalseKeyword) {
+    if (!standaloneProp || standaloneProp.initializer.kind !== ts.SyntaxKind.FalseKeyword) {
         return node;
     }
     const newProperties = metadata.properties.filter((element) => element !== standaloneProp);
     // Use `createDecorator` instead of `updateDecorator`, because
     // the latter ends up duplicating the node's leading comment.
-    return ts__default["default"].factory.createDecorator(ts__default["default"].factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
-        ts__default["default"].factory.createObjectLiteralExpression(ts__default["default"].factory.createNodeArray(newProperties, metadata.properties.hasTrailingComma), newProperties.length > 1),
+    return ts.factory.createDecorator(ts.factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
+        ts.factory.createObjectLiteralExpression(ts.factory.createNodeArray(newProperties, metadata.properties.hasTrailingComma), newProperties.length > 1),
     ]));
 }
 /**
@@ -590,27 +584,27 @@ function markDecoratorAsStandalone(node) {
  */
 function setPropertyOnAngularDecorator(node, name, initializer) {
     // Invalid decorator.
-    if (!ts__default["default"].isCallExpression(node.expression) || node.expression.arguments.length > 1) {
+    if (!ts.isCallExpression(node.expression) || node.expression.arguments.length > 1) {
         return node;
     }
     let literalProperties;
     let hasTrailingComma = false;
     if (node.expression.arguments.length === 0) {
-        literalProperties = [ts__default["default"].factory.createPropertyAssignment(name, initializer)];
+        literalProperties = [ts.factory.createPropertyAssignment(name, initializer)];
     }
-    else if (ts__default["default"].isObjectLiteralExpression(node.expression.arguments[0])) {
+    else if (ts.isObjectLiteralExpression(node.expression.arguments[0])) {
         const literal = node.expression.arguments[0];
         const existingProperty = findLiteralProperty(literal, name);
         hasTrailingComma = literal.properties.hasTrailingComma;
-        if (existingProperty && ts__default["default"].isPropertyAssignment(existingProperty)) {
+        if (existingProperty && ts.isPropertyAssignment(existingProperty)) {
             literalProperties = literal.properties.slice();
             literalProperties[literalProperties.indexOf(existingProperty)] =
-                ts__default["default"].factory.updatePropertyAssignment(existingProperty, existingProperty.name, initializer);
+                ts.factory.updatePropertyAssignment(existingProperty, existingProperty.name, initializer);
         }
         else {
             literalProperties = [
                 ...literal.properties,
-                ts__default["default"].factory.createPropertyAssignment(name, initializer),
+                ts.factory.createPropertyAssignment(name, initializer),
             ];
         }
     }
@@ -620,13 +614,13 @@ function setPropertyOnAngularDecorator(node, name, initializer) {
     }
     // Use `createDecorator` instead of `updateDecorator`, because
     // the latter ends up duplicating the node's leading comment.
-    return ts__default["default"].factory.createDecorator(ts__default["default"].factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
-        ts__default["default"].factory.createObjectLiteralExpression(ts__default["default"].factory.createNodeArray(literalProperties, hasTrailingComma), literalProperties.length > 1),
+    return ts.factory.createDecorator(ts.factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
+        ts.factory.createObjectLiteralExpression(ts.factory.createNodeArray(literalProperties, hasTrailingComma), literalProperties.length > 1),
     ]));
 }
 /** Checks if a node is a `PropertyAssignment` with a name. */
 function isNamedPropertyAssignment(node) {
-    return ts__default["default"].isPropertyAssignment(node) && node.name && ts__default["default"].isIdentifier(node.name);
+    return ts.isPropertyAssignment(node) && node.name && ts.isIdentifier(node.name);
 }
 /**
  * Finds the import from which to bring in a template dependency of a component.
@@ -663,16 +657,16 @@ function findImportLocation(target, inContext, importMode, typeChecker) {
  * but not `declarations: []`.
  */
 function hasNgModuleMetadataElements(node) {
-    return (ts__default["default"].isPropertyAssignment(node) &&
-        (!ts__default["default"].isArrayLiteralExpression(node.initializer) || node.initializer.elements.length > 0));
+    return (ts.isPropertyAssignment(node) &&
+        (!ts.isArrayLiteralExpression(node.initializer) || node.initializer.elements.length > 0));
 }
 /** Finds all modules whose declarations can be migrated. */
 function findNgModuleClassesToMigrate(sourceFile, typeChecker) {
     const modules = [];
     if (imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
         sourceFile.forEachChild(function walk(node) {
-            if (ts__default["default"].isClassDeclaration(node)) {
-                const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');
+            if (ts.isClassDeclaration(node)) {
+                const decorator = ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(node) || []).find((current) => current.name === 'NgModule');
                 const metadata = decorator ? extractMetadataLiteral(decorator.node) : null;
                 if (metadata) {
                     const declarations = findLiteralProperty(metadata, 'declarations');
@@ -696,8 +690,8 @@ function findTestObjectsToMigrate(sourceFile, typeChecker) {
                 const config = node.arguments[0];
                 const declarations = findLiteralProperty(config, 'declarations');
                 if (declarations &&
-                    ts__default["default"].isPropertyAssignment(declarations) &&
-                    ts__default["default"].isArrayLiteralExpression(declarations.initializer) &&
+                    ts.isPropertyAssignment(declarations) &&
+                    ts.isArrayLiteralExpression(declarations.initializer) &&
                     declarations.initializer.elements.length > 0) {
                     testObjects.push(config);
                 }
@@ -718,7 +712,7 @@ function findTemplateDependencies(decl, typeChecker) {
     const usedPipes = typeChecker.getUsedPipes(decl);
     if (usedDirectives !== null) {
         for (const dir of usedDirectives) {
-            if (ts__default["default"].isClassDeclaration(dir.ref.node)) {
+            if (ts.isClassDeclaration(dir.ref.node)) {
                 results.push(dir.ref);
             }
         }
@@ -726,7 +720,7 @@ function findTemplateDependencies(decl, typeChecker) {
     if (usedPipes !== null) {
         const potentialPipes = typeChecker.getPotentialPipes(decl);
         for (const pipe of potentialPipes) {
-            if (ts__default["default"].isClassDeclaration(pipe.ref.node) &&
+            if (ts.isClassDeclaration(pipe.ref.node) &&
                 usedPipes.some((current) => pipe.name === current)) {
                 results.push(pipe.ref);
             }
@@ -752,13 +746,13 @@ function filterNonBootstrappedDeclarations(declarations, ngModule, templateTypeC
     }
     // If we can't analyze the `bootstrap` property, we can't safely determine which
     // declarations aren't bootstrapped so we assume that all of them are.
-    if (!ts__default["default"].isPropertyAssignment(bootstrapProp) ||
-        !ts__default["default"].isArrayLiteralExpression(bootstrapProp.initializer)) {
+    if (!ts.isPropertyAssignment(bootstrapProp) ||
+        !ts.isArrayLiteralExpression(bootstrapProp.initializer)) {
         return [];
     }
     const bootstrappedClasses = new Set();
     for (const el of bootstrapProp.initializer.elements) {
-        const referencedClass = ts__default["default"].isIdentifier(el) ? findClassDeclaration(el, typeChecker) : null;
+        const referencedClass = ts.isIdentifier(el) ? findClassDeclaration(el, typeChecker) : null;
         // If we can resolve an element to a class, we can filter it out,
         // otherwise assume that the array isn't static.
         if (referencedClass) {
@@ -779,7 +773,7 @@ function extractDeclarationsFromModule(ngModule, templateTypeChecker) {
     const metadata = templateTypeChecker.getNgModuleMetadata(ngModule);
     return metadata
         ? metadata.declarations
-            .filter((decl) => ts__default["default"].isClassDeclaration(decl.node))
+            .filter((decl) => ts.isClassDeclaration(decl.node))
             .map((decl) => decl.node)
         : [];
 }
@@ -795,7 +789,7 @@ function migrateTestDeclarations(testObjects, declarationsOutsideOfTestFiles, tr
     const { decorators, componentImports } = analyzeTestingModules(testObjects, typeChecker);
     const allDeclarations = new Set(declarationsOutsideOfTestFiles);
     for (const decorator of decorators) {
-        const closestClass = nodes.closestNode(decorator.node, ts__default["default"].isClassDeclaration);
+        const closestClass = nodes.closestNode(decorator.node, ts.isClassDeclaration);
         if (decorator.name === 'Pipe' || decorator.name === 'Directive') {
             tracker.replaceNode(decorator.node, markDecoratorAsStandalone(decorator.node));
             if (closestClass) {
@@ -811,8 +805,8 @@ function migrateTestDeclarations(testObjects, declarationsOutsideOfTestFiles, tr
             if (importsToAdd && importsToAdd.size > 0) {
                 const hasTrailingComma = importsToAdd.size > 2 &&
                     !!extractMetadataLiteral(decorator.node)?.properties.hasTrailingComma;
-                const importsArray = ts__default["default"].factory.createNodeArray(Array.from(importsToAdd), hasTrailingComma);
-                tracker.replaceNode(decorator.node, setPropertyOnAngularDecorator(newDecorator, 'imports', ts__default["default"].factory.createArrayLiteralExpression(importsArray)));
+                const importsArray = ts.factory.createNodeArray(Array.from(importsToAdd), hasTrailingComma);
+                tracker.replaceNode(decorator.node, setPropertyOnAngularDecorator(newDecorator, 'imports', ts.factory.createArrayLiteralExpression(importsArray)));
             }
             else {
                 tracker.replaceNode(decorator.node, newDecorator);
@@ -841,10 +835,10 @@ function analyzeTestingModules(testObjects, typeChecker) {
         const importsProp = findLiteralProperty(obj, 'imports');
         const importElements = importsProp &&
             hasNgModuleMetadataElements(importsProp) &&
-            ts__default["default"].isArrayLiteralExpression(importsProp.initializer)
+            ts.isArrayLiteralExpression(importsProp.initializer)
             ? importsProp.initializer.elements.filter((el) => {
                 // Filter out calls since they may be a `ModuleWithProviders`.
-                return (!ts__default["default"].isCallExpression(el) &&
+                return (!ts.isCallExpression(el) &&
                     // Also filter out the animations modules since they throw errors if they're imported
                     // multiple times and it's common for apps to use the `NoopAnimationsModule` to
                     // disable animations in screenshot tests.
@@ -855,7 +849,7 @@ function analyzeTestingModules(testObjects, typeChecker) {
             if (seenDeclarations.has(decl)) {
                 continue;
             }
-            const [decorator] = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(decl) || []);
+            const [decorator] = ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(decl) || []);
             if (decorator) {
                 seenDeclarations.add(decl);
                 decorators.push(decorator);
@@ -885,7 +879,7 @@ function extractDeclarationsFromTestObject(obj, typeChecker) {
     const declarations = findLiteralProperty(obj, 'declarations');
     if (declarations &&
         hasNgModuleMetadataElements(declarations) &&
-        ts__default["default"].isArrayLiteralExpression(declarations.initializer)) {
+        ts.isArrayLiteralExpression(declarations.initializer)) {
         for (const element of declarations.initializer.elements) {
             const declaration = findClassDeclaration(element, typeChecker);
             // Note that we only migrate classes that are in the same file as the testing module,
@@ -901,9 +895,9 @@ function extractDeclarationsFromTestObject(obj, typeChecker) {
 /** Extracts the metadata object literal from an Angular decorator. */
 function extractMetadataLiteral(decorator) {
     // `arguments[0]` is the metadata object literal.
-    return ts__default["default"].isCallExpression(decorator.expression) &&
+    return ts.isCallExpression(decorator.expression) &&
         decorator.expression.arguments.length === 1 &&
-        ts__default["default"].isObjectLiteralExpression(decorator.expression.arguments[0])
+        ts.isObjectLiteralExpression(decorator.expression.arguments[0])
         ? decorator.expression.arguments[0]
         : null;
 }
@@ -947,14 +941,14 @@ function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, pri
     const testArrays = new UniqueItemTracker();
     const nodesToRemove = new Set();
     sourceFiles.forEach(function walk(node) {
-        if (ts__default["default"].isClassDeclaration(node) && canRemoveClass(node, typeChecker)) {
+        if (ts.isClassDeclaration(node) && canRemoveClass(node, typeChecker)) {
             collectChangeLocations(node, removalLocations, componentImportArrays, testArrays, templateTypeChecker, referenceResolver, program);
             classesToRemove.add(node);
         }
-        else if (ts__default["default"].isExportDeclaration(node) &&
+        else if (ts.isExportDeclaration(node) &&
             !node.exportClause &&
             node.moduleSpecifier &&
-            ts__default["default"].isStringLiteralLike(node.moduleSpecifier) &&
+            ts.isStringLiteralLike(node.moduleSpecifier) &&
             node.moduleSpecifier.text.startsWith('.')) {
             const exportedSourceFile = typeChecker
                 .getSymbolAtLocation(node.moduleSpecifier)
@@ -1021,15 +1015,15 @@ function collectChangeLocations(ngModule, removalLocations, componentImportArray
         }
     }
     for (const node of nodes$1) {
-        const closestArray = nodes.closestNode(node, ts__default["default"].isArrayLiteralExpression);
+        const closestArray = nodes.closestNode(node, ts.isArrayLiteralExpression);
         if (closestArray) {
-            const closestAssignment = nodes.closestNode(closestArray, ts__default["default"].isPropertyAssignment);
+            const closestAssignment = nodes.closestNode(closestArray, ts.isPropertyAssignment);
             if (closestAssignment && isInImportsArray(closestAssignment, closestArray)) {
-                const closestCall = nodes.closestNode(closestAssignment, ts__default["default"].isCallExpression);
+                const closestCall = nodes.closestNode(closestAssignment, ts.isCallExpression);
                 if (closestCall) {
-                    const closestDecorator = nodes.closestNode(closestCall, ts__default["default"].isDecorator);
+                    const closestDecorator = nodes.closestNode(closestCall, ts.isDecorator);
                     const closestClass = closestDecorator
-                        ? nodes.closestNode(closestDecorator, ts__default["default"].isClassDeclaration)
+                        ? nodes.closestNode(closestDecorator, ts.isClassDeclaration)
                         : null;
                     const directiveMeta = closestClass
                         ? templateTypeChecker.getDirectiveMetadata(closestClass)
@@ -1054,12 +1048,12 @@ function collectChangeLocations(ngModule, removalLocations, componentImportArray
             removalLocations.arrays.track(closestArray, node);
             continue;
         }
-        const closestImport = nodes.closestNode(node, ts__default["default"].isNamedImports);
+        const closestImport = nodes.closestNode(node, ts.isNamedImports);
         if (closestImport) {
             removalLocations.imports.track(closestImport, node);
             continue;
         }
-        const closestExport = nodes.closestNode(node, ts__default["default"].isNamedExports);
+        const closestExport = nodes.closestNode(node, ts.isNamedExports);
         if (closestExport) {
             removalLocations.exports.track(closestExport, node);
             continue;
@@ -1078,7 +1072,7 @@ function collectChangeLocations(ngModule, removalLocations, componentImportArray
  */
 function replaceInComponentImportsArray(componentImportArrays, classesToRemove, tracker, typeChecker, templateTypeChecker, importRemapper) {
     for (const [array, toReplace] of componentImportArrays.getEntries()) {
-        const closestClass = nodes.closestNode(array, ts__default["default"].isClassDeclaration);
+        const closestClass = nodes.closestNode(array, ts.isClassDeclaration);
         if (!closestClass) {
             continue;
         }
@@ -1157,7 +1151,7 @@ function replaceModulesInImportsArray(array, replacements, tracker, templateType
     const newElements = [];
     const identifiers = new Set();
     for (const element of array.elements) {
-        if (ts__default["default"].isIdentifier(element)) {
+        if (ts.isIdentifier(element)) {
             identifiers.add(element.text);
         }
     }
@@ -1175,12 +1169,12 @@ function replaceModulesInImportsArray(array, replacements, tracker, templateType
             }
         }
         potentialImportsToExpressions(potentialImports, array.getSourceFile(), tracker, importRemapper).forEach((expr) => {
-            if (!ts__default["default"].isIdentifier(expr) || !identifiers.has(expr.text)) {
+            if (!ts.isIdentifier(expr) || !identifiers.has(expr.text)) {
                 newElements.push(expr);
             }
         });
     }
-    tracker.replaceNode(array, ts__default["default"].factory.updateArrayLiteralExpression(array, newElements));
+    tracker.replaceNode(array, ts.factory.updateArrayLiteralExpression(array, newElements));
 }
 /**
  * Removes all tracked array references.
@@ -1190,7 +1184,7 @@ function replaceModulesInImportsArray(array, replacements, tracker, templateType
 function removeArrayReferences(locations, tracker) {
     for (const [array, toRemove] of locations.getEntries()) {
         const newElements = filterRemovedElements(array.elements, toRemove);
-        tracker.replaceNode(array, ts__default["default"].factory.updateArrayLiteralExpression(array, ts__default["default"].factory.createNodeArray(newElements, array.elements.hasTrailingComma)));
+        tracker.replaceNode(array, ts.factory.updateArrayLiteralExpression(array, ts.factory.createNodeArray(newElements, array.elements.hasTrailingComma)));
     }
 }
 /**
@@ -1203,15 +1197,15 @@ function removeImportReferences(locations, tracker) {
         const newElements = filterRemovedElements(namedImports.elements, toRemove);
         // If no imports are left, we can try to drop the entire import.
         if (newElements.length === 0) {
-            const importClause = nodes.closestNode(namedImports, ts__default["default"].isImportClause);
+            const importClause = nodes.closestNode(namedImports, ts.isImportClause);
             // If the import clause has a name we can only drop then named imports.
             // e.g. `import Foo, {ModuleToRemove} from './foo';` becomes `import Foo from './foo';`.
             if (importClause && importClause.name) {
-                tracker.replaceNode(importClause, ts__default["default"].factory.updateImportClause(importClause, importClause.isTypeOnly, importClause.name, undefined));
+                tracker.replaceNode(importClause, ts.factory.updateImportClause(importClause, importClause.isTypeOnly, importClause.name, undefined));
             }
             else {
                 // Otherwise we can drop the entire declaration.
-                const declaration = nodes.closestNode(namedImports, ts__default["default"].isImportDeclaration);
+                const declaration = nodes.closestNode(namedImports, ts.isImportDeclaration);
                 if (declaration) {
                     tracker.removeNode(declaration);
                 }
@@ -1219,7 +1213,7 @@ function removeImportReferences(locations, tracker) {
         }
         else {
             // Otherwise we just drop the imported symbols and keep the declaration intact.
-            tracker.replaceNode(namedImports, ts__default["default"].factory.updateNamedImports(namedImports, newElements));
+            tracker.replaceNode(namedImports, ts.factory.updateNamedImports(namedImports, newElements));
         }
     }
 }
@@ -1233,14 +1227,14 @@ function removeExportReferences(locations, tracker) {
         const newElements = filterRemovedElements(namedExports.elements, toRemove);
         // If no exports are left, we can drop the entire declaration.
         if (newElements.length === 0) {
-            const declaration = nodes.closestNode(namedExports, ts__default["default"].isExportDeclaration);
+            const declaration = nodes.closestNode(namedExports, ts.isExportDeclaration);
             if (declaration) {
                 tracker.removeNode(declaration);
             }
         }
         else {
             // Otherwise we just drop the exported symbols and keep the declaration intact.
-            tracker.replaceNode(namedExports, ts__default["default"].factory.updateNamedExports(namedExports, newElements));
+            tracker.replaceNode(namedExports, ts.factory.updateNamedExports(namedExports, newElements));
         }
     }
 }
@@ -1257,12 +1251,12 @@ function removeExportReferences(locations, tracker) {
 function canRemoveClass(node, typeChecker) {
     const decorator = findNgModuleDecorator(node, typeChecker)?.node;
     // We can't remove a declaration if it's not a valid `NgModule`.
-    if (!decorator || !ts__default["default"].isCallExpression(decorator.expression)) {
+    if (!decorator || !ts.isCallExpression(decorator.expression)) {
         return false;
     }
     // Unsupported case, e.g. `@NgModule(SOME_VALUE)`.
     if (decorator.expression.arguments.length > 0 &&
-        !ts__default["default"].isObjectLiteralExpression(decorator.expression.arguments[0])) {
+        !ts.isObjectLiteralExpression(decorator.expression.arguments[0])) {
         return false;
     }
     // We can't remove modules that have class members. We make an exception for an
@@ -1280,7 +1274,7 @@ function canRemoveClass(node, typeChecker) {
         // We can't remove the class if at least one import isn't identifier, because it may be a
         // `ModuleWithProviders` which is the equivalent of having something in the `providers` array.
         for (const dep of imports.initializer.elements) {
-            if (!ts__default["default"].isIdentifier(dep)) {
+            if (!ts.isIdentifier(dep)) {
                 return false;
             }
             const depDeclaration = findClassDeclaration(dep, typeChecker);
@@ -1316,9 +1310,9 @@ function canRemoveClass(node, typeChecker) {
  * @param node Node to be checked.
  */
 function isNonEmptyNgModuleProperty(node) {
-    return (ts__default["default"].isPropertyAssignment(node) &&
-        ts__default["default"].isIdentifier(node.name) &&
-        ts__default["default"].isArrayLiteralExpression(node.initializer) &&
+    return (ts.isPropertyAssignment(node) &&
+        ts.isIdentifier(node.name) &&
+        ts.isArrayLiteralExpression(node.initializer) &&
         node.initializer.elements.length > 0);
 }
 /**
@@ -1329,12 +1323,12 @@ function isNonEmptyNgModuleProperty(node) {
  */
 function canRemoveFile(sourceFile, nodesToBeRemoved) {
     for (const node of sourceFile.statements) {
-        if (ts__default["default"].isImportDeclaration(node) || nodesToBeRemoved.has(node)) {
+        if (ts.isImportDeclaration(node) || nodesToBeRemoved.has(node)) {
             continue;
         }
-        if (ts__default["default"].isExportDeclaration(node) ||
-            (ts__default["default"].canHaveModifiers(node) &&
-                ts__default["default"].getModifiers(node)?.some((m) => m.kind === ts__default["default"].SyntaxKind.ExportKeyword))) {
+        if (ts.isExportDeclaration(node) ||
+            (ts.canHaveModifiers(node) &&
+                ts.getModifiers(node)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword))) {
             return false;
         }
     }
@@ -1371,7 +1365,7 @@ function filterRemovedElements(elements, toRemove) {
 }
 /** Returns whether a node as an empty constructor. */
 function isEmptyConstructor(node) {
-    return (ts__default["default"].isConstructorDeclaration(node) &&
+    return (ts.isConstructorDeclaration(node) &&
         node.parameters.length === 0 &&
         (node.body == null || node.body.statements.length === 0));
 }
@@ -1392,7 +1386,7 @@ function addRemovalTodos(nodes, tracker) {
 }
 /** Finds the `NgModule` decorator in a class, if it exists. */
 function findNgModuleDecorator(node, typeChecker) {
-    const decorators = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []);
+    const decorators = ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(node) || []);
     return decorators.find((decorator) => decorator.name === 'NgModule') || null;
 }
 /**
@@ -1402,7 +1396,7 @@ function findNgModuleDecorator(node, typeChecker) {
  */
 function isInImportsArray(closestAssignment, closestArray) {
     return (closestAssignment.initializer === closestArray &&
-        (ts__default["default"].isIdentifier(closestAssignment.name) || ts__default["default"].isStringLiteralLike(closestAssignment.name)) &&
+        (ts.isIdentifier(closestAssignment.name) || ts.isStringLiteralLike(closestAssignment.name)) &&
         closestAssignment.name.text === 'imports');
 }
 
@@ -1428,8 +1422,8 @@ function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFil
         : null;
     for (const sourceFile of sourceFiles) {
         sourceFile.forEachChild(function walk(node) {
-            if (ts__default["default"].isCallExpression(node) &&
-                ts__default["default"].isPropertyAccessExpression(node.expression) &&
+            if (ts.isCallExpression(node) &&
+                ts.isPropertyAccessExpression(node.expression) &&
                 node.expression.name.text === 'bootstrapModule' &&
                 isClassReferenceInAngularModule(node.expression, 'PlatformRef', 'core', typeChecker)) {
                 const call = analyzeBootstrapCall(node, typeChecker, templateTypeChecker);
@@ -1461,30 +1455,30 @@ function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFil
  * @param templateTypeChecker
  */
 function analyzeBootstrapCall(call, typeChecker, templateTypeChecker) {
-    if (call.arguments.length === 0 || !ts__default["default"].isIdentifier(call.arguments[0])) {
+    if (call.arguments.length === 0 || !ts.isIdentifier(call.arguments[0])) {
         return null;
     }
     const declaration = findClassDeclaration(call.arguments[0], typeChecker);
     if (!declaration) {
         return null;
     }
-    const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
+    const decorator = ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
     if (!decorator ||
         decorator.node.expression.arguments.length === 0 ||
-        !ts__default["default"].isObjectLiteralExpression(decorator.node.expression.arguments[0])) {
+        !ts.isObjectLiteralExpression(decorator.node.expression.arguments[0])) {
         return null;
     }
     const metadata = decorator.node.expression.arguments[0];
     const bootstrapProp = findLiteralProperty(metadata, 'bootstrap');
     if (!bootstrapProp ||
-        !ts__default["default"].isPropertyAssignment(bootstrapProp) ||
-        !ts__default["default"].isArrayLiteralExpression(bootstrapProp.initializer) ||
+        !ts.isPropertyAssignment(bootstrapProp) ||
+        !ts.isArrayLiteralExpression(bootstrapProp.initializer) ||
         bootstrapProp.initializer.elements.length === 0 ||
-        !ts__default["default"].isIdentifier(bootstrapProp.initializer.elements[0])) {
+        !ts.isIdentifier(bootstrapProp.initializer.elements[0])) {
         return null;
     }
     const component = findClassDeclaration(bootstrapProp.initializer.elements[0], typeChecker);
-    if (component && component.name && ts__default["default"].isIdentifier(component.name)) {
+    if (component && component.name && ts.isIdentifier(component.name)) {
         return {
             module: declaration,
             metadata,
@@ -1518,23 +1512,23 @@ function migrateBootstrapCall(analysis, tracker, additionalProviders, referenceR
     // If the pruning is left for some reason, the user will still have an actionable TODO.
     tracker.insertText(moduleSourceFile, analysis.metadata.getStart(), '/* TODO(standalone-migration): clean up removed NgModule class manually. \n');
     tracker.insertText(moduleSourceFile, analysis.metadata.getEnd(), ' */');
-    if (providers && ts__default["default"].isPropertyAssignment(providers)) {
+    if (providers && ts.isPropertyAssignment(providers)) {
         nodeLookup = nodeLookup || getNodeLookup(moduleSourceFile);
-        if (ts__default["default"].isArrayLiteralExpression(providers.initializer)) {
+        if (ts.isArrayLiteralExpression(providers.initializer)) {
             providersInNewCall.push(...providers.initializer.elements);
         }
         else {
-            providersInNewCall.push(ts__default["default"].factory.createSpreadElement(providers.initializer));
+            providersInNewCall.push(ts.factory.createSpreadElement(providers.initializer));
         }
         addNodesToCopy(sourceFile, providers, nodeLookup, tracker, nodesToCopy, referenceResolver);
     }
-    if (imports && ts__default["default"].isPropertyAssignment(imports)) {
+    if (imports && ts.isPropertyAssignment(imports)) {
         nodeLookup = nodeLookup || getNodeLookup(moduleSourceFile);
         migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, moduleImportsInNewCall, providersInNewCall, tracker, nodesToCopy, referenceResolver, typeChecker);
     }
     if (additionalProviders) {
         additionalProviders.forEach((moduleSpecifier, name) => {
-            providersInNewCall.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, name, moduleSpecifier), undefined, undefined));
+            providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, name, moduleSpecifier), undefined, undefined));
         });
     }
     if (nodesToCopy.size > 0) {
@@ -1547,7 +1541,7 @@ function migrateBootstrapCall(analysis, tracker, additionalProviders, referenceR
                 text += transformedNode.getText() + '\n';
             }
             else {
-                text += printer.printNode(ts__default["default"].EmitHint.Unspecified, transformedNode, node.getSourceFile());
+                text += printer.printNode(ts.EmitHint.Unspecified, transformedNode, node.getSourceFile());
             }
         });
         text += '\n';
@@ -1571,15 +1565,15 @@ function replaceBootstrapCallExpression(analysis, providers, modules, tracker) {
         const combinedProviders = [];
         if (modules.length > 0) {
             const importProvidersExpression = tracker.addImport(sourceFile, 'importProvidersFrom', '@angular/core');
-            combinedProviders.push(ts__default["default"].factory.createCallExpression(importProvidersExpression, [], modules));
+            combinedProviders.push(ts.factory.createCallExpression(importProvidersExpression, [], modules));
         }
         // Push the providers after `importProvidersFrom` call for better readability.
         combinedProviders.push(...providers);
-        const providersArray = ts__default["default"].factory.createNodeArray(combinedProviders, analysis.metadata.properties.hasTrailingComma && combinedProviders.length > 2);
-        const initializer = remapDynamicImports(sourceFile.fileName, ts__default["default"].factory.createArrayLiteralExpression(providersArray, combinedProviders.length > 1));
-        args.push(ts__default["default"].factory.createObjectLiteralExpression([ts__default["default"].factory.createPropertyAssignment('providers', initializer)], true));
+        const providersArray = ts.factory.createNodeArray(combinedProviders, analysis.metadata.properties.hasTrailingComma && combinedProviders.length > 2);
+        const initializer = remapDynamicImports(sourceFile.fileName, ts.factory.createArrayLiteralExpression(providersArray, combinedProviders.length > 1));
+        args.push(ts.factory.createObjectLiteralExpression([ts.factory.createPropertyAssignment('providers', initializer)], true));
     }
-    tracker.replaceNode(analysis.call, ts__default["default"].factory.createCallExpression(bootstrapExpression, [], args), 
+    tracker.replaceNode(analysis.call, ts.factory.createCallExpression(bootstrapExpression, [], args), 
     // Note: it's important to pass in the source file that the nodes originated from!
     // Otherwise TS won't print out literals inside of the providers that we're copying
     // over from the module file.
@@ -1599,14 +1593,14 @@ function replaceBootstrapCallExpression(analysis, providers, modules, tracker) {
  * @param typeChecker
  */
 function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, importsForNewCall, providersInNewCall, tracker, nodesToCopy, referenceResolver, typeChecker) {
-    if (!ts__default["default"].isArrayLiteralExpression(imports.initializer)) {
+    if (!ts.isArrayLiteralExpression(imports.initializer)) {
         importsForNewCall.push(imports.initializer);
         return;
     }
     for (const element of imports.initializer.elements) {
         // If the reference is to a `RouterModule.forRoot` call, we can try to migrate it.
-        if (ts__default["default"].isCallExpression(element) &&
-            ts__default["default"].isPropertyAccessExpression(element.expression) &&
+        if (ts.isCallExpression(element) &&
+            ts.isPropertyAccessExpression(element.expression) &&
             element.arguments.length > 0 &&
             element.expression.name.text === 'forRoot' &&
             isClassReferenceInAngularModule(element.expression.expression, 'RouterModule', 'router', typeChecker)) {
@@ -1615,7 +1609,7 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
             // If the features come back as null, it means that the router
             // has a configuration that can't be migrated automatically.
             if (features !== null) {
-                providersInNewCall.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, 'provideRouter', '@angular/router'), [], [element.arguments[0], ...features]));
+                providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, 'provideRouter', '@angular/router'), [], [element.arguments[0], ...features]));
                 addNodesToCopy(sourceFile, element.arguments[0], nodeLookup, tracker, nodesToCopy, referenceResolver);
                 if (options) {
                     addNodesToCopy(sourceFile, options, nodeLookup, tracker, nodesToCopy, referenceResolver);
@@ -1623,17 +1617,17 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
                 continue;
             }
         }
-        if (ts__default["default"].isIdentifier(element)) {
+        if (ts.isIdentifier(element)) {
             // `BrowserAnimationsModule` can be replaced with `provideAnimations`.
             const animationsModule = 'platform-browser/animations';
             const animationsImport = `@angular/${animationsModule}`;
             if (isClassReferenceInAngularModule(element, 'BrowserAnimationsModule', animationsModule, typeChecker)) {
-                providersInNewCall.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, 'provideAnimations', animationsImport), [], []));
+                providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, 'provideAnimations', animationsImport), [], []));
                 continue;
             }
             // `NoopAnimationsModule` can be replaced with `provideNoopAnimations`.
             if (isClassReferenceInAngularModule(element, 'NoopAnimationsModule', animationsModule, typeChecker)) {
-                providersInNewCall.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, 'provideNoopAnimations', animationsImport), [], []));
+                providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, 'provideNoopAnimations', animationsImport), [], []));
                 continue;
             }
             // `HttpClientModule` can be replaced with `provideHttpClient()`.
@@ -1643,21 +1637,21 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
                 const callArgs = [
                     // we add `withInterceptorsFromDi()` to the call to ensure that class-based interceptors
                     // still work
-                    ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, 'withInterceptorsFromDi', httpClientImport), [], []),
+                    ts.factory.createCallExpression(tracker.addImport(sourceFile, 'withInterceptorsFromDi', httpClientImport), [], []),
                 ];
-                providersInNewCall.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, 'provideHttpClient', httpClientImport), [], callArgs));
+                providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, 'provideHttpClient', httpClientImport), [], callArgs));
                 continue;
             }
         }
         const target = 
         // If it's a call, it'll likely be a `ModuleWithProviders`
         // expression so the target is going to be call's expression.
-        ts__default["default"].isCallExpression(element) && ts__default["default"].isPropertyAccessExpression(element.expression)
+        ts.isCallExpression(element) && ts.isPropertyAccessExpression(element.expression)
             ? element.expression.expression
             : element;
         const classDeclaration = findClassDeclaration(target, typeChecker);
         const decorators = classDeclaration
-            ? ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(classDeclaration) || [])
+            ? ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(classDeclaration) || [])
             : undefined;
         if (!decorators ||
             decorators.length === 0 ||
@@ -1677,7 +1671,7 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
  */
 function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
     // Options that aren't a static object literal can't be migrated.
-    if (!ts__default["default"].isObjectLiteralExpression(options)) {
+    if (!ts.isObjectLiteralExpression(options)) {
         return null;
     }
     const featureExpressions = [];
@@ -1686,8 +1680,8 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
     const features = new UniqueItemTracker();
     for (const prop of options.properties) {
         // We can't migrate options that we can't easily analyze.
-        if (!ts__default["default"].isPropertyAssignment(prop) ||
-            (!ts__default["default"].isIdentifier(prop.name) && !ts__default["default"].isStringLiteralLike(prop.name))) {
+        if (!ts.isPropertyAssignment(prop) ||
+            (!ts.isIdentifier(prop.name) && !ts.isStringLiteralLike(prop.name))) {
             return null;
         }
         switch (prop.name.text) {
@@ -1697,7 +1691,7 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
                 break;
             // `enableTracing: true` maps to the `withDebugTracing` feature.
             case 'enableTracing':
-                if (prop.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword) {
+                if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
                     features.track('withDebugTracing', null);
                 }
                 break;
@@ -1705,7 +1699,7 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
             // `withEnabledBlockingInitialNavigation` feature, while `initialNavigation: 'disabled'` maps
             // to the `withDisabledInitialNavigation` feature.
             case 'initialNavigation':
-                if (!ts__default["default"].isStringLiteralLike(prop.initializer)) {
+                if (!ts.isStringLiteralLike(prop.initializer)) {
                     return null;
                 }
                 if (prop.initializer.text === 'enabledBlocking' || prop.initializer.text === 'enabled') {
@@ -1717,7 +1711,7 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
                 break;
             // `useHash: true` maps to the `withHashLocation` feature.
             case 'useHash':
-                if (prop.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword) {
+                if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
                     features.track('withHashLocation', null);
                 }
                 break;
@@ -1738,10 +1732,10 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
         }
     }
     if (inMemoryScrollingOptions.length > 0) {
-        features.track('withInMemoryScrolling', ts__default["default"].factory.createObjectLiteralExpression(inMemoryScrollingOptions));
+        features.track('withInMemoryScrolling', ts.factory.createObjectLiteralExpression(inMemoryScrollingOptions));
     }
     if (configOptions.length > 0) {
-        features.track('withRouterConfig', ts__default["default"].factory.createObjectLiteralExpression(configOptions));
+        features.track('withRouterConfig', ts.factory.createObjectLiteralExpression(configOptions));
     }
     for (const [feature, featureArgs] of features.getEntries()) {
         const callArgs = [];
@@ -1750,7 +1744,7 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
                 callArgs.push(arg);
             }
         });
-        featureExpressions.push(ts__default["default"].factory.createCallExpression(tracker.addImport(sourceFile, feature, '@angular/router'), [], callArgs));
+        featureExpressions.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, feature, '@angular/router'), [], callArgs));
     }
     return featureExpressions;
 }
@@ -1767,14 +1761,14 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
 function addNodesToCopy(targetFile, rootNode, nodeLookup, tracker, nodesToCopy, referenceResolver) {
     const refs = findAllSameFileReferences(rootNode, nodeLookup, referenceResolver);
     for (const ref of refs) {
-        const importSpecifier = closestOrSelf(ref, ts__default["default"].isImportSpecifier);
+        const importSpecifier = closestOrSelf(ref, ts.isImportSpecifier);
         const importDeclaration = importSpecifier
-            ? nodes.closestNode(importSpecifier, ts__default["default"].isImportDeclaration)
+            ? nodes.closestNode(importSpecifier, ts.isImportDeclaration)
             : null;
         // If the reference is in an import, we need to add an import to the main file.
         if (importDeclaration &&
             importSpecifier &&
-            ts__default["default"].isStringLiteralLike(importDeclaration.moduleSpecifier)) {
+            ts.isStringLiteralLike(importDeclaration.moduleSpecifier)) {
             const moduleName = importDeclaration.moduleSpecifier.text.startsWith('.')
                 ? remapRelativeImport(targetFile.fileName, importDeclaration.moduleSpecifier)
                 : importDeclaration.moduleSpecifier.text;
@@ -1785,12 +1779,12 @@ function addNodesToCopy(targetFile, rootNode, nodeLookup, tracker, nodesToCopy, 
             tracker.addImport(targetFile, symbolName, moduleName, alias);
             continue;
         }
-        const variableDeclaration = closestOrSelf(ref, ts__default["default"].isVariableDeclaration);
+        const variableDeclaration = closestOrSelf(ref, ts.isVariableDeclaration);
         const variableStatement = variableDeclaration
-            ? nodes.closestNode(variableDeclaration, ts__default["default"].isVariableStatement)
+            ? nodes.closestNode(variableDeclaration, ts.isVariableStatement)
             : null;
         // If the reference is a variable, we can attempt to import it or copy it over.
-        if (variableDeclaration && variableStatement && ts__default["default"].isIdentifier(variableDeclaration.name)) {
+        if (variableDeclaration && variableStatement && ts.isIdentifier(variableDeclaration.name)) {
             if (isExported(variableStatement)) {
                 tracker.addImport(targetFile, variableDeclaration.name.text, getRelativeImportPath(targetFile.fileName, ref.getSourceFile().fileName));
             }
@@ -1844,7 +1838,7 @@ function findAllSameFileReferences(rootNode, nodeLookup, referenceResolver) {
             }
             // Keep searching, starting from the closest top-level node. We skip import declarations,
             // because we already know about them and they may put the search into an infinite loop.
-            if (!ts__default["default"].isImportDeclaration(closestTopLevel) &&
+            if (!ts.isImportDeclaration(closestTopLevel) &&
                 isOutsideRange(excludeStart, excludeEnd, closestTopLevel.getStart(), closestTopLevel.getEnd())) {
                 traversedTopLevelNodes.add(closestTopLevel);
                 walk(closestTopLevel);
@@ -1883,11 +1877,11 @@ function referencesToNodeWithinSameFile(node, nodeLookup, excludeStart, excludeE
 function remapDynamicImports(targetFileName, rootNode) {
     let hasChanged = false;
     const transformer = (context) => {
-        return (sourceFile) => ts__default["default"].visitNode(sourceFile, function walk(node) {
-            if (ts__default["default"].isCallExpression(node) &&
-                node.expression.kind === ts__default["default"].SyntaxKind.ImportKeyword &&
+        return (sourceFile) => ts.visitNode(sourceFile, function walk(node) {
+            if (ts.isCallExpression(node) &&
+                node.expression.kind === ts.SyntaxKind.ImportKeyword &&
                 node.arguments.length > 0 &&
-                ts__default["default"].isStringLiteralLike(node.arguments[0]) &&
+                ts.isStringLiteralLike(node.arguments[0]) &&
                 node.arguments[0].text.startsWith('.')) {
                 hasChanged = true;
                 return context.factory.updateCallExpression(node, node.expression, node.typeArguments, [
@@ -1895,10 +1889,10 @@ function remapDynamicImports(targetFileName, rootNode) {
                     ...node.arguments.slice(1),
                 ]);
             }
-            return ts__default["default"].visitEachChild(node, walk, context);
+            return ts.visitEachChild(node, walk, context);
         });
     };
-    const result = ts__default["default"].transform(rootNode, [transformer]).transformed[0];
+    const result = ts.transform(rootNode, [transformer]).transformed[0];
     return hasChanged ? result : rootNode;
 }
 /**
@@ -1906,7 +1900,7 @@ function remapDynamicImports(targetFileName, rootNode) {
  * @param node Node to be checked.
  */
 function isTopLevelStatement(node) {
-    return node.parent != null && ts__default["default"].isSourceFile(node.parent);
+    return node.parent != null && ts.isSourceFile(node.parent);
 }
 /**
  * Asserts that a node is an identifier that might be referring to a symbol. This excludes
@@ -1914,8 +1908,8 @@ function isTopLevelStatement(node) {
  * @param node Node to be checked.
  */
 function isReferenceIdentifier(node) {
-    return (ts__default["default"].isIdentifier(node) &&
-        ((!ts__default["default"].isPropertyAssignment(node.parent) && !ts__default["default"].isParameter(node.parent)) ||
+    return (ts.isIdentifier(node) &&
+        ((!ts.isPropertyAssignment(node.parent) && !ts.isParameter(node.parent)) ||
             node.parent.name !== node));
 }
 /**
@@ -1941,8 +1935,8 @@ function remapRelativeImport(targetFileName, specifier) {
  * @param node Node to be checked.
  */
 function isExported(node) {
-    return ts__default["default"].canHaveModifiers(node) && node.modifiers
-        ? node.modifiers.some((modifier) => modifier.kind === ts__default["default"].SyntaxKind.ExportKeyword)
+    return ts.canHaveModifiers(node) && node.modifiers
+        ? node.modifiers.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
         : false;
 }
 /**
@@ -1951,11 +1945,11 @@ function isExported(node) {
  * @param node Node to be checked.
  */
 function isExportableDeclaration(node) {
-    return (ts__default["default"].isEnumDeclaration(node) ||
-        ts__default["default"].isClassDeclaration(node) ||
-        ts__default["default"].isFunctionDeclaration(node) ||
-        ts__default["default"].isInterfaceDeclaration(node) ||
-        ts__default["default"].isTypeAliasDeclaration(node));
+    return (ts.isEnumDeclaration(node) ||
+        ts.isClassDeclaration(node) ||
+        ts.isFunctionDeclaration(node) ||
+        ts.isInterfaceDeclaration(node) ||
+        ts.isTypeAliasDeclaration(node));
 }
 /**
  * Gets the index after the last import in a file. Can be used to insert new code into the file.
@@ -1964,7 +1958,7 @@ function isExportableDeclaration(node) {
 function getLastImportEnd(sourceFile) {
     let index = 0;
     for (const statement of sourceFile.statements) {
-        if (ts__default["default"].isImportDeclaration(statement)) {
+        if (ts.isImportDeclaration(statement)) {
             index = Math.max(index, statement.getEnd());
         }
         else {
@@ -1983,8 +1977,8 @@ function hasImport(program, rootFileNames, moduleName) {
             continue;
         }
         for (const statement of sourceFile.statements) {
-            if (ts__default["default"].isImportDeclaration(statement) &&
-                ts__default["default"].isStringLiteralLike(statement.moduleSpecifier) &&
+            if (ts.isImportDeclaration(statement) &&
+                ts.isStringLiteralLike(statement.moduleSpecifier) &&
                 (statement.moduleSpecifier.text === moduleName ||
                     statement.moduleSpecifier.text.startsWith(deepImportStart))) {
                 return true;
@@ -2036,7 +2030,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
     });
     const referenceLookupExcludedFiles = /node_modules|\.ngtypecheck\.ts/;
     const program = createProgram({ rootNames, host, options, oldProgram });
-    const printer = ts__default["default"].createPrinter();
+    const printer = ts.createPrinter();
     if (fs.existsSync(pathToMigrate) && !fs.statSync(pathToMigrate).isDirectory()) {
         throw new schematics.SchematicsException(`Migration path ${pathToMigrate} has to be a directory. Cannot run the standalone migration.`);
     }

@@ -1,45 +1,60 @@
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-import { ChangeDetectorRef } from '@angular/core';
-import { Component } from '@angular/core';
-import { ComponentRef } from '@angular/core';
-import { DebugElement } from '@angular/core';
-import { ɵDeferBlockBehavior as DeferBlockBehavior } from '@angular/core';
-import { ɵDeferBlockState as DeferBlockState } from '@angular/core';
-import { Directive } from '@angular/core';
-import { ElementRef } from '@angular/core';
-import { InjectionToken } from '@angular/core';
-import { InjectOptions } from '@angular/core';
-import { NgModule } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { Pipe } from '@angular/core';
-import { PlatformRef } from '@angular/core';
-import { ProviderToken } from '@angular/core';
-import { SchemaMetadata } from '@angular/core';
-import { Type } from '@angular/core';
-import { ɵDeferBlockDetails } from '@angular/core';
+import { ɵDeferBlockDetails as _DeferBlockDetails, ɵDeferBlockState as _DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, ɵDeferBlockBehavior as _DeferBlockBehavior, InjectionToken, PlatformRef, Type, ProviderToken, InjectOptions, NgModule, Component, Directive, Pipe } from '@angular/core';
+export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
+import { a as Navigation, c as NavigationHistoryEntry, d as NavigationNavigateOptions, g as NavigationResult, e as NavigationOptions, N as NavigateEvent, b as NavigationCurrentEntryChangeEvent, h as NavigationTransition, i as NavigationUpdateCurrentEntryOptions, f as NavigationReloadOptions } from '../navigation_types.d-u4EOrrdZ.js';
 
 /**
- * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
- * investigation.
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
  *
- * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ * Example:
  *
- * @codeGenApi
+ * ```ts
+ * it('...', waitForAsync(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * })));
+ * ```
+ *
+ * @publicApi
  */
-export declare const __core_private_testing_placeholder__ = "";
+declare function waitForAsync(fn: Function): (done: any) => any;
+
+/**
+ * Represents an individual defer block for testing purposes.
+ *
+ * @publicApi
+ */
+declare class DeferBlockFixture {
+    private block;
+    private componentFixture;
+    /** @nodoc */
+    constructor(block: _DeferBlockDetails, componentFixture: ComponentFixture<unknown>);
+    /**
+     * Renders the specified state of the defer fixture.
+     * @param state the defer state to render
+     */
+    render(state: _DeferBlockState): Promise<void>;
+    /**
+     * Retrieves all nested child defer block fixtures
+     * in a given defer block.
+     */
+    getDeferBlocks(): Promise<DeferBlockFixture[]>;
+}
 
 /**
  * Fixture for debugging and testing a component.
  *
  * @publicApi
  */
-export declare class ComponentFixture<T> {
+declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;
     /**
      * The DebugElement associated with the root element of this component.
@@ -119,48 +134,12 @@ export declare class ComponentFixture<T> {
 }
 
 /**
- * @publicApi
- */
-export declare const ComponentFixtureAutoDetect: InjectionToken<boolean>;
-
-/**
- * @publicApi
- */
-export declare const ComponentFixtureNoNgZone: InjectionToken<boolean>;
-
-export { DeferBlockBehavior }
-
-/**
- * Represents an individual defer block for testing purposes.
+ * Clears out the shared fake async zone for a test.
+ * To be called in a global `beforeEach`.
  *
  * @publicApi
  */
-export declare class DeferBlockFixture {
-    private block;
-    private componentFixture;
-    /** @nodoc */
-    constructor(block: ɵDeferBlockDetails, componentFixture: ComponentFixture<unknown>);
-    /**
-     * Renders the specified state of the defer fixture.
-     * @param state the defer state to render
-     */
-    render(state: DeferBlockState): Promise<void>;
-    /**
-     * Retrieves all nested child defer block fixtures
-     * in a given defer block.
-     */
-    getDeferBlocks(): Promise<DeferBlockFixture[]>;
-}
-
-export { DeferBlockState }
-
-/**
- * Discard all remaining periodic tasks.
- *
- * @publicApi
- */
-export declare function discardPeriodicTasks(): void;
-
+declare function resetFakeAsyncZone(): void;
 /**
  * Wraps a function to be executed in the `fakeAsync` zone:
  * - Microtasks are manually executed by calling `flushMicrotasks()`.
@@ -185,49 +164,76 @@ export declare function discardPeriodicTasks(): void;
  *
  * @publicApi
  */
-export declare function fakeAsync(fn: Function, options?: {
+declare function fakeAsync(fn: Function, options?: {
     flush?: boolean;
 }): (...args: any[]) => any;
-
 /**
- * Fake equivalent of `NavigationHistoryEntry`.
+ * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone.
+ *
+ * The microtasks queue is drained at the very start of this function and after any timer callback
+ * has been executed.
+ *
+ * @param millis The number of milliseconds to advance the virtual timer.
+ * @param tickOptions The options to pass to the `tick()` function.
+ *
+ * @usageNotes
+ *
+ * The `tick()` option is a flag called `processNewMacroTasksSynchronously`,
+ * which determines whether or not to invoke new macroTasks.
+ *
+ * If you provide a `tickOptions` object, but do not specify a
+ * `processNewMacroTasksSynchronously` property (`tick(100, {})`),
+ * then `processNewMacroTasksSynchronously` defaults to true.
+ *
+ * If you omit the `tickOptions` parameter (`tick(100))`), then
+ * `tickOptions` defaults to `{processNewMacroTasksSynchronously: true}`.
+ *
+ * ### Example
+ *
+ * {@example core/testing/ts/fake_async.ts region='basic'}
+ *
+ * The following example includes a nested timeout (new macroTask), and
+ * the `tickOptions` parameter is allowed to default. In this case,
+ * `processNewMacroTasksSynchronously` defaults to true, and the nested
+ * function is executed on each tick.
+ *
+ * ```ts
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick();
+ *   expect(nestedTimeoutInvoked).toBe(true);
+ * }));
+ * ```
+ *
+ * In the following case, `processNewMacroTasksSynchronously` is explicitly
+ * set to false, so the nested timeout function is not invoked.
+ *
+ * ```ts
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick(0, {processNewMacroTasksSynchronously: false});
+ *   expect(nestedTimeoutInvoked).toBe(false);
+ * }));
+ * ```
+ *
+ *
+ * @publicApi
  */
-declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
-    private eventTarget;
-    readonly url: string | null;
-    readonly sameDocument: boolean;
-    readonly id: string;
-    readonly key: string;
-    readonly index: number;
-    private readonly state;
-    private readonly historyState;
-    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
-    constructor(eventTarget: EventTarget, url: string | null, { id, key, index, sameDocument, state, historyState, }: {
-        id: string;
-        key: string;
-        index: number;
-        sameDocument: boolean;
-        historyState: unknown;
-        state?: unknown;
-    });
-    getState(): unknown;
-    getHistoryState(): unknown;
-    addEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
-    removeEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
-    dispatchEvent(event: Event): boolean;
-    /** internal */
-    dispose(): void;
-}
-
-/**
- * Fake equivalent of the `NavigationResult` interface with
- * `FakeNavigationHistoryEntry`.
- */
-declare interface FakeNavigationResult extends NavigationResult {
-    readonly committed: Promise<FakeNavigationHistoryEntry>;
-    readonly finished: Promise<FakeNavigationHistoryEntry>;
-}
-
+declare function tick(millis?: number, tickOptions?: {
+    processNewMacroTasksSynchronously: boolean;
+}): void;
 /**
  * Flushes any pending microtasks and simulates the asynchronous passage of time for the timers in
  * the `fakeAsync` zone by
@@ -239,222 +245,142 @@ declare interface FakeNavigationResult extends NavigationResult {
  *
  * @publicApi
  */
-export declare function flush(maxTurns?: number): number;
-
+declare function flush(maxTurns?: number): number;
+/**
+ * Discard all remaining periodic tasks.
+ *
+ * @publicApi
+ */
+declare function discardPeriodicTasks(): void;
 /**
  * Flush any pending microtasks.
  *
  * @publicApi
  */
-export declare function flushMicrotasks(): void;
-
-/**
- * Returns a singleton of the `TestBed` class.
- *
- * @publicApi
- */
-export declare function getTestBed(): TestBed;
-
-/**
- * Allows injecting dependencies in `beforeEach()` and `it()`. Note: this function
- * (imported from the `@angular/core/testing` package) can **only** be used to inject dependencies
- * in tests. To inject dependencies in your application code, use the [`inject`](api/core/inject)
- * function from the `@angular/core` package instead.
- *
- * Example:
- *
- * ```ts
- * beforeEach(inject([Dependency, AClass], (dep, object) => {
- *   // some code that uses `dep` and `object`
- *   // ...
- * }));
- *
- * it('...', inject([AClass], (object) => {
- *   object.doSomething();
- *   expect(...);
- * })
- * ```
- *
- * @publicApi
- */
-export declare function inject(tokens: any[], fn: Function): () => any;
-
-/**
- * @publicApi
- */
-export declare class InjectSetupWrapper {
-    private _moduleDef;
-    constructor(_moduleDef: () => TestModuleMetadata);
-    private _addModule;
-    inject(tokens: any[], fn: Function): () => any;
-}
-
+declare function flushMicrotasks(): void;
 
 /**
  * Type used for modifications to metadata
  *
  * @publicApi
  */
-export declare type MetadataOverride<T> = {
+type MetadataOverride<T> = {
     add?: Partial<T>;
     remove?: Partial<T>;
     set?: Partial<T>;
 };
 
 /**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @publicApi
+ */
+declare class TestComponentRenderer {
+    insertRootElement(rootElementId: string): void;
+    removeAllRootElements?(): void;
+}
+/**
+ * @publicApi
+ */
+declare const ComponentFixtureAutoDetect: InjectionToken<boolean>;
+/**
+ * @publicApi
+ */
+declare const ComponentFixtureNoNgZone: InjectionToken<boolean>;
+/**
+ * @publicApi
+ */
+interface TestModuleMetadata {
+    providers?: any[];
+    declarations?: any[];
+    imports?: any[];
+    schemas?: Array<SchemaMetadata | any[]>;
+    teardown?: ModuleTeardownOptions;
+    /**
+     * Whether NG0304 runtime errors should be thrown when unknown elements are present in component's
+     * template. Defaults to `false`, where the error is simply logged. If set to `true`, the error is
+     * thrown.
+     * @see [NG8001](/errors/NG8001) for the description of the problem and how to fix it
+     */
+    errorOnUnknownElements?: boolean;
+    /**
+     * Whether errors should be thrown when unknown properties are present in component's template.
+     * Defaults to `false`, where the error is simply logged.
+     * If set to `true`, the error is thrown.
+     * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
+     */
+    errorOnUnknownProperties?: boolean;
+    /**
+     * Whether errors that happen during application change detection should be rethrown.
+     *
+     * When `true`, errors that are caught during application change detection will
+     * be reported to the `ErrorHandler` and rethrown to prevent them from going
+     * unnoticed in tests.
+     *
+     * When `false`, errors are only forwarded to the `ErrorHandler`, which by default
+     * simply logs them to the console.
+     *
+     * Defaults to `true`.
+     */
+    rethrowApplicationErrors?: boolean;
+    /**
+     * Whether defer blocks should behave with manual triggering or play through normally.
+     * Defaults to `manual`.
+     */
+    deferBlockBehavior?: _DeferBlockBehavior;
+}
+/**
+ * @publicApi
+ */
+interface TestEnvironmentOptions {
+    /**
+     * Configures the test module teardown behavior in `TestBed`.
+     */
+    teardown?: ModuleTeardownOptions;
+    /**
+     * Whether errors should be thrown when unknown elements are present in component's template.
+     * Defaults to `false`, where the error is simply logged.
+     * If set to `true`, the error is thrown.
+     * @see [NG8001](/errors/NG8001) for the description of the error and how to fix it
+     */
+    errorOnUnknownElements?: boolean;
+    /**
+     * Whether errors should be thrown when unknown properties are present in component's template.
+     * Defaults to `false`, where the error is simply logged.
+     * If set to `true`, the error is thrown.
+     * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
+     */
+    errorOnUnknownProperties?: boolean;
+}
+/**
  * Configures the test module teardown behavior in `TestBed`.
  * @publicApi
  */
-export declare interface ModuleTeardownOptions {
+interface ModuleTeardownOptions {
     /** Whether the test module should be destroyed after every test. Defaults to `true`. */
     destroyAfterEach: boolean;
     /** Whether errors during test module destruction should be re-thrown. Defaults to `true`. */
     rethrowErrors?: boolean;
 }
 
-declare class NavigateEvent extends Event {
-    constructor(type: string, eventInit?: NavigateEventInit);
-    readonly navigationType: NavigationTypeString;
-    readonly canIntercept: boolean;
-    readonly userInitiated: boolean;
-    readonly hashChange: boolean;
-    readonly destination: NavigationDestination;
-    readonly signal: AbortSignal;
-    readonly formData: FormData | null;
-    readonly downloadRequest: string | null;
-    readonly info?: unknown;
-    intercept(options?: NavigationInterceptOptions): void;
-    scroll(): void;
-}
-
-declare interface NavigateEventInit extends EventInit {
-    navigationType?: NavigationTypeString;
-    canIntercept?: boolean;
-    userInitiated?: boolean;
-    hashChange?: boolean;
-    destination: NavigationDestination;
-    signal: AbortSignal;
-    formData?: FormData | null;
-    downloadRequest?: string | null;
-    info?: unknown;
-}
-
-declare class Navigation extends EventTarget {
-    entries(): NavigationHistoryEntry[];
-    readonly currentEntry: NavigationHistoryEntry | null;
-    updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void;
-    readonly transition: NavigationTransition | null;
-    readonly canGoBack: boolean;
-    readonly canGoForward: boolean;
-    navigate(url: string, options?: NavigationNavigateOptions): NavigationResult;
-    reload(options?: NavigationReloadOptions): NavigationResult;
-    traverseTo(key: string, options?: NavigationOptions): NavigationResult;
-    back(options?: NavigationOptions): NavigationResult;
-    forward(options?: NavigationOptions): NavigationResult;
-    onnavigate: ((this: Navigation, ev: NavigateEvent) => any) | null;
-    onnavigatesuccess: ((this: Navigation, ev: Event) => any) | null;
-    onnavigateerror: ((this: Navigation, ev: ErrorEvent) => any) | null;
-    oncurrententrychange: ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
-    addEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
-
-declare class NavigationCurrentEntryChangeEvent extends Event {
-    constructor(type: string, eventInit?: NavigationCurrentEntryChangeEventInit);
-    readonly navigationType: NavigationTypeString | null;
-    readonly from: NavigationHistoryEntry;
-}
-
-declare interface NavigationCurrentEntryChangeEventInit extends EventInit {
-    navigationType?: NavigationTypeString | null;
-    from: NavigationHistoryEntry;
-}
-
-declare class NavigationDestination {
-    readonly url: string;
-    readonly key: string | null;
-    readonly id: string | null;
-    readonly index: number;
-    readonly sameDocument: boolean;
-    getState(): unknown;
-}
-
-
-declare interface NavigationEventMap {
-    navigate: NavigateEvent;
-    navigatesuccess: Event;
-    navigateerror: ErrorEvent;
-    currententrychange: NavigationCurrentEntryChangeEvent;
-}
-
-declare class NavigationHistoryEntry extends EventTarget {
-    readonly key: string;
-    readonly id: string;
-    readonly url: string | null;
-    readonly index: number;
-    readonly sameDocument: boolean;
-    getState(): unknown;
-    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
-    addEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
-
-declare interface NavigationHistoryEntryEventMap {
-    dispose: Event;
-}
-
-declare interface NavigationInterceptOptions {
-    handler?: () => Promise<void>;
-    focusReset?: 'after-transition' | 'manual';
-    scroll?: 'after-transition' | 'manual';
-}
-
-declare interface NavigationNavigateOptions extends NavigationOptions {
-    state?: unknown;
-    history?: 'auto' | 'push' | 'replace';
-}
-
-declare interface NavigationOptions {
-    info?: unknown;
-}
-
-declare interface NavigationReloadOptions extends NavigationOptions {
-    state?: unknown;
-}
-
-declare interface NavigationResult {
-    committed: Promise<NavigationHistoryEntry>;
-    finished: Promise<NavigationHistoryEntry>;
-}
-
-declare class NavigationTransition {
-    readonly navigationType: NavigationTypeString;
-    readonly from: NavigationHistoryEntry;
-    readonly finished: Promise<void>;
-}
-
-declare type NavigationTypeString = 'reload' | 'push' | 'replace' | 'traverse';
-
-declare interface NavigationUpdateCurrentEntryOptions {
-    state: unknown;
-}
-
 /**
- * Clears out the shared fake async zone for a test.
- * To be called in a global `beforeEach`.
+ * Static methods implemented by the `TestBed`.
  *
  * @publicApi
  */
-export declare function resetFakeAsyncZone(): void;
-
+interface TestBedStatic extends TestBed {
+    new (...args: any[]): TestBed;
+}
+/**
+ * Returns a singleton of the `TestBed` class.
+ *
+ * @publicApi
+ */
+declare function getTestBed(): TestBed;
 /**
  * @publicApi
  */
-export declare interface TestBed {
+interface TestBed {
     get platform(): PlatformRef;
     get ngModule(): Type<any> | Type<any>[];
     /**
@@ -526,7 +452,6 @@ export declare interface TestBed {
      */
     flushEffects(): void;
 }
-
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -536,195 +461,72 @@ export declare interface TestBed {
  *
  * @publicApi
  */
-export declare const TestBed: TestBedStatic;
-
+declare const TestBed: TestBedStatic;
 /**
- * Static methods implemented by the `TestBed`.
- *
- * @publicApi
- */
-export declare interface TestBedStatic extends TestBed {
-    new (...args: any[]): TestBed;
-}
-
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @publicApi
- */
-export declare class TestComponentRenderer {
-    insertRootElement(rootElementId: string): void;
-    removeAllRootElements?(): void;
-}
-
-/**
- * @publicApi
- */
-export declare interface TestEnvironmentOptions {
-    /**
-     * Configures the test module teardown behavior in `TestBed`.
-     */
-    teardown?: ModuleTeardownOptions;
-    /**
-     * Whether errors should be thrown when unknown elements are present in component's template.
-     * Defaults to `false`, where the error is simply logged.
-     * If set to `true`, the error is thrown.
-     * @see [NG8001](/errors/NG8001) for the description of the error and how to fix it
-     */
-    errorOnUnknownElements?: boolean;
-    /**
-     * Whether errors should be thrown when unknown properties are present in component's template.
-     * Defaults to `false`, where the error is simply logged.
-     * If set to `true`, the error is thrown.
-     * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
-     */
-    errorOnUnknownProperties?: boolean;
-}
-
-/**
- * @publicApi
- */
-export declare interface TestModuleMetadata {
-    providers?: any[];
-    declarations?: any[];
-    imports?: any[];
-    schemas?: Array<SchemaMetadata | any[]>;
-    teardown?: ModuleTeardownOptions;
-    /**
-     * Whether NG0304 runtime errors should be thrown when unknown elements are present in component's
-     * template. Defaults to `false`, where the error is simply logged. If set to `true`, the error is
-     * thrown.
-     * @see [NG8001](/errors/NG8001) for the description of the problem and how to fix it
-     */
-    errorOnUnknownElements?: boolean;
-    /**
-     * Whether errors should be thrown when unknown properties are present in component's template.
-     * Defaults to `false`, where the error is simply logged.
-     * If set to `true`, the error is thrown.
-     * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
-     */
-    errorOnUnknownProperties?: boolean;
-    /**
-     * Whether errors that happen during application change detection should be rethrown.
-     *
-     * When `true`, errors that are caught during application change detection will
-     * be reported to the `ErrorHandler` and rethrown to prevent them from going
-     * unnoticed in tests.
-     *
-     * When `false`, errors are only forwarded to the `ErrorHandler`, which by default
-     * simply logs them to the console.
-     *
-     * Defaults to `true`.
-     */
-    rethrowApplicationErrors?: boolean;
-    /**
-     * Whether defer blocks should behave with manual triggering or play through normally.
-     * Defaults to `manual`.
-     */
-    deferBlockBehavior?: DeferBlockBehavior;
-}
-
-/**
- * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone.
- *
- * The microtasks queue is drained at the very start of this function and after any timer callback
- * has been executed.
- *
- * @param millis The number of milliseconds to advance the virtual timer.
- * @param tickOptions The options to pass to the `tick()` function.
- *
- * @usageNotes
- *
- * The `tick()` option is a flag called `processNewMacroTasksSynchronously`,
- * which determines whether or not to invoke new macroTasks.
- *
- * If you provide a `tickOptions` object, but do not specify a
- * `processNewMacroTasksSynchronously` property (`tick(100, {})`),
- * then `processNewMacroTasksSynchronously` defaults to true.
- *
- * If you omit the `tickOptions` parameter (`tick(100))`), then
- * `tickOptions` defaults to `{processNewMacroTasksSynchronously: true}`.
- *
- * ### Example
- *
- * {@example core/testing/ts/fake_async.ts region='basic'}
- *
- * The following example includes a nested timeout (new macroTask), and
- * the `tickOptions` parameter is allowed to default. In this case,
- * `processNewMacroTasksSynchronously` defaults to true, and the nested
- * function is executed on each tick.
- *
- * ```ts
- * it ('test with nested setTimeout', fakeAsync(() => {
- *   let nestedTimeoutInvoked = false;
- *   function funcWithNestedTimeout() {
- *     setTimeout(() => {
- *       nestedTimeoutInvoked = true;
- *     });
- *   };
- *   setTimeout(funcWithNestedTimeout);
- *   tick();
- *   expect(nestedTimeoutInvoked).toBe(true);
- * }));
- * ```
- *
- * In the following case, `processNewMacroTasksSynchronously` is explicitly
- * set to false, so the nested timeout function is not invoked.
- *
- * ```ts
- * it ('test with nested setTimeout', fakeAsync(() => {
- *   let nestedTimeoutInvoked = false;
- *   function funcWithNestedTimeout() {
- *     setTimeout(() => {
- *       nestedTimeoutInvoked = true;
- *     });
- *   };
- *   setTimeout(funcWithNestedTimeout);
- *   tick(0, {processNewMacroTasksSynchronously: false});
- *   expect(nestedTimeoutInvoked).toBe(false);
- * }));
- * ```
- *
- *
- * @publicApi
- */
-export declare function tick(millis?: number, tickOptions?: {
-    processNewMacroTasksSynchronously: boolean;
-}): void;
-
-
-/**
- * Wraps a test function in an asynchronous test zone. The test will automatically
- * complete when all asynchronous calls within this zone are done. Can be used
- * to wrap an {@link inject} call.
+ * Allows injecting dependencies in `beforeEach()` and `it()`. Note: this function
+ * (imported from the `@angular/core/testing` package) can **only** be used to inject dependencies
+ * in tests. To inject dependencies in your application code, use the [`inject`](api/core/inject)
+ * function from the `@angular/core` package instead.
  *
  * Example:
  *
  * ```ts
- * it('...', waitForAsync(inject([AClass], (object) => {
- *   object.doSomething.then(() => {
- *     expect(...);
- *   })
- * })));
+ * beforeEach(inject([Dependency, AClass], (dep, object) => {
+ *   // some code that uses `dep` and `object`
+ *   // ...
+ * }));
+ *
+ * it('...', inject([AClass], (object) => {
+ *   object.doSomething();
+ *   expect(...);
+ * })
  * ```
  *
  * @publicApi
  */
-export declare function waitForAsync(fn: Function): (done: any) => any;
-
+declare function inject(tokens: any[], fn: Function): () => any;
 /**
  * @publicApi
  */
-export declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;
+declare class InjectSetupWrapper {
+    private _moduleDef;
+    constructor(_moduleDef: () => TestModuleMetadata);
+    private _addModule;
+    inject(tokens: any[], fn: Function): () => any;
+}
+/**
+ * @publicApi
+ */
+declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;
+declare function withModule(moduleDef: TestModuleMetadata, fn: Function): () => any;
 
-export declare function withModule(moduleDef: TestModuleMetadata, fn: Function): () => any;
+/**
+ * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+ * investigation.
+ *
+ * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ *
+ * @codeGenApi
+ */
+declare const __core_private_testing_placeholder__ = "";
+
+declare class MetadataOverrider {
+    private _references;
+    /**
+     * Creates a new instance for the given metadata class
+     * based on an old instance and overrides.
+     */
+    overrideMetadata<C extends T, T>(metadataClass: {
+        new (options: T): C;
+    }, oldMetadata: C, override: MetadataOverride<T>): C;
+}
 
 /**
  * Fake implementation of user agent history and navigation behavior. This is a
  * high-fidelity implementation of browser behavior that attempts to emulate
  * things like traversal delay.
  */
-export declare class ɵFakeNavigation implements Navigation {
+declare class FakeNavigation implements Navigation {
     private readonly window;
     /**
      * The fake implementation of an entries array. Only same-document entries
@@ -855,16 +657,42 @@ export declare class ɵFakeNavigation implements Navigation {
     updateCurrentEntry(_options: NavigationUpdateCurrentEntryOptions): void;
     reload(_options?: NavigationReloadOptions): NavigationResult;
 }
-
-export declare class ɵMetadataOverrider {
-    private _references;
-    /**
-     * Creates a new instance for the given metadata class
-     * based on an old instance and overrides.
-     */
-    overrideMetadata<C extends T, T>(metadataClass: {
-        new (options: T): C;
-    }, oldMetadata: C, override: MetadataOverride<T>): C;
+/**
+ * Fake equivalent of the `NavigationResult` interface with
+ * `FakeNavigationHistoryEntry`.
+ */
+interface FakeNavigationResult extends NavigationResult {
+    readonly committed: Promise<FakeNavigationHistoryEntry>;
+    readonly finished: Promise<FakeNavigationHistoryEntry>;
+}
+/**
+ * Fake equivalent of `NavigationHistoryEntry`.
+ */
+declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
+    private eventTarget;
+    readonly url: string | null;
+    readonly sameDocument: boolean;
+    readonly id: string;
+    readonly key: string;
+    readonly index: number;
+    private readonly state;
+    private readonly historyState;
+    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
+    constructor(eventTarget: EventTarget, url: string | null, { id, key, index, sameDocument, state, historyState, }: {
+        id: string;
+        key: string;
+        index: number;
+        sameDocument: boolean;
+        historyState: unknown;
+        state?: unknown;
+    });
+    getState(): unknown;
+    getHistoryState(): unknown;
+    addEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
+    removeEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
+    dispatchEvent(event: Event): boolean;
+    /** internal */
+    dispose(): void;
 }
 
-export { }
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, type MetadataOverride, type ModuleTeardownOptions, TestBed, type TestBedStatic, TestComponentRenderer, type TestEnvironmentOptions, type TestModuleMetadata, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,10 +13,8 @@ var module$1 = require('module');
 var p = require('path');
 var url = require('url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
+var _documentCurrentScript = typeof document !== 'undefined' ? document.currentScript : null;
+function _interopNamespaceDefault(e) {
     var n = Object.create(null);
     if (e) {
         Object.keys(e).forEach(function (k) {
@@ -29,13 +27,11 @@ function _interopNamespace(e) {
             }
         });
     }
-    n["default"] = e;
+    n.default = e;
     return Object.freeze(n);
 }
 
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs$1);
-var p__namespace = /*#__PURE__*/_interopNamespace(p);
+var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
 
 const _SELECTOR_REGEXP = new RegExp('(\\:not\\()|' + // 1: ":not("
     '(([\\.\\#]?)[-\\w]+)|' + // 2: "tag"; 3: "."/"#";
@@ -432,6 +428,10 @@ class SelectorContext {
 }
 
 // Attention:
+// This file duplicates types and values from @angular/core
+// so that we are able to make @angular/compiler independent of @angular/core.
+// This is important to prevent a build cycle, as @angular/core needs to
+// be compiled with the compiler.
 // Stores the default value of `emitDistinctChangesOnly` when the `emitDistinctChangesOnly` is not
 // explicitly set.
 const emitDistinctChangesOnlyDefaultValue = true;
@@ -681,7 +681,7 @@ function fingerprint(str) {
     let lo = hash32(view, utf8.length, 102072);
     if (hi == 0 && (lo == 0 || lo == 1)) {
         hi = hi ^ 0x130f9bef;
-        lo = lo ^ -0x6b5f56d8;
+        lo = lo ^ -1801410264;
     }
     return (BigInt.asUintN(32, BigInt(hi)) << BigInt(32)) | BigInt.asUintN(32, BigInt(lo));
 }
@@ -1972,7 +1972,7 @@ class IfStmt extends Statement {
         return visitor.visitIfStmt(this, context);
     }
 }
-class RecursiveAstVisitor$1 {
+let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
     visitType(ast, context) {
         return ast;
     }
@@ -2163,7 +2163,7 @@ class RecursiveAstVisitor$1 {
     visitAllStatements(stmts, context) {
         stmts.forEach((stmt) => stmt.visitStatement(this, context));
     }
-}
+};
 function leadingComment(text, multiline = false, trailingNewline = true) {
     return new LeadingComment(text, multiline, trailingNewline);
 }
@@ -4130,11 +4130,11 @@ class ASTWithName extends AST {
         this.nameSpan = nameSpan;
     }
 }
-class EmptyExpr$1 extends AST {
+let EmptyExpr$1 = class EmptyExpr extends AST {
     visit(visitor, context = null) {
         // do nothing
     }
-}
+};
 class ImplicitReceiver extends AST {
     visit(visitor, context = null) {
         return visitor.visitImplicitReceiver(this, context);
@@ -4302,7 +4302,7 @@ class LiteralMap extends AST {
         return visitor.visitLiteralMap(this, context);
     }
 }
-class Interpolation$1 extends AST {
+let Interpolation$1 = class Interpolation extends AST {
     strings;
     expressions;
     constructor(span, sourceSpan, strings, expressions) {
@@ -4313,7 +4313,7 @@ class Interpolation$1 extends AST {
     visit(visitor, context = null) {
         return visitor.visitInterpolation(this, context);
     }
-}
+};
 class Binary extends AST {
     operation;
     left;
@@ -4811,7 +4811,7 @@ function mergeNsAndName(prefix, localName) {
  * the top-level of the R3 AST, and only if `Render3ParseOptions['collectCommentNodes']`
  * is true.
  */
-class Comment$1 {
+let Comment$1 = class Comment {
     value;
     sourceSpan;
     constructor(value, sourceSpan) {
@@ -4821,8 +4821,8 @@ class Comment$1 {
     visit(_visitor) {
         throw new Error('visit() not implemented for Comment');
     }
-}
-class Text$3 {
+};
+let Text$3 = class Text {
     value;
     sourceSpan;
     constructor(value, sourceSpan) {
@@ -4832,7 +4832,7 @@ class Text$3 {
     visit(visitor) {
         return visitor.visitText(this);
     }
-}
+};
 class BoundText {
     value;
     sourceSpan;
@@ -4933,7 +4933,7 @@ class BoundEvent {
         return visitor.visitBoundEvent(this);
     }
 }
-class Element$1 {
+let Element$1 = class Element {
     name;
     attributes;
     inputs;
@@ -4959,7 +4959,7 @@ class Element$1 {
     visit(visitor) {
         return visitor.visitElement(this);
     }
-}
+};
 class DeferredTrigger {
     nameSpan;
     sourceSpan;
@@ -5230,7 +5230,7 @@ class UnknownBlock {
         return visitor.visitUnknownBlock(this);
     }
 }
-class LetDeclaration$1 {
+let LetDeclaration$1 = class LetDeclaration {
     name;
     value;
     sourceSpan;
@@ -5246,7 +5246,7 @@ class LetDeclaration$1 {
     visit(visitor) {
         return visitor.visitLetDeclaration(this);
     }
-}
+};
 class Template {
     tagName;
     attributes;
@@ -5318,7 +5318,7 @@ class Variable {
         return visitor.visitVariable(this);
     }
 }
-class Reference$1 {
+let Reference$1 = class Reference {
     name;
     value;
     sourceSpan;
@@ -5334,8 +5334,8 @@ class Reference$1 {
     visit(visitor) {
         return visitor.visitReference(this);
     }
-}
-class Icu$1 {
+};
+let Icu$1 = class Icu {
     vars;
     placeholders;
     sourceSpan;
@@ -5349,8 +5349,8 @@ class Icu$1 {
     visit(visitor) {
         return visitor.visitIcu(this);
     }
-}
-class RecursiveVisitor$1 {
+};
+let RecursiveVisitor$1 = class RecursiveVisitor {
     visitElement(element) {
         visitAll$1(this, element.attributes);
         visitAll$1(this, element.inputs);
@@ -5414,7 +5414,7 @@ class RecursiveVisitor$1 {
     visitDeferredTrigger(trigger) { }
     visitUnknownBlock(block) { }
     visitLetDeclaration(decl) { }
-}
+};
 function visitAll$1(visitor, nodes) {
     const result = [];
     if (visitor.visit) {
@@ -5478,7 +5478,7 @@ class Message {
         }
     }
 }
-class Text$2 {
+let Text$2 = class Text {
     value;
     sourceSpan;
     constructor(value, sourceSpan) {
@@ -5488,7 +5488,7 @@ class Text$2 {
     visit(visitor, context) {
         return visitor.visitText(this, context);
     }
-}
+};
 // TODO(vicb): do we really need this node (vs an array) ?
 class Container {
     children;
@@ -5751,7 +5751,7 @@ class SimplePlaceholderMapper extends RecurseVisitor {
     }
 }
 
-class _Visitor$2 {
+let _Visitor$2 = class _Visitor {
     visitTag(tag) {
         const strAttrs = this._serializeAttributes(tag.attrs);
         if (tag.children.length == 0) {
@@ -5775,7 +5775,7 @@ class _Visitor$2 {
     visitDoctype(doctype) {
         return `<!DOCTYPE ${doctype.rootTag} [\n${doctype.dtd}\n]>`;
     }
-}
+};
 const _visitor = new _Visitor$2();
 function serialize$1(nodes) {
     return nodes.map((node) => node.visit(_visitor)).join('');
@@ -5817,7 +5817,7 @@ class Tag {
         return visitor.visitTag(this);
     }
 }
-class Text$1 {
+let Text$1 = class Text {
     value;
     constructor(unescapedValue) {
         this.value = escapeXml(unescapedValue);
@@ -5825,7 +5825,7 @@ class Text$1 {
     visit(visitor) {
         return visitor.visitText(this);
     }
-}
+};
 class CR extends Text$1 {
     constructor(ws = 0) {
         super(`\n${new Array(ws + 1).join(' ')}`);
@@ -5917,7 +5917,7 @@ class Xmb extends Serializer {
         return new SimplePlaceholderMapper(message, toPublicName);
     }
 }
-class _Visitor$1 {
+let _Visitor$1 = class _Visitor {
     visitText(text, context) {
         return [new Text$1(text.value)];
     }
@@ -5991,7 +5991,7 @@ class _Visitor$1 {
     serialize(nodes) {
         return [].concat(...nodes.map((node) => node.visit(this)));
     }
-}
+};
 function digest(message) {
     return decimalDigest(message);
 }
@@ -12428,9 +12428,9 @@ function resolveDeferTargetNames(job) {
         }
     }
 }
-class Scope$2 {
+let Scope$2 = class Scope {
     targets = new Map();
-}
+};
 
 const REPLACEMENTS = new Map([
     [OpKind.ElementEnd, [OpKind.ElementStart, OpKind.Element]],
@@ -12769,7 +12769,7 @@ function createI18nMessage(job, context, messagePlaceholder) {
     let formattedParams = formatParams(context.params);
     const formattedPostprocessingParams = formatParams(context.postprocessingParams);
     let needsPostprocessing = [...context.params.values()].some((v) => v.length > 1);
-    return createI18nMessageOp(job.allocateXrefId(), context.xref, context.i18nBlock, context.message, messagePlaceholder ?? null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
+    return createI18nMessageOp(job.allocateXrefId(), context.xref, context.i18nBlock, context.message, null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
 }
 /**
  * Formats an ICU placeholder into a single string with expression placeholders.
@@ -16860,7 +16860,7 @@ class ParseTreeResult {
         this.errors = errors;
     }
 }
-class Parser$1 {
+let Parser$1 = class Parser {
     getTagDefinition;
     constructor(getTagDefinition) {
         this.getTagDefinition = getTagDefinition;
@@ -16871,7 +16871,7 @@ class Parser$1 {
         parser.build();
         return new ParseTreeResult(parser.rootNodes, tokenizeResult.errors.concat(parser.errors));
     }
-}
+};
 class _TreeBuilder {
     tokens;
     getTagDefinition;
@@ -19235,9 +19235,10 @@ class _ParseAST {
     }
     parseNoInterpolationTemplateLiteral() {
         const text = this.next.strValue;
+        const start = this.inputIndex;
         this.advance();
-        const span = this.span(this.inputIndex);
-        const sourceSpan = this.sourceSpan(this.inputIndex);
+        const span = this.span(start);
+        const sourceSpan = this.sourceSpan(start);
         return new TemplateLiteral(span, sourceSpan, [new TemplateLiteralElement(span, sourceSpan, text)], []);
     }
     parseTaggedTemplateLiteral(tag, start) {
@@ -19251,8 +19252,9 @@ class _ParseAST {
         while (this.next !== EOF) {
             const token = this.next;
             if (token.isTemplateLiteralPart() || token.isTemplateLiteralEnd()) {
-                elements.push(new TemplateLiteralElement(this.span(this.inputIndex), this.sourceSpan(this.inputIndex), token.strValue));
+                const partStart = this.inputIndex;
                 this.advance();
+                elements.push(new TemplateLiteralElement(this.span(partStart), this.sourceSpan(partStart), token.strValue));
                 if (token.isTemplateLiteralEnd()) {
                     break;
                 }
@@ -26230,10 +26232,10 @@ function convertTemplateLiteral(ast, job, baseSourceSpan) {
 function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
     let expression;
     if (value instanceof Interpolation$1) {
-        expression = new Interpolation(value.strings, value.expressions.map((e) => convertAst(e, job, sourceSpan ?? null)), Object.keys(asMessage(i18nMeta)?.placeholders ?? {}));
+        expression = new Interpolation(value.strings, value.expressions.map((e) => convertAst(e, job, null)), Object.keys(asMessage(i18nMeta)?.placeholders ?? {}));
     }
     else if (value instanceof AST) {
-        expression = convertAst(value, job, sourceSpan ?? null);
+        expression = convertAst(value, job, null);
     }
     else {
         expression = literal$1(value);
@@ -29501,7 +29503,7 @@ class R3TargetBinder {
  * be captured and available by name in `namedEntities`. Additionally, child templates will
  * be analyzed and have their child `Scope`s available in `childScopes`.
  */
-class Scope$1 {
+let Scope$1 = class Scope {
     parentScope;
     rootNode;
     /**
@@ -29525,14 +29527,14 @@ class Scope$1 {
             parentScope !== null && parentScope.isDeferred ? true : rootNode instanceof DeferredBlock;
     }
     static newRootScope() {
-        return new Scope$1(null, null);
+        return new Scope(null, null);
     }
     /**
      * Process a template (either as a `Template` sub-template with variables, or a plain array of
      * template `Node`s) and construct its `Scope`.
      */
     static apply(template) {
-        const scope = Scope$1.newRootScope();
+        const scope = Scope.newRootScope();
         scope.ingest(template);
         return scope;
     }
@@ -29680,11 +29682,11 @@ class Scope$1 {
         return res;
     }
     ingestScopedNode(node) {
-        const scope = new Scope$1(this, node);
+        const scope = new Scope(this, node);
         scope.ingest(node);
         this.childScopes.set(node, scope);
     }
-}
+};
 /**
  * Processes a template and matches directives on nodes (elements and templates).
  *
@@ -30311,7 +30313,6 @@ class CompilerFacadeImpl {
             name: facade.name,
             type: wrapReference(facade.type),
             typeArgumentCount: 0,
-            deps: null,
             pipeName: facade.pipeName,
             pure: facade.pure,
             isStandalone: facade.isStandalone,
@@ -30521,8 +30522,8 @@ function convertQueryPredicate(predicate) {
             createMayBeForwardRefExpression(new WrappedNodeExpr(predicate), 1 /* ForwardRefHandling.Wrapped */);
 }
 function convertDirectiveFacadeToMetadata(facade) {
-    const inputsFromMetadata = parseInputsArray(facade.inputs || []);
-    const outputsFromMetadata = parseMappingStringArray(facade.outputs || []);
+    const inputsFromMetadata = parseInputsArray$1(facade.inputs || []);
+    const outputsFromMetadata = parseMappingStringArray$1(facade.outputs || []);
     const propMetadata = facade.propMetadata;
     const inputsFromType = {};
     const outputsFromType = {};
@@ -30559,9 +30560,9 @@ function convertDirectiveFacadeToMetadata(facade) {
                 : {
                     directive: wrapReference(hostDirective.directive),
                     isForwardReference: false,
-                    inputs: hostDirective.inputs ? parseMappingStringArray(hostDirective.inputs) : null,
+                    inputs: hostDirective.inputs ? parseMappingStringArray$1(hostDirective.inputs) : null,
                     outputs: hostDirective.outputs
-                        ? parseMappingStringArray(hostDirective.outputs)
+                        ? parseMappingStringArray$1(hostDirective.outputs)
                         : null,
                 };
         })
@@ -30573,7 +30574,7 @@ function convertDirectiveFacadeToMetadata(facade) {
         type: wrapReference(facade.type),
         deps: null,
         host: {
-            ...extractHostBindings(facade.propMetadata, facade.typeSourceSpan, facade.host),
+            ...extractHostBindings$1(facade.propMetadata, facade.typeSourceSpan, facade.host),
         },
         inputs: { ...inputsFromMetadata, ...inputsFromType },
         outputs: { ...outputsFromMetadata, ...outputsFromType },
@@ -30807,7 +30808,7 @@ function createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies) {
     }
     return { mode: 0 /* DeferBlockDepsEmitMode.PerBlock */, blocks };
 }
-function extractHostBindings(propMetadata, sourceSpan, host) {
+function extractHostBindings$1(propMetadata, sourceSpan, host) {
     // First parse the declarations from the metadata.
     const bindings = parseHostBindings(host || {});
     // After that check host bindings for errors
@@ -30888,10 +30889,10 @@ function parseLegacyInputPartialOutput(value) {
         isSignal: false,
     };
 }
-function parseInputsArray(values) {
+function parseInputsArray$1(values) {
     return values.reduce((results, value) => {
         if (typeof value === 'string') {
-            const [bindingPropertyName, classPropertyName] = parseMappingString(value);
+            const [bindingPropertyName, classPropertyName] = parseMappingString$1(value);
             results[classPropertyName] = {
                 bindingPropertyName,
                 classPropertyName,
@@ -30914,14 +30915,14 @@ function parseInputsArray(values) {
         return results;
     }, {});
 }
-function parseMappingStringArray(values) {
+function parseMappingStringArray$1(values) {
     return values.reduce((results, value) => {
-        const [alias, fieldName] = parseMappingString(value);
+        const [alias, fieldName] = parseMappingString$1(value);
         results[fieldName] = alias;
         return results;
     }, {});
 }
-function parseMappingString(value) {
+function parseMappingString$1(value) {
     // Either the value is 'field' or 'field: property'. In the first case, `property` will
     // be undefined, in which case the field name should also be used as the property name.
     const [fieldName, bindingPropertyName] = value.split(':', 2).map((str) => str.trim());
@@ -31436,9 +31437,27 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.1+sha-8be6e38');
+new Version('20.0.0-next.1+sha-4fa5d18');
 
 //////////////////////////////////////
+// THIS FILE HAS GLOBAL SIDE EFFECT //
+//       (see bottom of file)       //
+//////////////////////////////////////
+/**
+ * @module
+ * @description
+ * Entry point for all APIs of the compiler package.
+ *
+ * <div class="callout is-critical">
+ *   <header>Unstable APIs</header>
+ *   <p>
+ *     All compiler apis are currently considered experimental and private!
+ *   </p>
+ *   <p>
+ *     We expect the APIs in this package to keep on changing. Do not rely on them.
+ *   </p>
+ * </div>
+ */
 // This file only reexports content of the `src` folder. Keep it that way.
 // This function call has a global side effects and publishes the compiler into global namespace for
 // the late binding of the Compiler to the @angular/core for jit compilation.
@@ -31953,7 +31972,7 @@ class FatalDiagnosticError extends Error {
     diagnosticMessage;
     relatedInformation;
     constructor(code, node, diagnosticMessage, relatedInformation) {
-        super(`FatalDiagnosticError: Code: ${code}, Message: ${ts__default["default"].flattenDiagnosticMessageText(diagnosticMessage, '\n')}`);
+        super(`FatalDiagnosticError: Code: ${code}, Message: ${ts.flattenDiagnosticMessageText(diagnosticMessage, '\n')}`);
         this.code = code;
         this.node = node;
         this.diagnosticMessage = diagnosticMessage;
@@ -31971,12 +31990,12 @@ class FatalDiagnosticError extends Error {
         return makeDiagnostic(this.code, this.node, this.diagnosticMessage, this.relatedInformation);
     }
 }
-function makeDiagnostic(code, node, messageText, relatedInformation, category = ts__default["default"].DiagnosticCategory.Error) {
-    node = ts__default["default"].getOriginalNode(node);
+function makeDiagnostic(code, node, messageText, relatedInformation, category = ts.DiagnosticCategory.Error) {
+    node = ts.getOriginalNode(node);
     return {
         category,
         code: ngErrorCode(code),
-        file: ts__default["default"].getOriginalNode(node).getSourceFile(),
+        file: ts.getOriginalNode(node).getSourceFile(),
         start: node.getStart(undefined, false),
         length: node.getWidth(),
         messageText,
@@ -31985,16 +32004,16 @@ function makeDiagnostic(code, node, messageText, relatedInformation, category = 
 }
 function makeDiagnosticChain(messageText, next) {
     return {
-        category: ts__default["default"].DiagnosticCategory.Message,
+        category: ts.DiagnosticCategory.Message,
         code: 0,
         messageText,
         next,
     };
 }
 function makeRelatedInformation(node, messageText) {
-    node = ts__default["default"].getOriginalNode(node);
+    node = ts.getOriginalNode(node);
     return {
-        category: ts__default["default"].DiagnosticCategory.Message,
+        category: ts.DiagnosticCategory.Message,
         code: 0,
         file: node.getSourceFile(),
         start: node.getStart(),
@@ -32368,7 +32387,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-febe8b3a.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DF8ZaFW5.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32379,30 +32398,30 @@ class NodeJSReadonlyFileSystem extends NodeJSPathManipulation {
         if (this._caseSensitive === undefined) {
             // Note the use of the real file-system is intentional:
             // `this.exists()` relies upon `isCaseSensitive()` so that would cause an infinite recursion.
-            this._caseSensitive = !fs__default["default"].existsSync(this.normalize(toggleCase(currentFileName)));
+            this._caseSensitive = !fs$1.existsSync(this.normalize(toggleCase(currentFileName)));
         }
         return this._caseSensitive;
     }
     exists(path) {
-        return fs__default["default"].existsSync(path);
+        return fs$1.existsSync(path);
     }
     readFile(path) {
-        return fs__default["default"].readFileSync(path, 'utf8');
+        return fs$1.readFileSync(path, 'utf8');
     }
     readFileBuffer(path) {
-        return fs__default["default"].readFileSync(path);
+        return fs$1.readFileSync(path);
     }
     readdir(path) {
-        return fs__default["default"].readdirSync(path);
+        return fs$1.readdirSync(path);
     }
     lstat(path) {
-        return fs__default["default"].lstatSync(path);
+        return fs$1.lstatSync(path);
     }
     stat(path) {
-        return fs__default["default"].statSync(path);
+        return fs$1.statSync(path);
     }
     realpath(path) {
-        return this.resolve(fs__default["default"].realpathSync(path));
+        return this.resolve(fs$1.realpathSync(path));
     }
     getDefaultLibLocation() {
         // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
@@ -32415,25 +32434,25 @@ class NodeJSReadonlyFileSystem extends NodeJSPathManipulation {
  */
 class NodeJSFileSystem extends NodeJSReadonlyFileSystem {
     writeFile(path, data, exclusive = false) {
-        fs__default["default"].writeFileSync(path, data, exclusive ? { flag: 'wx' } : undefined);
+        fs$1.writeFileSync(path, data, exclusive ? { flag: 'wx' } : undefined);
     }
     removeFile(path) {
-        fs__default["default"].unlinkSync(path);
+        fs$1.unlinkSync(path);
     }
     symlink(target, path) {
-        fs__default["default"].symlinkSync(target, path);
+        fs$1.symlinkSync(target, path);
     }
     copyFile(from, to) {
-        fs__default["default"].copyFileSync(from, to);
+        fs$1.copyFileSync(from, to);
     }
     moveFile(from, to) {
-        fs__default["default"].renameSync(from, to);
+        fs$1.renameSync(from, to);
     }
     ensureDir(path) {
-        fs__default["default"].mkdirSync(path, { recursive: true });
+        fs$1.mkdirSync(path, { recursive: true });
     }
     removeDeep(path) {
-        fs__default["default"].rmdirSync(path, { recursive: true });
+        fs$1.rmdirSync(path, { recursive: true });
     }
 }
 /**
@@ -32460,17 +32479,17 @@ function isNonDeclarationTsPath(filePath) {
 function isFromDtsFile(node) {
     let sf = node.getSourceFile();
     if (sf === undefined) {
-        sf = ts__default["default"].getOriginalNode(node).getSourceFile();
+        sf = ts.getOriginalNode(node).getSourceFile();
     }
     return sf !== undefined && sf.isDeclarationFile;
 }
 function nodeNameForError(node) {
-    if (node.name !== undefined && ts__default["default"].isIdentifier(node.name)) {
+    if (node.name !== undefined && ts.isIdentifier(node.name)) {
         return node.name.text;
     }
     else {
-        const kind = ts__default["default"].SyntaxKind[node.kind];
-        const { line, character } = ts__default["default"].getLineAndCharacterOfPosition(node.getSourceFile(), node.getStart());
+        const kind = ts.SyntaxKind[node.kind];
+        const { line, character } = ts.getLineAndCharacterOfPosition(node.getSourceFile(), node.getStart());
         return `${kind}@${line}:${character}`;
     }
 }
@@ -32479,17 +32498,17 @@ function getSourceFile(node) {
     // despite the type signature not allowing it. In that event, get the `ts.SourceFile` via the
     // original node instead (which works).
     const directSf = node.getSourceFile();
-    return directSf !== undefined ? directSf : ts__default["default"].getOriginalNode(node).getSourceFile();
+    return directSf !== undefined ? directSf : ts.getOriginalNode(node).getSourceFile();
 }
 function getSourceFileOrNull(program, fileName) {
     return program.getSourceFile(fileName) || null;
 }
 function getTokenAtPosition(sf, pos) {
     // getTokenAtPosition is part of TypeScript's private API.
-    return ts__default["default"].getTokenAtPosition(sf, pos);
+    return ts.getTokenAtPosition(sf, pos);
 }
 function identifierOfNode(decl) {
-    if (decl.name !== undefined && ts__default["default"].isIdentifier(decl.name)) {
+    if (decl.name !== undefined && ts.isIdentifier(decl.name)) {
         return decl.name;
     }
     else {
@@ -32500,14 +32519,14 @@ function isDeclaration(node) {
     return isValueDeclaration(node) || isTypeDeclaration(node);
 }
 function isValueDeclaration(node) {
-    return (ts__default["default"].isClassDeclaration(node) || ts__default["default"].isFunctionDeclaration(node) || ts__default["default"].isVariableDeclaration(node));
+    return (ts.isClassDeclaration(node) || ts.isFunctionDeclaration(node) || ts.isVariableDeclaration(node));
 }
 function isTypeDeclaration(node) {
-    return (ts__default["default"].isEnumDeclaration(node) || ts__default["default"].isTypeAliasDeclaration(node) || ts__default["default"].isInterfaceDeclaration(node));
+    return (ts.isEnumDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node));
 }
 function isNamedDeclaration(node) {
     const namedNode = node;
-    return namedNode.name !== undefined && ts__default["default"].isIdentifier(namedNode.name);
+    return namedNode.name !== undefined && ts.isIdentifier(namedNode.name);
 }
 function getRootDirs(host, options) {
     const rootDirs = [];
@@ -32530,8 +32549,8 @@ function getRootDirs(host, options) {
 }
 function nodeDebugInfo(node) {
     const sf = getSourceFile(node);
-    const { line, character } = ts__default["default"].getLineAndCharacterOfPosition(sf, node.pos);
-    return `[${sf.fileName}: ${ts__default["default"].SyntaxKind[node.kind]} @ ${line}:${character}]`;
+    const { line, character } = ts.getLineAndCharacterOfPosition(sf, node.pos);
+    return `[${sf.fileName}: ${ts.SyntaxKind[node.kind]} @ ${line}:${character}]`;
 }
 /**
  * Resolve the specified `moduleName` using the given `compilerOptions` and `compilerHost`.
@@ -32546,12 +32565,12 @@ function resolveModuleName(moduleName, containingFile, compilerOptions, compiler
         compilerOptions)[0];
     }
     else {
-        return ts__default["default"].resolveModuleName(moduleName, containingFile, compilerOptions, compilerHost, moduleResolutionCache !== null ? moduleResolutionCache : undefined).resolvedModule;
+        return ts.resolveModuleName(moduleName, containingFile, compilerOptions, compilerHost, moduleResolutionCache !== null ? moduleResolutionCache : undefined).resolvedModule;
     }
 }
 /** Returns true if the node is an assignment expression. */
 function isAssignment(node) {
-    return ts__default["default"].isBinaryExpression(node) && node.operatorToken.kind === ts__default["default"].SyntaxKind.EqualsToken;
+    return ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken;
 }
 /**
  * Obtains the non-redirected source file for `sf`.
@@ -32767,10 +32786,10 @@ class AbsoluteModuleStrategy {
         }
         else if (!isDeclaration(ref.node)) {
             // It's not possible to import something which isn't a declaration.
-            throw new Error(`Debug assert: unable to import a Reference to non-declaration of type ${ts__default["default"].SyntaxKind[ref.node.kind]}.`);
+            throw new Error(`Debug assert: unable to import a Reference to non-declaration of type ${ts.SyntaxKind[ref.node.kind]}.`);
         }
         else if ((importFlags & exports.ImportFlags.AllowTypeImports) === 0 && isTypeDeclaration(ref.node)) {
-            throw new Error(`Importing a type-only declaration of type ${ts__default["default"].SyntaxKind[ref.node.kind]} in a value position is not allowed.`);
+            throw new Error(`Importing a type-only declaration of type ${ts.SyntaxKind[ref.node.kind]} in a value position is not allowed.`);
         }
         // Try to find the exported name of the declaration, if one is available.
         const { specifier, resolutionContext } = ref.bestGuessOwningModule;
@@ -33047,7 +33066,7 @@ function loadIsReferencedAliasDeclarationPatch(context) {
  * as these do not declare an actual symbol but just point to a target declaration.
  */
 function isAliasImportDeclaration(node) {
-    return ts__default["default"].isImportSpecifier(node) || ts__default["default"].isNamespaceImport(node) || ts__default["default"].isImportClause(node);
+    return ts.isImportSpecifier(node) || ts.isNamespaceImport(node) || ts.isImportClause(node);
 }
 /** Whether the transformation context exposes its emit resolver. */
 function isTransformationContextWithEmitResolver(context) {
@@ -33154,10 +33173,10 @@ class DefaultImportTracker {
 }
 
 function isDecoratorIdentifier(exp) {
-    return (ts__default["default"].isIdentifier(exp) ||
-        (ts__default["default"].isPropertyAccessExpression(exp) &&
-            ts__default["default"].isIdentifier(exp.expression) &&
-            ts__default["default"].isIdentifier(exp.name)));
+    return (ts.isIdentifier(exp) ||
+        (ts.isPropertyAccessExpression(exp) &&
+            ts.isIdentifier(exp.expression) &&
+            ts.isIdentifier(exp.name)));
 }
 /**
  * An enumeration of possible kinds of class members.
@@ -33194,7 +33213,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
     if (typeNode === null) {
         return missingType();
     }
-    if (!ts__default["default"].isTypeReferenceNode(typeNode)) {
+    if (!ts.isTypeReferenceNode(typeNode)) {
         return unsupportedType(typeNode);
     }
     const symbols = resolveTypeSymbols(typeNode, checker);
@@ -33205,7 +33224,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
     // It's only valid to convert a type reference to a value reference if the type actually
     // has a value declaration associated with it. Note that const enums are an exception,
     // because while they do have a value declaration, they don't exist at runtime.
-    if (decl.valueDeclaration === undefined || decl.flags & ts__default["default"].SymbolFlags.ConstEnum) {
+    if (decl.valueDeclaration === undefined || decl.flags & ts.SymbolFlags.ConstEnum) {
         let typeOnlyDecl = null;
         if (decl.declarations !== undefined && decl.declarations.length > 0) {
             typeOnlyDecl = decl.declarations[0];
@@ -33215,9 +33234,9 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
         if (!isLocalCompilation ||
             (typeOnlyDecl &&
                 [
-                    ts__default["default"].SyntaxKind.TypeParameter,
-                    ts__default["default"].SyntaxKind.TypeAliasDeclaration,
-                    ts__default["default"].SyntaxKind.InterfaceDeclaration,
+                    ts.SyntaxKind.TypeParameter,
+                    ts.SyntaxKind.TypeAliasDeclaration,
+                    ts.SyntaxKind.InterfaceDeclaration,
                 ].includes(typeOnlyDecl.kind))) {
             return noValueDeclaration(typeNode, typeOnlyDecl);
         }
@@ -33228,14 +33247,14 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
     // statement. If so, extract the module specifier and the name of the imported type.
     const firstDecl = local.declarations && local.declarations[0];
     if (firstDecl !== undefined) {
-        if (ts__default["default"].isImportClause(firstDecl) && firstDecl.name !== undefined) {
+        if (ts.isImportClause(firstDecl) && firstDecl.name !== undefined) {
             // This is a default import.
             //   import Foo from 'foo';
             if (firstDecl.isTypeOnly) {
                 // Type-only imports cannot be represented as value.
                 return typeOnlyImport(typeNode, firstDecl);
             }
-            if (!ts__default["default"].isImportDeclaration(firstDecl.parent)) {
+            if (!ts.isImportDeclaration(firstDecl.parent)) {
                 return unsupportedType(typeNode);
             }
             return {
@@ -33244,7 +33263,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
                 defaultImportStatement: firstDecl.parent,
             };
         }
-        else if (ts__default["default"].isImportSpecifier(firstDecl)) {
+        else if (ts.isImportSpecifier(firstDecl)) {
             // The symbol was imported by name
             //   import {Foo} from 'foo';
             // or
@@ -33265,7 +33284,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
             // Any remaining symbol names make up the complete path to the value.
             const [_localName, ...nestedPath] = symbols.symbolNames;
             const importDeclaration = firstDecl.parent.parent.parent;
-            if (!ts__default["default"].isImportDeclaration(importDeclaration)) {
+            if (!ts.isImportDeclaration(importDeclaration)) {
                 return unsupportedType(typeNode);
             }
             const moduleName = extractModuleName(importDeclaration);
@@ -33277,7 +33296,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
                 nestedPath,
             };
         }
-        else if (ts__default["default"].isNamespaceImport(firstDecl)) {
+        else if (ts.isNamespaceImport(firstDecl)) {
             // The import is a namespace import
             //   import * as Foo from 'foo';
             if (firstDecl.parent.isTypeOnly) {
@@ -33293,7 +33312,7 @@ function typeToValue(typeNode, checker, isLocalCompilation) {
             // to be imported and any remaining names that constitute the complete path to the value.
             const [_ns, importedName, ...nestedPath] = symbols.symbolNames;
             const importDeclaration = firstDecl.parent.parent;
-            if (!ts__default["default"].isImportDeclaration(importDeclaration)) {
+            if (!ts.isImportDeclaration(importDeclaration)) {
                 return unsupportedType(typeNode);
             }
             const moduleName = extractModuleName(importDeclaration);
@@ -33362,7 +33381,7 @@ function missingType() {
  * This will return `null` if an equivalent expression cannot be constructed.
  */
 function typeNodeToValueExpr(node) {
-    if (ts__default["default"].isTypeReferenceNode(node)) {
+    if (ts.isTypeReferenceNode(node)) {
         return entityNameToValue(node.typeName);
     }
     else {
@@ -33406,7 +33425,7 @@ function resolveTypeSymbols(typeRef, checker) {
     //   type is not qualified.
     let leftMost = typeName;
     const symbolNames = [];
-    while (ts__default["default"].isQualifiedName(leftMost)) {
+    while (ts.isQualifiedName(leftMost)) {
         symbolNames.unshift(leftMost.right.text);
         leftMost = leftMost.left;
     }
@@ -33419,18 +33438,18 @@ function resolveTypeSymbols(typeRef, checker) {
     }
     // De-alias the top-level type reference symbol to get the symbol of the actual declaration.
     let decl = typeRefSymbol;
-    if (typeRefSymbol.flags & ts__default["default"].SymbolFlags.Alias) {
+    if (typeRefSymbol.flags & ts.SymbolFlags.Alias) {
         decl = checker.getAliasedSymbol(typeRefSymbol);
     }
     return { local, decl, symbolNames };
 }
 function entityNameToValue(node) {
-    if (ts__default["default"].isQualifiedName(node)) {
+    if (ts.isQualifiedName(node)) {
         const left = entityNameToValue(node.left);
-        return left !== null ? ts__default["default"].factory.createPropertyAccessExpression(left, node.right) : null;
+        return left !== null ? ts.factory.createPropertyAccessExpression(left, node.right) : null;
     }
-    else if (ts__default["default"].isIdentifier(node)) {
-        const clone = ts__default["default"].setOriginalNode(ts__default["default"].factory.createIdentifier(node.text), node);
+    else if (ts.isIdentifier(node)) {
+        const clone = ts.setOriginalNode(ts.factory.createIdentifier(node.text), node);
         clone.parent = node.parent;
         return clone;
     }
@@ -33439,17 +33458,17 @@ function entityNameToValue(node) {
     }
 }
 function extractModuleName(node) {
-    if (!ts__default["default"].isStringLiteral(node.moduleSpecifier)) {
+    if (!ts.isStringLiteral(node.moduleSpecifier)) {
         throw new Error('not a module specifier');
     }
     return node.moduleSpecifier.text;
 }
 
 function isNamedClassDeclaration(node) {
-    return ts__default["default"].isClassDeclaration(node) && isIdentifier(node.name);
+    return ts.isClassDeclaration(node) && isIdentifier(node.name);
 }
 function isIdentifier(node) {
-    return node !== undefined && ts__default["default"].isIdentifier(node);
+    return node !== undefined && ts.isIdentifier(node);
 }
 /**
  * Converts the given class member access level to a string.
@@ -33489,8 +33508,8 @@ class TypeScriptReflectionHost {
         this.skipPrivateValueDeclarationTypes = skipPrivateValueDeclarationTypes;
     }
     getDecoratorsOfDeclaration(declaration) {
-        const decorators = ts__default["default"].canHaveDecorators(declaration)
-            ? ts__default["default"].getDecorators(declaration)
+        const decorators = ts.canHaveDecorators(declaration)
+            ? ts.getDecorators(declaration)
             : undefined;
         return decorators !== undefined && decorators.length
             ? decorators
@@ -33520,7 +33539,7 @@ class TypeScriptReflectionHost {
         // without a `body` are overloads whereas we want the implementation since it's the one that'll
         // be executed and which can have decorators. For declaration files, we take the first one that
         // we get.
-        const ctor = tsClazz.members.find((member) => ts__default["default"].isConstructorDeclaration(member) && (isDeclaration || member.body !== undefined));
+        const ctor = tsClazz.members.find((member) => ts.isConstructorDeclaration(member) && (isDeclaration || member.body !== undefined));
         if (ctor === undefined) {
             return null;
         }
@@ -33536,9 +33555,9 @@ class TypeScriptReflectionHost {
             // and extract the type. More complex union types e.g. `foo: Foo|Bar` are not supported.
             // We also don't need to support `foo: Foo|undefined` because Angular's DI injects `null` for
             // optional tokes that don't have providers.
-            if (typeNode && ts__default["default"].isUnionTypeNode(typeNode)) {
-                let childTypeNodes = typeNode.types.filter((childTypeNode) => !(ts__default["default"].isLiteralTypeNode(childTypeNode) &&
-                    childTypeNode.literal.kind === ts__default["default"].SyntaxKind.NullKeyword));
+            if (typeNode && ts.isUnionTypeNode(typeNode)) {
+                let childTypeNodes = typeNode.types.filter((childTypeNode) => !(ts.isLiteralTypeNode(childTypeNode) &&
+                    childTypeNode.literal.kind === ts.SyntaxKind.NullKeyword));
                 if (childTypeNodes.length === 1) {
                     typeNode = childTypeNodes[0];
                 }
@@ -33558,10 +33577,10 @@ class TypeScriptReflectionHost {
         if (directImport !== null) {
             return directImport;
         }
-        else if (ts__default["default"].isQualifiedName(id.parent) && id.parent.right === id) {
+        else if (ts.isQualifiedName(id.parent) && id.parent.right === id) {
             return this.getImportOfNamespacedIdentifier(id, getQualifiedNameRoot(id.parent));
         }
-        else if (ts__default["default"].isPropertyAccessExpression(id.parent) && id.parent.name === id) {
+        else if (ts.isPropertyAccessExpression(id.parent) && id.parent.name === id) {
             return this.getImportOfNamespacedIdentifier(id, getFarLeftIdentifier(id.parent));
         }
         else {
@@ -33570,7 +33589,7 @@ class TypeScriptReflectionHost {
     }
     getExportsOfModule(node) {
         // In TypeScript code, modules are only ts.SourceFiles. Throw if the node isn't a module.
-        if (!ts__default["default"].isSourceFile(node)) {
+        if (!ts.isSourceFile(node)) {
             throw new Error(`getExportsOfModule() called on non-SourceFile in TS code`);
         }
         // Reflect the module to a Symbol, and use getExportsOfModule() to get a list of exported
@@ -33598,11 +33617,11 @@ class TypeScriptReflectionHost {
         return this.getBaseClassExpression(clazz) !== null;
     }
     getBaseClassExpression(clazz) {
-        if (!(ts__default["default"].isClassDeclaration(clazz) || ts__default["default"].isClassExpression(clazz)) ||
+        if (!(ts.isClassDeclaration(clazz) || ts.isClassExpression(clazz)) ||
             clazz.heritageClauses === undefined) {
             return null;
         }
-        const extendsClause = clazz.heritageClauses.find((clause) => clause.token === ts__default["default"].SyntaxKind.ExtendsKeyword);
+        const extendsClause = clazz.heritageClauses.find((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword);
         if (extendsClause === undefined) {
             return null;
         }
@@ -33621,21 +33640,21 @@ class TypeScriptReflectionHost {
         return this.getDeclarationOfSymbol(symbol, id);
     }
     getDefinitionOfFunction(node) {
-        if (!ts__default["default"].isFunctionDeclaration(node) &&
-            !ts__default["default"].isMethodDeclaration(node) &&
-            !ts__default["default"].isFunctionExpression(node) &&
-            !ts__default["default"].isArrowFunction(node)) {
+        if (!ts.isFunctionDeclaration(node) &&
+            !ts.isMethodDeclaration(node) &&
+            !ts.isFunctionExpression(node) &&
+            !ts.isArrowFunction(node)) {
             return null;
         }
         let body = null;
         if (node.body !== undefined) {
             // The body might be an expression if the node is an arrow function.
-            body = ts__default["default"].isBlock(node.body)
+            body = ts.isBlock(node.body)
                 ? Array.from(node.body.statements)
-                : [ts__default["default"].factory.createReturnStatement(node.body)];
+                : [ts.factory.createReturnStatement(node.body)];
         }
         const type = this.checker.getTypeAtLocation(node);
-        const signatures = this.checker.getSignaturesOfType(type, ts__default["default"].SignatureKind.Call);
+        const signatures = this.checker.getSignaturesOfType(type, ts.SignatureKind.Call);
         return {
             node,
             body,
@@ -33649,7 +33668,7 @@ class TypeScriptReflectionHost {
         };
     }
     getGenericArityOfClass(clazz) {
-        if (!ts__default["default"].isClassDeclaration(clazz)) {
+        if (!ts.isClassDeclaration(clazz)) {
             return null;
         }
         return clazz.typeParameters !== undefined ? clazz.typeParameters.length : 0;
@@ -33660,12 +33679,12 @@ class TypeScriptReflectionHost {
     isStaticallyExported(decl) {
         // First check if there's an `export` modifier directly on the declaration.
         let topLevel = decl;
-        if (ts__default["default"].isVariableDeclaration(decl) && ts__default["default"].isVariableDeclarationList(decl.parent)) {
+        if (ts.isVariableDeclaration(decl) && ts.isVariableDeclarationList(decl.parent)) {
             topLevel = decl.parent.parent;
         }
-        const modifiers = ts__default["default"].canHaveModifiers(topLevel) ? ts__default["default"].getModifiers(topLevel) : undefined;
+        const modifiers = ts.canHaveModifiers(topLevel) ? ts.getModifiers(topLevel) : undefined;
         if (modifiers !== undefined &&
-            modifiers.some((modifier) => modifier.kind === ts__default["default"].SyntaxKind.ExportKeyword)) {
+            modifiers.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) {
             // The node is part of a declaration that's directly exported.
             return true;
         }
@@ -33678,7 +33697,7 @@ class TypeScriptReflectionHost {
         // The only way to check this is to look at the module level for exports of the class. As a
         // performance optimization, this check is only performed if the class is actually declared at
         // the top level of the file and thus eligible for exporting in the first place.
-        if (topLevel.parent === undefined || !ts__default["default"].isSourceFile(topLevel.parent)) {
+        if (topLevel.parent === undefined || !ts.isSourceFile(topLevel.parent)) {
             return false;
         }
         const localExports = this.getLocalExportedDeclarationsOfSourceFile(decl.getSourceFile());
@@ -33698,7 +33717,7 @@ class TypeScriptReflectionHost {
             return null;
         }
         // The module specifier is guaranteed to be a string literal, so this should always pass.
-        if (!ts__default["default"].isStringLiteral(importDecl.moduleSpecifier)) {
+        if (!ts.isStringLiteral(importDecl.moduleSpecifier)) {
             // Not allowed to happen in TypeScript ASTs.
             return null;
         }
@@ -33738,13 +33757,13 @@ class TypeScriptReflectionHost {
         if (!declaration) {
             return null;
         }
-        const namespaceDeclaration = ts__default["default"].isNamespaceImport(declaration) ? declaration : null;
+        const namespaceDeclaration = ts.isNamespaceImport(declaration) ? declaration : null;
         if (!namespaceDeclaration) {
             return null;
         }
         const importDeclaration = namespaceDeclaration.parent.parent;
-        if (!ts__default["default"].isImportDeclaration(importDeclaration) ||
-            !ts__default["default"].isStringLiteral(importDeclaration.moduleSpecifier)) {
+        if (!ts.isImportDeclaration(importDeclaration) ||
+            !ts.isStringLiteral(importDeclaration.moduleSpecifier)) {
             // Should not happen as this would be invalid TypesScript
             return null;
         }
@@ -33766,14 +33785,14 @@ class TypeScriptReflectionHost {
         else if (symbol.declarations !== undefined && symbol.declarations.length > 0) {
             valueDeclaration = symbol.declarations[0];
         }
-        if (valueDeclaration !== undefined && ts__default["default"].isShorthandPropertyAssignment(valueDeclaration)) {
+        if (valueDeclaration !== undefined && ts.isShorthandPropertyAssignment(valueDeclaration)) {
             const shorthandSymbol = this.checker.getShorthandAssignmentValueSymbol(valueDeclaration);
             if (shorthandSymbol === undefined) {
                 return null;
             }
             return this.getDeclarationOfSymbol(shorthandSymbol, originalId);
         }
-        else if (valueDeclaration !== undefined && ts__default["default"].isExportSpecifier(valueDeclaration)) {
+        else if (valueDeclaration !== undefined && ts.isExportSpecifier(valueDeclaration)) {
             const targetSymbol = this.checker.getExportSpecifierLocalTargetSymbol(valueDeclaration);
             if (targetSymbol === undefined) {
                 return null;
@@ -33782,7 +33801,7 @@ class TypeScriptReflectionHost {
         }
         const importInfo = originalId && this.getImportOfIdentifier(originalId);
         // Now, resolve the Symbol to its declaration by following any and all aliases.
-        while (symbol.flags & ts__default["default"].SymbolFlags.Alias) {
+        while (symbol.flags & ts.SymbolFlags.Alias) {
             symbol = this.checker.getAliasedSymbol(symbol);
         }
         // Look at the resolved Symbol's declarations and pick one of them to return.
@@ -33811,7 +33830,7 @@ class TypeScriptReflectionHost {
         let decoratorExpr = node.expression;
         let args = null;
         // Check for call expressions.
-        if (ts__default["default"].isCallExpression(decoratorExpr)) {
+        if (ts.isCallExpression(decoratorExpr)) {
             args = Array.from(decoratorExpr.arguments);
             decoratorExpr = decoratorExpr.expression;
         }
@@ -33820,7 +33839,7 @@ class TypeScriptReflectionHost {
         if (!isDecoratorIdentifier(decoratorExpr)) {
             return null;
         }
-        const decoratorIdentifier = ts__default["default"].isIdentifier(decoratorExpr) ? decoratorExpr : decoratorExpr.name;
+        const decoratorIdentifier = ts.isIdentifier(decoratorExpr) ? decoratorExpr : decoratorExpr.name;
         const importDecl = this.getImportOfIdentifier(decoratorIdentifier);
         return {
             name: decoratorIdentifier.text,
@@ -33860,7 +33879,7 @@ class TypeScriptReflectionHost {
             // If this exported symbol comes from an `export {Foo}` statement, then the symbol is actually
             // for the export declaration, not the original declaration. Such a symbol will be an alias,
             // so unwrap aliasing if necessary.
-            if (exportedSymbol.flags & ts__default["default"].SymbolFlags.Alias) {
+            if (exportedSymbol.flags & ts.SymbolFlags.Alias) {
                 exportedSymbol = this.checker.getAliasedSymbol(exportedSymbol);
             }
             if (exportedSymbol.valueDeclaration !== undefined &&
@@ -33900,7 +33919,7 @@ function reflectTypeEntityToDeclaration(type, checker) {
     if (realSymbol === undefined) {
         throw new TypeEntityToDeclarationError(`Cannot resolve type entity ${type.getText()} to symbol`);
     }
-    while (realSymbol.flags & ts__default["default"].SymbolFlags.Alias) {
+    while (realSymbol.flags & ts.SymbolFlags.Alias) {
         realSymbol = checker.getAliasedSymbol(realSymbol);
     }
     let node = null;
@@ -33913,8 +33932,8 @@ function reflectTypeEntityToDeclaration(type, checker) {
     else {
         throw new TypeEntityToDeclarationError(`Cannot resolve type entity symbol to declaration`);
     }
-    if (ts__default["default"].isQualifiedName(type)) {
-        if (!ts__default["default"].isIdentifier(type.left)) {
+    if (ts.isQualifiedName(type)) {
+        if (!ts.isIdentifier(type.left)) {
             throw new TypeEntityToDeclarationError(`Cannot handle qualified name with non-identifier lhs`);
         }
         const symbol = checker.getSymbolAtLocation(type.left);
@@ -33924,15 +33943,15 @@ function reflectTypeEntityToDeclaration(type, checker) {
             throw new TypeEntityToDeclarationError(`Cannot resolve qualified type entity lhs to symbol`);
         }
         const decl = symbol.declarations[0];
-        if (ts__default["default"].isNamespaceImport(decl)) {
+        if (ts.isNamespaceImport(decl)) {
             const clause = decl.parent;
             const importDecl = clause.parent;
-            if (!ts__default["default"].isStringLiteral(importDecl.moduleSpecifier)) {
+            if (!ts.isStringLiteral(importDecl.moduleSpecifier)) {
                 throw new TypeEntityToDeclarationError(`Module specifier is not a string`);
             }
             return { node, from: importDecl.moduleSpecifier.text };
         }
-        else if (ts__default["default"].isModuleDeclaration(decl)) {
+        else if (ts.isModuleDeclaration(decl)) {
             return { node, from: null };
         }
         else {
@@ -33966,23 +33985,23 @@ function filterToMembersWithDecorator(members, name, module) {
         .filter((value) => value !== null);
 }
 function extractModifiersOfMember(node) {
-    const modifiers = ts__default["default"].getModifiers(node);
+    const modifiers = ts.getModifiers(node);
     let isStatic = false;
     let isReadonly = false;
     let accessLevel = ClassMemberAccessLevel.PublicWritable;
     if (modifiers !== undefined) {
         for (const modifier of modifiers) {
             switch (modifier.kind) {
-                case ts__default["default"].SyntaxKind.StaticKeyword:
+                case ts.SyntaxKind.StaticKeyword:
                     isStatic = true;
                     break;
-                case ts__default["default"].SyntaxKind.PrivateKeyword:
+                case ts.SyntaxKind.PrivateKeyword:
                     accessLevel = ClassMemberAccessLevel.Private;
                     break;
-                case ts__default["default"].SyntaxKind.ProtectedKeyword:
+                case ts.SyntaxKind.ProtectedKeyword:
                     accessLevel = ClassMemberAccessLevel.Protected;
                     break;
-                case ts__default["default"].SyntaxKind.ReadonlyKeyword:
+                case ts.SyntaxKind.ReadonlyKeyword:
                     isReadonly = true;
                     break;
             }
@@ -33991,7 +34010,7 @@ function extractModifiersOfMember(node) {
     if (isReadonly && accessLevel === ClassMemberAccessLevel.PublicWritable) {
         accessLevel = ClassMemberAccessLevel.PublicReadonly;
     }
-    if (node.name !== undefined && ts__default["default"].isPrivateIdentifier(node.name)) {
+    if (node.name !== undefined && ts.isPrivateIdentifier(node.name)) {
         accessLevel = ClassMemberAccessLevel.EcmaScriptPrivate;
     }
     return { accessLevel, isStatic };
@@ -34008,37 +34027,37 @@ function reflectClassMember(node) {
     let value = null;
     let name = null;
     let nameNode = null;
-    if (ts__default["default"].isPropertyDeclaration(node)) {
+    if (ts.isPropertyDeclaration(node)) {
         kind = exports.ClassMemberKind.Property;
         value = node.initializer || null;
     }
-    else if (ts__default["default"].isGetAccessorDeclaration(node)) {
+    else if (ts.isGetAccessorDeclaration(node)) {
         kind = exports.ClassMemberKind.Getter;
     }
-    else if (ts__default["default"].isSetAccessorDeclaration(node)) {
+    else if (ts.isSetAccessorDeclaration(node)) {
         kind = exports.ClassMemberKind.Setter;
     }
-    else if (ts__default["default"].isMethodDeclaration(node)) {
+    else if (ts.isMethodDeclaration(node)) {
         kind = exports.ClassMemberKind.Method;
     }
-    else if (ts__default["default"].isConstructorDeclaration(node)) {
+    else if (ts.isConstructorDeclaration(node)) {
         kind = exports.ClassMemberKind.Constructor;
     }
     else {
         return null;
     }
-    if (ts__default["default"].isConstructorDeclaration(node)) {
+    if (ts.isConstructorDeclaration(node)) {
         name = 'constructor';
     }
-    else if (ts__default["default"].isIdentifier(node.name)) {
+    else if (ts.isIdentifier(node.name)) {
         name = node.name.text;
         nameNode = node.name;
     }
-    else if (ts__default["default"].isStringLiteral(node.name)) {
+    else if (ts.isStringLiteral(node.name)) {
         name = node.name.text;
         nameNode = node.name;
     }
-    else if (ts__default["default"].isPrivateIdentifier(node.name)) {
+    else if (ts.isPrivateIdentifier(node.name)) {
         name = node.name.text;
         nameNode = node.name;
     }
@@ -34061,14 +34080,14 @@ function reflectClassMember(node) {
 function reflectObjectLiteral(node) {
     const map = new Map();
     node.properties.forEach((prop) => {
-        if (ts__default["default"].isPropertyAssignment(prop)) {
+        if (ts.isPropertyAssignment(prop)) {
             const name = propertyNameToString(prop.name);
             if (name === null) {
                 return;
             }
             map.set(name, prop.initializer);
         }
-        else if (ts__default["default"].isShorthandPropertyAssignment(prop)) {
+        else if (ts.isShorthandPropertyAssignment(prop)) {
             map.set(prop.name.text, prop.name);
         }
         else {
@@ -34078,13 +34097,13 @@ function reflectObjectLiteral(node) {
     return map;
 }
 function castDeclarationToClassOrDie(declaration) {
-    if (!ts__default["default"].isClassDeclaration(declaration)) {
-        throw new Error(`Reflecting on a ${ts__default["default"].SyntaxKind[declaration.kind]} instead of a ClassDeclaration.`);
+    if (!ts.isClassDeclaration(declaration)) {
+        throw new Error(`Reflecting on a ${ts.SyntaxKind[declaration.kind]} instead of a ClassDeclaration.`);
     }
     return declaration;
 }
 function parameterName(name) {
-    if (ts__default["default"].isIdentifier(name)) {
+    if (ts.isIdentifier(name)) {
         return name.text;
     }
     else {
@@ -34092,7 +34111,7 @@ function parameterName(name) {
     }
 }
 function propertyNameToString(node) {
-    if (ts__default["default"].isIdentifier(node) || ts__default["default"].isStringLiteral(node) || ts__default["default"].isNumericLiteral(node)) {
+    if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
         return node.text;
     }
     else {
@@ -34114,10 +34133,10 @@ function isPrivateSymbol(typeChecker, symbol) {
  * @returns the left most identifier in the chain or `null` if it is not an identifier.
  */
 function getQualifiedNameRoot(qualifiedName) {
-    while (ts__default["default"].isQualifiedName(qualifiedName.left)) {
+    while (ts.isQualifiedName(qualifiedName.left)) {
         qualifiedName = qualifiedName.left;
     }
-    return ts__default["default"].isIdentifier(qualifiedName.left) ? qualifiedName.left : null;
+    return ts.isIdentifier(qualifiedName.left) ? qualifiedName.left : null;
 }
 /**
  * Compute the left most identifier in a property access chain. E.g. the `a` of `a.b.c.d`.
@@ -34126,18 +34145,18 @@ function getQualifiedNameRoot(qualifiedName) {
  * @returns the left most identifier in the chain or `null` if it is not an identifier.
  */
 function getFarLeftIdentifier(propertyAccess) {
-    while (ts__default["default"].isPropertyAccessExpression(propertyAccess.expression)) {
+    while (ts.isPropertyAccessExpression(propertyAccess.expression)) {
         propertyAccess = propertyAccess.expression;
     }
-    return ts__default["default"].isIdentifier(propertyAccess.expression) ? propertyAccess.expression : null;
+    return ts.isIdentifier(propertyAccess.expression) ? propertyAccess.expression : null;
 }
 /**
  * Gets the closest ancestor `ImportDeclaration` to a node.
  */
 function getContainingImportDeclaration(node) {
     let parent = node.parent;
-    while (parent && !ts__default["default"].isSourceFile(parent)) {
-        if (ts__default["default"].isImportDeclaration(parent)) {
+    while (parent && !ts.isSourceFile(parent)) {
+        if (ts.isImportDeclaration(parent)) {
             return parent;
         }
         parent = parent.parent;
@@ -34150,7 +34169,7 @@ function getContainingImportDeclaration(node) {
  * then fallback to the `originalId`.
  */
 function getExportedName(decl, originalId) {
-    return ts__default["default"].isImportSpecifier(decl)
+    return ts.isImportSpecifier(decl)
         ? (decl.propertyName !== undefined ? decl.propertyName : decl.name).text
         : originalId.text;
 }
@@ -34345,8 +34364,26 @@ function toR3Reference(origin, ref, context, refEmitter) {
 function isAngularCore(decorator) {
     return decorator.import !== null && decorator.import.from === CORE_MODULE;
 }
-function isAngularCoreReference(reference, symbolName, isCore) {
-    return ((reference.ownedByModuleGuess === CORE_MODULE || isCore) && reference.debugName === symbolName);
+/**
+ * This function is used for verifying that a given reference is declared
+ * inside `@angular/core` and corresponds to the given symbol name.
+ *
+ * In some cases, due to the compiler face duplicating many symbols as
+ * an independent bridge between core and the compiler, the dts bundler may
+ * decide to alias declarations in the `.d.ts`, to avoid conflicts.
+ *
+ * e.g.
+ *
+ * ```
+ * declare enum ViewEncapsulation {} // from the facade
+ * declare enum ViewEncapsulation$1 {} // the real one exported to users.
+ * ```
+ *
+ * This function accounts for such potential re-namings.
+ */
+function isAngularCoreReferenceWithPotentialAliasing(reference, symbolName, isCore) {
+    return ((reference.ownedByModuleGuess === CORE_MODULE || isCore) &&
+        reference.debugName?.replace(/\$\d+$/, '') === symbolName);
 }
 function findAngularDecorator(decorators, name, isCore) {
     return decorators.find((decorator) => isAngularDecorator(decorator, name, isCore));
@@ -34376,25 +34413,25 @@ function getAngularDecorators(decorators, names, isCore) {
  * For example, the expression "(foo as Type)" unwraps to "foo".
  */
 function unwrapExpression(node) {
-    while (ts__default["default"].isAsExpression(node) || ts__default["default"].isParenthesizedExpression(node)) {
+    while (ts.isAsExpression(node) || ts.isParenthesizedExpression(node)) {
         node = node.expression;
     }
     return node;
 }
 function expandForwardRef(arg) {
     arg = unwrapExpression(arg);
-    if (!ts__default["default"].isArrowFunction(arg) && !ts__default["default"].isFunctionExpression(arg)) {
+    if (!ts.isArrowFunction(arg) && !ts.isFunctionExpression(arg)) {
         return null;
     }
     const body = arg.body;
     // Either the body is a ts.Expression directly, or a block with a single return statement.
-    if (ts__default["default"].isBlock(body)) {
+    if (ts.isBlock(body)) {
         // Block body - look for a single return statement.
         if (body.statements.length !== 1) {
             return null;
         }
         const stmt = body.statements[0];
-        if (!ts__default["default"].isReturnStatement(stmt) || stmt.expression === undefined) {
+        if (!ts.isReturnStatement(stmt) || stmt.expression === undefined) {
             return null;
         }
         return stmt.expression;
@@ -34415,13 +34452,13 @@ function expandForwardRef(arg) {
  */
 function tryUnwrapForwardRef(node, reflector) {
     node = unwrapExpression(node);
-    if (!ts__default["default"].isCallExpression(node) || node.arguments.length !== 1) {
+    if (!ts.isCallExpression(node) || node.arguments.length !== 1) {
         return null;
     }
-    const fn = ts__default["default"].isPropertyAccessExpression(node.expression)
+    const fn = ts.isPropertyAccessExpression(node.expression)
         ? node.expression.name
         : node.expression;
-    if (!ts__default["default"].isIdentifier(fn)) {
+    if (!ts.isIdentifier(fn)) {
         return null;
     }
     const expr = expandForwardRef(node.arguments[0]);
@@ -34444,7 +34481,8 @@ function tryUnwrapForwardRef(node, reflector) {
  */
 function createForwardRefResolver(isCore) {
     return (fn, callExpr, resolve, unresolvable) => {
-        if (!isAngularCoreReference(fn, 'forwardRef', isCore) || callExpr.arguments.length !== 1) {
+        if (!isAngularCoreReferenceWithPotentialAliasing(fn, 'forwardRef', isCore) ||
+            callExpr.arguments.length !== 1) {
             return unresolvable;
         }
         const expanded = expandForwardRef(callExpr.arguments[0]);
@@ -34473,7 +34511,7 @@ function combineResolvers(resolvers) {
 }
 function isExpressionForwardReference(expr, context, contextSource) {
     if (isWrappedTsNodeExpr(expr)) {
-        const node = ts__default["default"].getOriginalNode(expr.node);
+        const node = ts.getOriginalNode(expr.node);
         return node.getSourceFile() === contextSource && context.pos < node.pos;
     }
     else {
@@ -34498,13 +34536,13 @@ function readBaseClass(node, reflector, evaluator) {
 }
 const parensWrapperTransformerFactory = (context) => {
     const visitor = (node) => {
-        const visited = ts__default["default"].visitEachChild(node, visitor, context);
-        if (ts__default["default"].isArrowFunction(visited) || ts__default["default"].isFunctionExpression(visited)) {
-            return ts__default["default"].factory.createParenthesizedExpression(visited);
+        const visited = ts.visitEachChild(node, visitor, context);
+        if (ts.isArrowFunction(visited) || ts.isFunctionExpression(visited)) {
+            return ts.factory.createParenthesizedExpression(visited);
         }
         return visited;
     };
-    return (node) => ts__default["default"].visitEachChild(node, visitor, context);
+    return (node) => ts.visitEachChild(node, visitor, context);
 };
 /**
  * Wraps all functions in a given expression in parentheses. This is needed to avoid problems
@@ -34517,7 +34555,7 @@ const parensWrapperTransformerFactory = (context) => {
  * @param expression Expression where functions should be wrapped in parentheses
  */
 function wrapFunctionExpressionsInParens(expression) {
-    return ts__default["default"].transform(expression, [parensWrapperTransformerFactory]).transformed[0];
+    return ts.transform(expression, [parensWrapperTransformerFactory]).transformed[0];
 }
 /**
  * Resolves the given `rawProviders` into `ClassDeclarations` and returns
@@ -34655,9 +34693,191 @@ function getOriginNodeForDiagnostics(expr, container) {
     }
 }
 function isAbstractClassDeclaration(clazz) {
-    return ts__default["default"].canHaveModifiers(clazz) && clazz.modifiers !== undefined
-        ? clazz.modifiers.some((mod) => mod.kind === ts__default["default"].SyntaxKind.AbstractKeyword)
+    return ts.canHaveModifiers(clazz) && clazz.modifiers !== undefined
+        ? clazz.modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword)
         : false;
+}
+
+function getConstructorDependencies(clazz, reflector, isCore) {
+    const deps = [];
+    const errors = [];
+    let ctorParams = reflector.getConstructorParameters(clazz);
+    if (ctorParams === null) {
+        if (reflector.hasBaseClass(clazz)) {
+            return null;
+        }
+        else {
+            ctorParams = [];
+        }
+    }
+    ctorParams.forEach((param, idx) => {
+        let token = valueReferenceToExpression(param.typeValueReference);
+        let attributeNameType = null;
+        let optional = false, self = false, skipSelf = false, host = false;
+        (param.decorators || [])
+            .filter((dec) => isCore || isAngularCore(dec))
+            .forEach((dec) => {
+            const name = isCore || dec.import === null ? dec.name : dec.import.name;
+            if (name === 'Inject') {
+                if (dec.args === null || dec.args.length !== 1) {
+                    throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, dec.node, `Unexpected number of arguments to @Inject().`);
+                }
+                token = new WrappedNodeExpr(dec.args[0]);
+            }
+            else if (name === 'Optional') {
+                optional = true;
+            }
+            else if (name === 'SkipSelf') {
+                skipSelf = true;
+            }
+            else if (name === 'Self') {
+                self = true;
+            }
+            else if (name === 'Host') {
+                host = true;
+            }
+            else if (name === 'Attribute') {
+                if (dec.args === null || dec.args.length !== 1) {
+                    throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, dec.node, `Unexpected number of arguments to @Attribute().`);
+                }
+                const attributeName = dec.args[0];
+                token = new WrappedNodeExpr(attributeName);
+                if (ts.isStringLiteralLike(attributeName)) {
+                    attributeNameType = new LiteralExpr(attributeName.text);
+                }
+                else {
+                    attributeNameType = new WrappedNodeExpr(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword));
+                }
+            }
+            else {
+                throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_UNEXPECTED, dec.node, `Unexpected decorator ${name} on parameter.`);
+            }
+        });
+        if (token === null) {
+            if (param.typeValueReference.kind !== 2 /* TypeValueReferenceKind.UNAVAILABLE */) {
+                throw new Error('Illegal state: expected value reference to be unavailable if no token is present');
+            }
+            errors.push({
+                index: idx,
+                param,
+                reason: param.typeValueReference.reason,
+            });
+        }
+        else {
+            deps.push({ token, attributeNameType, optional, self, skipSelf, host });
+        }
+    });
+    if (errors.length === 0) {
+        return { deps };
+    }
+    else {
+        return { deps: null, errors };
+    }
+}
+/**
+ * Convert `ConstructorDeps` into the `R3DependencyMetadata` array for those deps if they're valid,
+ * or into an `'invalid'` signal if they're not.
+ *
+ * This is a companion function to `validateConstructorDependencies` which accepts invalid deps.
+ */
+function unwrapConstructorDependencies(deps) {
+    if (deps === null) {
+        return null;
+    }
+    else if (deps.deps !== null) {
+        // These constructor dependencies are valid.
+        return deps.deps;
+    }
+    else {
+        // These deps are invalid.
+        return 'invalid';
+    }
+}
+function getValidConstructorDependencies(clazz, reflector, isCore) {
+    return validateConstructorDependencies(clazz, getConstructorDependencies(clazz, reflector, isCore));
+}
+/**
+ * Validate that `ConstructorDeps` does not have any invalid dependencies and convert them into the
+ * `R3DependencyMetadata` array if so, or raise a diagnostic if some deps are invalid.
+ *
+ * This is a companion function to `unwrapConstructorDependencies` which does not accept invalid
+ * deps.
+ */
+function validateConstructorDependencies(clazz, deps) {
+    if (deps === null) {
+        return null;
+    }
+    else if (deps.deps !== null) {
+        return deps.deps;
+    }
+    else {
+        // There is at least one error.
+        const error = deps.errors[0];
+        throw createUnsuitableInjectionTokenError(clazz, error);
+    }
+}
+/**
+ * Creates a fatal error with diagnostic for an invalid injection token.
+ * @param clazz The class for which the injection token was unavailable.
+ * @param error The reason why no valid injection token is available.
+ */
+function createUnsuitableInjectionTokenError(clazz, error) {
+    const { param, index, reason } = error;
+    let chainMessage = undefined;
+    let hints = undefined;
+    switch (reason.kind) {
+        case 5 /* ValueUnavailableKind.UNSUPPORTED */:
+            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
+            hints = [
+                makeRelatedInformation(reason.typeNode, 'This type is not supported as injection token.'),
+            ];
+            break;
+        case 1 /* ValueUnavailableKind.NO_VALUE_DECLARATION */:
+            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
+            hints = [
+                makeRelatedInformation(reason.typeNode, 'This type does not have a value, so it cannot be used as injection token.'),
+            ];
+            if (reason.decl !== null) {
+                hints.push(makeRelatedInformation(reason.decl, 'The type is declared here.'));
+            }
+            break;
+        case 2 /* ValueUnavailableKind.TYPE_ONLY_IMPORT */:
+            chainMessage =
+                'Consider changing the type-only import to a regular import, or use the @Inject decorator to specify an injection token.';
+            hints = [
+                makeRelatedInformation(reason.typeNode, 'This type is imported using a type-only import, which prevents it from being usable as an injection token.'),
+                makeRelatedInformation(reason.node, 'The type-only import occurs here.'),
+            ];
+            break;
+        case 4 /* ValueUnavailableKind.NAMESPACE */:
+            chainMessage = 'Consider using the @Inject decorator to specify an injection token.';
+            hints = [
+                makeRelatedInformation(reason.typeNode, 'This type corresponds with a namespace, which cannot be used as injection token.'),
+                makeRelatedInformation(reason.importClause, 'The namespace import occurs here.'),
+            ];
+            break;
+        case 3 /* ValueUnavailableKind.UNKNOWN_REFERENCE */:
+            chainMessage = 'The type should reference a known declaration.';
+            hints = [makeRelatedInformation(reason.typeNode, 'This type could not be resolved.')];
+            break;
+        case 0 /* ValueUnavailableKind.MISSING_TYPE */:
+            chainMessage =
+                'Consider adding a type to the parameter or use the @Inject decorator to specify an injection token.';
+            break;
+    }
+    const chain = {
+        messageText: `No suitable injection token for parameter '${param.name || index}' of class '${clazz.name.text}'.`,
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        next: [
+            {
+                messageText: chainMessage,
+                category: ts.DiagnosticCategory.Message,
+                code: 0,
+            },
+        ],
+    };
+    return new FatalDiagnosticError(exports.ErrorCode.PARAM_MISSING_TOKEN, param.nameNode, chain, hints);
 }
 
 /**
@@ -34680,14 +34900,158 @@ exports.MatchSource = void 0;
     MatchSource[MatchSource["HostDirective"] = 1] = "HostDirective";
 })(exports.MatchSource || (exports.MatchSource = {}));
 
+/**
+ * A mapping of component property and template binding property names, for example containing the
+ * inputs of a particular directive or component.
+ *
+ * A single component property has exactly one input/output annotation (and therefore one binding
+ * property name) associated with it, but the same binding property name may be shared across many
+ * component property names.
+ *
+ * Allows bidirectional querying of the mapping - looking up all inputs/outputs with a given
+ * property name, or mapping from a specific class property to its binding property name.
+ */
+class ClassPropertyMapping {
+    /**
+     * Mapping from class property names to the single `InputOrOutput` for that class property.
+     */
+    forwardMap;
+    /**
+     * Mapping from property names to one or more `InputOrOutput`s which share that name.
+     */
+    reverseMap;
+    constructor(forwardMap) {
+        this.forwardMap = forwardMap;
+        this.reverseMap = reverseMapFromForwardMap(forwardMap);
+    }
+    /**
+     * Construct a `ClassPropertyMapping` with no entries.
+     */
+    static empty() {
+        return new ClassPropertyMapping(new Map());
+    }
+    /**
+     * Construct a `ClassPropertyMapping` from a primitive JS object which maps class property names
+     * to either binding property names or an array that contains both names, which is used in on-disk
+     * metadata formats (e.g. in .d.ts files).
+     */
+    static fromMappedObject(obj) {
+        const forwardMap = new Map();
+        for (const classPropertyName of Object.keys(obj)) {
+            const value = obj[classPropertyName];
+            let inputOrOutput;
+            if (typeof value === 'string') {
+                inputOrOutput = {
+                    classPropertyName,
+                    bindingPropertyName: value,
+                    // Inputs/outputs not captured via an explicit `InputOrOutput` mapping
+                    // value are always considered non-signal. This is the string shorthand.
+                    isSignal: false,
+                };
+            }
+            else {
+                inputOrOutput = value;
+            }
+            forwardMap.set(classPropertyName, inputOrOutput);
+        }
+        return new ClassPropertyMapping(forwardMap);
+    }
+    /**
+     * Merge two mappings into one, with class properties from `b` taking precedence over class
+     * properties from `a`.
+     */
+    static merge(a, b) {
+        const forwardMap = new Map(a.forwardMap.entries());
+        for (const [classPropertyName, inputOrOutput] of b.forwardMap) {
+            forwardMap.set(classPropertyName, inputOrOutput);
+        }
+        return new ClassPropertyMapping(forwardMap);
+    }
+    /**
+     * All class property names mapped in this mapping.
+     */
+    get classPropertyNames() {
+        return Array.from(this.forwardMap.keys());
+    }
+    /**
+     * All binding property names mapped in this mapping.
+     */
+    get propertyNames() {
+        return Array.from(this.reverseMap.keys());
+    }
+    /**
+     * Check whether a mapping for the given property name exists.
+     */
+    hasBindingPropertyName(propertyName) {
+        return this.reverseMap.has(propertyName);
+    }
+    /**
+     * Lookup all `InputOrOutput`s that use this `propertyName`.
+     */
+    getByBindingPropertyName(propertyName) {
+        return this.reverseMap.has(propertyName) ? this.reverseMap.get(propertyName) : null;
+    }
+    /**
+     * Lookup the `InputOrOutput` associated with a `classPropertyName`.
+     */
+    getByClassPropertyName(classPropertyName) {
+        return this.forwardMap.has(classPropertyName) ? this.forwardMap.get(classPropertyName) : null;
+    }
+    /**
+     * Convert this mapping to a primitive JS object which maps each class property directly to the
+     * binding property name associated with it.
+     */
+    toDirectMappedObject() {
+        const obj = {};
+        for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
+            obj[classPropertyName] = inputOrOutput.bindingPropertyName;
+        }
+        return obj;
+    }
+    /**
+     * Convert this mapping to a primitive JS object which maps each class property either to itself
+     * (for cases where the binding property name is the same) or to an array which contains both
+     * names if they differ.
+     *
+     * This object format is used when mappings are serialized (for example into .d.ts files).
+     * @param transform Function used to transform the values of the generated map.
+     */
+    toJointMappedObject(transform) {
+        const obj = {};
+        for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
+            obj[classPropertyName] = transform(inputOrOutput);
+        }
+        return obj;
+    }
+    /**
+     * Implement the iterator protocol and return entry objects which contain the class and binding
+     * property names (and are useful for destructuring).
+     */
+    *[Symbol.iterator]() {
+        for (const inputOrOutput of this.forwardMap.values()) {
+            yield inputOrOutput;
+        }
+    }
+}
+function reverseMapFromForwardMap(forwardMap) {
+    const reverseMap = new Map();
+    for (const [_, inputOrOutput] of forwardMap) {
+        if (!reverseMap.has(inputOrOutput.bindingPropertyName)) {
+            reverseMap.set(inputOrOutput.bindingPropertyName, []);
+        }
+        reverseMap.get(inputOrOutput.bindingPropertyName).push(inputOrOutput);
+    }
+    return reverseMap;
+}
+
 function extractReferencesFromType(checker, def, bestGuessOwningModule) {
-    if (!ts__default["default"].isTupleTypeNode(def)) {
+    if (!ts.isTupleTypeNode(def)) {
         return { result: [], isIncomplete: false };
     }
     const result = [];
     let isIncomplete = false;
     for (const element of def.elements) {
-        if (!ts__default["default"].isTypeQueryNode(element)) {
+        if (!ts.isTypeQueryNode(element)) {
             throw new Error(`Expected TypeQueryNode: ${nodeDebugInfo(element)}`);
         }
         const ref = extraReferenceFromTypeQuery(checker, element, def, bestGuessOwningModule);
@@ -34735,34 +35099,34 @@ function extraReferenceFromTypeQuery(checker, typeNode, origin, bestGuessOwningM
     return new Reference(node, bestGuessOwningModule);
 }
 function readBooleanType(type) {
-    if (!ts__default["default"].isLiteralTypeNode(type)) {
+    if (!ts.isLiteralTypeNode(type)) {
         return null;
     }
     switch (type.literal.kind) {
-        case ts__default["default"].SyntaxKind.TrueKeyword:
+        case ts.SyntaxKind.TrueKeyword:
             return true;
-        case ts__default["default"].SyntaxKind.FalseKeyword:
+        case ts.SyntaxKind.FalseKeyword:
             return false;
         default:
             return null;
     }
 }
 function readStringType(type) {
-    if (!ts__default["default"].isLiteralTypeNode(type) || !ts__default["default"].isStringLiteral(type.literal)) {
+    if (!ts.isLiteralTypeNode(type) || !ts.isStringLiteral(type.literal)) {
         return null;
     }
     return type.literal.text;
 }
 function readMapType(type, valueTransform) {
-    if (!ts__default["default"].isTypeLiteralNode(type)) {
+    if (!ts.isTypeLiteralNode(type)) {
         return {};
     }
     const obj = {};
     type.members.forEach((member) => {
-        if (!ts__default["default"].isPropertySignature(member) ||
+        if (!ts.isPropertySignature(member) ||
             member.type === undefined ||
             member.name === undefined ||
-            (!ts__default["default"].isStringLiteral(member.name) && !ts__default["default"].isIdentifier(member.name))) {
+            (!ts.isStringLiteral(member.name) && !ts.isIdentifier(member.name))) {
             return;
         }
         const value = valueTransform(member.type);
@@ -34773,12 +35137,12 @@ function readMapType(type, valueTransform) {
     return obj;
 }
 function readStringArrayType(type) {
-    if (!ts__default["default"].isTupleTypeNode(type)) {
+    if (!ts.isTupleTypeNode(type)) {
         return [];
     }
     const res = [];
     type.elements.forEach((el) => {
-        if (!ts__default["default"].isLiteralTypeNode(el) || !ts__default["default"].isStringLiteral(el.literal)) {
+        if (!ts.isLiteralTypeNode(el) || !ts.isStringLiteral(el.literal)) {
             return;
         }
         res.push(el.literal.text);
@@ -34817,7 +35181,7 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
         if (isRestricted(field.node)) {
             restrictedInputFields.add(classPropertyName);
         }
-        if (field.nameNode !== null && ts__default["default"].isStringLiteral(field.nameNode)) {
+        if (field.nameNode !== null && ts.isStringLiteral(field.nameNode)) {
             stringLiteralInputFields.add(classPropertyName);
         }
         if (transform !== null) {
@@ -34836,12 +35200,12 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
     };
 }
 function isRestricted(node) {
-    const modifiers = ts__default["default"].canHaveModifiers(node) ? ts__default["default"].getModifiers(node) : undefined;
+    const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
     return (modifiers !== undefined &&
         modifiers.some(({ kind }) => {
-            return (kind === ts__default["default"].SyntaxKind.PrivateKeyword ||
-                kind === ts__default["default"].SyntaxKind.ProtectedKeyword ||
-                kind === ts__default["default"].SyntaxKind.ReadonlyKeyword);
+            return (kind === ts.SyntaxKind.PrivateKeyword ||
+                kind === ts.SyntaxKind.ProtectedKeyword ||
+                kind === ts.SyntaxKind.ReadonlyKeyword);
         }));
 }
 function extractTemplateGuard(member) {
@@ -34852,8 +35216,8 @@ function extractTemplateGuard(member) {
     if (member.kind === exports.ClassMemberKind.Property) {
         let type = null;
         if (member.type !== null &&
-            ts__default["default"].isLiteralTypeNode(member.type) &&
-            ts__default["default"].isStringLiteral(member.type.literal)) {
+            ts.isLiteralTypeNode(member.type) &&
+            ts.isStringLiteral(member.type.literal)) {
             type = member.type.literal.text;
         }
         // Only property members with string literal type 'binding' are considered as template guard.
@@ -34929,6 +35293,80 @@ function hasInjectableFields(clazz, host) {
 }
 function isHostDirectiveMetaForGlobalMode(hostDirectiveMeta) {
     return hostDirectiveMeta.directive instanceof Reference;
+}
+
+/**
+ * Given a reference to a directive, return a flattened version of its `DirectiveMeta` metadata
+ * which includes metadata from its entire inheritance chain.
+ *
+ * The returned `DirectiveMeta` will either have `baseClass: null` if the inheritance chain could be
+ * fully resolved, or `baseClass: 'dynamic'` if the inheritance chain could not be completely
+ * followed.
+ */
+function flattenInheritedDirectiveMetadata(reader, dir) {
+    const topMeta = reader.getDirectiveMetadata(dir);
+    if (topMeta === null) {
+        return null;
+    }
+    if (topMeta.baseClass === null) {
+        return topMeta;
+    }
+    const coercedInputFields = new Set();
+    const undeclaredInputFields = new Set();
+    const restrictedInputFields = new Set();
+    const stringLiteralInputFields = new Set();
+    let hostDirectives = null;
+    let isDynamic = false;
+    let inputs = ClassPropertyMapping.empty();
+    let outputs = ClassPropertyMapping.empty();
+    let isStructural = false;
+    const addMetadata = (meta) => {
+        if (meta.baseClass === 'dynamic') {
+            isDynamic = true;
+        }
+        else if (meta.baseClass !== null) {
+            const baseMeta = reader.getDirectiveMetadata(meta.baseClass);
+            if (baseMeta !== null) {
+                addMetadata(baseMeta);
+            }
+            else {
+                // Missing metadata for the base class means it's effectively dynamic.
+                isDynamic = true;
+            }
+        }
+        isStructural = isStructural || meta.isStructural;
+        inputs = ClassPropertyMapping.merge(inputs, meta.inputs);
+        outputs = ClassPropertyMapping.merge(outputs, meta.outputs);
+        for (const coercedInputField of meta.coercedInputFields) {
+            coercedInputFields.add(coercedInputField);
+        }
+        for (const undeclaredInputField of meta.undeclaredInputFields) {
+            undeclaredInputFields.add(undeclaredInputField);
+        }
+        for (const restrictedInputField of meta.restrictedInputFields) {
+            restrictedInputFields.add(restrictedInputField);
+        }
+        for (const field of meta.stringLiteralInputFields) {
+            stringLiteralInputFields.add(field);
+        }
+        if (meta.hostDirectives !== null && meta.hostDirectives.length > 0) {
+            hostDirectives ??= [];
+            hostDirectives.push(...meta.hostDirectives);
+        }
+    };
+    addMetadata(topMeta);
+    return {
+        ...topMeta,
+        inputs,
+        outputs,
+        coercedInputFields,
+        undeclaredInputFields,
+        restrictedInputFields,
+        stringLiteralInputFields,
+        baseClass: isDynamic ? 'dynamic' : null,
+        isStructural,
+        hostDirectives,
+    };
 }
 
 /**
@@ -35074,6 +35512,175 @@ class EnumValue {
 class KnownFn {
 }
 
+/**
+ * Derives a type representation from a resolved value to be reported in a diagnostic.
+ *
+ * @param value The resolved value for which a type representation should be derived.
+ * @param maxDepth The maximum nesting depth of objects and arrays, defaults to 1 level.
+ */
+function describeResolvedType(value, maxDepth = 1) {
+    if (value === null) {
+        return 'null';
+    }
+    else if (value === undefined) {
+        return 'undefined';
+    }
+    else if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'string') {
+        return typeof value;
+    }
+    else if (value instanceof Map) {
+        if (maxDepth === 0) {
+            return 'object';
+        }
+        const entries = Array.from(value.entries()).map(([key, v]) => {
+            return `${quoteKey(key)}: ${describeResolvedType(v, maxDepth - 1)}`;
+        });
+        return entries.length > 0 ? `{ ${entries.join('; ')} }` : '{}';
+    }
+    else if (value instanceof ResolvedModule) {
+        return '(module)';
+    }
+    else if (value instanceof EnumValue) {
+        return value.enumRef.debugName ?? '(anonymous)';
+    }
+    else if (value instanceof Reference) {
+        return value.debugName ?? '(anonymous)';
+    }
+    else if (Array.isArray(value)) {
+        if (maxDepth === 0) {
+            return 'Array';
+        }
+        return `[${value.map((v) => describeResolvedType(v, maxDepth - 1)).join(', ')}]`;
+    }
+    else if (value instanceof DynamicValue) {
+        return '(not statically analyzable)';
+    }
+    else if (value instanceof KnownFn) {
+        return 'Function';
+    }
+    else {
+        return 'unknown';
+    }
+}
+function quoteKey(key) {
+    if (/^[a-z0-9_]+$/i.test(key)) {
+        return key;
+    }
+    else {
+        return `'${key.replace(/'/g, "\\'")}'`;
+    }
+}
+/**
+ * Creates an array of related information diagnostics for a `DynamicValue` that describe the trace
+ * of why an expression was evaluated as dynamic.
+ *
+ * @param node The node for which a `ts.Diagnostic` is to be created with the trace.
+ * @param value The dynamic value for which a trace should be created.
+ */
+function traceDynamicValue(node, value) {
+    return value.accept(new TraceDynamicValueVisitor(node));
+}
+class TraceDynamicValueVisitor {
+    node;
+    currentContainerNode = null;
+    constructor(node) {
+        this.node = node;
+    }
+    visitDynamicInput(value) {
+        const trace = value.reason.accept(this);
+        if (this.shouldTrace(value.node)) {
+            const info = makeRelatedInformation(value.node, 'Unable to evaluate this expression statically.');
+            trace.unshift(info);
+        }
+        return trace;
+    }
+    visitSyntheticInput(value) {
+        return [makeRelatedInformation(value.node, 'Unable to evaluate this expression further.')];
+    }
+    visitDynamicString(value) {
+        return [
+            makeRelatedInformation(value.node, 'A string value could not be determined statically.'),
+        ];
+    }
+    visitExternalReference(value) {
+        const name = value.reason.debugName;
+        const description = name !== null ? `'${name}'` : 'an anonymous declaration';
+        return [
+            makeRelatedInformation(value.node, `A value for ${description} cannot be determined statically, as it is an external declaration.`),
+        ];
+    }
+    visitComplexFunctionCall(value) {
+        return [
+            makeRelatedInformation(value.node, 'Unable to evaluate function call of complex function. A function must have exactly one return statement.'),
+            makeRelatedInformation(value.reason.node, 'Function is declared here.'),
+        ];
+    }
+    visitInvalidExpressionType(value) {
+        return [makeRelatedInformation(value.node, 'Unable to evaluate an invalid expression.')];
+    }
+    visitUnknown(value) {
+        return [makeRelatedInformation(value.node, 'Unable to evaluate statically.')];
+    }
+    visitUnknownIdentifier(value) {
+        return [makeRelatedInformation(value.node, 'Unknown reference.')];
+    }
+    visitDynamicType(value) {
+        return [makeRelatedInformation(value.node, 'Dynamic type.')];
+    }
+    visitUnsupportedSyntax(value) {
+        return [makeRelatedInformation(value.node, 'This syntax is not supported.')];
+    }
+    /**
+     * Determines whether the dynamic value reported for the node should be traced, i.e. if it is not
+     * part of the container for which the most recent trace was created.
+     */
+    shouldTrace(node) {
+        if (node === this.node) {
+            // Do not include a dynamic value for the origin node, as the main diagnostic is already
+            // reported on that node.
+            return false;
+        }
+        const container = getContainerNode(node);
+        if (container === this.currentContainerNode) {
+            // The node is part of the same container as the previous trace entry, so this dynamic value
+            // should not become part of the trace.
+            return false;
+        }
+        this.currentContainerNode = container;
+        return true;
+    }
+}
+/**
+ * Determines the closest parent node that is to be considered as container, which is used to reduce
+ * the granularity of tracing the dynamic values to a single entry per container. Currently, full
+ * statements and destructuring patterns are considered as container.
+ */
+function getContainerNode(node) {
+    let currentNode = node;
+    while (currentNode !== undefined) {
+        switch (currentNode.kind) {
+            case ts.SyntaxKind.ExpressionStatement:
+            case ts.SyntaxKind.VariableStatement:
+            case ts.SyntaxKind.ReturnStatement:
+            case ts.SyntaxKind.IfStatement:
+            case ts.SyntaxKind.SwitchStatement:
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+            case ts.SyntaxKind.ForStatement:
+            case ts.SyntaxKind.ForInStatement:
+            case ts.SyntaxKind.ForOfStatement:
+            case ts.SyntaxKind.ContinueStatement:
+            case ts.SyntaxKind.BreakStatement:
+            case ts.SyntaxKind.ThrowStatement:
+            case ts.SyntaxKind.ObjectBindingPattern:
+            case ts.SyntaxKind.ArrayBindingPattern:
+                return currentNode;
+        }
+        currentNode = currentNode.parent;
+    }
+    return node.getSourceFile();
+}
+
 class ArraySliceBuiltinFn extends KnownFn {
     lhs;
     constructor(lhs) {
@@ -35158,34 +35765,34 @@ function referenceBinaryOp(op) {
     return { op, literal: false };
 }
 const BINARY_OPERATORS$2 = new Map([
-    [ts__default["default"].SyntaxKind.PlusToken, literalBinaryOp((a, b) => a + b)],
-    [ts__default["default"].SyntaxKind.MinusToken, literalBinaryOp((a, b) => a - b)],
-    [ts__default["default"].SyntaxKind.AsteriskToken, literalBinaryOp((a, b) => a * b)],
-    [ts__default["default"].SyntaxKind.SlashToken, literalBinaryOp((a, b) => a / b)],
-    [ts__default["default"].SyntaxKind.PercentToken, literalBinaryOp((a, b) => a % b)],
-    [ts__default["default"].SyntaxKind.AmpersandToken, literalBinaryOp((a, b) => a & b)],
-    [ts__default["default"].SyntaxKind.BarToken, literalBinaryOp((a, b) => a | b)],
-    [ts__default["default"].SyntaxKind.CaretToken, literalBinaryOp((a, b) => a ^ b)],
-    [ts__default["default"].SyntaxKind.LessThanToken, literalBinaryOp((a, b) => a < b)],
-    [ts__default["default"].SyntaxKind.LessThanEqualsToken, literalBinaryOp((a, b) => a <= b)],
-    [ts__default["default"].SyntaxKind.GreaterThanToken, literalBinaryOp((a, b) => a > b)],
-    [ts__default["default"].SyntaxKind.GreaterThanEqualsToken, literalBinaryOp((a, b) => a >= b)],
-    [ts__default["default"].SyntaxKind.EqualsEqualsToken, literalBinaryOp((a, b) => a == b)],
-    [ts__default["default"].SyntaxKind.EqualsEqualsEqualsToken, literalBinaryOp((a, b) => a === b)],
-    [ts__default["default"].SyntaxKind.ExclamationEqualsToken, literalBinaryOp((a, b) => a != b)],
-    [ts__default["default"].SyntaxKind.ExclamationEqualsEqualsToken, literalBinaryOp((a, b) => a !== b)],
-    [ts__default["default"].SyntaxKind.LessThanLessThanToken, literalBinaryOp((a, b) => a << b)],
-    [ts__default["default"].SyntaxKind.GreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >> b)],
-    [ts__default["default"].SyntaxKind.GreaterThanGreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >>> b)],
-    [ts__default["default"].SyntaxKind.AsteriskAsteriskToken, literalBinaryOp((a, b) => Math.pow(a, b))],
-    [ts__default["default"].SyntaxKind.AmpersandAmpersandToken, referenceBinaryOp((a, b) => a && b)],
-    [ts__default["default"].SyntaxKind.BarBarToken, referenceBinaryOp((a, b) => a || b)],
+    [ts.SyntaxKind.PlusToken, literalBinaryOp((a, b) => a + b)],
+    [ts.SyntaxKind.MinusToken, literalBinaryOp((a, b) => a - b)],
+    [ts.SyntaxKind.AsteriskToken, literalBinaryOp((a, b) => a * b)],
+    [ts.SyntaxKind.SlashToken, literalBinaryOp((a, b) => a / b)],
+    [ts.SyntaxKind.PercentToken, literalBinaryOp((a, b) => a % b)],
+    [ts.SyntaxKind.AmpersandToken, literalBinaryOp((a, b) => a & b)],
+    [ts.SyntaxKind.BarToken, literalBinaryOp((a, b) => a | b)],
+    [ts.SyntaxKind.CaretToken, literalBinaryOp((a, b) => a ^ b)],
+    [ts.SyntaxKind.LessThanToken, literalBinaryOp((a, b) => a < b)],
+    [ts.SyntaxKind.LessThanEqualsToken, literalBinaryOp((a, b) => a <= b)],
+    [ts.SyntaxKind.GreaterThanToken, literalBinaryOp((a, b) => a > b)],
+    [ts.SyntaxKind.GreaterThanEqualsToken, literalBinaryOp((a, b) => a >= b)],
+    [ts.SyntaxKind.EqualsEqualsToken, literalBinaryOp((a, b) => a == b)],
+    [ts.SyntaxKind.EqualsEqualsEqualsToken, literalBinaryOp((a, b) => a === b)],
+    [ts.SyntaxKind.ExclamationEqualsToken, literalBinaryOp((a, b) => a != b)],
+    [ts.SyntaxKind.ExclamationEqualsEqualsToken, literalBinaryOp((a, b) => a !== b)],
+    [ts.SyntaxKind.LessThanLessThanToken, literalBinaryOp((a, b) => a << b)],
+    [ts.SyntaxKind.GreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >> b)],
+    [ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >>> b)],
+    [ts.SyntaxKind.AsteriskAsteriskToken, literalBinaryOp((a, b) => Math.pow(a, b))],
+    [ts.SyntaxKind.AmpersandAmpersandToken, referenceBinaryOp((a, b) => a && b)],
+    [ts.SyntaxKind.BarBarToken, referenceBinaryOp((a, b) => a || b)],
 ]);
 const UNARY_OPERATORS$2 = new Map([
-    [ts__default["default"].SyntaxKind.TildeToken, (a) => ~a],
-    [ts__default["default"].SyntaxKind.MinusToken, (a) => -a],
-    [ts__default["default"].SyntaxKind.PlusToken, (a) => +a],
-    [ts__default["default"].SyntaxKind.ExclamationToken, (a) => !a],
+    [ts.SyntaxKind.TildeToken, (a) => ~a],
+    [ts.SyntaxKind.MinusToken, (a) => -a],
+    [ts.SyntaxKind.PlusToken, (a) => +a],
+    [ts.SyntaxKind.ExclamationToken, (a) => !a],
 ]);
 class StaticInterpreter {
     host;
@@ -35201,61 +35808,61 @@ class StaticInterpreter {
     }
     visitExpression(node, context) {
         let result;
-        if (node.kind === ts__default["default"].SyntaxKind.TrueKeyword) {
+        if (node.kind === ts.SyntaxKind.TrueKeyword) {
             return true;
         }
-        else if (node.kind === ts__default["default"].SyntaxKind.FalseKeyword) {
+        else if (node.kind === ts.SyntaxKind.FalseKeyword) {
             return false;
         }
-        else if (node.kind === ts__default["default"].SyntaxKind.NullKeyword) {
+        else if (node.kind === ts.SyntaxKind.NullKeyword) {
             return null;
         }
-        else if (ts__default["default"].isStringLiteral(node)) {
+        else if (ts.isStringLiteral(node)) {
             return node.text;
         }
-        else if (ts__default["default"].isNoSubstitutionTemplateLiteral(node)) {
+        else if (ts.isNoSubstitutionTemplateLiteral(node)) {
             return node.text;
         }
-        else if (ts__default["default"].isTemplateExpression(node)) {
+        else if (ts.isTemplateExpression(node)) {
             result = this.visitTemplateExpression(node, context);
         }
-        else if (ts__default["default"].isNumericLiteral(node)) {
+        else if (ts.isNumericLiteral(node)) {
             return parseFloat(node.text);
         }
-        else if (ts__default["default"].isObjectLiteralExpression(node)) {
+        else if (ts.isObjectLiteralExpression(node)) {
             result = this.visitObjectLiteralExpression(node, context);
         }
-        else if (ts__default["default"].isIdentifier(node)) {
+        else if (ts.isIdentifier(node)) {
             result = this.visitIdentifier(node, context);
         }
-        else if (ts__default["default"].isPropertyAccessExpression(node)) {
+        else if (ts.isPropertyAccessExpression(node)) {
             result = this.visitPropertyAccessExpression(node, context);
         }
-        else if (ts__default["default"].isCallExpression(node)) {
+        else if (ts.isCallExpression(node)) {
             result = this.visitCallExpression(node, context);
         }
-        else if (ts__default["default"].isConditionalExpression(node)) {
+        else if (ts.isConditionalExpression(node)) {
             result = this.visitConditionalExpression(node, context);
         }
-        else if (ts__default["default"].isPrefixUnaryExpression(node)) {
+        else if (ts.isPrefixUnaryExpression(node)) {
             result = this.visitPrefixUnaryExpression(node, context);
         }
-        else if (ts__default["default"].isBinaryExpression(node)) {
+        else if (ts.isBinaryExpression(node)) {
             result = this.visitBinaryExpression(node, context);
         }
-        else if (ts__default["default"].isArrayLiteralExpression(node)) {
+        else if (ts.isArrayLiteralExpression(node)) {
             result = this.visitArrayLiteralExpression(node, context);
         }
-        else if (ts__default["default"].isParenthesizedExpression(node)) {
+        else if (ts.isParenthesizedExpression(node)) {
             result = this.visitParenthesizedExpression(node, context);
         }
-        else if (ts__default["default"].isElementAccessExpression(node)) {
+        else if (ts.isElementAccessExpression(node)) {
             result = this.visitElementAccessExpression(node, context);
         }
-        else if (ts__default["default"].isAsExpression(node)) {
+        else if (ts.isAsExpression(node)) {
             result = this.visitExpression(node.expression, context);
         }
-        else if (ts__default["default"].isNonNullExpression(node)) {
+        else if (ts.isNonNullExpression(node)) {
             result = this.visitExpression(node.expression, context);
         }
         else if (this.host.isClass(node)) {
@@ -35273,7 +35880,7 @@ class StaticInterpreter {
         const array = [];
         for (let i = 0; i < node.elements.length; i++) {
             const element = node.elements[i];
-            if (ts__default["default"].isSpreadElement(element)) {
+            if (ts.isSpreadElement(element)) {
                 array.push(...this.visitSpreadElement(element, context));
             }
             else {
@@ -35286,7 +35893,7 @@ class StaticInterpreter {
         const map = new Map();
         for (let i = 0; i < node.properties.length; i++) {
             const property = node.properties[i];
-            if (ts__default["default"].isPropertyAssignment(property)) {
+            if (ts.isPropertyAssignment(property)) {
                 const name = this.stringNameFromPropertyName(property.name, context);
                 // Check whether the name can be determined statically.
                 if (name === undefined) {
@@ -35294,7 +35901,7 @@ class StaticInterpreter {
                 }
                 map.set(name, this.visitExpression(property.initializer, context));
             }
-            else if (ts__default["default"].isShorthandPropertyAssignment(property)) {
+            else if (ts.isShorthandPropertyAssignment(property)) {
                 const symbol = this.checker.getShorthandAssignmentValueSymbol(property);
                 if (symbol === undefined || symbol.valueDeclaration === undefined) {
                     map.set(property.name.text, DynamicValue.fromUnknown(property));
@@ -35303,7 +35910,7 @@ class StaticInterpreter {
                     map.set(property.name.text, this.visitDeclaration(symbol.valueDeclaration, context));
                 }
             }
-            else if (ts__default["default"].isSpreadAssignment(property)) {
+            else if (ts.isSpreadAssignment(property)) {
                 const spread = this.visitExpression(property.expression, context);
                 if (spread instanceof DynamicValue) {
                     return DynamicValue.fromDynamicInput(node, spread);
@@ -35339,7 +35946,7 @@ class StaticInterpreter {
     visitIdentifier(node, context) {
         const decl = this.host.getDeclarationOfIdentifier(node);
         if (decl === null) {
-            if (ts__default["default"].identifierToKeywordKind(node) === ts__default["default"].SyntaxKind.UndefinedKeyword) {
+            if (ts.identifierToKeywordKind(node) === ts.SyntaxKind.UndefinedKeyword) {
                 return undefined;
             }
             else {
@@ -35377,22 +35984,22 @@ class StaticInterpreter {
         if (this.host.isClass(node)) {
             return this.getReference(node, context);
         }
-        else if (ts__default["default"].isVariableDeclaration(node)) {
+        else if (ts.isVariableDeclaration(node)) {
             return this.visitVariableDeclaration(node, context);
         }
-        else if (ts__default["default"].isParameter(node) && context.scope.has(node)) {
+        else if (ts.isParameter(node) && context.scope.has(node)) {
             return context.scope.get(node);
         }
-        else if (ts__default["default"].isExportAssignment(node)) {
+        else if (ts.isExportAssignment(node)) {
             return this.visitExpression(node.expression, context);
         }
-        else if (ts__default["default"].isEnumDeclaration(node)) {
+        else if (ts.isEnumDeclaration(node)) {
             return this.visitEnumDeclaration(node, context);
         }
-        else if (ts__default["default"].isSourceFile(node)) {
+        else if (ts.isSourceFile(node)) {
             return this.visitSourceFile(node, context);
         }
-        else if (ts__default["default"].isBindingElement(node)) {
+        else if (ts.isBindingElement(node)) {
             return this.visitBindingElement(node, context);
         }
         else {
@@ -35611,7 +36218,7 @@ class StaticInterpreter {
         if (fn.body === null) {
             return DynamicValue.fromUnknown(node);
         }
-        else if (fn.body.length !== 1 || !ts__default["default"].isReturnStatement(fn.body[0])) {
+        else if (fn.body.length !== 1 || !ts.isReturnStatement(fn.body[0])) {
             return DynamicValue.fromComplexFunctionCall(node, fn);
         }
         const ret = fn.body[0];
@@ -35689,7 +36296,7 @@ class StaticInterpreter {
     evaluateFunctionArguments(node, context) {
         const args = [];
         for (const arg of node.arguments) {
-            if (ts__default["default"].isSpreadElement(arg)) {
+            if (ts.isSpreadElement(arg)) {
                 args.push(...this.visitSpreadElement(arg, context));
             }
             else {
@@ -35713,27 +36320,27 @@ class StaticInterpreter {
     visitBindingElement(node, context) {
         const path = [];
         let closestDeclaration = node;
-        while (ts__default["default"].isBindingElement(closestDeclaration) ||
-            ts__default["default"].isArrayBindingPattern(closestDeclaration) ||
-            ts__default["default"].isObjectBindingPattern(closestDeclaration)) {
-            if (ts__default["default"].isBindingElement(closestDeclaration)) {
+        while (ts.isBindingElement(closestDeclaration) ||
+            ts.isArrayBindingPattern(closestDeclaration) ||
+            ts.isObjectBindingPattern(closestDeclaration)) {
+            if (ts.isBindingElement(closestDeclaration)) {
                 path.unshift(closestDeclaration);
             }
             closestDeclaration = closestDeclaration.parent;
         }
-        if (!ts__default["default"].isVariableDeclaration(closestDeclaration) ||
+        if (!ts.isVariableDeclaration(closestDeclaration) ||
             closestDeclaration.initializer === undefined) {
             return DynamicValue.fromUnknown(node);
         }
         let value = this.visit(closestDeclaration.initializer, context);
         for (const element of path) {
             let key;
-            if (ts__default["default"].isArrayBindingPattern(element.parent)) {
+            if (ts.isArrayBindingPattern(element.parent)) {
                 key = element.parent.elements.indexOf(element);
             }
             else {
                 const name = element.propertyName || element.name;
-                if (ts__default["default"].isIdentifier(name)) {
+                if (ts.isIdentifier(name)) {
                     key = name.text;
                 }
                 else {
@@ -35748,10 +36355,10 @@ class StaticInterpreter {
         return value;
     }
     stringNameFromPropertyName(node, context) {
-        if (ts__default["default"].isIdentifier(node) || ts__default["default"].isStringLiteral(node) || ts__default["default"].isNumericLiteral(node)) {
+        if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
             return node.text;
         }
-        else if (ts__default["default"].isComputedPropertyName(node)) {
+        else if (ts.isComputedPropertyName(node)) {
             const literal = this.visitExpression(node.expression, context);
             return typeof literal === 'string' ? literal : undefined;
         }
@@ -35763,19 +36370,19 @@ class StaticInterpreter {
         return new Reference(node, owningModule(context));
     }
     visitType(node, context) {
-        if (ts__default["default"].isLiteralTypeNode(node)) {
+        if (ts.isLiteralTypeNode(node)) {
             return this.visitExpression(node.literal, context);
         }
-        else if (ts__default["default"].isTupleTypeNode(node)) {
+        else if (ts.isTupleTypeNode(node)) {
             return this.visitTupleType(node, context);
         }
-        else if (ts__default["default"].isNamedTupleMember(node)) {
+        else if (ts.isNamedTupleMember(node)) {
             return this.visitType(node.type, context);
         }
-        else if (ts__default["default"].isTypeOperatorNode(node) && node.operator === ts__default["default"].SyntaxKind.ReadonlyKeyword) {
+        else if (ts.isTypeOperatorNode(node) && node.operator === ts.SyntaxKind.ReadonlyKeyword) {
             return this.visitType(node.type, context);
         }
-        else if (ts__default["default"].isTypeQueryNode(node)) {
+        else if (ts.isTypeQueryNode(node)) {
             return this.visitTypeQuery(node, context);
         }
         return DynamicValue.fromDynamicType(node);
@@ -35788,7 +36395,7 @@ class StaticInterpreter {
         return res;
     }
     visitTypeQuery(node, context) {
-        if (!ts__default["default"].isIdentifier(node.exprName)) {
+        if (!ts.isIdentifier(node.exprName)) {
             return DynamicValue.fromUnknown(node);
         }
         const decl = this.host.getDeclarationOfIdentifier(node.exprName);
@@ -35800,9 +36407,9 @@ class StaticInterpreter {
     }
 }
 function isFunctionOrMethodReference(ref) {
-    return (ts__default["default"].isFunctionDeclaration(ref.node) ||
-        ts__default["default"].isMethodDeclaration(ref.node) ||
-        ts__default["default"].isFunctionExpression(ref.node));
+    return (ts.isFunctionDeclaration(ref.node) ||
+        ts.isMethodDeclaration(ref.node) ||
+        ts.isFunctionExpression(ref.node));
 }
 function literal(value, reject) {
     if (value instanceof EnumValue) {
@@ -35819,16 +36426,16 @@ function literal(value, reject) {
     return reject(value);
 }
 function isVariableDeclarationDeclared(node) {
-    if (node.parent === undefined || !ts__default["default"].isVariableDeclarationList(node.parent)) {
+    if (node.parent === undefined || !ts.isVariableDeclarationList(node.parent)) {
         return false;
     }
     const declList = node.parent;
-    if (declList.parent === undefined || !ts__default["default"].isVariableStatement(declList.parent)) {
+    if (declList.parent === undefined || !ts.isVariableStatement(declList.parent)) {
         return false;
     }
     const varStmt = declList.parent;
-    const modifiers = ts__default["default"].getModifiers(varStmt);
-    return (modifiers !== undefined && modifiers.some((mod) => mod.kind === ts__default["default"].SyntaxKind.DeclareKeyword));
+    const modifiers = ts.getModifiers(varStmt);
+    return (modifiers !== undefined && modifiers.some((mod) => mod.kind === ts.SyntaxKind.DeclareKeyword));
 }
 const EMPTY = {};
 function joinModuleContext(existing, node, decl) {
@@ -36287,18 +36894,18 @@ class TraitImpl {
  *
  * It tracks whether we are in the process of outputting a statement or an expression.
  */
-class Context$1 {
+let Context$1 = class Context {
     isStatement;
     constructor(isStatement) {
         this.isStatement = isStatement;
     }
     get withExpressionMode() {
-        return this.isStatement ? new Context$1(false) : this;
+        return this.isStatement ? new Context(false) : this;
     }
     get withStatementMode() {
-        return !this.isStatement ? new Context$1(true) : this;
+        return !this.isStatement ? new Context(true) : this;
     }
-}
+};
 
 /**
  * Generates a helper for `ImportManagerConfig` to generate unique identifiers
@@ -36324,7 +36931,7 @@ function createGenerateUniqueIdentifierHelper() {
             name = `${symbolName}_${counter++}`;
         } while (!isUniqueIdentifier(name));
         markIdentifierAsGenerated(sf, name);
-        return ts__default["default"].factory.createUniqueName(name, ts__default["default"].GeneratedIdentifierFlags.Optimistic);
+        return ts.factory.createUniqueName(name, ts.GeneratedIdentifierFlags.Optimistic);
     };
 }
 
@@ -36356,18 +36963,18 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
             }
         }
         const visitStatement = (node) => {
-            if (!ts__default["default"].isImportDeclaration(node)) {
+            if (!ts.isImportDeclaration(node)) {
                 return node;
             }
             if (deletedImports.has(node)) {
                 return undefined;
             }
-            if (node.importClause === undefined || !ts__default["default"].isImportClause(node.importClause)) {
+            if (node.importClause === undefined || !ts.isImportClause(node.importClause)) {
                 return node;
             }
             const clause = node.importClause;
             if (clause.namedBindings === undefined ||
-                !ts__default["default"].isNamedImports(clause.namedBindings) ||
+                !ts.isNamedImports(clause.namedBindings) ||
                 !updatedImports.has(clause.namedBindings)) {
                 return node;
             }
@@ -36377,7 +36984,7 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
             // By default, TS assumes, no specifiers are elide-able if the clause of the "original
             // node" has changed. google3:
             // typescript/unstable/src/compiler/transformers/ts.ts;l=456;rcl=611254538.
-            ts__default["default"].setOriginalNode(newImport, {
+            ts.setOriginalNode(newImport, {
                 importClause: newClause,
                 kind: newImport.kind,
             });
@@ -36387,7 +36994,7 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
             if (!affectedFiles.has(sourceFile.fileName)) {
                 return sourceFile;
             }
-            sourceFile = ts__default["default"].visitEachChild(sourceFile, visitStatement, ctx);
+            sourceFile = ts.visitEachChild(sourceFile, visitStatement, ctx);
             // Filter out the existing imports and the source file body.
             // All new statements will be inserted between them.
             const extraStatements = extraStatementsForFiles?.get(sourceFile.fileName) ?? [];
@@ -36412,7 +37019,7 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
 }
 /** Whether the given statement is an import statement. */
 function isImportStatement(stmt) {
-    return (ts__default["default"].isImportDeclaration(stmt) || ts__default["default"].isImportEqualsDeclaration(stmt) || ts__default["default"].isNamespaceImport(stmt));
+    return (ts.isImportDeclaration(stmt) || ts.isImportEqualsDeclaration(stmt) || ts.isNamespaceImport(stmt));
 }
 
 /** Attempts to efficiently re-use previous generated import requests. */
@@ -36431,7 +37038,7 @@ function attemptToReuseGeneratedImports(tracker, request) {
     if (request.exportSymbolName === null) {
         return potentialNamespaceImport;
     }
-    return [potentialNamespaceImport, ts__default["default"].factory.createIdentifier(request.exportSymbolName)];
+    return [potentialNamespaceImport, ts.factory.createIdentifier(request.exportSymbolName)];
 }
 /** Captures the given import request and its generated reference node/path for future re-use. */
 function captureGeneratedImport(request, tracker, referenceNode) {
@@ -36454,7 +37061,7 @@ function attemptToReuseExistingSourceFileImports(tracker, sourceFile, request) {
     let candidateImportToBeUpdated = null;
     for (let i = sourceFile.statements.length - 1; i >= 0; i--) {
         const statement = sourceFile.statements[i];
-        if (!ts__default["default"].isImportDeclaration(statement) || !ts__default["default"].isStringLiteral(statement.moduleSpecifier)) {
+        if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) {
             continue;
         }
         // Side-effect imports are ignored, or type-only imports.
@@ -36472,15 +37079,15 @@ function attemptToReuseExistingSourceFileImports(tracker, sourceFile, request) {
         if (statement.importClause.namedBindings) {
             const namedBindings = statement.importClause.namedBindings;
             // A namespace import can be reused.
-            if (ts__default["default"].isNamespaceImport(namedBindings)) {
+            if (ts.isNamespaceImport(namedBindings)) {
                 tracker.reusedAliasDeclarations.add(namedBindings);
                 if (request.exportSymbolName === null) {
                     return namedBindings.name;
                 }
-                return [namedBindings.name, ts__default["default"].factory.createIdentifier(request.exportSymbolName)];
+                return [namedBindings.name, ts.factory.createIdentifier(request.exportSymbolName)];
             }
             // Named imports can be re-used if a specific symbol is requested.
-            if (ts__default["default"].isNamedImports(namedBindings) && request.exportSymbolName !== null) {
+            if (ts.isNamedImports(namedBindings) && request.exportSymbolName !== null) {
                 const existingElement = namedBindings.elements.find((e) => {
                     // TODO: Consider re-using type-only imports efficiently.
                     let nameMatches;
@@ -36516,9 +37123,9 @@ function attemptToReuseExistingSourceFileImports(tracker, sourceFile, request) {
         tracker.updatedImports.set(candidateImportToBeUpdated, []);
     }
     const symbolsToBeImported = tracker.updatedImports.get(candidateImportToBeUpdated);
-    const propertyName = ts__default["default"].factory.createIdentifier(request.exportSymbolName);
+    const propertyName = ts.factory.createIdentifier(request.exportSymbolName);
     const fileUniqueAlias = request.unsafeAliasOverride
-        ? ts__default["default"].factory.createIdentifier(request.unsafeAliasOverride)
+        ? ts.factory.createIdentifier(request.unsafeAliasOverride)
         : tracker.generateUniqueIdentifier(sourceFile, request.exportSymbolName);
     // Since it can happen that multiple classes need to be imported within the
     // specified source file and we want to add the identifiers to the existing
@@ -36662,13 +37269,13 @@ class ImportManager {
             if (this.config.rewriter) {
                 namespaceImportName = this.config.rewriter.rewriteNamespaceImportIdentifier(namespaceImportName, request.exportModuleSpecifier);
             }
-            const namespaceImport = ts__default["default"].factory.createNamespaceImport(this.config.generateUniqueIdentifier(sourceFile, namespaceImportName) ??
-                ts__default["default"].factory.createIdentifier(namespaceImportName));
+            const namespaceImport = ts.factory.createNamespaceImport(this.config.generateUniqueIdentifier(sourceFile, namespaceImportName) ??
+                ts.factory.createIdentifier(namespaceImportName));
             namespaceImports.set(request.exportModuleSpecifier, namespaceImport);
             // Capture the generated namespace import alone, to allow re-use.
             captureGeneratedImport({ ...request, exportSymbolName: null }, this.reuseGeneratedImportsTracker, namespaceImport.name);
             if (request.exportSymbolName !== null) {
-                return [namespaceImport.name, ts__default["default"].factory.createIdentifier(request.exportSymbolName)];
+                return [namespaceImport.name, ts.factory.createIdentifier(request.exportSymbolName)];
             }
             return namespaceImport.name;
         }
@@ -36676,7 +37283,7 @@ class ImportManager {
         if (!namedImports.has(request.exportModuleSpecifier)) {
             namedImports.set(request.exportModuleSpecifier, []);
         }
-        const exportSymbolName = ts__default["default"].factory.createIdentifier(request.exportSymbolName);
+        const exportSymbolName = ts.factory.createIdentifier(request.exportSymbolName);
         const fileUniqueName = request.unsafeAliasOverride
             ? null
             : this.config.generateUniqueIdentifier(sourceFile, request.exportSymbolName);
@@ -36684,7 +37291,7 @@ class ImportManager {
         let specifierName;
         if (request.unsafeAliasOverride) {
             needsAlias = true;
-            specifierName = ts__default["default"].factory.createIdentifier(request.unsafeAliasOverride);
+            specifierName = ts.factory.createIdentifier(request.unsafeAliasOverride);
         }
         else if (fileUniqueName !== null) {
             needsAlias = true;
@@ -36696,7 +37303,7 @@ class ImportManager {
         }
         namedImports
             .get(request.exportModuleSpecifier)
-            .push(ts__default["default"].factory.createImportSpecifier(false, needsAlias ? exportSymbolName : undefined, specifierName));
+            .push(ts.factory.createImportSpecifier(false, needsAlias ? exportSymbolName : undefined, specifierName));
         return specifierName;
     }
     /**
@@ -36728,14 +37335,14 @@ class ImportManager {
             const namedBindings = importDecl.importClause.namedBindings;
             const moduleName = importDecl.moduleSpecifier.text;
             const newElements = namedBindings.elements
-                .concat(expressions.map(({ propertyName, fileUniqueAlias }) => ts__default["default"].factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : undefined, fileUniqueAlias ?? propertyName)))
+                .concat(expressions.map(({ propertyName, fileUniqueAlias }) => ts.factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : undefined, fileUniqueAlias ?? propertyName)))
                 .filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
             affectedFiles.add(sourceFile.fileName);
             if (newElements.length === 0) {
                 deletedImports.add(importDecl);
             }
             else {
-                updatedImportsResult.set(namedBindings, ts__default["default"].factory.updateNamedImports(namedBindings, newElements));
+                updatedImportsResult.set(namedBindings, ts.factory.updateNamedImports(namedBindings, newElements));
             }
         });
         this.removedImports.forEach((removeMap, sourceFile) => {
@@ -36744,12 +37351,12 @@ class ImportManager {
             }
             let allImports = importDeclarationsPerFile.get(sourceFile);
             if (!allImports) {
-                allImports = sourceFile.statements.filter(ts__default["default"].isImportDeclaration);
+                allImports = sourceFile.statements.filter(ts.isImportDeclaration);
                 importDeclarationsPerFile.set(sourceFile, allImports);
             }
             for (const node of allImports) {
                 if (!node.importClause?.namedBindings ||
-                    !ts__default["default"].isNamedImports(node.importClause.namedBindings) ||
+                    !ts.isNamedImports(node.importClause.namedBindings) ||
                     this.reuseSourceFileImportsTracker.updatedImports.has(node) ||
                     deletedImports.has(node)) {
                     continue;
@@ -36763,7 +37370,7 @@ class ImportManager {
                 }
                 else if (newImports.length !== namedBindings.elements.length) {
                     affectedFiles.add(sourceFile.fileName);
-                    updatedImportsResult.set(namedBindings, ts__default["default"].factory.updateNamedImports(namedBindings, newImports));
+                    updatedImportsResult.set(namedBindings, ts.factory.updateNamedImports(namedBindings, newImports));
                 }
             }
         });
@@ -36772,23 +37379,23 @@ class ImportManager {
             const useSingleQuotes = this.config.shouldUseSingleQuotes(sourceFile);
             const fileName = sourceFile.fileName;
             sideEffectImports.forEach((moduleName) => {
-                addNewImport(fileName, ts__default["default"].factory.createImportDeclaration(undefined, undefined, ts__default["default"].factory.createStringLiteral(moduleName)));
+                addNewImport(fileName, ts.factory.createImportDeclaration(undefined, undefined, ts.factory.createStringLiteral(moduleName)));
             });
             namespaceImports.forEach((namespaceImport, moduleName) => {
-                const newImport = ts__default["default"].factory.createImportDeclaration(undefined, ts__default["default"].factory.createImportClause(false, undefined, namespaceImport), ts__default["default"].factory.createStringLiteral(moduleName, useSingleQuotes));
+                const newImport = ts.factory.createImportDeclaration(undefined, ts.factory.createImportClause(false, undefined, namespaceImport), ts.factory.createStringLiteral(moduleName, useSingleQuotes));
                 // IMPORTANT: Set the original TS node to the `ts.ImportDeclaration`. This allows
                 // downstream transforms such as tsickle to properly process references to this import.
                 //
                 // This operation is load-bearing in g3 as some imported modules contain special metadata
                 // generated by clutz, which tsickle uses to transform imports and references to those
                 // imports. See: `google3: node_modules/tsickle/src/googmodule.ts;l=637-640;rcl=615418148`
-                ts__default["default"].setOriginalNode(namespaceImport.name, newImport);
+                ts.setOriginalNode(namespaceImport.name, newImport);
                 addNewImport(fileName, newImport);
             });
             namedImports.forEach((specifiers, moduleName) => {
                 const filteredSpecifiers = specifiers.filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
                 if (filteredSpecifiers.length > 0) {
-                    const newImport = ts__default["default"].factory.createImportDeclaration(undefined, ts__default["default"].factory.createImportClause(false, undefined, ts__default["default"].factory.createNamedImports(filteredSpecifiers)), ts__default["default"].factory.createStringLiteral(moduleName, useSingleQuotes));
+                    const newImport = ts.factory.createImportDeclaration(undefined, ts.factory.createImportClause(false, undefined, ts.factory.createNamedImports(filteredSpecifiers)), ts.factory.createStringLiteral(moduleName, useSingleQuotes));
                     addNewImport(fileName, newImport);
                 }
             });
@@ -36842,10 +37449,10 @@ class ImportManager {
 /** Creates an import reference based on the given identifier, or nested access. */
 function createImportReference(asTypeReference, ref) {
     if (asTypeReference) {
-        return Array.isArray(ref) ? ts__default["default"].factory.createQualifiedName(ref[0], ref[1]) : ref;
+        return Array.isArray(ref) ? ts.factory.createQualifiedName(ref[0], ref[1]) : ref;
     }
     else {
-        return Array.isArray(ref) ? ts__default["default"].factory.createPropertyAccessExpression(ref[0], ref[1]) : ref;
+        return Array.isArray(ref) ? ts.factory.createPropertyAccessExpression(ref[0], ref[1]) : ref;
     }
 }
 
@@ -37204,17 +37811,17 @@ function canEmitType(type, canEmit) {
     function visitNode(node) {
         // `import('module')` type nodes are not supported, as it may require rewriting the module
         // specifier which is currently not done.
-        if (ts__default["default"].isImportTypeNode(node)) {
+        if (ts.isImportTypeNode(node)) {
             return INELIGIBLE;
         }
         // Emitting a type reference node in a different context requires that an import for the type
         // can be created. If a type reference node cannot be emitted, `INELIGIBLE` is returned to stop
         // the walk.
-        if (ts__default["default"].isTypeReferenceNode(node) && !canEmitTypeReference(node)) {
+        if (ts.isTypeReferenceNode(node) && !canEmitTypeReference(node)) {
             return INELIGIBLE;
         }
         else {
-            return ts__default["default"].forEachChild(node, visitNode);
+            return ts.forEachChild(node, visitNode);
         }
     }
     function canEmitTypeReference(type) {
@@ -37263,13 +37870,13 @@ class TypeEmitter {
     emitType(type) {
         const typeReferenceTransformer = (context) => {
             const visitNode = (node) => {
-                if (ts__default["default"].isImportTypeNode(node)) {
+                if (ts.isImportTypeNode(node)) {
                     throw new Error('Unable to emit import type');
                 }
-                if (ts__default["default"].isTypeReferenceNode(node)) {
+                if (ts.isTypeReferenceNode(node)) {
                     return this.emitTypeReference(node);
                 }
-                else if (ts__default["default"].isLiteralExpression(node)) {
+                else if (ts.isLiteralExpression(node)) {
                     // TypeScript would typically take the emit text for a literal expression from the source
                     // file itself. As the type node is being emitted into a different file, however,
                     // TypeScript would extract the literal text from the wrong source file. To mitigate this
@@ -37277,34 +37884,34 @@ class TypeEmitter {
                     // range to a negative range, forcing TypeScript to determine the node's literal text from
                     // the synthesized node's text instead of the incorrect source file.
                     let clone;
-                    if (ts__default["default"].isStringLiteral(node)) {
-                        clone = ts__default["default"].factory.createStringLiteral(node.text);
+                    if (ts.isStringLiteral(node)) {
+                        clone = ts.factory.createStringLiteral(node.text);
                     }
-                    else if (ts__default["default"].isNumericLiteral(node)) {
-                        clone = ts__default["default"].factory.createNumericLiteral(node.text);
+                    else if (ts.isNumericLiteral(node)) {
+                        clone = ts.factory.createNumericLiteral(node.text);
                     }
-                    else if (ts__default["default"].isBigIntLiteral(node)) {
-                        clone = ts__default["default"].factory.createBigIntLiteral(node.text);
+                    else if (ts.isBigIntLiteral(node)) {
+                        clone = ts.factory.createBigIntLiteral(node.text);
                     }
-                    else if (ts__default["default"].isNoSubstitutionTemplateLiteral(node)) {
-                        clone = ts__default["default"].factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
+                    else if (ts.isNoSubstitutionTemplateLiteral(node)) {
+                        clone = ts.factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
                     }
-                    else if (ts__default["default"].isRegularExpressionLiteral(node)) {
-                        clone = ts__default["default"].factory.createRegularExpressionLiteral(node.text);
+                    else if (ts.isRegularExpressionLiteral(node)) {
+                        clone = ts.factory.createRegularExpressionLiteral(node.text);
                     }
                     else {
-                        throw new Error(`Unsupported literal kind ${ts__default["default"].SyntaxKind[node.kind]}`);
+                        throw new Error(`Unsupported literal kind ${ts.SyntaxKind[node.kind]}`);
                     }
-                    ts__default["default"].setTextRange(clone, { pos: -1, end: -1 });
+                    ts.setTextRange(clone, { pos: -1, end: -1 });
                     return clone;
                 }
                 else {
-                    return ts__default["default"].visitEachChild(node, visitNode, context);
+                    return ts.visitEachChild(node, visitNode, context);
                 }
             };
-            return (node) => ts__default["default"].visitNode(node, visitNode, ts__default["default"].isTypeNode);
+            return (node) => ts.visitNode(node, visitNode, ts.isTypeNode);
         };
-        return ts__default["default"].transform(type, [typeReferenceTransformer]).transformed[0];
+        return ts.transform(type, [typeReferenceTransformer]).transformed[0];
     }
     emitTypeReference(type) {
         // Determine the reference that the type corresponds with.
@@ -37315,9 +37922,9 @@ class TypeEmitter {
         // Emit the type arguments, if any.
         let typeArguments = undefined;
         if (type.typeArguments !== undefined) {
-            typeArguments = ts__default["default"].factory.createNodeArray(type.typeArguments.map((typeArg) => this.emitType(typeArg)));
+            typeArguments = ts.factory.createNodeArray(type.typeArguments.map((typeArg) => this.emitType(typeArg)));
         }
-        return ts__default["default"].factory.updateTypeReferenceNode(type, translatedType.typeName, typeArguments);
+        return ts.factory.updateTypeReferenceNode(type, translatedType.typeName, typeArguments);
     }
 }
 
@@ -37335,10 +37942,10 @@ function tsNumericExpression$1(value) {
     // As of TypeScript 5.3 negative numbers are represented as `prefixUnaryOperator` and passing a
     // negative number (even as a string) into `createNumericLiteral` will result in an error.
     if (value < 0) {
-        const operand = ts__default["default"].factory.createNumericLiteral(Math.abs(value));
-        return ts__default["default"].factory.createPrefixUnaryExpression(ts__default["default"].SyntaxKind.MinusToken, operand);
+        const operand = ts.factory.createNumericLiteral(Math.abs(value));
+        return ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, operand);
     }
-    return ts__default["default"].factory.createNumericLiteral(value);
+    return ts.factory.createNumericLiteral(value);
 }
 
 function translateType(type, contextFile, reflector, refEmitter, imports) {
@@ -37358,16 +37965,16 @@ class TypeTranslatorVisitor {
     visitBuiltinType(type, context) {
         switch (type.name) {
             case BuiltinTypeName.Bool:
-                return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.BooleanKeyword);
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
             case BuiltinTypeName.Dynamic:
-                return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword);
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
             case BuiltinTypeName.Int:
             case BuiltinTypeName.Number:
-                return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.NumberKeyword);
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
             case BuiltinTypeName.String:
-                return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.StringKeyword);
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
             case BuiltinTypeName.None:
-                return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.NeverKeyword);
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
             default:
                 throw new Error(`Unsupported builtin type: ${BuiltinTypeName[type.name]}`);
         }
@@ -37377,29 +37984,29 @@ class TypeTranslatorVisitor {
         if (type.typeParams === null) {
             return typeNode;
         }
-        if (!ts__default["default"].isTypeReferenceNode(typeNode)) {
+        if (!ts.isTypeReferenceNode(typeNode)) {
             throw new Error('An ExpressionType with type arguments must translate into a TypeReferenceNode');
         }
         else if (typeNode.typeArguments !== undefined) {
             throw new Error(`An ExpressionType with type arguments cannot have multiple levels of type arguments`);
         }
         const typeArgs = type.typeParams.map((param) => this.translateType(param, context));
-        return ts__default["default"].factory.createTypeReferenceNode(typeNode.typeName, typeArgs);
+        return ts.factory.createTypeReferenceNode(typeNode.typeName, typeArgs);
     }
     visitArrayType(type, context) {
-        return ts__default["default"].factory.createArrayTypeNode(this.translateType(type.of, context));
+        return ts.factory.createArrayTypeNode(this.translateType(type.of, context));
     }
     visitMapType(type, context) {
-        const parameter = ts__default["default"].factory.createParameterDeclaration(undefined, undefined, 'key', undefined, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.StringKeyword));
+        const parameter = ts.factory.createParameterDeclaration(undefined, undefined, 'key', undefined, ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword));
         const typeArgs = type.valueType !== null
             ? this.translateType(type.valueType, context)
-            : ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UnknownKeyword);
-        const indexSignature = ts__default["default"].factory.createIndexSignature(undefined, [parameter], typeArgs);
-        return ts__default["default"].factory.createTypeLiteralNode([indexSignature]);
+            : ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+        const indexSignature = ts.factory.createIndexSignature(undefined, [parameter], typeArgs);
+        return ts.factory.createTypeLiteralNode([indexSignature]);
     }
     visitTransplantedType(ast, context) {
         const node = ast.type instanceof Reference ? ast.type.node : ast.type;
-        if (!ts__default["default"].isTypeNode(node)) {
+        if (!ts.isTypeNode(node)) {
             throw new Error(`A TransplantedType must wrap a TypeNode`);
         }
         const viaModule = ast.type instanceof Reference ? ast.type.bestGuessOwningModule : null;
@@ -37410,7 +38017,7 @@ class TypeTranslatorVisitor {
         if (ast.name === null) {
             throw new Error(`ReadVarExpr with no variable name in type`);
         }
-        return ts__default["default"].factory.createTypeQueryNode(ts__default["default"].factory.createIdentifier(ast.name));
+        return ts.factory.createTypeQueryNode(ts.factory.createIdentifier(ast.name));
     }
     visitWriteVarExpr(expr, context) {
         throw new Error('Method not implemented.');
@@ -37438,19 +38045,19 @@ class TypeTranslatorVisitor {
     }
     visitLiteralExpr(ast, context) {
         if (ast.value === null) {
-            return ts__default["default"].factory.createLiteralTypeNode(ts__default["default"].factory.createNull());
+            return ts.factory.createLiteralTypeNode(ts.factory.createNull());
         }
         else if (ast.value === undefined) {
-            return ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UndefinedKeyword);
+            return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
         }
         else if (typeof ast.value === 'boolean') {
-            return ts__default["default"].factory.createLiteralTypeNode(ast.value ? ts__default["default"].factory.createTrue() : ts__default["default"].factory.createFalse());
+            return ts.factory.createLiteralTypeNode(ast.value ? ts.factory.createTrue() : ts.factory.createFalse());
         }
         else if (typeof ast.value === 'number') {
-            return ts__default["default"].factory.createLiteralTypeNode(tsNumericExpression$1(ast.value));
+            return ts.factory.createLiteralTypeNode(tsNumericExpression$1(ast.value));
         }
         else {
-            return ts__default["default"].factory.createLiteralTypeNode(ts__default["default"].factory.createStringLiteral(ast.value));
+            return ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(ast.value));
         }
     }
     visitLocalizedString(ast, context) {
@@ -37469,7 +38076,7 @@ class TypeTranslatorVisitor {
         const typeArguments = ast.typeParams !== null
             ? ast.typeParams.map((type) => this.translateType(type, context))
             : undefined;
-        return ts__default["default"].factory.createTypeReferenceNode(typeName, typeArguments);
+        return ts.factory.createTypeReferenceNode(typeName, typeArguments);
     }
     visitConditionalExpr(ast, context) {
         throw new Error('Method not implemented.');
@@ -37500,45 +38107,45 @@ class TypeTranslatorVisitor {
     }
     visitLiteralArrayExpr(ast, context) {
         const values = ast.entries.map((expr) => this.translateExpression(expr, context));
-        return ts__default["default"].factory.createTupleTypeNode(values);
+        return ts.factory.createTupleTypeNode(values);
     }
     visitLiteralMapExpr(ast, context) {
         const entries = ast.entries.map((entry) => {
             const { key, quoted } = entry;
             const type = this.translateExpression(entry.value, context);
-            return ts__default["default"].factory.createPropertySignature(
+            return ts.factory.createPropertySignature(
             /* modifiers */ undefined, 
-            /* name */ quoted ? ts__default["default"].factory.createStringLiteral(key) : key, 
+            /* name */ quoted ? ts.factory.createStringLiteral(key) : key, 
             /* questionToken */ undefined, 
             /* type */ type);
         });
-        return ts__default["default"].factory.createTypeLiteralNode(entries);
+        return ts.factory.createTypeLiteralNode(entries);
     }
     visitCommaExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
     visitWrappedNodeExpr(ast, context) {
         const node = ast.node;
-        if (ts__default["default"].isEntityName(node)) {
-            return ts__default["default"].factory.createTypeReferenceNode(node, /* typeArguments */ undefined);
+        if (ts.isEntityName(node)) {
+            return ts.factory.createTypeReferenceNode(node, /* typeArguments */ undefined);
         }
-        else if (ts__default["default"].isTypeNode(node)) {
+        else if (ts.isTypeNode(node)) {
             return node;
         }
-        else if (ts__default["default"].isLiteralExpression(node)) {
-            return ts__default["default"].factory.createLiteralTypeNode(node);
+        else if (ts.isLiteralExpression(node)) {
+            return ts.factory.createLiteralTypeNode(node);
         }
         else {
-            throw new Error(`Unsupported WrappedNodeExpr in TypeTranslatorVisitor: ${ts__default["default"].SyntaxKind[node.kind]}`);
+            throw new Error(`Unsupported WrappedNodeExpr in TypeTranslatorVisitor: ${ts.SyntaxKind[node.kind]}`);
         }
     }
     visitTypeofExpr(ast, context) {
         const typeNode = this.translateExpression(ast.expr, context);
-        if (!ts__default["default"].isTypeReferenceNode(typeNode)) {
+        if (!ts.isTypeReferenceNode(typeNode)) {
             throw new Error(`The target of a typeof expression must be a type reference, but it was
-          ${ts__default["default"].SyntaxKind[typeNode.kind]}`);
+          ${ts.SyntaxKind[typeNode.kind]}`);
         }
-        return ts__default["default"].factory.createTypeQueryNode(typeNode.typeName);
+        return ts.factory.createTypeQueryNode(typeNode.typeName);
     }
     visitVoidExpr(ast, context) {
         throw new Error('Method not implemented.');
@@ -37548,20 +38155,20 @@ class TypeTranslatorVisitor {
     }
     translateType(type, context) {
         const typeNode = type.visitType(this, context);
-        if (!ts__default["default"].isTypeNode(typeNode)) {
-            throw new Error(`A Type must translate to a TypeNode, but was ${ts__default["default"].SyntaxKind[typeNode.kind]}`);
+        if (!ts.isTypeNode(typeNode)) {
+            throw new Error(`A Type must translate to a TypeNode, but was ${ts.SyntaxKind[typeNode.kind]}`);
         }
         return typeNode;
     }
     translateExpression(expr, context) {
         const typeNode = expr.visitExpression(this, context);
-        if (!ts__default["default"].isTypeNode(typeNode)) {
-            throw new Error(`An Expression must translate to a TypeNode, but was ${ts__default["default"].SyntaxKind[typeNode.kind]}`);
+        if (!ts.isTypeNode(typeNode)) {
+            throw new Error(`An Expression must translate to a TypeNode, but was ${ts.SyntaxKind[typeNode.kind]}`);
         }
         return typeNode;
     }
     translateTypeReference(type, context, viaModule) {
-        const target = ts__default["default"].isIdentifier(type.typeName) ? type.typeName : type.typeName.right;
+        const target = ts.isIdentifier(type.typeName) ? type.typeName : type.typeName.right;
         const declaration = this.reflector.getDeclarationOfIdentifier(target);
         if (declaration === null) {
             throw new Error(`Unable to statically determine the declaration file of type node ${target.text}`);
@@ -37577,8 +38184,8 @@ class TypeTranslatorVisitor {
         const emittedType = this.refEmitter.emit(reference, this.contextFile, exports.ImportFlags.NoAliasing | exports.ImportFlags.AllowTypeImports | exports.ImportFlags.AllowAmbientReferences);
         assertSuccessfulReferenceEmit(emittedType, target, 'type');
         const typeNode = this.translateExpression(emittedType.expression, context);
-        if (!ts__default["default"].isTypeReferenceNode(typeNode)) {
-            throw new Error(`Expected TypeReferenceNode for emitted reference, got ${ts__default["default"].SyntaxKind[typeNode.kind]}.`);
+        if (!ts.isTypeReferenceNode(typeNode)) {
+            throw new Error(`Expected TypeReferenceNode for emitted reference, got ${ts.SyntaxKind[typeNode.kind]}.`);
         }
         return typeNode;
     }
@@ -37599,35 +38206,35 @@ var PureAnnotation;
     PureAnnotation["TERSER"] = "@__PURE__";
 })(PureAnnotation || (PureAnnotation = {}));
 const UNARY_OPERATORS = {
-    '+': ts__default["default"].SyntaxKind.PlusToken,
-    '-': ts__default["default"].SyntaxKind.MinusToken,
-    '!': ts__default["default"].SyntaxKind.ExclamationToken,
+    '+': ts.SyntaxKind.PlusToken,
+    '-': ts.SyntaxKind.MinusToken,
+    '!': ts.SyntaxKind.ExclamationToken,
 };
 const BINARY_OPERATORS = {
-    '&&': ts__default["default"].SyntaxKind.AmpersandAmpersandToken,
-    '>': ts__default["default"].SyntaxKind.GreaterThanToken,
-    '>=': ts__default["default"].SyntaxKind.GreaterThanEqualsToken,
-    '&': ts__default["default"].SyntaxKind.AmpersandToken,
-    '|': ts__default["default"].SyntaxKind.BarToken,
-    '/': ts__default["default"].SyntaxKind.SlashToken,
-    '==': ts__default["default"].SyntaxKind.EqualsEqualsToken,
-    '===': ts__default["default"].SyntaxKind.EqualsEqualsEqualsToken,
-    '<': ts__default["default"].SyntaxKind.LessThanToken,
-    '<=': ts__default["default"].SyntaxKind.LessThanEqualsToken,
-    '-': ts__default["default"].SyntaxKind.MinusToken,
-    '%': ts__default["default"].SyntaxKind.PercentToken,
-    '*': ts__default["default"].SyntaxKind.AsteriskToken,
-    '**': ts__default["default"].SyntaxKind.AsteriskAsteriskToken,
-    '!=': ts__default["default"].SyntaxKind.ExclamationEqualsToken,
-    '!==': ts__default["default"].SyntaxKind.ExclamationEqualsEqualsToken,
-    '||': ts__default["default"].SyntaxKind.BarBarToken,
-    '+': ts__default["default"].SyntaxKind.PlusToken,
-    '??': ts__default["default"].SyntaxKind.QuestionQuestionToken,
+    '&&': ts.SyntaxKind.AmpersandAmpersandToken,
+    '>': ts.SyntaxKind.GreaterThanToken,
+    '>=': ts.SyntaxKind.GreaterThanEqualsToken,
+    '&': ts.SyntaxKind.AmpersandToken,
+    '|': ts.SyntaxKind.BarToken,
+    '/': ts.SyntaxKind.SlashToken,
+    '==': ts.SyntaxKind.EqualsEqualsToken,
+    '===': ts.SyntaxKind.EqualsEqualsEqualsToken,
+    '<': ts.SyntaxKind.LessThanToken,
+    '<=': ts.SyntaxKind.LessThanEqualsToken,
+    '-': ts.SyntaxKind.MinusToken,
+    '%': ts.SyntaxKind.PercentToken,
+    '*': ts.SyntaxKind.AsteriskToken,
+    '**': ts.SyntaxKind.AsteriskAsteriskToken,
+    '!=': ts.SyntaxKind.ExclamationEqualsToken,
+    '!==': ts.SyntaxKind.ExclamationEqualsEqualsToken,
+    '||': ts.SyntaxKind.BarBarToken,
+    '+': ts.SyntaxKind.PlusToken,
+    '??': ts.SyntaxKind.QuestionQuestionToken,
 };
 const VAR_TYPES = {
-    'const': ts__default["default"].NodeFlags.Const,
-    'let': ts__default["default"].NodeFlags.Let,
-    'var': ts__default["default"].NodeFlags.None,
+    'const': ts.NodeFlags.Const,
+    'let': ts.NodeFlags.Let,
+    'var': ts.NodeFlags.None,
 };
 /**
  * A TypeScript flavoured implementation of the AstFactory.
@@ -37639,94 +38246,94 @@ class TypeScriptAstFactory {
         this.annotateForClosureCompiler = annotateForClosureCompiler;
     }
     attachComments = attachComments;
-    createArrayLiteral = ts__default["default"].factory.createArrayLiteralExpression;
+    createArrayLiteral = ts.factory.createArrayLiteralExpression;
     createAssignment(target, value) {
-        return ts__default["default"].factory.createBinaryExpression(target, ts__default["default"].SyntaxKind.EqualsToken, value);
+        return ts.factory.createBinaryExpression(target, ts.SyntaxKind.EqualsToken, value);
     }
     createBinaryExpression(leftOperand, operator, rightOperand) {
-        return ts__default["default"].factory.createBinaryExpression(leftOperand, BINARY_OPERATORS[operator], rightOperand);
+        return ts.factory.createBinaryExpression(leftOperand, BINARY_OPERATORS[operator], rightOperand);
     }
     createBlock(body) {
-        return ts__default["default"].factory.createBlock(body);
+        return ts.factory.createBlock(body);
     }
     createCallExpression(callee, args, pure) {
-        const call = ts__default["default"].factory.createCallExpression(callee, undefined, args);
+        const call = ts.factory.createCallExpression(callee, undefined, args);
         if (pure) {
-            ts__default["default"].addSyntheticLeadingComment(call, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, this.annotateForClosureCompiler ? PureAnnotation.CLOSURE : PureAnnotation.TERSER, 
+            ts.addSyntheticLeadingComment(call, ts.SyntaxKind.MultiLineCommentTrivia, this.annotateForClosureCompiler ? PureAnnotation.CLOSURE : PureAnnotation.TERSER, 
             /* trailing newline */ false);
         }
         return call;
     }
     createConditional(condition, whenTrue, whenFalse) {
-        return ts__default["default"].factory.createConditionalExpression(condition, undefined, whenTrue, undefined, whenFalse);
+        return ts.factory.createConditionalExpression(condition, undefined, whenTrue, undefined, whenFalse);
     }
-    createElementAccess = ts__default["default"].factory.createElementAccessExpression;
-    createExpressionStatement = ts__default["default"].factory.createExpressionStatement;
+    createElementAccess = ts.factory.createElementAccessExpression;
+    createExpressionStatement = ts.factory.createExpressionStatement;
     createDynamicImport(url) {
-        return ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.ImportKeyword), 
-        /* type */ undefined, [typeof url === 'string' ? ts__default["default"].factory.createStringLiteral(url) : url]);
+        return ts.factory.createCallExpression(ts.factory.createToken(ts.SyntaxKind.ImportKeyword), 
+        /* type */ undefined, [typeof url === 'string' ? ts.factory.createStringLiteral(url) : url]);
     }
     createFunctionDeclaration(functionName, parameters, body) {
-        if (!ts__default["default"].isBlock(body)) {
-            throw new Error(`Invalid syntax, expected a block, but got ${ts__default["default"].SyntaxKind[body.kind]}.`);
+        if (!ts.isBlock(body)) {
+            throw new Error(`Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`);
         }
-        return ts__default["default"].factory.createFunctionDeclaration(undefined, undefined, functionName, undefined, parameters.map((param) => ts__default["default"].factory.createParameterDeclaration(undefined, undefined, param)), undefined, body);
+        return ts.factory.createFunctionDeclaration(undefined, undefined, functionName, undefined, parameters.map((param) => ts.factory.createParameterDeclaration(undefined, undefined, param)), undefined, body);
     }
     createFunctionExpression(functionName, parameters, body) {
-        if (!ts__default["default"].isBlock(body)) {
-            throw new Error(`Invalid syntax, expected a block, but got ${ts__default["default"].SyntaxKind[body.kind]}.`);
+        if (!ts.isBlock(body)) {
+            throw new Error(`Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`);
         }
-        return ts__default["default"].factory.createFunctionExpression(undefined, undefined, functionName ?? undefined, undefined, parameters.map((param) => ts__default["default"].factory.createParameterDeclaration(undefined, undefined, param)), undefined, body);
+        return ts.factory.createFunctionExpression(undefined, undefined, functionName ?? undefined, undefined, parameters.map((param) => ts.factory.createParameterDeclaration(undefined, undefined, param)), undefined, body);
     }
     createArrowFunctionExpression(parameters, body) {
-        if (ts__default["default"].isStatement(body) && !ts__default["default"].isBlock(body)) {
-            throw new Error(`Invalid syntax, expected a block, but got ${ts__default["default"].SyntaxKind[body.kind]}.`);
+        if (ts.isStatement(body) && !ts.isBlock(body)) {
+            throw new Error(`Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`);
         }
-        return ts__default["default"].factory.createArrowFunction(undefined, undefined, parameters.map((param) => ts__default["default"].factory.createParameterDeclaration(undefined, undefined, param)), undefined, undefined, body);
+        return ts.factory.createArrowFunction(undefined, undefined, parameters.map((param) => ts.factory.createParameterDeclaration(undefined, undefined, param)), undefined, undefined, body);
     }
-    createIdentifier = ts__default["default"].factory.createIdentifier;
+    createIdentifier = ts.factory.createIdentifier;
     createIfStatement(condition, thenStatement, elseStatement) {
-        return ts__default["default"].factory.createIfStatement(condition, thenStatement, elseStatement ?? undefined);
+        return ts.factory.createIfStatement(condition, thenStatement, elseStatement ?? undefined);
     }
     createLiteral(value) {
         if (value === undefined) {
-            return ts__default["default"].factory.createIdentifier('undefined');
+            return ts.factory.createIdentifier('undefined');
         }
         else if (value === null) {
-            return ts__default["default"].factory.createNull();
+            return ts.factory.createNull();
         }
         else if (typeof value === 'boolean') {
-            return value ? ts__default["default"].factory.createTrue() : ts__default["default"].factory.createFalse();
+            return value ? ts.factory.createTrue() : ts.factory.createFalse();
         }
         else if (typeof value === 'number') {
             return tsNumericExpression$1(value);
         }
         else {
-            return ts__default["default"].factory.createStringLiteral(value);
+            return ts.factory.createStringLiteral(value);
         }
     }
     createNewExpression(expression, args) {
-        return ts__default["default"].factory.createNewExpression(expression, undefined, args);
+        return ts.factory.createNewExpression(expression, undefined, args);
     }
     createObjectLiteral(properties) {
-        return ts__default["default"].factory.createObjectLiteralExpression(properties.map((prop) => ts__default["default"].factory.createPropertyAssignment(prop.quoted
-            ? ts__default["default"].factory.createStringLiteral(prop.propertyName)
-            : ts__default["default"].factory.createIdentifier(prop.propertyName), prop.value)));
+        return ts.factory.createObjectLiteralExpression(properties.map((prop) => ts.factory.createPropertyAssignment(prop.quoted
+            ? ts.factory.createStringLiteral(prop.propertyName)
+            : ts.factory.createIdentifier(prop.propertyName), prop.value)));
     }
-    createParenthesizedExpression = ts__default["default"].factory.createParenthesizedExpression;
-    createPropertyAccess = ts__default["default"].factory.createPropertyAccessExpression;
+    createParenthesizedExpression = ts.factory.createParenthesizedExpression;
+    createPropertyAccess = ts.factory.createPropertyAccessExpression;
     createReturnStatement(expression) {
-        return ts__default["default"].factory.createReturnStatement(expression ?? undefined);
+        return ts.factory.createReturnStatement(expression ?? undefined);
     }
     createTaggedTemplate(tag, template) {
-        return ts__default["default"].factory.createTaggedTemplateExpression(tag, undefined, this.createTemplateLiteral(template));
+        return ts.factory.createTaggedTemplateExpression(tag, undefined, this.createTemplateLiteral(template));
     }
     createTemplateLiteral(template) {
         let templateLiteral;
         const length = template.elements.length;
         const head = template.elements[0];
         if (length === 1) {
-            templateLiteral = ts__default["default"].factory.createNoSubstitutionTemplateLiteral(head.cooked, head.raw);
+            templateLiteral = ts.factory.createNoSubstitutionTemplateLiteral(head.cooked, head.raw);
         }
         else {
             const spans = [];
@@ -37737,7 +38344,7 @@ class TypeScriptAstFactory {
                 if (range !== null) {
                     this.setSourceMapRange(middle, range);
                 }
-                spans.push(ts__default["default"].factory.createTemplateSpan(template.expressions[i - 1], middle));
+                spans.push(ts.factory.createTemplateSpan(template.expressions[i - 1], middle));
             }
             // Create the tail part
             const resolvedExpression = template.expressions[length - 2];
@@ -37746,24 +38353,24 @@ class TypeScriptAstFactory {
             if (templatePart.range !== null) {
                 this.setSourceMapRange(templateTail, templatePart.range);
             }
-            spans.push(ts__default["default"].factory.createTemplateSpan(resolvedExpression, templateTail));
+            spans.push(ts.factory.createTemplateSpan(resolvedExpression, templateTail));
             // Put it all together
-            templateLiteral = ts__default["default"].factory.createTemplateExpression(ts__default["default"].factory.createTemplateHead(head.cooked, head.raw), spans);
+            templateLiteral = ts.factory.createTemplateExpression(ts.factory.createTemplateHead(head.cooked, head.raw), spans);
         }
         if (head.range !== null) {
             this.setSourceMapRange(templateLiteral, head.range);
         }
         return templateLiteral;
     }
-    createThrowStatement = ts__default["default"].factory.createThrowStatement;
-    createTypeOfExpression = ts__default["default"].factory.createTypeOfExpression;
-    createVoidExpression = ts__default["default"].factory.createVoidExpression;
+    createThrowStatement = ts.factory.createThrowStatement;
+    createTypeOfExpression = ts.factory.createTypeOfExpression;
+    createVoidExpression = ts.factory.createVoidExpression;
     createUnaryExpression(operator, operand) {
-        return ts__default["default"].factory.createPrefixUnaryExpression(UNARY_OPERATORS[operator], operand);
+        return ts.factory.createPrefixUnaryExpression(UNARY_OPERATORS[operator], operand);
     }
     createVariableDeclaration(variableName, initializer, type) {
-        return ts__default["default"].factory.createVariableStatement(undefined, ts__default["default"].factory.createVariableDeclarationList([
-            ts__default["default"].factory.createVariableDeclaration(variableName, undefined, undefined, initializer ?? undefined),
+        return ts.factory.createVariableStatement(undefined, ts.factory.createVariableDeclarationList([
+            ts.factory.createVariableDeclaration(variableName, undefined, undefined, initializer ?? undefined),
         ], VAR_TYPES[type]));
     }
     setSourceMapRange(node, sourceMapRange) {
@@ -37772,10 +38379,10 @@ class TypeScriptAstFactory {
         }
         const url = sourceMapRange.url;
         if (!this.externalSourceFiles.has(url)) {
-            this.externalSourceFiles.set(url, ts__default["default"].createSourceMapSource(url, sourceMapRange.content, (pos) => pos));
+            this.externalSourceFiles.set(url, ts.createSourceMapSource(url, sourceMapRange.content, (pos) => pos));
         }
         const source = this.externalSourceFiles.get(url);
-        ts__default["default"].setSourceMapRange(node, {
+        ts.setSourceMapRange(node, {
             pos: sourceMapRange.start.offset,
             end: sourceMapRange.end.offset,
             source,
@@ -37786,15 +38393,15 @@ class TypeScriptAstFactory {
 // HACK: Use this in place of `ts.createTemplateMiddle()`.
 // Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed.
 function createTemplateMiddle(cooked, raw) {
-    const node = ts__default["default"].factory.createTemplateHead(cooked, raw);
-    node.kind = ts__default["default"].SyntaxKind.TemplateMiddle;
+    const node = ts.factory.createTemplateHead(cooked, raw);
+    node.kind = ts.SyntaxKind.TemplateMiddle;
     return node;
 }
 // HACK: Use this in place of `ts.createTemplateTail()`.
 // Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed.
 function createTemplateTail(cooked, raw) {
-    const node = ts__default["default"].factory.createTemplateHead(cooked, raw);
-    node.kind = ts__default["default"].SyntaxKind.TemplateTail;
+    const node = ts.factory.createTemplateHead(cooked, raw);
+    node.kind = ts.SyntaxKind.TemplateTail;
     return node;
 }
 /**
@@ -37806,14 +38413,14 @@ function createTemplateTail(cooked, raw) {
 function attachComments(statement, leadingComments) {
     for (const comment of leadingComments) {
         const commentKind = comment.multiline
-            ? ts__default["default"].SyntaxKind.MultiLineCommentTrivia
-            : ts__default["default"].SyntaxKind.SingleLineCommentTrivia;
+            ? ts.SyntaxKind.MultiLineCommentTrivia
+            : ts.SyntaxKind.SingleLineCommentTrivia;
         if (comment.multiline) {
-            ts__default["default"].addSyntheticLeadingComment(statement, commentKind, comment.toString(), comment.trailingNewline);
+            ts.addSyntheticLeadingComment(statement, commentKind, comment.toString(), comment.trailingNewline);
         }
         else {
             for (const line of comment.toString().split('\n')) {
-                ts__default["default"].addSyntheticLeadingComment(statement, commentKind, line, comment.trailingNewline);
+                ts.addSyntheticLeadingComment(statement, commentKind, line, comment.trailingNewline);
             }
         }
     }
@@ -37824,6 +38431,288 @@ function translateExpression(contextFile, expression, imports, options = {}) {
 }
 function translateStatement(contextFile, statement, imports, options = {}) {
     return statement.visitStatement(new ExpressionTranslatorVisitor(new TypeScriptAstFactory(options.annotateForClosureCompiler === true), imports, contextFile, options), new Context$1(true));
+}
+
+/**
+ * Create a `ts.Diagnostic` which indicates the given class is part of the declarations of two or
+ * more NgModules.
+ *
+ * The resulting `ts.Diagnostic` will have a context entry for each NgModule showing the point where
+ * the directive/pipe exists in its `declarations` (if possible).
+ */
+function makeDuplicateDeclarationError(node, data, kind) {
+    const context = [];
+    for (const decl of data) {
+        if (decl.rawDeclarations === null) {
+            continue;
+        }
+        // Try to find the reference to the declaration within the declarations array, to hang the
+        // error there. If it can't be found, fall back on using the NgModule's name.
+        const contextNode = decl.ref.getOriginForDiagnostics(decl.rawDeclarations, decl.ngModule.name);
+        context.push(makeRelatedInformation(contextNode, `'${node.name.text}' is listed in the declarations of the NgModule '${decl.ngModule.name.text}'.`));
+    }
+    // Finally, produce the diagnostic.
+    return makeDiagnostic(exports.ErrorCode.NGMODULE_DECLARATION_NOT_UNIQUE, node.name, `The ${kind} '${node.name.text}' is declared by more than one NgModule.`, context);
+}
+/**
+ * Creates a `FatalDiagnosticError` for a node that did not evaluate to the expected type. The
+ * diagnostic that is created will include details on why the value is incorrect, i.e. it includes
+ * a representation of the actual type that was unsupported, or in the case of a dynamic value the
+ * trace to the node where the dynamic value originated.
+ *
+ * @param node The node for which the diagnostic should be produced.
+ * @param value The evaluated value that has the wrong type.
+ * @param messageText The message text of the error.
+ */
+function createValueHasWrongTypeError(node, value, messageText) {
+    let chainedMessage;
+    let relatedInformation;
+    if (value instanceof DynamicValue) {
+        chainedMessage = 'Value could not be determined statically.';
+        relatedInformation = traceDynamicValue(node, value);
+    }
+    else if (value instanceof Reference) {
+        const target = value.debugName !== null ? `'${value.debugName}'` : 'an anonymous declaration';
+        chainedMessage = `Value is a reference to ${target}.`;
+        const referenceNode = identifierOfNode(value.node) ?? value.node;
+        relatedInformation = [makeRelatedInformation(referenceNode, 'Reference is declared here.')];
+    }
+    else {
+        chainedMessage = `Value is of type '${describeResolvedType(value)}'.`;
+    }
+    const chain = {
+        messageText,
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        next: [
+            {
+                messageText: chainedMessage,
+                category: ts.DiagnosticCategory.Message,
+                code: 0,
+            },
+        ],
+    };
+    return new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, node, chain, relatedInformation);
+}
+/**
+ * Gets the diagnostics for a set of provider classes.
+ * @param providerClasses Classes that should be checked.
+ * @param providersDeclaration Node that declares the providers array.
+ * @param registry Registry that keeps track of the registered injectable classes.
+ */
+function getProviderDiagnostics(providerClasses, providersDeclaration, registry) {
+    const diagnostics = [];
+    for (const provider of providerClasses) {
+        const injectableMeta = registry.getInjectableMeta(provider.node);
+        if (injectableMeta !== null) {
+            // The provided type is recognized as injectable, so we don't report a diagnostic for this
+            // provider.
+            continue;
+        }
+        const contextNode = provider.getOriginForDiagnostics(providersDeclaration);
+        diagnostics.push(makeDiagnostic(exports.ErrorCode.UNDECORATED_PROVIDER, contextNode, `The class '${provider.node.name.text}' cannot be created via dependency injection, as it does not have an Angular decorator. This will result in an error at runtime.
+
+Either add the @Injectable() decorator to '${provider.node.name.text}', or configure a different provider (such as a provider with 'useFactory').
+`, [makeRelatedInformation(provider.node, `'${provider.node.name.text}' is declared here.`)]));
+    }
+    return diagnostics;
+}
+function getDirectiveDiagnostics(node, injectableRegistry, evaluator, reflector, scopeRegistry, strictInjectionParameters, kind) {
+    let diagnostics = [];
+    const addDiagnostics = (more) => {
+        if (more === null) {
+            return;
+        }
+        else if (diagnostics === null) {
+            diagnostics = Array.isArray(more) ? more : [more];
+        }
+        else if (Array.isArray(more)) {
+            diagnostics.push(...more);
+        }
+        else {
+            diagnostics.push(more);
+        }
+    };
+    const duplicateDeclarations = scopeRegistry.getDuplicateDeclarations(node);
+    if (duplicateDeclarations !== null) {
+        addDiagnostics(makeDuplicateDeclarationError(node, duplicateDeclarations, kind));
+    }
+    addDiagnostics(checkInheritanceOfInjectable(node, injectableRegistry, reflector, evaluator, strictInjectionParameters, kind));
+    return diagnostics;
+}
+function validateHostDirectives(origin, hostDirectives, metaReader) {
+    const diagnostics = [];
+    for (const current of hostDirectives) {
+        if (!isHostDirectiveMetaForGlobalMode(current)) {
+            throw new Error('Impossible state: diagnostics code path for local compilation');
+        }
+        const hostMeta = flattenInheritedDirectiveMetadata(metaReader, current.directive);
+        if (hostMeta === null) {
+            diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_INVALID, current.directive.getOriginForDiagnostics(origin), `${current.directive.debugName} must be a standalone directive to be used as a host directive`));
+            continue;
+        }
+        if (!hostMeta.isStandalone) {
+            diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_NOT_STANDALONE, current.directive.getOriginForDiagnostics(origin), `Host directive ${hostMeta.name} must be standalone`));
+        }
+        if (hostMeta.isComponent) {
+            diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_COMPONENT, current.directive.getOriginForDiagnostics(origin), `Host directive ${hostMeta.name} cannot be a component`));
+        }
+        const requiredInputNames = Array.from(hostMeta.inputs)
+            .filter((input) => input.required)
+            .map((input) => input.classPropertyName);
+        validateHostDirectiveMappings('input', current, hostMeta, origin, diagnostics, requiredInputNames.length > 0 ? new Set(requiredInputNames) : null);
+        validateHostDirectiveMappings('output', current, hostMeta, origin, diagnostics, null);
+    }
+    return diagnostics;
+}
+function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, origin, diagnostics, requiredBindings) {
+    if (!isHostDirectiveMetaForGlobalMode(hostDirectiveMeta)) {
+        throw new Error('Impossible state: diagnostics code path for local compilation');
+    }
+    const className = meta.name;
+    const hostDirectiveMappings = bindingType === 'input' ? hostDirectiveMeta.inputs : hostDirectiveMeta.outputs;
+    const existingBindings = bindingType === 'input' ? meta.inputs : meta.outputs;
+    const exposedRequiredBindings = new Set();
+    for (const publicName in hostDirectiveMappings) {
+        if (hostDirectiveMappings.hasOwnProperty(publicName)) {
+            const bindings = existingBindings.getByBindingPropertyName(publicName);
+            if (bindings === null) {
+                diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`));
+            }
+            else if (requiredBindings !== null) {
+                for (const field of bindings) {
+                    if (requiredBindings.has(field.classPropertyName)) {
+                        exposedRequiredBindings.add(field.classPropertyName);
+                    }
+                }
+            }
+            const remappedPublicName = hostDirectiveMappings[publicName];
+            const bindingsForPublicName = existingBindings.getByBindingPropertyName(remappedPublicName);
+            if (bindingsForPublicName !== null) {
+                for (const binding of bindingsForPublicName) {
+                    if (binding.bindingPropertyName !== publicName) {
+                        diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_CONFLICTING_ALIAS, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`));
+                    }
+                }
+            }
+        }
+    }
+    if (requiredBindings !== null && requiredBindings.size !== exposedRequiredBindings.size) {
+        const missingBindings = [];
+        for (const publicName of requiredBindings) {
+            if (!exposedRequiredBindings.has(publicName)) {
+                const name = existingBindings.getByClassPropertyName(publicName);
+                if (name) {
+                    missingBindings.push(`'${name.bindingPropertyName}'`);
+                }
+            }
+        }
+        diagnostics.push(makeDiagnostic(exports.ErrorCode.HOST_DIRECTIVE_MISSING_REQUIRED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Required ${bindingType}${missingBindings.length === 1 ? '' : 's'} ${missingBindings.join(', ')} from host directive ${className} must be exposed.`));
+    }
+}
+function getUndecoratedClassWithAngularFeaturesDiagnostic(node) {
+    return makeDiagnostic(exports.ErrorCode.UNDECORATED_CLASS_USING_ANGULAR_FEATURES, node.name, `Class is using Angular features but is not decorated. Please add an explicit ` +
+        `Angular decorator.`);
+}
+function checkInheritanceOfInjectable(node, injectableRegistry, reflector, evaluator, strictInjectionParameters, kind) {
+    const classWithCtor = findInheritedCtor(node, injectableRegistry, reflector, evaluator);
+    if (classWithCtor === null || classWithCtor.isCtorValid) {
+        // The class does not inherit a constructor, or the inherited constructor is compatible
+        // with DI; no need to report a diagnostic.
+        return null;
+    }
+    if (!classWithCtor.isDecorated) {
+        // The inherited constructor exists in a class that does not have an Angular decorator.
+        // This is an error, as there won't be a factory definition available for DI to invoke
+        // the constructor.
+        return getInheritedUndecoratedCtorDiagnostic(node, classWithCtor.ref, kind);
+    }
+    if (isFromDtsFile(classWithCtor.ref.node)) {
+        // The inherited class is declared in a declaration file, in which case there is not enough
+        // information to detect invalid constructors as `@Inject()` metadata is not present in the
+        // declaration file. Consequently, we have to accept such occurrences, although they might
+        // still fail at runtime.
+        return null;
+    }
+    if (!strictInjectionParameters || isAbstractClassDeclaration(node)) {
+        // An invalid constructor is only reported as error under `strictInjectionParameters` and
+        // only for concrete classes; follow the same exclusions for derived types.
+        return null;
+    }
+    return getInheritedInvalidCtorDiagnostic(node, classWithCtor.ref, kind);
+}
+function findInheritedCtor(node, injectableRegistry, reflector, evaluator) {
+    if (!reflector.isClass(node) || reflector.getConstructorParameters(node) !== null) {
+        // We should skip nodes that aren't classes. If a constructor exists, then no base class
+        // definition is required on the runtime side - it's legal to inherit from any class.
+        return null;
+    }
+    // The extends clause is an expression which can be as dynamic as the user wants. Try to
+    // evaluate it, but fall back on ignoring the clause if it can't be understood. This is a View
+    // Engine compatibility hack: View Engine ignores 'extends' expressions that it cannot understand.
+    let baseClass = readBaseClass(node, reflector, evaluator);
+    while (baseClass !== null) {
+        if (baseClass === 'dynamic') {
+            return null;
+        }
+        const injectableMeta = injectableRegistry.getInjectableMeta(baseClass.node);
+        if (injectableMeta !== null) {
+            if (injectableMeta.ctorDeps !== null) {
+                // The class has an Angular decorator with a constructor.
+                return {
+                    ref: baseClass,
+                    isCtorValid: injectableMeta.ctorDeps !== 'invalid',
+                    isDecorated: true,
+                };
+            }
+        }
+        else {
+            const baseClassConstructorParams = reflector.getConstructorParameters(baseClass.node);
+            if (baseClassConstructorParams !== null) {
+                // The class is not decorated, but it does have constructor. An undecorated class is only
+                // allowed to have a constructor without parameters, otherwise it is invalid.
+                return {
+                    ref: baseClass,
+                    isCtorValid: baseClassConstructorParams.length === 0,
+                    isDecorated: false,
+                };
+            }
+        }
+        // Go up the chain and continue
+        baseClass = readBaseClass(baseClass.node, reflector, evaluator);
+    }
+    return null;
+}
+function getInheritedInvalidCtorDiagnostic(node, baseClass, kind) {
+    const baseClassName = baseClass.debugName;
+    return makeDiagnostic(exports.ErrorCode.INJECTABLE_INHERITS_INVALID_CONSTRUCTOR, node.name, `The ${kind.toLowerCase()} ${node.name.text} inherits its constructor from ${baseClassName}, ` +
+        `but the latter has a constructor parameter that is not compatible with dependency injection. ` +
+        `Either add an explicit constructor to ${node.name.text} or change ${baseClassName}'s constructor to ` +
+        `use parameters that are valid for DI.`);
+}
+function getInheritedUndecoratedCtorDiagnostic(node, baseClass, kind) {
+    const baseClassName = baseClass.debugName;
+    const baseNeedsDecorator = kind === 'Component' || kind === 'Directive' ? 'Directive' : 'Injectable';
+    return makeDiagnostic(exports.ErrorCode.DIRECTIVE_INHERITS_UNDECORATED_CTOR, node.name, `The ${kind.toLowerCase()} ${node.name.text} inherits its constructor from ${baseClassName}, ` +
+        `but the latter does not have an Angular decorator of its own. Dependency injection will not be able to ` +
+        `resolve the parameters of ${baseClassName}'s constructor. Either add a @${baseNeedsDecorator} decorator ` +
+        `to ${baseClassName}, or add an explicit constructor to ${node.name.text}.`);
+}
+/**
+ * Throws `FatalDiagnosticError` with error code `LOCAL_COMPILATION_UNRESOLVED_CONST`
+ * if the compilation mode is local and the value is not resolved due to being imported
+ * from external files. This is a common scenario for errors in local compilation mode,
+ * and so this helper can be used to quickly generate the relevant errors.
+ *
+ * @param nodeToHighlight Node to be highlighted in teh error message.
+ * Will default to value.node if not provided.
+ */
+function assertLocalCompilationUnresolvedConst(compilationMode, value, nodeToHighlight, errorMessage) {
+    if (compilationMode === exports.CompilationMode.LOCAL &&
+        value instanceof DynamicValue &&
+        value.isFromUnknownIdentifier()) {
+        throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNRESOLVED_CONST, nodeToHighlight ?? value.node, errorMessage);
+    }
 }
 
 exports.ComponentScopeKind = void 0;
@@ -37857,7 +38746,7 @@ function validateAccessOfInitializerApiMember({ api, call }, member) {
  * @returns The parsed initializer API, or null if none was found.
  */
 function tryParseInitializerApi(functions, expression, reflector, importTracker) {
-    if (!ts__default["default"].isCallExpression(expression)) {
+    if (!ts.isCallExpression(expression)) {
         return null;
     }
     const staticResult = parseTopLevelCall(expression, functions, importTracker) ||
@@ -37888,7 +38777,7 @@ function tryParseInitializerApi(functions, expression, reflector, importTracker)
  */
 function parseTopLevelCall(call, functions, importTracker) {
     const node = call.expression;
-    if (!ts__default["default"].isIdentifier(node)) {
+    if (!ts.isIdentifier(node)) {
         return null;
     }
     const matchingApi = functions.find((fn) => importTracker.isPotentialReferenceToNamedImport(node, fn.functionName, fn.owningModule));
@@ -37903,8 +38792,8 @@ function parseTopLevelCall(call, functions, importTracker) {
  */
 function parseTopLevelRequiredCall(call, functions, importTracker) {
     const node = call.expression;
-    if (!ts__default["default"].isPropertyAccessExpression(node) ||
-        !ts__default["default"].isIdentifier(node.expression) ||
+    if (!ts.isPropertyAccessExpression(node) ||
+        !ts.isIdentifier(node.expression) ||
         node.name.text !== 'required') {
         return null;
     }
@@ -37921,14 +38810,14 @@ function parseTopLevelRequiredCall(call, functions, importTracker) {
  */
 function parseTopLevelCallFromNamespace(call, functions, importTracker) {
     const node = call.expression;
-    if (!ts__default["default"].isPropertyAccessExpression(node)) {
+    if (!ts.isPropertyAccessExpression(node)) {
         return null;
     }
     let apiReference = null;
     let matchingApi = undefined;
     let isRequired = false;
     // `prop = core.input()`
-    if (ts__default["default"].isIdentifier(node.expression) && ts__default["default"].isIdentifier(node.name)) {
+    if (ts.isIdentifier(node.expression) && ts.isIdentifier(node.name)) {
         const namespaceRef = node.expression;
         apiReference = node.name;
         matchingApi = functions.find((fn) => node.name.text === fn.functionName &&
@@ -37936,9 +38825,9 @@ function parseTopLevelCallFromNamespace(call, functions, importTracker) {
     }
     else if (
     // `prop = core.input.required()`
-    ts__default["default"].isPropertyAccessExpression(node.expression) &&
-        ts__default["default"].isIdentifier(node.expression.expression) &&
-        ts__default["default"].isIdentifier(node.expression.name) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression) &&
+        ts.isIdentifier(node.expression.name) &&
         node.name.text === 'required') {
         const potentialName = node.expression.name.text;
         const namespaceRef = node.expression.expression;
@@ -37961,14 +38850,14 @@ function parseTopLevelCallFromNamespace(call, functions, importTracker) {
  * compile time.
  */
 function parseAndValidateInputAndOutputOptions(optionsNode) {
-    if (!ts__default["default"].isObjectLiteralExpression(optionsNode)) {
+    if (!ts.isObjectLiteralExpression(optionsNode)) {
         throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, optionsNode, 'Argument needs to be an object literal that is statically analyzable.');
     }
     const options = reflectObjectLiteral(optionsNode);
     let alias = undefined;
     if (options.has('alias')) {
         const aliasExpr = options.get('alias');
-        if (!ts__default["default"].isStringLiteralLike(aliasExpr)) {
+        if (!ts.isStringLiteralLike(aliasExpr)) {
             throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, aliasExpr, 'Alias needs to be a string that is statically analyzable.');
         }
         alias = aliasExpr.text;
@@ -38169,7 +39058,7 @@ function tryParseSignalQueryFromInitializer(member, reflector, importTracker) {
         throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, query.call, 'No locator specified.');
     }
     const optionsNode = query.call.arguments[1];
-    if (optionsNode !== undefined && !ts__default["default"].isObjectLiteralExpression(optionsNode)) {
+    if (optionsNode !== undefined && !ts.isObjectLiteralExpression(optionsNode)) {
         throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, optionsNode, 'Argument needs to be an object literal.');
     }
     const options = optionsNode && reflectObjectLiteral(optionsNode);
@@ -38199,7 +39088,7 @@ function parseLocator(expression, reflector) {
     if (unwrappedExpression !== null) {
         expression = unwrappedExpression;
     }
-    if (ts__default["default"].isStringLiteralLike(expression)) {
+    if (ts.isStringLiteralLike(expression)) {
         return [expression.text];
     }
     return createMayBeForwardRefExpression(new WrappedNodeExpr(expression), unwrappedExpression !== null ? 2 /* ForwardRefHandling.Unwrapped */ : 0 /* ForwardRefHandling.None */);
@@ -38216,26 +39105,1034 @@ function parseLocator(expression, reflector) {
  * live outside of the class in the static class definition.
  */
 function parseReadOption(value) {
-    if (ts__default["default"].isExpressionWithTypeArguments(value) ||
-        ts__default["default"].isParenthesizedExpression(value) ||
-        ts__default["default"].isAsExpression(value)) {
+    if (ts.isExpressionWithTypeArguments(value) ||
+        ts.isParenthesizedExpression(value) ||
+        ts.isAsExpression(value)) {
         return parseReadOption(value.expression);
     }
-    if ((ts__default["default"].isPropertyAccessExpression(value) && ts__default["default"].isIdentifier(value.expression)) ||
-        ts__default["default"].isIdentifier(value)) {
+    if ((ts.isPropertyAccessExpression(value) && ts.isIdentifier(value.expression)) ||
+        ts.isIdentifier(value)) {
         return new WrappedNodeExpr(value);
     }
     throw new FatalDiagnosticError(exports.ErrorCode.VALUE_NOT_LITERAL, value, `Query "read" option expected a literal class reference.`);
 }
 /** Parses the `descendants` option of a query. */
 function parseDescendantsOption(value) {
-    if (value.kind === ts__default["default"].SyntaxKind.TrueKeyword) {
+    if (value.kind === ts.SyntaxKind.TrueKeyword) {
         return true;
     }
-    else if (value.kind === ts__default["default"].SyntaxKind.FalseKeyword) {
+    else if (value.kind === ts.SyntaxKind.FalseKeyword) {
         return false;
     }
     throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, value, `Expected "descendants" option to be a boolean literal.`);
+}
+
+const EMPTY_OBJECT = {};
+const queryDecoratorNames = [
+    'ViewChild',
+    'ViewChildren',
+    'ContentChild',
+    'ContentChildren',
+];
+const QUERY_TYPES = new Set(queryDecoratorNames);
+/**
+ * Helper function to extract metadata from a `Directive` or `Component`. `Directive`s without a
+ * selector are allowed to be used for abstract base classes. These abstract directives should not
+ * appear in the declarations of an `NgModule` and additional verification is done when processing
+ * the module.
+ */
+function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone, implicitStandaloneValue) {
+    let directive;
+    if (decorator.args === null || decorator.args.length === 0) {
+        directive = new Map();
+    }
+    else if (decorator.args.length !== 1) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `Incorrect number of arguments to @${decorator.name} decorator`);
+    }
+    else {
+        const meta = unwrapExpression(decorator.args[0]);
+        if (!ts.isObjectLiteralExpression(meta)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, `@${decorator.name} argument must be an object literal`);
+        }
+        directive = reflectObjectLiteral(meta);
+    }
+    if (directive.has('jit')) {
+        // The only allowed value is true, so there's no need to expand further.
+        return { jitForced: true };
+    }
+    const members = reflector.getMembersOfClass(clazz);
+    // Precompute a list of ts.ClassElements that have decorators. This includes things like @Input,
+    // @Output, @HostBinding, etc.
+    const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
+    const coreModule = isCore ? undefined : '@angular/core';
+    // Construct the map of inputs both from the @Directive/@Component
+    // decorator, and the decorated fields.
+    const inputsFromMeta = parseInputsArray(clazz, directive, evaluator, reflector, refEmitter, compilationMode);
+    const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromMeta, decorator);
+    const inputs = ClassPropertyMapping.fromMappedObject({ ...inputsFromMeta, ...inputsFromFields });
+    // And outputs.
+    const outputsFromMeta = parseOutputsArray(directive, evaluator);
+    const outputsFromFields = parseOutputFields(clazz, decorator, members, isCore, reflector, importTracker, evaluator, outputsFromMeta);
+    const outputs = ClassPropertyMapping.fromMappedObject({ ...outputsFromMeta, ...outputsFromFields });
+    // Parse queries of fields.
+    const { viewQueries, contentQueries } = parseQueriesOfClassFields(members, reflector, importTracker, evaluator, isCore);
+    if (directive.has('queries')) {
+        const signalQueryFields = new Set([...viewQueries, ...contentQueries].filter((q) => q.isSignal).map((q) => q.propertyName));
+        const queriesFromDecorator = extractQueriesFromDecorator(directive.get('queries'), reflector, evaluator, isCore);
+        // Checks if the query is already declared/reserved via class members declaration.
+        // If so, we throw a fatal diagnostic error to prevent this unintentional pattern.
+        const checkAndUnwrapQuery = (q) => {
+            if (signalQueryFields.has(q.metadata.propertyName)) {
+                throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, q.expr, `Query is declared multiple times. "@${decorator.name}" declares a query for the same property.`);
+            }
+            return q.metadata;
+        };
+        contentQueries.push(...queriesFromDecorator.content.map((q) => checkAndUnwrapQuery(q)));
+        viewQueries.push(...queriesFromDecorator.view.map((q) => checkAndUnwrapQuery(q)));
+    }
+    // Parse the selector.
+    let selector = defaultSelector;
+    if (directive.has('selector')) {
+        const expr = directive.get('selector');
+        const resolved = evaluator.evaluate(expr);
+        assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, 'Unresolved identifier found for @Component.selector field! Did you ' +
+            'import this identifier from a file outside of the compilation unit? ' +
+            'This is not allowed when Angular compiler runs in local mode. Possible ' +
+            'solutions: 1) Move the declarations into a file within the compilation ' +
+            'unit, 2) Inline the selector');
+        if (typeof resolved !== 'string') {
+            throw createValueHasWrongTypeError(expr, resolved, `selector must be a string`);
+        }
+        // use default selector in case selector is an empty string
+        selector = resolved === '' ? defaultSelector : resolved;
+        if (!selector) {
+            throw new FatalDiagnosticError(exports.ErrorCode.DIRECTIVE_MISSING_SELECTOR, expr, `Directive ${clazz.name.text} has no selector, please add it!`);
+        }
+    }
+    const host = extractHostBindings(decoratedElements, evaluator, coreModule, compilationMode, directive);
+    const providers = directive.has('providers')
+        ? new WrappedNodeExpr(annotateForClosureCompiler
+            ? wrapFunctionExpressionsInParens(directive.get('providers'))
+            : directive.get('providers'))
+        : null;
+    // Determine if `ngOnChanges` is a lifecycle hook defined on the component.
+    const usesOnChanges = members.some((member) => !member.isStatic && member.kind === exports.ClassMemberKind.Method && member.name === 'ngOnChanges');
+    // Parse exportAs.
+    let exportAs = null;
+    if (directive.has('exportAs')) {
+        const expr = directive.get('exportAs');
+        const resolved = evaluator.evaluate(expr);
+        assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, 'Unresolved identifier found for exportAs field! Did you import this ' +
+            'identifier from a file outside of the compilation unit? This is not ' +
+            'allowed when Angular compiler runs in local mode. Possible solutions: ' +
+            '1) Move the declarations into a file within the compilation unit, ' +
+            '2) Inline the selector');
+        if (typeof resolved !== 'string') {
+            throw createValueHasWrongTypeError(expr, resolved, `exportAs must be a string`);
+        }
+        exportAs = resolved.split(',').map((part) => part.trim());
+    }
+    const rawCtorDeps = getConstructorDependencies(clazz, reflector, isCore);
+    // Non-abstract directives (those with a selector) require valid constructor dependencies, whereas
+    // abstract directives are allowed to have invalid dependencies, given that a subclass may call
+    // the constructor explicitly.
+    const ctorDeps = selector !== null
+        ? validateConstructorDependencies(clazz, rawCtorDeps)
+        : unwrapConstructorDependencies(rawCtorDeps);
+    // Structural directives must have a `TemplateRef` dependency.
+    const isStructural = ctorDeps !== null &&
+        ctorDeps !== 'invalid' &&
+        ctorDeps.some((dep) => dep.token instanceof ExternalExpr &&
+            dep.token.value.moduleName === '@angular/core' &&
+            dep.token.value.name === 'TemplateRef');
+    let isStandalone = implicitStandaloneValue;
+    if (directive.has('standalone')) {
+        const expr = directive.get('standalone');
+        const resolved = evaluator.evaluate(expr);
+        if (typeof resolved !== 'boolean') {
+            throw createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
+        }
+        isStandalone = resolved;
+        if (!isStandalone && strictStandalone) {
+            throw new FatalDiagnosticError(exports.ErrorCode.NON_STANDALONE_NOT_ALLOWED, expr, `Only standalone components/directives are allowed when 'strictStandalone' is enabled.`);
+        }
+    }
+    let isSignal = false;
+    if (directive.has('signals')) {
+        const expr = directive.get('signals');
+        const resolved = evaluator.evaluate(expr);
+        if (typeof resolved !== 'boolean') {
+            throw createValueHasWrongTypeError(expr, resolved, `signals flag must be a boolean`);
+        }
+        isSignal = resolved;
+    }
+    // Detect if the component inherits from another class
+    const usesInheritance = reflector.hasBaseClass(clazz);
+    const sourceFile = clazz.getSourceFile();
+    const type = wrapTypeReference(reflector, clazz);
+    const rawHostDirectives = directive.get('hostDirectives') || null;
+    const hostDirectives = rawHostDirectives === null
+        ? null
+        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, createForwardRefResolver(isCore));
+    if (compilationMode !== exports.CompilationMode.LOCAL && hostDirectives !== null) {
+        // In global compilation mode where we do type checking, the template type-checker will need to
+        // import host directive types, so add them as referenced by `clazz`. This will ensure that
+        // libraries are required to export host directives which are visible from publicly exported
+        // components.
+        referencesRegistry.add(clazz, ...hostDirectives.map((hostDir) => {
+            if (!isHostDirectiveMetaForGlobalMode(hostDir)) {
+                throw new Error('Impossible state');
+            }
+            return hostDir.directive;
+        }));
+    }
+    const metadata = {
+        name: clazz.name.text,
+        deps: ctorDeps,
+        host: {
+            ...host,
+        },
+        lifecycle: {
+            usesOnChanges,
+        },
+        inputs: inputs.toJointMappedObject(toR3InputMetadata),
+        outputs: outputs.toDirectMappedObject(),
+        queries: contentQueries,
+        viewQueries,
+        selector,
+        fullInheritance: false,
+        type,
+        typeArgumentCount: reflector.getGenericArityOfClass(clazz) || 0,
+        typeSourceSpan: createSourceSpan(clazz.name),
+        usesInheritance,
+        exportAs,
+        providers,
+        isStandalone,
+        isSignal,
+        hostDirectives: hostDirectives?.map((hostDir) => toHostDirectiveMetadata(hostDir, sourceFile, refEmitter)) ||
+            null,
+    };
+    return {
+        jitForced: false,
+        decorator: directive,
+        metadata,
+        inputs,
+        outputs,
+        isStructural,
+        hostDirectives,
+        rawHostDirectives,
+        // Track inputs from class metadata. This is useful for migration efforts.
+        inputFieldNamesFromMetadataArray: new Set(Object.values(inputsFromMeta).map((i) => i.classPropertyName)),
+    };
+}
+function extractDecoratorQueryMetadata(exprNode, name, args, propertyName, reflector, evaluator) {
+    if (args.length === 0) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, exprNode, `@${name} must have arguments`);
+    }
+    const first = name === 'ViewChild' || name === 'ContentChild';
+    const forwardReferenceTarget = tryUnwrapForwardRef(args[0], reflector);
+    const node = forwardReferenceTarget ?? args[0];
+    const arg = evaluator.evaluate(node);
+    /** Whether or not this query should collect only static results (see view/api.ts)  */
+    let isStatic = false;
+    // Extract the predicate
+    let predicate = null;
+    if (arg instanceof Reference || arg instanceof DynamicValue) {
+        // References and predicates that could not be evaluated statically are emitted as is.
+        predicate = createMayBeForwardRefExpression(new WrappedNodeExpr(node), forwardReferenceTarget !== null ? 2 /* ForwardRefHandling.Unwrapped */ : 0 /* ForwardRefHandling.None */);
+    }
+    else if (typeof arg === 'string') {
+        predicate = [arg];
+    }
+    else if (isStringArrayOrDie(arg, `@${name} predicate`, node)) {
+        predicate = arg;
+    }
+    else {
+        throw createValueHasWrongTypeError(node, arg, `@${name} predicate cannot be interpreted`);
+    }
+    // Extract the read and descendants options.
+    let read = null;
+    // The default value for descendants is true for every decorator except @ContentChildren.
+    let descendants = name !== 'ContentChildren';
+    let emitDistinctChangesOnly = emitDistinctChangesOnlyDefaultValue;
+    if (args.length === 2) {
+        const optionsExpr = unwrapExpression(args[1]);
+        if (!ts.isObjectLiteralExpression(optionsExpr)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARG_NOT_LITERAL, optionsExpr, `@${name} options must be an object literal`);
+        }
+        const options = reflectObjectLiteral(optionsExpr);
+        if (options.has('read')) {
+            read = new WrappedNodeExpr(options.get('read'));
+        }
+        if (options.has('descendants')) {
+            const descendantsExpr = options.get('descendants');
+            const descendantsValue = evaluator.evaluate(descendantsExpr);
+            if (typeof descendantsValue !== 'boolean') {
+                throw createValueHasWrongTypeError(descendantsExpr, descendantsValue, `@${name} options.descendants must be a boolean`);
+            }
+            descendants = descendantsValue;
+        }
+        if (options.has('emitDistinctChangesOnly')) {
+            const emitDistinctChangesOnlyExpr = options.get('emitDistinctChangesOnly');
+            const emitDistinctChangesOnlyValue = evaluator.evaluate(emitDistinctChangesOnlyExpr);
+            if (typeof emitDistinctChangesOnlyValue !== 'boolean') {
+                throw createValueHasWrongTypeError(emitDistinctChangesOnlyExpr, emitDistinctChangesOnlyValue, `@${name} options.emitDistinctChangesOnly must be a boolean`);
+            }
+            emitDistinctChangesOnly = emitDistinctChangesOnlyValue;
+        }
+        if (options.has('static')) {
+            const staticValue = evaluator.evaluate(options.get('static'));
+            if (typeof staticValue !== 'boolean') {
+                throw createValueHasWrongTypeError(node, staticValue, `@${name} options.static must be a boolean`);
+            }
+            isStatic = staticValue;
+        }
+    }
+    else if (args.length > 2) {
+        // Too many arguments.
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, node, `@${name} has too many arguments`);
+    }
+    return {
+        isSignal: false,
+        propertyName,
+        predicate,
+        first,
+        descendants,
+        read,
+        static: isStatic,
+        emitDistinctChangesOnly,
+    };
+}
+function extractHostBindings(members, evaluator, coreModule, compilationMode, metadata) {
+    let bindings;
+    if (metadata && metadata.has('host')) {
+        bindings = evaluateHostExpressionBindings(metadata.get('host'), evaluator);
+    }
+    else {
+        bindings = parseHostBindings({});
+    }
+    filterToMembersWithDecorator(members, 'HostBinding', coreModule).forEach(({ member, decorators }) => {
+        decorators.forEach((decorator) => {
+            let hostPropertyName = member.name;
+            if (decorator.args !== null && decorator.args.length > 0) {
+                if (decorator.args.length !== 1) {
+                    throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@HostBinding can have at most one argument, got ${decorator.args.length} argument(s)`);
+                }
+                const resolved = evaluator.evaluate(decorator.args[0]);
+                // Specific error for local compilation mode if the argument cannot be resolved
+                assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, "Unresolved identifier found for @HostBinding's argument! Did " +
+                    'you import this identifier from a file outside of the compilation ' +
+                    'unit? This is not allowed when Angular compiler runs in local mode. ' +
+                    'Possible solutions: 1) Move the declaration into a file within ' +
+                    'the compilation unit, 2) Inline the argument');
+                if (typeof resolved !== 'string') {
+                    throw createValueHasWrongTypeError(decorator.node, resolved, `@HostBinding's argument must be a string`);
+                }
+                hostPropertyName = resolved;
+            }
+            // Since this is a decorator, we know that the value is a class member. Always access it
+            // through `this` so that further down the line it can't be confused for a literal value
+            // (e.g. if there's a property called `true`). There is no size penalty, because all
+            // values (except literals) are converted to `ctx.propName` eventually.
+            bindings.properties[hostPropertyName] = getSafePropertyAccessString('this', member.name);
+        });
+    });
+    filterToMembersWithDecorator(members, 'HostListener', coreModule).forEach(({ member, decorators }) => {
+        decorators.forEach((decorator) => {
+            let eventName = member.name;
+            let args = [];
+            if (decorator.args !== null && decorator.args.length > 0) {
+                if (decorator.args.length > 2) {
+                    throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, decorator.args[2], `@HostListener can have at most two arguments`);
+                }
+                const resolved = evaluator.evaluate(decorator.args[0]);
+                // Specific error for local compilation mode if the event name cannot be resolved
+                assertLocalCompilationUnresolvedConst(compilationMode, resolved, null, "Unresolved identifier found for @HostListener's event name " +
+                    'argument! Did you import this identifier from a file outside of ' +
+                    'the compilation unit? This is not allowed when Angular compiler ' +
+                    'runs in local mode. Possible solutions: 1) Move the declaration ' +
+                    'into a file within the compilation unit, 2) Inline the argument');
+                if (typeof resolved !== 'string') {
+                    throw createValueHasWrongTypeError(decorator.args[0], resolved, `@HostListener's event name argument must be a string`);
+                }
+                eventName = resolved;
+                if (decorator.args.length === 2) {
+                    const expression = decorator.args[1];
+                    const resolvedArgs = evaluator.evaluate(decorator.args[1]);
+                    if (!isStringArrayOrDie(resolvedArgs, '@HostListener.args', expression)) {
+                        throw createValueHasWrongTypeError(decorator.args[1], resolvedArgs, `@HostListener's second argument must be a string array`);
+                    }
+                    args = resolvedArgs;
+                }
+            }
+            bindings.listeners[eventName] = `${member.name}(${args.join(',')})`;
+        });
+    });
+    return bindings;
+}
+function extractQueriesFromDecorator(queryData, reflector, evaluator, isCore) {
+    const content = [];
+    const view = [];
+    if (!ts.isObjectLiteralExpression(queryData)) {
+        throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator queries metadata must be an object literal');
+    }
+    reflectObjectLiteral(queryData).forEach((queryExpr, propertyName) => {
+        queryExpr = unwrapExpression(queryExpr);
+        if (!ts.isNewExpression(queryExpr)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
+        }
+        const queryType = ts.isPropertyAccessExpression(queryExpr.expression)
+            ? queryExpr.expression.name
+            : queryExpr.expression;
+        if (!ts.isIdentifier(queryType)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
+        }
+        const type = reflector.getImportOfIdentifier(queryType);
+        if (type === null ||
+            (!isCore && type.from !== '@angular/core') ||
+            !QUERY_TYPES.has(type.name)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, 'Decorator query metadata must be an instance of a query type');
+        }
+        const query = extractDecoratorQueryMetadata(queryExpr, type.name, queryExpr.arguments || [], propertyName, reflector, evaluator);
+        if (type.name.startsWith('Content')) {
+            content.push({ expr: queryExpr, metadata: query });
+        }
+        else {
+            view.push({ expr: queryExpr, metadata: query });
+        }
+    });
+    return { content, view };
+}
+function parseDirectiveStyles(directive, evaluator, compilationMode) {
+    const expression = directive.get('styles');
+    if (!expression) {
+        return null;
+    }
+    const evaluated = evaluator.evaluate(expression);
+    const value = typeof evaluated === 'string' ? [evaluated] : evaluated;
+    // Check if the identifier used for @Component.styles cannot be resolved in local compilation
+    // mode. if the case, an error specific to this situation is generated.
+    if (compilationMode === exports.CompilationMode.LOCAL) {
+        let unresolvedNode = null;
+        if (Array.isArray(value)) {
+            const entry = value.find((e) => e instanceof DynamicValue && e.isFromUnknownIdentifier());
+            unresolvedNode = entry?.node ?? null;
+        }
+        else if (value instanceof DynamicValue && value.isFromUnknownIdentifier()) {
+            unresolvedNode = value.node;
+        }
+        if (unresolvedNode !== null) {
+            throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNRESOLVED_CONST, unresolvedNode, 'Unresolved identifier found for @Component.styles field! Did you import ' +
+                'this identifier from a file outside of the compilation unit? This is ' +
+                'not allowed when Angular compiler runs in local mode. Possible ' +
+                'solutions: 1) Move the declarations into a file within the compilation ' +
+                'unit, 2) Inline the styles, 3) Move the styles into separate files and ' +
+                'include it using @Component.styleUrls');
+        }
+    }
+    if (!isStringArrayOrDie(value, 'styles', expression)) {
+        throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Component.styles to a string or an array of strings`);
+    }
+    return value;
+}
+function parseFieldStringArrayValue(directive, field, evaluator) {
+    if (!directive.has(field)) {
+        return null;
+    }
+    // Resolve the field of interest from the directive metadata to a string[].
+    const expression = directive.get(field);
+    const value = evaluator.evaluate(expression);
+    if (!isStringArrayOrDie(value, field, expression)) {
+        throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Directive.${field} to a string array`);
+    }
+    return value;
+}
+function isStringArrayOrDie(value, name, node) {
+    if (!Array.isArray(value)) {
+        return false;
+    }
+    for (let i = 0; i < value.length; i++) {
+        if (typeof value[i] !== 'string') {
+            throw createValueHasWrongTypeError(node, value[i], `Failed to resolve ${name} at position ${i} to a string`);
+        }
+    }
+    return true;
+}
+function tryGetQueryFromFieldDecorator(member, reflector, evaluator, isCore) {
+    const decorators = member.decorators;
+    if (decorators === null) {
+        return null;
+    }
+    const queryDecorators = getAngularDecorators(decorators, queryDecoratorNames, isCore);
+    if (queryDecorators.length === 0) {
+        return null;
+    }
+    if (queryDecorators.length !== 1) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_COLLISION, member.node ?? queryDecorators[0].node, 'Cannot combine multiple query decorators.');
+    }
+    const decorator = queryDecorators[0];
+    const node = member.node || decorator.node;
+    // Throw in case of `@Input() @ContentChild('foo') foo: any`, which is not supported in Ivy
+    if (decorators.some((v) => v.name === 'Input')) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_COLLISION, node, 'Cannot combine @Input decorators with query decorators');
+    }
+    if (!isPropertyTypeMember(member)) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_UNEXPECTED, node, 'Query decorator must go on a property-type member');
+    }
+    // Either the decorator was aliased, or is referenced directly with
+    // the proper query name.
+    const name = (decorator.import?.name ?? decorator.name);
+    return {
+        name,
+        decorator,
+        metadata: extractDecoratorQueryMetadata(node, name, decorator.args || [], member.name, reflector, evaluator),
+    };
+}
+function isPropertyTypeMember(member) {
+    return (member.kind === exports.ClassMemberKind.Getter ||
+        member.kind === exports.ClassMemberKind.Setter ||
+        member.kind === exports.ClassMemberKind.Property);
+}
+function parseMappingStringArray(values) {
+    return values.reduce((results, value) => {
+        if (typeof value !== 'string') {
+            throw new Error('Mapping value must be a string');
+        }
+        const [bindingPropertyName, fieldName] = parseMappingString(value);
+        results[fieldName] = bindingPropertyName;
+        return results;
+    }, {});
+}
+function parseMappingString(value) {
+    // Either the value is 'field' or 'field: property'. In the first case, `property` will
+    // be undefined, in which case the field name should also be used as the property name.
+    const [fieldName, bindingPropertyName] = value.split(':', 2).map((str) => str.trim());
+    return [bindingPropertyName ?? fieldName, fieldName];
+}
+/** Parses the `inputs` array of a directive/component decorator. */
+function parseInputsArray(clazz, decoratorMetadata, evaluator, reflector, refEmitter, compilationMode) {
+    const inputsField = decoratorMetadata.get('inputs');
+    if (inputsField === undefined) {
+        return {};
+    }
+    const inputs = {};
+    const inputsArray = evaluator.evaluate(inputsField);
+    if (!Array.isArray(inputsArray)) {
+        throw createValueHasWrongTypeError(inputsField, inputsArray, `Failed to resolve @Directive.inputs to an array`);
+    }
+    for (let i = 0; i < inputsArray.length; i++) {
+        const value = inputsArray[i];
+        if (typeof value === 'string') {
+            // If the value is a string, we treat it as a mapping string.
+            const [bindingPropertyName, classPropertyName] = parseMappingString(value);
+            inputs[classPropertyName] = {
+                bindingPropertyName,
+                classPropertyName,
+                required: false,
+                transform: null,
+                // Note: Signal inputs are not allowed with the array form.
+                isSignal: false,
+            };
+        }
+        else if (value instanceof Map) {
+            // If it's a map, we treat it as a config object.
+            const name = value.get('name');
+            const alias = value.get('alias');
+            const required = value.get('required');
+            let transform = null;
+            if (typeof name !== 'string') {
+                throw createValueHasWrongTypeError(inputsField, name, `Value at position ${i} of @Directive.inputs array must have a "name" property`);
+            }
+            if (value.has('transform')) {
+                const transformValue = value.get('transform');
+                if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference)) {
+                    throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
+                }
+                transform = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter, compilationMode);
+            }
+            inputs[name] = {
+                classPropertyName: name,
+                bindingPropertyName: typeof alias === 'string' ? alias : name,
+                required: required === true,
+                // Note: Signal inputs are not allowed with the array form.
+                isSignal: false,
+                transform,
+            };
+        }
+        else {
+            throw createValueHasWrongTypeError(inputsField, value, `@Directive.inputs array can only contain strings or object literals`);
+        }
+    }
+    return inputs;
+}
+/** Attempts to find a given Angular decorator on the class member. */
+function tryGetDecoratorOnMember(member, decoratorName, isCore) {
+    if (member.decorators === null) {
+        return null;
+    }
+    for (const decorator of member.decorators) {
+        if (isAngularDecorator(decorator, decoratorName, isCore)) {
+            return decorator;
+        }
+    }
+    return null;
+}
+function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode) {
+    const classPropertyName = member.name;
+    const decorator = tryGetDecoratorOnMember(member, 'Input', isCore);
+    const signalInputMapping = tryParseSignalInputMapping(member, reflector, importTracker);
+    const modelInputMapping = tryParseSignalModelMapping(member, reflector, importTracker);
+    if (decorator !== null && signalInputMapping !== null) {
+        throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decorator.node, `Using @Input with a signal input is not allowed.`);
+    }
+    if (decorator !== null && modelInputMapping !== null) {
+        throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decorator.node, `Using @Input with a model input is not allowed.`);
+    }
+    // Check `@Input` case.
+    if (decorator !== null) {
+        if (decorator.args !== null && decorator.args.length > 1) {
+            throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@${decorator.name} can have at most one argument, got ${decorator.args.length} argument(s)`);
+        }
+        const optionsNode = decorator.args !== null && decorator.args.length === 1 ? decorator.args[0] : undefined;
+        const options = optionsNode !== undefined ? evaluator.evaluate(optionsNode) : null;
+        const required = options instanceof Map ? options.get('required') === true : false;
+        // To preserve old behavior: Even though TypeScript types ensure proper options are
+        // passed, we sanity check for unsupported values here again.
+        if (options !== null && typeof options !== 'string' && !(options instanceof Map)) {
+            throw createValueHasWrongTypeError(decorator.node, options, `@${decorator.name} decorator argument must resolve to a string or an object literal`);
+        }
+        let alias = null;
+        if (typeof options === 'string') {
+            alias = options;
+        }
+        else if (options instanceof Map && typeof options.get('alias') === 'string') {
+            alias = options.get('alias');
+        }
+        const publicInputName = alias ?? classPropertyName;
+        let transform = null;
+        if (options instanceof Map && options.has('transform')) {
+            const transformValue = options.get('transform');
+            if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference)) {
+                throw createValueHasWrongTypeError(optionsNode, transformValue, `Input transform must be a function`);
+            }
+            transform = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter, compilationMode);
+        }
+        return {
+            isSignal: false,
+            classPropertyName,
+            bindingPropertyName: publicInputName,
+            transform,
+            required,
+        };
+    }
+    // Look for signal inputs. e.g. `memberName = input()`
+    if (signalInputMapping !== null) {
+        return signalInputMapping;
+    }
+    if (modelInputMapping !== null) {
+        return modelInputMapping.input;
+    }
+    return null;
+}
+/** Parses the class members that declare inputs (via decorator or initializer). */
+function parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromClassDecorator, classDecorator) {
+    const inputs = {};
+    for (const member of members) {
+        const classPropertyName = member.name;
+        const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode);
+        if (inputMapping === null) {
+            continue;
+        }
+        if (member.isStatic) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, member.node ?? clazz, `Input "${member.name}" is incorrectly declared as static member of "${clazz.name.text}".`);
+        }
+        // Validate that signal inputs are not accidentally declared in the `inputs` metadata.
+        if (inputMapping.isSignal && inputsFromClassDecorator.hasOwnProperty(classPropertyName)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, member.node ?? clazz, `Input "${member.name}" is also declared as non-signal in @${classDecorator.name}.`);
+        }
+        inputs[classPropertyName] = inputMapping;
+    }
+    return inputs;
+}
+/**
+ * Parses the `transform` function and its type for a decorator `@Input`.
+ *
+ * This logic verifies feasibility of extracting the transform write type
+ * into a different place, so that the input write type can be captured at
+ * a later point in a static acceptance member.
+ *
+ * Note: This is not needed for signal inputs where the transform type is
+ * automatically captured in the type of the `InputSignal`.
+ *
+ */
+function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter, compilationMode) {
+    // In local compilation mode we can skip type checking the function args. This is because usually
+    // the type check is done in a separate build which runs in full compilation mode. So here we skip
+    // all the diagnostics.
+    if (compilationMode === exports.CompilationMode.LOCAL) {
+        const node = value instanceof Reference ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
+        // This should never be null since we know the reference originates
+        // from the same file, but we null check it just in case.
+        if (node === null) {
+            throw createValueHasWrongTypeError(value.node, value, 'Input transform function could not be referenced');
+        }
+        return {
+            node,
+            type: new Reference(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)),
+        };
+    }
+    const definition = reflector.getDefinitionOfFunction(value.node);
+    if (definition === null) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform must be a function');
+    }
+    if (definition.typeParameters !== null && definition.typeParameters.length > 0) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform function cannot be generic');
+    }
+    if (definition.signatureCount > 1) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform function cannot have multiple signatures');
+    }
+    const members = reflector.getMembersOfClass(clazz);
+    for (const member of members) {
+        const conflictingName = `ngAcceptInputType_${classPropertyName}`;
+        if (member.name === conflictingName && member.isStatic) {
+            throw new FatalDiagnosticError(exports.ErrorCode.CONFLICTING_INPUT_TRANSFORM, value.node, `Class cannot have both a transform function on Input ${classPropertyName} and a static member called ${conflictingName}`);
+        }
+    }
+    const node = value instanceof Reference ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
+    // This should never be null since we know the reference originates
+    // from the same file, but we null check it just in case.
+    if (node === null) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform function could not be referenced');
+    }
+    // Skip over `this` parameters since they're typing the context, not the actual parameter.
+    // `this` parameters are guaranteed to be first if they exist, and the only to distinguish them
+    // is using the name, TS doesn't have a special AST for them.
+    const firstParam = definition.parameters[0]?.name === 'this' ? definition.parameters[1] : definition.parameters[0];
+    // Treat functions with no arguments as `unknown` since returning
+    // the same value from the transform function is valid.
+    if (!firstParam) {
+        return {
+            node,
+            type: new Reference(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)),
+        };
+    }
+    // This should be caught by `noImplicitAny` already, but null check it just in case.
+    if (!firstParam.type) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform function first parameter must have a type');
+    }
+    if (firstParam.node.dotDotDotToken) {
+        throw createValueHasWrongTypeError(value.node, value, 'Input transform function first parameter cannot be a spread parameter');
+    }
+    assertEmittableInputType(firstParam.type, clazz.getSourceFile(), reflector, refEmitter);
+    const viaModule = value instanceof Reference ? value.bestGuessOwningModule : null;
+    return { node, type: new Reference(firstParam.type, viaModule) };
+}
+/**
+ * Verifies that a type and all types contained within
+ * it can be referenced in a specific context file.
+ */
+function assertEmittableInputType(type, contextFile, reflector, refEmitter) {
+    (function walk(node) {
+        if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) {
+            const declaration = reflector.getDeclarationOfIdentifier(node.typeName);
+            if (declaration !== null) {
+                // If the type is declared in a different file, we have to check that it can be imported
+                // into the context file. If they're in the same file, we need to verify that they're
+                // exported, otherwise TS won't emit it to the .d.ts.
+                if (declaration.node.getSourceFile() !== contextFile) {
+                    const emittedType = refEmitter.emit(new Reference(declaration.node, declaration.viaModule === AmbientImport ? AmbientImport : null), contextFile, exports.ImportFlags.NoAliasing |
+                        exports.ImportFlags.AllowTypeImports |
+                        exports.ImportFlags.AllowRelativeDtsImports |
+                        exports.ImportFlags.AllowAmbientReferences);
+                    assertSuccessfulReferenceEmit(emittedType, node, 'type');
+                }
+                else if (!reflector.isStaticallyExported(declaration.node)) {
+                    throw new FatalDiagnosticError(exports.ErrorCode.SYMBOL_NOT_EXPORTED, type, `Symbol must be exported in order to be used as the type of an Input transform function`, [makeRelatedInformation(declaration.node, `The symbol is declared here.`)]);
+                }
+            }
+        }
+        node.forEachChild(walk);
+    })(type);
+}
+/**
+ * Iterates through all specified class members and attempts to detect
+ * view and content queries defined.
+ *
+ * Queries may be either defined via decorators, or through class member
+ * initializers for signal-based queries.
+ */
+function parseQueriesOfClassFields(members, reflector, importTracker, evaluator, isCore) {
+    const viewQueries = [];
+    const contentQueries = [];
+    // For backwards compatibility, decorator-based queries are grouped and
+    // ordered in a specific way. The order needs to match with what we had in:
+    // https://github.com/angular/angular/blob/8737544d6963bf664f752de273e919575cca08ac/packages/compiler-cli/src/ngtsc/annotations/directive/src/shared.ts#L94-L111.
+    const decoratorViewChild = [];
+    const decoratorViewChildren = [];
+    const decoratorContentChild = [];
+    const decoratorContentChildren = [];
+    for (const member of members) {
+        const decoratorQuery = tryGetQueryFromFieldDecorator(member, reflector, evaluator, isCore);
+        const signalQuery = tryParseSignalQueryFromInitializer(member, reflector, importTracker);
+        if (decoratorQuery !== null && signalQuery !== null) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorQuery.decorator.node, `Using @${decoratorQuery.name} with a signal-based query is not allowed.`);
+        }
+        const queryNode = decoratorQuery?.decorator.node ?? signalQuery?.call;
+        if (queryNode !== undefined && member.isStatic) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, queryNode, `Query is incorrectly declared on a static class member.`);
+        }
+        if (decoratorQuery !== null) {
+            switch (decoratorQuery.name) {
+                case 'ViewChild':
+                    decoratorViewChild.push(decoratorQuery.metadata);
+                    break;
+                case 'ViewChildren':
+                    decoratorViewChildren.push(decoratorQuery.metadata);
+                    break;
+                case 'ContentChild':
+                    decoratorContentChild.push(decoratorQuery.metadata);
+                    break;
+                case 'ContentChildren':
+                    decoratorContentChildren.push(decoratorQuery.metadata);
+                    break;
+            }
+        }
+        else if (signalQuery !== null) {
+            switch (signalQuery.name) {
+                case 'viewChild':
+                case 'viewChildren':
+                    viewQueries.push(signalQuery.metadata);
+                    break;
+                case 'contentChild':
+                case 'contentChildren':
+                    contentQueries.push(signalQuery.metadata);
+                    break;
+            }
+        }
+    }
+    return {
+        viewQueries: [...viewQueries, ...decoratorViewChild, ...decoratorViewChildren],
+        contentQueries: [...contentQueries, ...decoratorContentChild, ...decoratorContentChildren],
+    };
+}
+/** Parses the `outputs` array of a directive/component. */
+function parseOutputsArray(directive, evaluator) {
+    const metaValues = parseFieldStringArrayValue(directive, 'outputs', evaluator);
+    return metaValues ? parseMappingStringArray(metaValues) : EMPTY_OBJECT;
+}
+/** Parses the class members that are outputs. */
+function parseOutputFields(clazz, classDecorator, members, isCore, reflector, importTracker, evaluator, outputsFromMeta) {
+    const outputs = {};
+    for (const member of members) {
+        const decoratorOutput = tryParseDecoratorOutput(member, evaluator, isCore);
+        const initializerOutput = tryParseInitializerBasedOutput(member, reflector, importTracker);
+        const modelMapping = tryParseSignalModelMapping(member, reflector, importTracker);
+        if (decoratorOutput !== null && initializerOutput !== null) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorOutput.decorator.node, `Using "@Output" with "output()" is not allowed.`);
+        }
+        if (decoratorOutput !== null && modelMapping !== null) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_WITH_DISALLOWED_DECORATOR, decoratorOutput.decorator.node, `Using @Output with a model input is not allowed.`);
+        }
+        const queryNode = decoratorOutput?.decorator.node ?? initializerOutput?.call ?? modelMapping?.call;
+        if (queryNode !== undefined && member.isStatic) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INCORRECTLY_DECLARED_ON_STATIC_MEMBER, queryNode, `Output is incorrectly declared on a static class member.`);
+        }
+        let bindingPropertyName;
+        if (decoratorOutput !== null) {
+            bindingPropertyName = decoratorOutput.metadata.bindingPropertyName;
+        }
+        else if (initializerOutput !== null) {
+            bindingPropertyName = initializerOutput.metadata.bindingPropertyName;
+        }
+        else if (modelMapping !== null) {
+            bindingPropertyName = modelMapping.output.bindingPropertyName;
+        }
+        else {
+            continue;
+        }
+        // Validate that initializer-based outputs are not accidentally declared
+        // in the `outputs` class metadata.
+        if ((initializerOutput !== null || modelMapping !== null) &&
+            outputsFromMeta.hasOwnProperty(member.name)) {
+            throw new FatalDiagnosticError(exports.ErrorCode.INITIALIZER_API_DECORATOR_METADATA_COLLISION, member.node ?? clazz, `Output "${member.name}" is unexpectedly declared in @${classDecorator.name} as well.`);
+        }
+        outputs[member.name] = bindingPropertyName;
+    }
+    return outputs;
+}
+/** Attempts to parse a decorator-based @Output. */
+function tryParseDecoratorOutput(member, evaluator, isCore) {
+    const decorator = tryGetDecoratorOnMember(member, 'Output', isCore);
+    if (decorator === null) {
+        return null;
+    }
+    if (decorator.args !== null && decorator.args.length > 1) {
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `@Output can have at most one argument, got ${decorator.args.length} argument(s)`);
+    }
+    const classPropertyName = member.name;
+    let alias = null;
+    if (decorator.args?.length === 1) {
+        const resolvedAlias = evaluator.evaluate(decorator.args[0]);
+        if (typeof resolvedAlias !== 'string') {
+            throw createValueHasWrongTypeError(decorator.node, resolvedAlias, `@Output decorator argument must resolve to a string`);
+        }
+        alias = resolvedAlias;
+    }
+    return {
+        decorator,
+        metadata: {
+            isSignal: false,
+            classPropertyName,
+            bindingPropertyName: alias ?? classPropertyName,
+        },
+    };
+}
+function evaluateHostExpressionBindings(hostExpr, evaluator) {
+    const hostMetaMap = evaluator.evaluate(hostExpr);
+    if (!(hostMetaMap instanceof Map)) {
+        throw createValueHasWrongTypeError(hostExpr, hostMetaMap, `Decorator host metadata must be an object`);
+    }
+    const hostMetadata = {};
+    hostMetaMap.forEach((value, key) => {
+        // Resolve Enum references to their declared value.
+        if (value instanceof EnumValue) {
+            value = value.resolved;
+        }
+        if (typeof key !== 'string') {
+            throw createValueHasWrongTypeError(hostExpr, key, `Decorator host metadata must be a string -> string object, but found unparseable key`);
+        }
+        if (typeof value == 'string') {
+            hostMetadata[key] = value;
+        }
+        else if (value instanceof DynamicValue) {
+            hostMetadata[key] = new WrappedNodeExpr(value.node);
+        }
+        else {
+            throw createValueHasWrongTypeError(hostExpr, value, `Decorator host metadata must be a string -> string object, but found unparseable value`);
+        }
+    });
+    const bindings = parseHostBindings(hostMetadata);
+    const errors = verifyHostBindings(bindings, createSourceSpan(hostExpr));
+    if (errors.length > 0) {
+        throw new FatalDiagnosticError(exports.ErrorCode.HOST_BINDING_PARSE_ERROR, getHostBindingErrorNode(errors[0], hostExpr), errors.map((error) => error.msg).join('\n'));
+    }
+    return bindings;
+}
+/**
+ * Attempts to match a parser error to the host binding expression that caused it.
+ * @param error Error to match.
+ * @param hostExpr Expression declaring the host bindings.
+ */
+function getHostBindingErrorNode(error, hostExpr) {
+    // In the most common case the `host` object is an object literal with string values. We can
+    // confidently match the error to its expression by looking at the string value that the parser
+    // failed to parse and the initializers for each of the properties. If we fail to match, we fall
+    // back to the old behavior where the error is reported on the entire `host` object.
+    if (ts.isObjectLiteralExpression(hostExpr) && error.relatedError instanceof ParserError) {
+        for (const prop of hostExpr.properties) {
+            if (ts.isPropertyAssignment(prop) &&
+                ts.isStringLiteralLike(prop.initializer) &&
+                prop.initializer.text === error.relatedError.input) {
+                return prop.initializer;
+            }
+        }
+    }
+    return hostExpr;
+}
+/**
+ * Extracts and prepares the host directives metadata from an array literal expression.
+ * @param rawHostDirectives Expression that defined the `hostDirectives`.
+ */
+function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver) {
+    const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
+    if (!Array.isArray(resolved)) {
+        throw createValueHasWrongTypeError(rawHostDirectives, resolved, 'hostDirectives must be an array');
+    }
+    return resolved.map((value) => {
+        const hostReference = value instanceof Map ? value.get('directive') : value;
+        // Diagnostics
+        if (compilationMode !== exports.CompilationMode.LOCAL) {
+            if (!(hostReference instanceof Reference)) {
+                throw createValueHasWrongTypeError(rawHostDirectives, hostReference, 'Host directive must be a reference');
+            }
+            if (!isNamedClassDeclaration(hostReference.node)) {
+                throw createValueHasWrongTypeError(rawHostDirectives, hostReference, 'Host directive reference must be a class');
+            }
+        }
+        let directive;
+        let nameForErrors = (fieldName) => '@Directive.hostDirectives';
+        if (compilationMode === exports.CompilationMode.LOCAL && hostReference instanceof DynamicValue) {
+            // At the moment in local compilation we only support simple array for host directives, i.e.,
+            // an array consisting of the directive identifiers. We don't support forward refs or other
+            // expressions applied on externally imported directives. The main reason is simplicity, and
+            // that almost nobody wants to use host directives this way (e.g., what would be the point of
+            // forward ref for imported symbols?!)
+            if (!ts.isIdentifier(hostReference.node) &&
+                !ts.isPropertyAccessExpression(hostReference.node)) {
+                throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
+            }
+            directive = new WrappedNodeExpr(hostReference.node);
+        }
+        else if (hostReference instanceof Reference) {
+            directive = hostReference;
+            nameForErrors = (fieldName) => `@Directive.hostDirectives.${directive.node.name.text}.${fieldName}`;
+        }
+        else {
+            throw new Error('Impossible state');
+        }
+        const meta = {
+            directive,
+            isForwardReference: hostReference instanceof Reference && hostReference.synthetic,
+            inputs: parseHostDirectivesMapping('inputs', value, nameForErrors('input'), rawHostDirectives),
+            outputs: parseHostDirectivesMapping('outputs', value, nameForErrors('output'), rawHostDirectives),
+        };
+        return meta;
+    });
+}
+/**
+ * Parses the expression that defines the `inputs` or `outputs` of a host directive.
+ * @param field Name of the field that is being parsed.
+ * @param resolvedValue Evaluated value of the expression that defined the field.
+ * @param classReference Reference to the host directive class.
+ * @param sourceExpression Expression that the host directive is referenced in.
+ */
+function parseHostDirectivesMapping(field, resolvedValue, nameForErrors, sourceExpression) {
+    if (resolvedValue instanceof Map && resolvedValue.has(field)) {
+        const rawInputs = resolvedValue.get(field);
+        if (isStringArrayOrDie(rawInputs, nameForErrors, sourceExpression)) {
+            return parseMappingStringArray(rawInputs);
+        }
+    }
+    return null;
+}
+/** Converts the parsed host directive information into metadata. */
+function toHostDirectiveMetadata(hostDirective, context, refEmitter) {
+    let directive;
+    if (hostDirective.directive instanceof Reference) {
+        directive = toR3Reference(hostDirective.directive.node, hostDirective.directive, context, refEmitter);
+    }
+    else {
+        directive = {
+            value: hostDirective.directive,
+            type: hostDirective.directive,
+        };
+    }
+    return {
+        directive,
+        isForwardReference: hostDirective.isForwardReference,
+        inputs: hostDirective.inputs || null,
+        outputs: hostDirective.outputs || null,
+    };
+}
+/** Converts the parsed input information into metadata. */
+function toR3InputMetadata(mapping) {
+    return {
+        classPropertyName: mapping.classPropertyName,
+        bindingPropertyName: mapping.bindingPropertyName,
+        required: mapping.required,
+        transformFunction: mapping.transform !== null ? new WrappedNodeExpr(mapping.transform.node) : null,
+        isSignal: mapping.isSignal,
+    };
 }
 
 const NgOriginalFile = Symbol('NgOriginalFile');
@@ -38432,7 +40329,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
             relatedInformation = [];
             for (const relatedMessage of relatedMessages) {
                 relatedInformation.push({
-                    category: ts__default["default"].DiagnosticCategory.Message,
+                    category: ts.DiagnosticCategory.Message,
                     code: 0,
                     file: relatedMessage.sourceFile,
                     start: relatedMessage.start,
@@ -38471,7 +40368,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
         if (relatedMessages !== undefined) {
             for (const relatedMessage of relatedMessages) {
                 relatedInformation.push({
-                    category: ts__default["default"].DiagnosticCategory.Message,
+                    category: ts.DiagnosticCategory.Message,
                     code: 0,
                     file: relatedMessage.sourceFile,
                     start: relatedMessage.start,
@@ -38502,7 +40399,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
             };
         }
         relatedInformation.push({
-            category: ts__default["default"].DiagnosticCategory.Message,
+            category: ts.DiagnosticCategory.Message,
             code: 0,
             file: componentSf,
             // mapping.node represents either the 'template' or 'templateUrl' expression. getStart()
@@ -38539,8 +40436,8 @@ function getParsedTemplateSourceFile(fileName, mapping) {
 function parseTemplateAsSourceFile(fileName, template) {
     // TODO(alxhub): investigate creating a fake `ts.SourceFile` here instead of invoking the TS
     // parser against the template (HTML is just really syntactically invalid TypeScript code ;).
-    return ts__default["default"].createSourceFile(fileName, template, ts__default["default"].ScriptTarget.Latest, 
-    /* setParentNodes */ false, ts__default["default"].ScriptKind.JSX);
+    return ts.createSourceFile(fileName, template, ts.ScriptTarget.Latest, 
+    /* setParentNodes */ false, ts.ScriptKind.JSX);
 }
 
 const TYPE_CHECK_ID_MAP = Symbol('TypeCheckId');
@@ -38563,8 +40460,8 @@ const parseSpanComment = /^(\d+),(\d+)$/;
  * Will return `null` if no trailing comments on the node match the expected form of a source span.
  */
 function readSpanComment(node, sourceFile = node.getSourceFile()) {
-    return (ts__default["default"].forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts__default["default"].SyntaxKind.MultiLineCommentTrivia) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
             return null;
         }
         const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -38591,7 +40488,7 @@ var ExpressionIdentifier;
 })(ExpressionIdentifier || (ExpressionIdentifier = {}));
 /** Tags the node with the given expression identifier. */
 function addExpressionIdentifier(node, identifier) {
-    ts__default["default"].addSyntheticTrailingComment(node, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`, 
+    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`, 
     /* hasTrailingNewLine */ false);
 }
 const IGNORE_FOR_DIAGNOSTICS_MARKER = `${CommentTriviaType.DIAGNOSTIC}:ignore`;
@@ -38600,13 +40497,13 @@ const IGNORE_FOR_DIAGNOSTICS_MARKER = `${CommentTriviaType.DIAGNOSTIC}:ignore`;
  * should be ignored.
  */
 function markIgnoreDiagnostics(node) {
-    ts__default["default"].addSyntheticTrailingComment(node, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, IGNORE_FOR_DIAGNOSTICS_MARKER, 
+    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, IGNORE_FOR_DIAGNOSTICS_MARKER, 
     /* hasTrailingNewLine */ false);
 }
 /** Returns true if the node has a marker that indicates diagnostics errors should be ignored.  */
 function hasIgnoreForDiagnosticsMarker(node, sourceFile) {
-    return (ts__default["default"].forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts__default["default"].SyntaxKind.MultiLineCommentTrivia) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
             return null;
         }
         const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -38696,8 +40593,8 @@ function findAllMatchingNodes(tcb, opts) {
     return results;
 }
 function hasExpressionIdentifier(sourceFile, node, identifier) {
-    return (ts__default["default"].forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts__default["default"].SyntaxKind.MultiLineCommentTrivia) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
             return false;
         }
         const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -38730,7 +40627,7 @@ class CompletionEngine {
         this.tcbIsShim = tcbIsShim;
         // Find the component completion expression within the TCB. This looks like: `ctx. /* ... */;`
         const globalRead = findFirstMatchingNode(this.tcb, {
-            filter: ts__default["default"].isPropertyAccessExpression,
+            filter: ts.isPropertyAccessExpression,
             withExpressionIdentifier: ExpressionIdentifier.COMPONENT_COMPLETION,
         });
         if (globalRead !== null) {
@@ -38766,7 +40663,7 @@ class CompletionEngine {
         let nodeContext = null;
         if (node instanceof EmptyExpr$1) {
             const nodeLocation = findFirstMatchingNode(this.tcb, {
-                filter: ts__default["default"].isIdentifier,
+                filter: ts.isIdentifier,
                 withSpan: node.sourceSpan,
             });
             if (nodeLocation !== null) {
@@ -38779,7 +40676,7 @@ class CompletionEngine {
         }
         if (node instanceof PropertyRead && node.receiver instanceof ImplicitReceiver) {
             const nodeLocation = findFirstMatchingNode(this.tcb, {
-                filter: ts__default["default"].isPropertyAccessExpression,
+                filter: ts.isPropertyAccessExpression,
                 withSpan: node.sourceSpan,
             });
             if (nodeLocation) {
@@ -38805,7 +40702,7 @@ class CompletionEngine {
         if (expr instanceof PropertyRead || expr instanceof PropertyWrite) {
             // Non-safe navigation operations are trivial: `foo.bar` or `foo.bar()`
             tsExpr = findFirstMatchingNode(this.tcb, {
-                filter: ts__default["default"].isPropertyAccessExpression,
+                filter: ts.isPropertyAccessExpression,
                 withSpan: expr.nameSpan,
             });
         }
@@ -38813,18 +40710,18 @@ class CompletionEngine {
             // Safe navigation operations are a little more complex, and involve a ternary. Completion
             // happens in the "true" case of the ternary.
             const ternaryExpr = findFirstMatchingNode(this.tcb, {
-                filter: ts__default["default"].isParenthesizedExpression,
+                filter: ts.isParenthesizedExpression,
                 withSpan: expr.sourceSpan,
             });
-            if (ternaryExpr === null || !ts__default["default"].isConditionalExpression(ternaryExpr.expression)) {
+            if (ternaryExpr === null || !ts.isConditionalExpression(ternaryExpr.expression)) {
                 return null;
             }
             const whenTrue = ternaryExpr.expression.whenTrue;
-            if (ts__default["default"].isPropertyAccessExpression(whenTrue)) {
+            if (ts.isPropertyAccessExpression(whenTrue)) {
                 tsExpr = whenTrue;
             }
-            else if (ts__default["default"].isCallExpression(whenTrue) &&
-                ts__default["default"].isPropertyAccessExpression(whenTrue.expression)) {
+            else if (ts.isCallExpression(whenTrue) &&
+                ts.isPropertyAccessExpression(whenTrue.expression)) {
                 tsExpr = whenTrue.expression;
             }
         }
@@ -38846,16 +40743,16 @@ class CompletionEngine {
         let tsExpr = null;
         if (expr instanceof TextAttribute) {
             const strNode = findFirstMatchingNode(this.tcb, {
-                filter: ts__default["default"].isParenthesizedExpression,
+                filter: ts.isParenthesizedExpression,
                 withSpan: expr.sourceSpan,
             });
-            if (strNode !== null && ts__default["default"].isStringLiteral(strNode.expression)) {
+            if (strNode !== null && ts.isStringLiteral(strNode.expression)) {
                 tsExpr = strNode.expression;
             }
         }
         else {
             tsExpr = findFirstMatchingNode(this.tcb, {
-                filter: (n) => ts__default["default"].isStringLiteral(n) || ts__default["default"].isNumericLiteral(n),
+                filter: (n) => ts.isStringLiteral(n) || ts.isNumericLiteral(n),
                 withSpan: expr.sourceSpan,
             });
         }
@@ -38863,7 +40760,7 @@ class CompletionEngine {
             return null;
         }
         let positionInShimFile = tsExpr.getEnd();
-        if (ts__default["default"].isStringLiteral(tsExpr)) {
+        if (ts.isStringLiteral(tsExpr)) {
             // In the shimFile, if `tsExpr` is a string, the position should be in the quotes.
             positionInShimFile -= 1;
         }
@@ -40311,7 +42208,7 @@ class RegistryDomSchemaChecker {
             else {
                 errorMsg += `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
             }
-            const diag = makeTemplateDiagnostic(id, mapping, element.startSourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ELEMENT), errorMsg);
+            const diag = makeTemplateDiagnostic(id, mapping, element.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ELEMENT), errorMsg);
             this._diagnostics.push(diag);
         }
     }
@@ -40334,7 +42231,7 @@ class RegistryDomSchemaChecker {
                         `\n2. If '${element.name}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.` +
                         `\n3. To allow any property add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
             }
-            const diag = makeTemplateDiagnostic(id, mapping, span, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMsg);
+            const diag = makeTemplateDiagnostic(id, mapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMsg);
             this._diagnostics.push(diag);
         }
     }
@@ -40418,30 +42315,30 @@ class ReferenceEmitEnvironment {
 //
 const SAFE_TO_CAST_WITHOUT_PARENS = new Set([
     // Expressions which are already parenthesized can be cast without further wrapping.
-    ts__default["default"].SyntaxKind.ParenthesizedExpression,
+    ts.SyntaxKind.ParenthesizedExpression,
     // Expressions which form a single lexical unit leave no room for precedence issues with the cast.
-    ts__default["default"].SyntaxKind.Identifier,
-    ts__default["default"].SyntaxKind.CallExpression,
-    ts__default["default"].SyntaxKind.NonNullExpression,
-    ts__default["default"].SyntaxKind.ElementAccessExpression,
-    ts__default["default"].SyntaxKind.PropertyAccessExpression,
-    ts__default["default"].SyntaxKind.ArrayLiteralExpression,
-    ts__default["default"].SyntaxKind.ObjectLiteralExpression,
+    ts.SyntaxKind.Identifier,
+    ts.SyntaxKind.CallExpression,
+    ts.SyntaxKind.NonNullExpression,
+    ts.SyntaxKind.ElementAccessExpression,
+    ts.SyntaxKind.PropertyAccessExpression,
+    ts.SyntaxKind.ArrayLiteralExpression,
+    ts.SyntaxKind.ObjectLiteralExpression,
     // The same goes for various literals.
-    ts__default["default"].SyntaxKind.StringLiteral,
-    ts__default["default"].SyntaxKind.NumericLiteral,
-    ts__default["default"].SyntaxKind.TrueKeyword,
-    ts__default["default"].SyntaxKind.FalseKeyword,
-    ts__default["default"].SyntaxKind.NullKeyword,
-    ts__default["default"].SyntaxKind.UndefinedKeyword,
+    ts.SyntaxKind.StringLiteral,
+    ts.SyntaxKind.NumericLiteral,
+    ts.SyntaxKind.TrueKeyword,
+    ts.SyntaxKind.FalseKeyword,
+    ts.SyntaxKind.NullKeyword,
+    ts.SyntaxKind.UndefinedKeyword,
 ]);
 function tsCastToAny(expr) {
     // Wrap `expr` in parentheses if needed (see `SAFE_TO_CAST_WITHOUT_PARENS` above).
     if (!SAFE_TO_CAST_WITHOUT_PARENS.has(expr.kind)) {
-        expr = ts__default["default"].factory.createParenthesizedExpression(expr);
+        expr = ts.factory.createParenthesizedExpression(expr);
     }
     // The outer expression is always wrapped in parentheses.
-    return ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createAsExpression(expr, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword)));
+    return ts.factory.createParenthesizedExpression(ts.factory.createAsExpression(expr, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)));
 }
 /**
  * Create an expression which instantiates an element by its HTML tagName.
@@ -40450,12 +42347,12 @@ function tsCastToAny(expr) {
  * based on the tag name, including for custom elements that have appropriate .d.ts definitions.
  */
 function tsCreateElement(tagName) {
-    const createElement = ts__default["default"].factory.createPropertyAccessExpression(
-    /* expression */ ts__default["default"].factory.createIdentifier('document'), 'createElement');
-    return ts__default["default"].factory.createCallExpression(
+    const createElement = ts.factory.createPropertyAccessExpression(
+    /* expression */ ts.factory.createIdentifier('document'), 'createElement');
+    return ts.factory.createCallExpression(
     /* expression */ createElement, 
     /* typeArguments */ undefined, 
-    /* argumentsArray */ [ts__default["default"].factory.createStringLiteral(tagName)]);
+    /* argumentsArray */ [ts.factory.createStringLiteral(tagName)]);
 }
 /**
  * Create a `ts.VariableStatement` which declares a variable without explicit initialization.
@@ -40469,13 +42366,13 @@ function tsDeclareVariable(id, type) {
     // to be `never`, instead of a `boolean`. To work around it, we cast the value
     // in the initializer, e.g. `var _t1 = null! as boolean;`.
     addExpressionIdentifier(type, ExpressionIdentifier.VARIABLE_AS_EXPRESSION);
-    const initializer = ts__default["default"].factory.createAsExpression(ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createNull()), type);
-    const decl = ts__default["default"].factory.createVariableDeclaration(
+    const initializer = ts.factory.createAsExpression(ts.factory.createNonNullExpression(ts.factory.createNull()), type);
+    const decl = ts.factory.createVariableDeclaration(
     /* name */ id, 
     /* exclamationToken */ undefined, 
     /* type */ undefined, 
     /* initializer */ initializer);
-    return ts__default["default"].factory.createVariableStatement(
+    return ts.factory.createVariableStatement(
     /* modifiers */ undefined, 
     /* declarationList */ [decl]);
 }
@@ -40489,7 +42386,7 @@ function tsDeclareVariable(id, type) {
  * @param coercedInputName The field name of the coerced input.
  */
 function tsCreateTypeQueryForCoercedInput(typeName, coercedInputName) {
-    return ts__default["default"].factory.createTypeQueryNode(ts__default["default"].factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
+    return ts.factory.createTypeQueryNode(ts.factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
 }
 /**
  * Create a `ts.VariableStatement` that initializes a variable with a given expression.
@@ -40498,29 +42395,29 @@ function tsCreateTypeQueryForCoercedInput(typeName, coercedInputName) {
  * expression.
  */
 function tsCreateVariable(id, initializer, flags = null) {
-    const decl = ts__default["default"].factory.createVariableDeclaration(
+    const decl = ts.factory.createVariableDeclaration(
     /* name */ id, 
     /* exclamationToken */ undefined, 
     /* type */ undefined, 
     /* initializer */ initializer);
-    return ts__default["default"].factory.createVariableStatement(
+    return ts.factory.createVariableStatement(
     /* modifiers */ undefined, 
     /* declarationList */ flags === null
         ? [decl]
-        : ts__default["default"].factory.createVariableDeclarationList([decl], flags));
+        : ts.factory.createVariableDeclarationList([decl], flags));
 }
 /**
  * Construct a `ts.CallExpression` that calls a method on a receiver.
  */
 function tsCallMethod(receiver, methodName, args = []) {
-    const methodAccess = ts__default["default"].factory.createPropertyAccessExpression(receiver, methodName);
-    return ts__default["default"].factory.createCallExpression(
+    const methodAccess = ts.factory.createPropertyAccessExpression(receiver, methodName);
+    return ts.factory.createCallExpression(
     /* expression */ methodAccess, 
     /* typeArguments */ undefined, 
     /* argumentsArray */ args);
 }
 function isAccessExpression(node) {
-    return ts__default["default"].isPropertyAccessExpression(node) || ts__default["default"].isElementAccessExpression(node);
+    return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
 }
 /**
  * Creates a TypeScript node representing a numeric value.
@@ -40529,10 +42426,10 @@ function tsNumericExpression(value) {
     // As of TypeScript 5.3 negative numbers are represented as `prefixUnaryOperator` and passing a
     // negative number (even as a string) into `createNumericLiteral` will result in an error.
     if (value < 0) {
-        const operand = ts__default["default"].factory.createNumericLiteral(Math.abs(value));
-        return ts__default["default"].factory.createPrefixUnaryExpression(ts__default["default"].SyntaxKind.MinusToken, operand);
+        const operand = ts.factory.createNumericLiteral(Math.abs(value));
+        return ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, operand);
     }
-    return ts__default["default"].factory.createNumericLiteral(value);
+    return ts.factory.createNumericLiteral(value);
 }
 
 /**
@@ -40585,11 +42482,11 @@ class TypeParameterEmitter {
         return this.typeParameters.map((typeParam) => {
             const constraint = typeParam.constraint !== undefined ? emitter.emitType(typeParam.constraint) : undefined;
             const defaultType = typeParam.default !== undefined ? emitter.emitType(typeParam.default) : undefined;
-            return ts__default["default"].factory.updateTypeParameterDeclaration(typeParam, typeParam.modifiers, typeParam.name, constraint, defaultType);
+            return ts.factory.updateTypeParameterDeclaration(typeParam, typeParam.modifiers, typeParam.name, constraint, defaultType);
         });
     }
     resolveTypeReference(type) {
-        const target = ts__default["default"].isIdentifier(type.typeName) ? type.typeName : type.typeName.right;
+        const target = ts.isIdentifier(type.typeName) ? type.typeName : type.typeName.right;
         const declaration = this.reflector.getDeclarationOfIdentifier(target);
         // If no declaration could be resolved or does not have a `ts.Declaration`, the type cannot be
         // resolved.
@@ -40619,8 +42516,8 @@ class TypeParameterEmitter {
         if (typeNode === null) {
             return null;
         }
-        if (!ts__default["default"].isTypeReferenceNode(typeNode)) {
-            throw new Error(`Expected TypeReferenceNode for emitted reference, got ${ts__default["default"].SyntaxKind[typeNode.kind]}.`);
+        if (!ts.isTypeReferenceNode(typeNode)) {
+            throw new Error(`Expected TypeReferenceNode for emitted reference, got ${ts.SyntaxKind[typeNode.kind]}.`);
         }
         return typeNode;
     }
@@ -40710,7 +42607,7 @@ function getSourceMapping(shimSf, position, resolver, isDiagnosticRequest) {
 }
 function findTypeCheckBlock(file, id, isDiagnosticRequest) {
     for (const stmt of file.statements) {
-        if (ts__default["default"].isFunctionDeclaration(stmt) && getTemplateId(stmt, file, isDiagnosticRequest) === id) {
+        if (ts.isFunctionDeclaration(stmt) && getTemplateId(stmt, file, isDiagnosticRequest) === id) {
             return stmt;
         }
     }
@@ -40724,7 +42621,7 @@ function findTypeCheckBlock(file, id, isDiagnosticRequest) {
  */
 function findSourceLocation(node, sourceFile, isDiagnosticsRequest) {
     // Search for comments until the TCB's function declaration is encountered.
-    while (node !== undefined && !ts__default["default"].isFunctionDeclaration(node)) {
+    while (node !== undefined && !ts.isFunctionDeclaration(node)) {
         if (hasIgnoreForDiagnosticsMarker(node, sourceFile) && isDiagnosticsRequest) {
             // There's an ignore marker on this node, so the diagnostic should not be reported.
             return null;
@@ -40745,7 +42642,7 @@ function findSourceLocation(node, sourceFile, isDiagnosticsRequest) {
 }
 function getTemplateId(node, sourceFile, isDiagnosticRequest) {
     // Walk up to the function declaration of the TCB, the file information is attached there.
-    while (!ts__default["default"].isFunctionDeclaration(node)) {
+    while (!ts.isFunctionDeclaration(node)) {
         if (hasIgnoreForDiagnosticsMarker(node, sourceFile) && isDiagnosticRequest) {
             // There's an ignore marker on this node, so the diagnostic should not be reported.
             return null;
@@ -40757,8 +42654,8 @@ function getTemplateId(node, sourceFile, isDiagnosticRequest) {
         }
     }
     const start = node.getFullStart();
-    return (ts__default["default"].forEachLeadingCommentRange(sourceFile.text, start, (pos, end, kind) => {
-        if (kind !== ts__default["default"].SyntaxKind.MultiLineCommentTrivia) {
+    return (ts.forEachLeadingCommentRange(sourceFile.text, start, (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
             return null;
         }
         const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -40787,27 +42684,27 @@ function checkIfGenericTypeBoundsCanBeEmitted(node, reflector, env) {
 
 function generateTypeCtorDeclarationFn(env, meta, nodeTypeRef, typeParams) {
     const rawTypeArgs = typeParams !== undefined ? generateGenericArgs(typeParams) : undefined;
-    const rawType = ts__default["default"].factory.createTypeReferenceNode(nodeTypeRef, rawTypeArgs);
+    const rawType = ts.factory.createTypeReferenceNode(nodeTypeRef, rawTypeArgs);
     const initParam = constructTypeCtorParameter(env, meta, rawType);
     const typeParameters = typeParametersWithDefaultTypes(typeParams);
     if (meta.body) {
-        const fnType = ts__default["default"].factory.createFunctionTypeNode(
+        const fnType = ts.factory.createFunctionTypeNode(
         /* typeParameters */ typeParameters, 
         /* parameters */ [initParam], 
         /* type */ rawType);
-        const decl = ts__default["default"].factory.createVariableDeclaration(
+        const decl = ts.factory.createVariableDeclaration(
         /* name */ meta.fnName, 
         /* exclamationToken */ undefined, 
         /* type */ fnType, 
-        /* body */ ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createNull()));
-        const declList = ts__default["default"].factory.createVariableDeclarationList([decl], ts__default["default"].NodeFlags.Const);
-        return ts__default["default"].factory.createVariableStatement(
+        /* body */ ts.factory.createNonNullExpression(ts.factory.createNull()));
+        const declList = ts.factory.createVariableDeclarationList([decl], ts.NodeFlags.Const);
+        return ts.factory.createVariableStatement(
         /* modifiers */ undefined, 
         /* declarationList */ declList);
     }
     else {
-        return ts__default["default"].factory.createFunctionDeclaration(
-        /* modifiers */ [ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.DeclareKeyword)], 
+        return ts.factory.createFunctionDeclaration(
+        /* modifiers */ [ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword)], 
         /* asteriskToken */ undefined, 
         /* name */ meta.fnName, 
         /* typeParameters */ typeParameters, 
@@ -40856,20 +42753,20 @@ function generateInlineTypeCtor(env, node, meta) {
     // the definition without any type bounds. For example, if the class is
     // `FooDirective<T extends Bar>`, its rawType would be `FooDirective<T>`.
     const rawTypeArgs = node.typeParameters !== undefined ? generateGenericArgs(node.typeParameters) : undefined;
-    const rawType = ts__default["default"].factory.createTypeReferenceNode(node.name, rawTypeArgs);
+    const rawType = ts.factory.createTypeReferenceNode(node.name, rawTypeArgs);
     const initParam = constructTypeCtorParameter(env, meta, rawType);
     // If this constructor is being generated into a .ts file, then it needs a fake body. The body
     // is set to a return of `null!`. If the type constructor is being generated into a .d.ts file,
     // it needs no body.
     let body = undefined;
     if (meta.body) {
-        body = ts__default["default"].factory.createBlock([
-            ts__default["default"].factory.createReturnStatement(ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createNull())),
+        body = ts.factory.createBlock([
+            ts.factory.createReturnStatement(ts.factory.createNonNullExpression(ts.factory.createNull())),
         ]);
     }
     // Create the type constructor method declaration.
-    return ts__default["default"].factory.createMethodDeclaration(
-    /* modifiers */ [ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.StaticKeyword)], 
+    return ts.factory.createMethodDeclaration(
+    /* modifiers */ [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)], 
     /* asteriskToken */ undefined, 
     /* name */ meta.fnName, 
     /* questionToken */ undefined, 
@@ -40894,16 +42791,16 @@ function constructTypeCtorParameter(env, meta, rawType) {
     const signalInputKeys = [];
     for (const { classPropertyName, transform, isSignal } of meta.fields.inputs) {
         if (isSignal) {
-            signalInputKeys.push(ts__default["default"].factory.createLiteralTypeNode(ts__default["default"].factory.createStringLiteral(classPropertyName)));
+            signalInputKeys.push(ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(classPropertyName)));
         }
         else if (!meta.coercedInputFields.has(classPropertyName)) {
-            plainKeys.push(ts__default["default"].factory.createLiteralTypeNode(ts__default["default"].factory.createStringLiteral(classPropertyName)));
+            plainKeys.push(ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(classPropertyName)));
         }
         else {
             const coercionType = transform != null
                 ? transform.type.node
                 : tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName);
-            coercedKeys.push(ts__default["default"].factory.createPropertySignature(
+            coercedKeys.push(ts.factory.createPropertySignature(
             /* modifiers */ undefined, 
             /* name */ classPropertyName, 
             /* questionToken */ undefined, 
@@ -40912,19 +42809,19 @@ function constructTypeCtorParameter(env, meta, rawType) {
     }
     if (plainKeys.length > 0) {
         // Construct a union of all the field names.
-        const keyTypeUnion = ts__default["default"].factory.createUnionTypeNode(plainKeys);
+        const keyTypeUnion = ts.factory.createUnionTypeNode(plainKeys);
         // Construct the Pick<rawType, keyTypeUnion>.
-        initType = ts__default["default"].factory.createTypeReferenceNode('Pick', [rawType, keyTypeUnion]);
+        initType = ts.factory.createTypeReferenceNode('Pick', [rawType, keyTypeUnion]);
     }
     if (coercedKeys.length > 0) {
-        const coercedLiteral = ts__default["default"].factory.createTypeLiteralNode(coercedKeys);
+        const coercedLiteral = ts.factory.createTypeLiteralNode(coercedKeys);
         initType =
             initType !== null
-                ? ts__default["default"].factory.createIntersectionTypeNode([initType, coercedLiteral])
+                ? ts.factory.createIntersectionTypeNode([initType, coercedLiteral])
                 : coercedLiteral;
     }
     if (signalInputKeys.length > 0) {
-        const keyTypeUnion = ts__default["default"].factory.createUnionTypeNode(signalInputKeys);
+        const keyTypeUnion = ts.factory.createUnionTypeNode(signalInputKeys);
         // Construct the UnwrapDirectiveSignalInputs<rawType, keyTypeUnion>.
         const unwrapDirectiveSignalInputsExpr = env.referenceExternalType(Identifiers.UnwrapDirectiveSignalInputs.moduleName, Identifiers.UnwrapDirectiveSignalInputs.name, [
             // TODO:
@@ -40933,15 +42830,15 @@ function constructTypeCtorParameter(env, meta, rawType) {
         ]);
         initType =
             initType !== null
-                ? ts__default["default"].factory.createIntersectionTypeNode([initType, unwrapDirectiveSignalInputsExpr])
+                ? ts.factory.createIntersectionTypeNode([initType, unwrapDirectiveSignalInputsExpr])
                 : unwrapDirectiveSignalInputsExpr;
     }
     if (initType === null) {
         // Special case - no inputs, outputs, or other fields which could influence the result type.
-        initType = ts__default["default"].factory.createTypeLiteralNode([]);
+        initType = ts.factory.createTypeLiteralNode([]);
     }
     // Create the 'init' parameter itself.
-    return ts__default["default"].factory.createParameterDeclaration(
+    return ts.factory.createParameterDeclaration(
     /* modifiers */ undefined, 
     /* dotDotDotToken */ undefined, 
     /* name */ 'init', 
@@ -40950,7 +42847,7 @@ function constructTypeCtorParameter(env, meta, rawType) {
     /* initializer */ undefined);
 }
 function generateGenericArgs(params) {
-    return params.map((param) => ts__default["default"].factory.createTypeReferenceNode(param.name, undefined));
+    return params.map((param) => ts.factory.createTypeReferenceNode(param.name, undefined));
 }
 function requiresInlineTypeCtor(node, host, env) {
     // The class requires an inline type constructor if it has generic type bounds that can not be
@@ -41007,7 +42904,7 @@ function typeParametersWithDefaultTypes(params) {
     }
     return params.map((param) => {
         if (param.default === undefined) {
-            return ts__default["default"].factory.updateTypeParameterDeclaration(param, param.modifiers, param.name, param.constraint, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+            return ts.factory.updateTypeParameterDeclaration(param, param.modifiers, param.name, param.constraint, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
         }
         else {
             return param;
@@ -41056,14 +42953,14 @@ class Environment extends ReferenceEmitEnvironment {
             // The constructor has already been created inline, we just need to construct a reference to
             // it.
             const ref = this.reference(dirRef);
-            const typeCtorExpr = ts__default["default"].factory.createPropertyAccessExpression(ref, 'ngTypeCtor');
+            const typeCtorExpr = ts.factory.createPropertyAccessExpression(ref, 'ngTypeCtor');
             this.typeCtors.set(node, typeCtorExpr);
             return typeCtorExpr;
         }
         else {
             const fnName = `_ctor${this.nextIds.typeCtor++}`;
             const nodeTypeRef = this.referenceType(dirRef);
-            if (!ts__default["default"].isTypeReferenceNode(nodeTypeRef)) {
+            if (!ts.isTypeReferenceNode(nodeTypeRef)) {
                 throw new Error(`Expected TypeReferenceNode from reference to ${dirRef.debugName}`);
             }
             const meta = {
@@ -41079,7 +42976,7 @@ class Environment extends ReferenceEmitEnvironment {
             const typeParams = this.emitTypeParameters(node);
             const typeCtor = generateTypeCtorDeclarationFn(this, meta, nodeTypeRef.typeName, typeParams);
             this.typeCtorStatements.push(typeCtor);
-            const fnId = ts__default["default"].factory.createIdentifier(fnName);
+            const fnId = ts.factory.createIdentifier(fnName);
             this.typeCtors.set(node, fnId);
             return fnId;
         }
@@ -41092,7 +42989,7 @@ class Environment extends ReferenceEmitEnvironment {
             return this.pipeInsts.get(ref.node);
         }
         const pipeType = this.referenceType(ref);
-        const pipeInstId = ts__default["default"].factory.createIdentifier(`_pipe${this.nextIds.pipeInst++}`);
+        const pipeInstId = ts.factory.createIdentifier(`_pipe${this.nextIds.pipeInst++}`);
         this.pipeInstStatements.push(tsDeclareVariable(pipeInstId, pipeType));
         this.pipeInsts.set(ref.node, pipeInstId);
         return pipeInstId;
@@ -41139,7 +43036,7 @@ class OutOfBandDiagnosticRecorderImpl {
         const mapping = this.resolver.getTemplateSourceMapping(id);
         const value = ref.value.trim();
         const errorMsg = `No directive found with exportAs '${value}'.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, ref.valueSpan || ref.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REFERENCE_TARGET), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, ref.valueSpan || ref.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REFERENCE_TARGET), errorMsg));
     }
     missingPipe(id, ast) {
         if (this.recordedPipes.has(ast)) {
@@ -41151,7 +43048,7 @@ class OutOfBandDiagnosticRecorderImpl {
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${ast.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_PIPE), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_PIPE), errorMsg));
         this.recordedPipes.add(ast);
     }
     deferredPipeUsedEagerly(id, ast) {
@@ -41167,7 +43064,7 @@ class OutOfBandDiagnosticRecorderImpl {
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${ast.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_PIPE_USED_EAGERLY), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_PIPE_USED_EAGERLY), errorMsg));
         this.recordedPipes.add(ast);
     }
     deferredComponentUsedEagerly(id, element) {
@@ -41183,7 +43080,7 @@ class OutOfBandDiagnosticRecorderImpl {
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${element.name}'.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_DIRECTIVE_USED_EAGERLY), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFERRED_DIRECTIVE_USED_EAGERLY), errorMsg));
     }
     duplicateTemplateVar(id, variable, firstDecl) {
         const mapping = this.resolver.getTemplateSourceMapping(id);
@@ -41193,7 +43090,7 @@ class OutOfBandDiagnosticRecorderImpl {
         // variable in question.
         //
         // TODO(alxhub): allocate to a tighter span once one is available.
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, variable.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DUPLICATE_VARIABLE_DECLARATION), errorMsg, [
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, variable.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DUPLICATE_VARIABLE_DECLARATION), errorMsg, [
             {
                 text: `The variable '${firstDecl.name}' was first declared here.`,
                 start: firstDecl.sourceSpan.start.offset,
@@ -41237,7 +43134,7 @@ class OutOfBandDiagnosticRecorderImpl {
             varIdentification += ` (and ${variables.length - 1} others)`;
         }
         const message = `This structural directive supports advanced type inference, but the current compiler configuration prevents its usage. The variable ${varIdentification} will have type 'any' as a result.\n\nConsider enabling the 'strictTemplates' option in your tsconfig.json for better type inference within this template.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, diagnosticVar.keySpan, ts__default["default"].DiagnosticCategory.Suggestion, ngErrorCode(exports.ErrorCode.SUGGEST_SUBOPTIMAL_TYPE_INFERENCE), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, diagnosticVar.keySpan, ts.DiagnosticCategory.Suggestion, ngErrorCode(exports.ErrorCode.SUGGEST_SUBOPTIMAL_TYPE_INFERENCE), message));
     }
     splitTwoWayBinding(id, input, output, inputConsumer, outputConsumer) {
         const mapping = this.resolver.getTemplateSourceMapping(id);
@@ -41270,13 +43167,13 @@ class OutOfBandDiagnosticRecorderImpl {
                 sourceFile: outputConsumer.name.getSourceFile(),
             });
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, input.keySpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SPLIT_TWO_WAY_BINDING), errorMsg, relatedMessages));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, input.keySpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SPLIT_TWO_WAY_BINDING), errorMsg, relatedMessages));
     }
     missingRequiredInputs(id, element, directiveName, isComponent, inputAliases) {
         const message = `Required input${inputAliases.length === 1 ? '' : 's'} ${inputAliases
             .map((n) => `'${n}'`)
             .join(', ')} from ${isComponent ? 'component' : 'directive'} ${directiveName} must be specified.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), element.startSourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), element.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
     }
     illegalForLoopTrackAccess(id, block, access) {
         const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, access.sourceSpan);
@@ -41288,7 +43185,7 @@ class OutOfBandDiagnosticRecorderImpl {
             .join(', ');
         const message = `Cannot access '${access.name}' inside of a track expression. ` +
             `Only ${messageVars} and properties on the containing component are available to this expression.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_FOR_LOOP_TRACK_ACCESS), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_FOR_LOOP_TRACK_ACCESS), message));
     }
     inaccessibleDeferredTriggerElement(id, trigger) {
         let message;
@@ -41303,7 +43200,7 @@ class OutOfBandDiagnosticRecorderImpl {
                     `@defer block.\nDeferred blocks can only access triggers in same view, a parent ` +
                     `embedded view or the root view of the @placeholder block.`;
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
     }
     controlFlowPreventingContentProjection(id, category, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
         const blockName = controlFlowNode.nameSpan.toString().trim();
@@ -41326,19 +43223,19 @@ class OutOfBandDiagnosticRecorderImpl {
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for property write.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_LET_WRITE), `Cannot assign to @let declaration '${target.name}'.`));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.ILLEGAL_LET_WRITE), `Cannot assign to @let declaration '${target.name}'.`));
     }
     letUsedBeforeDefinition(id, node, target) {
         const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, node.sourceSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for property read.`);
         }
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.LET_USED_BEFORE_DEFINITION), `Cannot read @let declaration '${target.name}' before it has been defined.`));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.LET_USED_BEFORE_DEFINITION), `Cannot read @let declaration '${target.name}' before it has been defined.`));
     }
     conflictingDeclaration(id, decl) {
         const mapping = this.resolver.getTemplateSourceMapping(id);
         const errorMsg = `Cannot declare @let called '${decl.name}' as there is another symbol in the template with the same name.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, decl.sourceSpan, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.CONFLICTING_LET_DECLARATION), errorMsg));
+        this._diagnostics.push(makeTemplateDiagnostic(id, mapping, decl.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.CONFLICTING_LET_DECLARATION), errorMsg));
     }
 }
 function makeInlineDiagnostic(id, code, node, messageText, relatedInformation) {
@@ -41368,7 +43265,7 @@ class TypeCheckShimGenerator {
             // no harm in reuse here even if it's out of date.
             return priorShimSf;
         }
-        return ts__default["default"].createSourceFile(genFilePath, 'export const USED_FOR_NG_TYPE_CHECKING = true;', ts__default["default"].ScriptTarget.Latest, true, ts__default["default"].ScriptKind.TS);
+        return ts.createSourceFile(genFilePath, 'export const USED_FOR_NG_TYPE_CHECKING = true;', ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
     }
     static shimFor(fileName) {
         return absoluteFrom(fileName.replace(/\.tsx?$/, '.ngtypecheck.ts'));
@@ -41387,7 +43284,7 @@ class TypeCheckShimGenerator {
  * positional comment would be located within that node, resulting in a mismatch.
  */
 function wrapForDiagnostics(expr) {
-    return ts__default["default"].factory.createParenthesizedExpression(expr);
+    return ts.factory.createParenthesizedExpression(expr);
 }
 /**
  * Wraps the node in parenthesis such that inserted span comments become attached to the proper
@@ -41396,7 +43293,7 @@ function wrapForDiagnostics(expr) {
  * the rendered TCB code.
  */
 function wrapForTypeChecker(expr) {
-    return ts__default["default"].factory.createParenthesizedExpression(expr);
+    return ts.factory.createParenthesizedExpression(expr);
 }
 /**
  * Adds a synthetic comment to the expression that represents the parse span of the provided node.
@@ -41410,7 +43307,7 @@ function addParseSpanInfo(node, span) {
     else {
         commentText = `${span.start.offset},${span.end.offset}`;
     }
-    ts__default["default"].addSyntheticTrailingComment(node, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, commentText, 
+    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, commentText, 
     /* hasTrailingNewLine */ false);
 }
 /**
@@ -41418,7 +43315,7 @@ function addParseSpanInfo(node, span) {
  * of the class declaration.
  */
 function addTypeCheckId(tcb, id) {
-    ts__default["default"].addSyntheticLeadingComment(tcb, ts__default["default"].SyntaxKind.MultiLineCommentTrivia, id, true);
+    ts.addSyntheticLeadingComment(tcb, ts.SyntaxKind.MultiLineCommentTrivia, id, true);
 }
 /**
  * Determines if the diagnostic should be reported. Some diagnostics are produced because of the
@@ -41473,32 +43370,32 @@ function translateDiagnostic(diagnostic, resolver) {
  * - Some flavor of function call, like `isNan(0) as any` - requires even more characters than the
  *   NaN option and has the same issue with `noLib`.
  */
-const ANY_EXPRESSION = ts__default["default"].factory.createAsExpression(ts__default["default"].factory.createNumericLiteral('0'), ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
-const UNDEFINED = ts__default["default"].factory.createIdentifier('undefined');
+const ANY_EXPRESSION = ts.factory.createAsExpression(ts.factory.createNumericLiteral('0'), ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
+const UNDEFINED = ts.factory.createIdentifier('undefined');
 const UNARY_OPS = new Map([
-    ['+', ts__default["default"].SyntaxKind.PlusToken],
-    ['-', ts__default["default"].SyntaxKind.MinusToken],
+    ['+', ts.SyntaxKind.PlusToken],
+    ['-', ts.SyntaxKind.MinusToken],
 ]);
 const BINARY_OPS = new Map([
-    ['+', ts__default["default"].SyntaxKind.PlusToken],
-    ['-', ts__default["default"].SyntaxKind.MinusToken],
-    ['<', ts__default["default"].SyntaxKind.LessThanToken],
-    ['>', ts__default["default"].SyntaxKind.GreaterThanToken],
-    ['<=', ts__default["default"].SyntaxKind.LessThanEqualsToken],
-    ['>=', ts__default["default"].SyntaxKind.GreaterThanEqualsToken],
-    ['==', ts__default["default"].SyntaxKind.EqualsEqualsToken],
-    ['===', ts__default["default"].SyntaxKind.EqualsEqualsEqualsToken],
-    ['*', ts__default["default"].SyntaxKind.AsteriskToken],
-    ['**', ts__default["default"].SyntaxKind.AsteriskAsteriskToken],
-    ['/', ts__default["default"].SyntaxKind.SlashToken],
-    ['%', ts__default["default"].SyntaxKind.PercentToken],
-    ['!=', ts__default["default"].SyntaxKind.ExclamationEqualsToken],
-    ['!==', ts__default["default"].SyntaxKind.ExclamationEqualsEqualsToken],
-    ['||', ts__default["default"].SyntaxKind.BarBarToken],
-    ['&&', ts__default["default"].SyntaxKind.AmpersandAmpersandToken],
-    ['&', ts__default["default"].SyntaxKind.AmpersandToken],
-    ['|', ts__default["default"].SyntaxKind.BarToken],
-    ['??', ts__default["default"].SyntaxKind.QuestionQuestionToken],
+    ['+', ts.SyntaxKind.PlusToken],
+    ['-', ts.SyntaxKind.MinusToken],
+    ['<', ts.SyntaxKind.LessThanToken],
+    ['>', ts.SyntaxKind.GreaterThanToken],
+    ['<=', ts.SyntaxKind.LessThanEqualsToken],
+    ['>=', ts.SyntaxKind.GreaterThanEqualsToken],
+    ['==', ts.SyntaxKind.EqualsEqualsToken],
+    ['===', ts.SyntaxKind.EqualsEqualsEqualsToken],
+    ['*', ts.SyntaxKind.AsteriskToken],
+    ['**', ts.SyntaxKind.AsteriskAsteriskToken],
+    ['/', ts.SyntaxKind.SlashToken],
+    ['%', ts.SyntaxKind.PercentToken],
+    ['!=', ts.SyntaxKind.ExclamationEqualsToken],
+    ['!==', ts.SyntaxKind.ExclamationEqualsEqualsToken],
+    ['||', ts.SyntaxKind.BarBarToken],
+    ['&&', ts.SyntaxKind.AmpersandAmpersandToken],
+    ['&', ts.SyntaxKind.AmpersandToken],
+    ['|', ts.SyntaxKind.BarToken],
+    ['??', ts.SyntaxKind.QuestionQuestionToken],
 ]);
 /**
  * Convert an `AST` to TypeScript code directly, without going through an intermediate `Expression`
@@ -41523,7 +43420,7 @@ class AstTranslator {
         }
         // The `EmptyExpr` doesn't have a dedicated method on `AstVisitor`, so it's special cased here.
         if (ast instanceof EmptyExpr$1) {
-            const res = ts__default["default"].factory.createIdentifier('undefined');
+            const res = ts.factory.createIdentifier('undefined');
             addParseSpanInfo(res, ast.sourceSpan);
             return res;
         }
@@ -41540,7 +43437,7 @@ class AstTranslator {
         if (op === undefined) {
             throw new Error(`Unsupported Unary.operator: ${ast.operator}`);
         }
-        const node = wrapForDiagnostics(ts__default["default"].factory.createPrefixUnaryExpression(op, expr));
+        const node = wrapForDiagnostics(ts.factory.createPrefixUnaryExpression(op, expr));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41551,13 +43448,13 @@ class AstTranslator {
         if (op === undefined) {
             throw new Error(`Unsupported Binary.operation: ${ast.operation}`);
         }
-        const node = ts__default["default"].factory.createBinaryExpression(lhs, op, rhs);
+        const node = ts.factory.createBinaryExpression(lhs, op, rhs);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
     visitChain(ast) {
         const elements = ast.expressions.map((expr) => this.translate(expr));
-        const node = wrapForDiagnostics(ts__default["default"].factory.createCommaListExpression(elements));
+        const node = wrapForDiagnostics(ts.factory.createCommaListExpression(elements));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41572,7 +43469,7 @@ class AstTranslator {
         // `conditional /*1,2*/ ? trueExpr /*3,4*/ : falseExpr /*5,6*/`
         // This should be instead be `conditional /*1,2*/ ? trueExpr /*3,4*/ : (falseExpr /*5,6*/)`
         const falseExpr = wrapForTypeChecker(this.translate(ast.falseExp));
-        const node = ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createConditionalExpression(condExpr, undefined, trueExpr, undefined, falseExpr));
+        const node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(condExpr, undefined, trueExpr, undefined, falseExpr));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41586,28 +43483,28 @@ class AstTranslator {
         // Build up a chain of binary + operations to simulate the string concatenation of the
         // interpolation's expressions. The chain is started using an actual string literal to ensure
         // the type is inferred as 'string'.
-        return ast.expressions.reduce((lhs, ast) => ts__default["default"].factory.createBinaryExpression(lhs, ts__default["default"].SyntaxKind.PlusToken, wrapForTypeChecker(this.translate(ast))), ts__default["default"].factory.createStringLiteral(''));
+        return ast.expressions.reduce((lhs, ast) => ts.factory.createBinaryExpression(lhs, ts.SyntaxKind.PlusToken, wrapForTypeChecker(this.translate(ast))), ts.factory.createStringLiteral(''));
     }
     visitKeyedRead(ast) {
         const receiver = wrapForDiagnostics(this.translate(ast.receiver));
         const key = this.translate(ast.key);
-        const node = ts__default["default"].factory.createElementAccessExpression(receiver, key);
+        const node = ts.factory.createElementAccessExpression(receiver, key);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
     visitKeyedWrite(ast) {
         const receiver = wrapForDiagnostics(this.translate(ast.receiver));
-        const left = ts__default["default"].factory.createElementAccessExpression(receiver, this.translate(ast.key));
+        const left = ts.factory.createElementAccessExpression(receiver, this.translate(ast.key));
         // TODO(joost): annotate `left` with the span of the element access, which is not currently
         //  available on `ast`.
         const right = wrapForTypeChecker(this.translate(ast.value));
-        const node = wrapForDiagnostics(ts__default["default"].factory.createBinaryExpression(left, ts__default["default"].SyntaxKind.EqualsToken, right));
+        const node = wrapForDiagnostics(ts.factory.createBinaryExpression(left, ts.SyntaxKind.EqualsToken, right));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
     visitLiteralArray(ast) {
         const elements = ast.expressions.map((expr) => this.translate(expr));
-        const literal = ts__default["default"].factory.createArrayLiteralExpression(elements);
+        const literal = ts.factory.createArrayLiteralExpression(elements);
         // If strictLiteralTypes is disabled, array literals are cast to `any`.
         const node = this.config.strictLiteralTypes ? literal : tsCastToAny(literal);
         addParseSpanInfo(node, ast.sourceSpan);
@@ -41616,9 +43513,9 @@ class AstTranslator {
     visitLiteralMap(ast) {
         const properties = ast.keys.map(({ key }, idx) => {
             const value = this.translate(ast.values[idx]);
-            return ts__default["default"].factory.createPropertyAssignment(ts__default["default"].factory.createStringLiteral(key), value);
+            return ts.factory.createPropertyAssignment(ts.factory.createStringLiteral(key), value);
         });
-        const literal = ts__default["default"].factory.createObjectLiteralExpression(properties, true);
+        const literal = ts.factory.createObjectLiteralExpression(properties, true);
         // If strictLiteralTypes is disabled, object literals are cast to `any`.
         const node = this.config.strictLiteralTypes ? literal : tsCastToAny(literal);
         addParseSpanInfo(node, ast.sourceSpan);
@@ -41627,19 +43524,19 @@ class AstTranslator {
     visitLiteralPrimitive(ast) {
         let node;
         if (ast.value === undefined) {
-            node = ts__default["default"].factory.createIdentifier('undefined');
+            node = ts.factory.createIdentifier('undefined');
         }
         else if (ast.value === null) {
-            node = ts__default["default"].factory.createNull();
+            node = ts.factory.createNull();
         }
         else if (typeof ast.value === 'string') {
-            node = ts__default["default"].factory.createStringLiteral(ast.value);
+            node = ts.factory.createStringLiteral(ast.value);
         }
         else if (typeof ast.value === 'number') {
             node = tsNumericExpression(ast.value);
         }
         else if (typeof ast.value === 'boolean') {
-            node = ast.value ? ts__default["default"].factory.createTrue() : ts__default["default"].factory.createFalse();
+            node = ast.value ? ts.factory.createTrue() : ts.factory.createFalse();
         }
         else {
             throw Error(`Unsupported AST value of type ${typeof ast.value}`);
@@ -41649,7 +43546,7 @@ class AstTranslator {
     }
     visitNonNullAssert(ast) {
         const expr = wrapForDiagnostics(this.translate(ast.expression));
-        const node = ts__default["default"].factory.createNonNullExpression(expr);
+        const node = ts.factory.createNonNullExpression(expr);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41658,19 +43555,19 @@ class AstTranslator {
     }
     visitPrefixNot(ast) {
         const expression = wrapForDiagnostics(this.translate(ast.expression));
-        const node = ts__default["default"].factory.createLogicalNot(expression);
+        const node = ts.factory.createLogicalNot(expression);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
     visitTypeofExpression(ast) {
         const expression = wrapForDiagnostics(this.translate(ast.expression));
-        const node = ts__default["default"].factory.createTypeOfExpression(expression);
+        const node = ts.factory.createTypeOfExpression(expression);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
     visitVoidExpression(ast) {
         const expression = wrapForDiagnostics(this.translate(ast.expression));
-        const node = ts__default["default"].factory.createVoidExpression(expression);
+        const node = ts.factory.createVoidExpression(expression);
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41678,7 +43575,7 @@ class AstTranslator {
         // This is a normal property read - convert the receiver to an expression and emit the correct
         // TypeScript expression to read the property.
         const receiver = wrapForDiagnostics(this.translate(ast.receiver));
-        const name = ts__default["default"].factory.createPropertyAccessExpression(receiver, ast.name);
+        const name = ts.factory.createPropertyAccessExpression(receiver, ast.name);
         addParseSpanInfo(name, ast.nameSpan);
         const node = wrapForDiagnostics(name);
         addParseSpanInfo(node, ast.sourceSpan);
@@ -41686,7 +43583,7 @@ class AstTranslator {
     }
     visitPropertyWrite(ast) {
         const receiver = wrapForDiagnostics(this.translate(ast.receiver));
-        const left = ts__default["default"].factory.createPropertyAccessExpression(receiver, ast.name);
+        const left = ts.factory.createPropertyAccessExpression(receiver, ast.name);
         addParseSpanInfo(left, ast.nameSpan);
         // TypeScript reports assignment errors on the entire lvalue expression. Annotate the lvalue of
         // the assignment with the sourceSpan, which includes receivers, rather than nameSpan for
@@ -41701,7 +43598,7 @@ class AstTranslator {
         // It could refer to either the whole binary expression or just the RHS.
         // We should instead generate `e = ($event /*0,10*/)` so we know the span 0,10 matches RHS.
         const right = wrapForTypeChecker(this.translate(ast.value));
-        const node = wrapForDiagnostics(ts__default["default"].factory.createBinaryExpression(leftWithPath, ts__default["default"].SyntaxKind.EqualsToken, right));
+        const node = wrapForDiagnostics(ts.factory.createBinaryExpression(leftWithPath, ts.SyntaxKind.EqualsToken, right));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -41714,9 +43611,9 @@ class AstTranslator {
             // property read, or `undefined`. So a ternary is used to create an "or" type:
             // "a?.b" becomes (0 as any ? a!.b : undefined)
             // The type of this expression is (typeof a!.b) | undefined, which is exactly as desired.
-            const expr = ts__default["default"].factory.createPropertyAccessExpression(ts__default["default"].factory.createNonNullExpression(receiver), ast.name);
+            const expr = ts.factory.createPropertyAccessExpression(ts.factory.createNonNullExpression(receiver), ast.name);
             addParseSpanInfo(expr, ast.nameSpan);
-            node = ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
+            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
         }
         else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // Emulate a View Engine bug where 'any' is inferred for the left-hand side of the safe
@@ -41724,13 +43621,13 @@ class AstTranslator {
             // Therefore, the left-hand side only needs repeating in the output (to validate it), and then
             // 'any' is used for the rest of the expression. This is done using a comma operator:
             // "a?.b" becomes (a as any).b, which will of course have type 'any'.
-            node = ts__default["default"].factory.createPropertyAccessExpression(tsCastToAny(receiver), ast.name);
+            node = ts.factory.createPropertyAccessExpression(tsCastToAny(receiver), ast.name);
         }
         else {
             // The View Engine bug isn't active, so check the entire type of the expression, but the final
             // result is still inferred as `any`.
             // "a?.b" becomes (a!.b as any)
-            const expr = ts__default["default"].factory.createPropertyAccessExpression(ts__default["default"].factory.createNonNullExpression(receiver), ast.name);
+            const expr = ts.factory.createPropertyAccessExpression(ts.factory.createNonNullExpression(receiver), ast.name);
             addParseSpanInfo(expr, ast.nameSpan);
             node = tsCastToAny(expr);
         }
@@ -41744,17 +43641,17 @@ class AstTranslator {
         // The form of safe property reads depends on whether strictness is in use.
         if (this.config.strictSafeNavigationTypes) {
             // "a?.[...]" becomes (0 as any ? a![...] : undefined)
-            const expr = ts__default["default"].factory.createElementAccessExpression(ts__default["default"].factory.createNonNullExpression(receiver), key);
+            const expr = ts.factory.createElementAccessExpression(ts.factory.createNonNullExpression(receiver), key);
             addParseSpanInfo(expr, ast.sourceSpan);
-            node = ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
+            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
         }
         else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // "a?.[...]" becomes (a as any)[...]
-            node = ts__default["default"].factory.createElementAccessExpression(tsCastToAny(receiver), key);
+            node = ts.factory.createElementAccessExpression(tsCastToAny(receiver), key);
         }
         else {
             // "a?.[...]" becomes (a!.[...] as any)
-            const expr = ts__default["default"].factory.createElementAccessExpression(ts__default["default"].factory.createNonNullExpression(receiver), key);
+            const expr = ts.factory.createElementAccessExpression(ts.factory.createNonNullExpression(receiver), key);
             addParseSpanInfo(expr, ast.sourceSpan);
             node = tsCastToAny(expr);
         }
@@ -41775,7 +43672,7 @@ class AstTranslator {
             }
             else {
                 const propertyReceiver = wrapForDiagnostics(this.translate(receiver.receiver));
-                expr = ts__default["default"].factory.createPropertyAccessExpression(propertyReceiver, receiver.name);
+                expr = ts.factory.createPropertyAccessExpression(propertyReceiver, receiver.name);
                 addParseSpanInfo(expr, receiver.nameSpan);
             }
         }
@@ -41789,7 +43686,7 @@ class AstTranslator {
             node = this.convertToSafeCall(ast, expr, args);
         }
         else {
-            node = ts__default["default"].factory.createCallExpression(expr, undefined, args);
+            node = ts.factory.createCallExpression(expr, undefined, args);
         }
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
@@ -41806,19 +43703,19 @@ class AstTranslator {
         const head = ast.elements[0];
         let result;
         if (length === 1) {
-            result = ts__default["default"].factory.createNoSubstitutionTemplateLiteral(head.text);
+            result = ts.factory.createNoSubstitutionTemplateLiteral(head.text);
         }
         else {
             const spans = [];
             const tailIndex = length - 1;
             for (let i = 1; i < tailIndex; i++) {
-                const middle = ts__default["default"].factory.createTemplateMiddle(ast.elements[i].text);
-                spans.push(ts__default["default"].factory.createTemplateSpan(this.translate(ast.expressions[i - 1]), middle));
+                const middle = ts.factory.createTemplateMiddle(ast.elements[i].text);
+                spans.push(ts.factory.createTemplateSpan(this.translate(ast.expressions[i - 1]), middle));
             }
             const resolvedExpression = this.translate(ast.expressions[tailIndex - 1]);
-            const templateTail = ts__default["default"].factory.createTemplateTail(ast.elements[tailIndex].text);
-            spans.push(ts__default["default"].factory.createTemplateSpan(resolvedExpression, templateTail));
-            result = ts__default["default"].factory.createTemplateExpression(ts__default["default"].factory.createTemplateHead(head.text), spans);
+            const templateTail = ts.factory.createTemplateTail(ast.elements[tailIndex].text);
+            spans.push(ts.factory.createTemplateSpan(resolvedExpression, templateTail));
+            result = ts.factory.createTemplateExpression(ts.factory.createTemplateHead(head.text), spans);
         }
         return result;
     }
@@ -41826,23 +43723,23 @@ class AstTranslator {
         throw new Error('Method not implemented');
     }
     visitTaggedTemplateLiteral(ast) {
-        return ts__default["default"].factory.createTaggedTemplateExpression(this.translate(ast.tag), undefined, this.visitTemplateLiteral(ast.template));
+        return ts.factory.createTaggedTemplateExpression(this.translate(ast.tag), undefined, this.visitTemplateLiteral(ast.template));
     }
     visitParenthesizedExpression(ast) {
-        return ts__default["default"].factory.createParenthesizedExpression(this.translate(ast.expression));
+        return ts.factory.createParenthesizedExpression(this.translate(ast.expression));
     }
     convertToSafeCall(ast, expr, args) {
         if (this.config.strictSafeNavigationTypes) {
             // "a?.method(...)" becomes (0 as any ? a!.method(...) : undefined)
-            const call = ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createNonNullExpression(expr), undefined, args);
-            return ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createConditionalExpression(ANY_EXPRESSION, undefined, call, undefined, UNDEFINED));
+            const call = ts.factory.createCallExpression(ts.factory.createNonNullExpression(expr), undefined, args);
+            return ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, call, undefined, UNDEFINED));
         }
         if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // "a?.method(...)" becomes (a as any).method(...)
-            return ts__default["default"].factory.createCallExpression(tsCastToAny(expr), undefined, args);
+            return ts.factory.createCallExpression(tsCastToAny(expr), undefined, args);
         }
         // "a?.method(...)" becomes (a!.method(...) as any)
-        return tsCastToAny(ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createNonNullExpression(expr), undefined, args));
+        return tsCastToAny(ts.factory.createCallExpression(ts.factory.createNonNullExpression(expr), undefined, args));
     }
 }
 /**
@@ -42001,7 +43898,7 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
     const tcb = new Context(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone, meta.preserveWhitespaces);
     const scope = Scope.forNodes(tcb, null, null, tcb.boundTarget.target.template, /* guard */ null);
     const ctxRawType = env.referenceType(ref);
-    if (!ts__default["default"].isTypeReferenceNode(ctxRawType)) {
+    if (!ts.isTypeReferenceNode(ctxRawType)) {
         throw new Error(`Expected TypeReferenceNode when referencing the ctx param for ${ref.debugName}`);
     }
     let typeParameters = undefined;
@@ -42014,26 +43911,26 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
             case TcbGenericContextBehavior.UseEmitter:
                 // Guaranteed to emit type parameters since we checked that the class has them above.
                 typeParameters = new TypeParameterEmitter(ref.node.typeParameters, env.reflector).emit((typeRef) => env.referenceType(typeRef));
-                typeArguments = typeParameters.map((param) => ts__default["default"].factory.createTypeReferenceNode(param.name));
+                typeArguments = typeParameters.map((param) => ts.factory.createTypeReferenceNode(param.name));
                 break;
             case TcbGenericContextBehavior.CopyClassNodes:
                 typeParameters = [...ref.node.typeParameters];
-                typeArguments = typeParameters.map((param) => ts__default["default"].factory.createTypeReferenceNode(param.name));
+                typeArguments = typeParameters.map((param) => ts.factory.createTypeReferenceNode(param.name));
                 break;
             case TcbGenericContextBehavior.FallbackToAny:
-                typeArguments = ref.node.typeParameters.map(() => ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+                typeArguments = ref.node.typeParameters.map(() => ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
                 break;
         }
     }
     const paramList = [tcbThisParam(ctxRawType.typeName, typeArguments)];
     const scopeStatements = scope.render();
-    const innerBody = ts__default["default"].factory.createBlock([...env.getPreludeStatements(), ...scopeStatements]);
+    const innerBody = ts.factory.createBlock([...env.getPreludeStatements(), ...scopeStatements]);
     // Wrap the body in an "if (true)" expression. This is unnecessary but has the effect of causing
     // the `ts.Printer` to format the type-check block nicely.
-    const body = ts__default["default"].factory.createBlock([
-        ts__default["default"].factory.createIfStatement(ts__default["default"].factory.createTrue(), innerBody, undefined),
+    const body = ts.factory.createBlock([
+        ts.factory.createIfStatement(ts.factory.createTrue(), innerBody, undefined),
     ]);
-    const fnDecl = ts__default["default"].factory.createFunctionDeclaration(
+    const fnDecl = ts.factory.createFunctionDeclaration(
     /* modifiers */ undefined, 
     /* asteriskToken */ undefined, 
     /* name */ name, 
@@ -42132,7 +44029,7 @@ class TcbTemplateVariableOp extends TcbOp {
         // Allocate an identifier for the TmplAstVariable, and initialize it to a read of the variable
         // on the template context.
         const id = this.tcb.allocateId();
-        const initializer = ts__default["default"].factory.createPropertyAccessExpression(
+        const initializer = ts.factory.createPropertyAccessExpression(
         /* expression */ ctx, 
         /* name */ this.variable.value || '$implicit');
         addParseSpanInfo(id, this.variable.keySpan);
@@ -42169,7 +44066,7 @@ class TcbTemplateContextOp extends TcbOp {
         // Allocate a template ctx variable and declare it with an 'any' type. The type of this variable
         // may be narrowed as a result of template guard conditions.
         const ctx = this.tcb.allocateId();
-        const type = ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword);
+        const type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
         this.scope.addStatement(tsDeclareVariable(ctx, type));
         return ctx;
     }
@@ -42200,7 +44097,7 @@ class TcbLetDeclarationOp extends TcbOp {
         const value = tcbExpression(this.node.value, this.tcb, this.scope);
         // Value needs to be wrapped, because spans for the expressions inside of it can
         // be picked up incorrectly as belonging to the full variable declaration.
-        const varStatement = tsCreateVariable(id, wrapForTypeChecker(value), ts__default["default"].NodeFlags.Const);
+        const varStatement = tsCreateVariable(id, wrapForTypeChecker(value), ts.NodeFlags.Const);
         addParseSpanInfo(varStatement.declarationList.declarations[0], this.node.sourceSpan);
         this.scope.addStatement(varStatement);
         return id;
@@ -42296,7 +44193,7 @@ class TcbTemplateBodyOp extends TcbOp {
         if (directiveGuards.length > 0) {
             // Pop the first value and use it as the initializer to reduce(). This way, a single guard
             // will be used on its own, but two or more will be combined into binary AND expressions.
-            guard = directiveGuards.reduce((expr, dirGuard) => ts__default["default"].factory.createBinaryExpression(expr, ts__default["default"].SyntaxKind.AmpersandAmpersandToken, dirGuard), directiveGuards.pop());
+            guard = directiveGuards.reduce((expr, dirGuard) => ts.factory.createBinaryExpression(expr, ts.SyntaxKind.AmpersandAmpersandToken, dirGuard), directiveGuards.pop());
         }
         // Create a new Scope for the template. This constructs the list of operations for the template
         // children, as well as tracks bindings within the template.
@@ -42312,11 +44209,11 @@ class TcbTemplateBodyOp extends TcbOp {
             // type-checking time.
             return null;
         }
-        let tmplBlock = ts__default["default"].factory.createBlock(statements);
+        let tmplBlock = ts.factory.createBlock(statements);
         if (guard !== null) {
             // The scope has a guard that needs to be applied, so wrap the template block into an `if`
             // statement containing the guard expression.
-            tmplBlock = ts__default["default"].factory.createIfStatement(
+            tmplBlock = ts.factory.createIfStatement(
             /* expression */ guard, 
             /* thenStatement */ tmplBlock);
         }
@@ -42344,7 +44241,7 @@ class TcbExpressionOp extends TcbOp {
     }
     execute() {
         const expr = tcbExpression(this.expression, this.tcb, this.scope);
-        this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(expr));
+        this.scope.addStatement(ts.factory.createExpressionStatement(expr));
         return null;
     }
 }
@@ -42378,11 +44275,11 @@ class TcbDirectiveTypeOpBase extends TcbOp {
             type = rawType;
         }
         else {
-            if (!ts__default["default"].isTypeReferenceNode(rawType)) {
+            if (!ts.isTypeReferenceNode(rawType)) {
                 throw new Error(`Expected TypeReferenceNode when referencing the type for ${this.dir.ref.debugName}`);
             }
-            const typeArguments = dirRef.node.typeParameters.map(() => ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
-            type = ts__default["default"].factory.createTypeReferenceNode(rawType.typeName, typeArguments);
+            const typeArguments = dirRef.node.typeParameters.map(() => ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
+            type = ts.factory.createTypeReferenceNode(rawType.typeName, typeArguments);
         }
         const id = this.tcb.allocateId();
         addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
@@ -42479,15 +44376,15 @@ class TcbReferenceOp extends TcbOp {
             // References to DOM nodes are pinned to 'any' when `checkTypeOfDomReferences` is `false`.
             // References to `TemplateRef`s and directives are pinned to 'any' when
             // `checkTypeOfNonDomReferences` is `false`.
-            initializer = ts__default["default"].factory.createAsExpression(initializer, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+            initializer = ts.factory.createAsExpression(initializer, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
         }
         else if (this.target instanceof Template) {
             // Direct references to an <ng-template> node simply require a value of type
             // `TemplateRef<any>`. To get this, an expression of the form
             // `(_t1 as any as TemplateRef<any>)` is constructed.
-            initializer = ts__default["default"].factory.createAsExpression(initializer, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
-            initializer = ts__default["default"].factory.createAsExpression(initializer, this.tcb.env.referenceExternalType('@angular/core', 'TemplateRef', [DYNAMIC_TYPE]));
-            initializer = ts__default["default"].factory.createParenthesizedExpression(initializer);
+            initializer = ts.factory.createAsExpression(initializer, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
+            initializer = ts.factory.createAsExpression(initializer, this.tcb.env.referenceExternalType('@angular/core', 'TemplateRef', [DYNAMIC_TYPE]));
+            initializer = ts.factory.createParenthesizedExpression(initializer);
         }
         addParseSpanInfo(initializer, this.node.sourceSpan);
         addParseSpanInfo(id, this.node.keySpan);
@@ -42641,7 +44538,7 @@ class TcbDirectiveInputsOp extends TcbOp {
                         // with a type of `typeof Directive.ngAcceptInputType_fieldName` which is then used as
                         // target of the assignment.
                         const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
-                        if (!ts__default["default"].isTypeReferenceNode(dirTypeRef)) {
+                        if (!ts.isTypeReferenceNode(dirTypeRef)) {
                             throw new Error(`Expected TypeReferenceNode from reference to ${this.dir.ref.debugName}`);
                         }
                         type = tsCreateTypeQueryForCoercedInput(dirTypeRef.typeName, fieldName);
@@ -42667,10 +44564,10 @@ class TcbDirectiveInputsOp extends TcbOp {
                     }
                     const id = this.tcb.allocateId();
                     const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
-                    if (!ts__default["default"].isTypeReferenceNode(dirTypeRef)) {
+                    if (!ts.isTypeReferenceNode(dirTypeRef)) {
                         throw new Error(`Expected TypeReferenceNode from reference to ${this.dir.ref.debugName}`);
                     }
-                    const type = ts__default["default"].factory.createIndexedAccessTypeNode(ts__default["default"].factory.createTypeQueryNode(dirId), ts__default["default"].factory.createLiteralTypeNode(ts__default["default"].factory.createStringLiteral(fieldName)));
+                    const type = ts.factory.createIndexedAccessTypeNode(ts.factory.createTypeQueryNode(dirId), ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(fieldName)));
                     const temp = tsDeclareVariable(id, type);
                     this.scope.addStatement(temp);
                     target = id;
@@ -42683,8 +44580,8 @@ class TcbDirectiveInputsOp extends TcbOp {
                     // when possible. String literal fields may not be valid JS identifiers so we use
                     // literal element access instead for those cases.
                     target = this.dir.stringLiteralInputFields.has(fieldName)
-                        ? ts__default["default"].factory.createElementAccessExpression(dirId, ts__default["default"].factory.createStringLiteral(fieldName))
-                        : ts__default["default"].factory.createPropertyAccessExpression(dirId, ts__default["default"].factory.createIdentifier(fieldName));
+                        ? ts.factory.createElementAccessExpression(dirId, ts.factory.createStringLiteral(fieldName))
+                        : ts.factory.createPropertyAccessExpression(dirId, ts.factory.createIdentifier(fieldName));
                 }
                 // For signal inputs, we unwrap the target `InputSignal`. Note that
                 // we intentionally do the following things:
@@ -42693,11 +44590,11 @@ class TcbDirectiveInputsOp extends TcbOp {
                 //      This is a significant requirement for language service auto-completion.
                 if (isSignal) {
                     const inputSignalBrandWriteSymbol = this.tcb.env.referenceExternalSymbol(Identifiers.InputSignalBrandWriteType.moduleName, Identifiers.InputSignalBrandWriteType.name);
-                    if (!ts__default["default"].isIdentifier(inputSignalBrandWriteSymbol) &&
-                        !ts__default["default"].isPropertyAccessExpression(inputSignalBrandWriteSymbol)) {
+                    if (!ts.isIdentifier(inputSignalBrandWriteSymbol) &&
+                        !ts.isPropertyAccessExpression(inputSignalBrandWriteSymbol)) {
                         throw new Error(`Expected identifier or property access for reference to ${Identifiers.InputSignalBrandWriteType.name}`);
                     }
-                    target = ts__default["default"].factory.createElementAccessExpression(target, inputSignalBrandWriteSymbol);
+                    target = ts.factory.createElementAccessExpression(target, inputSignalBrandWriteSymbol);
                 }
                 if (attr.attribute.keySpan !== undefined) {
                     addParseSpanInfo(target, attr.attribute.keySpan);
@@ -42707,7 +44604,7 @@ class TcbDirectiveInputsOp extends TcbOp {
                     assignment = unwrapWritableSignal(assignment, this.tcb);
                 }
                 // Finally the assignment is extended by assigning it into the target expression.
-                assignment = ts__default["default"].factory.createBinaryExpression(target, ts__default["default"].SyntaxKind.EqualsToken, assignment);
+                assignment = ts.factory.createBinaryExpression(target, ts.SyntaxKind.EqualsToken, assignment);
             }
             addParseSpanInfo(assignment, attr.attribute.sourceSpan);
             // Ignore diagnostics for text attributes if configured to do so.
@@ -42715,7 +44612,7 @@ class TcbDirectiveInputsOp extends TcbOp {
                 attr.attribute instanceof TextAttribute) {
                 markIgnoreDiagnostics(assignment);
             }
-            this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(assignment));
+            this.scope.addStatement(ts.factory.createExpressionStatement(assignment));
         }
         this.checkRequiredInputs(seenRequiredInputs);
         return null;
@@ -42764,8 +44661,8 @@ class TcbDirectiveCtorCircularFallbackOp extends TcbOp {
     execute() {
         const id = this.tcb.allocateId();
         const typeCtor = this.tcb.env.typeCtorFor(this.dir);
-        const circularPlaceholder = ts__default["default"].factory.createCallExpression(typeCtor, 
-        /* typeArguments */ undefined, [ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createNull())]);
+        const circularPlaceholder = ts.factory.createCallExpression(typeCtor, 
+        /* typeArguments */ undefined, [ts.factory.createNonNullExpression(ts.factory.createNull())]);
         this.scope.addStatement(tsCreateVariable(id, circularPlaceholder));
         return id;
     }
@@ -42843,8 +44740,8 @@ class TcbControlFlowContentProjectionOp extends TcbOp {
         // this check won't be enabled for `suppress`.
         this.category =
             tcb.env.config.controlFlowPreventingContentProjection === 'error'
-                ? ts__default["default"].DiagnosticCategory.Error
-                : ts__default["default"].DiagnosticCategory.Warning;
+                ? ts.DiagnosticCategory.Error
+                : ts.DiagnosticCategory.Warning;
     }
     optional = false;
     execute() {
@@ -42980,20 +44877,20 @@ class TcbUnclaimedInputsOp extends TcbOp {
                     }
                     // A direct binding to a property.
                     const propertyName = ATTR_TO_PROP.get(binding.name) ?? binding.name;
-                    const prop = ts__default["default"].factory.createElementAccessExpression(elId, ts__default["default"].factory.createStringLiteral(propertyName));
-                    const stmt = ts__default["default"].factory.createBinaryExpression(prop, ts__default["default"].SyntaxKind.EqualsToken, wrapForDiagnostics(expr));
+                    const prop = ts.factory.createElementAccessExpression(elId, ts.factory.createStringLiteral(propertyName));
+                    const stmt = ts.factory.createBinaryExpression(prop, ts.SyntaxKind.EqualsToken, wrapForDiagnostics(expr));
                     addParseSpanInfo(stmt, binding.sourceSpan);
-                    this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(stmt));
+                    this.scope.addStatement(ts.factory.createExpressionStatement(stmt));
                 }
                 else {
-                    this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(expr));
+                    this.scope.addStatement(ts.factory.createExpressionStatement(expr));
                 }
             }
             else {
                 // A binding to an animation, attribute, class or style. For now, only validate the right-
                 // hand side of the expression.
                 // TODO: properly check class and style bindings.
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(expr));
+                this.scope.addStatement(ts.factory.createExpressionStatement(expr));
             }
         }
         return null;
@@ -43037,19 +44934,19 @@ class TcbDirectiveOutputsOp extends TcbOp {
             if (dirId === null) {
                 dirId = this.scope.resolve(this.node, this.dir);
             }
-            const outputField = ts__default["default"].factory.createElementAccessExpression(dirId, ts__default["default"].factory.createStringLiteral(field));
+            const outputField = ts.factory.createElementAccessExpression(dirId, ts.factory.createStringLiteral(field));
             addParseSpanInfo(outputField, output.keySpan);
             if (this.tcb.env.config.checkTypeOfOutputEvents) {
                 // For strict checking of directive events, generate a call to the `subscribe` method
                 // on the directive's output field to let type information flow into the handler function's
                 // `$event` parameter.
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0 /* EventParamType.Infer */);
-                const subscribeFn = ts__default["default"].factory.createPropertyAccessExpression(outputField, 'subscribe');
-                const call = ts__default["default"].factory.createCallExpression(subscribeFn, /* typeArguments */ undefined, [
+                const subscribeFn = ts.factory.createPropertyAccessExpression(outputField, 'subscribe');
+                const call = ts.factory.createCallExpression(subscribeFn, /* typeArguments */ undefined, [
                     handler,
                 ]);
                 addParseSpanInfo(call, output.sourceSpan);
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(call));
+                this.scope.addStatement(ts.factory.createExpressionStatement(call));
             }
             else {
                 // If strict checking of directive events is disabled:
@@ -43058,9 +44955,9 @@ class TcbDirectiveOutputsOp extends TcbOp {
                 //   of the `TemplateTypeChecker` can still find the node for the class member for the
                 //   output.
                 // * Emit a handler function where the `$event` parameter has an explicit `any` type.
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(outputField));
+                this.scope.addStatement(ts.factory.createExpressionStatement(outputField));
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1 /* EventParamType.Any */);
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(handler));
+                this.scope.addStatement(ts.factory.createExpressionStatement(handler));
             }
         }
         return null;
@@ -43109,7 +45006,7 @@ class TcbUnclaimedOutputsOp extends TcbOp {
                     ? this.tcb.env.referenceExternalType('@angular/animations', 'AnimationEvent')
                     : 1 /* EventParamType.Any */;
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, eventType);
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(handler));
+                this.scope.addStatement(ts.factory.createExpressionStatement(handler));
             }
             else if (this.tcb.env.config.checkTypeOfDomEvents) {
                 // If strict checking of DOM events is enabled, generate a call to `addEventListener` on
@@ -43121,20 +45018,20 @@ class TcbUnclaimedOutputsOp extends TcbOp {
                 if (elId === null) {
                     elId = this.scope.resolve(this.element);
                 }
-                const propertyAccess = ts__default["default"].factory.createPropertyAccessExpression(elId, 'addEventListener');
+                const propertyAccess = ts.factory.createPropertyAccessExpression(elId, 'addEventListener');
                 addParseSpanInfo(propertyAccess, output.keySpan);
-                const call = ts__default["default"].factory.createCallExpression(
+                const call = ts.factory.createCallExpression(
                 /* expression */ propertyAccess, 
                 /* typeArguments */ undefined, 
-                /* arguments */ [ts__default["default"].factory.createStringLiteral(output.name), handler]);
+                /* arguments */ [ts.factory.createStringLiteral(output.name), handler]);
                 addParseSpanInfo(call, output.sourceSpan);
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(call));
+                this.scope.addStatement(ts.factory.createExpressionStatement(call));
             }
             else {
                 // If strict checking of DOM inputs is disabled, emit a handler function where the `$event`
                 // parameter has an explicit `any` type.
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1 /* EventParamType.Any */);
-                this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(handler));
+                this.scope.addStatement(ts.factory.createExpressionStatement(handler));
             }
         }
         return null;
@@ -43155,11 +45052,11 @@ class TcbComponentContextCompletionOp extends TcbOp {
     }
     optional = false;
     execute() {
-        const ctx = ts__default["default"].factory.createThis();
-        const ctxDot = ts__default["default"].factory.createPropertyAccessExpression(ctx, '');
+        const ctx = ts.factory.createThis();
+        const ctxDot = ts.factory.createPropertyAccessExpression(ctx, '');
         markIgnoreDiagnostics(ctxDot);
         addExpressionIdentifier(ctxDot, ExpressionIdentifier.COMPONENT_COMPLETION);
-        this.scope.addStatement(ts__default["default"].factory.createExpressionStatement(ctxDot));
+        this.scope.addStatement(ts.factory.createExpressionStatement(ctxDot));
         return null;
     }
 }
@@ -43252,7 +45149,7 @@ class TcbIfOp extends TcbOp {
         // If the expression is null, it means that it's an `else` statement.
         if (branch.expression === null) {
             const branchScope = this.getBranchScope(this.scope, branch, index);
-            return ts__default["default"].factory.createBlock(branchScope.render());
+            return ts.factory.createBlock(branchScope.render());
         }
         // We process the expression first in the parent scope, but create a scope around the block
         // that the body will inherit from. We do this, because we need to declare a separate variable
@@ -43263,10 +45160,10 @@ class TcbIfOp extends TcbOp {
         this.expressionScopes.set(branch, outerScope);
         let expression = tcbExpression(branch.expression, this.tcb, this.scope);
         if (branch.expressionAlias !== null) {
-            expression = ts__default["default"].factory.createBinaryExpression(ts__default["default"].factory.createParenthesizedExpression(expression), ts__default["default"].SyntaxKind.AmpersandAmpersandToken, outerScope.resolve(branch.expressionAlias));
+            expression = ts.factory.createBinaryExpression(ts.factory.createParenthesizedExpression(expression), ts.SyntaxKind.AmpersandAmpersandToken, outerScope.resolve(branch.expressionAlias));
         }
         const bodyScope = this.getBranchScope(outerScope, branch, index);
-        return ts__default["default"].factory.createIfStatement(expression, ts__default["default"].factory.createBlock(bodyScope.render()), this.generateBranch(index + 1));
+        return ts.factory.createIfStatement(expression, ts.factory.createBlock(bodyScope.render()), this.generateBranch(index + 1));
     }
     getBranchScope(parentScope, branch, index) {
         const checkBody = this.tcb.env.config.checkControlFlowBodies;
@@ -43297,7 +45194,7 @@ class TcbIfOp extends TcbOp {
             // want it to produce a duplicate diagnostic.
             expression = tcbExpression(branch.expression, this.tcb, expressionScope);
             if (branch.expressionAlias !== null) {
-                expression = ts__default["default"].factory.createBinaryExpression(ts__default["default"].factory.createParenthesizedExpression(expression), ts__default["default"].SyntaxKind.AmpersandAmpersandToken, expressionScope.resolve(branch.expressionAlias));
+                expression = ts.factory.createBinaryExpression(ts.factory.createParenthesizedExpression(expression), ts.SyntaxKind.AmpersandAmpersandToken, expressionScope.resolve(branch.expressionAlias));
             }
             markIgnoreDiagnostics(expression);
             // The expressions of the preceding branches have to be negated
@@ -43305,12 +45202,12 @@ class TcbIfOp extends TcbOp {
             // for the branch's own expression which is preserved as is.
             const comparisonExpression = i === index
                 ? expression
-                : ts__default["default"].factory.createPrefixUnaryExpression(ts__default["default"].SyntaxKind.ExclamationToken, ts__default["default"].factory.createParenthesizedExpression(expression));
+                : ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.ExclamationToken, ts.factory.createParenthesizedExpression(expression));
             // Finally add the expression to the guard with an && operator.
             guard =
                 guard === null
                     ? comparisonExpression
-                    : ts__default["default"].factory.createBinaryExpression(guard, ts__default["default"].SyntaxKind.AmpersandAmpersandToken, comparisonExpression);
+                    : ts.factory.createBinaryExpression(guard, ts.SyntaxKind.AmpersandAmpersandToken, comparisonExpression);
         }
         return guard;
     }
@@ -43338,12 +45235,12 @@ class TcbSwitchOp extends TcbOp {
         const clauses = this.block.cases.map((current) => {
             const checkBody = this.tcb.env.config.checkControlFlowBodies;
             const clauseScope = Scope.forNodes(this.tcb, this.scope, null, checkBody ? current.children : [], checkBody ? this.generateGuard(current, switchExpression) : null);
-            const statements = [...clauseScope.render(), ts__default["default"].factory.createBreakStatement()];
+            const statements = [...clauseScope.render(), ts.factory.createBreakStatement()];
             return current.expression === null
-                ? ts__default["default"].factory.createDefaultClause(statements)
-                : ts__default["default"].factory.createCaseClause(tcbExpression(current.expression, this.tcb, clauseScope), statements);
+                ? ts.factory.createDefaultClause(statements)
+                : ts.factory.createCaseClause(tcbExpression(current.expression, this.tcb, clauseScope), statements);
         });
-        this.scope.addStatement(ts__default["default"].factory.createSwitchStatement(switchExpression, ts__default["default"].factory.createCaseBlock(clauses)));
+        this.scope.addStatement(ts.factory.createSwitchStatement(switchExpression, ts.factory.createCaseBlock(clauses)));
         return null;
     }
     generateGuard(node, switchValue) {
@@ -43353,7 +45250,7 @@ class TcbSwitchOp extends TcbOp {
             // The expression needs to be ignored for diagnostics since it has been checked already.
             const expression = tcbExpression(node.expression, this.tcb, this.scope);
             markIgnoreDiagnostics(expression);
-            return ts__default["default"].factory.createBinaryExpression(switchValue, ts__default["default"].SyntaxKind.EqualsEqualsEqualsToken, expression);
+            return ts.factory.createBinaryExpression(switchValue, ts.SyntaxKind.EqualsEqualsEqualsToken, expression);
         }
         // To fully narrow the type in the default case, we need to generate an expression that negates
         // the values of all of the other expressions. For example:
@@ -43371,12 +45268,12 @@ class TcbSwitchOp extends TcbOp {
             // The expression needs to be ignored for diagnostics since it has been checked already.
             const expression = tcbExpression(current.expression, this.tcb, this.scope);
             markIgnoreDiagnostics(expression);
-            const comparison = ts__default["default"].factory.createBinaryExpression(switchValue, ts__default["default"].SyntaxKind.ExclamationEqualsEqualsToken, expression);
+            const comparison = ts.factory.createBinaryExpression(switchValue, ts.SyntaxKind.ExclamationEqualsEqualsToken, expression);
             if (guard === null) {
                 guard = comparison;
             }
             else {
-                guard = ts__default["default"].factory.createBinaryExpression(guard, ts__default["default"].SyntaxKind.AmpersandAmpersandToken, comparison);
+                guard = ts.factory.createBinaryExpression(guard, ts.SyntaxKind.AmpersandAmpersandToken, comparison);
             }
         }
         return guard;
@@ -43403,21 +45300,21 @@ class TcbForOfOp extends TcbOp {
     execute() {
         const loopScope = Scope.forNodes(this.tcb, this.scope, this.block, this.tcb.env.config.checkControlFlowBodies ? this.block.children : [], null);
         const initializerId = loopScope.resolve(this.block.item);
-        if (!ts__default["default"].isIdentifier(initializerId)) {
+        if (!ts.isIdentifier(initializerId)) {
             throw new Error(`Could not resolve for loop variable ${this.block.item.name} to an identifier`);
         }
-        const initializer = ts__default["default"].factory.createVariableDeclarationList([ts__default["default"].factory.createVariableDeclaration(initializerId)], ts__default["default"].NodeFlags.Const);
+        const initializer = ts.factory.createVariableDeclarationList([ts.factory.createVariableDeclaration(initializerId)], ts.NodeFlags.Const);
         addParseSpanInfo(initializer, this.block.item.keySpan);
         // It's common to have a for loop over a nullable value (e.g. produced by the `async` pipe).
         // Add a non-null expression to allow such values to be assigned.
-        const expression = ts__default["default"].factory.createNonNullExpression(tcbExpression(this.block.expression, this.tcb, this.scope));
+        const expression = ts.factory.createNonNullExpression(tcbExpression(this.block.expression, this.tcb, this.scope));
         const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
         const trackExpression = trackTranslator.translate(this.block.trackBy);
         const statements = [
             ...loopScope.render(),
-            ts__default["default"].factory.createExpressionStatement(trackExpression),
+            ts.factory.createExpressionStatement(trackExpression),
         ];
-        this.scope.addStatement(ts__default["default"].factory.createForOfStatement(undefined, initializer, expression, ts__default["default"].factory.createBlock(statements)));
+        this.scope.addStatement(ts.factory.createForOfStatement(undefined, initializer, expression, ts.factory.createBlock(statements)));
         return null;
     }
 }
@@ -43428,7 +45325,7 @@ class TcbForOfOp extends TcbOp {
  * assertion of the null value (in TypeScript, the expression `null!`). This construction will infer
  * the least narrow type for whatever it's assigned to.
  */
-const INFER_TYPE_FOR_CIRCULAR_OP_EXPR = ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createNull());
+const INFER_TYPE_FOR_CIRCULAR_OP_EXPR = ts.factory.createNonNullExpression(ts.factory.createNull());
 /**
  * Overall generation context for the type check block.
  *
@@ -43465,7 +45362,7 @@ class Context {
      * might change depending on the type of data being stored.
      */
     allocateId() {
-        return ts__default["default"].factory.createIdentifier(`_t${this.nextId++}`);
+        return ts.factory.createIdentifier(`_t${this.nextId++}`);
     }
     getPipeByName(name) {
         if (this.pipes === null || !this.pipes.has(name)) {
@@ -43545,12 +45442,12 @@ class Scope {
      * Names of the for loop context variables and their types.
      */
     static forLoopContextVariableTypes = new Map([
-        ['$first', ts__default["default"].SyntaxKind.BooleanKeyword],
-        ['$last', ts__default["default"].SyntaxKind.BooleanKeyword],
-        ['$even', ts__default["default"].SyntaxKind.BooleanKeyword],
-        ['$odd', ts__default["default"].SyntaxKind.BooleanKeyword],
-        ['$index', ts__default["default"].SyntaxKind.NumberKeyword],
-        ['$count', ts__default["default"].SyntaxKind.NumberKeyword],
+        ['$first', ts.SyntaxKind.BooleanKeyword],
+        ['$last', ts.SyntaxKind.BooleanKeyword],
+        ['$even', ts.SyntaxKind.BooleanKeyword],
+        ['$odd', ts.SyntaxKind.BooleanKeyword],
+        ['$index', ts.SyntaxKind.NumberKeyword],
+        ['$count', ts.SyntaxKind.NumberKeyword],
     ]);
     constructor(tcb, parent = null, guard = null) {
         this.tcb = tcb;
@@ -43607,7 +45504,7 @@ class Scope {
                 if (!this.forLoopContextVariableTypes.has(variable.value)) {
                     throw new Error(`Unrecognized for loop context variable ${variable.name}`);
                 }
-                const type = ts__default["default"].factory.createKeywordTypeNode(this.forLoopContextVariableTypes.get(variable.value));
+                const type = ts.factory.createKeywordTypeNode(this.forLoopContextVariableTypes.get(variable.value));
                 this.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
             }
         }
@@ -43661,18 +45558,18 @@ class Scope {
             // In addition, returning a clone prevents the consumer of `Scope#resolve` from
             // attaching comments at the declaration site.
             let clone;
-            if (ts__default["default"].isIdentifier(res)) {
-                clone = ts__default["default"].factory.createIdentifier(res.text);
+            if (ts.isIdentifier(res)) {
+                clone = ts.factory.createIdentifier(res.text);
             }
-            else if (ts__default["default"].isNonNullExpression(res)) {
-                clone = ts__default["default"].factory.createNonNullExpression(res.expression);
+            else if (ts.isNonNullExpression(res)) {
+                clone = ts.factory.createNonNullExpression(res.expression);
             }
             else {
                 throw new Error(`Could not resolve ${node} to an Identifier or a NonNullExpression`);
             }
-            ts__default["default"].setOriginalNode(clone, res);
+            ts.setOriginalNode(clone, res);
             clone.parent = clone.parent;
-            return ts__default["default"].setSyntheticTrailingComments(clone, []);
+            return ts.setSyntheticTrailingComments(clone, []);
         }
         else if (this.parent !== null) {
             // Check with the parent.
@@ -43723,7 +45620,7 @@ class Scope {
             // Both the parent scope and this scope provide a guard, so create a combination of the two.
             // It is important that the parent guard is used as left operand, given that it may provide
             // narrowing that is required for this scope's guard to be valid.
-            return ts__default["default"].factory.createBinaryExpression(parentGuards, ts__default["default"].SyntaxKind.AmpersandAmpersandToken, this.guard);
+            return ts.factory.createBinaryExpression(parentGuards, ts.SyntaxKind.AmpersandAmpersandToken, this.guard);
         }
     }
     /** Returns whether a template symbol is defined locally within the current scope. */
@@ -44085,12 +45982,12 @@ class Scope {
  * arguments.
  */
 function tcbThisParam(name, typeArguments) {
-    return ts__default["default"].factory.createParameterDeclaration(
+    return ts.factory.createParameterDeclaration(
     /* modifiers */ undefined, 
     /* dotDotDotToken */ undefined, 
     /* name */ 'this', 
     /* questionToken */ undefined, 
-    /* type */ ts__default["default"].factory.createTypeReferenceNode(name, typeArguments), 
+    /* type */ ts.factory.createTypeReferenceNode(name, typeArguments), 
     /* initializer */ undefined);
 }
 /**
@@ -44137,7 +46034,7 @@ class TcbExpressionTranslator {
                 // We don't use `markIgnoreForDiagnostics` here, because it won't prevent duplicate
                 // diagnostics for nested accesses in cases like `@let value = value.foo.bar.baz`.
                 if (targetExpression !== null) {
-                    return ts__default["default"].factory.createAsExpression(targetExpression, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+                    return ts.factory.createAsExpression(targetExpression, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
                 }
             }
             return targetExpression;
@@ -44149,7 +46046,7 @@ class TcbExpressionTranslator {
             }
             const targetExpression = this.getTargetNodeExpression(target, ast);
             const expr = this.translate(ast.value);
-            const result = ts__default["default"].factory.createParenthesizedExpression(ts__default["default"].factory.createBinaryExpression(targetExpression, ts__default["default"].SyntaxKind.EqualsToken, expr));
+            const result = ts.factory.createParenthesizedExpression(ts.factory.createBinaryExpression(targetExpression, ts.SyntaxKind.EqualsToken, expr));
             addParseSpanInfo(result, ast.sourceSpan);
             // Ignore diagnostics from TS produced for writes to `@let` and re-report them using
             // our own infrastructure. We can't rely on the TS reporting, because it includes
@@ -44173,7 +46070,7 @@ class TcbExpressionTranslator {
             // Therefore if `resolve` is called on an `ImplicitReceiver`, it's because no outer
             // PropertyRead/Call resolved to a variable or reference, and therefore this is a
             // property read or method call on the component context itself.
-            return ts__default["default"].factory.createThis();
+            return ts.factory.createThis();
         }
         else if (ast instanceof BindingPipe) {
             const expr = this.translate(ast.exp);
@@ -44198,12 +46095,12 @@ class TcbExpressionTranslator {
                 pipe = this.tcb.env.pipeInst(pipeMeta.ref);
             }
             const args = ast.args.map((arg) => this.translate(arg));
-            let methodAccess = ts__default["default"].factory.createPropertyAccessExpression(pipe, 'transform');
+            let methodAccess = ts.factory.createPropertyAccessExpression(pipe, 'transform');
             addParseSpanInfo(methodAccess, ast.nameSpan);
             if (!this.tcb.env.config.checkTypeOfPipes) {
-                methodAccess = ts__default["default"].factory.createAsExpression(methodAccess, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
+                methodAccess = ts.factory.createAsExpression(methodAccess, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
             }
-            const result = ts__default["default"].factory.createCallExpression(
+            const result = ts.factory.createCallExpression(
             /* expression */ methodAccess, 
             /* typeArguments */ undefined, 
             /* argumentsArray */ [expr, ...args]);
@@ -44219,8 +46116,8 @@ class TcbExpressionTranslator {
                 ast.receiver.name === '$any' &&
                 ast.args.length === 1) {
                 const expr = this.translate(ast.args[0]);
-                const exprAsAny = ts__default["default"].factory.createAsExpression(expr, ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
-                const result = ts__default["default"].factory.createParenthesizedExpression(exprAsAny);
+                const exprAsAny = ts.factory.createAsExpression(expr, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
+                const result = ts.factory.createParenthesizedExpression(exprAsAny);
                 addParseSpanInfo(result, ast.sourceSpan);
                 return result;
             }
@@ -44236,7 +46133,7 @@ class TcbExpressionTranslator {
             const method = wrapForDiagnostics(receiver);
             addParseSpanInfo(method, ast.receiver.nameSpan);
             const args = ast.args.map((arg) => this.translate(arg));
-            const node = ts__default["default"].factory.createCallExpression(method, undefined, args);
+            const node = ts.factory.createCallExpression(method, undefined, args);
             addParseSpanInfo(node, ast.sourceSpan);
             return node;
         }
@@ -44268,29 +46165,29 @@ function tcbCallTypeCtor(dir, tcb, inputs) {
     const typeCtor = tcb.env.typeCtorFor(dir);
     // Construct an array of `ts.PropertyAssignment`s for each of the directive's inputs.
     const members = inputs.map((input) => {
-        const propertyName = ts__default["default"].factory.createStringLiteral(input.field);
+        const propertyName = ts.factory.createStringLiteral(input.field);
         if (input.type === 'binding') {
             // For bound inputs, the property is assigned the binding expression.
             let expr = widenBinding(input.expression, tcb);
             if (input.isTwoWayBinding && tcb.env.config.allowSignalsInTwoWayBindings) {
                 expr = unwrapWritableSignal(expr, tcb);
             }
-            const assignment = ts__default["default"].factory.createPropertyAssignment(propertyName, wrapForDiagnostics(expr));
+            const assignment = ts.factory.createPropertyAssignment(propertyName, wrapForDiagnostics(expr));
             addParseSpanInfo(assignment, input.sourceSpan);
             return assignment;
         }
         else {
             // A type constructor is required to be called with all input properties, so any unset
             // inputs are simply assigned a value of type `any` to ignore them.
-            return ts__default["default"].factory.createPropertyAssignment(propertyName, ANY_EXPRESSION);
+            return ts.factory.createPropertyAssignment(propertyName, ANY_EXPRESSION);
         }
     });
     // Call the `ngTypeCtor` method on the directive class, with an object literal argument created
     // from the matched inputs.
-    return ts__default["default"].factory.createCallExpression(
+    return ts.factory.createCallExpression(
     /* expression */ typeCtor, 
     /* typeArguments */ undefined, 
-    /* argumentsArray */ [ts__default["default"].factory.createObjectLiteralExpression(members)]);
+    /* argumentsArray */ [ts.factory.createObjectLiteralExpression(members)]);
 }
 function getBoundAttributes(directive, node) {
     const boundInputs = [];
@@ -44335,7 +46232,7 @@ function translateInput(attr, tcb, scope) {
     }
     else {
         // For regular attributes with a static string value, use the represented string literal.
-        return ts__default["default"].factory.createStringLiteral(attr.value);
+        return ts.factory.createStringLiteral(attr.value);
     }
 }
 /**
@@ -44348,7 +46245,7 @@ function widenBinding(expr, tcb) {
         return tsCastToAny(expr);
     }
     else if (!tcb.env.config.strictNullInputBindings) {
-        if (ts__default["default"].isObjectLiteralExpression(expr) || ts__default["default"].isArrayLiteralExpression(expr)) {
+        if (ts.isObjectLiteralExpression(expr) || ts.isArrayLiteralExpression(expr)) {
             // Object literals and array literals should not be wrapped in non-null assertions as that
             // would cause literals to be prematurely widened, resulting in type errors when assigning
             // into a literal type.
@@ -44357,7 +46254,7 @@ function widenBinding(expr, tcb) {
         else {
             // If strict null checks are disabled, erase `null` and `undefined` from the type by
             // wrapping the expression in a non-null assertion.
-            return ts__default["default"].factory.createNonNullExpression(expr);
+            return ts.factory.createNonNullExpression(expr);
         }
     }
     else {
@@ -44370,7 +46267,7 @@ function widenBinding(expr, tcb) {
  */
 function unwrapWritableSignal(expression, tcb) {
     const unwrapRef = tcb.env.referenceExternalSymbol(Identifiers.unwrapWritableSignal.moduleName, Identifiers.unwrapWritableSignal.name);
-    return ts__default["default"].factory.createCallExpression(unwrapRef, undefined, [expression]);
+    return ts.factory.createCallExpression(unwrapRef, undefined, [expression]);
 }
 const EVENT_PARAMETER = '$event';
 /**
@@ -44394,18 +46291,18 @@ function tcbCreateEventHandler(event, tcb, scope, eventType) {
         // this will already be covered by the corresponding input binding, however it allows us to
         // handle the case where the input has a wider type than the output (see #58971).
         const target = tcb.allocateId();
-        const assignment = ts__default["default"].factory.createBinaryExpression(target, ts__default["default"].SyntaxKind.EqualsToken, ts__default["default"].factory.createIdentifier(EVENT_PARAMETER));
-        statements.push(tsCreateVariable(target, tcb.env.config.allowSignalsInTwoWayBindings ? unwrapWritableSignal(handler, tcb) : handler), ts__default["default"].factory.createExpressionStatement(assignment));
+        const assignment = ts.factory.createBinaryExpression(target, ts.SyntaxKind.EqualsToken, ts.factory.createIdentifier(EVENT_PARAMETER));
+        statements.push(tsCreateVariable(target, tcb.env.config.allowSignalsInTwoWayBindings ? unwrapWritableSignal(handler, tcb) : handler), ts.factory.createExpressionStatement(assignment));
     }
     else {
-        statements.push(ts__default["default"].factory.createExpressionStatement(handler));
+        statements.push(ts.factory.createExpressionStatement(handler));
     }
     let eventParamType;
     if (eventType === 0 /* EventParamType.Infer */) {
         eventParamType = undefined;
     }
     else if (eventType === 1 /* EventParamType.Any */) {
-        eventParamType = ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword);
+        eventParamType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
     }
     else {
         eventParamType = eventType;
@@ -44413,12 +46310,12 @@ function tcbCreateEventHandler(event, tcb, scope, eventType) {
     // Obtain all guards that have been applied to the scope and its parents, as they have to be
     // repeated within the handler function for their narrowing to be in effect within the handler.
     const guards = scope.guards();
-    let body = ts__default["default"].factory.createBlock(statements);
+    let body = ts.factory.createBlock(statements);
     if (guards !== null) {
         // Wrap the body in an `if` statement containing all guards that have to be applied.
-        body = ts__default["default"].factory.createBlock([ts__default["default"].factory.createIfStatement(guards, body)]);
+        body = ts.factory.createBlock([ts.factory.createIfStatement(guards, body)]);
     }
-    const eventParam = ts__default["default"].factory.createParameterDeclaration(
+    const eventParam = ts.factory.createParameterDeclaration(
     /* modifiers */ undefined, 
     /* dotDotDotToken */ undefined, 
     /* name */ EVENT_PARAMETER, 
@@ -44426,11 +46323,11 @@ function tcbCreateEventHandler(event, tcb, scope, eventType) {
     /* type */ eventParamType);
     addExpressionIdentifier(eventParam, ExpressionIdentifier.EVENT_PARAMETER);
     // Return an arrow function instead of a function expression to preserve the `this` context.
-    return ts__default["default"].factory.createArrowFunction(
+    return ts.factory.createArrowFunction(
     /* modifiers */ undefined, 
     /* typeParameters */ undefined, 
     /* parameters */ [eventParam], 
-    /* type */ ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword), 
+    /* type */ ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword), 
     /* equalsGreaterThanToken */ undefined, 
     /* body */ body);
 }
@@ -44476,7 +46373,7 @@ class TcbEventHandlerTranslator extends TcbExpressionTranslator {
             ast.receiver instanceof ImplicitReceiver &&
             !(ast.receiver instanceof ThisReceiver) &&
             ast.name === EVENT_PARAMETER) {
-            const event = ts__default["default"].factory.createIdentifier(EVENT_PARAMETER);
+            const event = ts.factory.createIdentifier(EVENT_PARAMETER);
             addParseSpanInfo(event, ast.nameSpan);
             return event;
         }
@@ -44534,11 +46431,11 @@ class TypeCheckFile extends Environment {
             // Type check block code affects code completion and fix suggestions.
             // We want to encourage single quotes for now, like we always did.
             shouldUseSingleQuotes: () => true,
-        }), refEmitter, reflector, ts__default["default"].createSourceFile(compilerHost.getCanonicalFileName(fileName), '', ts__default["default"].ScriptTarget.Latest, true));
+        }), refEmitter, reflector, ts.createSourceFile(compilerHost.getCanonicalFileName(fileName), '', ts.ScriptTarget.Latest, true));
         this.fileName = fileName;
     }
     addTypeCheckBlock(ref, meta, domSchemaChecker, oobRecorder, genericContextBehavior) {
-        const fnId = ts__default["default"].factory.createIdentifier(`_tcb${this.nextTcbId++}`);
+        const fnId = ts.factory.createIdentifier(`_tcb${this.nextTcbId++}`);
         const fn = generateTypeCheckBlock(this, ref, fnId, meta, domSchemaChecker, oobRecorder, genericContextBehavior);
         this.tcbStatements.push(fn);
     }
@@ -44552,24 +46449,24 @@ class TypeCheckFile extends Environment {
         if (importChanges.updatedImports.size > 0) {
             throw new Error('AssertionError: Expected no imports to be updated for a new type check file.');
         }
-        const printer = ts__default["default"].createPrinter({ removeComments });
+        const printer = ts.createPrinter({ removeComments });
         let source = '';
         const newImports = importChanges.newImports.get(this.contextFile.fileName);
         if (newImports !== undefined) {
             source += newImports
-                .map((i) => printer.printNode(ts__default["default"].EmitHint.Unspecified, i, this.contextFile))
+                .map((i) => printer.printNode(ts.EmitHint.Unspecified, i, this.contextFile))
                 .join('\n');
         }
         source += '\n';
         for (const stmt of this.pipeInstStatements) {
-            source += printer.printNode(ts__default["default"].EmitHint.Unspecified, stmt, this.contextFile) + '\n';
+            source += printer.printNode(ts.EmitHint.Unspecified, stmt, this.contextFile) + '\n';
         }
         for (const stmt of this.typeCtorStatements) {
-            source += printer.printNode(ts__default["default"].EmitHint.Unspecified, stmt, this.contextFile) + '\n';
+            source += printer.printNode(ts.EmitHint.Unspecified, stmt, this.contextFile) + '\n';
         }
         source += '\n';
         for (const stmt of this.tcbStatements) {
-            source += printer.printNode(ts__default["default"].EmitHint.Unspecified, stmt, this.contextFile) + '\n';
+            source += printer.printNode(ts.EmitHint.Unspecified, stmt, this.contextFile) + '\n';
         }
         // Ensure the template type-checking file is an ES module. Otherwise, it's interpreted as some
         // kind of global namespace in TS, which forces a full re-typecheck of the user's program that
@@ -44762,7 +46659,7 @@ class TypeCheckContextImpl {
             return null;
         }
         // Use a `ts.Printer` to generate source code.
-        const printer = ts__default["default"].createPrinter({ omitTrailingSemicolon: true });
+        const printer = ts.createPrinter({ omitTrailingSemicolon: true });
         // Imports may need to be added to the file to support type-checking of directives
         // used in the template within it.
         const importManager = new ImportManager({
@@ -44788,7 +46685,7 @@ class TypeCheckContextImpl {
             newImports.get(sf.fileName).forEach((newImport) => {
                 updates.push({
                     pos: 0,
-                    text: printer.printNode(ts__default["default"].EmitHint.Unspecified, newImport, sf),
+                    text: printer.printNode(ts.EmitHint.Unspecified, newImport, sf),
                 });
             });
         }
@@ -44800,7 +46697,7 @@ class TypeCheckContextImpl {
             updates.push({
                 pos: oldBindings.getStart(),
                 deletePos: oldBindings.getEnd(),
-                text: printer.printNode(ts__default["default"].EmitHint.Unspecified, newBindings, sf),
+                text: printer.printNode(ts.EmitHint.Unspecified, newBindings, sf),
             });
         }
         const result = new MagicString(sf.text, { filename: sf.fileName });
@@ -44892,7 +46789,7 @@ function getTemplateDiagnostics(parseErrors, templateId, sourceMapping) {
             // diagnostic.
             span.end.offset++;
         }
-        return makeTemplateDiagnostic(templateId, sourceMapping, span, ts__default["default"].DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.TEMPLATE_PARSE_ERROR), error.msg);
+        return makeTemplateDiagnostic(templateId, sourceMapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.TEMPLATE_PARSE_ERROR), error.msg);
     });
 }
 /**
@@ -44921,11 +46818,11 @@ class InlineTcbOp {
     }
     execute(im, sf, refEmitter, printer) {
         const env = new Environment(this.config, im, refEmitter, this.reflector, sf);
-        const fnName = ts__default["default"].factory.createIdentifier(`_tcb_${this.ref.node.pos}`);
+        const fnName = ts.factory.createIdentifier(`_tcb_${this.ref.node.pos}`);
         // Inline TCBs should copy any generic type parameter nodes directly, as the TCB code is
         // inlined into the class in a context where that will always be legal.
         const fn = generateTypeCheckBlock(env, this.ref, fnName, this.meta, this.domSchemaChecker, this.oobRecorder, TcbGenericContextBehavior.CopyClassNodes);
-        return printer.printNode(ts__default["default"].EmitHint.Unspecified, fn, sf);
+        return printer.printNode(ts.EmitHint.Unspecified, fn, sf);
     }
 }
 /**
@@ -44949,7 +46846,7 @@ class TypeCtorOp {
     execute(im, sf, refEmitter, printer) {
         const emitEnv = new ReferenceEmitEnvironment(im, refEmitter, this.reflector, sf);
         const tcb = generateInlineTypeCtor(emitEnv, this.ref.node, this.meta);
-        return printer.printNode(ts__default["default"].EmitHint.Unspecified, tcb, sf);
+        return printer.printNode(ts.EmitHint.Unspecified, tcb, sf);
     }
 }
 
@@ -45139,7 +47036,7 @@ class SymbolBuilder {
         const elementSourceSpan = element.startSourceSpan ?? element.sourceSpan;
         const node = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: elementSourceSpan,
-            filter: ts__default["default"].isVariableDeclaration,
+            filter: ts.isVariableDeclaration,
         });
         if (node === null) {
             return null;
@@ -45165,8 +47062,8 @@ class SymbolBuilder {
         // directives could be either:
         // - var _t1: TestDir /*T:D*/ = null! as TestDir;
         // - var _t1 /*T:D*/ = _ctor1({});
-        const isDirectiveDeclaration = (node) => (ts__default["default"].isTypeNode(node) || ts__default["default"].isIdentifier(node)) &&
-            ts__default["default"].isVariableDeclaration(node.parent) &&
+        const isDirectiveDeclaration = (node) => (ts.isTypeNode(node) || ts.isIdentifier(node)) &&
+            ts.isVariableDeclaration(node.parent) &&
             hasExpressionIdentifier(tcbSourceFile, node, ExpressionIdentifier.DIRECTIVE);
         const nodes = findAllMatchingNodes(this.typeCheckBlock, {
             withSpan: elementSourceSpan,
@@ -45177,7 +47074,7 @@ class SymbolBuilder {
             const symbol = this.getSymbolOfTsNode(node.parent);
             if (symbol === null ||
                 !isSymbolWithValueDeclaration(symbol.tsSymbol) ||
-                !ts__default["default"].isClassDeclaration(symbol.tsSymbol.valueDeclaration)) {
+                !ts.isClassDeclaration(symbol.tsSymbol.valueDeclaration)) {
                 continue;
             }
             const meta = this.getDirectiveMeta(element, symbol.tsSymbol.valueDeclaration);
@@ -45208,7 +47105,7 @@ class SymbolBuilder {
             if (!isHostDirectiveMetaForGlobalMode(current)) {
                 throw new Error('Impossible state: typecheck code path in local compilation mode.');
             }
-            if (!ts__default["default"].isClassDeclaration(current.directive.node)) {
+            if (!ts.isClassDeclaration(current.directive.node)) {
                 continue;
             }
             const symbol = this.getSymbolOfTsNode(current.directive.node);
@@ -45293,11 +47190,11 @@ class SymbolBuilder {
             if (!isAccessExpression(n)) {
                 return false;
             }
-            if (ts__default["default"].isPropertyAccessExpression(n)) {
+            if (ts.isPropertyAccessExpression(n)) {
                 return n.name.getText() === expectedAccess;
             }
             else {
-                return (ts__default["default"].isStringLiteral(n.argumentExpression) && n.argumentExpression.text === expectedAccess);
+                return (ts.isStringLiteral(n.argumentExpression) && n.argumentExpression.text === expectedAccess);
             }
         }
         const outputFieldAccesses = findAllMatchingNodes(this.typeCheckBlock, {
@@ -45307,7 +47204,7 @@ class SymbolBuilder {
         const bindings = [];
         for (const outputFieldAccess of outputFieldAccesses) {
             if (consumer instanceof Template || consumer instanceof Element$1) {
-                if (!ts__default["default"].isPropertyAccessExpression(outputFieldAccess)) {
+                if (!ts.isPropertyAccessExpression(outputFieldAccess)) {
                     continue;
                 }
                 const addEventListener = outputFieldAccess.name;
@@ -45331,7 +47228,7 @@ class SymbolBuilder {
                 });
             }
             else {
-                if (!ts__default["default"].isElementAccessExpression(outputFieldAccess)) {
+                if (!ts.isElementAccessExpression(outputFieldAccess)) {
                     continue;
                 }
                 const tsSymbol = this.getTypeChecker().getSymbolAtLocation(outputFieldAccess.argumentExpression);
@@ -45393,7 +47290,7 @@ class SymbolBuilder {
                 // then we are handling the case of a temporary variable being used for the input field.
                 // This is the case with `honorAccessModifiersForInputBindings = false` and in those cases
                 // we cannot resolve the owning directive, similar to how we guard above with `isAccessExpression`.
-                if (ts__default["default"].isIdentifier(signalInputAssignment.fieldExpr)) {
+                if (ts.isIdentifier(signalInputAssignment.fieldExpr)) {
                     continue;
                 }
                 const fieldSymbol = this.getSymbolOfTsNode(signalInputAssignment.fieldExpr);
@@ -45440,7 +47337,7 @@ class SymbolBuilder {
             return null;
         }
         const [declaration] = tsSymbol.declarations;
-        if (!ts__default["default"].isVariableDeclaration(declaration) ||
+        if (!ts.isVariableDeclaration(declaration) ||
             !hasExpressionIdentifier(
             // The expression identifier could be on the type (for regular directives) or the name
             // (for generic directives and the ctor op).
@@ -45450,7 +47347,7 @@ class SymbolBuilder {
         const symbol = this.getSymbolOfTsNode(declaration);
         if (symbol === null ||
             !isSymbolWithValueDeclaration(symbol.tsSymbol) ||
-            !ts__default["default"].isClassDeclaration(symbol.tsSymbol.valueDeclaration)) {
+            !ts.isClassDeclaration(symbol.tsSymbol.valueDeclaration)) {
             return null;
         }
         const ref = new Reference(symbol.tsSymbol.valueDeclaration);
@@ -45472,13 +47369,13 @@ class SymbolBuilder {
     getSymbolOfVariable(variable) {
         const node = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: variable.sourceSpan,
-            filter: ts__default["default"].isVariableDeclaration,
+            filter: ts.isVariableDeclaration,
         });
         if (node === null) {
             return null;
         }
         let nodeValueSymbol = null;
-        if (ts__default["default"].isForOfStatement(node.parent.parent)) {
+        if (ts.isForOfStatement(node.parent.parent)) {
             nodeValueSymbol = this.getSymbolOfTsNode(node);
         }
         else if (node.initializer !== undefined) {
@@ -45505,7 +47402,7 @@ class SymbolBuilder {
         // Find the node for the reference declaration, i.e. `var _t2 = _t1;`
         let node = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: ref.sourceSpan,
-            filter: ts__default["default"].isVariableDeclaration,
+            filter: ts.isVariableDeclaration,
         });
         if (node === null || target === null || node.initializer === undefined) {
             return null;
@@ -45514,8 +47411,8 @@ class SymbolBuilder {
         // which are of the form var _t3 = (_t2 as any as i2.TemplateRef<any>)
         // TODO(atscott): Consider adding an `ExpressionIdentifier` to tag variable declaration
         // initializers as invalid for symbol retrieval.
-        const originalDeclaration = ts__default["default"].isParenthesizedExpression(node.initializer) &&
-            ts__default["default"].isAsExpression(node.initializer.expression)
+        const originalDeclaration = ts.isParenthesizedExpression(node.initializer) &&
+            ts.isAsExpression(node.initializer.expression)
             ? this.getTypeChecker().getSymbolAtLocation(node.name)
             : this.getTypeChecker().getSymbolAtLocation(node.initializer);
         if (originalDeclaration === undefined || originalDeclaration.valueDeclaration === undefined) {
@@ -45542,7 +47439,7 @@ class SymbolBuilder {
             };
         }
         else {
-            if (!ts__default["default"].isClassDeclaration(target.directive.ref.node)) {
+            if (!ts.isClassDeclaration(target.directive.ref.node)) {
                 return null;
             }
             return {
@@ -45559,7 +47456,7 @@ class SymbolBuilder {
     getSymbolOfLetDeclaration(decl) {
         const node = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: decl.sourceSpan,
-            filter: ts__default["default"].isVariableDeclaration,
+            filter: ts.isVariableDeclaration,
         });
         if (node === null) {
             return null;
@@ -45584,7 +47481,7 @@ class SymbolBuilder {
     getSymbolOfPipe(expression) {
         const methodAccess = findFirstMatchingNode(this.typeCheckBlock, {
             withSpan: expression.nameSpan,
-            filter: ts__default["default"].isPropertyAccessExpression,
+            filter: ts.isPropertyAccessExpression,
         });
         if (methodAccess === null) {
             return null;
@@ -45636,7 +47533,7 @@ class SymbolBuilder {
         if (expression instanceof PropertyRead) {
             node = findFirstMatchingNode(this.typeCheckBlock, {
                 withSpan,
-                filter: ts__default["default"].isPropertyAccessExpression,
+                filter: ts.isPropertyAccessExpression,
             });
         }
         // Otherwise fall back to searching for any AST node.
@@ -45646,7 +47543,7 @@ class SymbolBuilder {
         if (node === null) {
             return null;
         }
-        while (ts__default["default"].isParenthesizedExpression(node)) {
+        while (ts.isParenthesizedExpression(node)) {
             node = node.expression;
         }
         // - If we have safe property read ("a?.b") we want to get the Symbol for b, the `whenTrue`
@@ -45654,7 +47551,7 @@ class SymbolBuilder {
         // - If our expression is a pipe binding ("a | test:b:c"), we want the Symbol for the
         // `transform` on the pipe.
         // - Otherwise, we retrieve the symbol for the node itself with no special considerations
-        if (expression instanceof SafePropertyRead && ts__default["default"].isConditionalExpression(node)) {
+        if (expression instanceof SafePropertyRead && ts.isConditionalExpression(node)) {
             const whenTrueSymbol = this.getSymbolOfTsNode(node.whenTrue);
             if (whenTrueSymbol === null) {
                 return null;
@@ -45673,14 +47570,14 @@ class SymbolBuilder {
         }
     }
     getSymbolOfTsNode(node) {
-        while (ts__default["default"].isParenthesizedExpression(node)) {
+        while (ts.isParenthesizedExpression(node)) {
             node = node.expression;
         }
         let tsSymbol;
-        if (ts__default["default"].isPropertyAccessExpression(node)) {
+        if (ts.isPropertyAccessExpression(node)) {
             tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.name);
         }
-        else if (ts__default["default"].isCallExpression(node)) {
+        else if (ts.isCallExpression(node)) {
             tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.expression);
         }
         else {
@@ -45702,16 +47599,16 @@ class SymbolBuilder {
         };
     }
     getTcbPositionForNode(node) {
-        if (ts__default["default"].isTypeReferenceNode(node)) {
+        if (ts.isTypeReferenceNode(node)) {
             return this.getTcbPositionForNode(node.typeName);
         }
-        else if (ts__default["default"].isQualifiedName(node)) {
+        else if (ts.isQualifiedName(node)) {
             return node.right.getStart();
         }
-        else if (ts__default["default"].isPropertyAccessExpression(node)) {
+        else if (ts.isPropertyAccessExpression(node)) {
             return node.name.getStart();
         }
-        else if (ts__default["default"].isElementAccessExpression(node)) {
+        else if (ts.isElementAccessExpression(node)) {
             return node.argumentExpression.getStart();
         }
         else {
@@ -45730,13 +47627,13 @@ function unwrapSignalInputWriteTAccessor(expr) {
     // e.g. `_t2.inputA[i2.ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]`
     // 1. Assert that we are dealing with an element access expression.
     // 2. Assert that we are dealing with a signal brand symbol access in the argument expression.
-    if (!ts__default["default"].isElementAccessExpression(expr) ||
-        !ts__default["default"].isPropertyAccessExpression(expr.argumentExpression)) {
+    if (!ts.isElementAccessExpression(expr) ||
+        !ts.isPropertyAccessExpression(expr.argumentExpression)) {
         return null;
     }
     // Assert that the property access in the element access is a simple identifier and
     // refers to `ɵINPUT_SIGNAL_BRAND_WRITE_TYPE`.
-    if (!ts__default["default"].isIdentifier(expr.argumentExpression.name) ||
+    if (!ts.isIdentifier(expr.argumentExpression.name) ||
         expr.argumentExpression.name.text !== Identifiers.InputSignalBrandWriteType.name) {
         return null;
     }
@@ -45745,9 +47642,9 @@ function unwrapSignalInputWriteTAccessor(expr) {
     //   - or `_t2['input-A'][ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]` (non-identifier input field names)
     //   - or `_dirInput[ɵINPUT_SIGNAL_BRAND_WRITE_TYPE` (honorAccessModifiersForInputBindings=false)
     // This is checked for type safety and to catch unexpected cases.
-    if (!ts__default["default"].isPropertyAccessExpression(expr.expression) &&
-        !ts__default["default"].isElementAccessExpression(expr.expression) &&
-        !ts__default["default"].isIdentifier(expr.expression)) {
+    if (!ts.isPropertyAccessExpression(expr.expression) &&
+        !ts.isElementAccessExpression(expr.expression) &&
+        !ts.isIdentifier(expr.expression)) {
         throw new Error('Unexpected expression for signal input write type.');
     }
     return {
@@ -46580,7 +48477,6 @@ class SingleShimTypeCheckingHost extends SingleFileTypeCheckingHost {
 exports.AST = AST;
 exports.ASTWithSource = ASTWithSource;
 exports.AbsoluteModuleStrategy = AbsoluteModuleStrategy;
-exports.AmbientImport = AmbientImport;
 exports.ArrowFunctionExpr = ArrowFunctionExpr;
 exports.Binary = Binary;
 exports.BlockPlaceholder = BlockPlaceholder;
@@ -46592,6 +48488,7 @@ exports.CR = CR;
 exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
 exports.Call = Call;
 exports.Chain = Chain;
+exports.ClassPropertyMapping = ClassPropertyMapping;
 exports.CloneVisitor = CloneVisitor;
 exports.CompoundMetadataReader = CompoundMetadataReader;
 exports.Conditional = Conditional;
@@ -46627,7 +48524,6 @@ exports.InstantiateExpr = InstantiateExpr;
 exports.Interpolation = Interpolation$1;
 exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
-exports.KnownFn = KnownFn;
 exports.LetDeclaration = LetDeclaration$1;
 exports.LiteralArrayExpr = LiteralArrayExpr;
 exports.LiteralExpr = LiteralExpr;
@@ -46645,22 +48541,20 @@ exports.ParseLocation = ParseLocation;
 exports.ParseSourceFile = ParseSourceFile;
 exports.ParseSourceSpan = ParseSourceSpan;
 exports.Parser = Parser$1;
-exports.ParserError = ParserError;
 exports.Placeholder = Placeholder;
 exports.PropertyRead = PropertyRead;
 exports.PropertyWrite = PropertyWrite;
 exports.QUERY_INITIALIZER_FNS = QUERY_INITIALIZER_FNS;
 exports.R3TargetBinder = R3TargetBinder;
 exports.ReadVarExpr = ReadVarExpr;
-exports.RecursiveAstVisitor = RecursiveAstVisitor$1;
-exports.RecursiveAstVisitor$1 = RecursiveAstVisitor;
+exports.RecursiveAstVisitor = RecursiveAstVisitor;
+exports.RecursiveAstVisitor$1 = RecursiveAstVisitor$1;
 exports.RecursiveVisitor = RecursiveVisitor;
 exports.RecursiveVisitor$1 = RecursiveVisitor$1;
 exports.Reference = Reference;
 exports.Reference$1 = Reference$1;
 exports.ReferenceEmitter = ReferenceEmitter;
 exports.RelativePathStrategy = RelativePathStrategy;
-exports.ResolvedModule = ResolvedModule;
 exports.ReturnStatement = ReturnStatement;
 exports.SafeCall = SafeCall;
 exports.SafeKeyedRead = SafeKeyedRead;
@@ -46692,7 +48586,9 @@ exports.absoluteFrom = absoluteFrom;
 exports.absoluteFromSourceFile = absoluteFromSourceFile;
 exports.arrowFn = arrowFn;
 exports.asLiteral = asLiteral;
+exports.assertLocalCompilationUnresolvedConst = assertLocalCompilationUnresolvedConst;
 exports.assertSuccessfulReferenceEmit = assertSuccessfulReferenceEmit;
+exports.checkInheritanceOfInjectable = checkInheritanceOfInjectable;
 exports.combineResolvers = combineResolvers;
 exports.compileComponentFromMetadata = compileComponentFromMetadata;
 exports.compileDeferResolverFunction = compileDeferResolverFunction;
@@ -46716,43 +48612,47 @@ exports.createInjectorType = createInjectorType;
 exports.createMayBeForwardRefExpression = createMayBeForwardRefExpression;
 exports.createNgModuleType = createNgModuleType;
 exports.createPipeType = createPipeType;
-exports.createSourceSpan = createSourceSpan;
+exports.createValueHasWrongTypeError = createValueHasWrongTypeError;
 exports.decimalDigest = decimalDigest;
 exports.devOnlyGuardedExpression = devOnlyGuardedExpression;
 exports.digest = digest$1;
 exports.dirname = dirname;
-exports.emitDistinctChangesOnlyDefaultValue = emitDistinctChangesOnlyDefaultValue;
 exports.entityNameToValue = entityNameToValue;
 exports.extraReferenceFromTypeQuery = extraReferenceFromTypeQuery;
+exports.extractDecoratorQueryMetadata = extractDecoratorQueryMetadata;
+exports.extractDirectiveMetadata = extractDirectiveMetadata;
 exports.extractDirectiveTypeCheckMeta = extractDirectiveTypeCheckMeta;
 exports.extractMessages = extractMessages;
 exports.extractReferencesFromType = extractReferencesFromType;
-exports.filterToMembersWithDecorator = filterToMembersWithDecorator;
 exports.findAngularDecorator = findAngularDecorator;
+exports.flattenInheritedDirectiveMetadata = flattenInheritedDirectiveMetadata;
 exports.generateForwardRef = generateForwardRef;
 exports.getAngularDecorators = getAngularDecorators;
+exports.getConstructorDependencies = getConstructorDependencies;
 exports.getContainingImportDeclaration = getContainingImportDeclaration;
 exports.getDefaultImportDeclaration = getDefaultImportDeclaration;
+exports.getDirectiveDiagnostics = getDirectiveDiagnostics;
 exports.getFileSystem = getFileSystem;
 exports.getOriginNodeForDiagnostics = getOriginNodeForDiagnostics;
+exports.getProviderDiagnostics = getProviderDiagnostics;
 exports.getRootDirs = getRootDirs;
-exports.getSafePropertyAccessString = getSafePropertyAccessString;
 exports.getSourceFile = getSourceFile;
 exports.getSourceFileOrNull = getSourceFileOrNull;
 exports.getTemplateDiagnostics = getTemplateDiagnostics;
+exports.getUndecoratedClassWithAngularFeaturesDiagnostic = getUndecoratedClassWithAngularFeaturesDiagnostic;
+exports.getValidConstructorDependencies = getValidConstructorDependencies;
 exports.hasInjectableFields = hasInjectableFields;
 exports.identifierOfNode = identifierOfNode;
 exports.importExpr = importExpr;
 exports.isAbstractClassDeclaration = isAbstractClassDeclaration;
 exports.isAliasImportDeclaration = isAliasImportDeclaration;
 exports.isAngularCore = isAngularCore;
-exports.isAngularCoreReference = isAngularCoreReference;
+exports.isAngularCoreReferenceWithPotentialAliasing = isAngularCoreReferenceWithPotentialAliasing;
 exports.isAngularDecorator = isAngularDecorator;
 exports.isDtsPath = isDtsPath;
 exports.isExpressionForwardReference = isExpressionForwardReference;
 exports.isFatalDiagnosticError = isFatalDiagnosticError;
 exports.isFileShimSourceFile = isFileShimSourceFile;
-exports.isFromDtsFile = isFromDtsFile;
 exports.isHostDirectiveMetaForGlobalMode = isHostDirectiveMetaForGlobalMode;
 exports.isLocalRelativePath = isLocalRelativePath;
 exports.isNamedClassDeclaration = isNamedClassDeclaration;
@@ -46765,14 +48665,17 @@ exports.literalMap = literalMap;
 exports.loadIsReferencedAliasDeclarationPatch = loadIsReferencedAliasDeclarationPatch;
 exports.makeBindingParser = makeBindingParser;
 exports.makeDiagnostic = makeDiagnostic;
+exports.makeDuplicateDeclarationError = makeDuplicateDeclarationError;
 exports.makeRelatedInformation = makeRelatedInformation;
 exports.mapLiteral = mapLiteral;
 exports.ngErrorCode = ngErrorCode;
 exports.nodeDebugInfo = nodeDebugInfo;
 exports.nodeNameForError = nodeNameForError;
-exports.parseHostBindings = parseHostBindings;
+exports.parseDecoratorInputTransformFunction = parseDecoratorInputTransformFunction;
+exports.parseDirectiveStyles = parseDirectiveStyles;
 exports.parseTemplate = parseTemplate;
 exports.presetImportManagerForceNamespaceImports = presetImportManagerForceNamespaceImports;
+exports.queryDecoratorNames = queryDecoratorNames;
 exports.readBaseClass = readBaseClass;
 exports.readBooleanType = readBooleanType;
 exports.readMapType = readMapType;
@@ -46807,10 +48710,12 @@ exports.tryParseSignalQueryFromInitializer = tryParseSignalQueryFromInitializer;
 exports.tryUnwrapForwardRef = tryUnwrapForwardRef;
 exports.typeNodeToValueExpr = typeNodeToValueExpr;
 exports.untagAllTsFiles = untagAllTsFiles;
+exports.unwrapConstructorDependencies = unwrapConstructorDependencies;
 exports.unwrapExpression = unwrapExpression;
+exports.validateConstructorDependencies = validateConstructorDependencies;
+exports.validateHostDirectives = validateHostDirectives;
 exports.valueReferenceToExpression = valueReferenceToExpression;
 exports.variable = variable;
-exports.verifyHostBindings = verifyHostBindings;
 exports.visitAll = visitAll;
 exports.visitAll$1 = visitAll$1;
 exports.visitAllWithSiblings = visitAllWithSiblings;

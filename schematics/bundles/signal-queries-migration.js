@@ -1,36 +1,29 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-8be6e38
+ * @license Angular v20.0.0-next.1+sha-4fa5d18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var project_paths = require('./project_paths-88ea506b.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_paths = require('./project_paths-Jtbi76Bs.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-febe8b3a.js');
-var program = require('./program-a87583f2.js');
+var checker = require('./checker-DF8ZaFW5.js');
+var program = require('./program-BZk27Ndu.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-432c58c8.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-0967f888.js');
+var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-DtkOnnv0.js');
 var assert = require('assert');
-var index = require('./index-a9fb11d2.js');
+var index = require('./index-DnkWgagp.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
-require('./leading_space-f8944434.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
+require('./leading_space-D9nQ8UQC.js');
 
 /**
  * Phase that migrates Angular host binding references to
@@ -106,14 +99,14 @@ function migrateTemplateReferences(host, references) {
  */
 function extractQueryListType(node) {
     // Initializer variant of `new QueryList<T>()`.
-    if (ts__default["default"].isNewExpression(node) &&
-        ts__default["default"].isIdentifier(node.expression) &&
+    if (ts.isNewExpression(node) &&
+        ts.isIdentifier(node.expression) &&
         node.expression.text === 'QueryList') {
         return node.typeArguments?.[0];
     }
     // Type variant of `: QueryList<T>`.
-    if (ts__default["default"].isTypeReferenceNode(node) &&
-        ts__default["default"].isIdentifier(node.typeName) &&
+    if (ts.isTypeReferenceNode(node) &&
+        ts.isIdentifier(node.typeName) &&
         node.typeName.text === 'QueryList') {
         return node.typeArguments?.[0];
     }
@@ -166,14 +159,14 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
         }
     }
     if (metadata.queryInfo.read !== null) {
-        assert__default["default"](metadata.queryInfo.read instanceof checker.WrappedNodeExpr);
-        optionProperties.push(ts__default["default"].factory.createPropertyAssignment('read', metadata.queryInfo.read.node));
+        assert(metadata.queryInfo.read instanceof checker.WrappedNodeExpr);
+        optionProperties.push(ts.factory.createPropertyAssignment('read', metadata.queryInfo.read.node));
     }
     if (metadata.queryInfo.descendants !== defaultDescendants) {
-        optionProperties.push(ts__default["default"].factory.createPropertyAssignment('descendants', metadata.queryInfo.descendants ? ts__default["default"].factory.createTrue() : ts__default["default"].factory.createFalse()));
+        optionProperties.push(ts.factory.createPropertyAssignment('descendants', metadata.queryInfo.descendants ? ts.factory.createTrue() : ts.factory.createFalse()));
     }
     if (optionProperties.length > 0) {
-        args.push(ts__default["default"].factory.createObjectLiteralExpression(optionProperties));
+        args.push(ts.factory.createObjectLiteralExpression(optionProperties));
     }
     const strictNullChecksEnabled = options.strict === true || options.strictNullChecks === true;
     const strictPropertyInitialization = options.strict === true || options.strictPropertyInitialization === true;
@@ -196,12 +189,12 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     if (isRequired && metadata.queryInfo.first) {
         // If the query is required already via some indicators, and this is a "single"
         // query, use the available `.required` method.
-        newQueryFn = ts__default["default"].factory.createPropertyAccessExpression(newQueryFn, 'required');
+        newQueryFn = ts.factory.createPropertyAccessExpression(newQueryFn, 'required');
     }
     // If this query is still nullable (i.e. not required), attempt to remove
     // explicit `undefined` types if possible.
-    if (!isRequired && type !== undefined && ts__default["default"].isUnionTypeNode(type)) {
-        type = migrate_ts_type_references.removeFromUnionIfPossible(type, (v) => v.kind !== ts__default["default"].SyntaxKind.UndefinedKeyword);
+    if (!isRequired && type !== undefined && ts.isUnionTypeNode(type)) {
+        type = migrate_ts_type_references.removeFromUnionIfPossible(type, (v) => v.kind !== ts.SyntaxKind.UndefinedKeyword);
     }
     let locatorType = Array.isArray(metadata.queryInfo.predicate)
         ? null
@@ -211,23 +204,23 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     // on the TS inference, instead of repeating types, like in `viewChild<Button>(Button)`.
     if (type !== undefined &&
         resolvedReadType instanceof checker.WrappedNodeExpr &&
-        ts__default["default"].isIdentifier(resolvedReadType.node) &&
-        ts__default["default"].isTypeReferenceNode(type) &&
-        ts__default["default"].isIdentifier(type.typeName) &&
+        ts.isIdentifier(resolvedReadType.node) &&
+        ts.isTypeReferenceNode(type) &&
+        ts.isIdentifier(type.typeName) &&
         type.typeName.text === resolvedReadType.node.text) {
         locatorType = null;
     }
-    const call = ts__default["default"].factory.createCallExpression(newQueryFn, 
+    const call = ts.factory.createCallExpression(newQueryFn, 
     // If there is no resolved `ReadT` (e.g. string predicate), we use the
     // original type explicitly as generic. Otherwise, query API is smart
     // enough to always infer.
     resolvedReadType === null && type !== undefined ? [type] : undefined, args);
-    const updated = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
+    const updated = ts.factory.createPropertyDeclaration([ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
     return [
         new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
             position: node.getStart(),
             end: node.getEnd(),
-            toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, updated, sf),
+            toInsert: printer.printNode(ts.EmitHint.Unspecified, updated, sf),
         })),
     ];
 }
@@ -238,7 +231,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
  */
 function getClassFieldDescriptorForSymbol(symbol, info) {
     if (symbol?.valueDeclaration === undefined ||
-        !ts__default["default"].isPropertyDeclaration(symbol.valueDeclaration)) {
+        !ts.isPropertyDeclaration(symbol.valueDeclaration)) {
         return null;
     }
     const key = getUniqueIDForClassProperty(symbol.valueDeclaration, info);
@@ -259,7 +252,7 @@ function getClassFieldDescriptorForSymbol(symbol, info) {
  * would then match identity.
  */
 function getUniqueIDForClassProperty(property, info) {
-    if (!ts__default["default"].isClassDeclaration(property.parent) || property.parent.name === undefined) {
+    if (!ts.isClassDeclaration(property.parent) || property.parent.name === undefined) {
         return null;
     }
     if (property.name === undefined) {
@@ -279,14 +272,14 @@ function getUniqueIDForClassProperty(property, info) {
  * returns its resolved metadata if possible.
  */
 function extractSourceQueryDefinition(node, reflector, evaluator, info) {
-    if ((!ts__default["default"].isPropertyDeclaration(node) && !ts__default["default"].isAccessor(node)) ||
-        !ts__default["default"].isClassDeclaration(node.parent) ||
+    if ((!ts.isPropertyDeclaration(node) && !ts.isAccessor(node)) ||
+        !ts.isClassDeclaration(node.parent) ||
         node.parent.name === undefined ||
-        !ts__default["default"].isIdentifier(node.name)) {
+        !ts.isIdentifier(node.name)) {
         return null;
     }
     const decorators = reflector.getDecoratorsOfDeclaration(node) ?? [];
-    const ngDecorators = checker.getAngularDecorators(decorators, program.queryDecoratorNames, /* isCore */ false);
+    const ngDecorators = checker.getAngularDecorators(decorators, checker.queryDecoratorNames, /* isCore */ false);
     if (ngDecorators.length === 0) {
         return null;
     }
@@ -313,7 +306,7 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
     }
     let queryInfo = null;
     try {
-        queryInfo = program.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
+        queryInfo = checker.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
     }
     catch (e) {
         if (!(e instanceof checker.FatalDiagnosticError)) {
@@ -412,7 +405,7 @@ class KnownQueries {
         return this.classToQueryFields.get(clazz);
     }
     getAllClassesWithQueries() {
-        return Array.from(this.classToQueryFields.keys()).filter((c) => ts__default["default"].isClassDeclaration(c));
+        return Array.from(this.classToQueryFields.keys()).filter((c) => ts.isClassDeclaration(c));
     }
     captureKnownFieldInheritanceRelationship(derived, parent) {
         // Note: The edge problematic pattern recognition is not as good as the one
@@ -505,8 +498,8 @@ function queryFunctionNameToDecorator(name) {
 function checkTsReferenceAccessesField(ref, fieldName) {
     const accessNode = index.traverseAccess(ref.from.node);
     // Check if the reference is part of a property access.
-    if (!ts__default["default"].isPropertyAccessExpression(accessNode.parent) ||
-        !ts__default["default"].isIdentifier(accessNode.parent.name)) {
+    if (!ts.isPropertyAccessExpression(accessNode.parent) ||
+        !ts.isIdentifier(accessNode.parent.name)) {
         return null;
     }
     // Check if the reference is refers to the given field name.
@@ -543,7 +536,7 @@ function checkTsReferenceCallsField(ref, fieldName) {
     if (propertyAccess === null) {
         return null;
     }
-    if (ts__default["default"].isCallExpression(propertyAccess.parent) &&
+    if (ts.isCallExpression(propertyAccess.parent) &&
         propertyAccess.parent.expression === propertyAccess) {
         return propertyAccess.parent;
     }
@@ -769,17 +762,17 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                     fieldName: extractedQuery.queryInfo.propertyName,
                     isMulti: extractedQuery.queryInfo.first === false,
                 };
-                if (ts__default["default"].isAccessor(queryNode)) {
+                if (ts.isAccessor(queryNode)) {
                     markFieldIncompatibleInMetadata(res.potentialProblematicQueries, extractedQuery.id, migrate_ts_type_references.FieldIncompatibilityReason.Accessor);
                 }
                 // Detect queries with union types that are uncommon to be
                 // automatically migrate-able. E.g. `refs: ElementRef|null`,
                 // or `ElementRef|SomeOtherType`.
                 if (queryNode.type !== undefined &&
-                    ts__default["default"].isUnionTypeNode(queryNode.type) &&
+                    ts.isUnionTypeNode(queryNode.type) &&
                     // Either too large union, or doesn't match `T|undefined`.
                     (queryNode.type.types.length > 2 ||
-                        !queryNode.type.types.some((t) => t.kind === ts__default["default"].SyntaxKind.UndefinedKeyword))) {
+                        !queryNode.type.types.some((t) => t.kind === ts.SyntaxKind.UndefinedKeyword))) {
                     markFieldIncompatibleInMetadata(res.potentialProblematicQueries, extractedQuery.id, migrate_ts_type_references.FieldIncompatibilityReason.SignalQueries__IncompatibleMultiUnionType);
                 }
                 // Migrating fields with `@HostBinding` is incompatible as
@@ -927,7 +920,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
         const replacements = [];
         const importManager = new checker.ImportManager();
-        const printer = ts__default["default"].createPrinter();
+        const printer = ts.createPrinter();
         const filesWithSourceQueries = new Map();
         const filesWithIncompleteMigration = new Map();
         const filesWithQueryListOutsideOfDeclarations = new WeakSet();
@@ -944,8 +937,8 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 return;
             }
             // Detect OTHER queries, inside `.d.ts`. Needed for reference resolution below.
-            if (ts__default["default"].isPropertyDeclaration(node) ||
-                (ts__default["default"].isAccessor(node) && ts__default["default"].isClassDeclaration(node.parent))) {
+            if (ts.isPropertyDeclaration(node) ||
+                (ts.isAccessor(node) && ts.isClassDeclaration(node.parent))) {
                 const classFieldID = getUniqueIDForClassProperty(node, info);
                 if (classFieldID !== null && globalMetadata.knownQueryFields[classFieldID] !== undefined) {
                     knownQueries.registerQueryField(node, classFieldID);
@@ -954,15 +947,15 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
             }
             // Detect potential usages of `QueryList` outside of queries or imports.
             // Those prevent us from removing the import later.
-            if (ts__default["default"].isIdentifier(node) &&
+            if (ts.isIdentifier(node) &&
                 node.text === 'QueryList' &&
-                ts__default["default"].findAncestor(node, ts__default["default"].isImportDeclaration) === undefined) {
+                ts.findAncestor(node, ts.isImportDeclaration) === undefined) {
                 filesWithQueryListOutsideOfDeclarations.add(node.getSourceFile());
             }
-            ts__default["default"].forEachChild(node, queryWholeProgramVisitor);
+            ts.forEachChild(node, queryWholeProgramVisitor);
         };
         for (const sf of info.fullProgramSourceFiles) {
-            ts__default["default"].forEachChild(sf, queryWholeProgramVisitor);
+            ts.forEachChild(sf, queryWholeProgramVisitor);
         }
         // Set of all queries in the program. Useful for speeding up reference
         // lookups below.
