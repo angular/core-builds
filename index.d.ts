@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-f9b6bf9
+ * @license Angular v19.2.1+sha-b6f22a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15576,7 +15576,7 @@ declare const ɵWRITABLE_SIGNAL: unique symbol;
 /**
  * URL for the XSS security documentation.
  */
-export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
+export declare const ɵXSS_SECURITY_URL = "https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss";
 
 /** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
 export declare const ɵZONELESS_ENABLED: InjectionToken<boolean>;

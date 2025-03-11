@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.1+sha-f9b6bf9
+ * @license Angular v19.2.1+sha-b6f22a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24,7 +24,7 @@ const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.dev/errors';
 /**
  * URL for the XSS security documentation.
  */
-const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
+const XSS_SECURITY_URL = 'https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss';
 
 /**
  * Class that represents a runtime error.
@@ -17879,7 +17879,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.1+sha-f9b6bf9']
+                ? ['ng-version', '19.2.1+sha-b6f22a7']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -23441,12 +23441,15 @@ class ApplicationRef {
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
         const initStatus = this._injector.get(ApplicationInitStatus);
         if (!initStatus.done) {
-            const standalone = !isComponentFactory && isStandalone(componentOrFactory);
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) &&
-                'Cannot bootstrap as there are still asynchronous initializers running.' +
-                    (standalone
-                        ? ''
-                        : ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            let errorMessage = '';
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                const standalone = !isComponentFactory && isStandalone(componentOrFactory);
+                errorMessage =
+                    'Cannot bootstrap as there are still asynchronous initializers running.' +
+                        (standalone
+                            ? ''
+                            : ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            }
             throw new RuntimeError(405 /* RuntimeErrorCode.ASYNC_INITIALIZERS_STILL_RUNNING */, errorMessage);
         }
         let componentFactory;
@@ -34584,7 +34587,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.1+sha-f9b6bf9');
+const VERSION = new Version('19.2.1+sha-b6f22a7');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
