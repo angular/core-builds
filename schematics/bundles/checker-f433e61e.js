@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-705fb0d
+ * @license Angular v19.2.1+sha-56b551d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18716,7 +18716,7 @@ class _ParseAST {
             return new LiteralPrimitive(this.span(start), this.sourceSpan(start), value);
         }
         else if (this.next.isTemplateLiteralEnd()) {
-            return this.parseNoInterpolationTemplateLiteral(start);
+            return this.parseNoInterpolationTemplateLiteral();
         }
         else if (this.next.isTemplateLiteralPart()) {
             return this.parseTemplateLiteral();
@@ -19046,8 +19046,9 @@ class _ParseAST {
         const sourceSpan = new AbsoluteSourceSpan(spanStart, this.currentAbsoluteOffset);
         return new VariableBinding(sourceSpan, key, value);
     }
-    parseNoInterpolationTemplateLiteral(start) {
+    parseNoInterpolationTemplateLiteral() {
         const text = this.next.strValue;
+        const start = this.inputIndex;
         this.advance();
         const span = this.span(start);
         const sourceSpan = this.sourceSpan(start);
@@ -19060,8 +19061,9 @@ class _ParseAST {
         while (this.next !== EOF) {
             const token = this.next;
             if (token.isTemplateLiteralPart() || token.isTemplateLiteralEnd()) {
-                elements.push(new TemplateLiteralElement(this.span(this.inputIndex), this.sourceSpan(this.inputIndex), token.strValue));
+                const partStart = this.inputIndex;
                 this.advance();
+                elements.push(new TemplateLiteralElement(this.span(partStart), this.sourceSpan(partStart), token.strValue));
                 if (token.isTemplateLiteralEnd()) {
                     break;
                 }
@@ -30720,7 +30722,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.1+sha-705fb0d');
+new Version('19.2.1+sha-56b551d');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32128,7 +32130,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-9a0e59d0.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-f433e61e.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
