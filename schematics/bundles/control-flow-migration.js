@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.1+sha-30f6db3
+ * @license Angular v19.2.1+sha-e59432c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -747,7 +747,7 @@ function generatei18nContainer(i18nAttr, middle) {
 /**
  * Counts, replaces, and removes any necessary ng-templates post control flow migration
  */
-function processNgTemplates(template) {
+function processNgTemplates(template, sourceFile) {
     // count usage
     try {
         const templates = getTemplates(template);
@@ -780,7 +780,18 @@ function processNgTemplates(template) {
                 }
                 // the +1 accounts for the t.count's counting of the original template
                 if (t.count === matches.length + 1 && safeToRemove) {
-                    template = template.replace(t.contents, `${startMarker}${endMarker}`);
+                    const refsInComponentFile = getViewChildOrViewChildrenNames(sourceFile);
+                    if (refsInComponentFile?.length > 0) {
+                        const templateRefs = getTemplateReferences(template);
+                        for (const ref of refsInComponentFile) {
+                            if (!templateRefs.includes(ref)) {
+                                template = template.replace(t.contents, `${startMarker}${endMarker}`);
+                            }
+                        }
+                    }
+                    else {
+                        template = template.replace(t.contents, `${startMarker}${endMarker}`);
+                    }
                 }
                 // templates may have changed structure from nested replaced templates
                 // so we need to reprocess them before the next loop.
@@ -797,6 +808,44 @@ function processNgTemplates(template) {
     catch (err) {
         return { migrated: template, err: err };
     }
+}
+function getViewChildOrViewChildrenNames(sourceFile) {
+    const names = [];
+    function visit(node) {
+        if (ts__default["default"].isDecorator(node) && ts__default["default"].isCallExpression(node.expression)) {
+            const expr = node.expression;
+            if (ts__default["default"].isIdentifier(expr.expression) &&
+                (expr.expression.text === 'ViewChild' || expr.expression.text === 'ViewChildren')) {
+                const firstArg = expr.arguments[0];
+                if (firstArg && ts__default["default"].isStringLiteral(firstArg)) {
+                    names.push(firstArg.text);
+                }
+                return;
+            }
+        }
+        ts__default["default"].forEachChild(node, visit);
+    }
+    visit(sourceFile);
+    return names;
+}
+function getTemplateReferences(template) {
+    const parsed = parseTemplate(template);
+    if (parsed.tree === undefined) {
+        return [];
+    }
+    const references = [];
+    function visitNodes(nodes) {
+        for (const node of nodes) {
+            if (node?.name === 'ng-template') {
+                references.push(...node.attrs?.map((ref) => ref?.name?.slice(1)));
+            }
+            if (node.children) {
+                visitNodes(node.children);
+            }
+        }
+    }
+    visitNodes(parsed.tree.rootNodes);
+    return references;
 }
 function replaceRemainingPlaceholders(template) {
     const pattern = '.*';
@@ -1719,7 +1768,7 @@ function migrateTemplate(template, templateType, node, file, format = true, anal
             return { migrated: template, errors: switchResult.errors };
         }
         const caseResult = migrateCase(switchResult.migrated);
-        const templateResult = processNgTemplates(caseResult.migrated);
+        const templateResult = processNgTemplates(caseResult.migrated, file.sourceFile);
         if (templateResult.err !== undefined) {
             return { migrated: template, errors: [{ type: 'template', error: templateResult.err }] };
         }
