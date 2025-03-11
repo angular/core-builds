@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-9a124c8
+ * @license Angular v20.0.0-next.1+sha-8be6e38
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,8 +15,9 @@ var p = require('path');
 var ts = require('typescript');
 var compiler_host = require('./compiler_host-dc30551e.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-b558633b.js');
-var ng_decorators = require('./ng_decorators-ccbd63d1.js');
+var ng_decorators = require('./ng_decorators-b0d8b324.js');
 var nodes = require('./nodes-7758dbf6.js');
+var imports = require('./imports-047fbbc8.js');
 var checker = require('./checker-febe8b3a.js');
 require('os');
 var program = require('./program-a87583f2.js');
@@ -300,8 +301,8 @@ function isClassReferenceInAngularModule(node, className, moduleName, typeChecke
  */
 function getTestingImports(sourceFile) {
     return {
-        testBed: ng_decorators.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed'),
-        catalyst: ng_decorators.getImportSpecifier(sourceFile, /testing\/catalyst(\/(fake_)?async)?$/, 'setupModule'),
+        testBed: imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed'),
+        catalyst: imports.getImportSpecifier(sourceFile, /testing\/catalyst(\/(fake_)?async)?$/, 'setupModule'),
     };
 }
 /**
@@ -668,7 +669,7 @@ function hasNgModuleMetadataElements(node) {
 /** Finds all modules whose declarations can be migrated. */
 function findNgModuleClassesToMigrate(sourceFile, typeChecker) {
     const modules = [];
-    if (ng_decorators.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
+    if (imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
         sourceFile.forEachChild(function walk(node) {
             if (ts__default["default"].isClassDeclaration(node)) {
                 const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');

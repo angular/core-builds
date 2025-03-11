@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-9a124c8
+ * @license Angular v20.0.0-next.1+sha-8be6e38
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4360,13 +4360,6 @@ export declare abstract class EnvironmentInjector implements Injector {
      */
     abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
     /**
-     * Retrieves an instance from the injector based on the provided token.
-     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
-     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
-     * @deprecated use object-based flags (`InjectOptions`) instead.
-     */
-    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    /**
      * @deprecated from v4.0.0 use ProviderToken<T>
      * @suppress {duplicate}
      */
@@ -5834,18 +5827,6 @@ export declare function inject<T>(token: ProviderToken<T>): T;
 
 /**
  * @param token A token that represents a dependency that should be injected.
- * @param flags Control how injection is executed. The flags correspond to injection strategies that
- *     can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
- * @returns the injected value if operation is successful, `null` otherwise.
- * @throws if called outside of a supported context.
- *
- * @publicApi
- * @deprecated prefer an options object instead of `InjectFlags`
- */
-export declare function inject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
-
-/**
- * @param token A token that represents a dependency that should be injected.
  * @param options Control how injection is executed. Options correspond to injection strategies
  *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
  *     `@Optional`.
@@ -6038,7 +6019,7 @@ declare interface InjectedService {
     /**
      * Flags that this service was injected with
      */
-    flags?: InternalInjectFlags | InjectFlags | InjectOptions;
+    flags?: InternalInjectFlags | InjectOptions;
     /**
      * Injector that this service was provided in.
      */
@@ -6050,28 +6031,6 @@ declare interface InjectedService {
         lView: LView;
         tNode: TNode;
     };
-}
-
-/**
- * Injection flags for DI.
- *
- * @publicApi
- * @deprecated use an options object for [`inject`](api/core/inject) instead.
- */
-export declare enum InjectFlags {
-    /** Check self and check parent injector if needed */
-    Default = 0,
-    /**
-     * Specifies that an injector should retrieve a dependency from any injector until reaching the
-     * host element of the current component. (Only used with Element Injector)
-     */
-    Host = 1,
-    /** Don't ascend to ancestors of the node requesting injection. */
-    Self = 2,
-    /** Skip the node that is requesting injection. */
-    SkipSelf = 4,
-    /** Inject `defaultValue` instead if token not found. */
-    Optional = 8
 }
 
 /**
@@ -6202,12 +6161,6 @@ export declare abstract class Injector {
     static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
-     * Internal note on the `options?: InjectOptions|InjectFlags` override of the `get`
-     * method: consider dropping the `InjectFlags` part in one of the major versions.
-     * It can **not** be done in minor/patch, since it's breaking for custom injectors
-     * that only implement the old `InjectorFlags` interface.
-     */
-    /**
      * Retrieves an instance from the injector based on the provided token.
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
@@ -6226,14 +6179,7 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions | InjectFlags): T;
-    /**
-     * Retrieves an instance from the injector based on the provided token.
-     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
-     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
-     * @deprecated use object-based flags (`InjectOptions`) instead.
-     */
-    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
     /**
      * @deprecated from v4.0.0 use ProviderToken<T>
      * @suppress {duplicate}
@@ -13470,7 +13416,7 @@ export declare class ɵConsole {
  */
 export declare const ɵCONTAINER_HEADER_OFFSET = 10;
 
-export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags | undefined): InjectFlags | undefined;
+export declare function ɵconvertToBitFlags(flags: InjectOptions | InternalInjectFlags | undefined): InternalInjectFlags | undefined;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
@@ -14033,7 +13979,7 @@ export declare type ɵImageConfig = {
 };
 
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;
+export declare function ɵinjectChangeDetectorRef(flags: InternalInjectFlags): ChangeDetectorRef;
 
 /**
  * An internal token whose presence in an injector indicates that the injector should treat itself
@@ -16735,7 +16681,7 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
  */
 export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>): T;
 
-export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: InternalInjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -17076,13 +17022,13 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
  */
 export declare function ɵɵinject<T>(token: ProviderToken<T>): T;
 
-export declare function ɵɵinject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: ProviderToken<T>, flags?: InternalInjectFlags): T | null;
 
 export declare function ɵɵinject(token: HostAttributeToken): string;
 
-export declare function ɵɵinject(token: HostAttributeToken, flags?: InjectFlags): string | null;
+export declare function ɵɵinject(token: HostAttributeToken, flags?: InternalInjectFlags): string | null;
 
-export declare function ɵɵinject<T>(token: ProviderToken<T> | HostAttributeToken, flags?: InjectFlags): string | null;
+export declare function ɵɵinject<T>(token: ProviderToken<T> | HostAttributeToken, flags?: InternalInjectFlags): string | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.

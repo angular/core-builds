@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.1+sha-9a124c8
+ * @license Angular v20.0.0-next.1+sha-8be6e38
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, ɵDeferBlockBehavior, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ApplicationRef, ɵPendingTasksInternal, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵEffectScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution, ɵgetAsyncClassMetadataFn, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵNG_COMP_DEF, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵgenerateStandaloneInDeclarationsError, ɵtransitiveScopesFor, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, ɵDeferBlockBehavior, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ApplicationRef, ɵPendingTasksInternal, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵEffectScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution, ɵgetAsyncClassMetadataFn, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵNG_COMP_DEF, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵgenerateStandaloneInDeclarationsError, ɵtransitiveScopesFor, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵNgModuleFactory, ModuleWithComponentFactories, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -1831,12 +1831,12 @@ class TestBedImpl {
     static overrideProvider(token, provider) {
         return TestBedImpl.INSTANCE.overrideProvider(token, provider);
     }
-    static inject(token, notFoundValue, flags) {
-        return TestBedImpl.INSTANCE.inject(token, notFoundValue, ɵconvertToBitFlags(flags));
+    static inject(token, notFoundValue, options) {
+        return TestBedImpl.INSTANCE.inject(token, notFoundValue, options);
     }
     /** @deprecated from v9.0.0 use TestBed.inject */
-    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        return TestBedImpl.INSTANCE.inject(token, notFoundValue, flags);
+    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, options) {
+        return TestBedImpl.INSTANCE.inject(token, notFoundValue, options);
     }
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
@@ -1985,19 +1985,19 @@ class TestBedImpl {
     compileComponents() {
         return this.compiler.compileComponents();
     }
-    inject(token, notFoundValue, flags) {
+    inject(token, notFoundValue, options) {
         if (token === TestBed) {
             return this;
         }
         const UNDEFINED = {};
-        const result = this.testModuleRef.injector.get(token, UNDEFINED, ɵconvertToBitFlags(flags));
+        const result = this.testModuleRef.injector.get(token, UNDEFINED, options);
         return result === UNDEFINED
-            ? this.compiler.injector.get(token, notFoundValue, flags)
+            ? this.compiler.injector.get(token, notFoundValue, options)
             : result;
     }
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        return this.inject(token, notFoundValue, flags);
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, options) {
+        return this.inject(token, notFoundValue, options);
     }
     runInInjectionContext(fn) {
         return runInInjectionContext(this.inject(EnvironmentInjector), fn);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-9a124c8
+ * @license Angular v20.0.0-next.1+sha-8be6e38
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,7 +13,6 @@ import { ɵDeferBlockBehavior as DeferBlockBehavior } from '@angular/core';
 import { ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Directive } from '@angular/core';
 import { ElementRef } from '@angular/core';
-import { InjectFlags } from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { InjectOptions } from '@angular/core';
 import { NgModule } from '@angular/core';
@@ -486,12 +485,6 @@ export declare interface TestBed {
     }): T;
     inject<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
     inject<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
-    /** @deprecated use object-based flags (`InjectOptions`) instead. */
-    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    /** @deprecated use object-based flags (`InjectOptions`) instead. */
-    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     /**

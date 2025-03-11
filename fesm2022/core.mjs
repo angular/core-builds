@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-9a124c8
+ * @license Angular v20.0.0-next.1+sha-8be6e38
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -991,31 +991,6 @@ function throwProviderNotFoundError(token, injectorName) {
 }
 
 /**
- * Injection flags for DI.
- *
- * @publicApi
- * @deprecated use an options object for [`inject`](api/core/inject) instead.
- */
-var InjectFlags;
-(function (InjectFlags) {
-    // TODO(alxhub): make this 'const' (and remove `InternalInjectFlags` enum) when ngc no longer
-    // writes exports of it into ngfactory files.
-    /** Check self and check parent injector if needed */
-    InjectFlags[InjectFlags["Default"] = 0] = "Default";
-    /**
-     * Specifies that an injector should retrieve a dependency from any injector until reaching the
-     * host element of the current component. (Only used with Element Injector)
-     */
-    InjectFlags[InjectFlags["Host"] = 1] = "Host";
-    /** Don't ascend to ancestors of the node requesting injection. */
-    InjectFlags[InjectFlags["Self"] = 2] = "Self";
-    /** Skip the node that is requesting injection. */
-    InjectFlags[InjectFlags["SkipSelf"] = 4] = "SkipSelf";
-    /** Inject `defaultValue` instead if token not found. */
-    InjectFlags[InjectFlags["Optional"] = 8] = "Optional";
-})(InjectFlags || (InjectFlags = {}));
-
-/**
  * Current implementation of inject.
  *
  * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
@@ -1050,7 +1025,7 @@ function injectRootLimpMode(token, notFoundValue, flags) {
             ? (injectableDef.value = injectableDef.factory())
             : injectableDef.value;
     }
-    if (flags & InjectFlags.Optional)
+    if (flags & 8 /* InternalInjectFlags.Optional */)
         return null;
     if (notFoundValue !== undefined)
         return notFoundValue;
@@ -1087,10 +1062,10 @@ class RetrievingInjector {
         this.injector = injector;
     }
     retrieve(token, options) {
-        const flags = convertToBitFlags(options) || InjectFlags.Default;
+        const flags = convertToBitFlags(options) || 0 /* InternalInjectFlags.Default */;
         return this.injector.get(token, 
         // When a dependency is requested with an optional flag, DI returns null as the default value.
-        flags & InjectFlags.Optional ? null : undefined, flags);
+        flags & 8 /* InternalInjectFlags.Optional */ ? null : undefined, flags);
     }
 }
 const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
@@ -1098,7 +1073,7 @@ const NG_TOKEN_PATH = 'ngTokenPath';
 const NEW_LINE = /\n/gm;
 const NO_NEW_LINE = 'ɵ';
 const SOURCE = '__source';
-function injectInjectorOnly(token, flags = InjectFlags.Default) {
+function injectInjectorOnly(token, flags = 0 /* InternalInjectFlags.Default */) {
     const currentInjector = getCurrentInjector();
     if (currentInjector === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
@@ -1113,7 +1088,7 @@ function injectInjectorOnly(token, flags = InjectFlags.Default) {
         return value;
     }
 }
-function ɵɵinject(token, flags = InjectFlags.Default) {
+function ɵɵinject(token, flags = 0 /* InternalInjectFlags.Default */) {
     return (getInjectImplementation() || injectInjectorOnly)(resolveForwardRef(token), flags);
 }
 /**
@@ -1197,10 +1172,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  *
  * @publicApi
  */
-function inject(token, flags = InjectFlags.Default) {
+function inject(token, options) {
     // The `as any` here _shouldn't_ be necessary, but without it JSCompiler
     // throws a disambiguation  error due to the multiple signatures.
-    return ɵɵinject(token, convertToBitFlags(flags));
+    return ɵɵinject(token, convertToBitFlags(options));
 }
 // Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
 function convertToBitFlags(flags) {
@@ -1234,7 +1209,7 @@ function injectArgs(types) {
                 throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode && 'Arguments array must have arguments.');
             }
             let type = undefined;
-            let flags = InjectFlags.Default;
+            let flags = 0 /* InternalInjectFlags.Default */;
             for (let j = 0; j < arg.length; j++) {
                 const meta = arg[j];
                 const flag = getInjectFlag(meta);
@@ -2048,13 +2023,13 @@ class R3Injector extends EnvironmentInjector {
         if (record != null && typeof record.value === 'string') {
             this.scopes.add(record.value);
         }
-        this.injectorDefTypes = new Set(this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self));
+        this.injectorDefTypes = new Set(this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, { self: true }));
     }
     retrieve(token, options) {
-        const flags = convertToBitFlags(options) || InjectFlags.Default;
+        const flags = convertToBitFlags(options) || 0 /* InternalInjectFlags.Default */;
         return this.get(token, 
         // When a dependency is requested with an optional flag, DI returns null as the default value.
-        flags & InjectFlags.Optional ? null : undefined, flags);
+        flags & 8 /* InternalInjectFlags.Optional */ ? null : undefined, flags);
     }
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
@@ -2110,12 +2085,12 @@ class R3Injector extends EnvironmentInjector {
             ngDevMode && setInjectorProfilerContext(prevInjectContext);
         }
     }
-    get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+    get(token, notFoundValue = THROW_IF_NOT_FOUND, options) {
         assertNotDestroyed(this);
         if (token.hasOwnProperty(NG_ENV_ID)) {
             return token[NG_ENV_ID](this);
         }
-        flags = convertToBitFlags(flags);
+        const flags = convertToBitFlags(options);
         // Set the injection context.
         let prevInjectContext;
         if (ngDevMode) {
@@ -2125,7 +2100,7 @@ class R3Injector extends EnvironmentInjector {
         const previousInjectImplementation = setInjectImplementation(undefined);
         try {
             // Check for the SkipSelf flag.
-            if (!(flags & InjectFlags.SkipSelf)) {
+            if (!(flags & 4 /* InternalInjectFlags.SkipSelf */)) {
                 // SkipSelf isn't set, check if the record belongs to this injector.
                 let record = this.records.get(token);
                 if (record === undefined) {
@@ -2154,11 +2129,13 @@ class R3Injector extends EnvironmentInjector {
             }
             // Select the next injector based on the Self flag - if self is set, the next injector is
             // the NullInjector, otherwise it's the parent.
-            const nextInjector = !(flags & InjectFlags.Self) ? this.parent : getNullInjector();
+            const nextInjector = !(flags & 2 /* InternalInjectFlags.Self */) ? this.parent : getNullInjector();
             // Set the notFoundValue based on the Optional flag - if optional is set and notFoundValue
             // is undefined, the value is null, otherwise it's the notFoundValue.
             notFoundValue =
-                flags & InjectFlags.Optional && notFoundValue === THROW_IF_NOT_FOUND ? null : notFoundValue;
+                flags & 8 /* InternalInjectFlags.Optional */ && notFoundValue === THROW_IF_NOT_FOUND
+                    ? null
+                    : notFoundValue;
             return nextInjector.get(token, notFoundValue);
         }
         catch (e) {
@@ -2195,7 +2172,7 @@ class R3Injector extends EnvironmentInjector {
             prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
         }
         try {
-            const initializers = this.get(ENVIRONMENT_INITIALIZER, EMPTY_ARRAY, InjectFlags.Self);
+            const initializers = this.get(ENVIRONMENT_INITIALIZER, EMPTY_ARRAY, { self: true });
             if (ngDevMode && !Array.isArray(initializers)) {
                 throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
                     `(expected an array, but got ${typeof initializers}). ` +
@@ -3784,14 +3761,14 @@ function getDeclarationTNode(lView) {
  */
 function enterDI(lView, tNode, flags) {
     ngDevMode && assertLViewOrUndefined(lView);
-    if (flags & InjectFlags.SkipSelf) {
+    if (flags & 4 /* InternalInjectFlags.SkipSelf */) {
         ngDevMode && assertTNodeForTView(tNode, lView[TVIEW]);
         let parentTNode = tNode;
         let parentLView = lView;
         while (true) {
             ngDevMode && assertDefined(parentTNode, 'Parent TNode should be defined');
             parentTNode = parentTNode.parent;
-            if (parentTNode === null && !(flags & InjectFlags.Host)) {
+            if (parentTNode === null && !(flags & 1 /* InternalInjectFlags.Host */)) {
                 parentTNode = getDeclarationTNode(parentLView);
                 if (parentTNode === null)
                     break;
@@ -4771,9 +4748,8 @@ class ChainedInjector {
         this.injector = injector;
         this.parentInjector = parentInjector;
     }
-    get(token, notFoundValue, flags) {
-        flags = convertToBitFlags(flags);
-        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
+    get(token, notFoundValue, options) {
+        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, options);
         if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
             notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
             // Return the value from the root element injector when
@@ -4783,7 +4759,7 @@ class ChainedInjector {
             //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
             return value;
         }
-        return this.parentInjector.get(token, notFoundValue, flags);
+        return this.parentInjector.get(token, notFoundValue, options);
     }
 }
 
@@ -5107,7 +5083,7 @@ function injectAttributeImpl(tNode, attrNameToInject) {
     return null;
 }
 function notFoundValueOrThrow(notFoundValue, token, flags) {
-    if (flags & InjectFlags.Optional || notFoundValue !== undefined) {
+    if (flags & 8 /* InternalInjectFlags.Optional */ || notFoundValue !== undefined) {
         return notFoundValue;
     }
     else {
@@ -5120,15 +5096,15 @@ function notFoundValueOrThrow(notFoundValue, token, flags) {
  * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
  * @param flags Injection flags
- * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @param notFoundValue The value to return when the injection flags is `InternalInjectFlags.Optional`
  * @returns the value from the injector or throws an exception
  */
 function lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue) {
-    if (flags & InjectFlags.Optional && notFoundValue === undefined) {
+    if (flags & 8 /* InternalInjectFlags.Optional */ && notFoundValue === undefined) {
         // This must be set or the NullInjector will throw for optional deps
         notFoundValue = null;
     }
-    if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
+    if ((flags & (2 /* InternalInjectFlags.Self */ | 1 /* InternalInjectFlags.Host */)) === 0) {
         const moduleInjector = lView[INJECTOR];
         // switch to `injectInjectorOnly` implementation for module injector, since module injector
         // should not have access to Component/Directive DI scope (that may happen through
@@ -5136,10 +5112,10 @@ function lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue) {
         const previousInjectImplementation = setInjectImplementation(undefined);
         try {
             if (moduleInjector) {
-                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+                return moduleInjector.get(token, notFoundValue, flags & 8 /* InternalInjectFlags.Optional */);
             }
             else {
-                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+                return injectRootLimpMode(token, notFoundValue, flags & 8 /* InternalInjectFlags.Optional */);
             }
         }
         finally {
@@ -5161,17 +5137,17 @@ function lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue) {
  * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
  * @param flags Injection flags
- * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @param notFoundValue The value to return when the injection flags is `InternalInjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
-function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default, notFoundValue) {
+function getOrCreateInjectable(tNode, lView, token, flags = 0 /* InternalInjectFlags.Default */, notFoundValue) {
     if (tNode !== null) {
         // If the view or any of its ancestors have an embedded
         // view injector, we have to look it up there first.
         if (lView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */ &&
             // The token must be present on the current node injector when the `Self`
             // flag is set, so the lookup on embedded view injector(s) can be skipped.
-            !(flags & InjectFlags.Self)) {
+            !(flags & 2 /* InternalInjectFlags.Self */)) {
             const embeddedInjectorValue = lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, NOT_FOUND);
             if (embeddedInjectorValue !== NOT_FOUND) {
                 return embeddedInjectorValue;
@@ -5193,7 +5169,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
  * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
  * @param flags Injection flags
- * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @param notFoundValue The value to return when the injection flags is `InternalInjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
 function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue) {
@@ -5204,7 +5180,7 @@ function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue)
         if (!enterDI(lView, tNode, flags)) {
             // Failed to enter DI, try module injector instead. If a token is injected with the @Host
             // flag, the module injector is not searched for that token in Ivy.
-            return flags & InjectFlags.Host
+            return flags & 1 /* InternalInjectFlags.Host */
                 ? notFoundValueOrThrow(notFoundValue, token, flags)
                 : lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
         }
@@ -5220,7 +5196,7 @@ function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue)
             else {
                 value = bloomHash(flags);
             }
-            if (value == null && !(flags & InjectFlags.Optional)) {
+            if (value == null && !(flags & 8 /* InternalInjectFlags.Optional */)) {
                 throwProviderNotFoundError(token);
             }
             else {
@@ -5238,10 +5214,10 @@ function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue)
         let previousTView = null;
         let injectorIndex = getInjectorIndex(tNode, lView);
         let parentLocation = NO_PARENT_INJECTOR;
-        let hostTElementNode = flags & InjectFlags.Host ? lView[DECLARATION_COMPONENT_VIEW][T_HOST] : null;
+        let hostTElementNode = flags & 1 /* InternalInjectFlags.Host */ ? lView[DECLARATION_COMPONENT_VIEW][T_HOST] : null;
         // If we should skip this injector, or if there is no injector on this node, start by
         // searching the parent injector.
-        if (injectorIndex === -1 || flags & InjectFlags.SkipSelf) {
+        if (injectorIndex === -1 || flags & 4 /* InternalInjectFlags.SkipSelf */) {
             parentLocation =
                 injectorIndex === -1
                     ? getParentInjectorLocation(tNode, lView)
@@ -5315,7 +5291,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
             previousTView != currentTView && (tNode.type & 3 /* TNodeType.AnyRNode */) !== 0;
     // This special case happens when there is a @host on the inject and when we are searching
     // on the host element node.
-    const isHostSpecialCase = flags & InjectFlags.Host && hostTElementNode === tNode;
+    const isHostSpecialCase = flags & 1 /* InternalInjectFlags.Host */ && hostTElementNode === tNode;
     const injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
         return getNodeInjectable(lView, currentTView, injectableIdx, tNode);
@@ -5391,7 +5367,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
         const previousInjectImplementation = factory.injectImpl
             ? setInjectImplementation(factory.injectImpl)
             : null;
-        const success = enterDI(lView, tNode, InjectFlags.Default);
+        const success = enterDI(lView, tNode, 0 /* InternalInjectFlags.Default */);
         ngDevMode &&
             assertEqual(success, true, "Because flags do not contain `SkipSelf' we expect this to always succeed.");
         try {
@@ -5470,7 +5446,7 @@ function bloomHasToken(bloomHash, injectorIndex, injectorView) {
 }
 /** Returns true if flags prevent parent injector from being searched for tokens */
 function shouldSearchParent(flags, isFirstHostTNode) {
-    return !(flags & InjectFlags.Self) && !(flags & InjectFlags.Host && isFirstHostTNode);
+    return (!(flags & 2 /* InternalInjectFlags.Self */) && !(flags & 1 /* InternalInjectFlags.Host */ && isFirstHostTNode));
 }
 function getNodeInjectorLView(nodeInjector) {
     return nodeInjector._lView;
@@ -5538,7 +5514,7 @@ function getFactoryOf(type) {
  * @param lView The `LView` that contains the `tNode`
  * @param token The token to look for
  * @param flags Injection flags
- * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @param notFoundValue The value to return when the injection flags is `InternalInjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
 function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundValue) {
@@ -5558,7 +5534,7 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
         // Note that this lookup on the node injector is using the `Self` flag, because
         // we don't want the node injector to look at any parent injectors since we
         // may hit the embedded view injector first.
-        const nodeInjectorValue = lookupTokenUsingNodeInjector(currentTNode, currentLView, token, flags | InjectFlags.Self, NOT_FOUND);
+        const nodeInjectorValue = lookupTokenUsingNodeInjector(currentTNode, currentLView, token, flags | 2 /* InternalInjectFlags.Self */, NOT_FOUND);
         if (nodeInjectorValue !== NOT_FOUND) {
             return nodeInjectorValue;
         }
@@ -5925,7 +5901,7 @@ HOST_TAG_NAME.__NG_ELEMENT_ID__ = (flags) => {
     if (tNode.type & 2 /* TNodeType.Element */) {
         return tNode.value;
     }
-    if (flags & InjectFlags.Optional) {
+    if (flags & 8 /* InternalInjectFlags.Optional */) {
         return null;
     }
     throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode &&
@@ -17280,7 +17256,7 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
     writeToHost ? (tNode.classes = classes) : (tNode.classesWithoutHost = classes);
 }
 
-function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
+function ɵɵdirectiveInject(token, flags = 0 /* InternalInjectFlags.Default */) {
     const lView = getLView();
     // Fall back to inject() if view hasn't been created. This situation can happen in tests
     // if inject utilities are used before bootstrapping.
@@ -18515,7 +18491,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-9a124c8']
+        ? ['ng-version', '20.0.0-next.1+sha-8be6e38']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34850,7 +34826,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-9a124c8');
+const VERSION = new Version('20.0.0-next.1+sha-8be6e38');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35567,7 +35543,7 @@ function getGlobalLocale() {
  */
 const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
     providedIn: 'root',
-    factory: () => inject(LOCALE_ID, InjectFlags.Optional | InjectFlags.SkipSelf) || getGlobalLocale(),
+    factory: () => inject(LOCALE_ID, { optional: true, skipSelf: true }) || getGlobalLocale(),
 });
 /**
  * Provide this token to set the default currency code your application uses for
@@ -40709,5 +40685,5 @@ const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || n
     factory: () => null,
 });
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map
