@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-e3afa24
+ * @license Angular v20.0.0-next.1+sha-c73520b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-f5246ea0.js');
-var program = require('./program-6b7935ea.js');
+var checker = require('./checker-febe8b3a.js');
+var program = require('./program-a87583f2.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }

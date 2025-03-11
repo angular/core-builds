@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-e3afa24
+ * @license Angular v20.0.0-next.1+sha-c73520b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18515,7 +18515,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.1+sha-e3afa24']
+        ? ['ng-version', '20.0.0-next.1+sha-c73520b']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -25399,7 +25399,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
  */
 function interpolationV(lView, values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
-    ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     let isBindingUpdated = false;
     let bindingIndex = getBindingIndex();
     for (let i = 1; i < values.length; i += 2) {
@@ -25413,7 +25412,8 @@ function interpolationV(lView, values) {
     // Build the updated content
     let content = values[0];
     for (let i = 1; i < values.length; i += 2) {
-        content += renderStringify(values[i]) + values[i + 1];
+        // The condition is to prevent an out-of-bound read
+        content += renderStringify(values[i]) + (i + 1 !== values.length ? values[i + 1] : '');
     }
     return content;
 }
@@ -25424,14 +25424,14 @@ function interpolationV(lView, values) {
  * @param v0 value checked for change.
  * @param suffix static value used for concatenation only.
  */
-function interpolation1(lView, prefix, v0, suffix) {
+function interpolation1(lView, prefix, v0, suffix = '') {
     const different = bindingUpdated(lView, nextBindingIndex(), v0);
     return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
 }
 /**
  * Creates an interpolation binding with 2 expressions.
  */
-function interpolation2(lView, prefix, v0, i0, v1, suffix) {
+function interpolation2(lView, prefix, v0, i0, v1, suffix = '') {
     const bindingIndex = getBindingIndex();
     const different = bindingUpdated2(lView, bindingIndex, v0, v1);
     incrementBindingIndex(2);
@@ -25440,7 +25440,7 @@ function interpolation2(lView, prefix, v0, i0, v1, suffix) {
 /**
  * Creates an interpolation binding with 3 expressions.
  */
-function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
+function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix = '') {
     const bindingIndex = getBindingIndex();
     const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
     incrementBindingIndex(3);
@@ -25451,7 +25451,7 @@ function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
 /**
  * Create an interpolation binding with 4 expressions.
  */
-function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix = '') {
     const bindingIndex = getBindingIndex();
     const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     incrementBindingIndex(4);
@@ -25470,7 +25470,7 @@ function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
 /**
  * Creates an interpolation binding with 5 expressions.
  */
-function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix = '') {
     const bindingIndex = getBindingIndex();
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
@@ -25492,7 +25492,7 @@ function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffi
 /**
  * Creates an interpolation binding with 6 expressions.
  */
-function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix = '') {
     const bindingIndex = getBindingIndex();
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
@@ -25516,7 +25516,7 @@ function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
 /**
  * Creates an interpolation binding with 7 expressions.
  */
-function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix = '') {
     const bindingIndex = getBindingIndex();
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
@@ -25542,7 +25542,7 @@ function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
 /**
  * Creates an interpolation binding with 8 expressions.
  */
-function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix = '') {
     const bindingIndex = getBindingIndex();
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
@@ -25599,7 +25599,7 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix ?? '');
     }
     return ɵɵattributeInterpolate1;
 }
@@ -25636,7 +25636,7 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix ?? '');
     }
     return ɵɵattributeInterpolate2;
 }
@@ -25676,7 +25676,7 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix ?? '');
     }
     return ɵɵattributeInterpolate3;
 }
@@ -25718,7 +25718,7 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix ?? '');
     }
     return ɵɵattributeInterpolate4;
 }
@@ -25762,7 +25762,7 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix ?? '');
     }
     return ɵɵattributeInterpolate5;
 }
@@ -25808,7 +25808,7 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix ?? '');
     }
     return ɵɵattributeInterpolate6;
 }
@@ -25856,7 +25856,7 @@ function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix ?? '');
     }
     return ɵɵattributeInterpolate7;
 }
@@ -25906,7 +25906,7 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
         const tNode = getSelectedTNode();
         elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix ?? '');
     }
     return ɵɵattributeInterpolate8;
 }
@@ -30710,7 +30710,7 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix ?? '');
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -30752,7 +30752,7 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix ?? '');
     }
     return ɵɵpropertyInterpolate2;
 }
@@ -30797,7 +30797,7 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix ?? '');
     }
     return ɵɵpropertyInterpolate3;
 }
@@ -30844,7 +30844,7 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix ?? '');
     }
     return ɵɵpropertyInterpolate4;
 }
@@ -30893,7 +30893,7 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix ?? '');
     }
     return ɵɵpropertyInterpolate5;
 }
@@ -30944,7 +30944,7 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix ?? '');
     }
     return ɵɵpropertyInterpolate6;
 }
@@ -30997,7 +30997,7 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix ?? '');
     }
     return ɵɵpropertyInterpolate7;
 }
@@ -31052,7 +31052,7 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         const tNode = getSelectedTNode();
         elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix ?? '');
     }
     return ɵɵpropertyInterpolate8;
 }
@@ -31972,7 +31972,7 @@ function enableLocateOrCreateTextNodeImpl() {
  * @codeGenApi
  */
 function ɵɵtextInterpolate(v0) {
-    ɵɵtextInterpolate1('', v0, '');
+    ɵɵtextInterpolate1('', v0);
     return ɵɵtextInterpolate;
 }
 /**
@@ -34850,7 +34850,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.1+sha-e3afa24');
+const VERSION = new Version('20.0.0-next.1+sha-c73520b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

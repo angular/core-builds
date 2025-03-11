@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.1+sha-e3afa24
+ * @license Angular v20.0.0-next.1+sha-c73520b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15713,7 +15713,7 @@ export declare function ɵɵattribute(name: string, value: any, sanitizer?: Sani
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate1;
+export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate1;
 
 /**
  *
@@ -15741,7 +15741,7 @@ export declare function ɵɵattributeInterpolate1(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate2;
+export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate2;
 
 /**
  *
@@ -15772,7 +15772,7 @@ export declare function ɵɵattributeInterpolate2(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate3;
+export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate3;
 
 /**
  *
@@ -15805,7 +15805,7 @@ export declare function ɵɵattributeInterpolate3(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate4;
+export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate4;
 
 /**
  *
@@ -15840,7 +15840,7 @@ export declare function ɵɵattributeInterpolate4(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate5;
+export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate5;
 
 /**
  *
@@ -15877,7 +15877,7 @@ export declare function ɵɵattributeInterpolate5(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate6;
+export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate6;
 
 /**
  *
@@ -15916,7 +15916,7 @@ export declare function ɵɵattributeInterpolate6(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate7;
+export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate7;
 
 /**
  *
@@ -15957,7 +15957,7 @@ export declare function ɵɵattributeInterpolate7(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate8;
+export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate8;
 
 /**
  * Update an interpolated attribute on an element with 9 or more bound values surrounded by text.
@@ -16031,7 +16031,7 @@ export declare function ɵɵclassMap(classes: {
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate1(prefix: string, v0: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate1(prefix: string, v0: any, suffix?: string): void;
 
 /**
  *
@@ -16056,7 +16056,7 @@ export declare function ɵɵclassMapInterpolate1(prefix: string, v0: any, suffix
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix?: string): void;
 
 /**
  *
@@ -16084,7 +16084,7 @@ export declare function ɵɵclassMapInterpolate2(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string): void;
 
 /**
  *
@@ -16114,7 +16114,7 @@ export declare function ɵɵclassMapInterpolate3(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string): void;
 
 /**
  *
@@ -16146,7 +16146,7 @@ export declare function ɵɵclassMapInterpolate4(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string): void;
 
 /**
  *
@@ -16180,7 +16180,7 @@ export declare function ɵɵclassMapInterpolate5(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string): void;
 
 /**
  *
@@ -16216,7 +16216,7 @@ export declare function ɵɵclassMapInterpolate6(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string): void;
 
 /**
  *
@@ -16254,7 +16254,7 @@ export declare function ɵɵclassMapInterpolate7(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵclassMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): void;
+export declare function ɵɵclassMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string): void;
 
 /**
  * Update an interpolated class on an element with 9 or more bound values surrounded by text.
@@ -17565,7 +17565,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanit
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate1;
+export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate1;
 
 /**
  *
@@ -17597,7 +17597,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate2;
+export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate2;
 
 /**
  *
@@ -17632,7 +17632,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate3;
+export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate3;
 
 /**
  *
@@ -17669,7 +17669,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate4;
+export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate4;
 
 /**
  *
@@ -17708,7 +17708,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate5;
+export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate5;
 
 /**
  *
@@ -17749,7 +17749,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate6;
+export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate6;
 
 /**
  *
@@ -17792,7 +17792,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate7;
+export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate7;
 
 /**
  *
@@ -17837,7 +17837,7 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate8;
+export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate8;
 
 /**
  * Update an interpolated property on an element with 9 or more bound values surrounded by text.
@@ -18434,7 +18434,7 @@ export declare function ɵɵstyleMap(styles: {
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate1(prefix: string, v0: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate1(prefix: string, v0: any, suffix?: string): void;
 
 /**
  *
@@ -18459,7 +18459,7 @@ export declare function ɵɵstyleMapInterpolate1(prefix: string, v0: any, suffix
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix?: string): void;
 
 /**
  *
@@ -18487,7 +18487,7 @@ export declare function ɵɵstyleMapInterpolate2(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string): void;
 
 /**
  *
@@ -18517,7 +18517,7 @@ export declare function ɵɵstyleMapInterpolate3(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string): void;
 
 /**
  *
@@ -18549,7 +18549,7 @@ export declare function ɵɵstyleMapInterpolate4(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string): void;
 
 /**
  *
@@ -18585,7 +18585,7 @@ export declare function ɵɵstyleMapInterpolate5(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string): void;
 
 /**
  *
@@ -18623,7 +18623,7 @@ export declare function ɵɵstyleMapInterpolate6(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string): void;
 
 /**
  *
@@ -18663,7 +18663,7 @@ export declare function ɵɵstyleMapInterpolate7(prefix: string, v0: any, i0: st
  * @param suffix Static value used for concatenation only.
  * @codeGenApi
  */
-export declare function ɵɵstyleMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): void;
+export declare function ɵɵstyleMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string): void;
 
 /**
  * Update an interpolated style on an element with 9 or more bound values surrounded by text.
@@ -18739,7 +18739,7 @@ export declare function ɵɵstyleProp(prop: string, value: string | number | ɵS
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate1;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate1;
 
 /**
  *
@@ -18769,7 +18769,7 @@ export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate2;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate2;
 
 /**
  *
@@ -18801,7 +18801,7 @@ export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate3;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate3;
 
 /**
  *
@@ -18835,7 +18835,7 @@ export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate4;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate4;
 
 /**
  *
@@ -18871,7 +18871,7 @@ export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate5;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate5;
 
 /**
  *
@@ -18909,7 +18909,7 @@ export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate6;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate6;
 
 /**
  *
@@ -18950,7 +18950,7 @@ export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate7;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate7;
 
 /**
  *
@@ -18993,7 +18993,7 @@ export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate8;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate8;
 
 /**
  * Update an interpolated style property on an element with 9 or more bound values surrounded by
@@ -19153,7 +19153,7 @@ export declare function ɵɵtextInterpolate(v0: any): typeof ɵɵtextInterpolate
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): typeof ɵɵtextInterpolate1;
+export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix?: string): typeof ɵɵtextInterpolate1;
 
 /**
  *
@@ -19174,7 +19174,7 @@ export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: st
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): typeof ɵɵtextInterpolate2;
+export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix?: string): typeof ɵɵtextInterpolate2;
 
 /**
  *
@@ -19196,7 +19196,7 @@ export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): typeof ɵɵtextInterpolate3;
+export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix?: string): typeof ɵɵtextInterpolate3;
 
 /**
  *
@@ -19218,7 +19218,7 @@ export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string
  * @see ɵɵtextInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): typeof ɵɵtextInterpolate4;
+export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix?: string): typeof ɵɵtextInterpolate4;
 
 /**
  *
@@ -19240,7 +19240,7 @@ export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): typeof ɵɵtextInterpolate5;
+export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix?: string): typeof ɵɵtextInterpolate5;
 
 /**
  *
@@ -19264,7 +19264,7 @@ export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): typeof ɵɵtextInterpolate6;
+export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix?: string): typeof ɵɵtextInterpolate6;
 
 /**
  *
@@ -19286,7 +19286,7 @@ export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): typeof ɵɵtextInterpolate7;
+export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix?: string): typeof ɵɵtextInterpolate7;
 
 /**
  *
@@ -19308,7 +19308,7 @@ export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): typeof ɵɵtextInterpolate8;
+export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix?: string): typeof ɵɵtextInterpolate8;
 
 /**
  * Update text content with 9 or more bound values other surrounded by text.

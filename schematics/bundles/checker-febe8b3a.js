@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.1+sha-e3afa24
+ * @license Angular v20.0.0-next.1+sha-c73520b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23065,7 +23065,17 @@ const PURE_FUNCTION_CONFIG = {
     mapping: (n) => n,
 };
 function callVariadicInstructionExpr(config, baseArgs, interpolationArgs, extraArgs, sourceSpan) {
+    // mapping need to be done before potentially dropping the last interpolation argument
     const n = config.mapping(interpolationArgs.length);
+    // In the case the interpolation instruction ends with a empty string we drop it
+    // And the runtime will take care of it.
+    const lastInterpolationArg = interpolationArgs.at(-1);
+    if (extraArgs.length === 0 &&
+        interpolationArgs.length > 1 &&
+        lastInterpolationArg instanceof LiteralExpr &&
+        lastInterpolationArg.value === '') {
+        interpolationArgs.pop();
+    }
     if (n < config.constant.length) {
         // Constant calling pattern.
         return importExpr(config.constant[n])
@@ -31426,7 +31436,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.1+sha-e3afa24');
+new Version('20.0.0-next.1+sha-c73520b');
 
 //////////////////////////////////////
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -32358,7 +32368,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-f5246ea0.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-febe8b3a.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
