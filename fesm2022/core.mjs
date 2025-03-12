@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bc472b6
+ * @license Angular v20.0.0-next.2+sha-817021b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, getActiveConsumer, setActiveConsumer, createSignal, signalUpdateFn, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError, isInNotificationPhase, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, getActiveConsumer, setActiveConsumer, createSignal, signalUpdateFn, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError, untracked as untracked$1, isInNotificationPhase, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 import { getCurrentInjector, setCurrentInjector } from '@angular/core/primitives/di';
 export { setCurrentInjector as ɵsetCurrentInjector } from '@angular/core/primitives/di';
@@ -18476,7 +18476,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-bc472b6']
+        ? ['ng-version', '20.0.0-next.2+sha-817021b']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34814,7 +34814,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-bc472b6');
+const VERSION = new Version('20.0.0-next.2+sha-817021b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39596,15 +39596,7 @@ function disableProfiling() {
  * can, optionally, return a value.
  */
 function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer(prevConsumer);
-    }
+    return untracked$1(nonReactiveReadsFn);
 }
 
 /**

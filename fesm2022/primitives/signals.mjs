@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bc472b6
+ * @license Angular v20.0.0-next.2+sha-817021b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -330,9 +330,12 @@ function isConsumerNode(node) {
 /**
  * Create a computed signal which derives a reactive value from an expression.
  */
-function createComputed(computation) {
+function createComputed(computation, equal) {
     const node = Object.create(COMPUTED_NODE);
     node.computation = computation;
+    if (equal !== undefined) {
+        node.equal = equal;
+    }
     const computed = () => {
         // Check if the value needs updating before returning it.
         producerUpdateValueVersion(node);
@@ -440,9 +443,12 @@ let postSignalSetFn = null;
 /**
  * Create a `Signal` that can be set or updated directly.
  */
-function createSignal(initialValue) {
+function createSignal(initialValue, equal) {
     const node = Object.create(SIGNAL_NODE);
     node.value = initialValue;
+    if (equal !== undefined) {
+        node.equal = equal;
+    }
     const getter = (() => {
         producerAccessed(node);
         return node.value;

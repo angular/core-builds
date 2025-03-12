@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bc472b6
+ * @license Angular v20.0.0-next.2+sha-817021b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -218,7 +218,7 @@ type ComputedGetter<T> = (() => T) & {
 /**
  * Create a computed signal which derives a reactive value from an expression.
  */
-declare function createComputed<T>(computation: () => T): ComputedGetter<T>;
+declare function createComputed<T>(computation: () => T, equal?: ValueEqualityFn<T>): ComputedGetter<T>;
 
 type ComputationFn<S, D> = (source: S, previous?: {
     source: S;
@@ -269,7 +269,7 @@ interface SignalGetter<T> extends SignalBaseGetter<T> {
 /**
  * Create a `Signal` that can be set or updated directly.
  */
-declare function createSignal<T>(initialValue: T): SignalGetter<T>;
+declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SignalGetter<T>;
 declare function setPostSignalSetFn(fn: (() => void) | null): (() => void) | null;
 declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
 declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
