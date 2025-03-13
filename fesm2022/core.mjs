@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.2+sha-8caf9d7
+ * @license Angular v19.2.2+sha-3856629
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7010,11 +7010,8 @@ function ɵunwrapWritableSignal(value) {
  * Create a `Signal` that can be set or updated directly.
  */
 function signal(initialValue, options) {
-    const signalFn = createSignal(initialValue);
+    const signalFn = createSignal(initialValue, options?.equal);
     const node = signalFn[SIGNAL];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
     signalFn.set = (newValue) => signalSetFn(node, newValue);
     signalFn.update = (updateFn) => signalUpdateFn(node, updateFn);
     signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
@@ -17864,7 +17861,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.2+sha-8caf9d7']
+                ? ['ng-version', '19.2.2+sha-3856629']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34572,7 +34569,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.2+sha-8caf9d7');
+const VERSION = new Version('19.2.2+sha-3856629');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39346,10 +39343,7 @@ function untracked(nonReactiveReadsFn) {
  * Create a computed `Signal` which derives a reactive value from an expression.
  */
 function computed(computation, options) {
-    const getter = createComputed(computation);
-    if (options?.equal) {
-        getter[SIGNAL].equal = options.equal;
-    }
+    const getter = createComputed(computation, options?.equal);
     if (ngDevMode) {
         getter.toString = () => `[Computed: ${getter()}]`;
         getter[SIGNAL].debugName = options?.debugName;
