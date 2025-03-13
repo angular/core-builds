@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-55ba1ed
+ * @license Angular v20.0.0-next.2+sha-adecf4c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6263,11 +6263,8 @@ function ɵunwrapWritableSignal(value) {
  * Create a `Signal` that can be set or updated directly.
  */
 function signal(initialValue, options) {
-    const signalFn = createSignal(initialValue);
+    const signalFn = createSignal(initialValue, options?.equal);
     const node = signalFn[SIGNAL];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
     signalFn.set = (newValue) => signalSetFn(node, newValue);
     signalFn.update = (updateFn) => signalUpdateFn(node, updateFn);
     signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
@@ -18476,7 +18473,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-55ba1ed']
+        ? ['ng-version', '20.0.0-next.2+sha-adecf4c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34814,7 +34811,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-55ba1ed');
+const VERSION = new Version('20.0.0-next.2+sha-adecf4c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39603,10 +39600,7 @@ function untracked(nonReactiveReadsFn) {
  * Create a computed `Signal` which derives a reactive value from an expression.
  */
 function computed(computation, options) {
-    const getter = createComputed(computation);
-    if (options?.equal) {
-        getter[SIGNAL].equal = options.equal;
-    }
+    const getter = createComputed(computation, options?.equal);
     if (ngDevMode) {
         getter.toString = () => `[Computed: ${getter()}]`;
         getter[SIGNAL].debugName = options?.debugName;
