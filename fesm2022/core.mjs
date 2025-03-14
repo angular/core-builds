@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-c147a0d
+ * @license Angular v20.0.0-next.2+sha-b8daf47
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18473,7 +18473,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-c147a0d']
+        ? ['ng-version', '20.0.0-next.2+sha-b8daf47']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21280,8 +21280,9 @@ function onTimer(delay) {
  */
 function scheduleTimerTrigger(delay, callback, injector) {
     const scheduler = injector.get(TimerScheduler);
+    const ngZone = injector.get(NgZone);
     const cleanupFn = () => scheduler.remove(callback);
-    scheduler.add(delay, callback);
+    scheduler.add(delay, callback, ngZone);
     return cleanupFn;
 }
 /**
@@ -21307,10 +21308,10 @@ class TimerScheduler {
     // the current callback invocation. The shape of this list is the same
     // as the shape of the `current` list.
     deferred = [];
-    add(delay, callback) {
+    add(delay, callback, ngZone) {
         const target = this.executingCallbacks ? this.deferred : this.current;
         this.addToQueue(target, Date.now() + delay, callback);
-        this.scheduleTimer();
+        this.scheduleTimer(ngZone);
     }
     remove(callback) {
         const { current, deferred } = this;
@@ -21356,7 +21357,7 @@ class TimerScheduler {
         }
         return index;
     }
-    scheduleTimer() {
+    scheduleTimer(ngZone) {
         const callback = () => {
             this.clearTimeout();
             this.executingCallbacks = true;
@@ -21406,7 +21407,7 @@ class TimerScheduler {
                 }
                 this.deferred.length = 0;
             }
-            this.scheduleTimer();
+            this.scheduleTimer(ngZone);
         };
         // Avoid running timer callbacks more than once per
         // average frame duration. This is needed for better
@@ -21429,7 +21430,9 @@ class TimerScheduler {
                 this.clearTimeout();
                 const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
                 this.invokeTimerAt = invokeAt;
-                this.timeoutId = setTimeout(callback, timeout);
+                this.timeoutId = ngZone.runOutsideAngular(() => {
+                    return setTimeout(() => ngZone.run(callback), timeout);
+                });
             }
         }
     }
@@ -34811,7 +34814,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-c147a0d');
+const VERSION = new Version('20.0.0-next.2+sha-b8daf47');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
