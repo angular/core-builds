@@ -1,28 +1,28 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
-require('os');
-var ts = require('typescript');
 var checker = require('./checker-DF8ZaFW5.js');
-var program = require('./program-BZk27Ndu.js');
+var ts = require('typescript');
+require('os');
+var index$1 = require('./index-Crc_UIp6.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-DtkOnnv0.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
+var apply_import_manager = require('./apply_import_manager-8a9YgkFm.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BL3sL-vb.js');
 var assert = require('assert');
-var index = require('./index-DnkWgagp.js');
+var index = require('./index-CjmreVl7.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 require('./leading_space-D9nQ8UQC.js');
 
 /**
@@ -57,7 +57,7 @@ function migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new project_paths.Replacement(project_paths.projectFile(bindingField.getSourceFile(), info), new project_paths.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(bindingField.getSourceFile(), info), new run_in_devkit.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -86,7 +86,7 @@ function migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new project_paths.Replacement(reference.from.templateFile, new project_paths.TextUpdate({
+        host.replacements.push(new run_in_devkit.Replacement(reference.from.templateFile, new run_in_devkit.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -217,7 +217,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     resolvedReadType === null && type !== undefined ? [type] : undefined, args);
     const updated = ts.factory.createPropertyDeclaration([ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
     return [
-        new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
+        new run_in_devkit.Replacement(run_in_devkit.projectFile(node.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: node.getStart(),
             end: node.getEnd(),
             toInsert: printer.printNode(ts.EmitHint.Unspecified, updated, sf),
@@ -258,7 +258,7 @@ function getUniqueIDForClassProperty(property, info) {
     if (property.name === undefined) {
         return null;
     }
-    const id = project_paths.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
+    const id = run_in_devkit.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
     // Note: If a class is nested, there could be an ID clash.
     // This is highly unlikely though, and this is not a problem because
     // in such cases, there is even less chance there are any references to
@@ -382,7 +382,7 @@ class KnownQueries {
         });
         this.knownQueryIDs.set(id, { key: id, node: queryField });
         const descriptor = { key: id, node: queryField };
-        const file = project_paths.projectFile(queryField.getSourceFile(), this.info);
+        const file = run_in_devkit.projectFile(queryField.getSourceFile(), this.info);
         if (this.config.shouldMigrateQuery !== undefined &&
             !this.config.shouldMigrateQuery(descriptor, file)) {
             this.markFieldIncompatible(descriptor, {
@@ -581,7 +581,7 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
             return;
         }
         const toArrayExpr = toArrayCallExpr.expression;
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(toArrayExpr.getSourceFile(), info), new project_paths.TextUpdate({
+        replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(toArrayExpr.getSourceFile(), info), new run_in_devkit.TextUpdate({
             // Delete from expression end to call end. E.g. `.toArray(<..>)`.
             position: toArrayExpr.expression.getEnd(),
             end: toArrayCallExpr.getEnd(),
@@ -596,7 +596,7 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
+    replacements.push(new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
         // Delete from expression end to call end. E.g. `.toArray(<..>)`.
         position: offset + callExpr.receiver.receiver.sourceSpan.end,
         end: offset + callExpr.sourceSpan.end,
@@ -620,7 +620,7 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
             return;
         }
         const getExpr = getCallExpr.expression;
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(getExpr.getSourceFile(), info), new project_paths.TextUpdate({
+        replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(getExpr.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: getExpr.name.getStart(),
             end: getExpr.name.getEnd(),
             toInsert: 'at',
@@ -634,7 +634,7 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
+    replacements.push(new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
         position: offset + callExpr.receiver.nameSpan.start,
         end: offset + callExpr.receiver.nameSpan.end,
         toInsert: 'at',
@@ -689,7 +689,7 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
         if (expr === null) {
             return;
         }
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(expr.getSourceFile(), info), new project_paths.TextUpdate({
+        replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(expr.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: expr.name.getStart(),
             end: expr.name.getEnd(),
             toInsert: mapping.get(expr.name.text),
@@ -703,14 +703,14 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
     }
     const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
     const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
+    replacements.push(new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
         position: offset + expr.nameSpan.start,
         end: offset + expr.nameSpan.end,
         toInsert: mapping.get(expr.name),
     })));
 }
 
-class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
+class SignalQueriesMigration extends run_in_devkit.TsurgeComplexMigration {
     config;
     constructor(config = {}) {
         super();
@@ -726,10 +726,10 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         if (templateTypeChecker !== null) {
             templateTypeChecker.generateAllTypeCheckBlocks();
         }
-        const { sourceFiles, program: program$1 } = info;
-        const checker$1 = program$1.getTypeChecker();
+        const { sourceFiles, program } = info;
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const res = {
             knownQueryFields: {},
             potentialProblematicQueries: {},
@@ -748,7 +748,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                     key: extractedQuery.id,
                     node: queryNode,
                 };
-                const containingFile = project_paths.projectFile(queryNode.getSourceFile(), info);
+                const containingFile = run_in_devkit.projectFile(queryNode.getSourceFile(), info);
                 // If we have a config filter function, use it here for later
                 // perf-boosted reference lookups. Useful in non-batch mode.
                 if (this.config.shouldMigrateQuery === undefined ||
@@ -852,7 +852,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         if (this.config.assumeNonBatch) {
             res.reusableAnalysisReferences = referenceResult.references;
         }
-        return project_paths.confirmAsSerializable(res);
+        return run_in_devkit.confirmAsSerializable(res);
     }
     async combine(unitA, unitB) {
         const combined = {
@@ -892,7 +892,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 }
             }
         }
-        return project_paths.confirmAsSerializable(combined);
+        return run_in_devkit.confirmAsSerializable(combined);
     }
     async globalMeta(combinedData) {
         const globalUnitData = {
@@ -905,7 +905,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 markFieldIncompatibleInMetadata(globalUnitData.problematicQueries, id, migrate_ts_type_references.FieldIncompatibilityReason.SignalQueries__QueryListProblematicFieldAccessed);
             }
         }
-        return project_paths.confirmAsSerializable(globalUnitData);
+        return run_in_devkit.confirmAsSerializable(globalUnitData);
     }
     async migrate(globalMetadata, info) {
         // Pre-Analyze the program and get access to the template type checker.
@@ -914,10 +914,10 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
             metaReader: null,
         };
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
-        const { program: program$1, sourceFiles } = info;
-        const checker$1 = program$1.getTypeChecker();
+        const { program, sourceFiles } = info;
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const replacements = [];
         const importManager = new checker.ImportManager();
         const printer = ts.createPrinter();
@@ -1106,84 +1106,56 @@ function updateFileState(stateMap, node, queryType) {
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal queries migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new SignalQueriesMigration({
-            bestEffortMode: options.bestEffortMode,
-            insertTodosForSkippedFields: options.insertTodos,
-            shouldMigrateQuery: (_query, file) => {
-                return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(file.rootRelativePath));
+        await run_in_devkit.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new SignalQueriesMigration({
+                bestEffortMode: options.bestEffortMode,
+                insertTodosForSkippedFields: options.insertTodos,
+                shouldMigrateQuery: (_query, file) => {
+                    return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath) => {
+                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            },
+            afterProgramCreation: (info, fs) => {
+                const analysisPath = fs.resolve(options.analysisDir);
+                // Support restricting the analysis to subfolders for larger projects.
+                if (analysisPath !== '/') {
+                    info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                    info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for queries: ${tsconfigPath}...`);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            whenDone: ({ counters }) => {
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to signal queries 🎉`);
+                const { queriesCount, incompatibleQueries } = counters;
+                const migratedQueries = queriesCount - incompatibleQueries;
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to signal queries 🎉`);
+                context.logger.info(`  -> Migrated ${migratedQueries}/${queriesCount} queries.`);
+                if (incompatibleQueries > 0 && !options.insertTodos) {
+                    context.logger.warn(`To see why ${incompatibleQueries} queries couldn't be migrated`);
+                    context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
+                }
+                if (options.bestEffortMode) {
+                    context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
+                        `works as intended, and fix where necessary.`);
+                }
             },
         });
-        const analysisPath = fs.resolve(options.analysisDir);
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            // Support restricting the analysis to subfolders for larger projects.
-            if (analysisPath !== '/') {
-                info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-                info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-            }
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for queries: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta, info);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to signal queries 🎉`);
-        const { counters: { queriesCount, incompatibleQueries, multiQueries }, } = await migration.stats(globalMeta);
-        const migratedQueries = queriesCount - incompatibleQueries;
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to signal queries 🎉`);
-        context.logger.info(`  -> Migrated ${migratedQueries}/${queriesCount} queries.`);
-        if (incompatibleQueries > 0 && !options.insertTodos) {
-            context.logger.warn(`To see why ${incompatibleQueries} queries couldn't be migrated`);
-            context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
-        }
-        if (options.bestEffortMode) {
-            context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
-                `works as intended, and fix where necessary.`);
-        }
     };
 }
 

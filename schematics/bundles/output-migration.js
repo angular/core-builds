@@ -1,26 +1,26 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
-require('os');
 var ts = require('typescript');
+require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-var program = require('./program-BZk27Ndu.js');
+var index$1 = require('./index-Crc_UIp6.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
-var index = require('./index-DnkWgagp.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
+var apply_import_manager = require('./apply_import_manager-8a9YgkFm.js');
+var index = require('./index-CjmreVl7.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
@@ -90,7 +90,7 @@ function getOutputDecorator(node, reflector) {
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
 /** Computes an unique ID for a given Angular `@Output` property. */
 function getUniqueIdForProperty(info, prop) {
-    const { id } = project_paths.projectFile(prop.getSourceFile(), info);
+    const { id } = run_in_devkit.projectFile(prop.getSourceFile(), info);
     id.replace(/\.d\.ts$/, '.ts');
     return `${id}@@${prop.parent.name ?? 'unknown-class'}@@${prop.name.getText()}`;
 }
@@ -169,7 +169,7 @@ function calculateImportReplacements(info, sourceFiles) {
         const importManager = new checker.ImportManager();
         const addOnly = [];
         const addRemove = [];
-        const file = project_paths.projectFile(sf, info);
+        const file = run_in_devkit.projectFile(sf, info);
         importManager.addImport({
             requestedFile: sf,
             exportModuleSpecifier: '@angular/core',
@@ -225,36 +225,36 @@ function calculatePipeCallReplacement(info, node) {
 }
 function prepareTextReplacementForNode(info, node, replacement, start) {
     const sf = node.getSourceFile();
-    return new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
+    return new run_in_devkit.Replacement(run_in_devkit.projectFile(sf, info), new run_in_devkit.TextUpdate({
         position: start ?? node.getStart(),
         end: node.getEnd(),
         toInsert: replacement,
     }));
 }
 function prepareTextReplacement(file, replacement, start, end) {
-    return new project_paths.Replacement(file, new project_paths.TextUpdate({
+    return new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
         position: start,
         end: end,
         toInsert: replacement,
     }));
 }
 
-class OutputMigration extends project_paths.TsurgeFunnelMigration {
+class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
     config;
     constructor(config = {}) {
         super();
         this.config = config;
     }
     async analyze(info) {
-        const { sourceFiles, program: program$1 } = info;
+        const { sourceFiles, program } = info;
         const outputFieldReplacements = {};
         const problematicUsages = {};
         let problematicDeclarationCount = 0;
         const filesWithOutputDeclarations = new Set();
-        const checker$1 = program$1.getTypeChecker();
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const dtsReader = new program.DtsMetadataReader(checker$1, reflector);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const dtsReader = new index$1.DtsMetadataReader(checker$1, reflector);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         // Pre-analyze the program and get access to the template type checker.
         // If we are processing a non-Angular target, there is no template info.
@@ -290,7 +290,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                             id: getUniqueIdForProperty(info, node),
                             aliasParam: outputDecorator.args?.at(0),
                         };
-                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
+                        const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
                         if (this.config.shouldMigrate === undefined ||
                             this.config.shouldMigrate({
                                 key: outputDef.id,
@@ -318,7 +318,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
+                    const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
                     addOutputReplacement(outputFieldReplacements, id, outputFile, calculateNextFnReplacement(info, node.expression.name));
                 }
             }
@@ -327,7 +327,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
+                    const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
                     if (ts.isExpressionStatement(node.parent)) {
                         addOutputReplacement(outputFieldReplacements, id, outputFile, calculateCompleteCallReplacement(info, node.parent));
                     }
@@ -346,7 +346,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     if (isTestFile) {
-                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
+                        const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
                         addOutputReplacement(outputFieldReplacements, id, outputFile, ...calculatePipeCallReplacement(info, node));
                     }
                     else {
@@ -390,7 +390,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         }
         // calculate import replacements but do so only for files that have output declarations
         const importReplacements = calculateImportReplacements(info, filesWithOutputDeclarations);
-        return project_paths.confirmAsSerializable({
+        return run_in_devkit.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields: outputFieldReplacements,
             importReplacements,
@@ -420,7 +420,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                 problematicUsages[declId] = unit.problematicUsages[declId];
             }
         }
-        return project_paths.confirmAsSerializable({
+        return run_in_devkit.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields,
             importReplacements,
@@ -442,7 +442,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
             }
         }
         // Noop here as we don't have any form of special global metadata.
-        return project_paths.confirmAsSerializable(combinedData);
+        return run_in_devkit.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         const detectedOutputs = new Set(Object.keys(globalMetadata.outputFields)).size +
@@ -501,73 +501,45 @@ function addOutputReplacement(outputFieldReplacements, outputId, file, ...replac
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run output migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new OutputMigration({
-            shouldMigrate: (_, file) => {
-                return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(file.rootRelativePath));
+        await run_in_devkit.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new OutputMigration({
+                shouldMigrate: (_, file) => {
+                    return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath) => {
+                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            },
+            afterProgramCreation: (info, fs) => {
+                const analysisPath = fs.resolve(options.analysisDir);
+                // Support restricting the analysis to subfolders for larger projects.
+                if (analysisPath !== '/') {
+                    info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                    info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for outputs: ${tsconfigPath}...`);
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            whenDone: ({ counters }) => {
+                const { detectedOutputs, problematicOutputs, successRate } = counters;
+                const migratedOutputs = detectedOutputs - problematicOutputs;
+                const successRatePercent = (successRate * 100).toFixed(2);
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to outputs as functions 🎉`);
+                context.logger.info(`  -> Migrated ${migratedOutputs} out of ${detectedOutputs} detected outputs (${successRatePercent} %).`);
             },
         });
-        const analysisPath = fs.resolve(options.analysisDir);
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            // Support restricting the analysis to subfolders for larger projects.
-            if (analysisPath !== '/') {
-                info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-                info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-            }
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for outputs: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        const { counters: { detectedOutputs, problematicOutputs, successRate }, } = await migration.stats(globalMeta);
-        const migratedOutputs = detectedOutputs - problematicOutputs;
-        const successRatePercent = (successRate * 100).toFixed(2);
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to outputs as functions 🎉`);
-        context.logger.info(`  -> Migrated ${migratedOutputs} out of ${detectedOutputs} detected outputs (${successRatePercent} %).`);
     };
 }
 

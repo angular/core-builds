@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-require('./index-vGJcp5M7.js');
+var index = require('./index-Crc_UIp6.js');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
@@ -18,13 +18,12 @@ var nodes = require('./nodes-B16H9JUd.js');
 var imports = require('./imports-CIX-JgAN.js');
 var checker = require('./checker-DF8ZaFW5.js');
 require('os');
-var program = require('./program-BZk27Ndu.js');
 require('@angular-devkit/core');
 require('module');
 require('url');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
-    return new program.NgtscProgram(rootNames, options, host, oldProgram);
+    return new index.NgtscProgram(rootNames, options, host, oldProgram);
 }
 
 /** Checks whether a node is referring to a specific import specifier. */

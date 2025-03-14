@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,9 +9,9 @@
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-var program = require('./program-BZk27Ndu.js');
+var index = require('./index-Crc_UIp6.js');
 require('path');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -611,7 +611,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
                 readAstPath: ref.readAstPath,
                 isObjectShorthandExpression: ref.isObjectShorthandExpression,
                 isWrite: ref.isWrite,
-                file: project_paths.projectFile(ref.context.getSourceFile(), programInfo),
+                file: run_in_devkit.projectFile(ref.context.getSourceFile(), programInfo),
                 hostPropertyNode: ref.context,
             },
             target: ref.targetField,
@@ -628,7 +628,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
  */
 function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLoader) {
     const classDecorators = reflector.getDecoratorsOfDeclaration(node);
-    const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+    const evaluator = new index.PartialEvaluator(reflector, checker$1, null);
     const ngDecorators = classDecorators !== null
         ? checker.getAngularDecorators(classDecorators, ['Component'], /* isAngularCore */ false)
         : [];
@@ -711,8 +711,8 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
                     readAstPath: res.readAstPath,
                     node: res.context,
                     isObjectShorthandExpression: res.isObjectShorthandExpression,
-                    originatingTsFile: project_paths.projectFile(node.getSourceFile(), programInfo),
-                    templateFile: project_paths.projectFile(checker.absoluteFrom(templateFilePath), programInfo),
+                    originatingTsFile: run_in_devkit.projectFile(node.getSourceFile(), programInfo),
+                    templateFile: run_in_devkit.projectFile(checker.absoluteFrom(templateFilePath), programInfo),
                     isLikelyPartOfNarrowing: res.isLikelyNarrowed,
                     isWrite: res.isWrite,
                 },
@@ -738,7 +738,7 @@ function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, reso
     if (tmplDef === null) {
         return null;
     }
-    return program.extractTemplate(node, tmplDef, evaluator, null, resourceLoader, {
+    return index.extractTemplate(node, tmplDef, evaluator, null, resourceLoader, {
         enableBlockSyntax: true,
         enableLetSyntax: true,
         usePoisonedData: true,
@@ -894,7 +894,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
         kind: exports.ReferenceKind.TsReference,
         from: {
             node,
-            file: project_paths.projectFile(node.getSourceFile(), programInfo),
+            file: run_in_devkit.projectFile(node.getSourceFile(), programInfo),
             isWrite: isWriteReference,
             isPartOfElementBinding: ts.isBindingElement(node.parent),
         },
@@ -958,7 +958,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
             result.references.push({
                 kind: exports.ReferenceKind.TsClassTypeReference,
                 from: {
-                    file: project_paths.projectFile(partialDirectiveInCatalyst.referenceNode.getSourceFile(), programInfo),
+                    file: run_in_devkit.projectFile(partialDirectiveInCatalyst.referenceNode.getSourceFile(), programInfo),
                     node: partialDirectiveInCatalyst.referenceNode,
                 },
                 isPartialReference: true,

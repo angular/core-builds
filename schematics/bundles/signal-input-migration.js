@@ -1,29 +1,29 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-DtkOnnv0.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BL3sL-vb.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-var program = require('./program-BZk27Ndu.js');
+var index$1 = require('./index-Crc_UIp6.js');
 require('path');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
-var index = require('./index-DnkWgagp.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
+var index = require('./index-CjmreVl7.js');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var apply_import_manager = require('./apply_import_manager-8a9YgkFm.js');
+require('@angular-devkit/core');
+require('node:path/posix');
 require('./leading_space-D9nQ8UQC.js');
 require('fs');
 require('module');
 require('url');
-require('@angular-devkit/core');
-require('node:path/posix');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 /**
  * Class that holds information about a given directive and its input fields.
@@ -102,7 +102,7 @@ function getInputDescriptor(hostOrInfo, node) {
         className = node.parent.name?.text ?? '<anonymous>';
     }
     const info = hostOrInfo instanceof MigrationHost ? hostOrInfo.programInfo : hostOrInfo;
-    const file = project_paths.projectFile(node.getSourceFile(), info);
+    const file = run_in_devkit.projectFile(node.getSourceFile(), info);
     // Inputs may be detected in `.d.ts` files. Ensure that if the file IDs
     // match regardless of extension. E.g. `/google3/blaze-out/bin/my_file.ts` should
     // have the same ID as `/google3/my_file.ts`.
@@ -181,7 +181,7 @@ class KnownInputs {
         }
         const directiveInfo = this._classToDirectiveInfo.get(data.node.parent);
         const inputInfo = {
-            file: project_paths.projectFile(data.node.getSourceFile(), this.programInfo),
+            file: run_in_devkit.projectFile(data.node.getSourceFile(), this.programInfo),
             metadata: data.metadata,
             descriptor: data.descriptor,
             container: directiveInfo,
@@ -275,8 +275,8 @@ function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
     }
     const typeChecker = userProgram.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
-    const evaluator = new program.PartialEvaluator(reflector, typeChecker, null);
-    const dtsMetadataReader = new program.DtsMetadataReader(typeChecker, reflector);
+    const evaluator = new index$1.PartialEvaluator(reflector, typeChecker, null);
+    const dtsMetadataReader = new index$1.DtsMetadataReader(typeChecker, reflector);
     return {
         metaRegistry: metaReader,
         dtsMetadataReader,
@@ -1035,7 +1035,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (leadingTodoText !== null) {
         replacements.push(migrate_ts_type_references.insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...migrate_ts_type_references.cutStringToLineLimit(leadingTodoText, 70).map((line) => migrate_ts_type_references.insertPrecedingLine(node, info, `//  ${line}`)));
     }
-    replacements.push(new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
+    replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(node.getSourceFile(), info), new run_in_devkit.TextUpdate({
         position: node.getStart(),
         end: node.getEnd(),
         toInsert: newPropertyText,
@@ -1153,7 +1153,7 @@ function pass7__migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new project_paths.Replacement(reference.from.templateFile, new project_paths.TextUpdate({
+        host.replacements.push(new run_in_devkit.Replacement(reference.from.templateFile, new run_in_devkit.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -1193,7 +1193,7 @@ function pass8__migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new project_paths.Replacement(project_paths.projectFile(bindingField.getSourceFile(), info), new project_paths.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(bindingField.getSourceFile(), info), new run_in_devkit.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -1256,7 +1256,7 @@ function filterIncompatibilitiesForBestEffortMode(knownInputs) {
  * Tsurge migration for migrating Angular `@Input()` declarations to
  * signal inputs, with support for batch execution.
  */
-class SignalInputMigration extends project_paths.TsurgeComplexMigration {
+class SignalInputMigration extends run_in_devkit.TsurgeComplexMigration {
     config;
     upgradedAnalysisPhaseResults = null;
     constructor(config = {}) {
@@ -1265,7 +1265,7 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
     }
     // Override the default program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
-        return project_paths.createBaseProgramInfo(tsconfigAbsPath, fs, {
+        return run_in_devkit.createBaseProgramInfo(tsconfigAbsPath, fs, {
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -1337,13 +1337,13 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
                 knownInputs,
             };
         }
-        return project_paths.confirmAsSerializable(unitData);
+        return run_in_devkit.confirmAsSerializable(unitData);
     }
     async combine(unitA, unitB) {
-        return project_paths.confirmAsSerializable(combineCompilationUnitData(unitA, unitB));
+        return run_in_devkit.confirmAsSerializable(combineCompilationUnitData(unitA, unitB));
     }
     async globalMeta(combinedData) {
-        return project_paths.confirmAsSerializable(convertToGlobalMeta(combinedData));
+        return run_in_devkit.confirmAsSerializable(convertToGlobalMeta(combinedData));
     }
     async migrate(globalMetadata, info, nonBatchData) {
         const knownInputs = nonBatchData?.knownInputs ?? new KnownInputs(info, this.config);
@@ -1433,82 +1433,54 @@ function createMigrationHost(info, config) {
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal input migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new SignalInputMigration({
-            bestEffortMode: options.bestEffortMode,
-            insertTodosForSkippedFields: options.insertTodos,
-            shouldMigrateInput: (input) => {
-                return (input.file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(input.file.rootRelativePath));
+        await run_in_devkit.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new SignalInputMigration({
+                bestEffortMode: options.bestEffortMode,
+                insertTodosForSkippedFields: options.insertTodos,
+                shouldMigrateInput: (input) => {
+                    return (input.file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(input.file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath) => {
+                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            },
+            afterProgramCreation: (info, fs) => {
+                const analysisPath = fs.resolve(options.analysisDir);
+                // Support restricting the analysis to subfolders for larger projects.
+                if (analysisPath !== '/') {
+                    info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                    info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for inputs: ${tsconfigPath}...`);
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            whenDone: ({ counters }) => {
+                const { sourceInputs, incompatibleInputs } = counters;
+                const migratedInputs = sourceInputs - incompatibleInputs;
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to signal inputs 🎉`);
+                context.logger.info(`  -> Migrated ${migratedInputs}/${sourceInputs} inputs.`);
+                if (incompatibleInputs > 0 && !options.insertTodos) {
+                    context.logger.warn(`To see why ${incompatibleInputs} inputs couldn't be migrated`);
+                    context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
+                }
+                if (options.bestEffortMode) {
+                    context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
+                        `works as intended, and fix where necessary.`);
+                }
             },
         });
-        const analysisPath = fs.resolve(options.analysisDir);
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            // Support restricting the analysis to subfolders for larger projects.
-            if (analysisPath !== '/') {
-                info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-                info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-            }
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for inputs: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta, info);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        const { counters } = await migration.stats(globalMeta);
-        const migratedInputs = counters.sourceInputs - counters.incompatibleInputs;
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to signal inputs 🎉`);
-        context.logger.info(`  -> Migrated ${migratedInputs}/${counters.sourceInputs} inputs.`);
-        if (counters.incompatibleInputs > 0 && !options.insertTodos) {
-            context.logger.warn(`To see why ${counters.incompatibleInputs} inputs couldn't be migrated`);
-            context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
-        }
-        if (options.bestEffortMode) {
-            context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
-                `works as intended, and fix where necessary.`);
-        }
     };
 }
 

@@ -1,36 +1,35 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
-require('os');
 var ts = require('typescript');
+require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-var program = require('./program-BZk27Ndu.js');
+var index = require('./index-Crc_UIp6.js');
 require('path');
-require('./index-vGJcp5M7.js');
-var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
+var apply_import_manager = require('./apply_import_manager-8a9YgkFm.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 /** Migration that cleans up unused imports from a project. */
-class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
+class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
     printer = ts.createPrinter();
     createProgram(tsconfigAbsPath, fs) {
         return super.createProgram(tsconfigAbsPath, fs, {
             extendedDiagnostics: {
                 checks: {
                     // Ensure that the diagnostic is enabled.
-                    unusedStandaloneImports: program.DiagnosticCategoryLabel.Warning,
+                    unusedStandaloneImports: index.DiagnosticCategoryLabel.Warning,
                 },
             },
         });
@@ -62,10 +61,10 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             }
             this.generateReplacements(sourceFile, resolvedLocations, usageAnalysis, info, replacements);
         });
-        return project_paths.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
+        return run_in_devkit.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
     }
     async migrate(globalData) {
-        return project_paths.confirmAsSerializable(globalData);
+        return run_in_devkit.confirmAsSerializable(globalData);
     }
     async combine(unitA, unitB) {
         const combinedReplacements = [];
@@ -89,14 +88,14 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
                 }
             }
         });
-        return project_paths.confirmAsSerializable({
+        return run_in_devkit.confirmAsSerializable({
             replacements: combinedReplacements,
             removedIdentifiers: combinedRemovedIdentifiers,
             changedFiles: changedFileIds.size,
         });
     }
     async globalMeta(combinedData) {
-        return project_paths.confirmAsSerializable(combinedData);
+        return run_in_devkit.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         return {
@@ -223,7 +222,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         const importManager = new checker.ImportManager();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
+            replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(sourceFile, info), new run_in_devkit.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: '[]',
@@ -232,7 +231,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         // Filter out the unused identifiers from an array.
         partialRemovals.forEach((toRemove, node) => {
             const newNode = ts.factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
+            replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(sourceFile, info), new run_in_devkit.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: this.printer.printNode(ts.EmitHint.Unspecified, newNode, sourceFile),
@@ -264,59 +263,33 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
 
 function migrate() {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot clean up unused imports.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new UnusedImportsMigration();
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for ${tsconfigPath}`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            return { info, tsconfigPath };
+        await run_in_devkit.runMigrationInDevkit({
+            getMigration: () => new UnusedImportsMigration(),
+            tree,
+            beforeProgramCreation: (tsconfigPath) => {
+                context.logger.info(`Preparing analysis for ${tsconfigPath}`);
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for unused imports using ${tsconfigPath}`);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Schematic failed unexpectedly with no analysis data');
+            },
+            whenDone: (stats) => {
+                const { removedImports, changedFiles } = stats.counters;
+                let statsMessage;
+                if (removedImports === 0) {
+                    statsMessage = 'Schematic could not find unused imports in the project';
+                }
+                else {
+                    statsMessage =
+                        `Removed ${removedImports} import${removedImports !== 1 ? 's' : ''} ` +
+                            `in ${changedFiles} file${changedFiles !== 1 ? 's' : ''}`;
+                }
+                context.logger.info('');
+                context.logger.info(statsMessage);
+            },
         });
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for unused imports using ${tsconfigPath}`);
-            unitResults.push(await migration.analyze(info));
-        }
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Schematic failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        const { replacements } = await migration.migrate(globalMeta);
-        const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-        for (const [file, changes] of changesPerFile) {
-            if (!replacementsPerFile.has(file)) {
-                replacementsPerFile.set(file, changes);
-            }
-        }
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertRight(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        const { counters: { removedImports, changedFiles }, } = await migration.stats(globalMeta);
-        let statsMessage;
-        if (removedImports === 0) {
-            statsMessage = 'Schematic could not find unused imports in the project';
-        }
-        else {
-            statsMessage =
-                `Removed ${removedImports} import${removedImports !== 1 ? 's' : ''} ` +
-                    `in ${changedFiles} file${changedFiles !== 1 ? 's' : ''}`;
-        }
-        context.logger.info('');
-        context.logger.info(statsMessage);
     };
 }
 

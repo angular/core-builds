@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
 
 /**
  * Applies import manager changes, and writes them as replacements the
@@ -23,7 +23,7 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
     newImports.forEach((newImports, fileName) => {
         newImports.forEach((newImport) => {
             const printedImport = printer.printNode(ts.EmitHint.Unspecified, newImport, pathToFile.get(fileName));
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(checker.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
+            replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(checker.absoluteFrom(fileName), info), new run_in_devkit.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
         });
     });
     // Capture updated imports
@@ -46,7 +46,7 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
             formatFlags &= ~ts.ListFormat.SpaceBetweenBraces;
         }
         const printedBindings = printer.printList(formatFlags, newBindings.elements, oldBindings.getSourceFile());
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(oldBindings.getSourceFile(), info), new project_paths.TextUpdate({
+        replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(oldBindings.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: oldBindings.getStart(),
             end: oldBindings.getEnd(),
             // TS uses four spaces as indent. We migrate to two spaces as we
@@ -56,7 +56,7 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
     }
     // Update removed imports
     for (const removedImport of deletedImports) {
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(removedImport.getSourceFile(), info), new project_paths.TextUpdate({
+        replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(removedImport.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: removedImport.getStart(),
             end: removedImport.getEnd(),
             toInsert: '',

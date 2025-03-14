@@ -1,26 +1,26 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-2845906
+ * @license Angular v20.0.0-next.2+sha-c147a0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-Jtbi76Bs.js');
-require('os');
 var ts = require('typescript');
+require('os');
 var checker = require('./checker-DF8ZaFW5.js');
-require('./program-BZk27Ndu.js');
+require('./index-Crc_UIp6.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-CyRT0UvU.js');
+var run_in_devkit = require('./run_in_devkit-CL8jRFhP.js');
+var apply_import_manager = require('./apply_import_manager-8a9YgkFm.js');
 var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 /** Mapping between `InjectFlag` enum members to their object literal equvalients. */
 const FLAGS_TO_FIELDS = {
@@ -31,7 +31,7 @@ const FLAGS_TO_FIELDS = {
     'SkipSelf': 'skipSelf',
 };
 /** Migration that replaces `InjectFlags` usages with object literals. */
-class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
+class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
     async analyze(info) {
         const locations = {};
         const importRemovals = {};
@@ -40,7 +40,7 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
             if (specifier === null) {
                 continue;
             }
-            const file = project_paths.projectFile(sourceFile, info);
+            const file = run_in_devkit.projectFile(sourceFile, info);
             const importManager = new checker.ImportManager();
             const importReplacements = [];
             // Always remove the `InjectFlags` since it has been removed from Angular.
@@ -72,7 +72,7 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
                 }
             });
         }
-        return project_paths.confirmAsSerializable({ locations, importRemovals });
+        return run_in_devkit.confirmAsSerializable({ locations, importRemovals });
     }
     async migrate(globalData) {
         const replacements = [];
@@ -83,12 +83,12 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
             // Declare a property for each flag, except for `default` which does not have a flag.
             const properties = flags.filter((flag) => flag !== 'default').map((flag) => `${flag}: true`);
             const toInsert = properties.length ? `{ ${properties.join(', ')} }` : '{}';
-            replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({ position, end, toInsert })));
+            replacements.push(new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({ position, end, toInsert })));
         }
-        return project_paths.confirmAsSerializable({ replacements });
+        return run_in_devkit.confirmAsSerializable({ replacements });
     }
     async combine(unitA, unitB) {
-        return project_paths.confirmAsSerializable({
+        return run_in_devkit.confirmAsSerializable({
             locations: {
                 ...unitA.locations,
                 ...unitB.locations,
@@ -100,7 +100,7 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
         });
     }
     async globalMeta(combinedData) {
-        return project_paths.confirmAsSerializable(combinedData);
+        return run_in_devkit.confirmAsSerializable(combinedData);
     }
     async stats() {
         return { counters: {} };
@@ -137,44 +137,10 @@ function getInjectFlagsRootExpression(start) {
 
 function migrate() {
     return async (tree) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot replace `InjectFlags` usages.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new InjectFlagsMigration();
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            return { info, tsconfigPath };
+        await run_in_devkit.runMigrationInDevkit({
+            tree,
+            getMigration: () => new InjectFlagsMigration(),
         });
-        for (const { info } of programInfos) {
-            unitResults.push(await migration.analyze(info));
-        }
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        const { replacements } = await migration.migrate(globalMeta);
-        const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-        for (const [file, changes] of changesPerFile) {
-            if (!replacementsPerFile.has(file)) {
-                replacementsPerFile.set(file, changes);
-            }
-        }
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertRight(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
     };
 }
 
