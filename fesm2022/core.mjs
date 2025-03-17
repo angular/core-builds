@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.2+sha-acaadca
+ * @license Angular v19.2.2+sha-0615ffb
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -99,7 +99,12 @@ function createInputSignal(initialValue, options) {
         // Record that someone looked at this signal.
         producerAccessed(node);
         if (node.value === REQUIRED_UNSET_VALUE) {
-            throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, ngDevMode && 'Input is required but no value is available yet.');
+            let message = null;
+            if (ngDevMode) {
+                const name = options?.debugName ?? options?.alias;
+                message = `Input${name ? ` "${name}"` : ''} is required but no value is available yet.`;
+            }
+            throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, message);
         }
         return node.value;
     }
@@ -17861,7 +17866,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.2+sha-acaadca']
+                ? ['ng-version', '19.2.2+sha-0615ffb']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34572,7 +34577,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.2+sha-acaadca');
+const VERSION = new Version('19.2.2+sha-0615ffb');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
