@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-bb7e948
+ * @license Angular v20.0.0-next.2+sha-b154fb3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5350,6 +5350,28 @@ let Icu$1 = class Icu {
         return visitor.visitIcu(this);
     }
 };
+/**
+ * AST node that represents the host element of a directive.
+ * This node is used only for type checking purposes and cannot be produced from a user's template.
+ */
+class HostElement {
+    tagNames;
+    bindings;
+    listeners;
+    sourceSpan;
+    constructor(tagNames, bindings, listeners, sourceSpan) {
+        this.tagNames = tagNames;
+        this.bindings = bindings;
+        this.listeners = listeners;
+        this.sourceSpan = sourceSpan;
+        if (tagNames.length === 0) {
+            throw new Error('HostElement must have at least one tag name.');
+        }
+    }
+    visit() {
+        throw new Error(`HostElement cannot be visited`);
+    }
+}
 let RecursiveVisitor$1 = class RecursiveVisitor {
     visitElement(element) {
         visitAll$1(this, element.attributes);
@@ -29462,7 +29484,7 @@ class R3TargetBinder {
      * metadata about the types referenced in the template.
      */
     bind(target) {
-        if (!target.template) {
+        if (!target.template && !target.host) {
             throw new Error('Empty bound targets are not supported');
         }
         const directives = new Map();
@@ -29491,6 +29513,11 @@ class R3TargetBinder {
             // Finally, run the TemplateBinder to bind references, variables, and other entities within the
             // template. This extracts all the metadata that doesn't depend on directive matching.
             TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
+        }
+        // Bind the host element in a separate scope. Note that it only uses the
+        // `TemplateBinder` since directives don't apply inside a host context.
+        if (target.host) {
+            TemplateBinder.applyWithScope(target.host, Scope$1.apply(target.host), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
         }
         return new R3BoundTarget(target, directives, eagerDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
     }
@@ -29567,7 +29594,7 @@ let Scope$1 = class Scope {
             nodeOrNodes instanceof Content) {
             nodeOrNodes.children.forEach((node) => node.visit(this));
         }
-        else {
+        else if (!(nodeOrNodes instanceof HostElement)) {
             // No overarching `Template` instance, so process the nodes directly.
             nodeOrNodes.forEach((node) => node.visit(this));
         }
@@ -29896,7 +29923,7 @@ class TemplateBinder extends RecursiveAstVisitor {
     /**
      * Process a template and extract metadata about expressions and symbols within.
      *
-     * @param nodes the nodes of the template to process
+     * @param nodeOrNodes the nodes of the template to process
      * @param scope the `Scope` of the template being processed.
      * @returns three maps which contain metadata about the template: `expressions` which interprets
      * special `AST` nodes in expressions as pointing to references or variables declared within the
@@ -29905,11 +29932,11 @@ class TemplateBinder extends RecursiveAstVisitor {
      * nesting level (how many levels deep within the template structure the `Template` is), starting
      * at 1.
      */
-    static applyWithScope(nodes, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks) {
-        const template = nodes instanceof Template ? nodes : null;
+    static applyWithScope(nodeOrNodes, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks) {
+        const template = nodeOrNodes instanceof Template ? nodeOrNodes : null;
         // The top-level template has nesting level 0.
         const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template, 0);
-        binder.ingest(nodes);
+        binder.ingest(nodeOrNodes);
     }
     ingest(nodeOrNodes) {
         if (nodeOrNodes instanceof Template) {
@@ -29950,6 +29977,10 @@ class TemplateBinder extends RecursiveAstVisitor {
             nodeOrNodes instanceof Content) {
             nodeOrNodes.children.forEach((node) => node.visit(this));
             this.nestingLevel.set(nodeOrNodes, this.level);
+        }
+        else if (nodeOrNodes instanceof HostElement) {
+            // Host elements are always at the top level.
+            this.nestingLevel.set(nodeOrNodes, 0);
         }
         else {
             // Visit each node from the top-level template.
@@ -31436,7 +31467,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.2+sha-bb7e948');
+new Version('20.0.0-next.2+sha-b154fb3');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32386,7 +32417,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-r90mcJU9.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BAaPPHfB.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -39208,7 +39239,12 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
             throw new FatalDiagnosticError(exports.ErrorCode.DIRECTIVE_MISSING_SELECTOR, expr, `Directive ${clazz.name.text} has no selector, please add it!`);
         }
     }
-    const host = extractHostBindings(decoratedElements, evaluator, coreModule, compilationMode, directive);
+    const hostBindingNodes = {
+        literal: null,
+        bindingDecorators: new Set(),
+        listenerDecorators: new Set(),
+    };
+    const host = extractHostBindings(decoratedElements, evaluator, coreModule, compilationMode, hostBindingNodes, directive);
     const providers = directive.has('providers')
         ? new WrappedNodeExpr(annotateForClosureCompiler
             ? wrapFunctionExpressionsInParens(directive.get('providers'))
@@ -39320,6 +39356,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
         isStructural,
         hostDirectives,
         rawHostDirectives,
+        hostBindingNodes,
         // Track inputs from class metadata. This is useful for migration efforts.
         inputFieldNamesFromMetadataArray: new Set(Object.values(inputsFromMeta).map((i) => i.classPropertyName)),
     };
@@ -39402,10 +39439,14 @@ function extractDecoratorQueryMetadata(exprNode, name, args, propertyName, refle
         emitDistinctChangesOnly,
     };
 }
-function extractHostBindings(members, evaluator, coreModule, compilationMode, metadata) {
+function extractHostBindings(members, evaluator, coreModule, compilationMode, hostBindingNodes, metadata) {
     let bindings;
     if (metadata && metadata.has('host')) {
-        bindings = evaluateHostExpressionBindings(metadata.get('host'), evaluator);
+        const hostExpression = metadata.get('host');
+        bindings = evaluateHostExpressionBindings(hostExpression, evaluator);
+        if (ts.isObjectLiteralExpression(hostExpression)) {
+            hostBindingNodes.literal = hostExpression;
+        }
     }
     else {
         bindings = parseHostBindings({});
@@ -39428,6 +39469,9 @@ function extractHostBindings(members, evaluator, coreModule, compilationMode, me
                     throw createValueHasWrongTypeError(decorator.node, resolved, `@HostBinding's argument must be a string`);
                 }
                 hostPropertyName = resolved;
+            }
+            if (ts.isDecorator(decorator.node)) {
+                hostBindingNodes.bindingDecorators.add(decorator.node);
             }
             // Since this is a decorator, we know that the value is a class member. Always access it
             // through `this` so that further down the line it can't be confused for a literal value
@@ -39463,6 +39507,9 @@ function extractHostBindings(members, evaluator, coreModule, compilationMode, me
                     }
                     args = resolvedArgs;
                 }
+            }
+            if (ts.isDecorator(decorator.node)) {
+                hostBindingNodes.listenerDecorators.add(decorator.node);
             }
             bindings.listeners[eventName] = `${member.name}(${args.join(',')})`;
         });
@@ -40133,6 +40180,19 @@ function toR3InputMetadata(mapping) {
         isSignal: mapping.isSignal,
     };
 }
+function extractHostBindingResources(nodes) {
+    const result = new Set();
+    if (nodes.literal !== null) {
+        result.add({ path: null, node: nodes.literal });
+    }
+    for (const current of nodes.bindingDecorators) {
+        result.add({ path: null, node: current.expression });
+    }
+    for (const current of nodes.listenerDecorators) {
+        result.add({ path: null, node: current.expression });
+    }
+    return result;
+}
 
 const NgOriginalFile = Symbol('NgOriginalFile');
 exports.UpdateMode = void 0;
@@ -40440,7 +40500,7 @@ function parseTemplateAsSourceFile(fileName, template) {
 }
 
 const TYPE_CHECK_ID_MAP = Symbol('TypeCheckId');
-function getTypeCheckId(clazz) {
+function getTypeCheckId$1(clazz) {
     const sf = clazz.getSourceFile();
     if (sf[TYPE_CHECK_ID_MAP] === undefined) {
         sf[TYPE_CHECK_ID_MAP] = new Map();
@@ -42211,7 +42271,7 @@ class RegistryDomSchemaChecker {
             this._diagnostics.push(diag);
         }
     }
-    checkProperty(id, element, name, span, schemas, hostIsStandalone) {
+    checkTemplateElementProperty(id, element, name, span, schemas, hostIsStandalone) {
         if (!REGISTRY$1.hasProperty(element.name, name, schemas)) {
             const mapping = this.resolver.getTemplateSourceMapping(id);
             const decorator = hostIsStandalone ? '@Component' : '@NgModule';
@@ -42232,6 +42292,18 @@ class RegistryDomSchemaChecker {
             }
             const diag = makeTemplateDiagnostic(id, mapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMsg);
             this._diagnostics.push(diag);
+        }
+    }
+    checkHostElementProperty(id, element, name, span, schemas) {
+        for (const tagName of element.tagNames) {
+            if (REGISTRY$1.hasProperty(tagName, name, schemas)) {
+                continue;
+            }
+            const errorMessage = `Can't bind to '${name}' since it isn't a known property of '${tagName}'.`;
+            const mapping = this.resolver.getHostBindingsMapping(id);
+            const diag = makeTemplateDiagnostic(id, mapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMessage);
+            this._diagnostics.push(diag);
+            break;
         }
     }
 }
@@ -42345,13 +42417,26 @@ function tsCastToAny(expr) {
  * Thanks to narrowing of `document.createElement()`, this expression will have its type inferred
  * based on the tag name, including for custom elements that have appropriate .d.ts definitions.
  */
-function tsCreateElement(tagName) {
+function tsCreateElement(...tagNames) {
     const createElement = ts.factory.createPropertyAccessExpression(
     /* expression */ ts.factory.createIdentifier('document'), 'createElement');
+    let arg;
+    if (tagNames.length === 1) {
+        // If there's only one tag name, we can pass it in directly.
+        arg = ts.factory.createStringLiteral(tagNames[0]);
+    }
+    else {
+        // If there's more than one name, we have to generate a union of all the tag names. To do so,
+        // create an expression in the form of `null! as 'tag-1' | 'tag-2' | 'tag-3'`. This allows
+        // TypeScript to infer the type as a union of the differnet tags.
+        const assertedNullExpression = ts.factory.createNonNullExpression(ts.factory.createNull());
+        const type = ts.factory.createUnionTypeNode(tagNames.map((tag) => ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(tag))));
+        arg = ts.factory.createAsExpression(assertedNullExpression, type);
+    }
     return ts.factory.createCallExpression(
     /* expression */ createElement, 
     /* typeArguments */ undefined, 
-    /* argumentsArray */ [ts.factory.createStringLiteral(tagName)]);
+    /* argumentsArray */ [arg]);
 }
 /**
  * Create a `ts.VariableStatement` which declares a variable without explicit initialization.
@@ -42527,6 +42612,352 @@ class TypeParameterEmitter {
     }
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Comment attached to an AST node that serves as a guard to distinguish nodes
+ * used for type checking host bindings from ones used for templates.
+ */
+const GUARD_COMMENT_TEXT = 'hostBindingsBlockGuard';
+/**
+ * Creates an AST node that represents the host element of a directive.
+ * Can return null if there are no valid bindings to be checked.
+ * @param type Whether the host element is for a directive or a component.
+ * @param selector Selector of the directive.
+ * @param sourceNode Class declaration for the directive.
+ * @param literal `host` object literal from the decorator.
+ * @param bindingDecorators `HostBinding` decorators discovered on the node.
+ * @param listenerDecorators `HostListener` decorators discovered on the node.
+ */
+function createHostElement(type, selector, sourceNode, literal, bindingDecorators, listenerDecorators) {
+    const bindings = [];
+    const listeners = [];
+    let parser = null;
+    if (literal !== null) {
+        for (const prop of literal.properties) {
+            // We only support type checking of static bindings.
+            if (ts.isPropertyAssignment(prop) &&
+                ts.isStringLiteralLike(prop.initializer) &&
+                isStaticName(prop.name)) {
+                parser ??= makeBindingParser();
+                createNodeFromHostLiteralProperty(prop, parser, bindings, listeners);
+            }
+        }
+    }
+    for (const decorator of bindingDecorators) {
+        createNodeFromBindingDecorator(decorator, bindings);
+    }
+    for (const decorator of listenerDecorators) {
+        parser ??= makeBindingParser();
+        createNodeFromListenerDecorator(decorator, parser, listeners);
+    }
+    // The element will be a no-op if there are no bindings.
+    if (bindings.length === 0 && listeners.length === 0) {
+        return null;
+    }
+    const tagNames = [];
+    if (selector !== null) {
+        const parts = CssSelector.parse(selector);
+        for (const part of parts) {
+            if (part.element !== null) {
+                tagNames.push(part.element);
+            }
+        }
+    }
+    // If none of the selectors have a tag name, fall back to `ng-component`/`ng-directive`.
+    // This is how the runtime handles components without tag names as well.
+    if (tagNames.length === 0) {
+        tagNames.push(`ng-${type}`);
+    }
+    return new HostElement(tagNames, bindings, listeners, createSourceSpan(sourceNode.name));
+}
+/**
+ * Creates an AST node that can be used as a guard in `if` statements to distinguish TypeScript
+ * nodes used for checking host bindings from ones used for checking templates.
+ */
+function createHostBindingsBlockGuard() {
+    // Note that the comment text is quite generic. This doesn't really matter, because it is
+    // used only inside a TCB and there's no way for users to produce a comment there.
+    // `true /*hostBindings*/`.
+    const trueExpr = ts.addSyntheticTrailingComment(ts.factory.createTrue(), ts.SyntaxKind.MultiLineCommentTrivia, GUARD_COMMENT_TEXT);
+    // Wrap the expression in parentheses to ensure that the comment is attached to the correct node.
+    return ts.factory.createParenthesizedExpression(trueExpr);
+}
+/**
+ * Determines if a given node is a guard that indicates that descendant nodes are used to check
+ * host bindings.
+ */
+function isHostBindingsBlockGuard(node) {
+    if (!ts.isIfStatement(node)) {
+        return false;
+    }
+    // Needs to be kept in sync with `createHostBindingsMarker`.
+    const expr = node.expression;
+    if (!ts.isParenthesizedExpression(expr) || expr.expression.kind !== ts.SyntaxKind.TrueKeyword) {
+        return false;
+    }
+    const text = expr.getSourceFile().text;
+    return (ts.forEachTrailingCommentRange(text, expr.expression.getEnd(), (pos, end, kind) => kind === ts.SyntaxKind.MultiLineCommentTrivia &&
+        text.substring(pos + 2, end - 2) === GUARD_COMMENT_TEXT) || false);
+}
+/**
+ * If possible, creates and tracks the relevant AST node for a binding declared
+ * through a property on the `host` literal.
+ * @param prop Property to parse.
+ * @param parser Binding parser used to parse the expressions.
+ * @param bindings Array tracking the bound attributes of the host element.
+ * @param listeners Array tracking the event listeners of the host element.
+ */
+function createNodeFromHostLiteralProperty(property, parser, bindings, listeners) {
+    // TODO(crisbeto): surface parsing errors here, because currently they just get ignored.
+    // They'll still get reported when the handler tries to parse the bindings, but here we
+    // can highlight the nodes more accurately.
+    const { name, initializer } = property;
+    if (name.text.startsWith('[') && name.text.endsWith(']')) {
+        const { attrName, type } = inferBoundAttribute(name.text.slice(1, -1));
+        const valueSpan = createStaticExpressionSpan(initializer);
+        const ast = parser.parseBinding(initializer.text, true, valueSpan, valueSpan.start.offset);
+        if (ast.errors.length > 0) {
+            return; // See TODO above.
+        }
+        fixupSpans(ast, initializer);
+        bindings.push(new BoundAttribute(attrName, type, 0, ast, null, createSourceSpan(property), createStaticExpressionSpan(name), valueSpan, undefined));
+    }
+    else if (name.text.startsWith('(') && name.text.endsWith(')')) {
+        const events = [];
+        parser.parseEvent(name.text.slice(1, -1), initializer.text, false, createSourceSpan(property), createStaticExpressionSpan(initializer), [], events, createStaticExpressionSpan(name));
+        if (events.length === 0 || events[0].handler.errors.length > 0) {
+            return; // See TODO above.
+        }
+        fixupSpans(events[0].handler, initializer);
+        listeners.push(BoundEvent.fromParsedEvent(events[0]));
+    }
+}
+/**
+ * If possible, creates and tracks a bound attribute node from a `HostBinding` decorator.
+ * @param decorator Decorator from which to create the node.
+ * @param bindings Array tracking the bound attributes of the host element.
+ */
+function createNodeFromBindingDecorator(decorator, bindings) {
+    // We only support decorators that are being called.
+    if (!ts.isCallExpression(decorator.expression)) {
+        return;
+    }
+    const args = decorator.expression.arguments;
+    const property = decorator.parent;
+    let nameNode = null;
+    let propertyName = null;
+    if (property && ts.isPropertyDeclaration(property) && isStaticName(property.name)) {
+        propertyName = property.name;
+    }
+    // The first parameter is optional. If omitted, the name
+    // of the class member is used as the property.
+    if (args.length === 0) {
+        nameNode = propertyName;
+    }
+    else if (ts.isStringLiteralLike(args[0])) {
+        nameNode = args[0];
+    }
+    else {
+        return;
+    }
+    if (nameNode === null || propertyName === null) {
+        return;
+    }
+    // We can't synthesize a fake expression here and pass it through the binding parser, because
+    // it constructs all the spans based on the source code origin and they aren't easily mappable
+    // back to the source. E.g. `@HostBinding('foo') id = '123'` in source code would look
+    // something like `[foo]="this.id"` in the AST. Instead we construct the expressions
+    // manually here. Note that we use a dummy span with -1/-1 as offsets, because it isn't
+    // used for type checking and constructing it accurately would take some effort.
+    const span = new ParseSpan(-1, -1);
+    const propertyStart = property.getStart();
+    const receiver = new ThisReceiver(span, new AbsoluteSourceSpan(propertyStart, propertyStart));
+    const nameSpan = new AbsoluteSourceSpan(propertyName.getStart(), propertyName.getEnd());
+    const read = ts.isIdentifier(propertyName)
+        ? new PropertyRead(span, nameSpan, nameSpan, receiver, propertyName.text)
+        : new KeyedRead(span, nameSpan, receiver, new LiteralPrimitive(span, nameSpan, propertyName.text));
+    const { attrName, type } = inferBoundAttribute(nameNode.text);
+    bindings.push(new BoundAttribute(attrName, type, 0, read, null, createSourceSpan(decorator), createStaticExpressionSpan(nameNode), createSourceSpan(decorator), undefined));
+}
+/**
+ * If possible, creates and tracks a bound event node from a `HostBinding` decorator.
+ * @param decorator Decorator from which to create the node.
+ * @param parser Binding parser used to parse the expressions.
+ * @param bindings Array tracking the bound events of the host element.
+ */
+function createNodeFromListenerDecorator(decorator, parser, listeners) {
+    // We only support decorators that are being called with at least one argument.
+    if (!ts.isCallExpression(decorator.expression) || decorator.expression.arguments.length === 0) {
+        return;
+    }
+    const args = decorator.expression.arguments;
+    const method = decorator.parent;
+    // Only handle decorators that are statically analyzable.
+    if (!method ||
+        !ts.isMethodDeclaration(method) ||
+        !isStaticName(method.name) ||
+        !ts.isStringLiteralLike(args[0])) {
+        return;
+    }
+    // We can't synthesize a fake expression here and pass it through the binding parser, because
+    // it constructs all the spans based on the source code origin and they aren't easily mappable
+    // back to the source. E.g. `@HostListener('foo') handleFoo() {}` in source code would look
+    // something like `(foo)="handleFoo()"` in the AST. Instead we construct the expressions
+    // manually here. Note that we use a dummy span with -1/-1 as offsets, because it isn't
+    // used for type checking and constructing it accurately would take some effort.
+    const span = new ParseSpan(-1, -1);
+    const [name, phase] = method.name.text.split('.');
+    const argNodes = [];
+    const methodStart = method.getStart();
+    const methodReceiver = new ThisReceiver(span, new AbsoluteSourceSpan(methodStart, methodStart));
+    const nameSpan = new AbsoluteSourceSpan(method.name.getStart(), method.name.getEnd());
+    const receiver = ts.isIdentifier(method.name)
+        ? new PropertyRead(span, nameSpan, nameSpan, methodReceiver, method.name.text)
+        : new KeyedRead(span, nameSpan, methodReceiver, new LiteralPrimitive(span, nameSpan, method.name.text));
+    if (args.length > 1 && ts.isArrayLiteralExpression(args[1])) {
+        for (const expr of args[1].elements) {
+            // If the parameter is a static string, parse it using the binding parser since it can be any
+            // expression, otherwise treat it as `any` so the rest of the parameters can be checked.
+            if (ts.isStringLiteralLike(expr)) {
+                const span = createStaticExpressionSpan(expr);
+                const ast = parser.parseBinding(expr.text, true, span, span.start.offset);
+                fixupSpans(ast, expr);
+                argNodes.push(ast);
+            }
+            else {
+                // Represents `$any(0)`. We need to construct it manually in order to set the right spans.
+                const expressionSpan = new AbsoluteSourceSpan(expr.getStart(), expr.getEnd());
+                const anyRead = new PropertyRead(span, expressionSpan, expressionSpan, new ImplicitReceiver(span, expressionSpan), '$any');
+                const anyCall = new Call(span, expressionSpan, anyRead, [new LiteralPrimitive(span, expressionSpan, 0)], expressionSpan);
+                argNodes.push(anyCall);
+            }
+        }
+    }
+    const callNode = new Call(span, nameSpan, receiver, argNodes, span);
+    listeners.push(new BoundEvent(name, name.startsWith('@') ? exports.ParsedEventType.Animation : exports.ParsedEventType.Regular, callNode, null, phase, createSourceSpan(decorator), createSourceSpan(decorator), createStaticExpressionSpan(method.name)));
+}
+/**
+ * Infers the attribute name and binding type of a bound attribute based on its raw name.
+ * @param name Name from which to infer the information.
+ */
+function inferBoundAttribute(name) {
+    const attrPrefix = 'attr.';
+    const classPrefix = 'class.';
+    const stylePrefix = 'style.';
+    const animationPrefix = '@';
+    let attrName;
+    let type;
+    // Infer the binding type based on the prefix.
+    if (name.startsWith(attrPrefix)) {
+        attrName = name.slice(attrPrefix.length);
+        type = exports.BindingType.Attribute;
+    }
+    else if (name.startsWith(classPrefix)) {
+        attrName = name.slice(classPrefix.length);
+        type = exports.BindingType.Class;
+    }
+    else if (name.startsWith(stylePrefix)) {
+        attrName = name.slice(stylePrefix.length);
+        type = exports.BindingType.Style;
+    }
+    else if (name.startsWith(animationPrefix)) {
+        attrName = name.slice(animationPrefix.length);
+        type = exports.BindingType.Animation;
+    }
+    else {
+        attrName = name;
+        type = exports.BindingType.Property;
+    }
+    return { attrName, type };
+}
+/** Checks whether the specified node is a static name node. */
+function isStaticName(node) {
+    return ts.isIdentifier(node) || ts.isStringLiteralLike(node);
+}
+/** Creates a `ParseSourceSpan` pointing to a static expression AST node's source. */
+function createStaticExpressionSpan(node) {
+    const span = createSourceSpan(node);
+    // Offset by one on both sides to skip over the quotes.
+    if (ts.isStringLiteralLike(node)) {
+        span.fullStart = span.fullStart.moveBy(1);
+        span.start = span.start.moveBy(1);
+        span.end = span.end.moveBy(-1);
+    }
+    return span;
+}
+/**
+ * Adjusts the spans of a parsed AST so that they're appropriate for a host bindings context.
+ * @param ast The parsed AST that may need to be adjusted.
+ * @param initializer TypeScript node from which the source of the AST was extracted.
+ */
+function fixupSpans(ast, initializer) {
+    // When parsing the initializer as a property/event binding, we use `.text` which excludes escaped
+    // quotes and is generally what we want, because preserving them would result in a parser error,
+    // however it has the downside in that the spans of the expressions following the escaped
+    // characters are no longer accurate relative to the source code. The more escaped characters
+    // there are before a node, the more inaccurate its span will be. If we detect cases like that,
+    // we override the spans of all nodes following the escaped string to point to the entire
+    // initializer string so that we don't surface diagnostics with mangled spans. This isn't ideal,
+    // but is likely rare in user code. Some workarounds that were attempted and ultimately discarded:
+    // 1. Counting the number of escaped strings before a node and adjusting its span accordingly -
+    // There's a prototype of this approach in https://github.com/crisbeto/angular/commit/1eb92353784a609f6be7e6653ae5a9faef549e6a
+    // It works for the most part, but is complex and somewhat brittle, because it's not just the
+    // escaped literals that need to be updated, but also any nodes _after_ them and any nodes
+    // _containing_ them which gets increasingly complex with more complicated ASTs.
+    // 2. Replacing escape characters with whitespaces, for example `\'foo\' + 123` would become
+    // ` 'foo ' + 123` - this appears to produce accurate ASTs for some simpler use cases, but has
+    // the potential of either changing the user's code into something that's no longer parseable or
+    // causing type checking errors (e.g. the typings might require the exact string 'foo').
+    // 3. Passing the raw text (e.g. `initializer.getText().slice(1, -1)`) into the binding parser -
+    // This will preserve the right mappings, but can lead to parsing errors, because some of the
+    // strings won't have to be escaped anymore. We could add a mode to the parser that allows it to
+    // recover from such cases, but it'll introduce more complexity that we may not want to take on.
+    // 4. Constructing some sort of string like `<host ${name.getText()}=${initializer.getText()}/>`,
+    // passing it through the HTML parser and extracting the first attribute from it - wasn't explored
+    // much, but likely has the same issues as approach #3.
+    const escapeIndex = initializer.getText().indexOf('\\', 1);
+    if (escapeIndex > -1) {
+        const newSpan = new ParseSpan(0, initializer.getWidth());
+        const newSourceSpan = new AbsoluteSourceSpan(initializer.getStart(), initializer.getEnd());
+        ast.visit(new ReplaceSpanVisitor(escapeIndex, newSpan, newSourceSpan));
+    }
+}
+/**
+ * Visitor that replaces the spans of all nodes with new ones,
+ * if they're defined after a specific index.
+ */
+class ReplaceSpanVisitor extends RecursiveAstVisitor {
+    afterIndex;
+    overrideSpan;
+    overrideSourceSpan;
+    constructor(afterIndex, overrideSpan, overrideSourceSpan) {
+        super();
+        this.afterIndex = afterIndex;
+        this.overrideSpan = overrideSpan;
+        this.overrideSourceSpan = overrideSourceSpan;
+    }
+    visit(ast) {
+        // Only nodes after the index need to be adjusted, but all nodes should be visited.
+        if (ast.span.start >= this.afterIndex || ast.span.end >= this.afterIndex) {
+            ast.span = this.overrideSpan;
+            ast.sourceSpan = this.overrideSourceSpan;
+            if (ast instanceof ASTWithName) {
+                ast.nameSpan = this.overrideSourceSpan;
+            }
+            if (ast instanceof Call || ast instanceof SafeCall) {
+                ast.argumentSpan = this.overrideSourceSpan;
+            }
+        }
+        super.visit(ast);
+    }
+}
+
 /**
  * External modules/identifiers that always should exist for type check
  * block files.
@@ -42595,18 +43026,39 @@ function getSourceMapping(shimSf, position, resolver, isDiagnosticRequest) {
     if (sourceLocation === null) {
         return null;
     }
-    const mapping = resolver.getTemplateSourceMapping(sourceLocation.id);
+    if (isInHostBindingTcb(node)) {
+        const hostSourceMapping = resolver.getHostBindingsMapping(sourceLocation.id);
+        const span = resolver.toHostParseSourceSpan(sourceLocation.id, sourceLocation.span);
+        if (span === null) {
+            return null;
+        }
+        return { sourceLocation, sourceMapping: hostSourceMapping, span };
+    }
     const span = resolver.toTemplateParseSourceSpan(sourceLocation.id, sourceLocation.span);
     if (span === null) {
         return null;
     }
     // TODO(atscott): Consider adding a context span by walking up from `node` until we get a
     // different span.
-    return { sourceLocation, sourceMapping: mapping, span };
+    return {
+        sourceLocation,
+        sourceMapping: resolver.getTemplateSourceMapping(sourceLocation.id),
+        span,
+    };
+}
+function isInHostBindingTcb(node) {
+    let current = node;
+    while (current && !ts.isFunctionDeclaration(current)) {
+        if (isHostBindingsBlockGuard(current)) {
+            return true;
+        }
+        current = current.parent;
+    }
+    return false;
 }
 function findTypeCheckBlock(file, id, isDiagnosticRequest) {
     for (const stmt of file.statements) {
-        if (ts.isFunctionDeclaration(stmt) && getTemplateId(stmt, file, isDiagnosticRequest) === id) {
+        if (ts.isFunctionDeclaration(stmt) && getTypeCheckId(stmt, file, isDiagnosticRequest) === id) {
             return stmt;
         }
     }
@@ -42629,7 +43081,7 @@ function findSourceLocation(node, sourceFile, isDiagnosticsRequest) {
         if (span !== null) {
             // Once the positional information has been extracted, search further up the TCB to extract
             // the unique id that is attached with the TCB's function declaration.
-            const id = getTemplateId(node, sourceFile, isDiagnosticsRequest);
+            const id = getTypeCheckId(node, sourceFile, isDiagnosticsRequest);
             if (id === null) {
                 return null;
             }
@@ -42639,7 +43091,7 @@ function findSourceLocation(node, sourceFile, isDiagnosticsRequest) {
     }
     return null;
 }
-function getTemplateId(node, sourceFile, isDiagnosticRequest) {
+function getTypeCheckId(node, sourceFile, isDiagnosticRequest) {
     // Walk up to the function declaration of the TCB, the file information is attached there.
     while (!ts.isFunctionDeclaration(node)) {
         if (hasIgnoreForDiagnosticsMarker(node, sourceFile) && isDiagnosticRequest) {
@@ -43895,7 +44347,6 @@ var TcbGenericContextBehavior;
  */
 function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecorder, genericContextBehavior) {
     const tcb = new Context(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone, meta.preserveWhitespaces);
-    const scope = Scope.forNodes(tcb, null, null, tcb.boundTarget.target.template, /* guard */ null);
     const ctxRawType = env.referenceType(ref);
     if (!ts.isTypeReferenceNode(ctxRawType)) {
         throw new Error(`Expected TypeReferenceNode when referencing the ctx param for ${ref.debugName}`);
@@ -43922,13 +44373,19 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
         }
     }
     const paramList = [tcbThisParam(ctxRawType.typeName, typeArguments)];
-    const scopeStatements = scope.render();
-    const innerBody = ts.factory.createBlock([...env.getPreludeStatements(), ...scopeStatements]);
-    // Wrap the body in an "if (true)" expression. This is unnecessary but has the effect of causing
-    // the `ts.Printer` to format the type-check block nicely.
-    const body = ts.factory.createBlock([
-        ts.factory.createIfStatement(ts.factory.createTrue(), innerBody, undefined),
-    ]);
+    const statements = [];
+    // Add the template type checking code.
+    if (tcb.boundTarget.target.template !== undefined) {
+        const templateScope = Scope.forNodes(tcb, null, null, tcb.boundTarget.target.template, 
+        /* guard */ null);
+        statements.push(renderBlockStatements(env, templateScope, ts.factory.createTrue()));
+    }
+    // Add the host bindings type checking code.
+    if (tcb.boundTarget.target.host !== undefined) {
+        const hostScope = Scope.forNodes(tcb, null, tcb.boundTarget.target.host, null, null);
+        statements.push(renderBlockStatements(env, hostScope, createHostBindingsBlockGuard()));
+    }
+    const body = ts.factory.createBlock(statements);
     const fnDecl = ts.factory.createFunctionDeclaration(
     /* modifiers */ undefined, 
     /* asteriskToken */ undefined, 
@@ -43939,6 +44396,14 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
     /* body */ body);
     addTypeCheckId(fnDecl, meta.id);
     return fnDecl;
+}
+function renderBlockStatements(env, scope, wrapperExpression) {
+    const scopeStatements = scope.render();
+    const innerBody = ts.factory.createBlock([...env.getPreludeStatements(), ...scopeStatements]);
+    // Wrap the body in an if statement. This serves two purposes:
+    // 1. It allows us to distinguish between the sections of the block (e.g. host or template).
+    // 2. It allows the `ts.Printer` to produce better-looking output.
+    return ts.factory.createIfStatement(wrapperExpression, innerBody);
 }
 /**
  * A code generation operation that's involved in the construction of a Type Check Block.
@@ -44692,20 +45157,28 @@ class TcbDomSchemaCheckerOp extends TcbOp {
         return false;
     }
     execute() {
-        if (this.checkElement) {
-            this.tcb.domSchemaChecker.checkElement(this.tcb.id, this.element, this.tcb.schemas, this.tcb.hostIsStandalone);
+        const element = this.element;
+        const isTemplateElement = element instanceof Element$1;
+        const bindings = isTemplateElement ? element.inputs : element.bindings;
+        if (this.checkElement && isTemplateElement) {
+            this.tcb.domSchemaChecker.checkElement(this.tcb.id, element, this.tcb.schemas, this.tcb.hostIsStandalone);
         }
         // TODO(alxhub): this could be more efficient.
-        for (const binding of this.element.inputs) {
+        for (const binding of bindings) {
             const isPropertyBinding = binding.type === exports.BindingType.Property || binding.type === exports.BindingType.TwoWay;
-            if (isPropertyBinding && this.claimedInputs.has(binding.name)) {
+            if (isPropertyBinding && this.claimedInputs?.has(binding.name)) {
                 // Skip this binding as it was claimed by a directive.
                 continue;
             }
             if (isPropertyBinding && binding.name !== 'style' && binding.name !== 'class') {
                 // A direct binding to a property.
                 const propertyName = ATTR_TO_PROP.get(binding.name) ?? binding.name;
-                this.tcb.domSchemaChecker.checkProperty(this.tcb.id, this.element, propertyName, binding.sourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
+                if (isTemplateElement) {
+                    this.tcb.domSchemaChecker.checkTemplateElementProperty(this.tcb.id, element, propertyName, binding.sourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
+                }
+                else {
+                    this.tcb.domSchemaChecker.checkHostElementProperty(this.tcb.id, element, propertyName, binding.keySpan, this.tcb.schemas);
+                }
             }
         }
         return null;
@@ -44821,6 +45294,30 @@ class TcbControlFlowContentProjectionOp extends TcbOp {
     }
 }
 /**
+ * A `TcbOp` which creates an expression for a the host element of a directive.
+ *
+ * Executing this operation returns a reference to the element variable.
+ */
+class TcbHostElementOp extends TcbOp {
+    tcb;
+    scope;
+    element;
+    optional = true;
+    constructor(tcb, scope, element) {
+        super();
+        this.tcb = tcb;
+        this.scope = scope;
+        this.element = element;
+    }
+    execute() {
+        const id = this.tcb.allocateId();
+        const initializer = tsCreateElement(...this.element.tagNames);
+        addParseSpanInfo(initializer, this.element.sourceSpan);
+        this.scope.addStatement(tsCreateVariable(id, initializer));
+        return id;
+    }
+}
+/**
  * Mapping between attributes names that don't correspond to their element property names.
  * Note: this mapping has to be kept in sync with the equally named mapping in the runtime.
  */
@@ -44845,13 +45342,15 @@ const ATTR_TO_PROP = new Map(Object.entries({
 class TcbUnclaimedInputsOp extends TcbOp {
     tcb;
     scope;
-    element;
+    inputs;
+    target;
     claimedInputs;
-    constructor(tcb, scope, element, claimedInputs) {
+    constructor(tcb, scope, inputs, target, claimedInputs) {
         super();
         this.tcb = tcb;
         this.scope = scope;
-        this.element = element;
+        this.inputs = inputs;
+        this.target = target;
         this.claimedInputs = claimedInputs;
     }
     get optional() {
@@ -44862,9 +45361,9 @@ class TcbUnclaimedInputsOp extends TcbOp {
         // the element itself.
         let elId = null;
         // TODO(alxhub): this could be more efficient.
-        for (const binding of this.element.inputs) {
+        for (const binding of this.inputs) {
             const isPropertyBinding = binding.type === exports.BindingType.Property || binding.type === exports.BindingType.TwoWay;
-            if (isPropertyBinding && this.claimedInputs.has(binding.name)) {
+            if (isPropertyBinding && this.claimedInputs?.has(binding.name)) {
                 // Skip this binding as it was claimed by a directive.
                 continue;
             }
@@ -44872,7 +45371,7 @@ class TcbUnclaimedInputsOp extends TcbOp {
             if (this.tcb.env.config.checkTypeOfDomBindings && isPropertyBinding) {
                 if (binding.name !== 'style' && binding.name !== 'class') {
                     if (elId === null) {
-                        elId = this.scope.resolve(this.element);
+                        elId = this.scope.resolve(this.target);
                     }
                     // A direct binding to a property.
                     const propertyName = ATTR_TO_PROP.get(binding.name) ?? binding.name;
@@ -44972,13 +45471,17 @@ class TcbDirectiveOutputsOp extends TcbOp {
 class TcbUnclaimedOutputsOp extends TcbOp {
     tcb;
     scope;
-    element;
+    target;
+    outputs;
+    inputs;
     claimedOutputs;
-    constructor(tcb, scope, element, claimedOutputs) {
+    constructor(tcb, scope, target, outputs, inputs, claimedOutputs) {
         super();
         this.tcb = tcb;
         this.scope = scope;
-        this.element = element;
+        this.target = target;
+        this.outputs = outputs;
+        this.inputs = inputs;
         this.claimedOutputs = claimedOutputs;
     }
     get optional() {
@@ -44987,14 +45490,16 @@ class TcbUnclaimedOutputsOp extends TcbOp {
     execute() {
         let elId = null;
         // TODO(alxhub): this could be more efficient.
-        for (const output of this.element.outputs) {
-            if (this.claimedOutputs.has(output.name)) {
+        for (const output of this.outputs) {
+            if (this.claimedOutputs?.has(output.name)) {
                 // Skip this event handler as it was claimed by a directive.
                 continue;
             }
-            if (this.tcb.env.config.checkTypeOfOutputEvents && output.name.endsWith('Change')) {
+            if (this.tcb.env.config.checkTypeOfOutputEvents &&
+                this.inputs !== null &&
+                output.name.endsWith('Change')) {
                 const inputName = output.name.slice(0, -6);
-                if (checkSplitTwoWayBinding(inputName, output, this.element.inputs, this.tcb)) {
+                if (checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb)) {
                     // Skip this event handler as the error was already handled.
                     continue;
                 }
@@ -45015,7 +45520,7 @@ class TcbUnclaimedOutputsOp extends TcbOp {
                 // base `Event` type.
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0 /* EventParamType.Infer */);
                 if (elId === null) {
-                    elId = this.scope.resolve(this.element);
+                    elId = this.scope.resolve(this.target);
                 }
                 const propertyAccess = ts.factory.createPropertyAccessExpression(elId, 'addEventListener');
                 addParseSpanInfo(propertyAccess, output.keySpan);
@@ -45406,6 +45911,10 @@ class Scope {
      */
     elementOpMap = new Map();
     /**
+     * A map of `TmplAstHostElement`s to the index of their `TcbHostElementOp` in the `opQueue`
+     */
+    hostElementOpMap = new Map();
+    /**
      * A map of maps which tracks the index of `TcbDirectiveCtorOp`s in the `opQueue` for each
      * directive on a `TmplAstElement` or `TmplAstTemplate` node.
      */
@@ -45507,8 +46016,13 @@ class Scope {
                 this.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
             }
         }
-        for (const node of children) {
-            scope.appendNode(node);
+        else if (scopedNode instanceof HostElement) {
+            scope.appendNode(scopedNode);
+        }
+        if (children !== null) {
+            for (const node of children) {
+                scope.appendNode(node);
+            }
         }
         // Once everything is registered, we need to check if there are `@let`
         // declarations that conflict with other local symbols defined after them.
@@ -45668,6 +46182,9 @@ class Scope {
             // Resolving the DOM node of an element in this template.
             return this.resolveOp(this.elementOpMap.get(ref));
         }
+        else if (ref instanceof HostElement && this.hostElementOpMap.has(ref)) {
+            return this.resolveOp(this.hostElementOpMap.get(ref));
+        }
         else {
             return null;
         }
@@ -45763,6 +46280,11 @@ class Scope {
                 this.letDeclOpMap.set(node.name, { opIndex, node });
             }
         }
+        else if (node instanceof HostElement) {
+            const opIndex = this.opQueue.push(new TcbHostElementOp(this.tcb, this, node)) - 1;
+            this.hostElementOpMap.set(node, opIndex);
+            this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.bindings, node, null), new TcbUnclaimedOutputsOp(this.tcb, this, node, node.listeners, null, null), new TcbDomSchemaCheckerOp(this.tcb, node, false, null));
+        }
     }
     appendChildren(node) {
         for (const child of node.children) {
@@ -45797,8 +46319,7 @@ class Scope {
             // If there are no directives, then all inputs are unclaimed inputs, so queue an operation
             // to add them if needed.
             if (node instanceof Element$1) {
-                this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node, claimedInputs));
-                this.opQueue.push(new TcbDomSchemaCheckerOp(this.tcb, node, /* checkElement */ true, claimedInputs));
+                this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.inputs, node, claimedInputs), new TcbDomSchemaCheckerOp(this.tcb, node, /* checkElement */ true, claimedInputs));
             }
             return;
         }
@@ -45849,7 +46370,7 @@ class Scope {
                     claimedInputs.add(propertyName);
                 }
             }
-            this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node, claimedInputs));
+            this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.inputs, node, claimedInputs));
             // If there are no directives which match this element, then it's a "plain" DOM element (or a
             // web component), and should be checked against the DOM schema. If any directives match,
             // we must assume that the element could be custom (either a component, or a directive like
@@ -45866,7 +46387,7 @@ class Scope {
             // If there are no directives, then all outputs are unclaimed outputs, so queue an operation
             // to add them if needed.
             if (node instanceof Element$1) {
-                this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, claimedOutputs));
+                this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, node.outputs, node.inputs, claimedOutputs));
             }
             return;
         }
@@ -45883,7 +46404,7 @@ class Scope {
                     claimedOutputs.add(outputProperty);
                 }
             }
-            this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, claimedOutputs));
+            this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, node.outputs, node.inputs, claimedOutputs));
         }
     }
     appendDeepSchemaChecks(nodes) {
@@ -46534,18 +47055,22 @@ class TypeCheckContextImpl {
      *
      * Implements `TypeCheckContext.addTemplate`.
      */
-    addDirective(ref, binder, schemas, templateContext, isStandalone) {
+    addDirective(ref, binder, schemas, templateContext, hostBindingContext, isStandalone) {
         if (!this.host.shouldCheckClass(ref.node)) {
             return;
         }
-        const fileData = this.dataForFile(ref.node.getSourceFile());
+        const sourceFile = ref.node.getSourceFile();
+        const fileData = this.dataForFile(sourceFile);
         const shimData = this.pendingShimForClass(ref.node);
         const id = fileData.sourceManager.getTypeCheckId(ref.node);
         const templateParsingDiagnostics = [];
         if (templateContext !== null && templateContext.parseErrors !== null) {
             templateParsingDiagnostics.push(...getTemplateDiagnostics(templateContext.parseErrors, id, templateContext.sourceMapping));
         }
-        const boundTarget = binder.bind({ template: templateContext?.nodes });
+        const boundTarget = binder.bind({
+            template: templateContext?.nodes,
+            host: hostBindingContext?.node,
+        });
         if (this.inlining === InliningMode.InlineOps) {
             // Get all of the directives used in the template and record inline type constructors when
             // required.
@@ -46575,6 +47100,7 @@ class TypeCheckContextImpl {
             template: templateContext?.nodes || null,
             boundTarget,
             templateParsingDiagnostics,
+            hostElement: hostBindingContext?.node ?? null,
         });
         const usedPipes = [];
         if (templateContext !== null) {
@@ -46599,6 +47125,12 @@ class TypeCheckContextImpl {
         }
         if (templateContext !== null) {
             fileData.sourceManager.captureTemplateSource(id, templateContext.sourceMapping, templateContext.file);
+        }
+        if (hostBindingContext !== null) {
+            fileData.sourceManager.captureHostBindingsMapping(id, hostBindingContext.sourceMapping, 
+            // We only support host bindings in the same file as the directive
+            // so we can get the source file from here.
+            new ParseSourceFile(sourceFile.text, sourceFile.fileName));
         }
         const meta = {
             id,
@@ -46903,10 +47435,10 @@ function findClosestLineStartPosition(linesMap, position, low = 0, high = linesM
 }
 
 /**
- * Represents the source of a template that was processed during type-checking. This information is
- * used when translating parse offsets in diagnostics back to their original line/column location.
+ * Represents the source of code processed during type-checking. This information is used when
+ * translating parse offsets in diagnostics back to their original line/column location.
  */
-class TemplateSource {
+class Source {
     mapping;
     file;
     lineStarts = null;
@@ -46943,11 +47475,16 @@ class DirectiveSourceManager {
      * diagnostics produced for TCB code to their source location in the template.
      */
     templateSources = new Map();
+    /** Keeps track of type check IDs and the source location of their host bindings. */
+    hostBindingSources = new Map();
     getTypeCheckId(node) {
-        return getTypeCheckId(node);
+        return getTypeCheckId$1(node);
     }
     captureTemplateSource(id, mapping, file) {
-        this.templateSources.set(id, new TemplateSource(mapping, file));
+        this.templateSources.set(id, new Source(mapping, file));
+    }
+    captureHostBindingsMapping(id, mapping, file) {
+        this.hostBindingSources.set(id, new Source(mapping, file));
     }
     getTemplateSourceMapping(id) {
         if (!this.templateSources.has(id)) {
@@ -46955,12 +47492,25 @@ class DirectiveSourceManager {
         }
         return this.templateSources.get(id).mapping;
     }
+    getHostBindingsMapping(id) {
+        if (!this.hostBindingSources.has(id)) {
+            throw new Error(`Unexpected unknown type check ID: ${id}`);
+        }
+        return this.hostBindingSources.get(id).mapping;
+    }
     toTemplateParseSourceSpan(id, span) {
         if (!this.templateSources.has(id)) {
             return null;
         }
         const templateSource = this.templateSources.get(id);
         return templateSource.toParseSourceSpan(span.start, span.end);
+    }
+    toHostParseSourceSpan(id, span) {
+        if (!this.hostBindingSources.has(id)) {
+            return null;
+        }
+        const source = this.hostBindingSources.get(id);
+        return source.toParseSourceSpan(span.start, span.end);
     }
 }
 
@@ -47726,16 +48276,17 @@ class TemplateTypeCheckerImpl {
     }
     getTemplate(component, optimizeFor) {
         const { data } = this.getLatestComponentState(component, optimizeFor);
-        if (data === null) {
-            return null;
-        }
-        return data.template;
+        return data?.template ?? null;
+    }
+    getHostElement(directive, optimizeFor) {
+        const { data } = this.getLatestComponentState(directive, optimizeFor);
+        return data?.hostElement ?? null;
     }
     getUsedDirectives(component) {
-        return this.getLatestComponentState(component).data?.boundTarget.getUsedDirectives() || null;
+        return this.getLatestComponentState(component).data?.boundTarget.getUsedDirectives() ?? null;
     }
     getUsedPipes(component) {
-        return this.getLatestComponentState(component).data?.boundTarget.getUsedPipes() || null;
+        return this.getLatestComponentState(component).data?.boundTarget.getUsedPipes() ?? null;
     }
     getLatestComponentState(component, optimizeFor = exports.OptimizeFor.SingleFile) {
         switch (optimizeFor) {
@@ -47930,7 +48481,7 @@ class TemplateTypeCheckerImpl {
         this.isComplete = false;
     }
     getExpressionTarget(expression, clazz) {
-        return (this.getLatestComponentState(clazz).data?.boundTarget.getExpressionTarget(expression) || null);
+        return (this.getLatestComponentState(clazz).data?.boundTarget.getExpressionTarget(expression) ?? null);
     }
     makeTemplateDiagnostic(clazz, sourceSpan, category, errorCode, message, relatedInformation) {
         const sfPath = absoluteFromSourceFile(clazz.getSourceFile());
@@ -48606,6 +49157,7 @@ exports.createDirectiveType = createDirectiveType;
 exports.createFactoryType = createFactoryType;
 exports.createForwardRefResolver = createForwardRefResolver;
 exports.createHostDirectivesMappingArray = createHostDirectivesMappingArray;
+exports.createHostElement = createHostElement;
 exports.createInjectableType = createInjectableType;
 exports.createInjectorType = createInjectorType;
 exports.createMayBeForwardRefExpression = createMayBeForwardRefExpression;
@@ -48621,6 +49173,7 @@ exports.extraReferenceFromTypeQuery = extraReferenceFromTypeQuery;
 exports.extractDecoratorQueryMetadata = extractDecoratorQueryMetadata;
 exports.extractDirectiveMetadata = extractDirectiveMetadata;
 exports.extractDirectiveTypeCheckMeta = extractDirectiveTypeCheckMeta;
+exports.extractHostBindingResources = extractHostBindingResources;
 exports.extractMessages = extractMessages;
 exports.extractReferencesFromType = extractReferencesFromType;
 exports.findAngularDecorator = findAngularDecorator;

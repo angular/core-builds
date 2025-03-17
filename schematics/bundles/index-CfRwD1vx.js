@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-bb7e948
+ * @license Angular v20.0.0-next.2+sha-b154fb3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-r90mcJU9.js');
+var checker = require('./checker-BAaPPHfB.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -870,7 +870,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -888,7 +888,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -983,7 +983,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1399,7 +1399,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1434,7 +1434,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1485,7 +1485,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1518,7 +1518,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1569,7 +1569,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-bb7e948'));
+    definitionMap.set('version', checker.literal('20.0.0-next.2+sha-b154fb3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -2743,6 +2743,7 @@ class ResourceRegistry {
     componentToTemplateMap = new Map();
     componentToStylesMap = new Map();
     externalStyleToComponentsMap = new Map();
+    directiveToHostBindingsMap = new Map();
     getComponentsWithTemplate(template) {
         if (!this.externalTemplateToComponentsMap.has(template)) {
             return new Set();
@@ -2757,6 +2758,9 @@ class ResourceRegistry {
             for (const style of resources.styles) {
                 this.registerStyle(style, directive);
             }
+        }
+        if (resources.hostBindings !== null) {
+            this.directiveToHostBindingsMap.set(directive, resources.hostBindings);
         }
     }
     registerTemplate(templateResource, component) {
@@ -2799,6 +2803,9 @@ class ResourceRegistry {
             return new Set();
         }
         return this.externalStyleToComponentsMap.get(styleUrl);
+    }
+    getHostBindings(directive) {
+        return this.directiveToHostBindingsMap.get(directive) ?? null;
     }
 }
 
@@ -6072,6 +6079,462 @@ function isBaseClassEqual(current, previous) {
     return isSymbolEqual(current, previous);
 }
 
+const TS_EXTENSIONS = /\.tsx?$/i;
+/**
+ * Replace the .ts or .tsx extension of a file with the shim filename suffix.
+ */
+function makeShimFileName(fileName, suffix) {
+    return checker.absoluteFrom(fileName.replace(TS_EXTENSIONS, suffix));
+}
+
+/**
+ * Generates and tracks shim files for each original `ts.SourceFile`.
+ *
+ * The `ShimAdapter` provides an API that's designed to be used by a `ts.CompilerHost`
+ * implementation and allows it to include synthetic "shim" files in the program that's being
+ * created. It works for both freshly created programs as well as with reuse of an older program
+ * (which already may contain shim files and thus have a different creation flow).
+ */
+class ShimAdapter {
+    delegate;
+    /**
+     * A map of shim file names to the `ts.SourceFile` generated for those shims.
+     */
+    shims = new Map();
+    /**
+     * A map of shim file names to existing shims which were part of a previous iteration of this
+     * program.
+     *
+     * Not all of these shims will be inherited into this program.
+     */
+    priorShims = new Map();
+    /**
+     * File names which are already known to not be shims.
+     *
+     * This allows for short-circuit returns without the expense of running regular expressions
+     * against the filename repeatedly.
+     */
+    notShims = new Set();
+    /**
+     * The shim generators supported by this adapter as well as extra precalculated data facilitating
+     * their use.
+     */
+    generators = [];
+    /**
+     * A `Set` of shim `ts.SourceFile`s which should not be emitted.
+     */
+    ignoreForEmit = new Set();
+    /**
+     * A list of extra filenames which should be considered inputs to program creation.
+     *
+     * This includes any top-level shims generated for the program, as well as per-file shim names for
+     * those files which are included in the root files of the program.
+     */
+    extraInputFiles;
+    /**
+     * Extension prefixes of all installed per-file shims.
+     */
+    extensionPrefixes = [];
+    constructor(delegate, tsRootFiles, topLevelGenerators, perFileGenerators, oldProgram) {
+        this.delegate = delegate;
+        // Initialize `this.generators` with a regex that matches each generator's paths.
+        for (const gen of perFileGenerators) {
+            // This regex matches paths for shims from this generator. The first (and only) capture group
+            // extracts the filename prefix, which can be used to find the original file that was used to
+            // generate this shim.
+            const pattern = `^(.*)\\.${gen.extensionPrefix}\\.ts$`;
+            const regexp = new RegExp(pattern, 'i');
+            this.generators.push({
+                generator: gen,
+                test: regexp,
+                suffix: `.${gen.extensionPrefix}.ts`,
+            });
+            this.extensionPrefixes.push(gen.extensionPrefix);
+        }
+        // Process top-level generators and pre-generate their shims. Accumulate the list of filenames
+        // as extra input files.
+        const extraInputFiles = [];
+        for (const gen of topLevelGenerators) {
+            const sf = gen.makeTopLevelShim();
+            checker.sfExtensionData(sf).isTopLevelShim = true;
+            if (!gen.shouldEmit) {
+                this.ignoreForEmit.add(sf);
+            }
+            const fileName = checker.absoluteFromSourceFile(sf);
+            this.shims.set(fileName, sf);
+            extraInputFiles.push(fileName);
+        }
+        // Add to that list the per-file shims associated with each root file. This is needed because
+        // reference tagging alone may not work in TS compilations that have `noResolve` set. Such
+        // compilations rely on the list of input files completely describing the program.
+        for (const rootFile of tsRootFiles) {
+            for (const gen of this.generators) {
+                extraInputFiles.push(makeShimFileName(rootFile, gen.suffix));
+            }
+        }
+        this.extraInputFiles = extraInputFiles;
+        // If an old program is present, extract all per-file shims into a map, which will be used to
+        // generate new versions of those shims.
+        if (oldProgram !== null) {
+            for (const oldSf of oldProgram.getSourceFiles()) {
+                if (oldSf.isDeclarationFile || !checker.isFileShimSourceFile(oldSf)) {
+                    continue;
+                }
+                this.priorShims.set(checker.absoluteFromSourceFile(oldSf), oldSf);
+            }
+        }
+    }
+    /**
+     * Produce a shim `ts.SourceFile` if `fileName` refers to a shim file which should exist in the
+     * program.
+     *
+     * If `fileName` does not refer to a potential shim file, `null` is returned. If a corresponding
+     * base file could not be determined, `undefined` is returned instead.
+     */
+    maybeGenerate(fileName) {
+        // Fast path: either this filename has been proven not to be a shim before, or it is a known
+        // shim and no generation is required.
+        if (this.notShims.has(fileName)) {
+            return null;
+        }
+        else if (this.shims.has(fileName)) {
+            return this.shims.get(fileName);
+        }
+        // .d.ts files can't be shims.
+        if (checker.isDtsPath(fileName)) {
+            this.notShims.add(fileName);
+            return null;
+        }
+        // This is the first time seeing this path. Try to match it against a shim generator.
+        for (const record of this.generators) {
+            const match = record.test.exec(fileName);
+            if (match === null) {
+                continue;
+            }
+            // The path matched. Extract the filename prefix without the extension.
+            const prefix = match[1];
+            // This _might_ be a shim, if an underlying base file exists. The base file might be .ts or
+            // .tsx.
+            let baseFileName = checker.absoluteFrom(prefix + '.ts');
+            // Retrieve the original file for which the shim will be generated.
+            let inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
+            if (inputFile === undefined) {
+                // No .ts file by that name - try .tsx.
+                baseFileName = checker.absoluteFrom(prefix + '.tsx');
+                inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
+            }
+            if (inputFile === undefined || checker.isShim(inputFile)) {
+                // This isn't a shim after all since there is no original file which would have triggered
+                // its generation, even though the path is right. There are a few reasons why this could
+                // occur:
+                //
+                // * when resolving an import to an .ngfactory.d.ts file, the module resolution algorithm
+                //   will first look for an .ngfactory.ts file in its place, which will be requested here.
+                // * when the user writes a bad import.
+                // * when a file is present in one compilation and removed in the next incremental step.
+                //
+                // Note that this does not add the filename to `notShims`, so this path is not cached.
+                // That's okay as these cases above are edge cases and do not occur regularly in normal
+                // operations.
+                return undefined;
+            }
+            // Actually generate and cache the shim.
+            return this.generateSpecific(fileName, record.generator, inputFile);
+        }
+        // No generator matched.
+        this.notShims.add(fileName);
+        return null;
+    }
+    generateSpecific(fileName, generator, inputFile) {
+        let priorShimSf = null;
+        if (this.priorShims.has(fileName)) {
+            // In the previous program a shim with this name already existed. It's passed to the shim
+            // generator which may reuse it instead of generating a fresh shim.
+            priorShimSf = this.priorShims.get(fileName);
+            this.priorShims.delete(fileName);
+        }
+        const shimSf = generator.generateShimForFile(inputFile, fileName, priorShimSf);
+        // Mark the new generated source file as a shim that originated from this generator.
+        checker.sfExtensionData(shimSf).fileShim = {
+            extension: generator.extensionPrefix,
+            generatedFrom: checker.absoluteFromSourceFile(inputFile),
+        };
+        if (!generator.shouldEmit) {
+            this.ignoreForEmit.add(shimSf);
+        }
+        this.shims.set(fileName, shimSf);
+        return shimSf;
+    }
+}
+
+/**
+ * Manipulates the `referencedFiles` property of `ts.SourceFile`s to add references to shim files
+ * for each original source file, causing the shims to be loaded into the program as well.
+ *
+ * `ShimReferenceTagger`s are intended to operate during program creation only.
+ */
+class ShimReferenceTagger {
+    suffixes;
+    /**
+     * Tracks which original files have been processed and had shims generated if necessary.
+     *
+     * This is used to avoid generating shims twice for the same file.
+     */
+    tagged = new Set();
+    /**
+     * Whether shim tagging is currently being performed.
+     */
+    enabled = true;
+    constructor(shimExtensions) {
+        this.suffixes = shimExtensions.map((extension) => `.${extension}.ts`);
+    }
+    /**
+     * Tag `sf` with any needed references if it's not a shim itself.
+     */
+    tag(sf) {
+        if (!this.enabled ||
+            sf.isDeclarationFile ||
+            checker.isShim(sf) ||
+            this.tagged.has(sf) ||
+            !checker.isNonDeclarationTsPath(sf.fileName)) {
+            return;
+        }
+        const ext = checker.sfExtensionData(sf);
+        // If this file has never been tagged before, capture its `referencedFiles` in the extension
+        // data.
+        if (ext.originalReferencedFiles === null) {
+            ext.originalReferencedFiles = sf.referencedFiles;
+        }
+        const referencedFiles = [...ext.originalReferencedFiles];
+        const sfPath = checker.absoluteFromSourceFile(sf);
+        for (const suffix of this.suffixes) {
+            referencedFiles.push({
+                fileName: makeShimFileName(sfPath, suffix),
+                pos: 0,
+                end: 0,
+            });
+        }
+        ext.taggedReferenceFiles = referencedFiles;
+        sf.referencedFiles = referencedFiles;
+        this.tagged.add(sf);
+    }
+    /**
+     * Disable the `ShimReferenceTagger` and free memory associated with tracking tagged files.
+     */
+    finalize() {
+        this.enabled = false;
+        this.tagged.clear();
+    }
+}
+
+/**
+ * Delegates all methods of `ts.CompilerHost` to a delegate, with the exception of
+ * `getSourceFile`, `fileExists` and `writeFile` which are implemented in `TypeCheckProgramHost`.
+ *
+ * If a new method is added to `ts.CompilerHost` which is not delegated, a type error will be
+ * generated for this class.
+ */
+let DelegatingCompilerHost$1 = class DelegatingCompilerHost {
+    delegate;
+    createHash;
+    directoryExists;
+    getCancellationToken;
+    getCanonicalFileName;
+    getCurrentDirectory;
+    getDefaultLibFileName;
+    getDefaultLibLocation;
+    getDirectories;
+    getEnvironmentVariable;
+    getNewLine;
+    getParsedCommandLine;
+    getSourceFileByPath;
+    readDirectory;
+    readFile;
+    realpath;
+    resolveModuleNames;
+    resolveTypeReferenceDirectives;
+    trace;
+    useCaseSensitiveFileNames;
+    getModuleResolutionCache;
+    hasInvalidatedResolutions;
+    resolveModuleNameLiterals;
+    resolveTypeReferenceDirectiveReferences;
+    // jsDocParsingMode is not a method like the other elements above
+    // TODO: ignore usage can be dropped once 5.2 support is dropped
+    get jsDocParsingMode() {
+        // @ts-ignore
+        return this.delegate.jsDocParsingMode;
+    }
+    set jsDocParsingMode(mode) {
+        // @ts-ignore
+        this.delegate.jsDocParsingMode = mode;
+    }
+    constructor(delegate) {
+        // Excluded are 'getSourceFile', 'fileExists' and 'writeFile', which are actually implemented by
+        // `TypeCheckProgramHost` below.
+        this.delegate = delegate;
+        this.createHash = this.delegateMethod('createHash');
+        this.directoryExists = this.delegateMethod('directoryExists');
+        this.getCancellationToken = this.delegateMethod('getCancellationToken');
+        this.getCanonicalFileName = this.delegateMethod('getCanonicalFileName');
+        this.getCurrentDirectory = this.delegateMethod('getCurrentDirectory');
+        this.getDefaultLibFileName = this.delegateMethod('getDefaultLibFileName');
+        this.getDefaultLibLocation = this.delegateMethod('getDefaultLibLocation');
+        this.getDirectories = this.delegateMethod('getDirectories');
+        this.getEnvironmentVariable = this.delegateMethod('getEnvironmentVariable');
+        this.getNewLine = this.delegateMethod('getNewLine');
+        this.getParsedCommandLine = this.delegateMethod('getParsedCommandLine');
+        this.getSourceFileByPath = this.delegateMethod('getSourceFileByPath');
+        this.readDirectory = this.delegateMethod('readDirectory');
+        this.readFile = this.delegateMethod('readFile');
+        this.realpath = this.delegateMethod('realpath');
+        this.resolveModuleNames = this.delegateMethod('resolveModuleNames');
+        this.resolveTypeReferenceDirectives = this.delegateMethod('resolveTypeReferenceDirectives');
+        this.trace = this.delegateMethod('trace');
+        this.useCaseSensitiveFileNames = this.delegateMethod('useCaseSensitiveFileNames');
+        this.getModuleResolutionCache = this.delegateMethod('getModuleResolutionCache');
+        this.hasInvalidatedResolutions = this.delegateMethod('hasInvalidatedResolutions');
+        this.resolveModuleNameLiterals = this.delegateMethod('resolveModuleNameLiterals');
+        this.resolveTypeReferenceDirectiveReferences = this.delegateMethod('resolveTypeReferenceDirectiveReferences');
+    }
+    delegateMethod(name) {
+        return this.delegate[name] !== undefined
+            ? this.delegate[name].bind(this.delegate)
+            : undefined;
+    }
+};
+/**
+ * A `ts.CompilerHost` which augments source files.
+ */
+class UpdatedProgramHost extends DelegatingCompilerHost$1 {
+    originalProgram;
+    shimExtensionPrefixes;
+    /**
+     * Map of source file names to `ts.SourceFile` instances.
+     */
+    sfMap;
+    /**
+     * The `ShimReferenceTagger` responsible for tagging `ts.SourceFile`s loaded via this host.
+     *
+     * The `UpdatedProgramHost` is used in the creation of a new `ts.Program`. Even though this new
+     * program is based on a prior one, TypeScript will still start from the root files and enumerate
+     * all source files to include in the new program.  This means that just like during the original
+     * program's creation, these source files must be tagged with references to per-file shims in
+     * order for those shims to be loaded, and then cleaned up afterwards. Thus the
+     * `UpdatedProgramHost` has its own `ShimReferenceTagger` to perform this function.
+     */
+    shimTagger;
+    constructor(sfMap, originalProgram, delegate, shimExtensionPrefixes) {
+        super(delegate);
+        this.originalProgram = originalProgram;
+        this.shimExtensionPrefixes = shimExtensionPrefixes;
+        this.shimTagger = new ShimReferenceTagger(this.shimExtensionPrefixes);
+        this.sfMap = sfMap;
+    }
+    getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile) {
+        // Try to use the same `ts.SourceFile` as the original program, if possible. This guarantees
+        // that program reuse will be as efficient as possible.
+        let delegateSf = this.originalProgram.getSourceFile(fileName);
+        if (delegateSf === undefined) {
+            // Something went wrong and a source file is being requested that's not in the original
+            // program. Just in case, try to retrieve it from the delegate.
+            delegateSf = this.delegate.getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile);
+        }
+        if (delegateSf === undefined) {
+            return undefined;
+        }
+        // Look for replacements.
+        let sf;
+        if (this.sfMap.has(fileName)) {
+            sf = this.sfMap.get(fileName);
+            checker.copyFileShimData(delegateSf, sf);
+        }
+        else {
+            sf = delegateSf;
+        }
+        // TypeScript doesn't allow returning redirect source files. To avoid unforeseen errors we
+        // return the original source file instead of the redirect target.
+        sf = checker.toUnredirectedSourceFile(sf);
+        this.shimTagger.tag(sf);
+        return sf;
+    }
+    postProgramCreationCleanup() {
+        this.shimTagger.finalize();
+    }
+    writeFile() {
+        throw new Error(`TypeCheckProgramHost should never write files`);
+    }
+    fileExists(fileName) {
+        return this.sfMap.has(fileName) || this.delegate.fileExists(fileName);
+    }
+}
+/**
+ * Updates a `ts.Program` instance with a new one that incorporates specific changes, using the
+ * TypeScript compiler APIs for incremental program creation.
+ */
+class TsCreateProgramDriver {
+    originalProgram;
+    originalHost;
+    options;
+    shimExtensionPrefixes;
+    /**
+     * A map of source file paths to replacement `ts.SourceFile`s for those paths.
+     *
+     * Effectively, this tracks the delta between the user's program (represented by the
+     * `originalHost`) and the template type-checking program being managed.
+     */
+    sfMap = new Map();
+    program;
+    constructor(originalProgram, originalHost, options, shimExtensionPrefixes) {
+        this.originalProgram = originalProgram;
+        this.originalHost = originalHost;
+        this.options = options;
+        this.shimExtensionPrefixes = shimExtensionPrefixes;
+        this.program = this.originalProgram;
+    }
+    supportsInlineOperations = true;
+    getProgram() {
+        return this.program;
+    }
+    updateFiles(contents, updateMode) {
+        if (contents.size === 0) {
+            // No changes have been requested. Is it safe to skip updating entirely?
+            // If UpdateMode is Incremental, then yes. If UpdateMode is Complete, then it's safe to skip
+            // only if there are no active changes already (that would be cleared by the update).
+            if (updateMode !== checker.UpdateMode.Complete || this.sfMap.size === 0) {
+                // No changes would be made to the `ts.Program` anyway, so it's safe to do nothing here.
+                return;
+            }
+        }
+        if (updateMode === checker.UpdateMode.Complete) {
+            this.sfMap.clear();
+        }
+        for (const [filePath, { newText, originalFile }] of contents.entries()) {
+            const sf = ts.createSourceFile(filePath, newText, ts.ScriptTarget.Latest, true);
+            if (originalFile !== null) {
+                sf[checker.NgOriginalFile] = originalFile;
+            }
+            this.sfMap.set(filePath, sf);
+        }
+        const host = new UpdatedProgramHost(this.sfMap, this.originalProgram, this.originalHost, this.shimExtensionPrefixes);
+        const oldProgram = this.program;
+        // Retag the old program's `ts.SourceFile`s with shim tags, to allow TypeScript to reuse the
+        // most data.
+        checker.retagAllTsFiles(oldProgram);
+        this.program = ts.createProgram({
+            host,
+            rootNames: this.program.getRootFileNames(),
+            options: this.options,
+            oldProgram,
+        });
+        host.postProgramCreationCleanup();
+        // Only untag the old program. The new program needs to keep the tagged files, because as of
+        // TS 5.5 not having the files tagged while producing diagnostics can lead to errors. See:
+        // https://github.com/microsoft/TypeScript/pull/58398
+        checker.untagAllTsFiles(oldProgram);
+    }
+}
+
 const FIELD_DECORATORS = [
     'Input',
     'Output',
@@ -6108,11 +6571,15 @@ class DirectiveDecoratorHandler {
     perf;
     importTracker;
     includeClassMetadata;
+    typeCheckScopeRegistry;
     compilationMode;
     jitDeclarationRegistry;
+    resourceRegistry;
     strictStandalone;
     implicitStandaloneValue;
-    constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, jitDeclarationRegistry, strictStandalone, implicitStandaloneValue) {
+    usePoisonedData;
+    typeCheckHostBindings;
+    constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, typeCheckScopeRegistry, compilationMode, jitDeclarationRegistry, resourceRegistry, strictStandalone, implicitStandaloneValue, usePoisonedData, typeCheckHostBindings) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -6128,10 +6595,14 @@ class DirectiveDecoratorHandler {
         this.perf = perf;
         this.importTracker = importTracker;
         this.includeClassMetadata = includeClassMetadata;
+        this.typeCheckScopeRegistry = typeCheckScopeRegistry;
         this.compilationMode = compilationMode;
         this.jitDeclarationRegistry = jitDeclarationRegistry;
+        this.resourceRegistry = resourceRegistry;
         this.strictStandalone = strictStandalone;
         this.implicitStandaloneValue = implicitStandaloneValue;
+        this.usePoisonedData = usePoisonedData;
+        this.typeCheckHostBindings = typeCheckHostBindings;
     }
     precedence = checker.HandlerPrecedence.PRIMARY;
     name = 'DirectiveDecoratorHandler';
@@ -6195,6 +6666,12 @@ class DirectiveDecoratorHandler {
                 isPoisoned: false,
                 isStructural: directiveResult.isStructural,
                 decorator: decorator?.node ?? null,
+                hostBindingNodes: directiveResult.hostBindingNodes,
+                resources: {
+                    template: null,
+                    styles: null,
+                    hostBindings: checker.extractHostBindingResources(directiveResult.hostBindingNodes),
+                },
             },
         };
     }
@@ -6238,9 +6715,34 @@ class DirectiveDecoratorHandler {
             assumedToExportProviders: false,
             isExplicitlyDeferred: false,
         });
+        this.resourceRegistry.registerResources(analysis.resources, node);
         this.injectableRegistry.registerInjectable(node, {
             ctorDeps: analysis.meta.deps,
         });
+    }
+    typeCheck(ctx, node, meta) {
+        // Currently type checking in directives is only supported for host bindings
+        // so we can skip everything below if type checking is disabled.
+        if (!this.typeCheckHostBindings) {
+            return;
+        }
+        if (!ts.isClassDeclaration(node) || (meta.isPoisoned && !this.usePoisonedData)) {
+            return;
+        }
+        const scope = this.typeCheckScopeRegistry.getTypeCheckScope(node);
+        if (scope.isPoisoned && !this.usePoisonedData) {
+            // Don't type-check components that had errors in their scopes, unless requested.
+            return;
+        }
+        const hostElement = checker.createHostElement('directive', meta.meta.selector, node, meta.hostBindingNodes.literal, meta.hostBindingNodes.bindingDecorators, meta.hostBindingNodes.listenerDecorators);
+        if (hostElement !== null) {
+            const binder = new checker.R3TargetBinder(scope.matcher);
+            const hostBindingsContext = {
+                node: hostElement,
+                sourceMapping: { type: 'direct', node },
+            };
+            ctx.addDirective(new checker.Reference(node), binder, scope.schemas, null, hostBindingsContext, meta.meta.isStandalone);
+        }
     }
     resolve(node, analysis, symbol) {
         if (this.compilationMode === checker.CompilationMode.LOCAL) {
@@ -6265,7 +6767,12 @@ class DirectiveDecoratorHandler {
         if (hostDirectivesDiagnotics !== null) {
             diagnostics.push(...hostDirectivesDiagnotics);
         }
-        return { diagnostics: diagnostics.length > 0 ? diagnostics : undefined };
+        if (diagnostics.length > 0) {
+            return { diagnostics };
+        }
+        // Note: we need to produce *some* sort of the data in order
+        // for the host binding diagnostics to be surfaced.
+        return { data: {} };
     }
     compileFull(node, analysis, resolution, pool) {
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(analysis.meta, checker.FactoryTarget.Directive));
@@ -7676,11 +8183,11 @@ function extractInlineStyleResources(component) {
     if (stylesExpr !== undefined) {
         if (ts.isArrayLiteralExpression(stylesExpr)) {
             for (const expression of stringLiteralElements(stylesExpr)) {
-                styles.add({ path: null, expression });
+                styles.add({ path: null, node: expression });
             }
         }
         else if (ts.isStringLiteralLike(stylesExpr)) {
-            styles.add({ path: null, expression: stylesExpr });
+            styles.add({ path: null, node: stylesExpr });
         }
     }
     return styles;
@@ -7859,462 +8366,6 @@ function isLikelyModuleWithProviders(value) {
         return true;
     }
     return false;
-}
-
-const TS_EXTENSIONS = /\.tsx?$/i;
-/**
- * Replace the .ts or .tsx extension of a file with the shim filename suffix.
- */
-function makeShimFileName(fileName, suffix) {
-    return checker.absoluteFrom(fileName.replace(TS_EXTENSIONS, suffix));
-}
-
-/**
- * Generates and tracks shim files for each original `ts.SourceFile`.
- *
- * The `ShimAdapter` provides an API that's designed to be used by a `ts.CompilerHost`
- * implementation and allows it to include synthetic "shim" files in the program that's being
- * created. It works for both freshly created programs as well as with reuse of an older program
- * (which already may contain shim files and thus have a different creation flow).
- */
-class ShimAdapter {
-    delegate;
-    /**
-     * A map of shim file names to the `ts.SourceFile` generated for those shims.
-     */
-    shims = new Map();
-    /**
-     * A map of shim file names to existing shims which were part of a previous iteration of this
-     * program.
-     *
-     * Not all of these shims will be inherited into this program.
-     */
-    priorShims = new Map();
-    /**
-     * File names which are already known to not be shims.
-     *
-     * This allows for short-circuit returns without the expense of running regular expressions
-     * against the filename repeatedly.
-     */
-    notShims = new Set();
-    /**
-     * The shim generators supported by this adapter as well as extra precalculated data facilitating
-     * their use.
-     */
-    generators = [];
-    /**
-     * A `Set` of shim `ts.SourceFile`s which should not be emitted.
-     */
-    ignoreForEmit = new Set();
-    /**
-     * A list of extra filenames which should be considered inputs to program creation.
-     *
-     * This includes any top-level shims generated for the program, as well as per-file shim names for
-     * those files which are included in the root files of the program.
-     */
-    extraInputFiles;
-    /**
-     * Extension prefixes of all installed per-file shims.
-     */
-    extensionPrefixes = [];
-    constructor(delegate, tsRootFiles, topLevelGenerators, perFileGenerators, oldProgram) {
-        this.delegate = delegate;
-        // Initialize `this.generators` with a regex that matches each generator's paths.
-        for (const gen of perFileGenerators) {
-            // This regex matches paths for shims from this generator. The first (and only) capture group
-            // extracts the filename prefix, which can be used to find the original file that was used to
-            // generate this shim.
-            const pattern = `^(.*)\\.${gen.extensionPrefix}\\.ts$`;
-            const regexp = new RegExp(pattern, 'i');
-            this.generators.push({
-                generator: gen,
-                test: regexp,
-                suffix: `.${gen.extensionPrefix}.ts`,
-            });
-            this.extensionPrefixes.push(gen.extensionPrefix);
-        }
-        // Process top-level generators and pre-generate their shims. Accumulate the list of filenames
-        // as extra input files.
-        const extraInputFiles = [];
-        for (const gen of topLevelGenerators) {
-            const sf = gen.makeTopLevelShim();
-            checker.sfExtensionData(sf).isTopLevelShim = true;
-            if (!gen.shouldEmit) {
-                this.ignoreForEmit.add(sf);
-            }
-            const fileName = checker.absoluteFromSourceFile(sf);
-            this.shims.set(fileName, sf);
-            extraInputFiles.push(fileName);
-        }
-        // Add to that list the per-file shims associated with each root file. This is needed because
-        // reference tagging alone may not work in TS compilations that have `noResolve` set. Such
-        // compilations rely on the list of input files completely describing the program.
-        for (const rootFile of tsRootFiles) {
-            for (const gen of this.generators) {
-                extraInputFiles.push(makeShimFileName(rootFile, gen.suffix));
-            }
-        }
-        this.extraInputFiles = extraInputFiles;
-        // If an old program is present, extract all per-file shims into a map, which will be used to
-        // generate new versions of those shims.
-        if (oldProgram !== null) {
-            for (const oldSf of oldProgram.getSourceFiles()) {
-                if (oldSf.isDeclarationFile || !checker.isFileShimSourceFile(oldSf)) {
-                    continue;
-                }
-                this.priorShims.set(checker.absoluteFromSourceFile(oldSf), oldSf);
-            }
-        }
-    }
-    /**
-     * Produce a shim `ts.SourceFile` if `fileName` refers to a shim file which should exist in the
-     * program.
-     *
-     * If `fileName` does not refer to a potential shim file, `null` is returned. If a corresponding
-     * base file could not be determined, `undefined` is returned instead.
-     */
-    maybeGenerate(fileName) {
-        // Fast path: either this filename has been proven not to be a shim before, or it is a known
-        // shim and no generation is required.
-        if (this.notShims.has(fileName)) {
-            return null;
-        }
-        else if (this.shims.has(fileName)) {
-            return this.shims.get(fileName);
-        }
-        // .d.ts files can't be shims.
-        if (checker.isDtsPath(fileName)) {
-            this.notShims.add(fileName);
-            return null;
-        }
-        // This is the first time seeing this path. Try to match it against a shim generator.
-        for (const record of this.generators) {
-            const match = record.test.exec(fileName);
-            if (match === null) {
-                continue;
-            }
-            // The path matched. Extract the filename prefix without the extension.
-            const prefix = match[1];
-            // This _might_ be a shim, if an underlying base file exists. The base file might be .ts or
-            // .tsx.
-            let baseFileName = checker.absoluteFrom(prefix + '.ts');
-            // Retrieve the original file for which the shim will be generated.
-            let inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
-            if (inputFile === undefined) {
-                // No .ts file by that name - try .tsx.
-                baseFileName = checker.absoluteFrom(prefix + '.tsx');
-                inputFile = this.delegate.getSourceFile(baseFileName, ts.ScriptTarget.Latest);
-            }
-            if (inputFile === undefined || checker.isShim(inputFile)) {
-                // This isn't a shim after all since there is no original file which would have triggered
-                // its generation, even though the path is right. There are a few reasons why this could
-                // occur:
-                //
-                // * when resolving an import to an .ngfactory.d.ts file, the module resolution algorithm
-                //   will first look for an .ngfactory.ts file in its place, which will be requested here.
-                // * when the user writes a bad import.
-                // * when a file is present in one compilation and removed in the next incremental step.
-                //
-                // Note that this does not add the filename to `notShims`, so this path is not cached.
-                // That's okay as these cases above are edge cases and do not occur regularly in normal
-                // operations.
-                return undefined;
-            }
-            // Actually generate and cache the shim.
-            return this.generateSpecific(fileName, record.generator, inputFile);
-        }
-        // No generator matched.
-        this.notShims.add(fileName);
-        return null;
-    }
-    generateSpecific(fileName, generator, inputFile) {
-        let priorShimSf = null;
-        if (this.priorShims.has(fileName)) {
-            // In the previous program a shim with this name already existed. It's passed to the shim
-            // generator which may reuse it instead of generating a fresh shim.
-            priorShimSf = this.priorShims.get(fileName);
-            this.priorShims.delete(fileName);
-        }
-        const shimSf = generator.generateShimForFile(inputFile, fileName, priorShimSf);
-        // Mark the new generated source file as a shim that originated from this generator.
-        checker.sfExtensionData(shimSf).fileShim = {
-            extension: generator.extensionPrefix,
-            generatedFrom: checker.absoluteFromSourceFile(inputFile),
-        };
-        if (!generator.shouldEmit) {
-            this.ignoreForEmit.add(shimSf);
-        }
-        this.shims.set(fileName, shimSf);
-        return shimSf;
-    }
-}
-
-/**
- * Manipulates the `referencedFiles` property of `ts.SourceFile`s to add references to shim files
- * for each original source file, causing the shims to be loaded into the program as well.
- *
- * `ShimReferenceTagger`s are intended to operate during program creation only.
- */
-class ShimReferenceTagger {
-    suffixes;
-    /**
-     * Tracks which original files have been processed and had shims generated if necessary.
-     *
-     * This is used to avoid generating shims twice for the same file.
-     */
-    tagged = new Set();
-    /**
-     * Whether shim tagging is currently being performed.
-     */
-    enabled = true;
-    constructor(shimExtensions) {
-        this.suffixes = shimExtensions.map((extension) => `.${extension}.ts`);
-    }
-    /**
-     * Tag `sf` with any needed references if it's not a shim itself.
-     */
-    tag(sf) {
-        if (!this.enabled ||
-            sf.isDeclarationFile ||
-            checker.isShim(sf) ||
-            this.tagged.has(sf) ||
-            !checker.isNonDeclarationTsPath(sf.fileName)) {
-            return;
-        }
-        const ext = checker.sfExtensionData(sf);
-        // If this file has never been tagged before, capture its `referencedFiles` in the extension
-        // data.
-        if (ext.originalReferencedFiles === null) {
-            ext.originalReferencedFiles = sf.referencedFiles;
-        }
-        const referencedFiles = [...ext.originalReferencedFiles];
-        const sfPath = checker.absoluteFromSourceFile(sf);
-        for (const suffix of this.suffixes) {
-            referencedFiles.push({
-                fileName: makeShimFileName(sfPath, suffix),
-                pos: 0,
-                end: 0,
-            });
-        }
-        ext.taggedReferenceFiles = referencedFiles;
-        sf.referencedFiles = referencedFiles;
-        this.tagged.add(sf);
-    }
-    /**
-     * Disable the `ShimReferenceTagger` and free memory associated with tracking tagged files.
-     */
-    finalize() {
-        this.enabled = false;
-        this.tagged.clear();
-    }
-}
-
-/**
- * Delegates all methods of `ts.CompilerHost` to a delegate, with the exception of
- * `getSourceFile`, `fileExists` and `writeFile` which are implemented in `TypeCheckProgramHost`.
- *
- * If a new method is added to `ts.CompilerHost` which is not delegated, a type error will be
- * generated for this class.
- */
-let DelegatingCompilerHost$1 = class DelegatingCompilerHost {
-    delegate;
-    createHash;
-    directoryExists;
-    getCancellationToken;
-    getCanonicalFileName;
-    getCurrentDirectory;
-    getDefaultLibFileName;
-    getDefaultLibLocation;
-    getDirectories;
-    getEnvironmentVariable;
-    getNewLine;
-    getParsedCommandLine;
-    getSourceFileByPath;
-    readDirectory;
-    readFile;
-    realpath;
-    resolveModuleNames;
-    resolveTypeReferenceDirectives;
-    trace;
-    useCaseSensitiveFileNames;
-    getModuleResolutionCache;
-    hasInvalidatedResolutions;
-    resolveModuleNameLiterals;
-    resolveTypeReferenceDirectiveReferences;
-    // jsDocParsingMode is not a method like the other elements above
-    // TODO: ignore usage can be dropped once 5.2 support is dropped
-    get jsDocParsingMode() {
-        // @ts-ignore
-        return this.delegate.jsDocParsingMode;
-    }
-    set jsDocParsingMode(mode) {
-        // @ts-ignore
-        this.delegate.jsDocParsingMode = mode;
-    }
-    constructor(delegate) {
-        // Excluded are 'getSourceFile', 'fileExists' and 'writeFile', which are actually implemented by
-        // `TypeCheckProgramHost` below.
-        this.delegate = delegate;
-        this.createHash = this.delegateMethod('createHash');
-        this.directoryExists = this.delegateMethod('directoryExists');
-        this.getCancellationToken = this.delegateMethod('getCancellationToken');
-        this.getCanonicalFileName = this.delegateMethod('getCanonicalFileName');
-        this.getCurrentDirectory = this.delegateMethod('getCurrentDirectory');
-        this.getDefaultLibFileName = this.delegateMethod('getDefaultLibFileName');
-        this.getDefaultLibLocation = this.delegateMethod('getDefaultLibLocation');
-        this.getDirectories = this.delegateMethod('getDirectories');
-        this.getEnvironmentVariable = this.delegateMethod('getEnvironmentVariable');
-        this.getNewLine = this.delegateMethod('getNewLine');
-        this.getParsedCommandLine = this.delegateMethod('getParsedCommandLine');
-        this.getSourceFileByPath = this.delegateMethod('getSourceFileByPath');
-        this.readDirectory = this.delegateMethod('readDirectory');
-        this.readFile = this.delegateMethod('readFile');
-        this.realpath = this.delegateMethod('realpath');
-        this.resolveModuleNames = this.delegateMethod('resolveModuleNames');
-        this.resolveTypeReferenceDirectives = this.delegateMethod('resolveTypeReferenceDirectives');
-        this.trace = this.delegateMethod('trace');
-        this.useCaseSensitiveFileNames = this.delegateMethod('useCaseSensitiveFileNames');
-        this.getModuleResolutionCache = this.delegateMethod('getModuleResolutionCache');
-        this.hasInvalidatedResolutions = this.delegateMethod('hasInvalidatedResolutions');
-        this.resolveModuleNameLiterals = this.delegateMethod('resolveModuleNameLiterals');
-        this.resolveTypeReferenceDirectiveReferences = this.delegateMethod('resolveTypeReferenceDirectiveReferences');
-    }
-    delegateMethod(name) {
-        return this.delegate[name] !== undefined
-            ? this.delegate[name].bind(this.delegate)
-            : undefined;
-    }
-};
-/**
- * A `ts.CompilerHost` which augments source files.
- */
-class UpdatedProgramHost extends DelegatingCompilerHost$1 {
-    originalProgram;
-    shimExtensionPrefixes;
-    /**
-     * Map of source file names to `ts.SourceFile` instances.
-     */
-    sfMap;
-    /**
-     * The `ShimReferenceTagger` responsible for tagging `ts.SourceFile`s loaded via this host.
-     *
-     * The `UpdatedProgramHost` is used in the creation of a new `ts.Program`. Even though this new
-     * program is based on a prior one, TypeScript will still start from the root files and enumerate
-     * all source files to include in the new program.  This means that just like during the original
-     * program's creation, these source files must be tagged with references to per-file shims in
-     * order for those shims to be loaded, and then cleaned up afterwards. Thus the
-     * `UpdatedProgramHost` has its own `ShimReferenceTagger` to perform this function.
-     */
-    shimTagger;
-    constructor(sfMap, originalProgram, delegate, shimExtensionPrefixes) {
-        super(delegate);
-        this.originalProgram = originalProgram;
-        this.shimExtensionPrefixes = shimExtensionPrefixes;
-        this.shimTagger = new ShimReferenceTagger(this.shimExtensionPrefixes);
-        this.sfMap = sfMap;
-    }
-    getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile) {
-        // Try to use the same `ts.SourceFile` as the original program, if possible. This guarantees
-        // that program reuse will be as efficient as possible.
-        let delegateSf = this.originalProgram.getSourceFile(fileName);
-        if (delegateSf === undefined) {
-            // Something went wrong and a source file is being requested that's not in the original
-            // program. Just in case, try to retrieve it from the delegate.
-            delegateSf = this.delegate.getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile);
-        }
-        if (delegateSf === undefined) {
-            return undefined;
-        }
-        // Look for replacements.
-        let sf;
-        if (this.sfMap.has(fileName)) {
-            sf = this.sfMap.get(fileName);
-            checker.copyFileShimData(delegateSf, sf);
-        }
-        else {
-            sf = delegateSf;
-        }
-        // TypeScript doesn't allow returning redirect source files. To avoid unforeseen errors we
-        // return the original source file instead of the redirect target.
-        sf = checker.toUnredirectedSourceFile(sf);
-        this.shimTagger.tag(sf);
-        return sf;
-    }
-    postProgramCreationCleanup() {
-        this.shimTagger.finalize();
-    }
-    writeFile() {
-        throw new Error(`TypeCheckProgramHost should never write files`);
-    }
-    fileExists(fileName) {
-        return this.sfMap.has(fileName) || this.delegate.fileExists(fileName);
-    }
-}
-/**
- * Updates a `ts.Program` instance with a new one that incorporates specific changes, using the
- * TypeScript compiler APIs for incremental program creation.
- */
-class TsCreateProgramDriver {
-    originalProgram;
-    originalHost;
-    options;
-    shimExtensionPrefixes;
-    /**
-     * A map of source file paths to replacement `ts.SourceFile`s for those paths.
-     *
-     * Effectively, this tracks the delta between the user's program (represented by the
-     * `originalHost`) and the template type-checking program being managed.
-     */
-    sfMap = new Map();
-    program;
-    constructor(originalProgram, originalHost, options, shimExtensionPrefixes) {
-        this.originalProgram = originalProgram;
-        this.originalHost = originalHost;
-        this.options = options;
-        this.shimExtensionPrefixes = shimExtensionPrefixes;
-        this.program = this.originalProgram;
-    }
-    supportsInlineOperations = true;
-    getProgram() {
-        return this.program;
-    }
-    updateFiles(contents, updateMode) {
-        if (contents.size === 0) {
-            // No changes have been requested. Is it safe to skip updating entirely?
-            // If UpdateMode is Incremental, then yes. If UpdateMode is Complete, then it's safe to skip
-            // only if there are no active changes already (that would be cleared by the update).
-            if (updateMode !== checker.UpdateMode.Complete || this.sfMap.size === 0) {
-                // No changes would be made to the `ts.Program` anyway, so it's safe to do nothing here.
-                return;
-            }
-        }
-        if (updateMode === checker.UpdateMode.Complete) {
-            this.sfMap.clear();
-        }
-        for (const [filePath, { newText, originalFile }] of contents.entries()) {
-            const sf = ts.createSourceFile(filePath, newText, ts.ScriptTarget.Latest, true);
-            if (originalFile !== null) {
-                sf[checker.NgOriginalFile] = originalFile;
-            }
-            this.sfMap.set(filePath, sf);
-        }
-        const host = new UpdatedProgramHost(this.sfMap, this.originalProgram, this.originalHost, this.shimExtensionPrefixes);
-        const oldProgram = this.program;
-        // Retag the old program's `ts.SourceFile`s with shim tags, to allow TypeScript to reuse the
-        // most data.
-        checker.retagAllTsFiles(oldProgram);
-        this.program = ts.createProgram({
-            host,
-            rootNames: this.program.getRootFileNames(),
-            options: this.options,
-            oldProgram,
-        });
-        host.postProgramCreationCleanup();
-        // Only untag the old program. The new program needs to keep the tagged files, because as of
-        // TS 5.5 not having the files tagged while producing diagnostics can lead to errors. See:
-        // https://github.com/microsoft/TypeScript/pull/58398
-        checker.untagAllTsFiles(oldProgram);
-    }
 }
 
 /*!
@@ -8785,7 +8836,8 @@ class ComponentDecoratorHandler {
     strictStandalone;
     enableHmr;
     implicitStandaloneValue;
-    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr, implicitStandaloneValue) {
+    typeCheckHostBindings;
+    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr, implicitStandaloneValue, typeCheckHostBindings) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -8829,6 +8881,7 @@ class ComponentDecoratorHandler {
         this.strictStandalone = strictStandalone;
         this.enableHmr = enableHmr;
         this.implicitStandaloneValue = implicitStandaloneValue;
+        this.typeCheckHostBindings = typeCheckHostBindings;
         this.extractTemplateOptions = {
             enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
             i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
@@ -9138,10 +9191,10 @@ class ComponentDecoratorHandler {
             }
         }
         const templateResource = template.declaration.isInline
-            ? { path: null, expression: component.get('template') }
+            ? { path: null, node: component.get('template') }
             : {
                 path: checker.absoluteFrom(template.declaration.resolvedTemplateUrl),
-                expression: template.sourceMapping.node,
+                node: template.sourceMapping.node,
             };
         const relativeTemplatePath = getProjectRelativePath(templateResource.path ?? ts.getOriginalNode(node).getSourceFile().fileName, this.rootDirs, this.compilerHost);
         // Figure out the set of styles. The ordering here is important: external resources (styleUrls)
@@ -9149,6 +9202,7 @@ class ComponentDecoratorHandler {
         // component.
         let styles = [];
         const externalStyles = [];
+        const hostBindingResources = checker.extractHostBindingResources(directiveResult.hostBindingNodes);
         const styleResources = extractInlineStyleResources(component);
         const styleUrls = [
             ...extractComponentStyleUrls(this.evaluator, component),
@@ -9167,7 +9221,7 @@ class ComponentDecoratorHandler {
                     // Only string literal values from the decorator are considered style resources
                     styleResources.add({
                         path: checker.absoluteFrom(resourceUrl),
-                        expression: styleUrl.expression,
+                        node: styleUrl.expression,
                     });
                 }
                 const resourceStr = this.resourceLoader.load(resourceUrl);
@@ -9291,6 +9345,7 @@ class ComponentDecoratorHandler {
                 resources: {
                     styles: styleResources,
                     template: templateResource,
+                    hostBindings: hostBindingResources,
                 },
                 isPoisoned,
                 animationTriggerNames,
@@ -9301,6 +9356,7 @@ class ComponentDecoratorHandler {
                 explicitlyDeferredTypes,
                 schemas,
                 decorator: decorator?.node ?? null,
+                hostBindingNodes: directiveResult.hostBindingNodes,
             },
             diagnostics,
         };
@@ -9387,10 +9443,7 @@ class ComponentDecoratorHandler {
         return null;
     }
     typeCheck(ctx, node, meta) {
-        if (this.typeCheckScopeRegistry === null || !ts.isClassDeclaration(node)) {
-            return;
-        }
-        if (meta.isPoisoned && !this.usePoisonedData) {
+        if (!ts.isClassDeclaration(node) || (meta.isPoisoned && !this.usePoisonedData)) {
             return;
         }
         const scope = this.typeCheckScopeRegistry.getTypeCheckScope(node);
@@ -9407,7 +9460,16 @@ class ComponentDecoratorHandler {
             parseErrors: meta.template.errors,
             preserveWhitespaces: meta.meta.template.preserveWhitespaces ?? false,
         };
-        ctx.addDirective(new checker.Reference(node), binder, scope.schemas, templateContext, meta.meta.isStandalone);
+        const hostElement = this.typeCheckHostBindings
+            ? checker.createHostElement('component', meta.meta.selector, node, meta.hostBindingNodes.literal, meta.hostBindingNodes.bindingDecorators, meta.hostBindingNodes.listenerDecorators)
+            : null;
+        const hostBindingsContext = hostElement === null
+            ? null
+            : {
+                node: hostElement,
+                sourceMapping: { type: 'direct', node },
+            };
+        ctx.addDirective(new checker.Reference(node), binder, scope.schemas, templateContext, hostBindingsContext, meta.meta.isStandalone);
     }
     extendedTemplateCheck(component, extendedTemplateChecker) {
         return extendedTemplateChecker.getDiagnosticsForComponent(component);
@@ -10761,7 +10823,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('20.0.0-next.2+sha-bb7e948');
+new checker.Version('20.0.0-next.2+sha-b154fb3');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -18595,7 +18657,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.2+sha-bb7e948` usually means that core is at head so it supports
+    // A version of `20.0.0-next.2+sha-b154fb3` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -18976,7 +19038,8 @@ class NgCompiler {
         const { resourceRegistry } = this.ensureAnalyzed();
         const styles = resourceRegistry.getStyles(classDecl);
         const template = resourceRegistry.getTemplate(classDecl);
-        return { styles, template };
+        const hostBindings = resourceRegistry.getHostBindings(classDecl);
+        return { styles, template, hostBindings };
     }
     getMeta(classDecl) {
         if (!checker.isNamedClassDeclaration(classDecl)) {
@@ -19510,6 +19573,7 @@ class NgCompiler {
         const supportJitMode = this.options['supportJitMode'] ?? true;
         const supportTestBed = this.options['supportTestBed'] ?? true;
         const externalRuntimeStyles = this.options['externalRuntimeStyles'] ?? false;
+        const typeCheckHostBindings = this.options.typeCheckHostBindings ?? false;
         // Libraries compiled in partial mode could potentially be used with TestBed within an
         // application. Since this is not known at library compilation time, support is required to
         // prevent potential downstream application testing breakage.
@@ -19528,10 +19592,10 @@ class NgCompiler {
         const jitDeclarationRegistry = new JitDeclarationRegistry();
         // Set up the IvyCompilation, which manages state for the Ivy transformer.
         const handlers = [
-            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr, this.implicitStandaloneValue),
+            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr, this.implicitStandaloneValue, typeCheckHostBindings),
             // TODO(alxhub): understand why the cast here is necessary (something to do with `null`
             // not being assignable to `unknown` when wrapped in `Readonly`).
-            new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry, !!this.options.strictStandalone, this.implicitStandaloneValue),
+            new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, typeCheckScopeRegistry, compilationMode, jitDeclarationRegistry, resourceRegistry, !!this.options.strictStandalone, this.implicitStandaloneValue, this.usePoisonedData, typeCheckHostBindings),
             // Pipe handler must be before injectable handler in list so pipe factories are printed
             // before injectable factories (so injectable factories can delegate to them)
             new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode, !!this.options.generateExtraImportsInLocalMode, !!this.options.strictStandalone, this.implicitStandaloneValue),

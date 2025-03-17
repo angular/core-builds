@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bb7e948
+ * @license Angular v20.0.0-next.2+sha-b154fb3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8657,6 +8657,482 @@ interface PipeTransform {
 declare const defaultIterableDiffers: IterableDiffers;
 declare const defaultKeyValueDiffers: KeyValueDiffers;
 
+/**
+ * Options passed to the `computed` creation function.
+ */
+interface CreateComputedOptions<T> {
+    /**
+     * A comparison function which defines equality for computed values.
+     */
+    equal?: ValueEqualityFn<T>;
+    /**
+     * A debug name for the computed signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
+}
+/**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ */
+declare function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T>;
+
+/**
+ * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
+ *
+ * @developerPreview
+ */
+declare function linkedSignal<D>(computation: () => D, options?: {
+    equal?: ValueEqualityFn<NoInfer<D>>;
+}): WritableSignal<D>;
+/**
+ * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
+ * This is an advanced API form where the computation has access to the previous value of the signal and the computation result.
+ *
+ * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
+ *
+ * @developerPreview
+ */
+declare function linkedSignal<S, D>(options: {
+    source: () => S;
+    computation: (source: NoInfer<S>, previous?: {
+        source: NoInfer<S>;
+        value: NoInfer<D>;
+    }) => D;
+    equal?: ValueEqualityFn<NoInfer<D>>;
+}): WritableSignal<D>;
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+declare function untracked<T>(nonReactiveReadsFn: () => T): T;
+
+/**
+ * An argument list containing the first non-never type in the given type array, or an empty
+ * argument list if there are no non-never types in the type array.
+ */
+type ɵFirstAvailable<T extends unknown[]> = T extends [infer H, ...infer R] ? [H] extends [never] ? ɵFirstAvailable<R> : [H] : [];
+/**
+ * Options passed to `afterRender` and `afterNextRender`.
+ *
+ * @developerPreview
+ */
+interface AfterRenderOptions {
+    /**
+     * The `Injector` to use during creation.
+     *
+     * If this is not provided, the current injection context will be used instead (via `inject`).
+     */
+    injector?: Injector;
+    /**
+     * Whether the hook should require manual cleanup.
+     *
+     * If this is `false` (the default) the hook will automatically register itself to be cleaned up
+     * with the current `DestroyRef`.
+     */
+    manualCleanup?: boolean;
+    /**
+     * The phase the callback should be invoked in.
+     *
+     * <div class="docs-alert docs-alert-critical">
+     *
+     * Defaults to `AfterRenderPhase.MixedReadWrite`. You should choose a more specific
+     * phase instead. See `AfterRenderPhase` for more information.
+     *
+     * </div>
+     *
+     * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
+     *   parameter to `afterRender` or `afterNextRender` instead of a function.
+     */
+    phase?: AfterRenderPhase;
+}
+/**
+ * Register callbacks to be invoked each time the application finishes rendering, during the
+ * specified phases. The available phases are:
+ * - `earlyRead`
+ *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
+ *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
+ *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
+ * - `write`
+ *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
+ * - `mixedReadWrite`
+ *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
+ *    it is possible to divide the work among the other phases instead.
+ * - `read`
+ *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
+ * phases when possible, to avoid performance degradation.
+ *
+ * </div>
+ *
+ * Note that:
+ * - Callbacks run in the following phase order *after each render*:
+ *   1. `earlyRead`
+ *   2. `write`
+ *   3. `mixedReadWrite`
+ *   4. `read`
+ * - Callbacks in the same phase run in the order they are registered.
+ * - Callbacks run on browser platforms only, they will not run on the server.
+ *
+ * The first phase callback to run as part of this spec will receive no parameters. Each
+ * subsequent phase callback in this spec will receive the return value of the previously run
+ * phase callback as a parameter. This can be used to coordinate work across multiple phases.
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param spec The callback functions to register
+ * @param options Options to control the behavior of the callback
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```angular-ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender({
+ *       read: () => {
+ *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+declare function afterRender<E = never, W = never, M = never>(spec: {
+    earlyRead?: () => E;
+    write?: (...args: ɵFirstAvailable<[E]>) => W;
+    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
+    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
+}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+/**
+ * Register a callback to be invoked each time the application finishes rendering, during the
+ * `mixedReadWrite` phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer specifying an explicit phase for the callback instead, or you risk significant
+ * performance degradation.
+ *
+ * </div>
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - once per render
+ * - on browser platforms only
+ * - during the `mixedReadWrite` phase
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```angular-ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender({
+ *       read: () => {
+ *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+declare function afterRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
+/**
+ * Register callbacks to be invoked the next time the application finishes rendering, during the
+ * specified phases. The available phases are:
+ * - `earlyRead`
+ *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
+ *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
+ *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
+ * - `write`
+ *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
+ * - `mixedReadWrite`
+ *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
+ *    it is possible to divide the work among the other phases instead.
+ * - `read`
+ *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
+ * phases when possible, to avoid performance degradation.
+ *
+ * </div>
+ *
+ * Note that:
+ * - Callbacks run in the following phase order *once, after the next render*:
+ *   1. `earlyRead`
+ *   2. `write`
+ *   3. `mixedReadWrite`
+ *   4. `read`
+ * - Callbacks in the same phase run in the order they are registered.
+ * - Callbacks run on browser platforms only, they will not run on the server.
+ *
+ * The first phase callback to run as part of this spec will receive no parameters. Each
+ * subsequent phase callback in this spec will receive the return value of the previously run
+ * phase callback as a parameter. This can be used to coordinate work across multiple phases.
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param spec The callback functions to register
+ * @param options Options to control the behavior of the callback
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```angular-ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender({
+ *       write: () => {
+ *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+declare function afterNextRender<E = never, W = never, M = never>(spec: {
+    earlyRead?: () => E;
+    write?: (...args: ɵFirstAvailable<[E]>) => W;
+    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
+    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
+}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+/**
+ * Register a callback to be invoked the next time the application finishes rendering, during the
+ * `mixedReadWrite` phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer specifying an explicit phase for the callback instead, or you risk significant
+ * performance degradation.
+ *
+ * </div>
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - on browser platforms only
+ * - during the `mixedReadWrite` phase
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```angular-ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender({
+ *       write: () => {
+ *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+declare function afterNextRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
+
+/**
+ * An argument list containing the first non-never type in the given type array, or an empty
+ * argument list if there are no non-never types in the type array.
+ */
+type ɵFirstAvailableSignal<T extends unknown[]> = T extends [infer H, ...infer R] ? [H] extends [never] ? ɵFirstAvailableSignal<R> : [Signal<H>] : [];
+/**
+ * Register an effect that, when triggered, is invoked when the application finishes rendering, during the
+ * `mixedReadWrite` phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer specifying an explicit phase for the effect instead, or you risk significant
+ * performance degradation.
+ *
+ * </div>
+ *
+ * Note that callback-based `afterRenderEffect`s will run
+ * - in the order it they are registered
+ * - only when dirty
+ * - on browser platforms only
+ * - during the `mixedReadWrite` phase
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback An effect callback function to register
+ * @param options Options to control the behavior of the callback
+ *
+ * @experimental
+ */
+declare function afterRenderEffect(callback: (onCleanup: EffectCleanupRegisterFn) => void, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+/**
+ * Register effects that, when triggered, are invoked when the application finishes rendering,
+ * during the specified phases. The available phases are:
+ * - `earlyRead`
+ *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
+ *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
+ *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
+ * - `write`
+ *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
+ * - `mixedReadWrite`
+ *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
+ *    it is possible to divide the work among the other phases instead.
+ * - `read`
+ *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
+ *
+ * <div class="docs-alert docs-alert-critical">
+ *
+ * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
+ * phases when possible, to avoid performance degradation.
+ *
+ * </div>
+ *
+ * Note that:
+ * - Effects run in the following phase order, only when dirty through signal dependencies:
+ *   1. `earlyRead`
+ *   2. `write`
+ *   3. `mixedReadWrite`
+ *   4. `read`
+ * - `afterRenderEffect`s in the same phase run in the order they are registered.
+ * - `afterRenderEffect`s run on browser platforms only, they will not run on the server.
+ * - `afterRenderEffect`s will run at least once.
+ *
+ * The first phase callback to run as part of this spec will receive no parameters. Each
+ * subsequent phase callback in this spec will receive the return value of the previously run
+ * phase callback as a `Signal`. This can be used to coordinate work across multiple phases.
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * <div class="docs-alert docs-alert-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param spec The effect functions to register
+ * @param options Options to control the behavior of the effects
+ *
+ * @usageNotes
+ *
+ * Use `afterRenderEffect` to create effects that will read or write from the DOM and thus should
+ * run after rendering.
+ *
+ * @experimental
+ */
+declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
+    earlyRead?: (onCleanup: EffectCleanupRegisterFn) => E;
+    write?: (...args: [...ɵFirstAvailableSignal<[E]>, EffectCleanupRegisterFn]) => W;
+    mixedReadWrite?: (...args: [...ɵFirstAvailableSignal<[W, E]>, EffectCleanupRegisterFn]) => M;
+    read?: (...args: [...ɵFirstAvailableSignal<[M, W, E]>, EffectCleanupRegisterFn]) => void;
+}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+
+/**
+ * Asserts that the current stack frame is not within a reactive context. Useful
+ * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs/toSignal toSignal})
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+declare function assertNotInReactiveContext(debugFn: Function, extraContext?: string): void;
+
 /*!
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -8733,6 +9209,27 @@ declare function inputBinding(publicName: string, value: () => unknown): Binding
  * ```
  */
 declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
+/**
+ * Creates a two-way binding.
+ * @param eventName Public name of the two-way compatible input.
+ * @param value Writable signal from which to get the current value and to which to write new
+ * values.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
+ * input using a two-way binding.
+ *
+ * ```
+ * const checkboxValue = signal('');
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    twoWayBinding('value', checkboxValue),
+ *   ],
+ * });
+ * ```
+ */
+declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
 
 /**
  * A wrapper around a native element inside of a View.
@@ -17882,482 +18379,6 @@ declare class DepsTracker implements DepsTrackerApi {
 declare const depsTracker: DepsTracker;
 
 /**
- * Options passed to the `computed` creation function.
- */
-interface CreateComputedOptions<T> {
-    /**
-     * A comparison function which defines equality for computed values.
-     */
-    equal?: ValueEqualityFn<T>;
-    /**
-     * A debug name for the computed signal. Used in Angular DevTools to identify the signal.
-     */
-    debugName?: string;
-}
-/**
- * Create a computed `Signal` which derives a reactive value from an expression.
- */
-declare function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T>;
-
-/**
- * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
- *
- * @developerPreview
- */
-declare function linkedSignal<D>(computation: () => D, options?: {
-    equal?: ValueEqualityFn<NoInfer<D>>;
-}): WritableSignal<D>;
-/**
- * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
- * This is an advanced API form where the computation has access to the previous value of the signal and the computation result.
- *
- * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
- *
- * @developerPreview
- */
-declare function linkedSignal<S, D>(options: {
-    source: () => S;
-    computation: (source: NoInfer<S>, previous?: {
-        source: NoInfer<S>;
-        value: NoInfer<D>;
-    }) => D;
-    equal?: ValueEqualityFn<NoInfer<D>>;
-}): WritableSignal<D>;
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-declare function untracked<T>(nonReactiveReadsFn: () => T): T;
-
-/**
- * An argument list containing the first non-never type in the given type array, or an empty
- * argument list if there are no non-never types in the type array.
- */
-type ɵFirstAvailable<T extends unknown[]> = T extends [infer H, ...infer R] ? [H] extends [never] ? ɵFirstAvailable<R> : [H] : [];
-/**
- * Options passed to `afterRender` and `afterNextRender`.
- *
- * @developerPreview
- */
-interface AfterRenderOptions {
-    /**
-     * The `Injector` to use during creation.
-     *
-     * If this is not provided, the current injection context will be used instead (via `inject`).
-     */
-    injector?: Injector;
-    /**
-     * Whether the hook should require manual cleanup.
-     *
-     * If this is `false` (the default) the hook will automatically register itself to be cleaned up
-     * with the current `DestroyRef`.
-     */
-    manualCleanup?: boolean;
-    /**
-     * The phase the callback should be invoked in.
-     *
-     * <div class="docs-alert docs-alert-critical">
-     *
-     * Defaults to `AfterRenderPhase.MixedReadWrite`. You should choose a more specific
-     * phase instead. See `AfterRenderPhase` for more information.
-     *
-     * </div>
-     *
-     * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
-     *   parameter to `afterRender` or `afterNextRender` instead of a function.
-     */
-    phase?: AfterRenderPhase;
-}
-/**
- * Register callbacks to be invoked each time the application finishes rendering, during the
- * specified phases. The available phases are:
- * - `earlyRead`
- *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
- *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
- *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
- * - `write`
- *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
- * - `mixedReadWrite`
- *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
- *    it is possible to divide the work among the other phases instead.
- * - `read`
- *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
- * phases when possible, to avoid performance degradation.
- *
- * </div>
- *
- * Note that:
- * - Callbacks run in the following phase order *after each render*:
- *   1. `earlyRead`
- *   2. `write`
- *   3. `mixedReadWrite`
- *   4. `read`
- * - Callbacks in the same phase run in the order they are registered.
- * - Callbacks run on browser platforms only, they will not run on the server.
- *
- * The first phase callback to run as part of this spec will receive no parameters. Each
- * subsequent phase callback in this spec will receive the return value of the previously run
- * phase callback as a parameter. This can be used to coordinate work across multiple phases.
- *
- * Angular is unable to verify or enforce that phases are used correctly, and instead
- * relies on each developer to follow the guidelines documented for each value and
- * carefully choose the appropriate one, refactoring their code if necessary. By doing
- * so, Angular is better able to minimize the performance degradation associated with
- * manual DOM access, ensuring the best experience for the end users of your application
- * or library.
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param spec The callback functions to register
- * @param options Options to control the behavior of the callback
- *
- * @usageNotes
- *
- * Use `afterRender` to read or write the DOM after each render.
- *
- * ### Example
- * ```angular-ts
- * @Component({
- *   selector: 'my-cmp',
- *   template: `<span #content>{{ ... }}</span>`,
- * })
- * export class MyComponent {
- *   @ViewChild('content') contentRef: ElementRef;
- *
- *   constructor() {
- *     afterRender({
- *       read: () => {
- *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
- *       }
- *     });
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-declare function afterRender<E = never, W = never, M = never>(spec: {
-    earlyRead?: () => E;
-    write?: (...args: ɵFirstAvailable<[E]>) => W;
-    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
-    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
-/**
- * Register a callback to be invoked each time the application finishes rendering, during the
- * `mixedReadWrite` phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer specifying an explicit phase for the callback instead, or you risk significant
- * performance degradation.
- *
- * </div>
- *
- * Note that the callback will run
- * - in the order it was registered
- * - once per render
- * - on browser platforms only
- * - during the `mixedReadWrite` phase
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param callback A callback function to register
- * @param options Options to control the behavior of the callback
- *
- * @usageNotes
- *
- * Use `afterRender` to read or write the DOM after each render.
- *
- * ### Example
- * ```angular-ts
- * @Component({
- *   selector: 'my-cmp',
- *   template: `<span #content>{{ ... }}</span>`,
- * })
- * export class MyComponent {
- *   @ViewChild('content') contentRef: ElementRef;
- *
- *   constructor() {
- *     afterRender({
- *       read: () => {
- *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
- *       }
- *     });
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-declare function afterRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
-/**
- * Register callbacks to be invoked the next time the application finishes rendering, during the
- * specified phases. The available phases are:
- * - `earlyRead`
- *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
- *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
- *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
- * - `write`
- *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
- * - `mixedReadWrite`
- *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
- *    it is possible to divide the work among the other phases instead.
- * - `read`
- *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
- * phases when possible, to avoid performance degradation.
- *
- * </div>
- *
- * Note that:
- * - Callbacks run in the following phase order *once, after the next render*:
- *   1. `earlyRead`
- *   2. `write`
- *   3. `mixedReadWrite`
- *   4. `read`
- * - Callbacks in the same phase run in the order they are registered.
- * - Callbacks run on browser platforms only, they will not run on the server.
- *
- * The first phase callback to run as part of this spec will receive no parameters. Each
- * subsequent phase callback in this spec will receive the return value of the previously run
- * phase callback as a parameter. This can be used to coordinate work across multiple phases.
- *
- * Angular is unable to verify or enforce that phases are used correctly, and instead
- * relies on each developer to follow the guidelines documented for each value and
- * carefully choose the appropriate one, refactoring their code if necessary. By doing
- * so, Angular is better able to minimize the performance degradation associated with
- * manual DOM access, ensuring the best experience for the end users of your application
- * or library.
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param spec The callback functions to register
- * @param options Options to control the behavior of the callback
- *
- * @usageNotes
- *
- * Use `afterNextRender` to read or write the DOM once,
- * for example to initialize a non-Angular library.
- *
- * ### Example
- * ```angular-ts
- * @Component({
- *   selector: 'my-chart-cmp',
- *   template: `<div #chart>{{ ... }}</div>`,
- * })
- * export class MyChartCmp {
- *   @ViewChild('chart') chartRef: ElementRef;
- *   chart: MyChart|null;
- *
- *   constructor() {
- *     afterNextRender({
- *       write: () => {
- *         this.chart = new MyChart(this.chartRef.nativeElement);
- *       }
- *     });
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-declare function afterNextRender<E = never, W = never, M = never>(spec: {
-    earlyRead?: () => E;
-    write?: (...args: ɵFirstAvailable<[E]>) => W;
-    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
-    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
-/**
- * Register a callback to be invoked the next time the application finishes rendering, during the
- * `mixedReadWrite` phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer specifying an explicit phase for the callback instead, or you risk significant
- * performance degradation.
- *
- * </div>
- *
- * Note that the callback will run
- * - in the order it was registered
- * - on browser platforms only
- * - during the `mixedReadWrite` phase
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param callback A callback function to register
- * @param options Options to control the behavior of the callback
- *
- * @usageNotes
- *
- * Use `afterNextRender` to read or write the DOM once,
- * for example to initialize a non-Angular library.
- *
- * ### Example
- * ```angular-ts
- * @Component({
- *   selector: 'my-chart-cmp',
- *   template: `<div #chart>{{ ... }}</div>`,
- * })
- * export class MyChartCmp {
- *   @ViewChild('chart') chartRef: ElementRef;
- *   chart: MyChart|null;
- *
- *   constructor() {
- *     afterNextRender({
- *       write: () => {
- *         this.chart = new MyChart(this.chartRef.nativeElement);
- *       }
- *     });
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-declare function afterNextRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
-
-/**
- * An argument list containing the first non-never type in the given type array, or an empty
- * argument list if there are no non-never types in the type array.
- */
-type ɵFirstAvailableSignal<T extends unknown[]> = T extends [infer H, ...infer R] ? [H] extends [never] ? ɵFirstAvailableSignal<R> : [Signal<H>] : [];
-/**
- * Register an effect that, when triggered, is invoked when the application finishes rendering, during the
- * `mixedReadWrite` phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer specifying an explicit phase for the effect instead, or you risk significant
- * performance degradation.
- *
- * </div>
- *
- * Note that callback-based `afterRenderEffect`s will run
- * - in the order it they are registered
- * - only when dirty
- * - on browser platforms only
- * - during the `mixedReadWrite` phase
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param callback An effect callback function to register
- * @param options Options to control the behavior of the callback
- *
- * @experimental
- */
-declare function afterRenderEffect(callback: (onCleanup: EffectCleanupRegisterFn) => void, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
-/**
- * Register effects that, when triggered, are invoked when the application finishes rendering,
- * during the specified phases. The available phases are:
- * - `earlyRead`
- *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
- *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
- *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
- * - `write`
- *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
- * - `mixedReadWrite`
- *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
- *    it is possible to divide the work among the other phases instead.
- * - `read`
- *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
- *
- * <div class="docs-alert docs-alert-critical">
- *
- * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
- * phases when possible, to avoid performance degradation.
- *
- * </div>
- *
- * Note that:
- * - Effects run in the following phase order, only when dirty through signal dependencies:
- *   1. `earlyRead`
- *   2. `write`
- *   3. `mixedReadWrite`
- *   4. `read`
- * - `afterRenderEffect`s in the same phase run in the order they are registered.
- * - `afterRenderEffect`s run on browser platforms only, they will not run on the server.
- * - `afterRenderEffect`s will run at least once.
- *
- * The first phase callback to run as part of this spec will receive no parameters. Each
- * subsequent phase callback in this spec will receive the return value of the previously run
- * phase callback as a `Signal`. This can be used to coordinate work across multiple phases.
- *
- * Angular is unable to verify or enforce that phases are used correctly, and instead
- * relies on each developer to follow the guidelines documented for each value and
- * carefully choose the appropriate one, refactoring their code if necessary. By doing
- * so, Angular is better able to minimize the performance degradation associated with
- * manual DOM access, ensuring the best experience for the end users of your application
- * or library.
- *
- * <div class="docs-alert docs-alert-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param spec The effect functions to register
- * @param options Options to control the behavior of the effects
- *
- * @usageNotes
- *
- * Use `afterRenderEffect` to create effects that will read or write from the DOM and thus should
- * run after rendering.
- *
- * @experimental
- */
-declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
-    earlyRead?: (onCleanup: EffectCleanupRegisterFn) => E;
-    write?: (...args: [...ɵFirstAvailableSignal<[E]>, EffectCleanupRegisterFn]) => W;
-    mixedReadWrite?: (...args: [...ɵFirstAvailableSignal<[W, E]>, EffectCleanupRegisterFn]) => M;
-    read?: (...args: [...ɵFirstAvailableSignal<[M, W, E]>, EffectCleanupRegisterFn]) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
-
-/**
- * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs/toSignal toSignal})
- *
- * @param debugFn a reference to the function making the assertion (used for the error message).
- *
- * @publicApi
- */
-declare function assertNotInReactiveContext(debugFn: Function, extraContext?: string): void;
-
-/**
  * Creates a `ComponentRef` instance based on provided component type and a set of options.
  *
  * @usageNotes
@@ -18592,4 +18613,4 @@ declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
  */
 declare const REQUEST_CONTEXT: InjectionToken<unknown>;
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, type AbstractType, type AfterContentChecked, type AfterContentInit, type AfterRenderOptions, AfterRenderPhase, type AfterRenderRef, type AfterViewChecked, type AfterViewInit, type ApplicationConfig, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, type AttributeDecorator, type BaseResourceOptions, type BootstrapOptions, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, type ClassProvider, type ClassSansProvider, Compiler, CompilerFactory, type CompilerOptions, Component, type ComponentDecorator, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, type ComponentMirror, ComponentRef$1 as ComponentRef, type ConstructorProvider, type ConstructorSansProvider, ContentChild, type ContentChildDecorator, type ContentChildFunction, ContentChildren, type ContentChildrenDecorator, type CreateComputedOptions, type CreateEffectOptions, type CreateSignalOptions, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, type DestroyableInjector, Directive, type DirectiveDecorator, type DoBootstrap, type DoCheck, ENVIRONMENT_INITIALIZER, type EffectCleanupFn, type EffectCleanupRegisterFn, type EffectRef, ElementRef, EmbeddedViewRef, EnvironmentInjector, type EnvironmentProviders, ErrorHandler, EventEmitter, type ExistingProvider, type ExistingSansProvider, type FactoryProvider, type FactorySansProvider, type ForwardRefFn, type GetTestability, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, type HostBindingDecorator, type HostDecorator, HostListener, type HostListenerDecorator, INJECTOR, type ImportProvidersSource, type ImportedNgModuleProviders, Inject, type InjectDecorator, type InjectOptions, Injectable, type InjectableDecorator, type InjectableProvider, type InjectableType, InjectionToken, Injector, type InjectorType, Input, type InputDecorator, type InputFunction, type InputOptions, type InputOptionsWithTransform, type InputOptionsWithoutTransform, type InputSignal, type InputSignalWithTransform, type IterableChangeRecord, type IterableChanges, type IterableDiffer, type IterableDifferFactory, IterableDiffers, type KeyValueChangeRecord, type KeyValueChanges, type KeyValueDiffer, type KeyValueDifferFactory, KeyValueDiffers, LOCALE_ID, type ListenerOptions, MissingTranslationStrategy, type ModelFunction, type ModelOptions, type ModelSignal, ModuleWithComponentFactories, type ModuleWithProviders, NO_ERRORS_SCHEMA, type NgIterable, NgModule, type NgModuleDecorator, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, type NgZoneOptions, type OnChanges, type OnDestroy, type OnInit, Optional, type OptionalDecorator, Output, type OutputDecorator, OutputEmitterRef, type OutputOptions, type OutputRef, type OutputRefSubscription, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, type PipeDecorator, type PipeTransform, PlatformRef, type Predicate, type PromiseResourceOptions, type Provider, type ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, type RendererType2, type Resource, type ResourceLoader, type ResourceLoaderParams, type ResourceOptions, type ResourceRef, ResourceStatus, type ResourceStreamItem, type ResourceStreamingLoader, Sanitizer, type SchemaMetadata, SecurityContext, Self, type SelfDecorator, type Signal, SimpleChange, type SimpleChanges, SkipSelf, type SkipSelfDecorator, type StateKey, type StaticClassProvider, type StaticClassSansProvider, type StaticProvider, type StreamingResourceOptions, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, type TrackByFunction, TransferState, Type$1 as Type, type TypeDecorator, type TypeProvider, VERSION, type ValueEqualityFn, type ValueProvider, type ValueSansProvider, Version, ViewChild, type ViewChildDecorator, type ViewChildFunction, ViewChildren, type ViewChildrenDecorator, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, type WritableResource, type WritableSignal, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, BypassType as ɵBypassType, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, type ComponentDebugMetadata as ɵComponentDebugMetadata, type ComponentDef as ɵComponentDef, ComponentFactory$1 as ɵComponentFactory, type ComponentType as ɵComponentType, Console as ɵConsole, type CssSelectorList as ɵCssSelectorList, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, type DeferBlockConfig as ɵDeferBlockConfig, type DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, type DeferBlockDetails as ɵDeferBlockDetails, DeferBlockState as ɵDeferBlockState, type DirectiveDef as ɵDirectiveDef, type DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, type ɵFirstAvailable, type ɵFirstAvailableSignal, type GlobalDevModeUtils as ɵGlobalDevModeUtils, type HydratedNode as ɵHydratedNode, type HydrationInfo as ɵHydrationInfo, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, type ImageConfig as ɵImageConfig, type InjectorProfilerContext as ɵInjectorProfilerContext, type InputSignalNode as ɵInputSignalNode, type InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, type NgModuleDef as ɵNgModuleDef, NgModuleFactory as ɵNgModuleFactory, type NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, type NgModuleType as ɵNgModuleType, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, type PipeDef as ɵPipeDef, type Profiler as ɵProfiler, ProfilerEvent as ɵProfilerEvent, type ProviderRecord as ɵProviderRecord, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RenderFlags as ɵRenderFlags, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, type SafeHtml as ɵSafeHtml, type SafeResourceUrl as ɵSafeResourceUrl, type SafeScript as ɵSafeScript, type SafeStyle as ɵSafeStyle, type SafeUrl as ɵSafeUrl, type SafeValue as ɵSafeValue, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, type TracingSnapshot as ɵTracingSnapshot, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, type ɵUnwrapDirectiveSignalInputs, ViewRef as ɵViewRef, type Writable as ɵWritable, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, type ɵɵComponentDeclaration, ɵɵCopyDefinitionFeature, type ɵɵDirectiveDeclaration, ɵɵExternalStylesFeature, type ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, type ɵɵInjectableDeclaration, type ɵɵInjectorDeclaration, type ɵɵInjectorDef, type ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, type ɵɵPipeDeclaration, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, type AbstractType, type AfterContentChecked, type AfterContentInit, type AfterRenderOptions, AfterRenderPhase, type AfterRenderRef, type AfterViewChecked, type AfterViewInit, type ApplicationConfig, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, type AttributeDecorator, type BaseResourceOptions, type BootstrapOptions, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, type ClassProvider, type ClassSansProvider, Compiler, CompilerFactory, type CompilerOptions, Component, type ComponentDecorator, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, type ComponentMirror, ComponentRef$1 as ComponentRef, type ConstructorProvider, type ConstructorSansProvider, ContentChild, type ContentChildDecorator, type ContentChildFunction, ContentChildren, type ContentChildrenDecorator, type CreateComputedOptions, type CreateEffectOptions, type CreateSignalOptions, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, type DestroyableInjector, Directive, type DirectiveDecorator, type DoBootstrap, type DoCheck, ENVIRONMENT_INITIALIZER, type EffectCleanupFn, type EffectCleanupRegisterFn, type EffectRef, ElementRef, EmbeddedViewRef, EnvironmentInjector, type EnvironmentProviders, ErrorHandler, EventEmitter, type ExistingProvider, type ExistingSansProvider, type FactoryProvider, type FactorySansProvider, type ForwardRefFn, type GetTestability, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, type HostBindingDecorator, type HostDecorator, HostListener, type HostListenerDecorator, INJECTOR, type ImportProvidersSource, type ImportedNgModuleProviders, Inject, type InjectDecorator, type InjectOptions, Injectable, type InjectableDecorator, type InjectableProvider, type InjectableType, InjectionToken, Injector, type InjectorType, Input, type InputDecorator, type InputFunction, type InputOptions, type InputOptionsWithTransform, type InputOptionsWithoutTransform, type InputSignal, type InputSignalWithTransform, type IterableChangeRecord, type IterableChanges, type IterableDiffer, type IterableDifferFactory, IterableDiffers, type KeyValueChangeRecord, type KeyValueChanges, type KeyValueDiffer, type KeyValueDifferFactory, KeyValueDiffers, LOCALE_ID, type ListenerOptions, MissingTranslationStrategy, type ModelFunction, type ModelOptions, type ModelSignal, ModuleWithComponentFactories, type ModuleWithProviders, NO_ERRORS_SCHEMA, type NgIterable, NgModule, type NgModuleDecorator, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, type NgZoneOptions, type OnChanges, type OnDestroy, type OnInit, Optional, type OptionalDecorator, Output, type OutputDecorator, OutputEmitterRef, type OutputOptions, type OutputRef, type OutputRefSubscription, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, type PipeDecorator, type PipeTransform, PlatformRef, type Predicate, type PromiseResourceOptions, type Provider, type ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, type RendererType2, type Resource, type ResourceLoader, type ResourceLoaderParams, type ResourceOptions, type ResourceRef, ResourceStatus, type ResourceStreamItem, type ResourceStreamingLoader, Sanitizer, type SchemaMetadata, SecurityContext, Self, type SelfDecorator, type Signal, SimpleChange, type SimpleChanges, SkipSelf, type SkipSelfDecorator, type StateKey, type StaticClassProvider, type StaticClassSansProvider, type StaticProvider, type StreamingResourceOptions, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, type TrackByFunction, TransferState, Type$1 as Type, type TypeDecorator, type TypeProvider, VERSION, type ValueEqualityFn, type ValueProvider, type ValueSansProvider, Version, ViewChild, type ViewChildDecorator, type ViewChildFunction, ViewChildren, type ViewChildrenDecorator, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, type WritableResource, type WritableSignal, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, twoWayBinding, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, BypassType as ɵBypassType, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, type ComponentDebugMetadata as ɵComponentDebugMetadata, type ComponentDef as ɵComponentDef, ComponentFactory$1 as ɵComponentFactory, type ComponentType as ɵComponentType, Console as ɵConsole, type CssSelectorList as ɵCssSelectorList, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, type DeferBlockConfig as ɵDeferBlockConfig, type DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, type DeferBlockDetails as ɵDeferBlockDetails, DeferBlockState as ɵDeferBlockState, type DirectiveDef as ɵDirectiveDef, type DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, type ɵFirstAvailable, type ɵFirstAvailableSignal, type GlobalDevModeUtils as ɵGlobalDevModeUtils, type HydratedNode as ɵHydratedNode, type HydrationInfo as ɵHydrationInfo, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, type ImageConfig as ɵImageConfig, type InjectorProfilerContext as ɵInjectorProfilerContext, type InputSignalNode as ɵInputSignalNode, type InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, type NgModuleDef as ɵNgModuleDef, NgModuleFactory as ɵNgModuleFactory, type NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, type NgModuleType as ɵNgModuleType, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, type PipeDef as ɵPipeDef, type Profiler as ɵProfiler, ProfilerEvent as ɵProfilerEvent, type ProviderRecord as ɵProviderRecord, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RenderFlags as ɵRenderFlags, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, type SafeHtml as ɵSafeHtml, type SafeResourceUrl as ɵSafeResourceUrl, type SafeScript as ɵSafeScript, type SafeStyle as ɵSafeStyle, type SafeUrl as ɵSafeUrl, type SafeValue as ɵSafeValue, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, type TracingSnapshot as ɵTracingSnapshot, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, type ɵUnwrapDirectiveSignalInputs, ViewRef as ɵViewRef, type Writable as ɵWritable, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, type ɵɵComponentDeclaration, ɵɵCopyDefinitionFeature, type ɵɵDirectiveDeclaration, ɵɵExternalStylesFeature, type ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, type ɵɵInjectableDeclaration, type ɵɵInjectorDeclaration, type ɵɵInjectorDef, type ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, type ɵɵPipeDeclaration, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
