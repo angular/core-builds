@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-1668b9f
+ * @license Angular v20.0.0-next.2+sha-bb7e948
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22548,7 +22548,6 @@ function enableBindings() {
 function listener(name, handlerFn, eventTargetResolver, syntheticHost, sourceSpan) {
     const args = [literal$1(name), handlerFn];
     if (eventTargetResolver !== null) {
-        args.push(literal$1(false)); // `useCapture` flag, defaults to `false`
         args.push(importExpr(eventTargetResolver));
     }
     return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
@@ -31437,7 +31436,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.2+sha-1668b9f');
+new Version('20.0.0-next.2+sha-bb7e948');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32387,7 +32386,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DF8ZaFW5.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-r90mcJU9.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

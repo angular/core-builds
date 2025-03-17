@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-1668b9f
+ * @license Angular v20.0.0-next.2+sha-bb7e948
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -99,7 +99,12 @@ function createInputSignal(initialValue, options) {
         // Record that someone looked at this signal.
         producerAccessed(node);
         if (node.value === REQUIRED_UNSET_VALUE) {
-            throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, ngDevMode && 'Input is required but no value is available yet.');
+            let message = null;
+            if (ngDevMode) {
+                const name = options?.debugName ?? options?.alias;
+                message = `Input${name ? ` "${name}"` : ''} is required but no value is available yet.`;
+            }
+            throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, message);
         }
         return node.value;
     }
@@ -17902,14 +17907,12 @@ function setStashFn(fn) {
  *
  * @param eventName Name of the event
  * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
- *     from the Renderer3 infrastructure and should be removed from the instruction arguments
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
  *
  * @codeGenApi
  */
-function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
+function ɵɵlistener(eventName, listenerFn, eventTargetResolver) {
     const lView = getLView();
     const tView = getTView();
     const tNode = getCurrentTNode();
@@ -18473,7 +18476,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-1668b9f']
+        ? ['ng-version', '20.0.0-next.2+sha-bb7e948']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34814,7 +34817,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-1668b9f');
+const VERSION = new Version('20.0.0-next.2+sha-bb7e948');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

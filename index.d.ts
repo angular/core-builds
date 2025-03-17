@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-1668b9f
+ * @license Angular v20.0.0-next.2+sha-bb7e948
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7815,6 +7815,13 @@ declare class IterableDiffers {
  */
 interface InjectDecorator {
     /**
+     * Warning: String tokens are not recommended.
+     *
+     * Use an InjectionToken or a class as a token instead.
+     */
+    (token: string): any;
+    new (token: string): Inject;
+    /**
      * Parameter decorator on a dependency parameter of a class constructor
      * that specifies a custom provider of the dependency.
      *
@@ -15110,14 +15117,12 @@ declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *
  * @param eventName Name of the event
  * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
- *     from the Renderer3 infrastructure and should be removed from the instruction arguments
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
  *
  * @codeGenApi
  */
-declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
+declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 /**
  * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
  *
