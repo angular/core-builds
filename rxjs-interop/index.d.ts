@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bf5d995
+ * @license Angular v20.0.0-next.2+sha-48974c3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -117,15 +117,6 @@ interface ToSignalOptions<T> {
      * until the `Observable` itself completes.
      */
     manualCleanup?: boolean;
-    /**
-     * Whether `toSignal` should throw errors from the Observable error channel back to RxJS, where
-     * they'll be processed as uncaught exceptions.
-     *
-     * In practice, this means that the signal returned by `toSignal` will keep returning the last
-     * good value forever, as Observables which error produce no further values. This option emulates
-     * the behavior of the `async` pipe.
-     */
-    rejectErrors?: boolean;
     /**
      * A comparison function which defines equality for values emitted by the observable.
      *

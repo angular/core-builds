@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bf5d995
+ * @license Angular v20.0.0-next.2+sha-48974c3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -197,11 +197,6 @@ function toSignal(source, options) {
     const sub = source.subscribe({
         next: (value) => state.set({ kind: 1 /* StateKind.Value */, value }),
         error: (error) => {
-            if (options?.rejectErrors) {
-                // Kick the error back to RxJS. It will be caught and rethrown in a macrotask, which causes
-                // the error to end up as an uncaught exception.
-                throw error;
-            }
             state.set({ kind: 2 /* StateKind.Error */, error });
         },
         // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
