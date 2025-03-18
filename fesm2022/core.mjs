@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-22d3f05
+ * @license Angular v20.0.0-next.2+sha-1dba2a8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18522,7 +18522,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-22d3f05']
+        ? ['ng-version', '20.0.0-next.2+sha-1dba2a8']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -34864,7 +34864,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-22d3f05');
+const VERSION = new Version('20.0.0-next.2+sha-1dba2a8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35120,7 +35120,7 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
  * ```
  *
  * @publicApi
- * @see {@link /api/core/bootstrapApplication bootstrapApplication}
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  * @see {@link NgZoneOptions}
  */
 function provideZoneChangeDetection(options) {
