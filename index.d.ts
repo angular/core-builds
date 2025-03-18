@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.2+sha-9291d52
+ * @license Angular v19.2.2+sha-7d47678
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11233,7 +11233,7 @@ declare function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChang
  * ```
  *
  * @publicApi
- * @see {@link /api/core/bootstrapApplication bootstrapApplication}
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  * @see {@link NgZoneOptions}
  */
 declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
