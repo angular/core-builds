@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-48974c3
+ * @license Angular v20.0.0-next.2+sha-22d3f05
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,6 +18,7 @@ declare function defaultEquals<T>(a: T, b: T): boolean;
 type Version = number & {
     __brand: 'Version';
 };
+type ReactiveHookFn = (node: ReactiveNode) => void;
 /**
  * Symbol used to tell `Signal`s apart from other functions.
  *
@@ -189,6 +190,8 @@ declare function consumerPollProducersForChange(node: ReactiveNode): boolean;
  * Disconnect this consumer from the graph.
  */
 declare function consumerDestroy(node: ReactiveNode): void;
+declare function runPostProducerCreatedFn(node: ReactiveNode): void;
+declare function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 
 /**
  * A computation, which derives a value from a declarative reactive expression.
@@ -270,10 +273,10 @@ interface SignalGetter<T> extends SignalBaseGetter<T> {
  * Create a `Signal` that can be set or updated directly.
  */
 declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SignalGetter<T>;
-declare function setPostSignalSetFn(fn: (() => void) | null): (() => void) | null;
+declare function setPostSignalSetFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
 declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
-declare function runPostSignalSetFn(): void;
+declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
 declare const SIGNAL_NODE: SignalNode<unknown>;
 
 declare function setThrowInvalidWriteToSignalError(fn: <T>(node: SignalNode<T>) => never): void;
@@ -320,4 +323,4 @@ declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sc
  */
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
-export { type ComputationFn, type ComputedNode, type LinkedSignalGetter, type LinkedSignalNode, REACTIVE_NODE, type Reactive, type ReactiveNode, SIGNAL, SIGNAL_NODE, type SignalGetter, type SignalNode, type ValueEqualityFn, type Watch, type WatchCleanupFn, type WatchCleanupRegisterFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
+export { type ComputationFn, type ComputedNode, type LinkedSignalGetter, type LinkedSignalNode, REACTIVE_NODE, type Reactive, type ReactiveHookFn, type ReactiveNode, SIGNAL, SIGNAL_NODE, type SignalGetter, type SignalNode, type ValueEqualityFn, type Watch, type WatchCleanupFn, type WatchCleanupRegisterFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };

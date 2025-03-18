@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-48974c3
+ * @license Angular v20.0.0-next.2+sha-22d3f05
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30,6 +30,7 @@ const NOT_FOUND = Symbol('NotFound');
  * hierarchy. Context can be attached below.
  */
 class NotFoundError extends Error {
+    name = 'ɵNotFound';
     constructor(message) {
         super(message);
     }
@@ -38,7 +39,7 @@ class NotFoundError extends Error {
  * Type guard for checking if an unknown value is a NotFound.
  */
 function isNotFound(e) {
-    return e === NOT_FOUND || e instanceof NotFoundError;
+    return e === NOT_FOUND || e.name === 'ɵNotFound';
 }
 
 export { NOT_FOUND, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector };

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-48974c3
+ * @license Angular v20.0.0-next.2+sha-22d3f05
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -85,6 +85,7 @@ declare const NOT_FOUND: unique symbol;
  * hierarchy. Context can be attached below.
  */
 declare class NotFoundError extends Error {
+    readonly name: string;
     constructor(message: string);
 }
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-48974c3
+ * @license Angular v20.0.0-next.2+sha-22d3f05
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24,6 +24,10 @@ let inNotificationPhase = false;
  * Global epoch counter. Incremented whenever a source signal is set.
  */
 let epoch = 1;
+/**
+ * If set, called after a producer `ReactiveNode` is created.
+ */
+let postProducerCreatedFn = null;
 /**
  * Symbol used to tell `Signal`s apart from other functions.
  *
@@ -326,6 +330,14 @@ function assertProducerNode(node) {
 function isConsumerNode(node) {
     return node.producerNode !== undefined;
 }
+function runPostProducerCreatedFn(node) {
+    postProducerCreatedFn?.(node);
+}
+function setPostProducerCreatedFn(fn) {
+    const prev = postProducerCreatedFn;
+    postProducerCreatedFn = fn;
+    return prev;
+}
 
 /**
  * Create a computed signal which derives a reactive value from an expression.
@@ -347,6 +359,7 @@ function createComputed(computation, equal) {
         return node.value;
     };
     computed[SIGNAL] = node;
+    runPostProducerCreatedFn(node);
     return computed;
 }
 /**
@@ -454,6 +467,7 @@ function createSignal(initialValue, equal) {
         return node.value;
     });
     getter[SIGNAL] = node;
+    runPostProducerCreatedFn(node);
     return getter;
 }
 function setPostSignalSetFn(fn) {
@@ -476,8 +490,8 @@ function signalUpdateFn(node, updater) {
     }
     signalSetFn(node, updater(node.value));
 }
-function runPostSignalSetFn() {
-    postSignalSetFn?.();
+function runPostSignalSetFn(node) {
+    postSignalSetFn?.(node);
 }
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
@@ -494,7 +508,7 @@ function signalValueChanged(node) {
     node.version++;
     producerIncrementEpoch();
     producerNotifyConsumers(node);
-    postSignalSetFn?.();
+    postSignalSetFn?.(node);
 }
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
@@ -516,6 +530,7 @@ function createLinkedSignal(sourceFn, computationFn, equalityFn) {
     };
     const getter = linkedSignalGetter;
     getter[SIGNAL] = node;
+    runPostProducerCreatedFn(node);
     return getter;
 }
 function linkedSignalSetFn(node, newValue) {
@@ -672,5 +687,5 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
 //# sourceMappingURL=signals.mjs.map
