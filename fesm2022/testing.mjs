@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bec1610
+ * @license Angular v20.0.0-next.2+sha-34f0453
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1836,10 +1836,6 @@ class TestBedImpl {
     static inject(token, notFoundValue, options) {
         return TestBedImpl.INSTANCE.inject(token, notFoundValue, options);
     }
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, options) {
-        return TestBedImpl.INSTANCE.inject(token, notFoundValue, options);
-    }
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *
@@ -1996,10 +1992,6 @@ class TestBedImpl {
         return result === UNDEFINED
             ? this.compiler.injector.get(token, notFoundValue, options)
             : result;
-    }
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, options) {
-        return this.inject(token, notFoundValue, options);
     }
     runInInjectionContext(fn) {
         return runInInjectionContext(this.inject(EnvironmentInjector), fn);

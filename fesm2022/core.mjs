@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bec1610
+ * @license Angular v20.0.0-next.2+sha-34f0453
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9954,6 +9954,56 @@ function processBlockData(injector) {
     }
     return blockDetails;
 }
+function isSsrContentsIntegrity(node) {
+    return (!!node &&
+        node.nodeType === Node.COMMENT_NODE &&
+        node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER);
+}
+function skipTextNodes(node) {
+    // Ignore whitespace. Before the <body>, we shouldn't find text nodes that aren't whitespace.
+    while (node && node.nodeType === Node.TEXT_NODE) {
+        node = node.previousSibling;
+    }
+    return node;
+}
+/**
+ * Verifies whether the DOM contains a special marker added during SSR time to make sure
+ * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
+ * happens either by CDN or during the build process as an optimization to remove comment nodes.
+ * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
+ * When this special marker is *not* present - throw an error and do not proceed with hydration,
+ * since it will not be able to function correctly.
+ *
+ * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
+ */
+function verifySsrContentsIntegrity(doc) {
+    for (const node of doc.body.childNodes) {
+        if (isSsrContentsIntegrity(node)) {
+            return;
+        }
+    }
+    // Check if the HTML parser may have moved the marker to just before the <body> tag,
+    // e.g. because the body tag was implicit and not present in the markup. An implicit body
+    // tag is unlikely to interfer with whitespace/comments inside of the app's root element.
+    // Case 1: Implicit body. Example:
+    //   <!doctype html><head><title>Hi</title></head><!--nghm--><app-root></app-root>
+    const beforeBody = skipTextNodes(doc.body.previousSibling);
+    if (isSsrContentsIntegrity(beforeBody)) {
+        return;
+    }
+    // Case 2: Implicit body & head. Example:
+    //   <!doctype html><head><title>Hi</title><!--nghm--><app-root></app-root>
+    let endOfHead = skipTextNodes(doc.head.lastChild);
+    if (isSsrContentsIntegrity(endOfHead)) {
+        return;
+    }
+    throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' &&
+        ngDevMode &&
+        'Angular hydration logic detected that HTML content of this page was modified after it ' +
+            'was produced during server side rendering. Make sure that there are no optimizations ' +
+            'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
+            'relies on HTML produced by the server, including whitespaces and comment nodes.');
+}
 
 /** Refreshes all content queries declared by directives in a given view */
 function refreshContentQueries(tView, lView) {
@@ -12710,17 +12760,6 @@ function handleUncaughtError(lView, error) {
     }
     const errorHandler = injector.get(INTERNAL_APPLICATION_ERROR_HANDLER, null);
     errorHandler?.(error);
-}
-/**
- * Handles an error thrown in an LView.
- * @deprecated Use handleUncaughtError to report to application error handler
- */
-function handleError(lView, error) {
-    const injector = lView[INJECTOR];
-    if (!injector) {
-        return;
-    }
-    injector.get(ErrorHandler, null)?.handleError(error);
 }
 /**
  * Set all directive inputs with the specific public name on the node.
@@ -17895,211 +17934,6 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 }
 
 /**
- * Contains a reference to a function that disables event replay feature
- * for server-side rendered applications. This function is overridden with
- * an actual implementation when the event replay feature is enabled via
- * `withEventReplay()` call.
- */
-let stashEventListener = (el, eventName, listenerFn) => { };
-function setStashFn(fn) {
-    stashEventListener = fn;
-}
-/**
- * Adds an event listener to the current node.
- *
- * If an output exists on one of the node's directives, it also subscribes to the output
- * and saves the subscription for later cleanup.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵlistener(eventName, listenerFn, eventTargetResolver) {
-    const lView = getLView();
-    const tView = getTView();
-    const tNode = getCurrentTNode();
-    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
-    return ɵɵlistener;
-}
-/**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵsyntheticHostListener(eventName, listenerFn) {
-    const tNode = getCurrentTNode();
-    const lView = getLView();
-    const tView = getTView();
-    const currentDef = getCurrentDirectiveDef(tView.data);
-    const renderer = loadComponentRenderer(currentDef, tNode, lView);
-    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
-    return ɵɵsyntheticHostListener;
-}
-/**
- * A utility function that checks if a given element has already an event handler registered for an
- * event with a specified name. The TView.cleanup data structure is used to find out which events
- * are registered for a given element.
- */
-function findExistingListener(tView, lView, eventName, tNodeIdx) {
-    const tCleanup = tView.cleanup;
-    if (tCleanup != null) {
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            const cleanupEventName = tCleanup[i];
-            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
-                // We have found a matching event name on the same node but it might not have been
-                // registered yet, so we must explicitly verify entries in the LView cleanup data
-                // structures.
-                const lCleanup = lView[CLEANUP];
-                const listenerIdxInLCleanup = tCleanup[i + 2];
-                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
-            }
-            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
-            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
-            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
-            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
-            // documentation of TView.cleanup for more details of this data structure layout.
-            if (typeof cleanupEventName === 'string') {
-                i += 2;
-            }
-        }
-    }
-    return null;
-}
-function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
-    const isTNodeDirectiveHost = isDirectiveHost(tNode);
-    const firstCreatePass = tView.firstCreatePass;
-    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const context = lView[CONTEXT];
-    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
-    // native listener or a directive output on this element. As such we we know that we will have to
-    // register a listener and store its cleanup function on LView.
-    const lCleanup = getOrCreateLViewCleanup(lView);
-    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
-    let processOutputs = true;
-    // Adding a native event listener is applicable when:
-    // - The corresponding TNode represents a DOM element.
-    // - The event target has a resolver (usually resulting in a global object,
-    //   such as `window` or `document`).
-    if (tNode.type & 3 /* TNodeType.AnyRNode */ || eventTargetResolver) {
-        const native = getNativeByTNode(tNode, lView);
-        const target = eventTargetResolver ? eventTargetResolver(native) : native;
-        const lCleanupIndex = lCleanup.length;
-        const idxOrTargetGetter = eventTargetResolver
-            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
-            : tNode.index;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        // There might be cases where multiple directives on the same element try to register an event
-        // handler function for the same event. In this situation we want to avoid registration of
-        // several native listeners as each registration would be intercepted by NgZone and
-        // trigger change detection. This would mean that a single user action would result in several
-        // change detections being invoked. To avoid this situation we want to have only one call to
-        // native handler registration (for the same element and same type of event).
-        //
-        // In order to have just one native event handler in presence of multiple handler functions,
-        // we just register a first handler function as a native event listener and then chain
-        // (coalesce) other handler functions on top of the first native handler function.
-        let existingListener = null;
-        // Please note that the coalescing described here doesn't happen for events specifying an
-        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-        // view engine.
-        // Also, we don't have to search for existing listeners is there are no directives
-        // matching on a given node as we can't register multiple event handlers for the same event in
-        // a template (this would mean having duplicate attributes).
-        if (!eventTargetResolver && isTNodeDirectiveHost) {
-            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
-        }
-        if (existingListener !== null) {
-            // Attach a new listener to coalesced listeners list, maintaining the order in which
-            // listeners are registered. For performance reasons, we keep a reference to the last
-            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-            // the entire set each time we need to add a new listener.
-            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-            lastListenerFn.__ngNextListenerFn__ = listenerFn;
-            existingListener.__ngLastListenerFn__ = listenerFn;
-            processOutputs = false;
-        }
-        else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn);
-            stashEventListener(target, eventName, listenerFn);
-            const cleanupFn = renderer.listen(target, eventName, listenerFn);
-            lCleanup.push(listenerFn, cleanupFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-        }
-    }
-    else {
-        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
-        // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, context, listenerFn);
-    }
-    if (processOutputs) {
-        const outputConfig = tNode.outputs?.[eventName];
-        const hostDirectiveOutputConfig = tNode.hostDirectiveOutputs?.[eventName];
-        if (hostDirectiveOutputConfig && hostDirectiveOutputConfig.length) {
-            for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
-                const index = hostDirectiveOutputConfig[i];
-                const lookupName = hostDirectiveOutputConfig[i + 1];
-                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
-            }
-        }
-        if (outputConfig && outputConfig.length) {
-            for (const index of outputConfig) {
-                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
-            }
-        }
-    }
-}
-function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
-    ngDevMode && assertIndexInRange(lView, index);
-    const instance = lView[index];
-    const def = tView.data[index];
-    const propertyName = def.outputs[lookupName];
-    const output = instance[propertyName];
-    if (ngDevMode && !isOutputSubscribable(output)) {
-        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
-    }
-    const subscription = output.subscribe(listenerFn);
-    const idx = lCleanup.length;
-    lCleanup.push(listenerFn, subscription);
-    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-}
-function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
-    const prevConsumer = setActiveConsumer(null);
-    try {
-        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
-        // Only explicitly returning false from a listener should preventDefault
-        return listenerFn(e) !== false;
-    }
-    catch (error) {
-        // TODO(atscott): This should report to the application error handler, not the ErrorHandler on LView injector
-        handleError(lView, error);
-        return false;
-    }
-    finally {
-        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
-        setActiveConsumer(prevConsumer);
-    }
-}
-/**
  * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
  * if applicable.
  *
@@ -18134,14 +17968,43 @@ function wrapListener(tNode, lView, context, listenerFn) {
         return result;
     };
 }
+function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
+    const prevConsumer = setActiveConsumer(null);
+    try {
+        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
+    }
+    catch (error) {
+        // TODO(atscott): This should report to the application error handler, not the ErrorHandler on LView injector
+        handleError(lView, error);
+        return false;
+    }
+    finally {
+        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
+        setActiveConsumer(prevConsumer);
+    }
+}
 /**
- * Whether the given value represents a subscribable output.
- *
- * For example, an `EventEmitter, a `Subject`, an `Observable` or an
- * `OutputEmitter`.
+ * Handles an error thrown in an LView.
+ * @deprecated Use handleUncaughtError to report to application error handler
  */
-function isOutputSubscribable(value) {
-    return (value != null && typeof value.subscribe === 'function');
+function handleError(lView, error) {
+    const injector = lView[INJECTOR];
+    if (!injector) {
+        return;
+    }
+    injector.get(ErrorHandler, null)?.handleError(error);
+}
+
+function createOutputListener(tNode, lView, listenerFn, targetDef, eventName) {
+    // TODO(pk): decouple checks from the actual binding
+    const wrappedListener = wrapListener(tNode, lView, lView[CONTEXT], listenerFn);
+    // TODO(pk): simplify signature of listenToDirectiveOutput
+    const hasBound = listenToDirectiveOutput(tNode, lView[TVIEW], lView, targetDef, eventName, wrappedListener);
+    if (!hasBound && ngDevMode) {
+        throw new RuntimeError(316 /* RuntimeErrorCode.INVALID_BINDING_TARGET */, `${stringifyForError(targetDef.type)} does not have an output with a public name of "${eventName}".`);
+    }
 }
 /** Listens to an output on a specific directive. */
 function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listenerFn) {
@@ -18177,12 +18040,35 @@ function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listene
             }
         }
     }
-    if (hostIndex !== null && target.outputs.hasOwnProperty(eventName)) {
+    if (target.outputs.hasOwnProperty(eventName)) {
         ngDevMode && assertIndexInRange(lView, hostIndex);
         hasOutput = true;
         listenToOutput(tNode, tView, lView, hostIndex, eventName, eventName, listenerFn, lCleanup, tCleanup);
     }
     return hasOutput;
+}
+function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
+    ngDevMode && assertIndexInRange(lView, index);
+    const instance = lView[index];
+    const def = tView.data[index];
+    const propertyName = def.outputs[lookupName];
+    const output = instance[propertyName];
+    if (ngDevMode && !isOutputSubscribable(output)) {
+        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
+    }
+    const subscription = output.subscribe(listenerFn);
+    const idx = lCleanup.length;
+    lCleanup.push(listenerFn, subscription);
+    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+}
+/**
+ * Whether the given value represents a subscribable output.
+ *
+ * For example, an `EventEmitter, a `Subject`, an `Observable` or an
+ * `OutputEmitter`.
+ */
+function isOutputSubscribable(value) {
+    return (value != null && typeof value.subscribe === 'function');
 }
 
 /*!
@@ -18277,14 +18163,8 @@ function outputBinding(eventName, listener) {
                 throw new RuntimeError(315 /* RuntimeErrorCode.NO_BINDING_TARGET */, `Output binding to "${eventName}" does not have a target.`);
             }
             const lView = getLView();
-            const tView = getTView();
             const tNode = getCurrentTNode();
-            const context = lView[CONTEXT];
-            const wrappedListener = wrapListener(tNode, lView, context, listener);
-            const hasBound = listenToDirectiveOutput(tNode, tView, lView, target, eventName, wrappedListener);
-            if (!hasBound && ngDevMode) {
-                throw new RuntimeError(316 /* RuntimeErrorCode.INVALID_BINDING_TARGET */, `${stringifyForError(target.type)} does not have an output with a public name of "${eventName}".`);
-            }
+            createOutputListener(tNode, lView, listener, target, eventName);
         },
     };
     return binding;
@@ -18522,7 +18402,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.2+sha-bec1610']
+        ? ['ng-version', '20.0.0-next.2+sha-34f0453']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -30497,6 +30377,181 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 }
 
 /**
+ * Contains a reference to a function that disables event replay feature
+ * for server-side rendered applications. This function is overridden with
+ * an actual implementation when the event replay feature is enabled via
+ * `withEventReplay()` call.
+ */
+let stashEventListener = (el, eventName, listenerFn) => { };
+function setStashFn(fn) {
+    stashEventListener = fn;
+}
+/**
+ * Adds an event listener to the current node.
+ *
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @codeGenApi
+ */
+function ɵɵlistener(eventName, listenerFn, eventTargetResolver) {
+    const lView = getLView();
+    const tView = getTView();
+    const tNode = getCurrentTNode();
+    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
+    return ɵɵlistener;
+}
+/**
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation @triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @codeGenApi
+ */
+function ɵɵsyntheticHostListener(eventName, listenerFn) {
+    const tNode = getCurrentTNode();
+    const lView = getLView();
+    const tView = getTView();
+    const currentDef = getCurrentDirectiveDef(tView.data);
+    const renderer = loadComponentRenderer(currentDef, tNode, lView);
+    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
+    return ɵɵsyntheticHostListener;
+}
+/**
+ * A utility function that checks if a given element has already an event handler registered for an
+ * event with a specified name. The TView.cleanup data structure is used to find out which events
+ * are registered for a given element.
+ */
+function findExistingListener(tView, lView, eventName, tNodeIdx) {
+    const tCleanup = tView.cleanup;
+    if (tCleanup != null) {
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            const cleanupEventName = tCleanup[i];
+            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
+                // We have found a matching event name on the same node but it might not have been
+                // registered yet, so we must explicitly verify entries in the LView cleanup data
+                // structures.
+                const lCleanup = lView[CLEANUP];
+                const listenerIdxInLCleanup = tCleanup[i + 2];
+                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+            }
+            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+            // documentation of TView.cleanup for more details of this data structure layout.
+            if (typeof cleanupEventName === 'string') {
+                i += 2;
+            }
+        }
+    }
+    return null;
+}
+function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
+    const isTNodeDirectiveHost = isDirectiveHost(tNode);
+    const firstCreatePass = tView.firstCreatePass;
+    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const context = lView[CONTEXT];
+    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+    // native listener or a directive output on this element. As such we we know that we will have to
+    // register a listener and store its cleanup function on LView.
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
+    let processOutputs = true;
+    // Adding a native event listener is applicable when:
+    // - The corresponding TNode represents a DOM element.
+    // - The event target has a resolver (usually resulting in a global object,
+    //   such as `window` or `document`).
+    if (tNode.type & 3 /* TNodeType.AnyRNode */ || eventTargetResolver) {
+        const native = getNativeByTNode(tNode, lView);
+        const target = eventTargetResolver ? eventTargetResolver(native) : native;
+        const lCleanupIndex = lCleanup.length;
+        const idxOrTargetGetter = eventTargetResolver
+            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
+            : tNode.index;
+        // In order to match current behavior, native DOM event listeners must be added for all
+        // events (including outputs).
+        // There might be cases where multiple directives on the same element try to register an event
+        // handler function for the same event. In this situation we want to avoid registration of
+        // several native listeners as each registration would be intercepted by NgZone and
+        // trigger change detection. This would mean that a single user action would result in several
+        // change detections being invoked. To avoid this situation we want to have only one call to
+        // native handler registration (for the same element and same type of event).
+        //
+        // In order to have just one native event handler in presence of multiple handler functions,
+        // we just register a first handler function as a native event listener and then chain
+        // (coalesce) other handler functions on top of the first native handler function.
+        let existingListener = null;
+        // Please note that the coalescing described here doesn't happen for events specifying an
+        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+        // view engine.
+        // Also, we don't have to search for existing listeners is there are no directives
+        // matching on a given node as we can't register multiple event handlers for the same event in
+        // a template (this would mean having duplicate attributes).
+        if (!eventTargetResolver && isTNodeDirectiveHost) {
+            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
+        }
+        if (existingListener !== null) {
+            // Attach a new listener to coalesced listeners list, maintaining the order in which
+            // listeners are registered. For performance reasons, we keep a reference to the last
+            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+            // the entire set each time we need to add a new listener.
+            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+            lastListenerFn.__ngNextListenerFn__ = listenerFn;
+            existingListener.__ngLastListenerFn__ = listenerFn;
+            processOutputs = false;
+        }
+        else {
+            listenerFn = wrapListener(tNode, lView, context, listenerFn);
+            stashEventListener(target, eventName, listenerFn);
+            const cleanupFn = renderer.listen(target, eventName, listenerFn);
+            lCleanup.push(listenerFn, cleanupFn);
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+        }
+    }
+    else {
+        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
+        // ancestors are marked dirty when an event occurs.
+        listenerFn = wrapListener(tNode, lView, context, listenerFn);
+    }
+    if (processOutputs) {
+        const outputConfig = tNode.outputs?.[eventName];
+        const hostDirectiveOutputConfig = tNode.hostDirectiveOutputs?.[eventName];
+        if (hostDirectiveOutputConfig && hostDirectiveOutputConfig.length) {
+            for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
+                const index = hostDirectiveOutputConfig[i];
+                const lookupName = hostDirectiveOutputConfig[i + 1];
+                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
+            }
+        }
+        if (outputConfig && outputConfig.length) {
+            for (const index of outputConfig) {
+                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
+            }
+        }
+    }
+}
+
+/**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
  * Will get the next level up if level is not specified.
  *
@@ -34864,7 +34919,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.2+sha-bec1610');
+const VERSION = new Version('20.0.0-next.2+sha-34f0453');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39375,7 +39430,7 @@ function withDomHydration() {
                     return;
                 }
                 if (inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    verifySsrContentsIntegrity();
+                    verifySsrContentsIntegrity(getDocument());
                     enableHydrationRuntimeSupport();
                 }
                 else if (typeof ngDevMode !== 'undefined' && ngDevMode && !isClientRenderModeEnabled()) {
@@ -39516,35 +39571,6 @@ function logWarningOnStableTimedout(time, console) {
         `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
         `as a signal to complete hydration process.`;
     console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
-}
-/**
- * Verifies whether the DOM contains a special marker added during SSR time to make sure
- * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
- * happens either by CDN or during the build process as an optimization to remove comment nodes.
- * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
- * When this special marker is *not* present - throw an error and do not proceed with hydration,
- * since it will not be able to function correctly.
- *
- * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
- */
-function verifySsrContentsIntegrity() {
-    const doc = getDocument();
-    let hydrationMarker;
-    for (const node of doc.body.childNodes) {
-        if (node.nodeType === Node.COMMENT_NODE &&
-            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
-            hydrationMarker = node;
-            break;
-        }
-    }
-    if (!hydrationMarker) {
-        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' &&
-            ngDevMode &&
-            'Angular hydration logic detected that HTML content of this page was modified after it ' +
-                'was produced during server side rendering. Make sure that there are no optimizations ' +
-                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
-                'relies on HTML produced by the server, including whitespaces and comment nodes.');
-    }
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-bec1610
+ * @license Angular v20.0.0-next.2+sha-34f0453
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -411,8 +411,6 @@ interface TestBed {
     }): T;
     inject<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
     inject<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    get(token: any, notFoundValue?: any): any;
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *

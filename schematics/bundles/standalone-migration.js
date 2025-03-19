@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-bec1610
+ * @license Angular v20.0.0-next.2+sha-34f0453
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,6 +15,7 @@ var compiler_host = require('./compiler_host-Bm6XsaaX.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var nodes = require('./nodes-B16H9JUd.js');
+var symbol = require('./symbol-VPWguRxr.js');
 var imports = require('./imports-CIX-JgAN.js');
 var checker = require('./checker-Bp6rAwHs.js');
 require('os');
@@ -24,20 +25,6 @@ require('url');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new index.NgtscProgram(rootNames, options, host, oldProgram);
-}
-
-/** Checks whether a node is referring to a specific import specifier. */
-function isReferenceToImport(typeChecker, node, importSpecifier) {
-    // If this function is called on an identifier (should be most cases), we can quickly rule out
-    // non-matches by comparing the identifier's string and the local name of the import specifier
-    // which saves us some calls to the type checker.
-    if (ts.isIdentifier(node) && node.text !== importSpecifier.name.text) {
-        return false;
-    }
-    const nodeSymbol = typeChecker.getTypeAtLocation(node).getSymbol();
-    const importSymbol = typeChecker.getTypeAtLocation(importSpecifier).getSymbol();
-    return (!!(nodeSymbol?.declarations?.[0] && importSymbol?.declarations?.[0]) &&
-        nodeSymbol.declarations[0] === importSymbol.declarations[0]);
 }
 
 /*!
@@ -314,11 +301,11 @@ function isTestCall(typeChecker, node, testBedImport, catalystImport) {
         testBedImport &&
         ts.isPropertyAccessExpression(node.expression) &&
         node.expression.name.text === 'configureTestingModule' &&
-        isReferenceToImport(typeChecker, node.expression.expression, testBedImport);
+        symbol.isReferenceToImport(typeChecker, node.expression.expression, testBedImport);
     const isCatalystCall = isObjectLiteralCall &&
         catalystImport &&
         ts.isIdentifier(node.expression) &&
-        isReferenceToImport(typeChecker, node.expression, catalystImport);
+        symbol.isReferenceToImport(typeChecker, node.expression, catalystImport);
     return !!(isTestBedCall || isCatalystCall);
 }
 
