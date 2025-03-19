@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-644d9f3
+ * @license Angular v20.0.0-next.2+sha-bec1610
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31467,7 +31467,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.2+sha-644d9f3');
+new Version('20.0.0-next.2+sha-bec1610');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -31934,6 +31934,10 @@ exports.ErrorCode = void 0;
      */
     ErrorCode[ErrorCode["UNUSED_STANDALONE_IMPORTS"] = 8113] = "UNUSED_STANDALONE_IMPORTS";
     /**
+     * An expression mixes nullish coalescing and logical and/or without parentheses.
+     */
+    ErrorCode[ErrorCode["UNPARENTHESIZED_NULLISH_COALESCING"] = 8114] = "UNPARENTHESIZED_NULLISH_COALESCING";
+    /**
      * The template type-checking engine would need to generate an inline type check block for a
      * component, but the current type-checking environment doesn't support it.
      */
@@ -32091,6 +32095,7 @@ exports.ExtendedTemplateDiagnosticName = void 0;
     ExtendedTemplateDiagnosticName["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = "controlFlowPreventingContentProjection";
     ExtendedTemplateDiagnosticName["UNUSED_LET_DECLARATION"] = "unusedLetDeclaration";
     ExtendedTemplateDiagnosticName["UNUSED_STANDALONE_IMPORTS"] = "unusedStandaloneImports";
+    ExtendedTemplateDiagnosticName["UNPARENTHESIZED_NULLISH_COALESCING"] = "unparenthesizedNullishCoalescing";
 })(exports.ExtendedTemplateDiagnosticName || (exports.ExtendedTemplateDiagnosticName = {}));
 
 /**
@@ -32417,7 +32422,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BAaPPHfB.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Bp6rAwHs.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
