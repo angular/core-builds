@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.2+sha-d306e31
+ * @license Angular v19.2.2+sha-2466fc9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1513,7 +1513,7 @@ class TestBedCompiler {
             return this._injector;
         }
         const providers = [];
-        const compilerOptions = this.platform.injector.get(COMPILER_OPTIONS);
+        const compilerOptions = this.platform.injector.get(COMPILER_OPTIONS, []);
         compilerOptions.forEach((opts) => {
             if (opts.providers) {
                 providers.push(opts.providers);
