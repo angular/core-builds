@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.2+sha-c7cacbf
+ * @license Angular v20.0.0-next.2+sha-0362665
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31467,7 +31467,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.2+sha-c7cacbf');
+new Version('20.0.0-next.2+sha-0362665');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32422,7 +32422,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Bp6rAwHs.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BHb19MHt.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -42817,7 +42817,6 @@ function createNodeFromListenerDecorator(decorator, parser, listeners) {
     // manually here. Note that we use a dummy span with -1/-1 as offsets, because it isn't
     // used for type checking and constructing it accurately would take some effort.
     const span = new ParseSpan(-1, -1);
-    const [name, phase] = method.name.text.split('.');
     const argNodes = [];
     const methodStart = method.getStart();
     const methodReceiver = new ThisReceiver(span, new AbsoluteSourceSpan(methodStart, methodStart));
@@ -42845,7 +42844,9 @@ function createNodeFromListenerDecorator(decorator, parser, listeners) {
         }
     }
     const callNode = new Call(span, nameSpan, receiver, argNodes, span);
-    listeners.push(new BoundEvent(name, name.startsWith('@') ? exports.ParsedEventType.Animation : exports.ParsedEventType.Regular, callNode, null, phase, createSourceSpan(decorator), createSourceSpan(decorator), createStaticExpressionSpan(method.name)));
+    const eventNameNode = args[0];
+    const [eventName, phase] = eventNameNode.text.split('.');
+    listeners.push(new BoundEvent(eventName, eventName.startsWith('@') ? exports.ParsedEventType.Animation : exports.ParsedEventType.Regular, callNode, null, phase, createSourceSpan(decorator), createSourceSpan(decorator), createStaticExpressionSpan(eventNameNode)));
 }
 /**
  * Infers the attribute name and binding type of a bound attribute based on its raw name.
