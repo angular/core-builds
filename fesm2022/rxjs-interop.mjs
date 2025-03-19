@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.2+sha-1dba2a8
+ * @license Angular v20.0.0-next.2+sha-644d9f3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -164,8 +164,6 @@ function toObservable(source, options) {
  * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
  * option can be specified instead, which disables the automatic subscription teardown. No injection
  * context is needed in this configuration as well.
- *
- * @developerPreview
  */
 function toSignal(source, options) {
     ngDevMode &&
