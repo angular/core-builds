@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.2+sha-9fea601
+ * @license Angular v19.2.2+sha-13a8709
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9974,6 +9974,56 @@ function processBlockData(injector) {
     }
     return blockDetails;
 }
+function isSsrContentsIntegrity(node) {
+    return (!!node &&
+        node.nodeType === Node.COMMENT_NODE &&
+        node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER);
+}
+function skipTextNodes(node) {
+    // Ignore whitespace. Before the <body>, we shouldn't find text nodes that aren't whitespace.
+    while (node && node.nodeType === Node.TEXT_NODE) {
+        node = node.previousSibling;
+    }
+    return node;
+}
+/**
+ * Verifies whether the DOM contains a special marker added during SSR time to make sure
+ * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
+ * happens either by CDN or during the build process as an optimization to remove comment nodes.
+ * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
+ * When this special marker is *not* present - throw an error and do not proceed with hydration,
+ * since it will not be able to function correctly.
+ *
+ * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
+ */
+function verifySsrContentsIntegrity(doc) {
+    for (const node of doc.body.childNodes) {
+        if (isSsrContentsIntegrity(node)) {
+            return;
+        }
+    }
+    // Check if the HTML parser may have moved the marker to just before the <body> tag,
+    // e.g. because the body tag was implicit and not present in the markup. An implicit body
+    // tag is unlikely to interfer with whitespace/comments inside of the app's root element.
+    // Case 1: Implicit body. Example:
+    //   <!doctype html><head><title>Hi</title></head><!--nghm--><app-root></app-root>
+    const beforeBody = skipTextNodes(doc.body.previousSibling);
+    if (isSsrContentsIntegrity(beforeBody)) {
+        return;
+    }
+    // Case 2: Implicit body & head. Example:
+    //   <!doctype html><head><title>Hi</title><!--nghm--><app-root></app-root>
+    let endOfHead = skipTextNodes(doc.head.lastChild);
+    if (isSsrContentsIntegrity(endOfHead)) {
+        return;
+    }
+    throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' &&
+        ngDevMode &&
+        'Angular hydration logic detected that HTML content of this page was modified after it ' +
+            'was produced during server side rendering. Make sure that there are no optimizations ' +
+            'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
+            'relies on HTML produced by the server, including whitespaces and comment nodes.');
+}
 
 /** Refreshes all content queries declared by directives in a given view */
 function refreshContentQueries(tView, lView) {
@@ -17866,7 +17916,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.2+sha-9fea601']
+                ? ['ng-version', '19.2.2+sha-13a8709']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34577,7 +34627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.2+sha-9fea601');
+const VERSION = new Version('19.2.2+sha-13a8709');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39073,7 +39123,7 @@ function withDomHydration() {
                     return;
                 }
                 if (inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    verifySsrContentsIntegrity();
+                    verifySsrContentsIntegrity(getDocument());
                     enableHydrationRuntimeSupport();
                 }
                 else if (typeof ngDevMode !== 'undefined' && ngDevMode && !isClientRenderModeEnabled()) {
@@ -39214,35 +39264,6 @@ function logWarningOnStableTimedout(time, console) {
         `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
         `as a signal to complete hydration process.`;
     console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
-}
-/**
- * Verifies whether the DOM contains a special marker added during SSR time to make sure
- * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
- * happens either by CDN or during the build process as an optimization to remove comment nodes.
- * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
- * When this special marker is *not* present - throw an error and do not proceed with hydration,
- * since it will not be able to function correctly.
- *
- * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
- */
-function verifySsrContentsIntegrity() {
-    const doc = getDocument();
-    let hydrationMarker;
-    for (const node of doc.body.childNodes) {
-        if (node.nodeType === Node.COMMENT_NODE &&
-            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
-            hydrationMarker = node;
-            break;
-        }
-    }
-    if (!hydrationMarker) {
-        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' &&
-            ngDevMode &&
-            'Angular hydration logic detected that HTML content of this page was modified after it ' +
-                'was produced during server side rendering. Make sure that there are no optimizations ' +
-                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
-                'relies on HTML produced by the server, including whitespaces and comment nodes.');
-    }
 }
 
 /**
