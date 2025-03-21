@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.3+sha-9ffeff9
+ * @license Angular v20.0.0-next.3+sha-13d1c8a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2771,6 +2771,11 @@ class Identifiers {
     };
     static deferEnableTimerScheduling = {
         name: 'ɵɵdeferEnableTimerScheduling',
+        moduleName: CORE,
+    };
+    static conditionalCreate = { name: 'ɵɵconditionalCreate', moduleName: CORE };
+    static conditionalBranchCreate = {
+        name: 'ɵɵconditionalBranchCreate',
         moduleName: CORE,
     };
     static conditional = { name: 'ɵɵconditional', moduleName: CORE };
@@ -8604,166 +8609,174 @@ var OpKind;
      */
     OpKind[OpKind["DisableBindings"] = 10] = "DisableBindings";
     /**
+     * Create a conditional creation instruction op.
+     */
+    OpKind[OpKind["ConditionalCreate"] = 11] = "ConditionalCreate";
+    /**
+     * Create a conditional branch creation instruction op.
+     */
+    OpKind[OpKind["ConditionalBranchCreate"] = 12] = "ConditionalBranchCreate";
+    /**
      * An op to conditionally render a template.
      */
-    OpKind[OpKind["Conditional"] = 11] = "Conditional";
+    OpKind[OpKind["Conditional"] = 13] = "Conditional";
     /**
      * An operation to re-enable binding, after it was previously disabled.
      */
-    OpKind[OpKind["EnableBindings"] = 12] = "EnableBindings";
+    OpKind[OpKind["EnableBindings"] = 14] = "EnableBindings";
     /**
      * An operation to render a text node.
      */
-    OpKind[OpKind["Text"] = 13] = "Text";
+    OpKind[OpKind["Text"] = 15] = "Text";
     /**
      * An operation declaring an event listener for an element.
      */
-    OpKind[OpKind["Listener"] = 14] = "Listener";
+    OpKind[OpKind["Listener"] = 16] = "Listener";
     /**
      * An operation to interpolate text into a text node.
      */
-    OpKind[OpKind["InterpolateText"] = 15] = "InterpolateText";
+    OpKind[OpKind["InterpolateText"] = 17] = "InterpolateText";
     /**
      * An intermediate binding op, that has not yet been processed into an individual property,
      * attribute, style, etc.
      */
-    OpKind[OpKind["Binding"] = 16] = "Binding";
+    OpKind[OpKind["Binding"] = 18] = "Binding";
     /**
      * An operation to bind an expression to a property of an element.
      */
-    OpKind[OpKind["Property"] = 17] = "Property";
+    OpKind[OpKind["Property"] = 19] = "Property";
     /**
      * An operation to bind an expression to a style property of an element.
      */
-    OpKind[OpKind["StyleProp"] = 18] = "StyleProp";
+    OpKind[OpKind["StyleProp"] = 20] = "StyleProp";
     /**
      * An operation to bind an expression to a class property of an element.
      */
-    OpKind[OpKind["ClassProp"] = 19] = "ClassProp";
+    OpKind[OpKind["ClassProp"] = 21] = "ClassProp";
     /**
      * An operation to bind an expression to the styles of an element.
      */
-    OpKind[OpKind["StyleMap"] = 20] = "StyleMap";
+    OpKind[OpKind["StyleMap"] = 22] = "StyleMap";
     /**
      * An operation to bind an expression to the classes of an element.
      */
-    OpKind[OpKind["ClassMap"] = 21] = "ClassMap";
+    OpKind[OpKind["ClassMap"] = 23] = "ClassMap";
     /**
      * An operation to advance the runtime's implicit slot context during the update phase of a view.
      */
-    OpKind[OpKind["Advance"] = 22] = "Advance";
+    OpKind[OpKind["Advance"] = 24] = "Advance";
     /**
      * An operation to instantiate a pipe.
      */
-    OpKind[OpKind["Pipe"] = 23] = "Pipe";
+    OpKind[OpKind["Pipe"] = 25] = "Pipe";
     /**
      * An operation to associate an attribute with an element.
      */
-    OpKind[OpKind["Attribute"] = 24] = "Attribute";
+    OpKind[OpKind["Attribute"] = 26] = "Attribute";
     /**
      * An attribute that has been extracted for inclusion in the consts array.
      */
-    OpKind[OpKind["ExtractedAttribute"] = 25] = "ExtractedAttribute";
+    OpKind[OpKind["ExtractedAttribute"] = 27] = "ExtractedAttribute";
     /**
      * An operation that configures a `@defer` block.
      */
-    OpKind[OpKind["Defer"] = 26] = "Defer";
+    OpKind[OpKind["Defer"] = 28] = "Defer";
     /**
      * An operation that controls when a `@defer` loads.
      */
-    OpKind[OpKind["DeferOn"] = 27] = "DeferOn";
+    OpKind[OpKind["DeferOn"] = 29] = "DeferOn";
     /**
      * An operation that controls when a `@defer` loads, using a custom expression as the condition.
      */
-    OpKind[OpKind["DeferWhen"] = 28] = "DeferWhen";
+    OpKind[OpKind["DeferWhen"] = 30] = "DeferWhen";
     /**
      * An i18n message that has been extracted for inclusion in the consts array.
      */
-    OpKind[OpKind["I18nMessage"] = 29] = "I18nMessage";
+    OpKind[OpKind["I18nMessage"] = 31] = "I18nMessage";
     /**
      * A host binding property.
      */
-    OpKind[OpKind["HostProperty"] = 30] = "HostProperty";
+    OpKind[OpKind["HostProperty"] = 32] = "HostProperty";
     /**
      * A namespace change, which causes the subsequent elements to be processed as either HTML or SVG.
      */
-    OpKind[OpKind["Namespace"] = 31] = "Namespace";
+    OpKind[OpKind["Namespace"] = 33] = "Namespace";
     /**
      * Configure a content projeciton definition for the view.
      */
-    OpKind[OpKind["ProjectionDef"] = 32] = "ProjectionDef";
+    OpKind[OpKind["ProjectionDef"] = 34] = "ProjectionDef";
     /**
      * Create a content projection slot.
      */
-    OpKind[OpKind["Projection"] = 33] = "Projection";
+    OpKind[OpKind["Projection"] = 35] = "Projection";
     /**
      * Create a repeater creation instruction op.
      */
-    OpKind[OpKind["RepeaterCreate"] = 34] = "RepeaterCreate";
+    OpKind[OpKind["RepeaterCreate"] = 36] = "RepeaterCreate";
     /**
      * An update up for a repeater.
      */
-    OpKind[OpKind["Repeater"] = 35] = "Repeater";
+    OpKind[OpKind["Repeater"] = 37] = "Repeater";
     /**
      * An operation to bind an expression to the property side of a two-way binding.
      */
-    OpKind[OpKind["TwoWayProperty"] = 36] = "TwoWayProperty";
+    OpKind[OpKind["TwoWayProperty"] = 38] = "TwoWayProperty";
     /**
      * An operation declaring the event side of a two-way binding.
      */
-    OpKind[OpKind["TwoWayListener"] = 37] = "TwoWayListener";
+    OpKind[OpKind["TwoWayListener"] = 39] = "TwoWayListener";
     /**
      * A creation-time operation that initializes the slot for a `@let` declaration.
      */
-    OpKind[OpKind["DeclareLet"] = 38] = "DeclareLet";
+    OpKind[OpKind["DeclareLet"] = 40] = "DeclareLet";
     /**
      * An update-time operation that stores the current value of a `@let` declaration.
      */
-    OpKind[OpKind["StoreLet"] = 39] = "StoreLet";
+    OpKind[OpKind["StoreLet"] = 41] = "StoreLet";
     /**
      * The start of an i18n block.
      */
-    OpKind[OpKind["I18nStart"] = 40] = "I18nStart";
+    OpKind[OpKind["I18nStart"] = 42] = "I18nStart";
     /**
      * A self-closing i18n on a single element.
      */
-    OpKind[OpKind["I18n"] = 41] = "I18n";
+    OpKind[OpKind["I18n"] = 43] = "I18n";
     /**
      * The end of an i18n block.
      */
-    OpKind[OpKind["I18nEnd"] = 42] = "I18nEnd";
+    OpKind[OpKind["I18nEnd"] = 44] = "I18nEnd";
     /**
      * An expression in an i18n message.
      */
-    OpKind[OpKind["I18nExpression"] = 43] = "I18nExpression";
+    OpKind[OpKind["I18nExpression"] = 45] = "I18nExpression";
     /**
      * An instruction that applies a set of i18n expressions.
      */
-    OpKind[OpKind["I18nApply"] = 44] = "I18nApply";
+    OpKind[OpKind["I18nApply"] = 46] = "I18nApply";
     /**
      * An instruction to create an ICU expression.
      */
-    OpKind[OpKind["IcuStart"] = 45] = "IcuStart";
+    OpKind[OpKind["IcuStart"] = 47] = "IcuStart";
     /**
      * An instruction to update an ICU expression.
      */
-    OpKind[OpKind["IcuEnd"] = 46] = "IcuEnd";
+    OpKind[OpKind["IcuEnd"] = 48] = "IcuEnd";
     /**
      * An instruction representing a placeholder in an ICU expression.
      */
-    OpKind[OpKind["IcuPlaceholder"] = 47] = "IcuPlaceholder";
+    OpKind[OpKind["IcuPlaceholder"] = 49] = "IcuPlaceholder";
     /**
      * An i18n context containing information needed to generate an i18n message.
      */
-    OpKind[OpKind["I18nContext"] = 48] = "I18nContext";
+    OpKind[OpKind["I18nContext"] = 50] = "I18nContext";
     /**
      * A creation op that corresponds to i18n attributes on an element.
      */
-    OpKind[OpKind["I18nAttributes"] = 49] = "I18nAttributes";
+    OpKind[OpKind["I18nAttributes"] = 51] = "I18nAttributes";
     /**
      * Creation op that attaches the location at which an element was defined in a template to it.
      */
-    OpKind[OpKind["SourceLocation"] = 50] = "SourceLocation";
+    OpKind[OpKind["SourceLocation"] = 52] = "SourceLocation";
 })(OpKind || (OpKind = {}));
 /**
  * Distinguishes different kinds of IR expressions.
@@ -10313,6 +10326,8 @@ function transformExpressionsInOp(op, transform, flags) {
         case OpKind.IcuPlaceholder:
         case OpKind.DeclareLet:
         case OpKind.SourceLocation:
+        case OpKind.ConditionalCreate:
+        case OpKind.ConditionalBranchCreate:
             // These operations contain no expressions.
             break;
         default:
@@ -10728,6 +10743,8 @@ const elementContainerOpKinds = new Set([
     OpKind.ContainerStart,
     OpKind.Template,
     OpKind.RepeaterCreate,
+    OpKind.ConditionalCreate,
+    OpKind.ConditionalBranchCreate,
 ]);
 /**
  * Checks whether the given operation represents the creation of an element or container.
@@ -10761,6 +10778,48 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, startSource
 function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
     return {
         kind: OpKind.Template,
+        xref,
+        templateKind,
+        attributes: null,
+        tag,
+        handle: new SlotHandle(),
+        functionNameSuffix,
+        decls: null,
+        vars: null,
+        localRefs: [],
+        nonBindable: false,
+        namespace,
+        i18nPlaceholder,
+        startSourceSpan,
+        wholeSourceSpan,
+        ...TRAIT_CONSUMES_SLOT,
+        ...NEW_OP,
+    };
+}
+function createConditionalCreateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+    return {
+        kind: OpKind.ConditionalCreate,
+        xref,
+        templateKind,
+        attributes: null,
+        tag,
+        handle: new SlotHandle(),
+        functionNameSuffix,
+        decls: null,
+        vars: null,
+        localRefs: [],
+        nonBindable: false,
+        namespace,
+        i18nPlaceholder,
+        startSourceSpan,
+        wholeSourceSpan,
+        ...TRAIT_CONSUMES_SLOT,
+        ...NEW_OP,
+    };
+}
+function createConditionalBranchCreateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+    return {
+        kind: OpKind.ConditionalBranchCreate,
         xref,
         templateKind,
         attributes: null,
@@ -11726,36 +11785,38 @@ function specializeBindings(job) {
     }
 }
 
-const CHAINABLE = new Set([
-    Identifiers.attribute,
-    Identifiers.classProp,
-    Identifiers.element,
-    Identifiers.elementContainer,
-    Identifiers.elementContainerEnd,
-    Identifiers.elementContainerStart,
-    Identifiers.elementEnd,
-    Identifiers.elementStart,
-    Identifiers.hostProperty,
-    Identifiers.i18nExp,
-    Identifiers.listener,
-    Identifiers.listener,
-    Identifiers.property,
-    Identifiers.styleProp,
-    Identifiers.stylePropInterpolate1,
-    Identifiers.stylePropInterpolate2,
-    Identifiers.stylePropInterpolate3,
-    Identifiers.stylePropInterpolate4,
-    Identifiers.stylePropInterpolate5,
-    Identifiers.stylePropInterpolate6,
-    Identifiers.stylePropInterpolate7,
-    Identifiers.stylePropInterpolate8,
-    Identifiers.stylePropInterpolateV,
-    Identifiers.syntheticHostListener,
-    Identifiers.syntheticHostProperty,
-    Identifiers.templateCreate,
-    Identifiers.twoWayProperty,
-    Identifiers.twoWayListener,
-    Identifiers.declareLet,
+const CHAIN_COMPATIBILITY = new Map([
+    [Identifiers.attribute, Identifiers.attribute],
+    [Identifiers.classProp, Identifiers.classProp],
+    [Identifiers.element, Identifiers.element],
+    [Identifiers.elementContainer, Identifiers.elementContainer],
+    [Identifiers.elementContainerEnd, Identifiers.elementContainerEnd],
+    [Identifiers.elementContainerStart, Identifiers.elementContainerStart],
+    [Identifiers.elementEnd, Identifiers.elementEnd],
+    [Identifiers.elementStart, Identifiers.elementStart],
+    [Identifiers.hostProperty, Identifiers.hostProperty],
+    [Identifiers.i18nExp, Identifiers.i18nExp],
+    [Identifiers.listener, Identifiers.listener],
+    [Identifiers.listener, Identifiers.listener],
+    [Identifiers.property, Identifiers.property],
+    [Identifiers.styleProp, Identifiers.styleProp],
+    [Identifiers.stylePropInterpolate1, Identifiers.stylePropInterpolate1],
+    [Identifiers.stylePropInterpolate2, Identifiers.stylePropInterpolate2],
+    [Identifiers.stylePropInterpolate3, Identifiers.stylePropInterpolate3],
+    [Identifiers.stylePropInterpolate4, Identifiers.stylePropInterpolate4],
+    [Identifiers.stylePropInterpolate5, Identifiers.stylePropInterpolate5],
+    [Identifiers.stylePropInterpolate6, Identifiers.stylePropInterpolate6],
+    [Identifiers.stylePropInterpolate7, Identifiers.stylePropInterpolate7],
+    [Identifiers.stylePropInterpolate8, Identifiers.stylePropInterpolate8],
+    [Identifiers.stylePropInterpolateV, Identifiers.stylePropInterpolateV],
+    [Identifiers.syntheticHostListener, Identifiers.syntheticHostListener],
+    [Identifiers.syntheticHostProperty, Identifiers.syntheticHostProperty],
+    [Identifiers.templateCreate, Identifiers.templateCreate],
+    [Identifiers.twoWayProperty, Identifiers.twoWayProperty],
+    [Identifiers.twoWayListener, Identifiers.twoWayListener],
+    [Identifiers.declareLet, Identifiers.declareLet],
+    [Identifiers.conditionalCreate, Identifiers.conditionalBranchCreate],
+    [Identifiers.conditionalBranchCreate, Identifiers.conditionalBranchCreate],
 ]);
 /**
  * Chaining results in repeated call expressions, causing a deep AST of receiver expressions. To prevent running out of
@@ -11801,14 +11862,16 @@ function chainOperationsInList(opList) {
             continue;
         }
         const instruction = op.statement.expr.fn.value;
-        if (!CHAINABLE.has(instruction)) {
+        if (!CHAIN_COMPATIBILITY.has(instruction)) {
             // This instruction isn't chainable.
             chain = null;
             continue;
         }
         // This instruction can be chained. It can either be added on to the previous chain (if
         // compatible) or it can be the start of a new chain.
-        if (chain !== null && chain.instruction === instruction && chain.length < MAX_CHAIN_LENGTH) {
+        if (chain !== null &&
+            CHAIN_COMPATIBILITY.get(chain.instruction) === instruction &&
+            chain.length < MAX_CHAIN_LENGTH) {
             // This instruction can be added onto the previous chain.
             const expression = chain.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
             chain.expression = expression;
@@ -13036,6 +13099,8 @@ function recursivelyProcessView(view, parentScope) {
     const scope = getScopeForView(view, parentScope);
     for (const op of view.create) {
         switch (op.kind) {
+            case OpKind.ConditionalCreate:
+            case OpKind.ConditionalBranchCreate:
             case OpKind.Template:
                 // Descend into child embedded views.
                 recursivelyProcessView(view.job.views.get(op.xref), scope);
@@ -13093,6 +13158,8 @@ function getScopeForView(view, parent) {
     for (const op of view.create) {
         switch (op.kind) {
             case OpKind.ElementStart:
+            case OpKind.ConditionalCreate:
+            case OpKind.ConditionalBranchCreate:
             case OpKind.Template:
                 if (!Array.isArray(op.localRefs)) {
                     throw new Error(`AssertionError: expected localRefs to be an array`);
@@ -21623,6 +21690,8 @@ function liftLocalRefs(job) {
         for (const op of unit.create) {
             switch (op.kind) {
                 case OpKind.ElementStart:
+                case OpKind.ConditionalCreate:
+                case OpKind.ConditionalBranchCreate:
                 case OpKind.Template:
                     if (!Array.isArray(op.localRefs)) {
                         throw new Error(`AssertionError: expected localRefs to be an array still`);
@@ -21765,7 +21834,9 @@ function parseExtractedStyles(job) {
                 isStringLiteral(op.expression)) {
                 const target = elements.get(op.target);
                 if (target !== undefined &&
-                    target.kind === OpKind.Template &&
+                    (target.kind === OpKind.Template ||
+                        target.kind === OpKind.ConditionalCreate ||
+                        target.kind === OpKind.ConditionalBranchCreate) &&
                     target.templateKind === TemplateKind.Structural) {
                     // TemplateDefinitionBuilder will not apply class and style bindings to structural
                     // directives; instead, it will leave them as attributes.
@@ -21880,6 +21951,8 @@ function addNamesToView(unit, baseName, state, compatibility) {
                     addNamesToView(fallbackView, `${baseName}_ProjectionFallback_${op.handle.slot}`, state, compatibility);
                 }
                 break;
+            case OpKind.ConditionalCreate:
+            case OpKind.ConditionalBranchCreate:
             case OpKind.Template:
                 if (!(unit instanceof ViewCompilationUnit)) {
                     throw new Error(`AssertionError: must be compiling a component`);
@@ -22365,6 +22438,8 @@ function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
                 }
                 i18nBlock = null;
                 break;
+            case OpKind.ConditionalCreate:
+            case OpKind.ConditionalBranchCreate:
             case OpKind.Template:
                 subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.xref), i18nBlock, op.i18nPlaceholder, subTemplateIndex);
                 break;
@@ -22728,6 +22803,42 @@ function i18nStart(slot, constIndex, subTemplateIndex, sourceSpan) {
         args.push(literal$1(subTemplateIndex));
     }
     return call(Identifiers.i18nStart, args, sourceSpan);
+}
+function conditionalCreate(slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan) {
+    const args = [
+        literal$1(slot),
+        templateFnRef,
+        literal$1(decls),
+        literal$1(vars),
+        literal$1(tag),
+        literal$1(constIndex),
+    ];
+    if (localRefs !== null) {
+        args.push(literal$1(localRefs));
+        args.push(importExpr(Identifiers.templateRefExtractor));
+    }
+    while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
+        args.pop();
+    }
+    return call(Identifiers.conditionalCreate, args, sourceSpan);
+}
+function conditionalBranchCreate(slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan) {
+    const args = [
+        literal$1(slot),
+        templateFnRef,
+        literal$1(decls),
+        literal$1(vars),
+        literal$1(tag),
+        literal$1(constIndex),
+    ];
+    if (localRefs !== null) {
+        args.push(literal$1(localRefs));
+        args.push(importExpr(Identifiers.templateRefExtractor));
+    }
+    while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
+        args.pop();
+    }
+    return call(Identifiers.conditionalBranchCreate, args, sourceSpan);
 }
 function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, emptyTag, emptyConstIndex, sourceSpan) {
     const args = [
@@ -23298,6 +23409,26 @@ function reifyCreateOperations(unit, ops) {
                 }
                 OpList.replace(op, projection(op.handle.slot, op.projectionSlotIndex, op.attributes, fallbackViewFnName, fallbackDecls, fallbackVars, op.sourceSpan));
                 break;
+            case OpKind.ConditionalCreate:
+                if (!(unit instanceof ViewCompilationUnit)) {
+                    throw new Error(`AssertionError: must be compiling a component`);
+                }
+                if (Array.isArray(op.localRefs)) {
+                    throw new Error(`AssertionError: local refs array should have been extracted into a constant`);
+                }
+                const conditionalCreateChildView = unit.job.views.get(op.xref);
+                OpList.replace(op, conditionalCreate(op.handle.slot, variable(conditionalCreateChildView.fnName), conditionalCreateChildView.decls, conditionalCreateChildView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
+                break;
+            case OpKind.ConditionalBranchCreate:
+                if (!(unit instanceof ViewCompilationUnit)) {
+                    throw new Error(`AssertionError: must be compiling a component`);
+                }
+                if (Array.isArray(op.localRefs)) {
+                    throw new Error(`AssertionError: local refs array should have been extracted into a constant`);
+                }
+                const conditionalBranchCreateChildView = unit.job.views.get(op.xref);
+                OpList.replace(op, conditionalBranchCreate(op.handle.slot, variable(conditionalBranchCreateChildView.fnName), conditionalBranchCreateChildView.decls, conditionalBranchCreateChildView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
+                break;
             case OpKind.RepeaterCreate:
                 if (op.handle.slot === null) {
                     throw new Error('No slot was assigned for repeater instruction');
@@ -23855,6 +23986,8 @@ function resolvePlaceholdersForView(job, unit, i18nContexts, elements, pendingSt
                     pendingStructuralDirective = undefined;
                 }
                 break;
+            case OpKind.ConditionalCreate:
+            case OpKind.ConditionalBranchCreate:
             case OpKind.Template:
                 const view = job.views.get(op.xref);
                 if (op.i18nPlaceholder === undefined) {
@@ -24418,7 +24551,10 @@ function allocateSlots(job) {
     // propagate the number of slots used for each view into the operation which declares it.
     for (const unit of job.units) {
         for (const op of unit.ops()) {
-            if (op.kind === OpKind.Template || op.kind === OpKind.RepeaterCreate) {
+            if (op.kind === OpKind.Template ||
+                op.kind === OpKind.ConditionalCreate ||
+                op.kind === OpKind.ConditionalBranchCreate ||
+                op.kind === OpKind.RepeaterCreate) {
                 // Record the number of slots used by the view this `ir.TemplateOp` declares in the
                 // operation itself, so it can be emitted later.
                 const childView = job.views.get(op.xref);
@@ -24479,6 +24615,8 @@ function optimizeStoreLet(job) {
  *    typescript AST, the parentheses node is removed, and then the remaining AST is printed, it
  *    incorrectly prints `a ? b : c ?? d`. This is different from how it handles the same situation
  *    with `||` and `&&` where it prints the parentheses even if they are not present in the AST.
+ *    Note: We may be able to remove this case if Typescript resolves the following issue:
+ *    https://github.com/microsoft/TypeScript/issues/61369
  */
 function stripNonrequiredParentheses(job) {
     // Check which parentheses are required.
@@ -24853,7 +24991,10 @@ function countVariables(job) {
         // an embedded view).
         for (const unit of job.units) {
             for (const op of unit.create) {
-                if (op.kind !== OpKind.Template && op.kind !== OpKind.RepeaterCreate) {
+                if (op.kind !== OpKind.Template &&
+                    op.kind !== OpKind.RepeaterCreate &&
+                    op.kind !== OpKind.ConditionalCreate &&
+                    op.kind !== OpKind.ConditionalBranchCreate) {
                     continue;
                 }
                 const childView = job.views.get(op.xref);
@@ -25837,13 +25978,14 @@ function ingestIfBlock(unit, ifBlock) {
             }
             ifCaseI18nMeta = ifCase.i18n;
         }
-        const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, 'Conditional', Namespace.HTML, ifCaseI18nMeta, ifCase.startSourceSpan, ifCase.sourceSpan);
-        unit.create.push(templateOp);
+        const createOp = i === 0 ? createConditionalCreateOp : createConditionalBranchCreateOp;
+        const conditionalCreateOp = createOp(cView.xref, TemplateKind.Block, tagName, 'Conditional', Namespace.HTML, ifCaseI18nMeta, ifCase.startSourceSpan, ifCase.sourceSpan);
+        unit.create.push(conditionalCreateOp);
         if (firstXref === null) {
             firstXref = cView.xref;
         }
         const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
-        const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle, ifCase.expressionAlias);
+        const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, conditionalCreateOp.xref, conditionalCreateOp.handle, ifCase.expressionAlias);
         conditions.push(conditionalCaseExpr);
         ingestNodes(cView, ifCase.children);
     }
@@ -25859,7 +26001,8 @@ function ingestSwitchBlock(unit, switchBlock) {
     }
     let firstXref = null;
     let conditions = [];
-    for (const switchCase of switchBlock.cases) {
+    for (let i = 0; i < switchBlock.cases.length; i++) {
+        const switchCase = switchBlock.cases[i];
         const cView = unit.job.allocateView(unit.xref);
         const tagName = ingestControlFlowInsertionPoint(unit, cView.xref, switchCase);
         let switchCaseI18nMeta = undefined;
@@ -25869,15 +26012,16 @@ function ingestSwitchBlock(unit, switchBlock) {
             }
             switchCaseI18nMeta = switchCase.i18n;
         }
-        const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, 'Case', Namespace.HTML, switchCaseI18nMeta, switchCase.startSourceSpan, switchCase.sourceSpan);
-        unit.create.push(templateOp);
+        const createOp = i === 0 ? createConditionalCreateOp : createConditionalBranchCreateOp;
+        const conditionalCreateOp = createOp(cView.xref, TemplateKind.Block, tagName, 'Case', Namespace.HTML, switchCaseI18nMeta, switchCase.startSourceSpan, switchCase.sourceSpan);
+        unit.create.push(conditionalCreateOp);
         if (firstXref === null) {
             firstXref = cView.xref;
         }
         const caseExpr = switchCase.expression
             ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan)
             : null;
-        const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle);
+        const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, conditionalCreateOp.xref, conditionalCreateOp.handle);
         conditions.push(conditionalCaseExpr);
         ingestNodes(cView, switchCase.children);
     }
@@ -31467,7 +31611,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.3+sha-9ffeff9');
+new Version('20.0.0-next.3+sha-13d1c8a');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32422,7 +32566,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BHb19MHt.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-k591b6WQ.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -37673,33 +37817,7 @@ class ExpressionTranslatorVisitor {
         }
     }
     visitConditionalExpr(ast, context) {
-        let cond = ast.condition.visitExpression(this, context);
-        // Ordinarily the ternary operator is right-associative. The following are equivalent:
-        //   `a ? b : c ? d : e` => `a ? b : (c ? d : e)`
-        //
-        // However, occasionally Angular needs to produce a left-associative conditional, such as in
-        // the case of a null-safe navigation production: `{{a?.b ? c : d}}`. This template produces
-        // a ternary of the form:
-        //   `a == null ? null : rest of expression`
-        // If the rest of the expression is also a ternary though, this would produce the form:
-        //   `a == null ? null : a.b ? c : d`
-        // which, if left as right-associative, would be incorrectly associated as:
-        //   `a == null ? null : (a.b ? c : d)`
-        //
-        // In such cases, the left-associativity needs to be enforced with parentheses:
-        //   `(a == null ? null : a.b) ? c : d`
-        //
-        // Such parentheses could always be included in the condition (guaranteeing correct behavior) in
-        // all cases, but this has a code size cost. Instead, parentheses are added only when a
-        // conditional expression is directly used as the condition of another.
-        //
-        // TODO(alxhub): investigate better logic for precendence of conditional operators
-        if (ast.condition instanceof ConditionalExpr) {
-            // The condition of this ternary needs to be wrapped in parentheses to maintain
-            // left-associativity.
-            cond = this.factory.createParenthesizedExpression(cond);
-        }
-        return this.factory.createConditional(cond, ast.trueCase.visitExpression(this, context), ast.falseCase.visitExpression(this, context));
+        return this.factory.createConditional(ast.condition.visitExpression(this, context), ast.trueCase.visitExpression(this, context), ast.falseCase.visitExpression(this, context));
     }
     visitDynamicImportExpr(ast, context) {
         const urlExpression = typeof ast.url === 'string'
