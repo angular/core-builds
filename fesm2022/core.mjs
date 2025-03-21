@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.3+sha-c667d54
+ * @license Angular v19.2.3+sha-877456e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12786,7 +12786,7 @@ function loadComponentRenderer(currentDef, tNode, lView) {
     return lView[RENDERER];
 }
 /** Handles an error thrown in an LView. */
-function handleError(lView, error) {
+function handleError$1(lView, error) {
     const injector = lView[INJECTOR];
     const errorHandler = injector ? injector.get(ErrorHandler, null) : null;
     errorHandler && errorHandler.handleError(error);
@@ -13969,7 +13969,7 @@ function detectChangesInternal(lView, notifyErrorHandler = true, mode = 0 /* Cha
     }
     catch (error) {
         if (notifyErrorHandler) {
-            handleError(lView, error);
+            handleError$1(lView, error);
         }
         throw error;
     }
@@ -17916,7 +17916,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.3+sha-c667d54']
+                ? ['ng-version', '19.2.3+sha-877456e']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -21171,7 +21171,7 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
             applyStateFn(newState, lDetails, lContainer, tNode, hostLView);
         }
         catch (error) {
-            handleError(hostLView, error);
+            handleError$1(hostLView, error);
         }
     }
 }
@@ -23939,7 +23939,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
                     'Loading dependencies for `@defer` block failed, ' +
                         `but no \`@error\` block was configured${templateLocation}. ` +
                         'Consider using the `@error` block to render an error state.');
-                handleError(lView, error);
+                handleError$1(lView, error);
             }
         }
         else {
@@ -30008,6 +30008,89 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 }
 
 /**
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param tNode The TNode associated with this listener
+ * @param lView The LView that contains this listener
+ * @param listenerFn The listener function to call
+ * @param wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
+ */
+function wrapListener(tNode, lView, context, listenerFn) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // Ivy uses `Function` as a special token that allows us to unwrap the function
+        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
+        if (e === Function) {
+            return listenerFn;
+        }
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
+        markViewDirty(startView, 5 /* NotificationSource.Listener */);
+        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
+        // A just-invoked listener function might have coalesced listeners so we need to check for
+        // their presence and invoke as needed.
+        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
+        while (nextListenerFn) {
+            // We should prevent default if any of the listeners explicitly return false
+            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
+            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
+        }
+        return result;
+    };
+}
+function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
+    const prevConsumer = setActiveConsumer(null);
+    try {
+        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
+    }
+    catch (error) {
+        // TODO(atscott): This should report to the application error handler, not the ErrorHandler on LView injector
+        handleError(lView, error);
+        return false;
+    }
+    finally {
+        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
+        setActiveConsumer(prevConsumer);
+    }
+}
+/** Handles an error thrown in an LView. */
+function handleError(lView, error) {
+    const injector = lView[INJECTOR];
+    const errorHandler = injector ? injector.get(ErrorHandler, null) : null;
+    errorHandler && errorHandler.handleError(error);
+}
+
+function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
+    ngDevMode && assertIndexInRange(lView, index);
+    const instance = lView[index];
+    const def = tView.data[index];
+    const propertyName = def.outputs[lookupName];
+    const output = instance[propertyName];
+    if (ngDevMode && !isOutputSubscribable(output)) {
+        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
+    }
+    const subscription = output.subscribe(listenerFn);
+    const idx = lCleanup.length;
+    lCleanup.push(listenerFn, subscription);
+    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+}
+/**
+ * Whether the given value represents a subscribable output.
+ *
+ * For example, an `EventEmitter, a `Subject`, an `Observable` or an
+ * `OutputEmitter`.
+ */
+function isOutputSubscribable(value) {
+    return (value != null && typeof value.subscribe === 'function');
+}
+
+/**
  * Contains a reference to a function that disables event replay feature
  * for server-side rendered applications. This function is overridden with
  * an actual implementation when the event replay feature is enabled via
@@ -30183,80 +30266,6 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             }
         }
     }
-}
-function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
-    ngDevMode && assertIndexInRange(lView, index);
-    const instance = lView[index];
-    const def = tView.data[index];
-    const propertyName = def.outputs[lookupName];
-    const output = instance[propertyName];
-    if (ngDevMode && !isOutputSubscribable(output)) {
-        throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
-    }
-    const subscription = output.subscribe(listenerFn);
-    const idx = lCleanup.length;
-    lCleanup.push(listenerFn, subscription);
-    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-}
-function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
-    const prevConsumer = setActiveConsumer(null);
-    try {
-        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
-        // Only explicitly returning false from a listener should preventDefault
-        return listenerFn(e) !== false;
-    }
-    catch (error) {
-        handleError(lView, error);
-        return false;
-    }
-    finally {
-        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
-        setActiveConsumer(prevConsumer);
-    }
-}
-/**
- * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
- * if applicable.
- *
- * @param tNode The TNode associated with this listener
- * @param lView The LView that contains this listener
- * @param listenerFn The listener function to call
- * @param wrapWithPreventDefault Whether or not to prevent default behavior
- * (the procedural renderer does this already, so in those cases, we should skip)
- */
-function wrapListener(tNode, lView, context, listenerFn) {
-    // Note: we are performing most of the work in the listener function itself
-    // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // Ivy uses `Function` as a special token that allows us to unwrap the function
-        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
-        if (e === Function) {
-            return listenerFn;
-        }
-        // In order to be backwards compatible with View Engine, events on component host nodes
-        // must also mark the component view itself dirty (i.e. the view that it owns).
-        const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView, 5 /* NotificationSource.Listener */);
-        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
-        // A just-invoked listener function might have coalesced listeners so we need to check for
-        // their presence and invoke as needed.
-        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
-        while (nextListenerFn) {
-            // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
-            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
-        }
-        return result;
-    };
-}
-/**
- * Whether the given value represents a subscribable output.
- *
- * For example, an `EventEmitter, a `Subject`, an `Observable` or an
- * `OutputEmitter`.
- */
-function isOutputSubscribable(value) {
-    return (value != null && typeof value.subscribe === 'function');
 }
 
 /**
@@ -34627,7 +34636,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.3+sha-c667d54');
+const VERSION = new Version('19.2.3+sha-877456e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
