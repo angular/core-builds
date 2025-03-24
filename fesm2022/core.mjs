@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.3+sha-997836e
+ * @license Angular v20.0.0-next.3+sha-7499b74
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17956,7 +17956,7 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * @param wrapWithPreventDefault Whether or not to prevent default behavior
  * (the procedural renderer does this already, so in those cases, we should skip)
  */
-function wrapListener(tNode, lView, context, listenerFn) {
+function wrapListener(tNode, lView, listenerFn) {
     // Note: we are performing most of the work in the listener function itself
     // to optimize listener registration.
     return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -17969,6 +17969,7 @@ function wrapListener(tNode, lView, context, listenerFn) {
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
         markViewDirty(startView, 5 /* NotificationSource.Listener */);
+        const context = lView[CONTEXT];
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
@@ -18012,17 +18013,14 @@ function handleError(lView, error) {
 
 function createOutputListener(tNode, lView, listenerFn, targetDef, eventName) {
     // TODO(pk): decouple checks from the actual binding
-    const wrappedListener = wrapListener(tNode, lView, lView[CONTEXT], listenerFn);
-    // TODO(pk): simplify signature of listenToDirectiveOutput
-    const hasBound = listenToDirectiveOutput(tNode, lView[TVIEW], lView, targetDef, eventName, wrappedListener);
+    const wrappedListener = wrapListener(tNode, lView, listenerFn);
+    const hasBound = listenToDirectiveOutput(tNode, lView, targetDef, eventName, wrappedListener);
     if (!hasBound && ngDevMode) {
         throw new RuntimeError(316 /* RuntimeErrorCode.INVALID_BINDING_TARGET */, `${stringifyForError(targetDef.type)} does not have an output with a public name of "${eventName}".`);
     }
 }
 /** Listens to an output on a specific directive. */
-function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listenerFn) {
-    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const lCleanup = getOrCreateLViewCleanup(lView);
+function listenToDirectiveOutput(tNode, lView, target, eventName, listenerFn) {
     let hostIndex = null;
     let hostDirectivesStart = null;
     let hostDirectivesEnd = null;
@@ -18046,7 +18044,7 @@ function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listene
             if (index >= hostDirectivesStart && index <= hostDirectivesEnd) {
                 ngDevMode && assertIndexInRange(lView, index);
                 hasOutput = true;
-                listenToOutput(tNode, tView, lView, index, hostDirectiveOutputs[i + 1], eventName, listenerFn, lCleanup, tCleanup);
+                listenToOutput(tNode, lView, index, hostDirectiveOutputs[i + 1], eventName, listenerFn);
             }
             else if (index > hostDirectivesEnd) {
                 break;
@@ -18056,19 +18054,23 @@ function listenToDirectiveOutput(tNode, tView, lView, target, eventName, listene
     if (target.outputs.hasOwnProperty(eventName)) {
         ngDevMode && assertIndexInRange(lView, hostIndex);
         hasOutput = true;
-        listenToOutput(tNode, tView, lView, hostIndex, eventName, eventName, listenerFn, lCleanup, tCleanup);
+        listenToOutput(tNode, lView, hostIndex, eventName, eventName, listenerFn);
     }
     return hasOutput;
 }
-function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
-    ngDevMode && assertIndexInRange(lView, index);
-    const instance = lView[index];
-    const def = tView.data[index];
+function listenToOutput(tNode, lView, directiveIndex, lookupName, eventName, listenerFn) {
+    ngDevMode && assertIndexInRange(lView, directiveIndex);
+    const instance = lView[directiveIndex];
+    const tView = lView[TVIEW];
+    const def = tView.data[directiveIndex];
     const propertyName = def.outputs[lookupName];
     const output = instance[propertyName];
     if (ngDevMode && !isOutputSubscribable(output)) {
         throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
     }
+    // TODO(pk): introduce utility to store cleanup or find a different way of sharing code with listener
+    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const lCleanup = getOrCreateLViewCleanup(lView);
     const subscription = output.subscribe(listenerFn);
     const idx = lCleanup.length;
     lCleanup.push(listenerFn, subscription);
@@ -18415,7 +18417,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.3+sha-997836e']
+        ? ['ng-version', '20.0.0-next.3+sha-7499b74']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -30589,7 +30591,6 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     const isTNodeDirectiveHost = isDirectiveHost(tNode);
     const firstCreatePass = tView.firstCreatePass;
     const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const context = lView[CONTEXT];
     // When the ɵɵlistener instruction was generated and is executed we know that there is either a
     // native listener or a directive output on this element. As such we we know that we will have to
     // register a listener and store its cleanup function on LView.
@@ -30640,7 +30641,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             processOutputs = false;
         }
         else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn);
+            listenerFn = wrapListener(tNode, lView, listenerFn);
             stashEventListener(target, eventName, listenerFn);
             const cleanupFn = renderer.listen(target, eventName, listenerFn);
             lCleanup.push(listenerFn, cleanupFn);
@@ -30650,7 +30651,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     else {
         // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
         // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, context, listenerFn);
+        listenerFn = wrapListener(tNode, lView, listenerFn);
     }
     if (processOutputs) {
         const outputConfig = tNode.outputs?.[eventName];
@@ -30659,12 +30660,12 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
                 const index = hostDirectiveOutputConfig[i];
                 const lookupName = hostDirectiveOutputConfig[i + 1];
-                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
+                listenToOutput(tNode, lView, index, lookupName, eventName, listenerFn);
             }
         }
         if (outputConfig && outputConfig.length) {
             for (const index of outputConfig) {
-                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
+                listenToOutput(tNode, lView, index, eventName, eventName, listenerFn);
             }
         }
     }
@@ -35040,7 +35041,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.3+sha-997836e');
+const VERSION = new Version('20.0.0-next.3+sha-7499b74');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
