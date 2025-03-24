@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.3+sha-d6a1a3a
+ * @license Angular v19.2.3+sha-9ac4057
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -538,6 +538,7 @@ const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
         dirty: true,
         error: null,
         equal: defaultEquals,
+        kind: 'linkedSignal',
         producerMustRecompute(node) {
             // Force a recomputation if there's no current value, or if the current value is in the
             // process of being calculated (which should throw an error).
