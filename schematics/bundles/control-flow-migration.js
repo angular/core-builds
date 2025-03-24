@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.3+sha-9ac4057
+ * @license Angular v19.2.3+sha-00a9331
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -680,9 +680,6 @@ function calculateNesting(visitor, hasLineBreaks) {
         }
     }
 }
-function escapeRegExp(val) {
-    return val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
 /**
  * determines if a given template string contains line breaks
  */
@@ -711,17 +708,41 @@ function getTemplates(template) {
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
         checker.visitAll(visitor, parsed.tree.rootNodes);
-        // count usages of each ng-template
         for (let [key, tmpl] of visitor.templates) {
-            const escapeKey = escapeRegExp(key.slice(1));
-            const regex = new RegExp(`[^a-zA-Z0-9-<(\']${escapeKey}\\W`, 'gm');
-            const matches = template.match(regex);
-            tmpl.count = matches?.length ?? 0;
+            tmpl.count = countTemplateUsage(parsed.tree.rootNodes, key);
             tmpl.generateContents(template);
         }
         return visitor.templates;
     }
     return new Map();
+}
+function countTemplateUsage(nodes, templateName) {
+    let count = 0;
+    let isReferencedInTemplateOutlet = false;
+    for (const node of nodes) {
+        if (node.attrs) {
+            for (const attr of node.attrs) {
+                if (attr.name === '*ngTemplateOutlet' && attr.value === templateName.slice(1)) {
+                    isReferencedInTemplateOutlet = true;
+                    break;
+                }
+                if (attr.name.trim() === templateName) {
+                    count++;
+                }
+            }
+        }
+        if (node.children) {
+            if (node.name === 'for') {
+                for (const child of node.children) {
+                    if (child.value?.includes(templateName.slice(1))) {
+                        count++;
+                    }
+                }
+            }
+            count += countTemplateUsage(node.children, templateName);
+        }
+    }
+    return isReferencedInTemplateOutlet ? count + 2 : count;
 }
 function updateTemplates(template, templates) {
     const updatedTemplates = getTemplates(template);
@@ -772,8 +793,8 @@ function processNgTemplates(template, sourceFile) {
                 else {
                     template = template.replace(replaceRegex, t.children);
                 }
-                // the +1 accounts for the t.count's counting of the original template
-                if (t.count === matches.length + 1 && safeToRemove) {
+                const dist = matches.filter((obj, index, self) => index === self.findIndex((t) => t.input === obj.input));
+                if ((t.count === dist.length || t.count - matches.length === 1) && safeToRemove) {
                     const refsInComponentFile = getViewChildOrViewChildrenNames(sourceFile);
                     if (refsInComponentFile?.length > 0) {
                         const templateRefs = getTemplateReferences(template);
