@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.3+sha-7499b74
+ * @license Angular v20.0.0-next.3+sha-6d3849f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -118,4 +118,4 @@ declare class NavigationDestination {
     getState(): unknown;
 }
 
-export { NavigateEvent as N, Navigation as a, NavigationCurrentEntryChangeEvent as b, NavigationHistoryEntry as c, type NavigationNavigateOptions as d, type NavigationOptions as e, type NavigationReloadOptions as f, type NavigationResult as g, NavigationTransition as h, type NavigationUpdateCurrentEntryOptions as i, type NavigationTypeString as j, type NavigationInterceptOptions as k, NavigationDestination as l };
+export { Navigation as N, NavigationHistoryEntry as a, type NavigationNavigateOptions as b, type NavigationResult as c, type NavigationOptions as d, NavigateEvent as e, NavigationCurrentEntryChangeEvent as f, NavigationTransition as g, type NavigationUpdateCurrentEntryOptions as h, type NavigationReloadOptions as i, type NavigationTypeString as j, type NavigationInterceptOptions as k, NavigationDestination as l };

@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.0-next.3+sha-7499b74
+ * @license Angular v20.0.0-next.3+sha-6d3849f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { ɵDeferBlockDetails as _DeferBlockDetails, ɵDeferBlockState as _DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, ɵDeferBlockBehavior as _DeferBlockBehavior, InjectionToken, PlatformRef, Type, ProviderToken, InjectOptions, NgModule, Component, Directive, Pipe } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
-import { a as Navigation, c as NavigationHistoryEntry, d as NavigationNavigateOptions, g as NavigationResult, e as NavigationOptions, N as NavigateEvent, b as NavigationCurrentEntryChangeEvent, h as NavigationTransition, i as NavigationUpdateCurrentEntryOptions, f as NavigationReloadOptions } from '../navigation_types.d-u4EOrrdZ.js';
+import { N as Navigation, a as NavigationHistoryEntry, b as NavigationNavigateOptions, c as NavigationResult, d as NavigationOptions, e as NavigateEvent, f as NavigationCurrentEntryChangeEvent, g as NavigationTransition, h as NavigationUpdateCurrentEntryOptions, i as NavigationReloadOptions } from '../navigation_types.d-DgDrF5rp.js';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically

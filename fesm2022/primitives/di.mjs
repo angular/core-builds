@@ -1,24 +1,10 @@
 /**
- * @license Angular v20.0.0-next.3+sha-7499b74
+ * @license Angular v20.0.0-next.3+sha-6d3849f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-/**
- * Current injector value used by `inject`.
- * - `undefined`: it is an error to call `inject`
- * - `null`: `inject` can be called but there is no injector (limp-mode).
- * - Injector instance: Use the injector for resolution.
- */
-let _currentInjector = undefined;
-function getCurrentInjector() {
-    return _currentInjector;
-}
-function setCurrentInjector(injector) {
-    const former = _currentInjector;
-    _currentInjector = injector;
-    return former;
-}
+export { g as getCurrentInjector, s as setCurrentInjector } from '../injector-BlLwZ2sr.mjs';
 
 /**
  * Value returned if the key-value pair couldn't be found in the context
@@ -42,5 +28,5 @@ function isNotFound(e) {
     return e === NOT_FOUND || e.name === 'ɵNotFound';
 }
 
-export { NOT_FOUND, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector };
+export { NOT_FOUND, NotFoundError, isNotFound };
 //# sourceMappingURL=di.mjs.map
