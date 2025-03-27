@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-b53220a
+ * @license Angular v19.2.4+sha-f4c4b10
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,13 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-DzM2hemp.js');
+var compiler_host = require('./compiler_host-DKobiBrR.js');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var imports = require('./imports-CIX-JgAN.js');
 var nodes = require('./nodes-B16H9JUd.js');
 var leading_space = require('./leading_space-D9nQ8UQC.js');
-require('./checker-DP-zos5Q.js');
+require('./checker-B_GCUUMg.js');
 require('os');
 require('fs');
 require('module');
@@ -1098,16 +1098,20 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
     }
     result.toCombine.forEach(({ declaration, initializer }) => {
         const initializerStatement = nodes.closestNode(initializer, ts.isStatement);
-        const newProperty = ts.factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
         // If the initialization order is being preserved, we have to remove the original
         // declaration and re-declare it. Otherwise we can do the replacement in-place.
         if (preserveInitOrder) {
+            // Preserve comment in the new property since we are removing the entire node.
+            const newProperty = ts.factory.createPropertyDeclaration(declaration.modifiers, declaration.name, declaration.questionToken, declaration.type, initializer);
             tracker.removeNode(declaration, true);
             removedMembers.add(declaration);
             afterInjectCalls.push(memberIndentation +
                 printer.printNode(ts.EmitHint.Unspecified, newProperty, declaration.getSourceFile()));
         }
         else {
+            // Strip comments from the declaration since we are replacing just
+            // the node, not the leading comment.
+            const newProperty = ts.factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
             tracker.replaceNode(declaration, newProperty);
         }
         // This should always be defined, but null check it just in case.

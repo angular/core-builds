@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-b53220a
+ * @license Angular v19.2.4+sha-f4c4b10
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27094,11 +27094,13 @@ const FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+([\S\s]*)/;
 /** Pattern for the tracking expression in a for loop block. */
 const FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
 /** Pattern for the `as` expression in a conditional block. */
-const CONDITIONAL_ALIAS_PATTERN = /^(as\s)+(.*)/;
+const CONDITIONAL_ALIAS_PATTERN = /^(as\s+)(.*)/;
 /** Pattern used to identify an `else if` block. */
 const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 /** Pattern used to identify a `let` parameter. */
 const FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
+/** Pattern used to validate a JavaScript identifier. */
+const IDENTIFIER_PATTERN = /^[$A-Z_][0-9A-Z_$]*$/i;
 /**
  * Pattern to group a string into leading whitespace, non whitespace, and trailing whitespace.
  * Useful for getting the variable name span when a span can contain leading and trailing space.
@@ -27446,9 +27448,14 @@ function parseConditionalBlockParameters(block, errors, bindingParser) {
         }
         else {
             const name = aliasMatch[2].trim();
-            const variableStart = param.sourceSpan.start.moveBy(aliasMatch[1].length);
-            const variableSpan = new ParseSourceSpan(variableStart, variableStart.moveBy(name.length));
-            expressionAlias = new Variable(name, name, variableSpan, variableSpan);
+            if (IDENTIFIER_PATTERN.test(name)) {
+                const variableStart = param.sourceSpan.start.moveBy(aliasMatch[1].length);
+                const variableSpan = new ParseSourceSpan(variableStart, variableStart.moveBy(name.length));
+                expressionAlias = new Variable(name, name, variableSpan, variableSpan);
+            }
+            else {
+                errors.push(new ParseError(param.sourceSpan, '"as" expression must be a valid JavaScript identifier'));
+            }
         }
     }
     return { expression, expressionAlias };
@@ -30721,7 +30728,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.4+sha-b53220a');
+new Version('19.2.4+sha-f4c4b10');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31238,6 +31245,7 @@ exports.ErrorCode = void 0;
     ErrorCode[ErrorCode["DECORATOR_COLLISION"] = 1006] = "DECORATOR_COLLISION";
     ErrorCode[ErrorCode["VALUE_HAS_WRONG_TYPE"] = 1010] = "VALUE_HAS_WRONG_TYPE";
     ErrorCode[ErrorCode["VALUE_NOT_LITERAL"] = 1011] = "VALUE_NOT_LITERAL";
+    ErrorCode[ErrorCode["DUPLICATE_DECORATED_PROPERTIES"] = 1012] = "DUPLICATE_DECORATED_PROPERTIES";
     /**
      * Raised when an initializer API is annotated with an unexpected decorator.
      *
@@ -32147,7 +32155,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DP-zos5Q.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B_GCUUMg.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

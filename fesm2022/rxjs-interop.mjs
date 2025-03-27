@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-b53220a
+ * @license Angular v19.2.4+sha-f4c4b10
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -189,7 +189,8 @@ function toObservableMicrotask(source, options) {
  * @developerPreview
  */
 function toSignal(source, options) {
-    ngDevMode &&
+    typeof ngDevMode !== 'undefined' &&
+        ngDevMode &&
         assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +
             'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;

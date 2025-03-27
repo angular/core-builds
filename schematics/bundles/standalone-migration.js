@@ -1,24 +1,24 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-b53220a
+ * @license Angular v19.2.4+sha-f4c4b10
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-require('./index-DSRiNecA.js');
+require('./index-DwJw0djT.js');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-DzM2hemp.js');
+var compiler_host = require('./compiler_host-DKobiBrR.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var nodes = require('./nodes-B16H9JUd.js');
 var imports = require('./imports-CIX-JgAN.js');
-var checker = require('./checker-DP-zos5Q.js');
+var checker = require('./checker-B_GCUUMg.js');
 require('os');
-var program = require('./program-Cj0NrXa0.js');
+var program = require('./program-C93pimal.js');
 require('@angular-devkit/core');
 require('module');
 require('url');
