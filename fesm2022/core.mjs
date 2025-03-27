@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-3bc8fe4
+ * @license Angular v19.2.4+sha-b53220a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8523,7 +8523,7 @@ var AfterRenderPhase;
      * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
      * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
      * custom layout that the browser doesn't natively support. Prefer the
-     * `AfterRenderPhase.EarlyRead` phase if reading can wait until after the write phase.
+     * `AfterRenderPhase.Read` phase if reading can wait until after the write phase.
      * **Never** write to the DOM in this phase.
      *
      * <div class="docs-alert docs-alert-important">
@@ -9891,10 +9891,10 @@ function getParentBlockHydrationQueue(deferBlockId, injector) {
 function gatherDeferBlocksByJSActionAttribute(doc) {
     const jsactionNodes = doc.body.querySelectorAll('[jsaction]');
     const blockMap = new Set();
+    const eventTypes = [hoverEventNames.join(':;'), interactionEventNames.join(':;')].join('|');
     for (let node of jsactionNodes) {
         const attr = node.getAttribute('jsaction');
         const blockId = node.getAttribute('ngb');
-        const eventTypes = [...hoverEventNames.join(':;'), ...interactionEventNames.join(':;')].join('|');
         if (attr?.match(eventTypes) && blockId !== null) {
             blockMap.add(node);
         }
@@ -17916,7 +17916,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.4+sha-3bc8fe4']
+                ? ['ng-version', '19.2.4+sha-b53220a']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34640,7 +34640,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.4+sha-3bc8fe4');
+const VERSION = new Version('19.2.4+sha-b53220a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
