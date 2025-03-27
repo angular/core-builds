@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-4c16eae
+ * @license Angular v19.2.4+sha-d9fc010
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17916,7 +17916,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.4+sha-4c16eae']
+                ? ['ng-version', '19.2.4+sha-d9fc010']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -30017,7 +30017,7 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
  * @param wrapWithPreventDefault Whether or not to prevent default behavior
  * (the procedural renderer does this already, so in those cases, we should skip)
  */
-function wrapListener(tNode, lView, context, listenerFn) {
+function wrapListener(tNode, lView, listenerFn) {
     // Note: we are performing most of the work in the listener function itself
     // to optimize listener registration.
     return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -30030,6 +30030,7 @@ function wrapListener(tNode, lView, context, listenerFn) {
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
         markViewDirty(startView, 5 /* NotificationSource.Listener */);
+        const context = lView[CONTEXT];
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
@@ -30066,15 +30067,19 @@ function handleError(lView, error) {
     errorHandler && errorHandler.handleError(error);
 }
 
-function listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup) {
-    ngDevMode && assertIndexInRange(lView, index);
-    const instance = lView[index];
-    const def = tView.data[index];
+function listenToOutput(tNode, lView, directiveIndex, lookupName, eventName, listenerFn) {
+    ngDevMode && assertIndexInRange(lView, directiveIndex);
+    const instance = lView[directiveIndex];
+    const tView = lView[TVIEW];
+    const def = tView.data[directiveIndex];
     const propertyName = def.outputs[lookupName];
     const output = instance[propertyName];
     if (ngDevMode && !isOutputSubscribable(output)) {
         throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
     }
+    // TODO(pk): introduce utility to store cleanup or find a different way of sharing code with listener
+    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const lCleanup = getOrCreateLViewCleanup(lView);
     const subscription = output.subscribe(listenerFn);
     const idx = lCleanup.length;
     lCleanup.push(listenerFn, subscription);
@@ -30186,7 +30191,6 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     const isTNodeDirectiveHost = isDirectiveHost(tNode);
     const firstCreatePass = tView.firstCreatePass;
     const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const context = lView[CONTEXT];
     // When the ɵɵlistener instruction was generated and is executed we know that there is either a
     // native listener or a directive output on this element. As such we we know that we will have to
     // register a listener and store its cleanup function on LView.
@@ -30237,7 +30241,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             processOutputs = false;
         }
         else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn);
+            listenerFn = wrapListener(tNode, lView, listenerFn);
             stashEventListener(target, eventName, listenerFn);
             const cleanupFn = renderer.listen(target, eventName, listenerFn);
             ngDevMode && ngDevMode.rendererAddEventListener++;
@@ -30248,7 +30252,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     else {
         // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
         // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, context, listenerFn);
+        listenerFn = wrapListener(tNode, lView, listenerFn);
     }
     if (processOutputs) {
         const outputConfig = tNode.outputs?.[eventName];
@@ -30257,12 +30261,12 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
                 const index = hostDirectiveOutputConfig[i];
                 const lookupName = hostDirectiveOutputConfig[i + 1];
-                listenToOutput(tNode, tView, lView, index, lookupName, eventName, listenerFn, lCleanup, tCleanup);
+                listenToOutput(tNode, lView, index, lookupName, eventName, listenerFn);
             }
         }
         if (outputConfig && outputConfig.length) {
             for (const index of outputConfig) {
-                listenToOutput(tNode, tView, lView, index, eventName, eventName, listenerFn, lCleanup, tCleanup);
+                listenToOutput(tNode, lView, index, eventName, eventName, listenerFn);
             }
         }
     }
@@ -34636,7 +34640,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.4+sha-4c16eae');
+const VERSION = new Version('19.2.4+sha-d9fc010');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
