@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-76c60a6
+ * @license Angular v20.0.0-next.4+sha-5948cd0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-BvSedeIB.js');
+var checker = require('./checker-DSBE_Uym.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -870,7 +870,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -888,7 +888,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -983,7 +983,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1399,7 +1399,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1434,7 +1434,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1485,7 +1485,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1518,7 +1518,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1569,7 +1569,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-76c60a6'));
+    definitionMap.set('version', checker.literal('20.0.0-next.4+sha-5948cd0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -4519,15 +4519,13 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
     const classMembers = reflection
         .getMembersOfClass(clazz)
         .filter((member) => !member.isStatic && member.decorators !== null && member.decorators.length > 0);
-    const duplicateDecoratedMemberNames = classMembers
-        .map((member) => member.name)
-        .filter((name, i, arr) => arr.indexOf(name) < i);
-    if (duplicateDecoratedMemberNames.length > 0) {
+    const duplicateDecoratedMembers = classMembers.filter((member, i, arr) => arr.findIndex((arrayMember) => arrayMember.name === member.name) < i);
+    if (duplicateDecoratedMembers.length > 0) {
         // This should theoretically never happen, because the only way to have duplicate instance
         // member names is getter/setter pairs and decorators cannot appear in both a getter and the
         // corresponding setter.
-        throw new Error(`Duplicate decorated properties found on class '${clazz.name.text}': ` +
-            duplicateDecoratedMemberNames.join(', '));
+        throw new checker.FatalDiagnosticError(checker.ErrorCode.DUPLICATE_DECORATED_PROPERTIES, duplicateDecoratedMembers[0].nameNode ?? clazz, `Duplicate decorated properties found on class '${clazz.name.text}': ` +
+            duplicateDecoratedMembers.map((member) => member.name).join(', '));
     }
     const decoratedMembers = classMembers.map((member) => classMemberToMetadata(member.nameNode ?? member.name, member.decorators, isCore));
     if (decoratedMembers.length > 0) {
@@ -10845,7 +10843,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('20.0.0-next.4+sha-76c60a6');
+new checker.Version('20.0.0-next.4+sha-5948cd0');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -18713,7 +18711,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.4+sha-76c60a6` usually means that core is at head so it supports
+    // A version of `20.0.0-next.4+sha-5948cd0` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

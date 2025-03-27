@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-76c60a6
+ * @license Angular v20.0.0-next.4+sha-5948cd0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -172,7 +172,8 @@ function toObservable(source, options) {
  * context is needed in this configuration as well.
  */
 function toSignal(source, options) {
-    ngDevMode &&
+    typeof ngDevMode !== 'undefined' &&
+        ngDevMode &&
         assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +
             'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;
