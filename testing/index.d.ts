@@ -1,12 +1,15 @@
 /**
- * @license Angular v20.0.0-next.4+sha-f7385b4
+ * @license Angular v20.0.0-next.4+sha-76c60a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockDetails as _DeferBlockDetails, ɵDeferBlockState as _DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, ɵDeferBlockBehavior as _DeferBlockBehavior, InjectionToken, PlatformRef, Type, ProviderToken, InjectOptions, NgModule, Component, Directive, Pipe } from '@angular/core';
-export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
-import { N as Navigation, a as NavigationHistoryEntry, b as NavigationNavigateOptions, c as NavigationResult, d as NavigationOptions, e as NavigateEvent, f as NavigationCurrentEntryChangeEvent, g as NavigationTransition, h as NavigationUpdateCurrentEntryOptions, i as NavigationReloadOptions } from '../navigation_types.d-DgDrF5rp.js';
+import { b as InjectionToken, T as Type, P as ProviderToken, c as InjectOptions } from '../ng_i18n_closure_mode.d-D37FVT4X.js';
+import { D as DeferBlockDetails, a as DeferBlockState, C as ComponentRef, b as DebugElement, E as ElementRef, c as ChangeDetectorRef, N as NgZone, S as SchemaMetadata, d as DeferBlockBehavior, P as PlatformRef, e as NgModule, f as Component, g as Directive, h as Pipe, i as Navigation, j as NavigationHistoryEntry, k as NavigationNavigateOptions, l as NavigationResult, m as NavigationOptions, n as NavigateEvent, o as NavigationCurrentEntryChangeEvent, p as NavigationTransition, q as NavigationUpdateCurrentEntryOptions, r as NavigationReloadOptions } from '../discovery.d-CSfTnmOX.js';
+import '../graph.d-DosWhngN.js';
+import '../event_dispatcher.d-pVP0-wST.js';
+import 'rxjs';
+import '../signal.d-DHhB2ZZR.js';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -36,12 +39,12 @@ declare class DeferBlockFixture {
     private block;
     private componentFixture;
     /** @nodoc */
-    constructor(block: _DeferBlockDetails, componentFixture: ComponentFixture<unknown>);
+    constructor(block: DeferBlockDetails, componentFixture: ComponentFixture<unknown>);
     /**
      * Renders the specified state of the defer fixture.
      * @param state the defer state to render
      */
-    render(state: _DeferBlockState): Promise<void>;
+    render(state: DeferBlockState): Promise<void>;
     /**
      * Retrieves all nested child defer block fixtures
      * in a given defer block.
@@ -327,7 +330,7 @@ interface TestModuleMetadata {
      * Whether defer blocks should behave with manual triggering or play through normally.
      * Defaults to `manual`.
      */
-    deferBlockBehavior?: _DeferBlockBehavior;
+    deferBlockBehavior?: DeferBlockBehavior;
 }
 /**
  * @publicApi
@@ -414,7 +417,7 @@ interface TestBed {
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *
-     * @see {@link EnvironmentInjector#runInContext}
+     * @see {@link https://angular.dev/api/core/EnvironmentInjector#runInContext}
      */
     runInInjectionContext<T>(fn: () => T): T;
     execute(tokens: any[], fn: Function, context?: any): any;
@@ -693,4 +696,4 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispose(): void;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, type MetadataOverride, type ModuleTeardownOptions, TestBed, type TestBedStatic, TestComponentRenderer, type TestEnvironmentOptions, type TestModuleMetadata, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, type MetadataOverride, type ModuleTeardownOptions, TestBed, type TestBedStatic, TestComponentRenderer, type TestEnvironmentOptions, type TestModuleMetadata, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };

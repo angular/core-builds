@@ -1,12 +1,18 @@
 /**
- * @license Angular v20.0.0-next.4+sha-f7385b4
+ * @license Angular v20.0.0-next.4+sha-76c60a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError as _RuntimeError, ɵgetOutputDestroyRef as _getOutputDestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-CYEevElB.mjs';
+import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-D2Mf0Lyi.mjs';
+import './primitives/di.mjs';
+import '@angular/core/primitives/di';
+import '@angular/core/primitives/signals';
+import './signal-CCmjQ6F4.mjs';
+import './untracked-q3e9vBkl.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -50,7 +56,7 @@ class OutputFromObservableRef {
     }
     subscribe(callbackFn) {
         if (this.destroyed) {
-            throw new _RuntimeError(953 /* ɵRuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
+            throw new RuntimeError(953 /* ɵRuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
                 'Unexpected subscription to destroyed `OutputRef`. ' +
                     'The owning directive/component is destroyed.');
         }
@@ -101,7 +107,7 @@ function outputFromObservable(observable, opts) {
  * @publicApi
  */
 function outputToObservable(ref) {
-    const destroyRef = _getOutputDestroyRef(ref);
+    const destroyRef = getOutputDestroyRef(ref);
     return new Observable((observer) => {
         // Complete the observable upon directive/component destroy.
         // Note: May be `undefined` if an `EventEmitter` is declared outside
@@ -201,7 +207,7 @@ function toSignal(source, options) {
         // "complete".
     });
     if (options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
-        throw new _RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+        throw new RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
             '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
     // Unsubscribe when the current context is destroyed, if requested.
@@ -217,7 +223,7 @@ function toSignal(source, options) {
                 throw current.error;
             case 0 /* StateKind.NoValue */:
                 // This shouldn't really happen because the error is thrown on creation.
-                throw new _RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+                throw new RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
                     '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
         }
     }, { equal: options?.equal });

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-f7385b4
+ * @license Angular v20.0.0-next.4+sha-76c60a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -357,6 +357,10 @@ function createComputed(computation, equal) {
         return node.value;
     };
     computed[SIGNAL] = node;
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
+        computed.toString = () => `[Computed${debugName}: ${node.value}]`;
+    }
     runPostProducerCreatedFn(node);
     return computed;
 }
@@ -465,6 +469,10 @@ function createSignal(initialValue, equal) {
         return node.value;
     });
     getter[SIGNAL] = node;
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
+        getter.toString = () => `[Signal${debugName}: ${node.value}]`;
+    }
     runPostProducerCreatedFn(node);
     return getter;
 }
@@ -509,112 +517,5 @@ function signalValueChanged(node) {
     postSignalSetFn?.(node);
 }
 
-function createLinkedSignal(sourceFn, computationFn, equalityFn) {
-    const node = Object.create(LINKED_SIGNAL_NODE);
-    node.source = sourceFn;
-    node.computation = computationFn;
-    if (equalityFn != undefined) {
-        node.equal = equalityFn;
-    }
-    const linkedSignalGetter = () => {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion(node);
-        // Record that someone looked at this signal.
-        producerAccessed(node);
-        if (node.value === ERRORED) {
-            throw node.error;
-        }
-        return node.value;
-    };
-    const getter = linkedSignalGetter;
-    getter[SIGNAL] = node;
-    runPostProducerCreatedFn(node);
-    return getter;
-}
-function linkedSignalSetFn(node, newValue) {
-    producerUpdateValueVersion(node);
-    signalSetFn(node, newValue);
-    producerMarkClean(node);
-}
-function linkedSignalUpdateFn(node, updater) {
-    producerUpdateValueVersion(node);
-    signalUpdateFn(node, updater);
-    producerMarkClean(node);
-}
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        value: UNSET,
-        dirty: true,
-        error: null,
-        equal: defaultEquals,
-        kind: 'linkedSignal',
-        producerMustRecompute(node) {
-            // Force a recomputation if there's no current value, or if the current value is in the
-            // process of being calculated (which should throw an error).
-            return node.value === UNSET || node.value === COMPUTING;
-        },
-        producerRecomputeValue(node) {
-            if (node.value === COMPUTING) {
-                // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
-            }
-            const oldValue = node.value;
-            node.value = COMPUTING;
-            const prevConsumer = consumerBeforeComputation(node);
-            let newValue;
-            try {
-                const newSourceValue = node.source();
-                const prev = oldValue === UNSET || oldValue === ERRORED
-                    ? undefined
-                    : {
-                        source: node.sourceValue,
-                        value: oldValue,
-                    };
-                newValue = node.computation(newSourceValue, prev);
-                node.sourceValue = newSourceValue;
-            }
-            catch (err) {
-                newValue = ERRORED;
-                node.error = err;
-            }
-            finally {
-                consumerAfterComputation(node, prevConsumer);
-            }
-            if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
-                // No change to `valueVersion` - old and new values are
-                // semantically equivalent.
-                node.value = oldValue;
-                return;
-            }
-            node.value = newValue;
-            node.version++;
-        },
-    };
-})();
-
-function setAlternateWeakRefImpl(impl) {
-    // TODO: remove this function
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer(prevConsumer);
-    }
-}
-
-export { setPostSignalSetFn as A, signalSetFn as B, signalUpdateFn as C, setAlternateWeakRefImpl as D, untracked as E, REACTIVE_NODE as R, SIGNAL as S, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, createLinkedSignal as g, linkedSignalUpdateFn as h, isInNotificationPhase as i, defaultEquals as j, getActiveConsumer as k, linkedSignalSetFn as l, isReactive as m, producerIncrementEpoch as n, producerMarkClean as o, producerAccessed as p, producerNotifyConsumers as q, producerUpdateValueVersion as r, setThrowInvalidWriteToSignalError as s, producerUpdatesAllowed as t, runPostProducerCreatedFn as u, setActiveConsumer as v, setPostProducerCreatedFn as w, SIGNAL_NODE as x, createSignal as y, runPostSignalSetFn as z };
-//# sourceMappingURL=untracked-DkcXpNb_.mjs.map
+export { COMPUTING as C, ERRORED as E, REACTIVE_NODE as R, SIGNAL as S, UNSET as U, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, defaultEquals as g, getActiveConsumer as h, isInNotificationPhase as i, isReactive as j, producerIncrementEpoch as k, producerMarkClean as l, producerNotifyConsumers as m, producerUpdateValueVersion as n, producerUpdatesAllowed as o, producerAccessed as p, setActiveConsumer as q, runPostProducerCreatedFn as r, setThrowInvalidWriteToSignalError as s, setPostProducerCreatedFn as t, SIGNAL_NODE as u, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalSetFn as y, signalUpdateFn as z };
+//# sourceMappingURL=signal-CCmjQ6F4.mjs.map

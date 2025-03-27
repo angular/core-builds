@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-f7385b4
+ * @license Angular v20.0.0-next.4+sha-76c60a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -191,26 +191,4 @@ declare function consumerDestroy(node: ReactiveNode): void;
 declare function runPostProducerCreatedFn(node: ReactiveNode): void;
 declare function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 
-interface SignalNode<T> extends ReactiveNode {
-    value: T;
-    equal: ValueEqualityFn<T>;
-}
-type SignalBaseGetter<T> = (() => T) & {
-    readonly [SIGNAL]: unknown;
-};
-interface SignalGetter<T> extends SignalBaseGetter<T> {
-    readonly [SIGNAL]: SignalNode<T>;
-}
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SignalGetter<T>;
-declare function setPostSignalSetFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
-declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
-declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
-declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
-declare const SIGNAL_NODE: SignalNode<unknown>;
-
-declare function setAlternateWeakRefImpl(impl: unknown): void;
-
-export { setPostSignalSetFn as A, signalSetFn as B, signalUpdateFn as C, setAlternateWeakRefImpl as D, type ReactiveNode as R, SIGNAL as S, type ValueEqualityFn as V, type SignalNode as a, REACTIVE_NODE as b, type Reactive as c, defaultEquals as d, type ReactiveHookFn as e, consumerAfterComputation as f, consumerBeforeComputation as g, consumerDestroy as h, consumerMarkDirty as i, consumerPollProducersForChange as j, getActiveConsumer as k, isInNotificationPhase as l, isReactive as m, producerIncrementEpoch as n, producerMarkClean as o, producerAccessed as p, producerNotifyConsumers as q, producerUpdateValueVersion as r, producerUpdatesAllowed as s, runPostProducerCreatedFn as t, setActiveConsumer as u, setPostProducerCreatedFn as v, SIGNAL_NODE as w, type SignalGetter as x, createSignal as y, runPostSignalSetFn as z };
+export { type ReactiveNode as R, SIGNAL as S, type ValueEqualityFn as V, type ReactiveHookFn as a, REACTIVE_NODE as b, type Reactive as c, defaultEquals as d, consumerAfterComputation as e, consumerBeforeComputation as f, consumerDestroy as g, consumerMarkDirty as h, consumerPollProducersForChange as i, getActiveConsumer as j, isInNotificationPhase as k, isReactive as l, producerIncrementEpoch as m, producerMarkClean as n, producerNotifyConsumers as o, producerAccessed as p, producerUpdateValueVersion as q, producerUpdatesAllowed as r, runPostProducerCreatedFn as s, setActiveConsumer as t, setPostProducerCreatedFn as u };

@@ -1,14 +1,20 @@
 /**
- * @license Angular v20.0.0-next.4+sha-f7385b4
+ * @license Angular v20.0.0-next.4+sha-76c60a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import * as i0 from '@angular/core';
-import { ɵDeferBlockState as _DeferBlockState, ɵtriggerResourceLoading as _triggerResourceLoading, ɵrenderDeferBlockState as _renderDeferBlockState, ɵCONTAINER_HEADER_OFFSET as _CONTAINER_HEADER_OFFSET, ɵgetDeferBlocks as _getDeferBlocks, InjectionToken, ɵDeferBlockBehavior as _DeferBlockBehavior, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone as _NoopNgZone, ApplicationRef, ɵPendingTasksInternal as _PendingTasksInternal, ɵZONELESS_ENABLED as _ZONELESS_ENABLED, ɵChangeDetectionScheduler as _ChangeDetectionScheduler, ɵEffectScheduler as _EffectScheduler, getDebugNode, RendererFactory2, ɵstringify as _stringify, Pipe, Directive, Component, NgModule, ɵReflectionCapabilities as _ReflectionCapabilities, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT as _USE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker as _depsTracker, ɵgetInjectableDef as _getInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution as _isComponentDefPendingResolution, ɵgetAsyncClassMetadataFn as _getAsyncClassMetadataFn, ɵresolveComponentResources as _resolveComponentResources, ɵRender3NgModuleRef as _Render3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID as _DEFAULT_LOCALE_ID, ɵsetLocaleId as _setLocaleId, ɵRender3ComponentFactory as _Render3ComponentFactory, ɵNG_COMP_DEF as _NG_COMP_DEF, ɵcompileComponent as _compileComponent, ɵNG_DIR_DEF as _NG_DIR_DEF, ɵcompileDirective as _compileDirective, ɵNG_PIPE_DEF as _NG_PIPE_DEF, ɵcompilePipe as _compilePipe, ɵNG_MOD_DEF as _NG_MOD_DEF, ɵpatchComponentDefWithScope as _patchComponentDefWithScope, ɵNG_INJ_DEF as _NG_INJ_DEF, ɵcompileNgModuleDefs as _compileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue as _clearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue as _restoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection as _internalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl as _ChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG as _DEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER as _INTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵtransitiveScopesFor as _transitiveScopesFor, ɵgenerateStandaloneInDeclarationsError as _generateStandaloneInDeclarationsError, ɵNgModuleFactory as _NgModuleFactory, ModuleWithComponentFactories, ɵisEnvironmentProviders as _isEnvironmentProviders, ɵsetAllowDuplicateNgModuleIdsForTest as _setAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents as _resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible as _flushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
-export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { D as DeferBlockState, t as triggerResourceLoading, r as renderDeferBlockState, g as getDeferBlocks, a as DeferBlockBehavior, N as NgZone, I as Injectable, b as NoopNgZone, A as ApplicationRef, c as getDebugNode, R as RendererFactory2, P as Pipe, d as Directive, C as Component, e as NgModule, f as ReflectionCapabilities, h as depsTracker, i as isComponentDefPendingResolution, j as getAsyncClassMetadataFn, k as resolveComponentResources, l as NgModuleRef, m as ApplicationInitStatus, L as LOCALE_ID, n as DEFAULT_LOCALE_ID, s as setLocaleId, o as ComponentFactory, p as compileComponent, q as compileDirective, u as compilePipe, v as patchComponentDefWithScope, w as compileNgModuleDefs, x as clearResolutionOfComponentResourcesQueue, y as restoreComponentResolutionQueue, z as internalProvideZoneChangeDetection, B as ChangeDetectionSchedulerImpl, E as Compiler, F as DEFER_BLOCK_CONFIG, G as COMPILER_OPTIONS, H as transitiveScopesFor, J as generateStandaloneInDeclarationsError, K as NgModuleFactory, M as ModuleWithComponentFactories, O as resetCompiledComponents, ɵ as _setUnknownElementStrictMode, Q as _setUnknownPropertyStrictMode, S as _getUnknownElementStrictMode, T as _getUnknownPropertyStrictMode, U as flushModuleScopingQueueAsMuchAsPossible, V as setAllowDuplicateNgModuleIdsForTest } from './debug_node-BUQRW09Z.mjs';
+import { l as CONTAINER_HEADER_OFFSET, j as InjectionToken, i as inject$1, E as ErrorHandler, o as PendingTasksInternal, Z as ZONELESS_ENABLED, C as ChangeDetectionScheduler, c as EffectScheduler, p as stringify, q as getInjectableDef, r as resolveForwardRef, t as NG_COMP_DEF, u as NG_DIR_DEF, v as NG_PIPE_DEF, w as NG_INJ_DEF, x as NG_MOD_DEF, y as INTERNAL_APPLICATION_ERROR_HANDLER, I as Injector, z as isEnvironmentProviders, A as runInInjectionContext, B as EnvironmentInjector } from './root_effect_scheduler-CYEevElB.mjs';
+import * as i0 from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
+import './signal-CCmjQ6F4.mjs';
+import '@angular/core/primitives/signals';
+import 'rxjs/operators';
+import './attribute-B17mgaqe.mjs';
+import './primitives/di.mjs';
+import '@angular/core/primitives/di';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -68,13 +74,13 @@ class DeferBlockFixture {
             throw new Error(`Tried to render this defer block in the \`${stateAsString}\` state, ` +
                 `but there was no @${stateAsString.toLowerCase()} block defined in a template.`);
         }
-        if (state === _DeferBlockState.Complete) {
-            await _triggerResourceLoading(this.block.tDetails, this.block.lView, this.block.tNode);
+        if (state === DeferBlockState.Complete) {
+            await triggerResourceLoading(this.block.tDetails, this.block.lView, this.block.tNode);
         }
         // If the `render` method is used explicitly - skip timer-based scheduling for
         // `@placeholder` and `@loading` blocks and render them immediately.
         const skipTimerScheduling = true;
-        _renderDeferBlockState(state, this.block.tNode, this.block.lContainer, skipTimerScheduling);
+        renderDeferBlockState(state, this.block.tNode, this.block.lContainer, skipTimerScheduling);
         this.componentFixture.detectChanges();
     }
     /**
@@ -87,9 +93,9 @@ class DeferBlockFixture {
         // located right after an LContainer header. Get a hold of that view and inspect
         // it for nested defer blocks.
         const deferBlockFixtures = [];
-        if (this.block.lContainer.length >= _CONTAINER_HEADER_OFFSET) {
-            const lView = this.block.lContainer[_CONTAINER_HEADER_OFFSET];
-            _getDeferBlocks(lView, deferBlocks);
+        if (this.block.lContainer.length >= CONTAINER_HEADER_OFFSET) {
+            const lView = this.block.lContainer[CONTAINER_HEADER_OFFSET];
+            getDeferBlocks(lView, deferBlocks);
             for (const block of deferBlocks) {
                 deferBlockFixtures.push(new DeferBlockFixture(block, this.componentFixture));
             }
@@ -99,13 +105,13 @@ class DeferBlockFixture {
 }
 function hasStateTemplate(state, block) {
     switch (state) {
-        case _DeferBlockState.Placeholder:
+        case DeferBlockState.Placeholder:
             return block.tDetails.placeholderTmplIndex !== null;
-        case _DeferBlockState.Loading:
+        case DeferBlockState.Loading:
             return block.tDetails.loadingTmplIndex !== null;
-        case _DeferBlockState.Error:
+        case DeferBlockState.Error:
             return block.tDetails.errorTmplIndex !== null;
-        case _DeferBlockState.Complete:
+        case DeferBlockState.Complete:
             return true;
         default:
             return false;
@@ -113,11 +119,11 @@ function hasStateTemplate(state, block) {
 }
 function getDeferBlockStateNameFromEnum(state) {
     switch (state) {
-        case _DeferBlockState.Placeholder:
+        case DeferBlockState.Placeholder:
             return 'Placeholder';
-        case _DeferBlockState.Loading:
+        case DeferBlockState.Loading:
             return 'Loading';
-        case _DeferBlockState.Error:
+        case DeferBlockState.Error:
             return 'Error';
         default:
             return 'Main';
@@ -131,7 +137,7 @@ const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
 /** Whether unknown properties in templates should throw by default. */
 const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
 /** Whether defer blocks should use manual triggering or play through normally. */
-const DEFER_BLOCK_DEFAULT_BEHAVIOR = _DeferBlockBehavior.Playthrough;
+const DEFER_BLOCK_DEFAULT_BEHAVIOR = DeferBlockBehavior.Playthrough;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -214,7 +220,7 @@ class ComponentFixture {
     /** @internal */
     _noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, { optional: true });
     /** @internal */
-    _ngZone = this._noZoneOptionIsSet ? new _NoopNgZone() : inject$1(NgZone);
+    _ngZone = this._noZoneOptionIsSet ? new NoopNgZone() : inject$1(NgZone);
     // Inject ApplicationRef to ensure NgZone stableness causes after render hooks to run
     // This will likely happen as a result of fixture.detectChanges because it calls ngZone.run
     // This is a crazy way of doing things but hey, it's the world we live in.
@@ -224,11 +230,11 @@ class ComponentFixture {
     /** @internal */
     _appRef = inject$1(ApplicationRef);
     _testAppRef = this._appRef;
-    pendingTasks = inject$1(_PendingTasksInternal);
+    pendingTasks = inject$1(PendingTasksInternal);
     appErrorHandler = inject$1(TestBedApplicationErrorHandler);
-    zonelessEnabled = inject$1(_ZONELESS_ENABLED);
-    scheduler = inject$1(_ChangeDetectionScheduler);
-    rootEffectScheduler = inject$1(_EffectScheduler);
+    zonelessEnabled = inject$1(ZONELESS_ENABLED);
+    scheduler = inject$1(ChangeDetectionScheduler);
+    rootEffectScheduler = inject$1(EffectScheduler);
     autoDetectDefault = this.zonelessEnabled ? true : false;
     autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? this.autoDetectDefault;
     subscriptions = new Subscription();
@@ -366,7 +372,7 @@ class ComponentFixture {
     getDeferBlocks() {
         const deferBlocks = [];
         const lView = this.componentRef.hostView['_lView'];
-        _getDeferBlocks(lView, deferBlocks);
+        getDeferBlocks(lView, deferBlocks);
         const deferBlockFixtures = [];
         for (const block of deferBlocks) {
             deferBlockFixtures.push(new DeferBlockFixture(block, this));
@@ -579,7 +585,7 @@ class MetadataOverrider {
         }
         if (override.set) {
             if (override.remove || override.add) {
-                throw new Error(`Cannot set and add/remove ${_stringify(metadataClass)} at the same time!`);
+                throw new Error(`Cannot set and add/remove ${stringify(metadataClass)} at the same time!`);
             }
             setMetadata(props, override.set);
         }
@@ -658,7 +664,7 @@ function _propHashKey(propName, propValue, references) {
 function _serializeReference(ref, references) {
     let id = references.get(ref);
     if (!id) {
-        id = `${_stringify(ref)}${_nextReferenceId++}`;
+        id = `${stringify(ref)}${_nextReferenceId++}`;
         references.set(ref, id);
     }
     return id;
@@ -684,7 +690,7 @@ function _valueProps(obj) {
     return props;
 }
 
-const reflection = new _ReflectionCapabilities();
+const reflection = new ReflectionCapabilities();
 /**
  * Allows to override ivy metadata for tests (via the `TestBed`).
  */
@@ -771,10 +777,10 @@ function isTestingModuleOverride(value) {
 }
 function assertNoStandaloneComponents(types, resolver, location) {
     types.forEach((type) => {
-        if (!_getAsyncClassMetadataFn(type)) {
+        if (!getAsyncClassMetadataFn(type)) {
             const component = resolver.resolve(type);
             if (component && (component.standalone == null || component.standalone)) {
-                throw new Error(_generateStandaloneInDeclarationsError(type, location));
+                throw new Error(generateStandaloneInDeclarationsError(type, location));
             }
         }
     });
@@ -869,8 +875,8 @@ class TestBedCompiler {
             moduleDef.rethrowApplicationErrors ?? RETHROW_APPLICATION_ERRORS_DEFAULT;
     }
     overrideModule(ngModule, override) {
-        if (_USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-            _depsTracker.clearScopeCacheFor(ngModule);
+        {
+            depsTracker.clearScopeCacheFor(ngModule);
         }
         this.overriddenModules.add(ngModule);
         // Compile the module right away.
@@ -927,7 +933,7 @@ class TestBedCompiler {
         else {
             providerDef = { provide: token };
         }
-        const injectableDef = typeof token !== 'string' ? _getInjectableDef(token) : null;
+        const injectableDef = typeof token !== 'string' ? getInjectableDef(token) : null;
         const providedIn = injectableDef === null ? null : resolveForwardRef(injectableDef.providedIn);
         const overridesBucket = providedIn === 'root' ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
@@ -944,12 +950,12 @@ class TestBedCompiler {
         }
     }
     overrideTemplateUsingTestingModule(type, template) {
-        const def = type[_NG_COMP_DEF];
+        const def = type[NG_COMP_DEF];
         const hasStyleUrls = () => {
             const metadata = this.resolvers.component.resolve(type);
             return !!metadata.styleUrl || !!metadata.styleUrls?.length;
         };
-        const overrideStyleUrls = !!def && !_isComponentDefPendingResolution(type) && hasStyleUrls();
+        const overrideStyleUrls = !!def && !isComponentDefPendingResolution(type) && hasStyleUrls();
         // In Ivy, compiling a component does not require knowing the module providing the
         // component's scope, so overrideTemplateUsingTestingModule can be implemented purely via
         // overrideComponent. Important: overriding template requires full Component re-compilation,
@@ -972,7 +978,7 @@ class TestBedCompiler {
             return;
         const promises = [];
         for (const component of this.componentsWithAsyncMetadata) {
-            const asyncMetadataFn = _getAsyncClassMetadataFn(component);
+            const asyncMetadataFn = getAsyncClassMetadataFn(component);
             if (asyncMetadataFn) {
                 promises.push(asyncMetadataFn());
             }
@@ -1009,7 +1015,7 @@ class TestBedCompiler {
                 }
                 return Promise.resolve(resourceLoader.get(url));
             };
-            await _resolveComponentResources(resolver);
+            await resolveComponentResources(resolver);
         }
     }
     finalize() {
@@ -1026,15 +1032,15 @@ class TestBedCompiler {
         // every component.
         this.componentToModuleScope.clear();
         const parentInjector = this.platform.injector;
-        this.testModuleRef = new _Render3NgModuleRef(this.testModuleType, parentInjector, []);
+        this.testModuleRef = new NgModuleRef(this.testModuleType, parentInjector, []);
         // ApplicationInitStatus.runInitializers() is marked @internal to core.
         // Cast it to any before accessing it.
         this.testModuleRef.injector.get(ApplicationInitStatus).runInitializers();
         // Set locale ID after running app initializers, since locale information might be updated while
         // running initializers. This is also consistent with the execution order while bootstrapping an
         // app (see `packages/core/src/application_ref.ts` file).
-        const localeId = this.testModuleRef.injector.get(LOCALE_ID, _DEFAULT_LOCALE_ID);
-        _setLocaleId(localeId);
+        const localeId = this.testModuleRef.injector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+        setLocaleId(localeId);
         return this.testModuleRef;
     }
     /**
@@ -1069,7 +1075,7 @@ class TestBedCompiler {
     _getComponentFactories(moduleType) {
         return maybeUnwrapFn(moduleType.ɵmod.declarations).reduce((factories, declaration) => {
             const componentDef = declaration.ɵcmp;
-            componentDef && factories.push(new _Render3ComponentFactory(componentDef, this.testModuleRef));
+            componentDef && factories.push(new ComponentFactory(componentDef, this.testModuleRef));
             return factories;
         }, []);
     }
@@ -1077,20 +1083,20 @@ class TestBedCompiler {
         // Compile all queued components, directives, pipes.
         let needsAsyncResources = false;
         this.pendingComponents.forEach((declaration) => {
-            if (_getAsyncClassMetadataFn(declaration)) {
+            if (getAsyncClassMetadataFn(declaration)) {
                 throw new Error(`Component '${declaration.name}' has unresolved metadata. ` +
                     `Please call \`await TestBed.compileComponents()\` before running this test.`);
             }
-            needsAsyncResources = needsAsyncResources || _isComponentDefPendingResolution(declaration);
+            needsAsyncResources = needsAsyncResources || isComponentDefPendingResolution(declaration);
             const metadata = this.resolvers.component.resolve(declaration);
             if (metadata === null) {
                 throw invalidTypeError(declaration.name, 'Component');
             }
-            this.maybeStoreNgDef(_NG_COMP_DEF, declaration);
-            if (_USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-                _depsTracker.clearScopeCacheFor(declaration);
+            this.maybeStoreNgDef(NG_COMP_DEF, declaration);
+            {
+                depsTracker.clearScopeCacheFor(declaration);
             }
-            _compileComponent(declaration, metadata);
+            compileComponent(declaration, metadata);
         });
         this.pendingComponents.clear();
         this.pendingDirectives.forEach((declaration) => {
@@ -1098,8 +1104,8 @@ class TestBedCompiler {
             if (metadata === null) {
                 throw invalidTypeError(declaration.name, 'Directive');
             }
-            this.maybeStoreNgDef(_NG_DIR_DEF, declaration);
-            _compileDirective(declaration, metadata);
+            this.maybeStoreNgDef(NG_DIR_DEF, declaration);
+            compileDirective(declaration, metadata);
         });
         this.pendingDirectives.clear();
         this.pendingPipes.forEach((declaration) => {
@@ -1107,8 +1113,8 @@ class TestBedCompiler {
             if (metadata === null) {
                 throw invalidTypeError(declaration.name, 'Pipe');
             }
-            this.maybeStoreNgDef(_NG_PIPE_DEF, declaration);
-            _compilePipe(declaration, metadata);
+            this.maybeStoreNgDef(NG_PIPE_DEF, declaration);
+            compilePipe(declaration, metadata);
         });
         this.pendingPipes.clear();
         return needsAsyncResources;
@@ -1118,16 +1124,12 @@ class TestBedCompiler {
             // Module overrides (via `TestBed.overrideModule`) might affect scopes that were previously
             // calculated and stored in `transitiveCompileScopes`. If module overrides are present,
             // collect all affected modules and reset scopes to force their re-calculation.
-            const testingModuleDef = this.testModuleType[_NG_MOD_DEF];
+            const testingModuleDef = this.testModuleType[NG_MOD_DEF];
             const affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
             if (affectedModules.size > 0) {
                 affectedModules.forEach((moduleType) => {
-                    if (!_USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-                        this.storeFieldOfDefOnType(moduleType, _NG_MOD_DEF, 'transitiveCompileScopes');
-                        moduleType[_NG_MOD_DEF].transitiveCompileScopes = null;
-                    }
-                    else {
-                        _depsTracker.clearScopeCacheFor(moduleType);
+                    {
+                        depsTracker.clearScopeCacheFor(moduleType);
                     }
                 });
             }
@@ -1137,16 +1139,16 @@ class TestBedCompiler {
             if (!moduleToScope.has(moduleType)) {
                 const isTestingModule = isTestingModuleOverride(moduleType);
                 const realType = isTestingModule ? this.testModuleType : moduleType;
-                moduleToScope.set(moduleType, _transitiveScopesFor(realType));
+                moduleToScope.set(moduleType, transitiveScopesFor(realType));
             }
             return moduleToScope.get(moduleType);
         };
         this.componentToModuleScope.forEach((moduleType, componentType) => {
             if (moduleType !== null) {
                 const moduleScope = getScopeOfModule(moduleType);
-                this.storeFieldOfDefOnType(componentType, _NG_COMP_DEF, 'directiveDefs');
-                this.storeFieldOfDefOnType(componentType, _NG_COMP_DEF, 'pipeDefs');
-                _patchComponentDefWithScope(getComponentDef(componentType), moduleScope);
+                this.storeFieldOfDefOnType(componentType, NG_COMP_DEF, 'directiveDefs');
+                this.storeFieldOfDefOnType(componentType, NG_COMP_DEF, 'pipeDefs');
+                patchComponentDefWithScope(getComponentDef(componentType), moduleScope);
             }
             // `tView` that is stored on component def contains information about directives and pipes
             // that are in the scope of this component. Patching component scope will cause `tView` to be
@@ -1155,20 +1157,20 @@ class TestBedCompiler {
             // Resetting `tView` is also needed for cases when we apply provider overrides and those
             // providers are defined on component's level, in which case they may end up included into
             // `tView.blueprint`.
-            this.storeFieldOfDefOnType(componentType, _NG_COMP_DEF, 'tView');
+            this.storeFieldOfDefOnType(componentType, NG_COMP_DEF, 'tView');
         });
         this.componentToModuleScope.clear();
     }
     applyProviderOverrides() {
         const maybeApplyOverrides = (field) => (type) => {
-            const resolver = field === _NG_COMP_DEF ? this.resolvers.component : this.resolvers.directive;
+            const resolver = field === NG_COMP_DEF ? this.resolvers.component : this.resolvers.directive;
             const metadata = resolver.resolve(type);
             if (this.hasProviderOverrides(metadata.providers)) {
                 this.patchDefWithProviderOverrides(type, field);
             }
         };
-        this.seenComponents.forEach(maybeApplyOverrides(_NG_COMP_DEF));
-        this.seenDirectives.forEach(maybeApplyOverrides(_NG_DIR_DEF));
+        this.seenComponents.forEach(maybeApplyOverrides(NG_COMP_DEF));
+        this.seenDirectives.forEach(maybeApplyOverrides(NG_DIR_DEF));
         this.seenComponents.clear();
         this.seenDirectives.clear();
     }
@@ -1191,7 +1193,7 @@ class TestBedCompiler {
         // detailed error messages. The fact that the code relies on this line being
         // present here is suspicious and should be refactored in a way that the line
         // below can be moved (for ex. after an early exit check below).
-        const injectorDef = type[_NG_INJ_DEF];
+        const injectorDef = type[NG_INJ_DEF];
         // No provider overrides, exit early.
         if (this.providerOverridesByToken.size === 0)
             return;
@@ -1209,12 +1211,12 @@ class TestBedCompiler {
                 ...(this.providerOverridesByModule.get(type) || []),
             ];
             if (this.hasProviderOverrides(providers)) {
-                this.maybeStoreNgDef(_NG_INJ_DEF, type);
-                this.storeFieldOfDefOnType(type, _NG_INJ_DEF, 'providers');
+                this.maybeStoreNgDef(NG_INJ_DEF, type);
+                this.storeFieldOfDefOnType(type, NG_INJ_DEF, 'providers');
                 injectorDef.providers = this.getOverriddenProviders(providers);
             }
             // Apply provider overrides to imported modules recursively
-            const moduleDef = type[_NG_MOD_DEF];
+            const moduleDef = type[NG_MOD_DEF];
             const imports = maybeUnwrapFn(moduleDef.imports);
             for (const importedModule of imports) {
                 this.applyProviderOverridesInScope(importedModule);
@@ -1234,7 +1236,7 @@ class TestBedCompiler {
         }
     }
     patchComponentsWithExistingStyles() {
-        this.existingComponentStyles.forEach((styles, type) => (type[_NG_COMP_DEF].styles = styles));
+        this.existingComponentStyles.forEach((styles, type) => (type[NG_COMP_DEF].styles = styles));
         this.existingComponentStyles.clear();
     }
     queueTypeArray(arr, moduleType) {
@@ -1249,12 +1251,12 @@ class TestBedCompiler {
     }
     recompileNgModule(ngModule, metadata) {
         // Cache the initial ngModuleDef as it will be overwritten.
-        this.maybeStoreNgDef(_NG_MOD_DEF, ngModule);
-        this.maybeStoreNgDef(_NG_INJ_DEF, ngModule);
-        _compileNgModuleDefs(ngModule, metadata);
+        this.maybeStoreNgDef(NG_MOD_DEF, ngModule);
+        this.maybeStoreNgDef(NG_INJ_DEF, ngModule);
+        compileNgModuleDefs(ngModule, metadata);
     }
     maybeRegisterComponentWithAsyncMetadata(type) {
-        const asyncMetadataFn = _getAsyncClassMetadataFn(type);
+        const asyncMetadataFn = getAsyncClassMetadataFn(type);
         if (asyncMetadataFn) {
             this.componentsWithAsyncMetadata.add(type);
         }
@@ -1268,7 +1270,7 @@ class TestBedCompiler {
             // Check whether a give Type has respective NG def (ɵcmp) and compile if def is
             // missing. That might happen in case a class without any Angular decorators extends another
             // class where Component/Directive/Pipe decorator is defined.
-            if (_isComponentDefPendingResolution(type) || !type.hasOwnProperty(_NG_COMP_DEF)) {
+            if (isComponentDefPendingResolution(type) || !type.hasOwnProperty(NG_COMP_DEF)) {
                 this.pendingComponents.add(type);
             }
             this.seenComponents.add(type);
@@ -1295,14 +1297,14 @@ class TestBedCompiler {
         }
         const directive = this.resolvers.directive.resolve(type);
         if (directive) {
-            if (!type.hasOwnProperty(_NG_DIR_DEF)) {
+            if (!type.hasOwnProperty(NG_DIR_DEF)) {
                 this.pendingDirectives.add(type);
             }
             this.seenDirectives.add(type);
             return;
         }
         const pipe = this.resolvers.pipe.resolve(type);
-        if (pipe && !type.hasOwnProperty(_NG_PIPE_DEF)) {
+        if (pipe && !type.hasOwnProperty(NG_PIPE_DEF)) {
             this.pendingPipes.add(type);
             return;
         }
@@ -1390,7 +1392,7 @@ class TestBedCompiler {
                         path.forEach((item) => affectedModules.add(item));
                     }
                     // Examine module imports recursively to look for overridden modules.
-                    const moduleDef = value[_NG_MOD_DEF];
+                    const moduleDef = value[NG_MOD_DEF];
                     calcAffectedModulesRecur(maybeUnwrapFn(moduleDef.imports), path.concat(value));
                 }
             }
@@ -1428,7 +1430,7 @@ class TestBedCompiler {
         if (this.originalComponentResolutionQueue === null) {
             this.originalComponentResolutionQueue = new Map();
         }
-        _clearResolutionOfComponentResourcesQueue().forEach((value, key) => this.originalComponentResolutionQueue.set(key, value));
+        clearResolutionOfComponentResourcesQueue().forEach((value, key) => this.originalComponentResolutionQueue.set(key, value));
     }
     /*
      * Restores component resolution queue to the previously saved state. This operation is performed
@@ -1437,7 +1439,7 @@ class TestBedCompiler {
      */
     restoreComponentResolutionQueue() {
         if (this.originalComponentResolutionQueue !== null) {
-            _restoreComponentResolutionQueue(this.originalComponentResolutionQueue);
+            restoreComponentResolutionQueue(this.originalComponentResolutionQueue);
             this.originalComponentResolutionQueue = null;
         }
     }
@@ -1449,8 +1451,8 @@ class TestBedCompiler {
         });
         // Restore initial component/directive/pipe defs
         this.initialNgDefs.forEach((defs, type) => {
-            if (_USE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
-                _depsTracker.clearScopeCacheFor(type);
+            {
+                depsTracker.clearScopeCacheFor(type);
             }
             defs.forEach((descriptor, prop) => {
                 if (!descriptor) {
@@ -1471,24 +1473,24 @@ class TestBedCompiler {
         this.scopesWithOverriddenProviders.clear();
         this.restoreComponentResolutionQueue();
         // Restore the locale ID to the default value, this shouldn't be necessary but we never know
-        _setLocaleId(_DEFAULT_LOCALE_ID);
+        setLocaleId(DEFAULT_LOCALE_ID);
     }
     compileTestModule() {
         class RootScopeModule {
         }
-        _compileNgModuleDefs(RootScopeModule, {
+        compileNgModuleDefs(RootScopeModule, {
             providers: [
                 ...this.rootProviderOverrides,
-                _internalProvideZoneChangeDetection({}),
+                internalProvideZoneChangeDetection({}),
                 TestBedApplicationErrorHandler,
-                { provide: _ChangeDetectionScheduler, useExisting: _ChangeDetectionSchedulerImpl },
+                { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
             ],
         });
         const providers = [
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
-            { provide: _DEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
+            { provide: DEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
             {
-                provide: _INTERNAL_APPLICATION_ERROR_HANDLER,
+                provide: INTERNAL_APPLICATION_ERROR_HANDLER,
                 useFactory: () => {
                     if (this.rethrowApplicationTickErrors) {
                         const handler = inject$1(TestBedApplicationErrorHandler);
@@ -1507,7 +1509,7 @@ class TestBedCompiler {
             ...this.providerOverrides,
         ];
         const imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
-        _compileNgModuleDefs(this.testModuleType, {
+        compileNgModuleDefs(this.testModuleType, {
             declarations: this.declarations,
             imports,
             schemas: this.schemas,
@@ -1633,7 +1635,7 @@ function identityFn(value) {
 function flattenProviders(providers, mapFn = identityFn) {
     const out = [];
     for (let provider of providers) {
-        if (_isEnvironmentProviders(provider)) {
+        if (isEnvironmentProviders(provider)) {
             provider = provider.ɵproviders;
         }
         if (Array.isArray(provider)) {
@@ -1669,11 +1671,11 @@ class R3TestCompiler {
     }
     compileModuleSync(moduleType) {
         this.testBed._compileNgModuleSync(moduleType);
-        return new _NgModuleFactory(moduleType);
+        return new NgModuleFactory(moduleType);
     }
     async compileModuleAsync(moduleType) {
         await this.testBed._compileNgModuleAsync(moduleType);
-        return new _NgModuleFactory(moduleType);
+        return new NgModuleFactory(moduleType);
     }
     compileModuleAndAllComponentsSync(moduleType) {
         const ngModuleFactory = this.compileModuleSync(moduleType);
@@ -1839,7 +1841,7 @@ class TestBedImpl {
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *
-     * @see {@link EnvironmentInjector#runInContext}
+     * @see {@link https://angular.dev/api/core/EnvironmentInjector#runInContext}
      */
     static runInInjectionContext(fn) {
         return TestBedImpl.INSTANCE.runInInjectionContext(fn);
@@ -1901,7 +1903,7 @@ class TestBedImpl {
         // used to track the state of the NgModule registry and reset it correctly. Instead, when we
         // know we're in a testing scenario, we disable the check for duplicate NgModule registration
         // completely.
-        _setAllowDuplicateNgModuleIdsForTest(true);
+        setAllowDuplicateNgModuleIdsForTest(true);
     }
     /**
      * Reset the providers for the test injector.
@@ -1914,11 +1916,11 @@ class TestBedImpl {
         this.platform = null;
         this.ngModule = null;
         TestBedImpl._environmentTeardownOptions = undefined;
-        _setAllowDuplicateNgModuleIdsForTest(false);
+        setAllowDuplicateNgModuleIdsForTest(false);
     }
     resetTestingModule() {
         this.checkGlobalCompilationFinished();
-        _resetCompiledComponents();
+        resetCompiledComponents();
         if (this._compiler !== null) {
             this.compiler.restoreOriginalState();
         }
@@ -2040,15 +2042,15 @@ class TestBedImpl {
         const testComponentRenderer = this.inject(TestComponentRenderer);
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        if (_getAsyncClassMetadataFn(type)) {
+        if (getAsyncClassMetadataFn(type)) {
             throw new Error(`Component '${type.name}' has unresolved metadata. ` +
                 `Please call \`await TestBed.compileComponents()\` before running this test.`);
         }
         const componentDef = type.ɵcmp;
         if (!componentDef) {
-            throw new Error(`It looks like '${_stringify(type)}' has not been compiled.`);
+            throw new Error(`It looks like '${stringify(type)}' has not been compiled.`);
         }
-        const componentFactory = new _Render3ComponentFactory(componentDef);
+        const componentFactory = new ComponentFactory(componentDef);
         const initComponent = () => {
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef);
             return this.runInInjectionContext(() => new ComponentFixture(componentRef));
@@ -2101,7 +2103,7 @@ class TestBedImpl {
         // Checking _testNgModuleRef is null should not be necessary, but is left in as an additional
         // guard that compilations queued in tests (after instantiation) are never flushed accidentally.
         if (!this.globalCompilationChecked && this._testModuleRef === null) {
-            _flushModuleScopingQueueAsMuchAsPossible();
+            flushModuleScopingQueueAsMuchAsPossible();
         }
         this.globalCompilationChecked = true;
     }
@@ -2189,7 +2191,7 @@ class TestBedImpl {
      * @developerPreview
      */
     flushEffects() {
-        this.inject(_EffectScheduler).flush();
+        this.inject(EffectScheduler).flush();
     }
 }
 /**
@@ -3153,5 +3155,5 @@ class InternalNavigationResult {
     }
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
