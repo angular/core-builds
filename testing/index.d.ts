@@ -1,15 +1,15 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { b as InjectionToken, T as Type, P as ProviderToken, c as InjectOptions } from '../ng_i18n_closure_mode.d-D37FVT4X.js';
-import { D as DeferBlockDetails, a as DeferBlockState, C as ComponentRef, b as DebugElement, E as ElementRef, c as ChangeDetectorRef, N as NgZone, S as SchemaMetadata, d as DeferBlockBehavior, P as PlatformRef, e as NgModule, f as Component, g as Directive, h as Pipe, i as Navigation, j as NavigationHistoryEntry, k as NavigationNavigateOptions, l as NavigationResult, m as NavigationOptions, n as NavigateEvent, o as NavigationCurrentEntryChangeEvent, p as NavigationTransition, q as NavigationUpdateCurrentEntryOptions, r as NavigationReloadOptions } from '../discovery.d-CSfTnmOX.js';
-import '../graph.d-DosWhngN.js';
-import '../event_dispatcher.d-pVP0-wST.js';
+import { b as InjectionToken, T as Type, P as ProviderToken, c as InjectOptions } from '../ng_i18n_closure_mode.d-7twEpBAl.js';
+import { D as DeferBlockDetails, a as DeferBlockState, C as ComponentRef, b as DebugElement, E as ElementRef, c as ChangeDetectorRef, N as NgZone, S as SchemaMetadata, d as DeferBlockBehavior, P as PlatformRef, e as NgModule, f as Component, g as Directive, h as Pipe, i as Navigation, j as NavigationHistoryEntry, k as NavigationNavigateOptions, l as NavigationResult, m as NavigationOptions, n as NavigateEvent, o as NavigationCurrentEntryChangeEvent, p as NavigationTransition, q as NavigationUpdateCurrentEntryOptions, r as NavigationReloadOptions } from '../discovery.d-B9FVqIKI.js';
+import '../graph.d-StYigYp1.js';
+import '../event_dispatcher.d-PWnbqZDx.js';
 import 'rxjs';
-import '../signal.d-DHhB2ZZR.js';
+import '../signal.d-CLrto-mj.js';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -696,4 +696,5 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispose(): void;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, type MetadataOverride, type ModuleTeardownOptions, TestBed, type TestBedStatic, TestComponentRenderer, type TestEnvironmentOptions, type TestModuleMetadata, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata };

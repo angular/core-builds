@@ -1,14 +1,14 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { O as OutputRef, D as DestroyRef, S as Signal, I as Injector } from '../ng_i18n_closure_mode.d-D37FVT4X.js';
-import { O as OutputOptions, B as BaseResourceOptions, R as ResourceLoaderParams, a as ResourceRef } from '../api.d-CxulzRTc.js';
+import { O as OutputRef, D as DestroyRef, S as Signal, I as Injector } from '../ng_i18n_closure_mode.d-7twEpBAl.js';
+import { O as OutputOptions, B as BaseResourceOptions, R as ResourceLoaderParams, a as ResourceRef } from '../api.d-DQTxwa0o.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
-import { V as ValueEqualityFn } from '../graph.d-DosWhngN.js';
-import '../event_dispatcher.d-pVP0-wST.js';
+import { V as ValueEqualityFn } from '../graph.d-StYigYp1.js';
+import '../event_dispatcher.d-PWnbqZDx.js';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
@@ -180,4 +180,5 @@ declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
  */
 declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
 
-export { type RxResourceOptions, type ToObservableOptions, type ToSignalOptions, outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal };
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal };
+export type { RxResourceOptions, ToObservableOptions, ToSignalOptions };

@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { O as OutputRef, a as OutputRefSubscription, D as DestroyRef, S as Signal, W as WritableSignal, V as ValueEqualityFn, I as Injector } from './ng_i18n_closure_mode.d-D37FVT4X.js';
+import { O as OutputRef, a as OutputRefSubscription, D as DestroyRef, S as Signal, W as WritableSignal, V as ValueEqualityFn, I as Injector } from './ng_i18n_closure_mode.d-7twEpBAl.js';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -293,4 +293,5 @@ type ResourceStreamItem<T> = {
     error: unknown;
 };
 
-export { type BaseResourceOptions as B, type OutputOptions as O, type PromiseResourceOptions as P, type ResourceLoaderParams as R, type StreamingResourceOptions as S, type WritableResource as W, type ResourceRef as a, ResourceStatus as b, type Resource as c, type ResourceStreamingLoader as d, type ResourceOptions as e, OutputEmitterRef as f, getOutputDestroyRef as g, type ResourceLoader as h, type ResourceStreamItem as i, output as o };
+export { ResourceStatus as b, OutputEmitterRef as f, getOutputDestroyRef as g, output as o };
+export type { BaseResourceOptions as B, OutputOptions as O, PromiseResourceOptions as P, ResourceLoaderParams as R, StreamingResourceOptions as S, WritableResource as W, ResourceRef as a, Resource as c, ResourceStreamingLoader as d, ResourceOptions as e, ResourceLoader as h, ResourceStreamItem as i };

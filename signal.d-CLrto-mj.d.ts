@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL, a as ReactiveHookFn } from './graph.d-DosWhngN.js';
+import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL, a as ReactiveHookFn } from './graph.d-StYigYp1.js';
 
 interface SignalNode<T> extends ReactiveNode {
     value: T;
@@ -26,4 +26,5 @@ declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T
 declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
 declare const SIGNAL_NODE: SignalNode<unknown>;
 
-export { type SignalNode as S, SIGNAL_NODE as a, type SignalGetter as b, createSignal as c, signalSetFn as d, signalUpdateFn as e, runPostSignalSetFn as r, setPostSignalSetFn as s };
+export { SIGNAL_NODE as a, createSignal as c, signalSetFn as d, signalUpdateFn as e, runPostSignalSetFn as r, setPostSignalSetFn as s };
+export type { SignalNode as S, SignalGetter as b };

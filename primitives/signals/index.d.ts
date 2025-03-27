@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL } from '../../graph.d-DosWhngN.js';
-export { b as REACTIVE_NODE, c as Reactive, a as ReactiveHookFn, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, s as runPostProducerCreatedFn, t as setActiveConsumer, u as setPostProducerCreatedFn } from '../../graph.d-DosWhngN.js';
-import { S as SignalNode } from '../../signal.d-DHhB2ZZR.js';
-export { a as SIGNAL_NODE, b as SignalGetter, c as createSignal, r as runPostSignalSetFn, s as setPostSignalSetFn, d as signalSetFn, e as signalUpdateFn } from '../../signal.d-DHhB2ZZR.js';
+import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL } from '../../graph.d-StYigYp1.js';
+export { b as REACTIVE_NODE, c as Reactive, a as ReactiveHookFn, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, s as runPostProducerCreatedFn, t as setActiveConsumer, u as setPostProducerCreatedFn } from '../../graph.d-StYigYp1.js';
+import { S as SignalNode } from '../../signal.d-CLrto-mj.js';
+export { a as SIGNAL_NODE, b as SignalGetter, c as createSignal, r as runPostSignalSetFn, s as setPostSignalSetFn, d as signalSetFn, e as signalUpdateFn } from '../../signal.d-CLrto-mj.js';
 export { s as setAlternateWeakRefImpl } from '../../weak_ref.d-ttyj86RV.js';
 
 /**
@@ -120,4 +120,5 @@ declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sc
  */
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
-export { type ComputationFn, type ComputedNode, type LinkedSignalGetter, type LinkedSignalNode, ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, type Watch, type WatchCleanupFn, type WatchCleanupRegisterFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
+export { ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
+export type { ComputationFn, ComputedNode, LinkedSignalGetter, LinkedSignalNode, Watch, WatchCleanupFn, WatchCleanupRegisterFn };

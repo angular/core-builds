@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.4+sha-5948cd0
+ * @license Angular v20.0.0-next.4+sha-0b34c58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { S as SIGNAL } from './graph.d-DosWhngN.js';
-import { f as EventContract } from './event_dispatcher.d-pVP0-wST.js';
+import { S as SIGNAL } from './graph.d-StYigYp1.js';
+import { f as EventContract } from './event_dispatcher.d-PWnbqZDx.js';
 
 /**
  * A reactive value which notifies consumers of any changes.
@@ -819,4 +819,5 @@ declare global {
     const ngI18nClosureMode: boolean;
 }
 
-export { type AbstractType as A, type ConstructorProvider as C, DestroyRef as D, type ExistingProvider as E, type FactoryProvider as F, Injector as I, JSACTION_EVENT_CONTRACT as J, type ModuleWithProviders as M, type OutputRef as O, type ProviderToken as P, type Signal as S, Type as T, type ValueEqualityFn as V, type WritableSignal as W, type OutputRefSubscription as a, InjectionToken as b, type InjectOptions as c, type ValueProvider as d, type StaticClassProvider as e, type ClassProvider as f, type EnvironmentProviders as g, type ProcessProvidersFunction as h, type Provider as i, InternalInjectFlags as j, type StaticProvider as k, type TypeProvider as l, type ValueSansProvider as m, type ExistingSansProvider as n, type StaticClassSansProvider as o, type ConstructorSansProvider as p, type FactorySansProvider as q, type ClassSansProvider as r, isSignal as s, type DestroyableInjector as t, type ImportedNgModuleProviders as u, type InternalEnvironmentProviders as v, isEnvironmentProviders as w, type Writable as x, type CreateSignalOptions as y, signal as z, ɵunwrapWritableSignal as ɵ };
+export { DestroyRef as D, Injector as I, JSACTION_EVENT_CONTRACT as J, Type as T, InjectionToken as b, InternalInjectFlags as j, isSignal as s, isEnvironmentProviders as w, signal as z, ɵunwrapWritableSignal as ɵ };
+export type { AbstractType as A, ConstructorProvider as C, ExistingProvider as E, FactoryProvider as F, ModuleWithProviders as M, OutputRef as O, ProviderToken as P, Signal as S, ValueEqualityFn as V, WritableSignal as W, OutputRefSubscription as a, InjectOptions as c, ValueProvider as d, StaticClassProvider as e, ClassProvider as f, EnvironmentProviders as g, ProcessProvidersFunction as h, Provider as i, StaticProvider as k, TypeProvider as l, ValueSansProvider as m, ExistingSansProvider as n, StaticClassSansProvider as o, ConstructorSansProvider as p, FactorySansProvider as q, ClassSansProvider as r, DestroyableInjector as t, ImportedNgModuleProviders as u, InternalEnvironmentProviders as v, Writable as x, CreateSignalOptions as y };
