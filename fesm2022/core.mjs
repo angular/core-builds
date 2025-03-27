@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.3+sha-6d3849f
+ * @license Angular v20.0.0-next.4+sha-98bf4d5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3152,20 +3152,38 @@ function setSimpleChangesStore(instance, store) {
     return (instance[SIMPLE_CHANGES_STORE] = store);
 }
 
-let profilerCallback = null;
+const profilerCallbacks = [];
+const NOOP_PROFILER_REMOVAL = () => { };
+function removeProfiler(profiler) {
+    const profilerIdx = profilerCallbacks.indexOf(profiler);
+    if (profilerIdx !== -1) {
+        profilerCallbacks.splice(profilerIdx, 1);
+    }
+}
 /**
- * Sets the callback function which will be invoked before and after performing certain actions at
- * runtime (for example, before and after running change detection).
+ * Adds a callback function which will be invoked before and after performing certain actions at
+ * runtime (for example, before and after running change detection). Multiple profiler callbacks can be set:
+ * in this case profiling events are reported to every registered callback.
  *
  * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
  * The contract of the function might be changed in any release and/or the function can be removed
  * completely.
  *
- * @param profiler function provided by the caller or null value to disable profiling.
+ * @param profiler function provided by the caller or null value to disable all profilers.
+ * @returns a cleanup function that, when invoked, removes a given profiler callback.
  */
-const setProfiler = (profiler) => {
-    profilerCallback = profiler;
-};
+function setProfiler(profiler) {
+    if (profiler !== null) {
+        if (!profilerCallbacks.includes(profiler)) {
+            profilerCallbacks.push(profiler);
+        }
+        return () => removeProfiler(profiler);
+    }
+    else {
+        profilerCallbacks.length = 0;
+        return NOOP_PROFILER_REMOVAL;
+    }
+}
 /**
  * Profiler function which wraps user code executed by the runtime.
  *
@@ -3174,10 +3192,10 @@ const setProfiler = (profiler) => {
  * @param eventFn function associated with event.
  *    For example a template function, lifecycle hook, or output listener.
  *    The value depends on the execution context
- * @returns
  */
 const profiler = function (event, instance = null, eventFn) {
-    if (profilerCallback != null /* both `null` and `undefined` */) {
+    for (let i = 0; i < profilerCallbacks.length; i++) {
+        const profilerCallback = profilerCallbacks[i];
         profilerCallback(event, instance, eventFn);
     }
 };
@@ -17946,6 +17964,16 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 }
 
 /**
+ * Contains a reference to a function that disables event replay feature
+ * for server-side rendered applications. This function is overridden with
+ * an actual implementation when the event replay feature is enabled via
+ * `withEventReplay()` call.
+ */
+let stashEventListener = (el, eventName, listenerFn) => { };
+function setStashFn(fn) {
+    stashEventListener = fn;
+}
+/**
  * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
  * if applicable.
  *
@@ -17958,24 +17986,19 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 function wrapListener(tNode, lView, listenerFn) {
     // Note: we are performing most of the work in the listener function itself
     // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // Ivy uses `Function` as a special token that allows us to unwrap the function
-        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
-        if (e === Function) {
-            return listenerFn;
-        }
+    return function wrapListenerIn_markDirtyAndPreventDefault(event) {
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
         markViewDirty(startView, 5 /* NotificationSource.Listener */);
         const context = lView[CONTEXT];
-        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
+        let result = executeListenerWithErrorHandling(lView, context, listenerFn, event);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
         let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
         while (nextListenerFn) {
             // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
+            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, event) && result;
             nextListenerFn = nextListenerFn.__ngNextListenerFn__;
         }
         return result;
@@ -18008,6 +18031,121 @@ function handleError(lView, error) {
         return;
     }
     injector.get(ErrorHandler, null)?.handleError(error);
+}
+/**
+ * Listen to a DOM event on a specific node.
+ * @param tNode TNode on which to listen.
+ * @param tView TView in which the node is placed.
+ * @param lView LView in which the node instance is placed.
+ * @param eventTargetResolver Resolver for global event targets.
+ * @param renderer Renderer to use for listening to the event.
+ * @param eventName Name of the event.
+ * @param originalListener Original listener as it was created by the compiler. Necessary for event
+ *   coalescing.
+ * @param wrappedListener Listener wrapped with additional logic like marking for check and error
+ *   handling.
+ * @returns Boolean indicating whether the event was bound or was coalesced into an existing
+ *   listener.
+ */
+function listenToDomEvent(tNode, tView, lView, eventTargetResolver, renderer, eventName, originalListener, wrappedListener) {
+    ngDevMode &&
+        assertNotSame(wrappedListener, originalListener, 'Expected wrapped and original listeners to be different.');
+    const isTNodeDirectiveHost = isDirectiveHost(tNode);
+    let hasCoalesced = false;
+    // In order to match current behavior, native DOM event listeners must be added for all
+    // events (including outputs).
+    // There might be cases where multiple directives on the same element try to register an event
+    // handler function for the same event. In this situation we want to avoid registration of
+    // several native listeners as each registration would be intercepted by NgZone and
+    // trigger change detection. This would mean that a single user action would result in several
+    // change detections being invoked. To avoid this situation we want to have only one call to
+    // native handler registration (for the same element and same type of event).
+    //
+    // In order to have just one native event handler in presence of multiple handler functions,
+    // we just register a first handler function as a native event listener and then chain
+    // (coalesce) other handler functions on top of the first native handler function.
+    let existingListener = null;
+    // Please note that the coalescing described here doesn't happen for events specifying an
+    // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+    // view engine.
+    // Also, we don't have to search for existing listeners if there are no directives
+    // matching on a given node as we can't register multiple event handlers for the same event in
+    // a template (this would mean having duplicate attributes).
+    if (!eventTargetResolver && isTNodeDirectiveHost) {
+        existingListener = findExistingListener(tView, lView, eventName, tNode.index);
+    }
+    if (existingListener !== null) {
+        // Attach a new listener to coalesced listeners list, maintaining the order in which
+        // listeners are registered. For performance reasons, we keep a reference to the last
+        // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+        // the entire set each time we need to add a new listener.
+        const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+        lastListenerFn.__ngNextListenerFn__ = originalListener;
+        existingListener.__ngLastListenerFn__ = originalListener;
+        hasCoalesced = true;
+    }
+    else {
+        const native = getNativeByTNode(tNode, lView);
+        const target = eventTargetResolver ? eventTargetResolver(native) : native;
+        stashEventListener(target, eventName, wrappedListener);
+        const cleanupFn = renderer.listen(target, eventName, wrappedListener);
+        const idxOrTargetGetter = eventTargetResolver
+            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
+            : tNode.index;
+        storeListenerCleanup(idxOrTargetGetter, tView, lView, eventName, wrappedListener, cleanupFn, false);
+    }
+    return hasCoalesced;
+}
+/**
+ * A utility function that checks if a given element has already an event handler registered for an
+ * event with a specified name. The TView.cleanup data structure is used to find out which events
+ * are registered for a given element.
+ */
+function findExistingListener(tView, lView, eventName, tNodeIndex) {
+    const tCleanup = tView.cleanup;
+    if (tCleanup != null) {
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            const cleanupEventName = tCleanup[i];
+            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIndex) {
+                // We have found a matching event name on the same node but it might not have been
+                // registered yet, so we must explicitly verify entries in the LView cleanup data
+                // structures.
+                const lCleanup = lView[CLEANUP];
+                const listenerIdxInLCleanup = tCleanup[i + 2];
+                return lCleanup && lCleanup.length > listenerIdxInLCleanup
+                    ? lCleanup[listenerIdxInLCleanup]
+                    : null;
+            }
+            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+            // documentation of TView.cleanup for more details of this data structure layout.
+            if (typeof cleanupEventName === 'string') {
+                i += 2;
+            }
+        }
+    }
+    return null;
+}
+/**
+ * Stores a cleanup function for an event listener.
+ * @param indexOrTargetGetter Either the index of the TNode on which the event is bound or a
+ *  function that when invoked will return the event target.
+ * @param tView TView in which the event is bound.
+ * @param lView LView in which the event is bound.
+ * @param eventName Name of the event.
+ * @param listenerFn Final callback of the event.
+ * @param cleanup Function to invoke during cleanup.
+ * @param isOutput Whether this is an output listener or a native DOM listener.
+ */
+function storeListenerCleanup(indexOrTargetGetter, tView, lView, eventName, listenerFn, cleanup, isOutput) {
+    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    const index = lCleanup.length;
+    lCleanup.push(listenerFn, cleanup);
+    tCleanup &&
+        tCleanup.push(eventName, indexOrTargetGetter, index, (index + 1) * (isOutput ? -1 : 1));
 }
 
 function createOutputListener(tNode, lView, listenerFn, targetDef, eventName) {
@@ -18067,13 +18205,8 @@ function listenToOutput(tNode, lView, directiveIndex, lookupName, eventName, lis
     if (ngDevMode && !isOutputSubscribable(output)) {
         throw new Error(`@Output ${propertyName} not initialized in '${instance.constructor.name}'.`);
     }
-    // TODO(pk): introduce utility to store cleanup or find a different way of sharing code with listener
-    const tCleanup = tView.firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    const lCleanup = getOrCreateLViewCleanup(lView);
     const subscription = output.subscribe(listenerFn);
-    const idx = lCleanup.length;
-    lCleanup.push(listenerFn, subscription);
-    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+    storeListenerCleanup(tNode.index, tView, lView, eventName, listenerFn, subscription, true);
 }
 /**
  * Whether the given value represents a subscribable output.
@@ -18416,7 +18549,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.3+sha-6d3849f']
+        ? ['ng-version', '20.0.0-next.4+sha-98bf4d5']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -30497,16 +30630,6 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 }
 
 /**
- * Contains a reference to a function that disables event replay feature
- * for server-side rendered applications. This function is overridden with
- * an actual implementation when the event replay feature is enabled via
- * `withEventReplay()` call.
- */
-let stashEventListener = (el, eventName, listenerFn) => { };
-function setStashFn(fn) {
-    stashEventListener = fn;
-}
-/**
  * Adds an event listener to the current node.
  *
  * If an output exists on one of the node's directives, it also subscribes to the output
@@ -30556,101 +30679,21 @@ function ɵɵsyntheticHostListener(eventName, listenerFn) {
     listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
     return ɵɵsyntheticHostListener;
 }
-/**
- * A utility function that checks if a given element has already an event handler registered for an
- * event with a specified name. The TView.cleanup data structure is used to find out which events
- * are registered for a given element.
- */
-function findExistingListener(tView, lView, eventName, tNodeIdx) {
-    const tCleanup = tView.cleanup;
-    if (tCleanup != null) {
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            const cleanupEventName = tCleanup[i];
-            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
-                // We have found a matching event name on the same node but it might not have been
-                // registered yet, so we must explicitly verify entries in the LView cleanup data
-                // structures.
-                const lCleanup = lView[CLEANUP];
-                const listenerIdxInLCleanup = tCleanup[i + 2];
-                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
-            }
-            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
-            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
-            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
-            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
-            // documentation of TView.cleanup for more details of this data structure layout.
-            if (typeof cleanupEventName === 'string') {
-                i += 2;
-            }
-        }
-    }
-    return null;
-}
 function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
-    const isTNodeDirectiveHost = isDirectiveHost(tNode);
-    const firstCreatePass = tView.firstCreatePass;
-    const tCleanup = firstCreatePass ? getOrCreateTViewCleanup(tView) : null;
-    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
-    // native listener or a directive output on this element. As such we we know that we will have to
-    // register a listener and store its cleanup function on LView.
-    const lCleanup = getOrCreateLViewCleanup(lView);
     ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
     let processOutputs = true;
+    let wrappedListener = null;
     // Adding a native event listener is applicable when:
     // - The corresponding TNode represents a DOM element.
     // - The event target has a resolver (usually resulting in a global object,
     //   such as `window` or `document`).
     if (tNode.type & 3 /* TNodeType.AnyRNode */ || eventTargetResolver) {
-        const native = getNativeByTNode(tNode, lView);
-        const target = eventTargetResolver ? eventTargetResolver(native) : native;
-        const lCleanupIndex = lCleanup.length;
-        const idxOrTargetGetter = eventTargetResolver
-            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
-            : tNode.index;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        // There might be cases where multiple directives on the same element try to register an event
-        // handler function for the same event. In this situation we want to avoid registration of
-        // several native listeners as each registration would be intercepted by NgZone and
-        // trigger change detection. This would mean that a single user action would result in several
-        // change detections being invoked. To avoid this situation we want to have only one call to
-        // native handler registration (for the same element and same type of event).
-        //
-        // In order to have just one native event handler in presence of multiple handler functions,
-        // we just register a first handler function as a native event listener and then chain
-        // (coalesce) other handler functions on top of the first native handler function.
-        let existingListener = null;
-        // Please note that the coalescing described here doesn't happen for events specifying an
-        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-        // view engine.
-        // Also, we don't have to search for existing listeners is there are no directives
-        // matching on a given node as we can't register multiple event handlers for the same event in
-        // a template (this would mean having duplicate attributes).
-        if (!eventTargetResolver && isTNodeDirectiveHost) {
-            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
-        }
-        if (existingListener !== null) {
-            // Attach a new listener to coalesced listeners list, maintaining the order in which
-            // listeners are registered. For performance reasons, we keep a reference to the last
-            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-            // the entire set each time we need to add a new listener.
-            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-            lastListenerFn.__ngNextListenerFn__ = listenerFn;
-            existingListener.__ngLastListenerFn__ = listenerFn;
+        wrappedListener ??= wrapListener(tNode, lView, listenerFn);
+        const hasCoalescedDomEvent = listenToDomEvent(tNode, tView, lView, eventTargetResolver, renderer, eventName, listenerFn, wrappedListener);
+        // Context: https://github.com/angular/angular/pull/30144
+        if (hasCoalescedDomEvent) {
             processOutputs = false;
         }
-        else {
-            listenerFn = wrapListener(tNode, lView, listenerFn);
-            stashEventListener(target, eventName, listenerFn);
-            const cleanupFn = renderer.listen(target, eventName, listenerFn);
-            lCleanup.push(listenerFn, cleanupFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-        }
-    }
-    else {
-        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
-        // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, listenerFn);
     }
     if (processOutputs) {
         const outputConfig = tNode.outputs?.[eventName];
@@ -30659,12 +30702,14 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             for (let i = 0; i < hostDirectiveOutputConfig.length; i += 2) {
                 const index = hostDirectiveOutputConfig[i];
                 const lookupName = hostDirectiveOutputConfig[i + 1];
-                listenToOutput(tNode, lView, index, lookupName, eventName, listenerFn);
+                wrappedListener ??= wrapListener(tNode, lView, listenerFn);
+                listenToOutput(tNode, lView, index, lookupName, eventName, wrappedListener);
             }
         }
         if (outputConfig && outputConfig.length) {
             for (const index of outputConfig) {
-                listenToOutput(tNode, lView, index, eventName, eventName, listenerFn);
+                wrappedListener ??= wrapListener(tNode, lView, listenerFn);
+                listenToOutput(tNode, lView, index, eventName, eventName, wrappedListener);
             }
         }
     }
@@ -35040,7 +35085,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.3+sha-6d3849f');
+const VERSION = new Version('20.0.0-next.4+sha-98bf4d5');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39925,6 +39970,7 @@ const BASE_EFFECT_NODE =
         if (!this.cleanupFns?.length) {
             return;
         }
+        const prevConsumer = setActiveConsumer$1(null);
         try {
             // Attempt to run the cleanup functions. Regardless of failure or success, we consider
             // cleanup "completed" and clear the list for the next run of the effect. Note that an error
@@ -39935,6 +39981,7 @@ const BASE_EFFECT_NODE =
         }
         finally {
             this.cleanupFns = [];
+            setActiveConsumer$1(prevConsumer);
         }
     },
 }))();

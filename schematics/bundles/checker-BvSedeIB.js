@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.3+sha-6d3849f
+ * @license Angular v20.0.0-next.4+sha-98bf4d5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1314,14 +1314,13 @@ class TemplateLiteralElementExpr extends Expression {
     constructor(text, sourceSpan, rawText) {
         super(STRING_TYPE, sourceSpan);
         this.text = text;
-        // If `rawText` is not provided, try to extract the raw string from its
-        // associated `sourceSpan`. If that is also not available, "fake" the raw
-        // string instead by escaping the following control sequences:
+        // If `rawText` is not provided, "fake" the raw string by escaping the following sequences:
         // - "\" would otherwise indicate that the next character is a control character.
         // - "`" and "${" are template string control sequences that would otherwise prematurely
         // indicate the end of the template literal element.
-        this.rawText =
-            rawText ?? sourceSpan?.toString() ?? escapeForTemplateLiteral(escapeSlashes(text));
+        // Note that we can't rely on the `sourceSpan` here, because it may be incorrect (see
+        // https://github.com/angular/angular/pull/60267#discussion_r1986402524).
+        this.rawText = rawText ?? escapeForTemplateLiteral(escapeSlashes(text));
     }
     visitExpression(visitor, context) {
         return visitor.visitTemplateLiteralElementExpr(this, context);
@@ -27275,10 +27274,16 @@ class BindingParser {
         const prop = this._schemaRegistry.getMappedPropName(propName);
         return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
     }
+    parseEventListenerName(rawName) {
+        const [target, eventName] = splitAtColon(rawName, [null, rawName]);
+        return { eventName: eventName, target };
+    }
+    parseAnimationEventName(rawName) {
+        const matches = splitAtPeriod(rawName, [rawName, null]);
+        return { eventName: matches[0], phase: matches[1] === null ? null : matches[1].toLowerCase() };
+    }
     _parseAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan) {
-        const matches = splitAtPeriod(name, [name, '']);
-        const eventName = matches[0];
-        const phase = matches[1].toLowerCase();
+        const { eventName, phase } = this.parseAnimationEventName(name);
         const ast = this._parseAction(expression, handlerSpan);
         targetEvents.push(new ParsedEvent(eventName, phase, exports.ParsedEventType.Animation, ast, sourceSpan, handlerSpan, keySpan));
         if (eventName.length === 0) {
@@ -27295,7 +27300,7 @@ class BindingParser {
     }
     _parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
         // long format: 'target: eventName'
-        const [target, eventName] = splitAtColon(name, [null, name]);
+        const { eventName, target } = this.parseEventListenerName(name);
         const prevErrorCount = this.errors.length;
         const ast = this._parseAction(expression, handlerSpan);
         const isValid = this.errors.length === prevErrorCount;
@@ -31611,7 +31616,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.3+sha-6d3849f');
+new Version('20.0.0-next.4+sha-98bf4d5');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32566,7 +32571,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-k591b6WQ.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BvSedeIB.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -42963,8 +42968,25 @@ function createNodeFromListenerDecorator(decorator, parser, listeners) {
     }
     const callNode = new Call(span, nameSpan, receiver, argNodes, span);
     const eventNameNode = args[0];
-    const [eventName, phase] = eventNameNode.text.split('.');
-    listeners.push(new BoundEvent(eventName, eventName.startsWith('@') ? exports.ParsedEventType.Animation : exports.ParsedEventType.Regular, callNode, null, phase, createSourceSpan(decorator), createSourceSpan(decorator), createStaticExpressionSpan(eventNameNode)));
+    let type;
+    let eventName;
+    let phase;
+    let target;
+    if (eventNameNode.text.startsWith('@')) {
+        const parsedName = parser.parseAnimationEventName(eventNameNode.text);
+        type = exports.ParsedEventType.Animation;
+        eventName = parsedName.eventName;
+        phase = parsedName.phase;
+        target = null;
+    }
+    else {
+        const parsedName = parser.parseEventListenerName(eventNameNode.text);
+        type = exports.ParsedEventType.Regular;
+        eventName = parsedName.eventName;
+        target = parsedName.target;
+        phase = null;
+    }
+    listeners.push(new BoundEvent(eventName, type, callNode, target, phase, createSourceSpan(decorator), createSourceSpan(decorator), createStaticExpressionSpan(eventNameNode)));
 }
 /**
  * Infers the attribute name and binding type of a bound attribute based on its raw name.
@@ -45643,10 +45665,18 @@ class TcbUnclaimedOutputsOp extends TcbOp {
                 // `$event` depending on the event name. For unknown event names, TypeScript resorts to the
                 // base `Event` type.
                 const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0 /* EventParamType.Infer */);
-                if (elId === null) {
-                    elId = this.scope.resolve(this.target);
+                let target;
+                // Only check for `window` and `document` since in theory any target can be passed.
+                if (output.target === 'window' || output.target === 'document') {
+                    target = ts.factory.createIdentifier(output.target);
                 }
-                const propertyAccess = ts.factory.createPropertyAccessExpression(elId, 'addEventListener');
+                else if (elId === null) {
+                    target = elId = this.scope.resolve(this.target);
+                }
+                else {
+                    target = elId;
+                }
+                const propertyAccess = ts.factory.createPropertyAccessExpression(target, 'addEventListener');
                 addParseSpanInfo(propertyAccess, output.keySpan);
                 const call = ts.factory.createCallExpression(
                 /* expression */ propertyAccess, 

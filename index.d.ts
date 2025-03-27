@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.3+sha-6d3849f
+ * @license Angular v20.0.0-next.4+sha-98bf4d5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15659,6 +15659,9 @@ declare function ɵɵi18nPostprocess(message: string, replacements?: {
     [key: string]: string | string[];
 }): string;
 
+/** Shorthand for an event listener callback function to reduce duplication. */
+type EventCallback = (event?: any) => any;
+
 /**
  * Adds an event listener to the current node.
  *
@@ -15672,7 +15675,7 @@ declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *
  * @codeGenApi
  */
-declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
+declare function ɵɵlistener(eventName: string, listenerFn: EventCallback, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 /**
  * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
  *
@@ -15694,7 +15697,7 @@ declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, e
  *
  * @codeGenApi
  */
-declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any): typeof ɵɵsyntheticHostListener;
+declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: EventCallback): typeof ɵɵsyntheticHostListener;
 
 /**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
@@ -17163,7 +17166,7 @@ declare function ɵɵtwoWayBindingSet<T>(target: unknown, value: T): boolean;
  *
  * @codeGenApi
  */
-declare function ɵɵtwoWayListener(eventName: string, listenerFn: (e?: any) => any): typeof ɵɵtwoWayListener;
+declare function ɵɵtwoWayListener(eventName: string, listenerFn: EventCallback): typeof ɵɵtwoWayListener;
 
 /*!
  * @license
@@ -17970,6 +17973,20 @@ interface Profiler {
 }
 
 /**
+ * Adds a callback function which will be invoked before and after performing certain actions at
+ * runtime (for example, before and after running change detection). Multiple profiler callbacks can be set:
+ * in this case profiling events are reported to every registered callback.
+ *
+ * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+ * The contract of the function might be changed in any release and/or the function can be removed
+ * completely.
+ *
+ * @param profiler function provided by the caller or null value to disable all profilers.
+ * @returns a cleanup function that, when invoked, removes a given profiler callback.
+ */
+declare function setProfiler(profiler: Profiler | null): () => void;
+
+/**
  * Marks a component for check (in case of OnPush components) and synchronously
  * performs change detection on the application this component belongs to.
  *
@@ -18133,7 +18150,7 @@ declare const globalUtilsFunctions: {
     ɵgetInjectorProviders: typeof getInjectorProviders;
     ɵgetInjectorResolutionPath: typeof getInjectorResolutionPath;
     ɵgetInjectorMetadata: typeof getInjectorMetadata;
-    ɵsetProfiler: (profiler: _angular_core.ɵProfiler | null) => void;
+    ɵsetProfiler: typeof setProfiler;
     ɵgetSignalGraph: typeof getSignalGraph;
     ɵgetDeferBlocks: typeof getDeferBlocks;
     getDirectiveMetadata: typeof getDirectiveMetadata;
