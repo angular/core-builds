@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-b18215d
+ * @license Angular v19.2.4+sha-882f96f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -49,15 +49,18 @@ class RuntimeError extends Error {
         this.code = code;
     }
 }
+function formatRuntimeErrorCode(code) {
+    // Error code might be a negative number, which is a special marker that instructs the logic to
+    // generate a link to the error details page on angular.io.
+    // We also prepend `0` to non-compile-time errors.
+    return `NG0${Math.abs(code)}`;
+}
 /**
  * Called to format a runtime error.
  * See additional info on the `message` argument type in the `RuntimeError` class description.
  */
 function formatRuntimeError(code, message) {
-    // Error code might be a negative number, which is a special marker that instructs the logic to
-    // generate a link to the error details page on angular.io.
-    // We also prepend `0` to non-compile-time errors.
-    const fullCode = `NG0${Math.abs(code)}`;
+    const fullCode = formatRuntimeErrorCode(code);
     let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
     if (ngDevMode && code < 0) {
         const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
@@ -17916,7 +17919,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.4+sha-b18215d']
+                ? ['ng-version', '19.2.4+sha-882f96f']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -24314,6 +24317,25 @@ function setImmediateTriggers(injector, elementTriggers) {
 }
 
 /**
+ * Indicates whether we've already produced a warning,
+ * prevents the logic from producing it multiple times.
+ */
+let _hmrWarningProduced = false;
+/**
+ * Logs a message into the console to indicate that `@defer` block
+ * dependencies are loaded eagerly when the HMR mode is enabled.
+ */
+function logHmrWarning(injector) {
+    if (!_hmrWarningProduced) {
+        _hmrWarningProduced = true;
+        const console = injector.get(Console);
+        // tslint:disable-next-line:no-console
+        console.log(formatRuntimeError(-751 /* RuntimeErrorCode.DEFER_IN_HMR_MODE */, 'Angular has detected that this application contains `@defer` blocks ' +
+            'and the hot module replacement (HMR) mode is enabled. All `@defer` ' +
+            'block dependencies will be loaded eagerly.'));
+    }
+}
+/**
  * Creates runtime data structures for defer blocks.
  *
  * @param index Index of the `defer` instruction.
@@ -24342,6 +24364,9 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
     const injector = lView[INJECTOR];
     if (tView.firstCreatePass) {
         performanceMarkFeature('NgDefer');
+        if (ngDevMode && typeof ngHmrMode !== 'undefined' && ngHmrMode) {
+            logHmrWarning(injector);
+        }
         const tDetails = {
             primaryTmplIndex,
             loadingTmplIndex: loadingTmplIndex ?? null,
@@ -34640,7 +34665,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.4+sha-b18215d');
+const VERSION = new Version('19.2.4+sha-882f96f');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

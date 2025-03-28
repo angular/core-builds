@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-b18215d
+ * @license Angular v19.2.4+sha-882f96f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7681,6 +7681,19 @@ interface HostListener {
 declare const HostListener: HostListenerDecorator;
 
 declare global {
+    /**
+     * Indicates whether HMR is enabled for the application.
+     *
+     * `ngHmrMode` is a global flag set by Angular's CLI.
+     *
+     * @remarks
+     * - **Internal Angular Flag**: This is an *internal* Angular flag (not a public API), avoid relying on it in application code.
+     * - **Avoid Direct Use**: This variable is intended for runtime configuration; it should not be accessed directly in application code.
+     */
+    var ngHmrMode: boolean | undefined;
+}
+
+declare global {
     const ngJitMode: boolean;
 }
 
@@ -12523,6 +12536,7 @@ declare const enum RuntimeErrorCode {
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     DEFER_LOADING_FAILED = -750,
+    DEFER_IN_HMR_MODE = -751,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,
