@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-152261c
+ * @license Angular v20.0.0-next.4+sha-e40b5c9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DSBE_Uym.js');
-require('./index-B_BMgcyr.js');
+var checker = require('./checker-B2EFE6kN.js');
+var compiler = require('./compiler-OAe7rLEY.js');
+require('./index-L4q0vOFe.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-DJdCpwB7.js');
+var run_in_devkit = require('./run_in_devkit-C6VDQLwr.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var property_name = require('./property_name-BBwFuqMe.js');
 require('@angular-devkit/core');
@@ -202,7 +203,7 @@ function parseTemplate(template) {
         // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
         // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
         // easily get the text-only ranges without having to reconstruct the original text.
-        parsed = new checker.HtmlParser().parse(template, '', {
+        parsed = new compiler.HtmlParser().parse(template, '', {
             // Allows for ICUs to be parsed.
             tokenizeExpansionForms: true,
             // Explicitly disable blocks so that their characters are treated as plain text.
@@ -227,7 +228,7 @@ function migrateTemplateToSelfClosingTags(template) {
         return { migrated: template, changed: false, replacementCount: 0 };
     }
     const visitor = new AngularElementCollector();
-    checker.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll$1(visitor, parsed.tree.rootNodes);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -255,8 +256,8 @@ function replaceWithSelfClosingTag(html, tagName) {
 function replaceTemplate(template, replaceValue, start, end, offset) {
     return template.slice(0, start + offset) + replaceValue + template.slice(end + offset);
 }
-const ALL_HTML_TAGS = new checker.DomElementSchemaRegistry().allKnownElementNames();
-class AngularElementCollector extends checker.RecursiveVisitor {
+const ALL_HTML_TAGS = new compiler.DomElementSchemaRegistry().allKnownElementNames();
+class AngularElementCollector extends compiler.RecursiveVisitor$1 {
     elements = [];
     constructor() {
         super();
@@ -283,7 +284,7 @@ class AngularElementCollector extends checker.RecursiveVisitor {
         }
         if (element.children.length === 1) {
             const child = element.children[0];
-            return child instanceof checker.Text && /^\s*$/.test(child.value);
+            return child instanceof compiler.Text && /^\s*$/.test(child.value);
         }
         return false;
     }

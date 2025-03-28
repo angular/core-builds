@@ -1,21 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-152261c
+ * @license Angular v20.0.0-next.4+sha-e40b5c9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-DSBE_Uym.js');
+var compiler = require('./compiler-OAe7rLEY.js');
 var ts = require('typescript');
+var checker = require('./checker-B2EFE6kN.js');
 require('os');
-var index$1 = require('./index-B_BMgcyr.js');
+var index$1 = require('./index-L4q0vOFe.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-DJdCpwB7.js');
-var apply_import_manager = require('./apply_import_manager-85cHOpGQ.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-BNrpzeOF.js');
+var run_in_devkit = require('./run_in_devkit-C6VDQLwr.js');
+var apply_import_manager = require('./apply_import_manager-h4cy3Sso.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BOphL2fx.js');
 var assert = require('assert');
-var index = require('./index-Ciwadf5y.js');
+var index = require('./index-Bup_-3o1.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -134,7 +135,7 @@ function extractQueryListType(node) {
  *       --> read stays
  *       --> emitDistinctChangesOnly is gone!
  */
-function computeReplacementsToMigrateQuery(node, metadata, importManager, info, printer, options, checker$1) {
+function computeReplacementsToMigrateQuery(node, metadata, importManager, info, printer, options, checker) {
     const sf = node.getSourceFile();
     let newQueryFn = importManager.addImport({
         requestedFile: sf,
@@ -159,7 +160,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
         }
     }
     if (metadata.queryInfo.read !== null) {
-        assert(metadata.queryInfo.read instanceof checker.WrappedNodeExpr);
+        assert(metadata.queryInfo.read instanceof compiler.WrappedNodeExpr);
         optionProperties.push(ts.factory.createPropertyAssignment('read', metadata.queryInfo.read.node));
     }
     if (metadata.queryInfo.descendants !== defaultDescendants) {
@@ -183,7 +184,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
         node.initializer === undefined &&
         node.questionToken === undefined &&
         type !== undefined &&
-        !checker$1.isTypeAssignableTo(checker$1.getUndefinedType(), checker$1.getTypeFromTypeNode(type))) {
+        !checker.isTypeAssignableTo(checker.getUndefinedType(), checker.getTypeFromTypeNode(type))) {
         isRequired = true;
     }
     if (isRequired && metadata.queryInfo.first) {
@@ -203,7 +204,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     // If the original property type and the read type are matching, we can rely
     // on the TS inference, instead of repeating types, like in `viewChild<Button>(Button)`.
     if (type !== undefined &&
-        resolvedReadType instanceof checker.WrappedNodeExpr &&
+        resolvedReadType instanceof compiler.WrappedNodeExpr &&
         ts.isIdentifier(resolvedReadType.node) &&
         ts.isTypeReferenceNode(type) &&
         ts.isIdentifier(type.typeName) &&
@@ -520,7 +521,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof checker.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof compiler.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
@@ -558,7 +559,7 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
         return null;
     }
     const potentialCall = ref.from.readAstPath[accessIdx - 1];
-    if (potentialCall === undefined || !(potentialCall instanceof checker.Call)) {
+    if (potentialCall === undefined || !(potentialCall instanceof compiler.Call)) {
         return null;
     }
     return potentialCall;
