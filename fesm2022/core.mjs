@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-958e98e
+ * @license Angular v19.2.4+sha-b18215d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9903,8 +9903,8 @@ function gatherDeferBlocksByJSActionAttribute(doc) {
 }
 function appendDeferBlocksToJSActionMap(doc, injector) {
     const blockMap = gatherDeferBlocksByJSActionAttribute(doc);
+    const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
     for (let rNode of blockMap) {
-        const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
         sharedMapFunction(rNode, jsActionMap);
     }
 }
@@ -17916,7 +17916,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.4+sha-958e98e']
+                ? ['ng-version', '19.2.4+sha-b18215d']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34640,7 +34640,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.4+sha-958e98e');
+const VERSION = new Version('19.2.4+sha-b18215d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
