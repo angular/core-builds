@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.4+sha-b21c6e5
+ * @license Angular v20.0.0-next.4+sha-152261c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { b as InjectionToken, T as Type, d as ValueProvider, E as ExistingProvider, F as FactoryProvider, C as ConstructorProvider, e as StaticClassProvider, f as ClassProvider, g as EnvironmentProviders, I as Injector, P as ProviderToken, c as InjectOptions, h as ProcessProvidersFunction, M as ModuleWithProviders, i as Provider, D as DestroyRef, j as InternalInjectFlags, W as WritableSignal, O as OutputRef, k as StaticProvider } from './ng_i18n_closure_mode.d-7twEpBAl.js';
+import { b as InjectionToken, T as Type, d as ValueProvider, E as ExistingProvider, F as FactoryProvider, C as ConstructorProvider, e as StaticClassProvider, f as ClassProvider, g as EnvironmentProviders, I as Injector, P as ProviderToken, c as InjectOptions, h as ProcessProvidersFunction, M as ModuleWithProviders, i as Provider, D as DestroyRef, j as InternalInjectFlags, W as WritableSignal, O as OutputRef, k as StaticProvider } from './ng_i18n_closure_mode.d-CcKUjg4s.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { S as SignalNode } from './signal.d-CLrto-mj.js';
 import { R as ReactiveNode } from './graph.d-StYigYp1.js';

@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.4+sha-b21c6e5
+ * @license Angular v20.0.0-next.4+sha-152261c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { O as OutputRef, a as OutputRefSubscription, D as DestroyRef, S as Signal, W as WritableSignal, V as ValueEqualityFn, I as Injector } from './ng_i18n_closure_mode.d-7twEpBAl.js';
+import { O as OutputRef, a as OutputRefSubscription, D as DestroyRef, S as Signal, W as WritableSignal, V as ValueEqualityFn, I as Injector } from './ng_i18n_closure_mode.d-CcKUjg4s.js';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
