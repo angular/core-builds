@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.2.4+sha-fdde642
+ * @license Angular v19.2.4+sha-84f3ba0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL, a as SignalNode } from '../../weak_ref.d-Bp6cSy-X.js';
-export { b as REACTIVE_NODE, c as Reactive, t as SIGNAL_NODE, u as SignalGetter, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, v as createSignal, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, w as runPostSignalSetFn, s as setActiveConsumer, A as setAlternateWeakRefImpl, x as setPostSignalSetFn, y as signalSetFn, z as signalUpdateFn } from '../../weak_ref.d-Bp6cSy-X.js';
+import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL, a as SignalNode } from '../../weak_ref.d-DOjz-6fK.js';
+export { b as REACTIVE_NODE, c as Reactive, t as SIGNAL_NODE, u as SignalGetter, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, v as createSignal, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, w as runPostSignalSetFn, s as setActiveConsumer, A as setAlternateWeakRefImpl, x as setPostSignalSetFn, y as signalSetFn, z as signalUpdateFn } from '../../weak_ref.d-DOjz-6fK.js';
 
 /**
  * A computation, which derives a value from a declarative reactive expression.
@@ -117,4 +117,5 @@ declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sc
  */
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
-export { type ComputationFn, type ComputedNode, type LinkedSignalGetter, type LinkedSignalNode, ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, type Watch, type WatchCleanupFn, type WatchCleanupRegisterFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
+export { ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
+export type { ComputationFn, ComputedNode, LinkedSignalGetter, LinkedSignalNode, Watch, WatchCleanupFn, WatchCleanupRegisterFn };

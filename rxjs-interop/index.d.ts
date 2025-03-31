@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-fdde642
+ * @license Angular v19.2.4+sha-84f3ba0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -188,4 +188,5 @@ declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
  */
 declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
 
-export { type RxResourceOptions, type ToObservableOptions, type ToSignalOptions, outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
+export type { RxResourceOptions, ToObservableOptions, ToSignalOptions };

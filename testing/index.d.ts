@@ -1,12 +1,12 @@
 /**
- * @license Angular v19.2.4+sha-fdde642
+ * @license Angular v19.2.4+sha-84f3ba0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { ɵDeferBlockDetails as _DeferBlockDetails, ɵDeferBlockState as _DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, ɵDeferBlockBehavior as _DeferBlockBehavior, InjectionToken, PlatformRef, Type, ProviderToken, InjectOptions, InjectFlags, NgModule, Component, Directive, Pipe } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
-import { N as Navigation, a as NavigationHistoryEntry, b as NavigationNavigateOptions, c as NavigationResult, d as NavigationOptions, e as NavigateEvent, f as NavigationCurrentEntryChangeEvent, g as NavigationTransition, h as NavigationUpdateCurrentEntryOptions, i as NavigationReloadOptions } from '../navigation_types.d-DgDrF5rp.js';
+import { N as Navigation, a as NavigationHistoryEntry, b as NavigationNavigateOptions, c as NavigationResult, d as NavigationOptions, e as NavigateEvent, f as NavigationCurrentEntryChangeEvent, g as NavigationTransition, h as NavigationUpdateCurrentEntryOptions, i as NavigationReloadOptions } from '../navigation_types.d-Lh6SmhKv.js';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -702,4 +702,5 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispose(): void;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, type MetadataOverride, type ModuleTeardownOptions, TestBed, type TestBedStatic, TestComponentRenderer, type TestEnvironmentOptions, type TestModuleMetadata, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata };

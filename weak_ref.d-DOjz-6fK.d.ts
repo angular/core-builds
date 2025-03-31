@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-fdde642
+ * @license Angular v19.2.4+sha-84f3ba0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -210,4 +210,5 @@ declare const SIGNAL_NODE: SignalNode<unknown>;
 
 declare function setAlternateWeakRefImpl(impl: unknown): void;
 
-export { setAlternateWeakRefImpl as A, type ReactiveNode as R, SIGNAL as S, type ValueEqualityFn as V, type SignalNode as a, REACTIVE_NODE as b, type Reactive as c, defaultEquals as d, consumerAfterComputation as e, consumerBeforeComputation as f, consumerDestroy as g, consumerMarkDirty as h, consumerPollProducersForChange as i, getActiveConsumer as j, isInNotificationPhase as k, isReactive as l, producerIncrementEpoch as m, producerMarkClean as n, producerNotifyConsumers as o, producerAccessed as p, producerUpdateValueVersion as q, producerUpdatesAllowed as r, setActiveConsumer as s, SIGNAL_NODE as t, type SignalGetter as u, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalSetFn as y, signalUpdateFn as z };
+export { setAlternateWeakRefImpl as A, SIGNAL as S, REACTIVE_NODE as b, defaultEquals as d, consumerAfterComputation as e, consumerBeforeComputation as f, consumerDestroy as g, consumerMarkDirty as h, consumerPollProducersForChange as i, getActiveConsumer as j, isInNotificationPhase as k, isReactive as l, producerIncrementEpoch as m, producerMarkClean as n, producerNotifyConsumers as o, producerAccessed as p, producerUpdateValueVersion as q, producerUpdatesAllowed as r, setActiveConsumer as s, SIGNAL_NODE as t, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalSetFn as y, signalUpdateFn as z };
+export type { ReactiveNode as R, ValueEqualityFn as V, SignalNode as a, Reactive as c, SignalGetter as u };

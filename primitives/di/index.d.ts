@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-fdde642
+ * @license Angular v19.2.4+sha-84f3ba0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -102,4 +102,5 @@ interface Injector {
 declare function getCurrentInjector(): Injector | undefined | null;
 declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 
-export { type InjectionToken, type Injector, NOT_FOUND, type NotFound, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector, type ɵɵInjectableDeclaration };
+export { NOT_FOUND, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector };
+export type { InjectionToken, Injector, NotFound, ɵɵInjectableDeclaration };
