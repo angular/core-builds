@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-8b5ba62
+ * @license Angular v20.0.0-next.4+sha-1e697f3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3061,11 +3061,6 @@ interface CreateEffectOptions {
      */
     manualCleanup?: boolean;
     /**
-     * Always create a root effect (which is scheduled as a microtask) regardless of whether `effect`
-     * is called within a component.
-     */
-    forceRoot?: true;
-    /**
      * @deprecated no longer required, signal writes are allowed by default.
      */
     allowSignalWrites?: boolean;
@@ -3095,7 +3090,7 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * Angular has two different kinds of effect: component effects and root effects. Component effects
  * are created when `effect()` is called from a component, directive, or within a service of a
  * component/directive. Root effects are created when `effect()` is called from outside the
- * component tree, such as in a root service, or when the `forceRoot` option is provided.
+ * component tree, such as in a root service.
  *
  * The two effect types differ in their timing. Component effects run as a component lifecycle
  * event during Angular's synchronization (change detection) process, and can safely read input

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-8b5ba62
+ * @license Angular v20.0.0-next.4+sha-1e697f3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -118,7 +118,7 @@ class EffectRefImpl {
  * Angular has two different kinds of effect: component effects and root effects. Component effects
  * are created when `effect()` is called from a component, directive, or within a service of a
  * component/directive. Root effects are created when `effect()` is called from outside the
- * component tree, such as in a root service, or when the `forceRoot` option is provided.
+ * component tree, such as in a root service.
  *
  * The two effect types differ in their timing. Component effects run as a component lifecycle
  * event during Angular's synchronization (change detection) process, and can safely read input
@@ -142,7 +142,7 @@ function effect(effectFn, options) {
     let node;
     const viewContext = injector.get(ViewContext, null, { optional: true });
     const notifier = injector.get(ChangeDetectionScheduler);
-    if (viewContext !== null && !options?.forceRoot) {
+    if (viewContext !== null) {
         // This effect was created in the context of a view, and will be associated with the view.
         node = createViewEffect(viewContext.view, notifier, effectFn);
         if (destroyRef instanceof NodeInjectorDestroyRef && destroyRef._lView === viewContext.view) {
@@ -618,4 +618,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef as O, ResourceImpl as R, ResourceStatus as a, computed as c, effect as e, getOutputDestroyRef as g, linkedSignal as l, resource as r, untracked as u };
-//# sourceMappingURL=resource-BO1W4uEf.mjs.map
+//# sourceMappingURL=resource-BGT_dqVT.mjs.map
