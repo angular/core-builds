@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-cbd6ec8
+ * @license Angular v20.0.0-next.4+sha-9c106f4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8517,22 +8517,33 @@ function mapPropName(name) {
         return 'tabIndex';
     return name;
 }
-function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
+function setPropertyAndInputs(tNode, lView, propName, value, renderer, sanitizer) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    if (!nativeOnly) {
-        const hasSetInput = setAllInputsForProperty(tNode, tView, lView, propName, value);
-        if (hasSetInput) {
-            isComponentHost(tNode) && markDirtyIfOnPush(lView, tNode.index);
-            ngDevMode && setNgReflectProperties(lView, tView, tNode, propName, value);
-            return; // Stop propcessing if we've matched at least one input.
-        }
+    const tView = lView[TVIEW];
+    const hasSetInput = setAllInputsForProperty(tNode, tView, lView, propName, value);
+    if (hasSetInput) {
+        isComponentHost(tNode) && markDirtyIfOnPush(lView, tNode.index);
+        ngDevMode && setNgReflectProperties(lView, tView, tNode, propName, value);
+        return; // Stop propcessing if we've matched at least one input.
     }
+    setDomProperty(tNode, lView, propName, value, renderer, sanitizer);
+}
+/**
+ * Sets a DOM property on a specific node.
+ * @param tNode TNode on which to set the value.
+ * @param lView View in which the node is located.
+ * @param propName Name of the property.
+ * @param value Value to set on the property.
+ * @param renderer Renderer to use when setting the property.
+ * @param sanitizer Function used to sanitize the value before setting it.
+ */
+function setDomProperty(tNode, lView, propName, value, renderer, sanitizer) {
     if (tNode.type & 3 /* TNodeType.AnyRNode */) {
         const element = getNativeByTNode(tNode, lView);
         propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
-            if (!isPropertyValid(element, propName, tNode.value, tView.schemas)) {
+            if (!isPropertyValid(element, propName, tNode.value, lView[TVIEW].schemas)) {
                 handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
             }
         }
@@ -8544,7 +8555,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
     else if (tNode.type & 12 /* TNodeType.AnyContainer */) {
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
-        if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
+        if (ngDevMode && !matchingSchemas(lView[TVIEW].schemas, tNode.value)) {
             handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
         }
     }
@@ -14568,7 +14579,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-next.4+sha-cbd6ec8']
+        ? ['ng-version', '20.0.0-next.4+sha-9c106f4']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22290,7 +22301,7 @@ function ɵɵproperty(propName, value, sanitizer) {
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, value, lView[RENDERER], sanitizer);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵproperty;
@@ -24459,30 +24470,28 @@ function ɵɵgetCurrentView() {
 }
 
 /**
- * Update a property on a host element. Only applies to native node properties, not inputs.
+ * Update a DOM property on an element.
  *
- * Operates on the element selected by index via the {@link select} instruction.
- *
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
+ * @param propName Name of property..
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
  * @returns This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *  (e.g. `domProperty('name', ctx.name)('title', ctx.title)`)
  *
  * @codeGenApi
  */
-function ɵɵhostProperty(propName, value, sanitizer) {
+function ɵɵdomProperty(propName, value, sanitizer) {
     const lView = getLView();
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, true);
+        setDomProperty(tNode, lView, propName, value, lView[RENDERER], sanitizer);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
-    return ɵɵhostProperty;
+    return ɵɵdomProperty;
 }
+// TODO(crisbeto): try to fold this into `domProperty`. Main difference is the renderer.
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
  *
@@ -24512,7 +24521,7 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
         const tNode = getSelectedTNode();
         const currentDef = getCurrentDirectiveDef(tView.data);
         const renderer = loadComponentRenderer(currentDef, tNode, lView);
-        elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
+        setDomProperty(tNode, lView, propName, value, renderer, sanitizer);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵsyntheticHostProperty;
@@ -25027,7 +25036,7 @@ function applyUpdateOpCodes(tView, lView, updateOpCodes, bindingsStartIndex, cha
                                     setElementAttribute(lView[RENDERER], lView[nodeIndex], null, tNodeOrTagName, propName, value, sanitizeFn);
                                 }
                                 else {
-                                    elementPropertyInternal(tView, tNodeOrTagName, lView, propName, value, lView[RENDERER], sanitizeFn, false);
+                                    setPropertyAndInputs(tNodeOrTagName, lView, propName, value, lView[RENDERER], sanitizeFn);
                                 }
                                 break;
                             case 0 /* I18nUpdateOpCode.Text */:
@@ -26610,7 +26619,7 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix ?? '');
     }
@@ -26652,7 +26661,7 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix ?? '');
     }
@@ -26697,7 +26706,7 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix ?? '');
     }
@@ -26744,7 +26753,7 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix ?? '');
     }
@@ -26793,7 +26802,7 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix ?? '');
     }
@@ -26844,7 +26853,7 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix ?? '');
     }
@@ -26897,7 +26906,7 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix ?? '');
     }
@@ -26952,7 +26961,7 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix ?? '');
     }
@@ -26994,7 +27003,7 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
         if (ngDevMode) {
             const interpolationInBetween = [values[0]]; // prefix
             for (let i = 2; i < values.length; i += 2) {
@@ -28175,7 +28184,7 @@ function ɵɵtwoWayProperty(propName, value, sanitizer) {
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        setPropertyAndInputs(tNode, lView, propName, value, lView[RENDERER], sanitizer);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵtwoWayProperty;
@@ -29598,7 +29607,7 @@ const angularCoreEnv = (() => ({
     'ɵɵpipeBind4': ɵɵpipeBind4,
     'ɵɵpipeBindV': ɵɵpipeBindV,
     'ɵɵprojectionDef': ɵɵprojectionDef,
-    'ɵɵhostProperty': ɵɵhostProperty,
+    'ɵɵdomProperty': ɵɵdomProperty,
     'ɵɵproperty': ɵɵproperty,
     'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
     'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
@@ -32080,5 +32089,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { setJitOptions as $, ApplicationRef as A, ChangeDetectionSchedulerImpl as B, Component as C, DeferBlockState as D, Compiler as E, DEFER_BLOCK_CONFIG as F, COMPILER_OPTIONS as G, transitiveScopesFor as H, Injectable as I, generateStandaloneInDeclarationsError as J, NgModuleFactory as K, LOCALE_ID as L, ModuleWithComponentFactories as M, NgZone as N, resetCompiledComponents as O, Pipe as P, ɵsetUnknownPropertyStrictMode as Q, RendererFactory2 as R, ɵgetUnknownElementStrictMode as S, ɵgetUnknownPropertyStrictMode as T, flushModuleScopingQueueAsMuchAsPossible as U, setAllowDuplicateNgModuleIdsForTest as V, ɵɵinjectAttribute as W, createMultiResultQuerySignalFn as X, createSingleResultRequiredQuerySignalFn as Y, createSingleResultOptionalQuerySignalFn as Z, makePropDecorator as _, DeferBlockBehavior as a, processTextNodeBeforeSerialization as a$, isComponentResourceResolutionQueueEmpty as a0, getCompilerFacade as a1, IMAGE_CONFIG as a2, getDocument as a3, setClassMetadata as a4, PROVIDED_NG_ZONE as a5, remove as a6, isPromise as a7, createNgModuleRefWithProviders as a8, optionsReducer as a9, DEFER_BLOCK_SSR_ID_ATTRIBUTE as aA, invokeListeners as aB, triggerHydrationFromBlockName as aC, setStashFn as aD, sharedStashFunction as aE, sharedMapFunction as aF, isI18nHydrationEnabled as aG, TransferState as aH, NGH_DATA_KEY as aI, NGH_DEFER_BLOCKS_KEY as aJ, getLNodeForHydration as aK, NGH_ATTR_NAME as aL, SKIP_HYDRATION_ATTR_NAME as aM, isI18nHydrationSupportEnabled as aN, ViewEncapsulation as aO, getOrComputeI18nChildren as aP, trySerializeI18nBlock as aQ, I18N_DATA as aR, isTNodeShape as aS, isDetachedByI18n as aT, isDisconnectedNode as aU, isInSkipHydrationBlock as aV, unsupportedProjectionOfDomNodes as aW, TEMPLATES as aX, CONTAINERS as aY, isLetDeclaration as aZ, ELEMENT_CONTAINERS as a_, getNgZone as aa, getNgZoneOptions as ab, publishDefaultGlobalUtils as ac, PLATFORM_INITIALIZER as ad, publishSignalConfiguration as ae, checkNoChangesInternal as af, getRegisteredNgModuleType as ag, ViewRef as ah, isListLikeIterable as ai, iterateListLike as aj, isJsObject as ak, SkipSelf as al, Optional as am, ɵɵdefineNgModule as an, profiler as ao, assertStandaloneComponentType as ap, EnvironmentNgModuleRefAdapter as aq, IS_EVENT_REPLAY_ENABLED as ar, JSACTION_BLOCK_ELEMENT_MAP as as, APP_BOOTSTRAP_LISTENER as at, APP_ID as au, JSACTION_EVENT_CONTRACT as av, removeListeners as aw, isIncrementalHydrationEnabled as ax, performanceMarkFeature as ay, EVENT_REPLAY_ENABLED_DEFAULT as az, NoopNgZone as b, CSP_NONCE as b$, setJSActionAttributes as b0, DISCONNECTED_NODES as b1, NODES as b2, calcPathForNode as b3, NUM_ROOT_NODES as b4, TEMPLATE_ID as b5, isDeferBlock as b6, getLDeferBlockDetails as b7, getTDeferBlockDetails as b8, collectNativeNodesInLContainer as b9, enableLocateOrCreateContainerRefImpl as bA, enableFindMatchingDehydratedViewImpl as bB, enableApplyRootElementTransformImpl as bC, setIsI18nHydrationSupportEnabled as bD, PRESERVE_HOST_CONTENT as bE, cleanupDehydratedViews as bF, countBlocksSkippedByHydration as bG, enableLocateOrCreateI18nNodeImpl as bH, enablePrepareI18nBlockForHydrationImpl as bI, enableClaimDehydratedIcuCaseImpl as bJ, enableRetrieveDeferBlockDataImpl as bK, readPatchedLView as bL, setClassMetadataAsync as bM, angularCoreEnv as bN, NOOP_AFTER_RENDER_REF as bO, AfterRenderManager as bP, TracingService as bQ, AfterRenderImpl as bR, AfterRenderSequence as bS, AFTER_RENDER_PHASES as bT, assertComponentDef as bU, NgProbeToken as bV, provideZoneChangeDetection as bW, provideExperimentalZonelessChangeDetection as bX, PACKAGE_ROOT_URL as bY, PLATFORM_ID as bZ, ANIMATION_MODULE_TYPE as b_, validateNodeExists as ba, validateMatchingNode as bb, DEFER_BLOCK_ID as bc, DEFER_BLOCK_STATE$1 as bd, DEFER_BLOCK_STATE as be, MULTIPLIER as bf, collectNativeNodes as bg, convertHydrateTriggersToJsAction as bh, DEFER_HYDRATE_TRIGGERS as bi, DEFER_PARENT_BLOCK_ID as bj, IS_HYDRATION_DOM_REUSE_ENABLED as bk, IS_I18N_HYDRATION_ENABLED as bl, IS_INCREMENTAL_HYDRATION_ENABLED as bm, DehydratedBlockRegistry as bn, DEHYDRATED_BLOCK_REGISTRY as bo, processBlockData as bp, gatherDeferBlocksCommentNodes as bq, processAndInitTriggers as br, appendDeferBlocksToJSActionMap as bs, verifySsrContentsIntegrity as bt, Console as bu, enableRetrieveHydrationInfoImpl as bv, enableLocateOrCreateElementNodeImpl as bw, enableLocateOrCreateTextNodeImpl as bx, enableLocateOrCreateElementContainerNodeImpl as by, enableLocateOrCreateContainerAnchorImpl as bz, getDebugNode as c, allowSanitizationBypassAndThrow as c$, APP_INITIALIZER as c0, provideAppInitializer as c1, DebugElement as c2, DebugEventListener as c3, DebugNode as c4, asNativeElements as c5, Testability as c6, TestabilityRegistry as c7, setTestabilityGetter as c8, TRANSLATIONS as c9, Self as cA, Host as cB, Renderer2 as cC, RendererStyleFlags2 as cD, CompilerFactory as cE, ComponentFactory$1 as cF, ComponentRef$1 as cG, ComponentFactoryResolver$1 as cH, ElementRef as cI, NgModuleFactory$1 as cJ, NgModuleRef$1 as cK, QueryList as cL, TemplateRef as cM, ViewContainerRef as cN, ChangeDetectionStrategy as cO, SimpleChange as cP, detectChangesInViewIfRequired as cQ, IMAGE_CONFIG_DEFAULTS as cR, TracingAction as cS, readHydrationInfo as cT, SSR_CONTENT_INTEGRITY_MARKER as cU, findLocaleData as cV, getLocaleCurrencyCode as cW, getLocalePluralCase as cX, LocaleDataIndex as cY, registerLocaleData as cZ, unregisterAllLocaleData as c_, TRANSLATIONS_FORMAT as ca, DEFAULT_CURRENCY_CODE as cb, MissingTranslationStrategy as cc, Type as cd, EventEmitter as ce, SecurityContext as cf, Sanitizer as cg, createNgModule as ch, createNgModuleRef as ci, createEnvironmentInjector as cj, AfterRenderPhase as ck, publishExternalGlobalUtil as cl, afterRender as cm, afterNextRender as cn, inputBinding as co, outputBinding as cp, twoWayBinding as cq, makeStateKey as cr, Attribute as cs, HostBinding as ct, HostListener as cu, Input as cv, Output as cw, CUSTOM_ELEMENTS_SCHEMA as cx, NO_ERRORS_SCHEMA as cy, Inject as cz, Directive as d, ɵɵgetInheritedFactory as d$, getSanitizationBypassType as d0, unwrapSafeValue as d1, _sanitizeHtml as d2, _sanitizeUrl as d3, TESTABILITY as d4, TESTABILITY_GETTER as d5, devModeEqual as d6, isSubscribable as d7, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as d8, isBoundToModule as d9, ɵɵclassMapInterpolate2 as dA, ɵɵclassMapInterpolate3 as dB, ɵɵclassMapInterpolate4 as dC, ɵɵclassMapInterpolate5 as dD, ɵɵclassMapInterpolate6 as dE, ɵɵclassMapInterpolate7 as dF, ɵɵclassMapInterpolate8 as dG, ɵɵclassMapInterpolateV as dH, ɵɵclassProp as dI, ɵɵconditional as dJ, ɵɵconditionalCreate as dK, ɵɵconditionalBranchCreate as dL, ɵɵcontentQuery as dM, ɵɵcontentQuerySignal as dN, ɵɵcomponentInstance as dO, ɵɵCopyDefinitionFeature as dP, ɵɵdefineComponent as dQ, ɵɵdefineDirective as dR, ɵɵdefinePipe as dS, ɵɵdirectiveInject as dT, ɵɵelement as dU, ɵɵelementContainer as dV, ɵɵelementContainerEnd as dW, ɵɵelementContainerStart as dX, ɵɵelementEnd as dY, ɵɵelementStart as dZ, ɵɵgetCurrentView as d_, registerNgModuleType as da, getLContext as db, ComponentRef as dc, getDirectives as dd, getHostElement as de, NO_CHANGE as df, ɵsetClassDebugInfo as dg, store as dh, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as di, Framework as dj, AcxChangeDetectionStrategy as dk, AcxViewEncapsulation as dl, ɵɵadvance as dm, ɵɵattribute as dn, ɵɵattributeInterpolate1 as dp, ɵɵattributeInterpolate2 as dq, ɵɵattributeInterpolate3 as dr, ɵɵattributeInterpolate4 as ds, ɵɵattributeInterpolate5 as dt, ɵɵattributeInterpolate6 as du, ɵɵattributeInterpolate7 as dv, ɵɵattributeInterpolate8 as dw, ɵɵattributeInterpolateV as dx, ɵɵclassMap as dy, ɵɵclassMapInterpolate1 as dz, NgModule as e, ɵɵstyleMapInterpolate4 as e$, ɵɵhostProperty as e0, ɵɵi18n as e1, ɵɵi18nApply as e2, ɵɵi18nAttributes as e3, ɵɵi18nEnd as e4, ɵɵi18nExp as e5, ɵɵi18nPostprocess as e6, ɵɵi18nStart as e7, ɵɵInheritDefinitionFeature as e8, ɵɵinvalidFactory as e9, ɵɵpureFunction1 as eA, ɵɵpureFunction2 as eB, ɵɵpureFunction3 as eC, ɵɵpureFunction4 as eD, ɵɵpureFunction5 as eE, ɵɵpureFunction6 as eF, ɵɵpureFunction7 as eG, ɵɵpureFunction8 as eH, ɵɵpureFunctionV as eI, ɵɵqueryAdvance as eJ, ɵɵqueryRefresh as eK, ɵɵreference as eL, ɵɵresolveBody as eM, ɵɵresolveDocument as eN, ɵɵresolveWindow as eO, ɵɵrepeater as eP, ɵɵrepeaterCreate as eQ, ɵɵrepeaterTrackByIdentity as eR, ɵɵrepeaterTrackByIndex as eS, ɵɵsetComponentScope as eT, ɵɵsetNgModuleScope as eU, ɵɵgetComponentDepsFactory as eV, ɵɵExternalStylesFeature as eW, ɵɵstyleMap as eX, ɵɵstyleMapInterpolate1 as eY, ɵɵstyleMapInterpolate2 as eZ, ɵɵstyleMapInterpolate3 as e_, ɵɵlistener as ea, ɵɵloadQuery as eb, ɵɵnextContext as ec, ɵɵNgOnChangesFeature as ed, ɵɵpipe as ee, ɵɵpipeBind1 as ef, ɵɵpipeBind2 as eg, ɵɵpipeBind3 as eh, ɵɵpipeBind4 as ei, ɵɵpipeBindV as ej, ɵɵprojection as ek, ɵɵprojectionDef as el, ɵɵproperty as em, ɵɵpropertyInterpolate as en, ɵɵpropertyInterpolate1 as eo, ɵɵpropertyInterpolate2 as ep, ɵɵpropertyInterpolate3 as eq, ɵɵpropertyInterpolate4 as er, ɵɵpropertyInterpolate5 as es, ɵɵpropertyInterpolate6 as et, ɵɵpropertyInterpolate7 as eu, ɵɵpropertyInterpolate8 as ev, ɵɵpropertyInterpolateV as ew, ɵɵProvidersFeature as ex, ɵɵHostDirectivesFeature as ey, ɵɵpureFunction0 as ez, ReflectionCapabilities as f, ɵɵattachSourceLocations as f$, ɵɵstyleMapInterpolate5 as f0, ɵɵstyleMapInterpolate6 as f1, ɵɵstyleMapInterpolate7 as f2, ɵɵstyleMapInterpolate8 as f3, ɵɵstyleMapInterpolateV as f4, ɵɵstyleProp as f5, ɵɵstylePropInterpolate1 as f6, ɵɵstylePropInterpolate2 as f7, ɵɵstylePropInterpolate3 as f8, ɵɵstylePropInterpolate4 as f9, ɵɵdeferHydrateNever as fA, ɵɵdeferHydrateOnIdle as fB, ɵɵdeferHydrateOnImmediate as fC, ɵɵdeferHydrateOnTimer as fD, ɵɵdeferHydrateOnHover as fE, ɵɵdeferHydrateOnInteraction as fF, ɵɵdeferHydrateOnViewport as fG, ɵɵtext as fH, ɵɵtextInterpolate as fI, ɵɵtextInterpolate1 as fJ, ɵɵtextInterpolate2 as fK, ɵɵtextInterpolate3 as fL, ɵɵtextInterpolate4 as fM, ɵɵtextInterpolate5 as fN, ɵɵtextInterpolate6 as fO, ɵɵtextInterpolate7 as fP, ɵɵtextInterpolate8 as fQ, ɵɵtextInterpolateV as fR, ɵɵviewQuery as fS, ɵɵviewQuerySignal as fT, ɵɵtwoWayProperty as fU, ɵɵtwoWayBindingSet as fV, ɵɵtwoWayListener as fW, ɵɵdeclareLet as fX, ɵɵstoreLet as fY, ɵɵreadContextLet as fZ, ɵɵreplaceMetadata as f_, ɵɵstylePropInterpolate5 as fa, ɵɵstylePropInterpolate6 as fb, ɵɵstylePropInterpolate7 as fc, ɵɵstylePropInterpolate8 as fd, ɵɵstylePropInterpolateV as fe, ɵɵsyntheticHostListener as ff, ɵɵsyntheticHostProperty as fg, ɵɵtemplate as fh, ɵɵtemplateRefExtractor as fi, ɵɵdefer as fj, ɵɵdeferWhen as fk, ɵɵdeferOnIdle as fl, ɵɵdeferOnImmediate as fm, ɵɵdeferOnTimer as fn, ɵɵdeferOnHover as fo, ɵɵdeferOnInteraction as fp, ɵɵdeferOnViewport as fq, ɵɵdeferPrefetchWhen as fr, ɵɵdeferPrefetchOnIdle as fs, ɵɵdeferPrefetchOnImmediate as ft, ɵɵdeferPrefetchOnTimer as fu, ɵɵdeferPrefetchOnHover as fv, ɵɵdeferPrefetchOnInteraction as fw, ɵɵdeferPrefetchOnViewport as fx, ɵɵdeferEnableTimerScheduling as fy, ɵɵdeferHydrateWhen as fz, getDeferBlocks$1 as g, LContext as g0, setDocument as g1, resetJitOptions as g2, compileNgModule as g3, isNgModule as g4, isViewDirty as g5, markForRefresh as g6, bypassSanitizationTrustHtml as g7, bypassSanitizationTrustResourceUrl as g8, bypassSanitizationTrustScript as g9, bypassSanitizationTrustStyle as ga, bypassSanitizationTrustUrl as gb, ɵɵsanitizeHtml as gc, ɵɵsanitizeResourceUrl as gd, ɵɵsanitizeScript as ge, ɵɵsanitizeStyle as gf, ɵɵsanitizeUrl as gg, ɵɵsanitizeUrlOrResourceUrl as gh, ɵɵtrustConstantHtml as gi, ɵɵtrustConstantResourceUrl as gj, ɵɵvalidateIframeAttribute as gk, noSideEffects as gl, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as gm, depsTracker as h, isComponentDefPendingResolution as i, getAsyncClassMetadataFn as j, resolveComponentResources as k, NgModuleRef as l, ApplicationInitStatus as m, DEFAULT_LOCALE_ID as n, ComponentFactory as o, compileComponent as p, compileDirective as q, renderDeferBlockState as r, setLocaleId as s, triggerResourceLoading as t, compilePipe as u, patchComponentDefWithScope as v, compileNgModuleDefs as w, clearResolutionOfComponentResourcesQueue as x, restoreComponentResolutionQueue as y, internalProvideZoneChangeDetection as z, ɵsetUnknownElementStrictMode as ɵ };
-//# sourceMappingURL=debug_node-Dc7V0Ich.mjs.map
+export { setJitOptions as $, ApplicationRef as A, ChangeDetectionSchedulerImpl as B, Component as C, DeferBlockState as D, Compiler as E, DEFER_BLOCK_CONFIG as F, COMPILER_OPTIONS as G, transitiveScopesFor as H, Injectable as I, generateStandaloneInDeclarationsError as J, NgModuleFactory as K, LOCALE_ID as L, ModuleWithComponentFactories as M, NgZone as N, resetCompiledComponents as O, Pipe as P, ɵsetUnknownPropertyStrictMode as Q, RendererFactory2 as R, ɵgetUnknownElementStrictMode as S, ɵgetUnknownPropertyStrictMode as T, flushModuleScopingQueueAsMuchAsPossible as U, setAllowDuplicateNgModuleIdsForTest as V, ɵɵinjectAttribute as W, createMultiResultQuerySignalFn as X, createSingleResultRequiredQuerySignalFn as Y, createSingleResultOptionalQuerySignalFn as Z, makePropDecorator as _, DeferBlockBehavior as a, processTextNodeBeforeSerialization as a$, isComponentResourceResolutionQueueEmpty as a0, getCompilerFacade as a1, IMAGE_CONFIG as a2, getDocument as a3, setClassMetadata as a4, PROVIDED_NG_ZONE as a5, remove as a6, isPromise as a7, createNgModuleRefWithProviders as a8, optionsReducer as a9, DEFER_BLOCK_SSR_ID_ATTRIBUTE as aA, invokeListeners as aB, triggerHydrationFromBlockName as aC, setStashFn as aD, sharedStashFunction as aE, sharedMapFunction as aF, isI18nHydrationEnabled as aG, TransferState as aH, NGH_DATA_KEY as aI, NGH_DEFER_BLOCKS_KEY as aJ, getLNodeForHydration as aK, NGH_ATTR_NAME as aL, SKIP_HYDRATION_ATTR_NAME as aM, isI18nHydrationSupportEnabled as aN, ViewEncapsulation as aO, getOrComputeI18nChildren as aP, trySerializeI18nBlock as aQ, I18N_DATA as aR, isTNodeShape as aS, isDetachedByI18n as aT, isDisconnectedNode as aU, isInSkipHydrationBlock as aV, unsupportedProjectionOfDomNodes as aW, TEMPLATES as aX, CONTAINERS as aY, isLetDeclaration as aZ, ELEMENT_CONTAINERS as a_, getNgZone as aa, getNgZoneOptions as ab, publishDefaultGlobalUtils as ac, PLATFORM_INITIALIZER as ad, publishSignalConfiguration as ae, checkNoChangesInternal as af, getRegisteredNgModuleType as ag, ViewRef as ah, isListLikeIterable as ai, iterateListLike as aj, isJsObject as ak, SkipSelf as al, Optional as am, ɵɵdefineNgModule as an, profiler as ao, assertStandaloneComponentType as ap, EnvironmentNgModuleRefAdapter as aq, IS_EVENT_REPLAY_ENABLED as ar, JSACTION_BLOCK_ELEMENT_MAP as as, APP_BOOTSTRAP_LISTENER as at, APP_ID as au, JSACTION_EVENT_CONTRACT as av, removeListeners as aw, isIncrementalHydrationEnabled as ax, performanceMarkFeature as ay, EVENT_REPLAY_ENABLED_DEFAULT as az, NoopNgZone as b, CSP_NONCE as b$, setJSActionAttributes as b0, DISCONNECTED_NODES as b1, NODES as b2, calcPathForNode as b3, NUM_ROOT_NODES as b4, TEMPLATE_ID as b5, isDeferBlock as b6, getLDeferBlockDetails as b7, getTDeferBlockDetails as b8, collectNativeNodesInLContainer as b9, enableLocateOrCreateContainerRefImpl as bA, enableFindMatchingDehydratedViewImpl as bB, enableApplyRootElementTransformImpl as bC, setIsI18nHydrationSupportEnabled as bD, PRESERVE_HOST_CONTENT as bE, cleanupDehydratedViews as bF, countBlocksSkippedByHydration as bG, enableLocateOrCreateI18nNodeImpl as bH, enablePrepareI18nBlockForHydrationImpl as bI, enableClaimDehydratedIcuCaseImpl as bJ, enableRetrieveDeferBlockDataImpl as bK, readPatchedLView as bL, setClassMetadataAsync as bM, angularCoreEnv as bN, NOOP_AFTER_RENDER_REF as bO, AfterRenderManager as bP, TracingService as bQ, AfterRenderImpl as bR, AfterRenderSequence as bS, AFTER_RENDER_PHASES as bT, assertComponentDef as bU, NgProbeToken as bV, provideZoneChangeDetection as bW, provideExperimentalZonelessChangeDetection as bX, PACKAGE_ROOT_URL as bY, PLATFORM_ID as bZ, ANIMATION_MODULE_TYPE as b_, validateNodeExists as ba, validateMatchingNode as bb, DEFER_BLOCK_ID as bc, DEFER_BLOCK_STATE$1 as bd, DEFER_BLOCK_STATE as be, MULTIPLIER as bf, collectNativeNodes as bg, convertHydrateTriggersToJsAction as bh, DEFER_HYDRATE_TRIGGERS as bi, DEFER_PARENT_BLOCK_ID as bj, IS_HYDRATION_DOM_REUSE_ENABLED as bk, IS_I18N_HYDRATION_ENABLED as bl, IS_INCREMENTAL_HYDRATION_ENABLED as bm, DehydratedBlockRegistry as bn, DEHYDRATED_BLOCK_REGISTRY as bo, processBlockData as bp, gatherDeferBlocksCommentNodes as bq, processAndInitTriggers as br, appendDeferBlocksToJSActionMap as bs, verifySsrContentsIntegrity as bt, Console as bu, enableRetrieveHydrationInfoImpl as bv, enableLocateOrCreateElementNodeImpl as bw, enableLocateOrCreateTextNodeImpl as bx, enableLocateOrCreateElementContainerNodeImpl as by, enableLocateOrCreateContainerAnchorImpl as bz, getDebugNode as c, allowSanitizationBypassAndThrow as c$, APP_INITIALIZER as c0, provideAppInitializer as c1, DebugElement as c2, DebugEventListener as c3, DebugNode as c4, asNativeElements as c5, Testability as c6, TestabilityRegistry as c7, setTestabilityGetter as c8, TRANSLATIONS as c9, Self as cA, Host as cB, Renderer2 as cC, RendererStyleFlags2 as cD, CompilerFactory as cE, ComponentFactory$1 as cF, ComponentRef$1 as cG, ComponentFactoryResolver$1 as cH, ElementRef as cI, NgModuleFactory$1 as cJ, NgModuleRef$1 as cK, QueryList as cL, TemplateRef as cM, ViewContainerRef as cN, ChangeDetectionStrategy as cO, SimpleChange as cP, detectChangesInViewIfRequired as cQ, IMAGE_CONFIG_DEFAULTS as cR, TracingAction as cS, readHydrationInfo as cT, SSR_CONTENT_INTEGRITY_MARKER as cU, findLocaleData as cV, getLocaleCurrencyCode as cW, getLocalePluralCase as cX, LocaleDataIndex as cY, registerLocaleData as cZ, unregisterAllLocaleData as c_, TRANSLATIONS_FORMAT as ca, DEFAULT_CURRENCY_CODE as cb, MissingTranslationStrategy as cc, Type as cd, EventEmitter as ce, SecurityContext as cf, Sanitizer as cg, createNgModule as ch, createNgModuleRef as ci, createEnvironmentInjector as cj, AfterRenderPhase as ck, publishExternalGlobalUtil as cl, afterRender as cm, afterNextRender as cn, inputBinding as co, outputBinding as cp, twoWayBinding as cq, makeStateKey as cr, Attribute as cs, HostBinding as ct, HostListener as cu, Input as cv, Output as cw, CUSTOM_ELEMENTS_SCHEMA as cx, NO_ERRORS_SCHEMA as cy, Inject as cz, Directive as d, ɵɵgetInheritedFactory as d$, getSanitizationBypassType as d0, unwrapSafeValue as d1, _sanitizeHtml as d2, _sanitizeUrl as d3, TESTABILITY as d4, TESTABILITY_GETTER as d5, devModeEqual as d6, isSubscribable as d7, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as d8, isBoundToModule as d9, ɵɵclassMapInterpolate2 as dA, ɵɵclassMapInterpolate3 as dB, ɵɵclassMapInterpolate4 as dC, ɵɵclassMapInterpolate5 as dD, ɵɵclassMapInterpolate6 as dE, ɵɵclassMapInterpolate7 as dF, ɵɵclassMapInterpolate8 as dG, ɵɵclassMapInterpolateV as dH, ɵɵclassProp as dI, ɵɵconditional as dJ, ɵɵconditionalCreate as dK, ɵɵconditionalBranchCreate as dL, ɵɵcontentQuery as dM, ɵɵcontentQuerySignal as dN, ɵɵcomponentInstance as dO, ɵɵCopyDefinitionFeature as dP, ɵɵdefineComponent as dQ, ɵɵdefineDirective as dR, ɵɵdefinePipe as dS, ɵɵdirectiveInject as dT, ɵɵelement as dU, ɵɵelementContainer as dV, ɵɵelementContainerEnd as dW, ɵɵelementContainerStart as dX, ɵɵelementEnd as dY, ɵɵelementStart as dZ, ɵɵgetCurrentView as d_, registerNgModuleType as da, getLContext as db, ComponentRef as dc, getDirectives as dd, getHostElement as de, NO_CHANGE as df, ɵsetClassDebugInfo as dg, store as dh, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as di, Framework as dj, AcxChangeDetectionStrategy as dk, AcxViewEncapsulation as dl, ɵɵadvance as dm, ɵɵattribute as dn, ɵɵattributeInterpolate1 as dp, ɵɵattributeInterpolate2 as dq, ɵɵattributeInterpolate3 as dr, ɵɵattributeInterpolate4 as ds, ɵɵattributeInterpolate5 as dt, ɵɵattributeInterpolate6 as du, ɵɵattributeInterpolate7 as dv, ɵɵattributeInterpolate8 as dw, ɵɵattributeInterpolateV as dx, ɵɵclassMap as dy, ɵɵclassMapInterpolate1 as dz, NgModule as e, ɵɵstyleMapInterpolate4 as e$, ɵɵdomProperty as e0, ɵɵi18n as e1, ɵɵi18nApply as e2, ɵɵi18nAttributes as e3, ɵɵi18nEnd as e4, ɵɵi18nExp as e5, ɵɵi18nPostprocess as e6, ɵɵi18nStart as e7, ɵɵInheritDefinitionFeature as e8, ɵɵinvalidFactory as e9, ɵɵpureFunction1 as eA, ɵɵpureFunction2 as eB, ɵɵpureFunction3 as eC, ɵɵpureFunction4 as eD, ɵɵpureFunction5 as eE, ɵɵpureFunction6 as eF, ɵɵpureFunction7 as eG, ɵɵpureFunction8 as eH, ɵɵpureFunctionV as eI, ɵɵqueryAdvance as eJ, ɵɵqueryRefresh as eK, ɵɵreference as eL, ɵɵresolveBody as eM, ɵɵresolveDocument as eN, ɵɵresolveWindow as eO, ɵɵrepeater as eP, ɵɵrepeaterCreate as eQ, ɵɵrepeaterTrackByIdentity as eR, ɵɵrepeaterTrackByIndex as eS, ɵɵsetComponentScope as eT, ɵɵsetNgModuleScope as eU, ɵɵgetComponentDepsFactory as eV, ɵɵExternalStylesFeature as eW, ɵɵstyleMap as eX, ɵɵstyleMapInterpolate1 as eY, ɵɵstyleMapInterpolate2 as eZ, ɵɵstyleMapInterpolate3 as e_, ɵɵlistener as ea, ɵɵloadQuery as eb, ɵɵnextContext as ec, ɵɵNgOnChangesFeature as ed, ɵɵpipe as ee, ɵɵpipeBind1 as ef, ɵɵpipeBind2 as eg, ɵɵpipeBind3 as eh, ɵɵpipeBind4 as ei, ɵɵpipeBindV as ej, ɵɵprojection as ek, ɵɵprojectionDef as el, ɵɵproperty as em, ɵɵpropertyInterpolate as en, ɵɵpropertyInterpolate1 as eo, ɵɵpropertyInterpolate2 as ep, ɵɵpropertyInterpolate3 as eq, ɵɵpropertyInterpolate4 as er, ɵɵpropertyInterpolate5 as es, ɵɵpropertyInterpolate6 as et, ɵɵpropertyInterpolate7 as eu, ɵɵpropertyInterpolate8 as ev, ɵɵpropertyInterpolateV as ew, ɵɵProvidersFeature as ex, ɵɵHostDirectivesFeature as ey, ɵɵpureFunction0 as ez, ReflectionCapabilities as f, ɵɵattachSourceLocations as f$, ɵɵstyleMapInterpolate5 as f0, ɵɵstyleMapInterpolate6 as f1, ɵɵstyleMapInterpolate7 as f2, ɵɵstyleMapInterpolate8 as f3, ɵɵstyleMapInterpolateV as f4, ɵɵstyleProp as f5, ɵɵstylePropInterpolate1 as f6, ɵɵstylePropInterpolate2 as f7, ɵɵstylePropInterpolate3 as f8, ɵɵstylePropInterpolate4 as f9, ɵɵdeferHydrateNever as fA, ɵɵdeferHydrateOnIdle as fB, ɵɵdeferHydrateOnImmediate as fC, ɵɵdeferHydrateOnTimer as fD, ɵɵdeferHydrateOnHover as fE, ɵɵdeferHydrateOnInteraction as fF, ɵɵdeferHydrateOnViewport as fG, ɵɵtext as fH, ɵɵtextInterpolate as fI, ɵɵtextInterpolate1 as fJ, ɵɵtextInterpolate2 as fK, ɵɵtextInterpolate3 as fL, ɵɵtextInterpolate4 as fM, ɵɵtextInterpolate5 as fN, ɵɵtextInterpolate6 as fO, ɵɵtextInterpolate7 as fP, ɵɵtextInterpolate8 as fQ, ɵɵtextInterpolateV as fR, ɵɵviewQuery as fS, ɵɵviewQuerySignal as fT, ɵɵtwoWayProperty as fU, ɵɵtwoWayBindingSet as fV, ɵɵtwoWayListener as fW, ɵɵdeclareLet as fX, ɵɵstoreLet as fY, ɵɵreadContextLet as fZ, ɵɵreplaceMetadata as f_, ɵɵstylePropInterpolate5 as fa, ɵɵstylePropInterpolate6 as fb, ɵɵstylePropInterpolate7 as fc, ɵɵstylePropInterpolate8 as fd, ɵɵstylePropInterpolateV as fe, ɵɵsyntheticHostListener as ff, ɵɵsyntheticHostProperty as fg, ɵɵtemplate as fh, ɵɵtemplateRefExtractor as fi, ɵɵdefer as fj, ɵɵdeferWhen as fk, ɵɵdeferOnIdle as fl, ɵɵdeferOnImmediate as fm, ɵɵdeferOnTimer as fn, ɵɵdeferOnHover as fo, ɵɵdeferOnInteraction as fp, ɵɵdeferOnViewport as fq, ɵɵdeferPrefetchWhen as fr, ɵɵdeferPrefetchOnIdle as fs, ɵɵdeferPrefetchOnImmediate as ft, ɵɵdeferPrefetchOnTimer as fu, ɵɵdeferPrefetchOnHover as fv, ɵɵdeferPrefetchOnInteraction as fw, ɵɵdeferPrefetchOnViewport as fx, ɵɵdeferEnableTimerScheduling as fy, ɵɵdeferHydrateWhen as fz, getDeferBlocks$1 as g, LContext as g0, setDocument as g1, resetJitOptions as g2, compileNgModule as g3, isNgModule as g4, isViewDirty as g5, markForRefresh as g6, bypassSanitizationTrustHtml as g7, bypassSanitizationTrustResourceUrl as g8, bypassSanitizationTrustScript as g9, bypassSanitizationTrustStyle as ga, bypassSanitizationTrustUrl as gb, ɵɵsanitizeHtml as gc, ɵɵsanitizeResourceUrl as gd, ɵɵsanitizeScript as ge, ɵɵsanitizeStyle as gf, ɵɵsanitizeUrl as gg, ɵɵsanitizeUrlOrResourceUrl as gh, ɵɵtrustConstantHtml as gi, ɵɵtrustConstantResourceUrl as gj, ɵɵvalidateIframeAttribute as gk, noSideEffects as gl, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as gm, depsTracker as h, isComponentDefPendingResolution as i, getAsyncClassMetadataFn as j, resolveComponentResources as k, NgModuleRef as l, ApplicationInitStatus as m, DEFAULT_LOCALE_ID as n, ComponentFactory as o, compileComponent as p, compileDirective as q, renderDeferBlockState as r, setLocaleId as s, triggerResourceLoading as t, compilePipe as u, patchComponentDefWithScope as v, compileNgModuleDefs as w, clearResolutionOfComponentResourcesQueue as x, restoreComponentResolutionQueue as y, internalProvideZoneChangeDetection as z, ɵsetUnknownElementStrictMode as ɵ };
+//# sourceMappingURL=debug_node-lUt5fVdt.mjs.map
