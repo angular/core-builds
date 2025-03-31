@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-0252da9
+ * @license Angular v19.2.4+sha-fdde642
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-LiyxAZTZ.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-C_WqKzLy.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-B_GCUUMg.js');
-var program = require('./program-C93pimal.js');
+var program = require('./program-DU_suzwZ.js');
 require('path');
-var project_paths = require('./project_paths-t2ghQjtj.js');
-var index = require('./index-BMdgCMBZ.js');
+var project_paths = require('./project_paths-Bu67Zdzl.js');
+var index = require('./index-CyuvO93b.js');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-BljPBKs2.js');
+var apply_import_manager = require('./apply_import_manager-BCkjPQ_p.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
 require('./leading_space-D9nQ8UQC.js');
 require('fs');

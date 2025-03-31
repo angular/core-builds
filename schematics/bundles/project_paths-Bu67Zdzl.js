@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-0252da9
+ * @license Angular v19.2.4+sha-fdde642
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-B_GCUUMg.js');
-var program = require('./program-C93pimal.js');
+var program = require('./program-DU_suzwZ.js');
 require('path');
 
 function _interopNamespaceDefault(e) {
