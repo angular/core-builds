@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-ea62a4f
+ * @license Angular v20.0.0-next.4+sha-a4bad8d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21,10 +21,11 @@ interface SignalGetter<T> extends SignalBaseGetter<T> {
  */
 declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SignalGetter<T>;
 declare function setPostSignalSetFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
+declare function signalGetFn<T>(node: SignalNode<T>): T;
 declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
 declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
 declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
 declare const SIGNAL_NODE: SignalNode<unknown>;
 
-export { SIGNAL_NODE as a, createSignal as c, signalSetFn as d, signalUpdateFn as e, runPostSignalSetFn as r, setPostSignalSetFn as s };
+export { SIGNAL_NODE as a, createSignal as c, signalGetFn as d, signalSetFn as e, signalUpdateFn as f, runPostSignalSetFn as r, setPostSignalSetFn as s };
 export type { SignalNode as S, SignalGetter as b };

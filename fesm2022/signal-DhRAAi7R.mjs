@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-ea62a4f
+ * @license Angular v20.0.0-next.4+sha-a4bad8d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -464,10 +464,7 @@ function createSignal(initialValue, equal) {
     if (equal !== undefined) {
         node.equal = equal;
     }
-    const getter = (() => {
-        producerAccessed(node);
-        return node.value;
-    });
+    const getter = (() => signalGetFn(node));
     getter[SIGNAL] = node;
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
@@ -480,6 +477,10 @@ function setPostSignalSetFn(fn) {
     const prev = postSignalSetFn;
     postSignalSetFn = fn;
     return prev;
+}
+function signalGetFn(node) {
+    producerAccessed(node);
+    return node.value;
 }
 function signalSetFn(node, newValue) {
     if (!producerUpdatesAllowed()) {
@@ -517,5 +518,5 @@ function signalValueChanged(node) {
     postSignalSetFn?.(node);
 }
 
-export { COMPUTING as C, ERRORED as E, REACTIVE_NODE as R, SIGNAL as S, UNSET as U, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, defaultEquals as g, getActiveConsumer as h, isInNotificationPhase as i, isReactive as j, producerIncrementEpoch as k, producerMarkClean as l, producerNotifyConsumers as m, producerUpdateValueVersion as n, producerUpdatesAllowed as o, producerAccessed as p, setActiveConsumer as q, runPostProducerCreatedFn as r, setThrowInvalidWriteToSignalError as s, setPostProducerCreatedFn as t, SIGNAL_NODE as u, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalSetFn as y, signalUpdateFn as z };
-//# sourceMappingURL=signal-CCmjQ6F4.mjs.map
+export { signalUpdateFn as A, COMPUTING as C, ERRORED as E, REACTIVE_NODE as R, SIGNAL as S, UNSET as U, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, defaultEquals as g, getActiveConsumer as h, isInNotificationPhase as i, isReactive as j, producerIncrementEpoch as k, producerMarkClean as l, producerNotifyConsumers as m, producerUpdateValueVersion as n, producerUpdatesAllowed as o, producerAccessed as p, setActiveConsumer as q, runPostProducerCreatedFn as r, setThrowInvalidWriteToSignalError as s, setPostProducerCreatedFn as t, SIGNAL_NODE as u, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalGetFn as y, signalSetFn as z };
+//# sourceMappingURL=signal-DhRAAi7R.mjs.map

@@ -1,18 +1,18 @@
 /**
- * @license Angular v20.0.0-next.4+sha-ea62a4f
+ * @license Angular v20.0.0-next.4+sha-a4bad8d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-D1CgyUzu.mjs';
-import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-BGT_dqVT.mjs';
+import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-Dw4lxi2t.mjs';
+import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-zr2xfWj1.mjs';
 import './primitives/di.mjs';
 import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
-import './signal-CCmjQ6F4.mjs';
-import './untracked-q3e9vBkl.mjs';
+import './signal-DhRAAi7R.mjs';
+import './untracked-DaaW3JJm.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,

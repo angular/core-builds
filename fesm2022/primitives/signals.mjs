@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.0-next.4+sha-ea62a4f
+ * @license Angular v20.0.0-next.4+sha-a4bad8d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { c as consumerMarkDirty, S as SIGNAL, a as consumerDestroy, i as isInNotificationPhase, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation, R as REACTIVE_NODE } from '../signal-CCmjQ6F4.mjs';
-export { u as SIGNAL_NODE, f as createComputed, v as createSignal, g as defaultEquals, h as getActiveConsumer, j as isReactive, p as producerAccessed, k as producerIncrementEpoch, l as producerMarkClean, m as producerNotifyConsumers, n as producerUpdateValueVersion, o as producerUpdatesAllowed, r as runPostProducerCreatedFn, w as runPostSignalSetFn, q as setActiveConsumer, t as setPostProducerCreatedFn, x as setPostSignalSetFn, s as setThrowInvalidWriteToSignalError, y as signalSetFn, z as signalUpdateFn } from '../signal-CCmjQ6F4.mjs';
-export { c as createLinkedSignal, l as linkedSignalSetFn, a as linkedSignalUpdateFn, u as untracked } from '../untracked-q3e9vBkl.mjs';
+import { c as consumerMarkDirty, S as SIGNAL, a as consumerDestroy, i as isInNotificationPhase, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation, R as REACTIVE_NODE } from '../signal-DhRAAi7R.mjs';
+export { u as SIGNAL_NODE, f as createComputed, v as createSignal, g as defaultEquals, h as getActiveConsumer, j as isReactive, p as producerAccessed, k as producerIncrementEpoch, l as producerMarkClean, m as producerNotifyConsumers, n as producerUpdateValueVersion, o as producerUpdatesAllowed, r as runPostProducerCreatedFn, w as runPostSignalSetFn, q as setActiveConsumer, t as setPostProducerCreatedFn, x as setPostSignalSetFn, s as setThrowInvalidWriteToSignalError, y as signalGetFn, z as signalSetFn, A as signalUpdateFn } from '../signal-DhRAAi7R.mjs';
+export { c as createLinkedSignal, l as linkedSignalSetFn, a as linkedSignalUpdateFn, u as untracked } from '../untracked-DaaW3JJm.mjs';
 export { s as setAlternateWeakRefImpl } from '../weak_ref-DrMdAIDh.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {
