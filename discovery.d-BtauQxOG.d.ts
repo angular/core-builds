@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-2fe8f1a
+ * @license Angular v20.0.0-next.4+sha-5db7e4c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3058,6 +3058,9 @@ interface CreateEffectOptions {
      *
      * If this is `false` (the default) the effect will automatically register itself to be cleaned up
      * with the current `DestroyRef`.
+     *
+     * If this is `true` and you want to use the effect outside an injection context, you still
+     * need to provide an `Injector` to the effect.
      */
     manualCleanup?: boolean;
     /**
