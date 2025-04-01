@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-accc65c
+ * @license Angular v20.0.0-next.4+sha-2fe8f1a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4925,6 +4925,7 @@ declare const enum RuntimeErrorCode {
     UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     MISSING_NG_MODULE_DEFINITION = 915,
     MISSING_DIRECTIVE_DEFINITION = 916,
+    NO_COMPONENT_FACTORY_FOUND = 917,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
