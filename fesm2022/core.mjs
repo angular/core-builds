@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.4+sha-0e9e034
+ * @license Angular v19.2.4+sha-e816d2d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17911,7 +17911,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.4+sha-0e9e034']
+                ? ['ng-version', '19.2.4+sha-e816d2d']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -23462,6 +23462,9 @@ class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
     bootstrap(componentOrFactory, rootSelectorOrNode) {
+        return this.bootstrapImpl(componentOrFactory, rootSelectorOrNode);
+    }
+    bootstrapImpl(componentOrFactory, rootSelectorOrNode, injector = Injector.NULL) {
         profiler(10 /* ProfilerEvent.BootstrapComponentStart */);
         (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
@@ -23492,7 +23495,7 @@ class ApplicationRef {
             ? undefined
             : this._injector.get(NgModuleRef$1);
         const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
-        const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
+        const compRef = componentFactory.create(injector, [], selectorOrNode, ngModule);
         const nativeElement = compRef.location.nativeElement;
         const testability = compRef.injector.get(TESTABILITY, null);
         testability?.registerApplication(nativeElement);
@@ -34648,7 +34651,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.4+sha-0e9e034');
+const VERSION = new Version('19.2.4+sha-e816d2d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
