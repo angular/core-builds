@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.4+sha-316fabb
+ * @license Angular v20.0.0-next.4+sha-84ba1ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { O as OutputRef, D as DestroyRef, S as Signal, I as Injector } from '../ng_i18n_closure_mode.d-CcKUjg4s.js';
-import { O as OutputOptions, B as BaseResourceOptions, R as ResourceLoaderParams, a as ResourceRef } from '../api.d-B0DHAF3U.js';
+import { O as OutputRef, D as DestroyRef, S as Signal, I as Injector } from '../ng_i18n_closure_mode.d-DLxSUiDr.js';
+import { O as OutputOptions, B as BaseResourceOptions, R as ResourceLoaderParams, a as ResourceRef } from '../api.d-mxcXqDpA.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { V as ValueEqualityFn } from '../graph.d-StYigYp1.js';
 import '../event_dispatcher.d-PWnbqZDx.js';

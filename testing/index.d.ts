@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.4+sha-316fabb
+ * @license Angular v20.0.0-next.4+sha-84ba1ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { b as InjectionToken, T as Type, P as ProviderToken, c as InjectOptions } from '../ng_i18n_closure_mode.d-CcKUjg4s.js';
-import { D as DeferBlockDetails, a as DeferBlockState, C as ComponentRef, b as DebugElement, E as ElementRef, c as ChangeDetectorRef, N as NgZone, S as SchemaMetadata, d as DeferBlockBehavior, P as PlatformRef, e as NgModule, f as Component, g as Directive, h as Pipe, i as Navigation, j as NavigationHistoryEntry, k as NavigationNavigateOptions, l as NavigationResult, m as NavigationOptions, n as NavigateEvent, o as NavigationCurrentEntryChangeEvent, p as NavigationTransition, q as NavigationUpdateCurrentEntryOptions, r as NavigationReloadOptions } from '../discovery.d-BtauQxOG.js';
+import { b as InjectionToken, T as Type, P as ProviderToken, c as InjectOptions } from '../ng_i18n_closure_mode.d-DLxSUiDr.js';
+import { D as DeferBlockDetails, a as DeferBlockState, C as ComponentRef, b as DebugElement, E as ElementRef, c as ChangeDetectorRef, N as NgZone, S as SchemaMetadata, d as DeferBlockBehavior, P as PlatformRef, e as NgModule, f as Component, g as Directive, h as Pipe, i as Navigation, j as NavigationHistoryEntry, k as NavigationNavigateOptions, l as NavigationResult, m as NavigationOptions, n as NavigateEvent, o as NavigationCurrentEntryChangeEvent, p as NavigationTransition, q as NavigationUpdateCurrentEntryOptions, r as NavigationReloadOptions } from '../discovery.d-bmnnjCcO.js';
 import '../graph.d-StYigYp1.js';
 import '../event_dispatcher.d-PWnbqZDx.js';
 import 'rxjs';

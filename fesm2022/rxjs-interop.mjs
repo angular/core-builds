@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.0.0-next.4+sha-316fabb
+ * @license Angular v20.0.0-next.4+sha-84ba1ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-BE2J2HHR.mjs';
-import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-DvHMg-sG.mjs';
+import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-BnDyWJ7_.mjs';
+import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-CFUzF4ak.mjs';
 import { S as SIGNAL } from './signal-DhRAAi7R.mjs';
 import './primitives/di.mjs';
 import '@angular/core/primitives/di';
