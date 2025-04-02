@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1c6d5b2
+ * @license Angular v20.0.0-next.5+sha-1c1ad12
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { D as DeferBlockState, t as triggerResourceLoading, r as renderDeferBlockState, g as getDeferBlocks, a as DeferBlockBehavior, N as NgZone, I as Injectable, b as NoopNgZone, A as ApplicationRef, c as getDebugNode, R as RendererFactory2, P as Pipe, d as Directive, C as Component, e as NgModule, f as ReflectionCapabilities, h as depsTracker, i as isComponentDefPendingResolution, j as getAsyncClassMetadataFn, k as resolveComponentResources, l as NgModuleRef, m as ApplicationInitStatus, L as LOCALE_ID, n as DEFAULT_LOCALE_ID, s as setLocaleId, o as ComponentFactory, p as compileComponent, q as compileDirective, u as compilePipe, v as patchComponentDefWithScope, w as compileNgModuleDefs, x as clearResolutionOfComponentResourcesQueue, y as restoreComponentResolutionQueue, z as internalProvideZoneChangeDetection, B as ChangeDetectionSchedulerImpl, E as Compiler, F as DEFER_BLOCK_CONFIG, G as COMPILER_OPTIONS, H as transitiveScopesFor, J as generateStandaloneInDeclarationsError, K as NgModuleFactory, M as ModuleWithComponentFactories, O as resetCompiledComponents, ɵ as _setUnknownElementStrictMode, Q as _setUnknownPropertyStrictMode, S as _getUnknownElementStrictMode, T as _getUnknownPropertyStrictMode, U as flushModuleScopingQueueAsMuchAsPossible, V as setAllowDuplicateNgModuleIdsForTest } from './debug_node-xKpCIZm-.mjs';
-import { l as CONTAINER_HEADER_OFFSET, j as InjectionToken, i as inject$1, E as ErrorHandler, o as PendingTasksInternal, Z as ZONELESS_ENABLED, C as ChangeDetectionScheduler, c as EffectScheduler, p as stringify, q as getInjectableDef, r as resolveForwardRef, t as NG_COMP_DEF, u as NG_DIR_DEF, v as NG_PIPE_DEF, w as NG_INJ_DEF, x as NG_MOD_DEF, y as INTERNAL_APPLICATION_ERROR_HANDLER, I as Injector, z as isEnvironmentProviders, A as runInInjectionContext, B as EnvironmentInjector } from './root_effect_scheduler-D0_b1cf_.mjs';
+import { D as DeferBlockState, t as triggerResourceLoading, r as renderDeferBlockState, g as getDeferBlocks, a as DeferBlockBehavior, N as NgZone, I as Injectable, b as NoopNgZone, A as ApplicationRef, c as getDebugNode, R as RendererFactory2, P as Pipe, d as Directive, C as Component, e as NgModule, f as ReflectionCapabilities, h as depsTracker, i as isComponentDefPendingResolution, j as getAsyncClassMetadataFn, k as resolveComponentResources, l as NgModuleRef, m as ApplicationInitStatus, L as LOCALE_ID, n as DEFAULT_LOCALE_ID, s as setLocaleId, o as ComponentFactory, p as compileComponent, q as compileDirective, u as compilePipe, v as patchComponentDefWithScope, w as compileNgModuleDefs, x as clearResolutionOfComponentResourcesQueue, y as restoreComponentResolutionQueue, z as internalProvideZoneChangeDetection, B as ChangeDetectionSchedulerImpl, E as Compiler, F as DEFER_BLOCK_CONFIG, G as COMPILER_OPTIONS, H as transitiveScopesFor, J as generateStandaloneInDeclarationsError, K as NgModuleFactory, M as ModuleWithComponentFactories, O as resetCompiledComponents, ɵ as _setUnknownElementStrictMode, Q as _setUnknownPropertyStrictMode, S as _getUnknownElementStrictMode, T as _getUnknownPropertyStrictMode, U as flushModuleScopingQueueAsMuchAsPossible, V as setAllowDuplicateNgModuleIdsForTest } from './debug_node-UBNfDg4_.mjs';
+import { l as CONTAINER_HEADER_OFFSET, j as InjectionToken, i as inject$1, o as EnvironmentInjector, E as ErrorHandler, p as PendingTasksInternal, Z as ZONELESS_ENABLED, C as ChangeDetectionScheduler, c as EffectScheduler, q as stringify, r as getInjectableDef, t as resolveForwardRef, u as NG_COMP_DEF, v as NG_DIR_DEF, w as NG_PIPE_DEF, x as NG_INJ_DEF, y as NG_MOD_DEF, z as ENVIRONMENT_INITIALIZER, A as INTERNAL_APPLICATION_ERROR_HANDLER, I as Injector, B as isEnvironmentProviders, G as runInInjectionContext } from './root_effect_scheduler-y_GmoF1A.mjs';
 import * as i0 from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import './signal-DhRAAi7R.mjs';
@@ -159,11 +159,15 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 const RETHROW_APPLICATION_ERRORS_DEFAULT = true;
 class TestBedApplicationErrorHandler {
     zone = inject$1(NgZone);
-    userErrorHandler = inject$1(ErrorHandler);
+    injector = inject$1(EnvironmentInjector);
+    userErrorHandler;
     whenStableRejectFunctions = new Set();
     handleError(e) {
         try {
-            this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
+            this.zone.runOutsideAngular(() => {
+                this.userErrorHandler ??= this.injector.get(ErrorHandler);
+                this.userErrorHandler.handleError(e);
+            });
         }
         catch (userError) {
             e = userError;
@@ -1484,6 +1488,13 @@ class TestBedCompiler {
                 internalProvideZoneChangeDetection({}),
                 TestBedApplicationErrorHandler,
                 { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
+                {
+                    provide: ENVIRONMENT_INITIALIZER,
+                    multi: true,
+                    useValue: () => {
+                        inject$1(ErrorHandler);
+                    },
+                },
             ],
         });
         const providers = [
