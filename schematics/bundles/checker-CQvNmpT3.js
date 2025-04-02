@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.4+sha-da9f509
+ * @license Angular v19.2.4+sha-9604ec6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15974,7 +15974,7 @@ class _Tokenizer {
             else {
                 const name = this._cursor.getChars(nameStart);
                 this._cursor.advance();
-                const char = NAMED_ENTITIES[name];
+                const char = NAMED_ENTITIES.hasOwnProperty(name) && NAMED_ENTITIES[name];
                 if (!char) {
                     throw this._createError(_unknownEntityErrorMsg(name), this._cursor.getSpan(start));
                 }
@@ -30728,7 +30728,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.4+sha-da9f509');
+new Version('19.2.4+sha-9604ec6');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32155,7 +32155,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B_GCUUMg.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CQvNmpT3.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
