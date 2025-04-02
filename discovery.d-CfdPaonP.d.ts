@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-59d40f2
+ * @license Angular v20.0.0-next.4+sha-6acce7c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5673,8 +5673,8 @@ interface Binding {
         readonly kind: string;
         readonly requiredVars: number;
     };
-    /** Target to which to apply the binding. */
-    readonly target?: unknown;
+    /** Target index (in a view's registry) to which to apply the binding. */
+    readonly targetIdx?: number;
     /** Callback that will be invoked during creation. */
     create?(): void;
     /** Callback that will be invoked during updates. */

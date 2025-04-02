@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-59d40f2
+ * @license Angular v20.0.0-next.4+sha-6acce7c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -216,7 +216,14 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     // original type explicitly as generic. Otherwise, query API is smart
     // enough to always infer.
     resolvedReadType === null && type !== undefined ? [type] : undefined, args);
-    const updated = ts.factory.createPropertyDeclaration([ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
+    const accessibilityModifier = getAccessibilityModifier(node);
+    let modifiers = [
+        ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword),
+    ];
+    if (accessibilityModifier) {
+        modifiers = [accessibilityModifier, ...modifiers];
+    }
+    const updated = ts.factory.createPropertyDeclaration(modifiers, node.name, undefined, undefined, call);
     return [
         new run_in_devkit.Replacement(run_in_devkit.projectFile(node.getSourceFile(), info), new run_in_devkit.TextUpdate({
             position: node.getStart(),
@@ -224,6 +231,11 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
             toInsert: printer.printNode(ts.EmitHint.Unspecified, updated, sf),
         })),
     ];
+}
+function getAccessibilityModifier(node) {
+    return node.modifiers?.find((mod) => mod.kind === ts.SyntaxKind.PublicKeyword ||
+        mod.kind === ts.SyntaxKind.PrivateKeyword ||
+        mod.kind === ts.SyntaxKind.ProtectedKeyword);
 }
 
 /**
