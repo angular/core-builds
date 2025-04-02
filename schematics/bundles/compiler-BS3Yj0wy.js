@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-916f768
+ * @license Angular v20.0.0-next.4+sha-bdfbd54
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16181,7 +16181,7 @@ class _Tokenizer {
             else {
                 const name = this._cursor.getChars(nameStart);
                 this._cursor.advance();
-                const char = NAMED_ENTITIES[name];
+                const char = NAMED_ENTITIES.hasOwnProperty(name) && NAMED_ENTITIES[name];
                 if (!char) {
                     throw this._createError(_unknownEntityErrorMsg(name), this._cursor.getSpan(start));
                 }
@@ -31596,7 +31596,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.4+sha-916f768');
+new Version('20.0.0-next.4+sha-bdfbd54');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
