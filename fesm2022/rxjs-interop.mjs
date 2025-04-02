@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1c1ad12
+ * @license Angular v20.0.0-next.5+sha-4e88e18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { a as assertInInjectionContext, i as inject, D as DestroyRef, R as RuntimeError, I as Injector, b as assertNotInReactiveContext, s as signal, P as PendingTasks } from './root_effect_scheduler-y_GmoF1A.mjs';
 import { g as getOutputDestroyRef, e as effect, u as untracked, c as computed, r as resource } from './resource-Ul8_EdKL.mjs';
-import { S as SIGNAL } from './signal-DhRAAi7R.mjs';
 import './primitives/di.mjs';
+import './signal-DhRAAi7R.mjs';
 import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
 import './untracked-DaaW3JJm.mjs';
@@ -125,12 +125,9 @@ function outputToObservable(ref) {
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
- * @developerPreview
+ * @publicApi
  */
 function toObservable(source, options) {
-    if (options?.forceSyncFirstEmit === true) {
-        return toObservableNext(source, options);
-    }
     !options?.injector && assertInInjectionContext(toObservable);
     const injector = options?.injector ?? inject(Injector);
     const subject = new ReplaySubject(1);
@@ -150,80 +147,6 @@ function toObservable(source, options) {
         subject.complete();
     });
     return subject.asObservable();
-}
-/**
- * New version of `toObservable` with always-synchronous first emit.
- *
- * This will eventually replace the other implementation.
- */
-function toObservableNext(source, options) {
-    !options?.injector && assertInInjectionContext(toObservable);
-    const injector = options?.injector ?? inject(Injector);
-    return new Observable((subscriber) => {
-        let firstVersion = -1;
-        let firstValue;
-        try {
-            firstValue = untracked(source);
-        }
-        catch (err) {
-            // A failure on the first read just errors the observable without
-            // creating an effect.
-            subscriber.error(err);
-            return;
-        }
-        // We cache the `version` of the first value. This lets us avoid emitting
-        // this value a second time during the `effect`.
-        firstVersion = signalVersion(source);
-        // Emit the first value synchronously on subscription.
-        subscriber.next(firstValue);
-        // Create an effect that will watch the signal for future changes.
-        let firstEmit = true;
-        const ref = effect(() => {
-            let value;
-            try {
-                // Read the value (& track it).
-                value = source();
-            }
-            catch (err) {
-                // Errors cause the Observable stream to terminate.
-                untracked(() => subscriber.error(err));
-                cleanup(false);
-                return;
-            }
-            // Skip the emit of the value if it hasn't changed since the
-            // synchronous emit.
-            if (firstEmit) {
-                firstEmit = false;
-                if (signalVersion(source) === firstVersion) {
-                    return;
-                }
-            }
-            untracked(() => subscriber.next(value));
-        }, { injector, manualCleanup: true });
-        const cleanup = (fromInjector) => {
-            ref.destroy();
-            if (fromInjector) {
-                // If we're cleaning up because the injector is destroyed, then our
-                // subscription is still active and we need to complete it.
-                subscriber.complete();
-            }
-            else {
-                // Otherwise, remove the cleanup function. This both prevents the
-                // complete() event from being produced and allows memory to be
-                // reclaimed.
-                removeInjectorCleanupFn();
-            }
-        };
-        const removeInjectorCleanupFn = injector.get(DestroyRef).onDestroy(() => {
-            // Cleaning up from the `DestroyRef` means the stream is still active, so
-            // we should emit completion.
-            cleanup(true);
-        });
-        return () => cleanup(false);
-    });
-}
-function signalVersion(source) {
-    return source[SIGNAL].version;
 }
 
 /**

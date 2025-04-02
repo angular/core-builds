@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1c1ad12
+ * @license Angular v20.0.0-next.5+sha-4e88e18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -61,7 +61,7 @@ declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperato
 /**
  * Options for `toObservable`.
  *
- * @developerPreview
+ * @publicApi
  */
 interface ToObservableOptions {
     /**
@@ -71,15 +71,6 @@ interface ToObservableOptions {
      * will be used.
      */
     injector?: Injector;
-    /**
-     * Temporary option for forcing a synchronous emit of the signal's initial value.
-     *
-     * This will eventually become the default behavior, but is opt-in to allow a short migration
-     * period.
-     *
-     * @deprecated will become default behavior
-     */
-    forceSyncFirstEmit?: true;
 }
 /**
  * Exposes the value of an Angular `Signal` as an RxJS `Observable`.
@@ -88,7 +79,7 @@ interface ToObservableOptions {
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
- * @developerPreview
+ * @publicApi
  */
 declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
