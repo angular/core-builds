@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.4+sha-0bb4bd6
+ * @license Angular v20.0.0-next.4+sha-1c7b356
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { i as inject, R as RuntimeError, f as formatRuntimeError, E as ErrorHandler, D as DestroyRef, b as assertNotInReactiveContext, a as assertInInjectionContext, I as Injector, V as ViewContext, C as ChangeDetectionScheduler, c as EffectScheduler, d as setInjectorProfilerContext, e as emitEffectCreatedEvent, g as EFFECTS, n as noop, F as FLAGS, m as markAncestorsForTraversal, h as setIsRefreshingViews, N as NodeInjectorDestroyRef, j as InjectionToken, k as signalAsReadonlyFn, P as PendingTasks, s as signal } from './root_effect_scheduler-DtgAE-Is.mjs';
+import { i as inject, R as RuntimeError, f as formatRuntimeError, E as ErrorHandler, D as DestroyRef, b as assertNotInReactiveContext, a as assertInInjectionContext, I as Injector, V as ViewContext, C as ChangeDetectionScheduler, c as EffectScheduler, d as setInjectorProfilerContext, e as emitEffectCreatedEvent, g as EFFECTS, n as noop, F as FLAGS, m as markAncestorsForTraversal, h as setIsRefreshingViews, N as NodeInjectorDestroyRef, j as InjectionToken, k as signalAsReadonlyFn, P as PendingTasks, s as signal } from './root_effect_scheduler-D0_b1cf_.mjs';
 import { q as setActiveConsumer, f as createComputed, S as SIGNAL, R as REACTIVE_NODE, a as consumerDestroy, i as isInNotificationPhase, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation } from './signal-DhRAAi7R.mjs';
 import { u as untracked$1, c as createLinkedSignal, l as linkedSignalSetFn, a as linkedSignalUpdateFn } from './untracked-DaaW3JJm.mjs';
 
@@ -280,7 +280,7 @@ function createRootEffect(fn, scheduler, notifier) {
     node.scheduler = scheduler;
     node.notifier = notifier;
     node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
-    node.scheduler.schedule(node);
+    node.scheduler.add(node);
     node.notifier.notify(12 /* NotificationSource.RootEffect */);
     return node;
 }
@@ -618,4 +618,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef as O, ResourceImpl as R, ResourceStatus as a, computed as c, effect as e, getOutputDestroyRef as g, linkedSignal as l, resource as r, untracked as u };
-//# sourceMappingURL=resource-DcTd2Q9B.mjs.map
+//# sourceMappingURL=resource-BPpYEDic.mjs.map

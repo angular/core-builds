@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-0bb4bd6
+ * @license Angular v20.0.0-next.4+sha-1c7b356
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3008,11 +3008,13 @@ interface SchedulableEffect {
     zone: {
         run<T>(fn: () => T): T;
     } | null;
+    dirty: boolean;
 }
 /**
  * A scheduler which manages the execution of effects.
  */
 declare abstract class EffectScheduler {
+    abstract add(e: SchedulableEffect): void;
     /**
      * Schedule the given effect to be executed at a later time.
      *
@@ -6597,10 +6599,11 @@ declare class ApplicationRef {
      * Get a list of components registered to this application.
      */
     readonly components: ComponentRef<any>[];
+    private internalPendingTask;
     /**
      * Returns an Observable that indicates when the application is stable or unstable.
      */
-    readonly isStable: Observable<boolean>;
+    get isStable(): Observable<boolean>;
     constructor();
     /**
      * @returns A promise that resolves when the application becomes stable

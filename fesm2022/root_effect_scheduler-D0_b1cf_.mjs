@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.4+sha-0bb4bd6
+ * @license Angular v20.0.0-next.4+sha-1c7b356
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import { getCurrentInjector, isNotFound, setCurrentInjector } from './primitives
 import { NotFoundError, isNotFound as isNotFound$1 } from '@angular/core/primitives/di';
 import { setActiveConsumer } from '@angular/core/primitives/signals';
 import { h as getActiveConsumer, S as SIGNAL, v as createSignal, z as signalSetFn, A as signalUpdateFn } from './signal-DhRAAi7R.mjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
  * Base URL for the error details page.
@@ -3594,13 +3594,30 @@ const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined
 class PendingTasksInternal {
     taskId = 0;
     pendingTasks = new Set();
-    get _hasPendingTasks() {
-        return this.hasPendingTasks.value;
+    destroyed = false;
+    pendingTask = new BehaviorSubject(false);
+    get hasPendingTasks() {
+        // Accessing the value of a closed `BehaviorSubject` throws an error.
+        return this.destroyed ? false : this.pendingTask.value;
     }
-    hasPendingTasks = new BehaviorSubject(false);
+    /**
+     * In case the service is about to be destroyed, return a self-completing observable.
+     * Otherwise, return the observable that emits the current state of pending tasks.
+     */
+    get hasPendingTasksObservable() {
+        if (this.destroyed) {
+            // Manually creating the observable pulls less symbols from RxJS than `of(false)`.
+            return new Observable((subscriber) => {
+                subscriber.next(false);
+                subscriber.complete();
+            });
+        }
+        return this.pendingTask;
+    }
     add() {
-        if (!this._hasPendingTasks) {
-            this.hasPendingTasks.next(true);
+        // Emitting a value to a closed subject throws an error.
+        if (!this.hasPendingTasks && !this.destroyed) {
+            this.pendingTask.next(true);
         }
         const taskId = this.taskId++;
         this.pendingTasks.add(taskId);
@@ -3611,15 +3628,22 @@ class PendingTasksInternal {
     }
     remove(taskId) {
         this.pendingTasks.delete(taskId);
-        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
+        if (this.pendingTasks.size === 0 && this.hasPendingTasks) {
+            this.pendingTask.next(false);
         }
     }
     ngOnDestroy() {
         this.pendingTasks.clear();
-        if (this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
+        if (this.hasPendingTasks) {
+            this.pendingTask.next(false);
         }
+        // We call `unsubscribe()` to release observers, as users may forget to
+        // unsubscribe manually when subscribing to `isStable`. We do not call
+        // `complete()` because it is unsafe; if someone subscribes using the `first`
+        // operator and the observable completes before emitting a value,
+        // RxJS will throw an error.
+        this.destroyed = true;
+        this.pendingTask.unsubscribe();
     }
     /** @nocollapse */
     static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
@@ -3714,10 +3738,17 @@ class EffectScheduler {
  * when.
  */
 class ZoneAwareEffectScheduler {
-    queuedEffectCount = 0;
+    dirtyEffectCount = 0;
     queues = new Map();
-    schedule(handle) {
+    add(handle) {
         this.enqueue(handle);
+        this.schedule(handle);
+    }
+    schedule(handle) {
+        if (!handle.dirty) {
+            return;
+        }
+        this.dirtyEffectCount++;
     }
     remove(handle) {
         const zone = handle.zone;
@@ -3726,7 +3757,9 @@ class ZoneAwareEffectScheduler {
             return;
         }
         queue.delete(handle);
-        this.queuedEffectCount--;
+        if (handle.dirty) {
+            this.dirtyEffectCount--;
+        }
     }
     enqueue(handle) {
         const zone = handle.zone;
@@ -3737,7 +3770,6 @@ class ZoneAwareEffectScheduler {
         if (queue.has(handle)) {
             return;
         }
-        this.queuedEffectCount++;
         queue.add(handle);
     }
     /**
@@ -3747,27 +3779,38 @@ class ZoneAwareEffectScheduler {
      * ordering guarantee between effects scheduled in different zones.
      */
     flush() {
-        while (this.queuedEffectCount > 0) {
+        while (this.dirtyEffectCount > 0) {
+            let ranOneEffect = false;
             for (const [zone, queue] of this.queues) {
                 // `zone` here must be defined.
                 if (zone === null) {
-                    this.flushQueue(queue);
+                    ranOneEffect ||= this.flushQueue(queue);
                 }
                 else {
-                    zone.run(() => this.flushQueue(queue));
+                    ranOneEffect ||= zone.run(() => this.flushQueue(queue));
                 }
+            }
+            // Safeguard against infinite looping if somehow our dirty effect count gets out of sync with
+            // the dirty flag across all the effects.
+            if (!ranOneEffect) {
+                this.dirtyEffectCount = 0;
             }
         }
     }
     flushQueue(queue) {
+        let ranOneEffect = false;
         for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
+            if (!handle.dirty) {
+                continue;
+            }
+            this.dirtyEffectCount--;
+            ranOneEffect = true;
             // TODO: what happens if this throws an error?
             handle.run();
         }
+        return ranOneEffect;
     }
 }
 
 export { CLEANUP as $, runInInjectionContext as A, EnvironmentInjector as B, ChangeDetectionScheduler as C, DestroyRef as D, ErrorHandler as E, FLAGS as F, getCurrentTNode as G, assertNgModuleType as H, Injector as I, PROVIDED_ZONELESS as J, ɵɵinject as K, makeEnvironmentProviders as L, INJECTOR_SCOPE as M, NodeInjectorDestroyRef as N, ENVIRONMENT_INITIALIZER as O, PendingTasks as P, CheckNoChangesMode as Q, RuntimeError as R, isComponentHost as S, getComponentLViewByIndex as T, DECLARATION_COMPONENT_VIEW as U, ViewContext as V, getLView as W, ɵɵdefineInjector as X, unwrapRNode as Y, ZONELESS_ENABLED as Z, _global as _, assertInInjectionContext as a, throwProviderNotFoundError as a$, isLContainer as a0, unwrapLView as a1, hasI18n as a2, RENDERER as a3, HOST as a4, getComponentDef as a5, assertTNode as a6, isProjectionTNode as a7, PARENT as a8, CONTEXT as a9, ɵɵrestoreView as aA, isSignal as aB, ɵunwrapWritableSignal as aC, attachInjectFlag as aD, newArray as aE, assertString as aF, EMPTY_OBJ as aG, assertFirstCreatePass as aH, assertDefined as aI, assertNotEqual as aJ, assertEqual as aK, isInCheckNoChangesMode as aL, PREORDER_HOOK_FLAGS as aM, throwError as aN, assertNumber as aO, assertGreaterThan as aP, DECLARATION_VIEW as aQ, throwCyclicDependencyError as aR, stringifyForError as aS, setInjectImplementation as aT, enterDI as aU, emitInjectorToCreateInstanceEvent as aV, emitInstanceCreatedByInjectorEvent as aW, assertDirectiveDef as aX, leaveDI as aY, assertTNodeForLView as aZ, runInInjectorProfilerContext as a_, HEADER_OFFSET as aa, TVIEW as ab, isRootView as ac, isLView as ad, getTNode as ae, getNullInjector as af, isStandalone as ag, defineInjectable as ah, forwardRef as ai, importProvidersFrom as aj, provideEnvironmentInitializer as ak, ɵɵinvalidFactoryDep as al, INJECTOR$1 as am, convertToBitFlags as an, XSS_SECURITY_URL as ao, truncateMiddle as ap, NG_PROV_DEF as aq, isInjectable as ar, createInjector as as, NG_ELEMENT_ID as at, ɵɵdisableBindings as au, ɵɵenableBindings as av, ɵɵnamespaceHTML as aw, ɵɵnamespaceMathML as ax, ɵɵnamespaceSVG as ay, ɵɵresetView as az, assertNotInReactiveContext as b, requiresRefreshOrTraversal as b$, assertNodeInjector as b0, injectRootLimpMode as b1, assertIndexInRange as b2, EMBEDDED_VIEW_INJECTOR as b3, T_HOST as b4, INJECTOR as b5, isComponentDef as b6, NG_FACTORY_DEF as b7, isForwardRef as b8, getFactoryDef as b9, resetPreOrderHookFlags as bA, HYDRATION as bB, CHILD_TAIL as bC, assertSame as bD, assertFirstUpdatePass as bE, getSelectedIndex as bF, getTView as bG, setSelectedIndex as bH, assertNotSame as bI, setCurrentDirectiveIndex as bJ, getCurrentDirectiveIndex as bK, assertNotReactive as bL, enterView as bM, QUERIES as bN, leaveView as bO, isCreationMode as bP, DECLARATION_LCONTAINER as bQ, MOVED_VIEWS as bR, NATIVE as bS, assertProjectionSlots as bT, assertParentView as bU, REACTIVE_TEMPLATE_CONSUMER as bV, ON_DESTROY_HOOKS as bW, assertFunction as bX, markViewForRefresh as bY, setIsInCheckNoChangesMode as bZ, isExhaustiveCheckNoChanges as b_, getClosureSafeProperty as ba, getNativeByTNode as bb, flatten as bc, arrayEquals as bd, ID as be, assertDomNode as bf, EMPTY_ARRAY as bg, assertLView as bh, getLViewParent as bi, CHILD_HEAD as bj, NEXT as bk, getDirectiveDef as bl, isInInjectionContext as bm, AFTER_RENDER_SEQUENCES_TO_ADD as bn, assertIndexInDeclRange as bo, isDestroyed as bp, removeLViewOnDestroy as bq, storeLViewOnDestroy as br, walkUpViews as bs, assertLContainer as bt, getNativeByIndex as bu, assertElement as bv, isContentQueryHost as bw, setCurrentQueryIndex as bx, renderStringify as by, ENVIRONMENT as bz, EffectScheduler as c, getNamespace as c$, setBindingIndex as c0, EFFECTS_TO_SCHEDULE as c1, setBindingRootForHostBindings as c2, viewAttachedToChangeDetector as c3, isRefreshingViews as c4, removeFromArray as c5, addToArray as c6, updateAncestorTraversalFlagsOnAttach as c7, VIEW_REFS as c8, assertGreaterThanOrEqual as c9, MATH_ML_NAMESPACE as cA, viewAttachedToContainer as cB, storeCleanupWithContext as cC, createInjectorWithoutInjectorInstances as cD, R3Injector as cE, internalImportProvidersFrom as cF, initNgDevMode as cG, fillProperties as cH, wasLastNodeCreated as cI, getBindingsEnabled as cJ, lastNodeWasCreated as cK, arrayInsert2 as cL, arraySplice as cM, setInjectorProfiler as cN, NullInjector as cO, INJECTOR_DEF_TYPES as cP, walkProviderTree as cQ, getInjectorDef as cR, deepForEach as cS, incrementBindingIndex as cT, getBindingIndex as cU, keyValueArrayIndexOf as cV, keyValueArrayGet as cW, getCurrentDirectiveDef as cX, keyValueArraySet as cY, assertHasParent as cZ, getElementDepthCount as c_, isInI18nBlock as ca, getCurrentParentTNode as cb, assertTNodeForTView as cc, setCurrentTNode as cd, getCurrentTNodePlaceholderOk as ce, isCurrentTNodeParent as cf, isInSkipHydrationBlock as cg, assertTIcu as ch, assertNumberInRange as ci, DEHYDRATED_VIEWS as cj, getNgModuleDef as ck, getPipeDef as cl, concatStringsWithSpace as cm, assertInjectImplementationNotEqual as cn, emitInjectEvent as co, getConstant as cp, assertLessThan as cq, getOrCreateTViewCleanup as cr, getOrCreateLViewCleanup as cs, isDirectiveHost as ct, assertNotDefined as cu, getSelectedTNode as cv, nextBindingIndex as cw, debugStringifyTypeForError as cx, assertComponentType as cy, SVG_NAMESPACE as cz, setInjectorProfilerContext as d, enterSkipHydrationBlock as d0, increaseElementDepthCount as d1, setCurrentTNodeAsNotParent as d2, isSkipHydrationRootTNode as d3, leaveSkipHydrationBlock as d4, decreaseElementDepthCount as d5, assertIndexInExpandoRange as d6, assertOneOf as d7, setInI18nBlock as d8, nextContextImpl as d9, getCurrentQueryIndex as da, getContextLView as db, load as dc, isWritableSignal as dd, isTypeProvider as de, providerToFactory as df, emitProviderConfiguredEvent as dg, isClassProvider as dh, getBindingRoot as di, ZONELESS_SCHEDULER_DISABLED as dj, SCHEDULE_IN_ROOT_ZONE as dk, getNativeByTNodeOrNull as dl, emitEffectCreatedEvent as e, formatRuntimeError as f, EFFECTS as g, setIsRefreshingViews as h, inject as i, InjectionToken as j, signalAsReadonlyFn as k, CONTAINER_HEADER_OFFSET as l, markAncestorsForTraversal as m, noop as n, PendingTasksInternal as o, stringify as p, getInjectableDef as q, resolveForwardRef as r, signal as s, NG_COMP_DEF as t, NG_DIR_DEF as u, NG_PIPE_DEF as v, NG_INJ_DEF as w, NG_MOD_DEF as x, INTERNAL_APPLICATION_ERROR_HANDLER as y, isEnvironmentProviders as z, ɵɵdefineInjectable as ɵ };
-//# sourceMappingURL=root_effect_scheduler-DtgAE-Is.mjs.map
+//# sourceMappingURL=root_effect_scheduler-D0_b1cf_.mjs.map
