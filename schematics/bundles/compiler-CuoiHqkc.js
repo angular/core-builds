@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-4f86f3f
+ * @license Angular v20.0.0-next.4+sha-84ca0ef
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19816,6 +19816,7 @@ const SCHEMA = [
     'q,blockquote,cite^[HTMLElement]|',
     'script^[HTMLElement]|!async,charset,%crossOrigin,!defer,event,htmlFor,integrity,!noModule,%referrerPolicy,src,text,type',
     'select^[HTMLElement]|autocomplete,!disabled,#length,!multiple,name,!required,#selectedIndex,#size,value',
+    'selectedcontent^[HTMLElement]|',
     'slot^[HTMLElement]|name',
     'source^[HTMLElement]|#height,media,sizes,src,srcset,type,#width',
     'span^[HTMLElement]|',
@@ -31596,7 +31597,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.4+sha-4f86f3f');
+new Version('20.0.0-next.4+sha-84ca0ef');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

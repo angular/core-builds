@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.4+sha-4f86f3f
+ * @license Angular v20.0.0-next.4+sha-84ca0ef
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-BS3Yj0wy.js');
+var compiler = require('./compiler-CuoiHqkc.js');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -964,7 +964,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-dMKqtsQe.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DqUKCGda.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
