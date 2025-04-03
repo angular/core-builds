@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-a22b13f
+ * @license Angular v20.0.0-next.5+sha-2348f26
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6694,6 +6694,7 @@ declare class ApplicationRef {
      *     deprecated. Pass Component Types instead.
      */
     bootstrap<C>(componentFactory: ComponentFactory<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
+    private bootstrapImpl;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
      *
