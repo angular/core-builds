@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-4e88e18
+ * @license Angular v20.0.0-next.5+sha-866cea9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3989,7 +3989,6 @@ declare class PendingTasksInternal implements OnDestroy {
  * ```
  *
  * @publicApi
- * @developerPreview
  */
 declare class PendingTasks {
     private readonly internalPendingTasks;
@@ -4011,8 +4010,9 @@ declare class PendingTasks {
      * ```
      *
      * @param fn The asynchronous function to execute
+     * @developerPreview
      */
-    run<T>(fn: () => Promise<T>): void;
+    run(fn: () => Promise<unknown>): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }
