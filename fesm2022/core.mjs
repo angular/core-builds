@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-5795e03
+ * @license Angular v20.0.0-next.5+sha-c975e75
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -622,7 +622,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.5+sha-5795e03');
+const VERSION = new Version('20.0.0-next.5+sha-c975e75');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -4517,9 +4517,9 @@ function mergeApplicationConfig(...configs) {
  * * When performing static site generation (SSG).
  * * During route extraction in development (at the time of the request).
  *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | `Request` on MDN}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
  *
- * @developerPreview
+ * @publicApi
  */
 const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST' : '', {
     providedIn: 'platform',
@@ -4539,9 +4539,9 @@ const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode
  * * When performing static site generation (SSG).
  * * During route extraction in development (at the time of the request).
  *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response | `ResponseInit` on MDN}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
  *
- * @developerPreview
+ * @publicApi
  */
 const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'RESPONSE_INIT' : '', {
     providedIn: 'platform',
@@ -4555,7 +4555,7 @@ const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngD
  * @remarks
  * This token is only available during server-side rendering and will be `null` in other contexts.
  *
- * @developerPreview
+ * @publicApi
  */
 const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST_CONTEXT' : '', {
     providedIn: 'platform',

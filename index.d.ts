@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-5795e03
+ * @license Angular v20.0.0-next.5+sha-c975e75
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10337,9 +10337,9 @@ declare function mergeApplicationConfig(...configs: ApplicationConfig[]): Applic
  * * When performing static site generation (SSG).
  * * During route extraction in development (at the time of the request).
  *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | `Request` on MDN}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
  *
- * @developerPreview
+ * @publicApi
  */
 declare const REQUEST: InjectionToken<Request | null>;
 /**
@@ -10356,9 +10356,9 @@ declare const REQUEST: InjectionToken<Request | null>;
  * * When performing static site generation (SSG).
  * * During route extraction in development (at the time of the request).
  *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response | `ResponseInit` on MDN}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
  *
- * @developerPreview
+ * @publicApi
  */
 declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
 /**
@@ -10369,7 +10369,7 @@ declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
  * @remarks
  * This token is only available during server-side rendering and will be `null` in other contexts.
  *
- * @developerPreview
+ * @publicApi
  */
 declare const REQUEST_CONTEXT: InjectionToken<unknown>;
 
