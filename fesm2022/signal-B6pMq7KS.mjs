@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -518,5 +518,5 @@ function signalValueChanged(node) {
     postSignalSetFn?.(node);
 }
 
-export { signalUpdateFn as A, COMPUTING as C, ERRORED as E, REACTIVE_NODE as R, SIGNAL as S, UNSET as U, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, defaultEquals as g, getActiveConsumer as h, isInNotificationPhase as i, isReactive as j, producerIncrementEpoch as k, producerMarkClean as l, producerNotifyConsumers as m, producerUpdateValueVersion as n, producerUpdatesAllowed as o, producerAccessed as p, setActiveConsumer as q, runPostProducerCreatedFn as r, setThrowInvalidWriteToSignalError as s, setPostProducerCreatedFn as t, SIGNAL_NODE as u, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalGetFn as y, signalSetFn as z };
-//# sourceMappingURL=signal-DhRAAi7R.mjs.map
+export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
+//# sourceMappingURL=signal-B6pMq7KS.mjs.map

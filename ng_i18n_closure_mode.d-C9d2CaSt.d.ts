@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { S as SIGNAL } from './graph.d-StYigYp1.js';
-import { f as EventContract } from './event_dispatcher.d-PWnbqZDx.js';
+import { SIGNAL } from './graph.d-BcIOep_B.js';
+import { EventContract } from './event_dispatcher.d-DlbccpYq.js';
 
 /**
  * A reactive value which notifies consumers of any changes.
@@ -828,5 +828,5 @@ declare global {
     const ngI18nClosureMode: boolean;
 }
 
-export { DestroyRef as D, Injector as I, JSACTION_EVENT_CONTRACT as J, Type as T, InjectionToken as b, InternalInjectFlags as j, isSignal as s, isEnvironmentProviders as w, signal as z, ɵunwrapWritableSignal as ɵ };
-export type { AbstractType as A, ConstructorProvider as C, ExistingProvider as E, FactoryProvider as F, ModuleWithProviders as M, OutputRef as O, ProviderToken as P, Signal as S, ValueEqualityFn as V, WritableSignal as W, OutputRefSubscription as a, InjectOptions as c, ValueProvider as d, StaticClassProvider as e, ClassProvider as f, EnvironmentProviders as g, ProcessProvidersFunction as h, Provider as i, StaticProvider as k, TypeProvider as l, ValueSansProvider as m, ExistingSansProvider as n, StaticClassSansProvider as o, ConstructorSansProvider as p, FactorySansProvider as q, ClassSansProvider as r, DestroyableInjector as t, ImportedNgModuleProviders as u, InternalEnvironmentProviders as v, Writable as x, CreateSignalOptions as y };
+export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
+export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, ImportedNgModuleProviders, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };

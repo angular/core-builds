@@ -1,14 +1,14 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL } from '../../graph.d-StYigYp1.js';
-export { b as REACTIVE_NODE, c as Reactive, a as ReactiveHookFn, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, s as runPostProducerCreatedFn, t as setActiveConsumer, u as setPostProducerCreatedFn } from '../../graph.d-StYigYp1.js';
-import { S as SignalNode } from '../../signal.d-BeaTIeOE.js';
-export { a as SIGNAL_NODE, b as SignalGetter, c as createSignal, r as runPostSignalSetFn, s as setPostSignalSetFn, d as signalGetFn, e as signalSetFn, f as signalUpdateFn } from '../../signal.d-BeaTIeOE.js';
-export { s as setAlternateWeakRefImpl } from '../../weak_ref.d-ttyj86RV.js';
+import { ReactiveNode, ValueEqualityFn, SIGNAL } from '../../graph.d-BcIOep_B.js';
+export { REACTIVE_NODE, Reactive, ReactiveHookFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from '../../graph.d-BcIOep_B.js';
+import { SignalNode } from '../../signal.d-E0e5nW1p.js';
+export { SIGNAL_NODE, SignalGetter, createSignal, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from '../../signal.d-E0e5nW1p.js';
+export { setAlternateWeakRefImpl } from '../../weak_ref.d-eGOEP9S1.js';
 
 /**
  * A computation, which derives a value from a declarative reactive expression.

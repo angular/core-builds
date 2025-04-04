@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { c as consumerMarkDirty, S as SIGNAL, a as consumerDestroy, i as isInNotificationPhase, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation, R as REACTIVE_NODE } from '../signal-DhRAAi7R.mjs';
-export { u as SIGNAL_NODE, f as createComputed, v as createSignal, g as defaultEquals, h as getActiveConsumer, j as isReactive, p as producerAccessed, k as producerIncrementEpoch, l as producerMarkClean, m as producerNotifyConsumers, n as producerUpdateValueVersion, o as producerUpdatesAllowed, r as runPostProducerCreatedFn, w as runPostSignalSetFn, q as setActiveConsumer, t as setPostProducerCreatedFn, x as setPostSignalSetFn, s as setThrowInvalidWriteToSignalError, y as signalGetFn, z as signalSetFn, A as signalUpdateFn } from '../signal-DhRAAi7R.mjs';
-export { c as createLinkedSignal, l as linkedSignalSetFn, a as linkedSignalUpdateFn, u as untracked } from '../untracked-DaaW3JJm.mjs';
-export { s as setAlternateWeakRefImpl } from '../weak_ref-DrMdAIDh.mjs';
+import { consumerMarkDirty, SIGNAL, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, REACTIVE_NODE } from '../signal-B6pMq7KS.mjs';
+export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal-B6pMq7KS.mjs';
+export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked-Bz5WMeU1.mjs';
+export { setAlternateWeakRefImpl } from '../weak_ref-BaIq-pgY.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {
     const node = Object.create(WATCH_NODE);

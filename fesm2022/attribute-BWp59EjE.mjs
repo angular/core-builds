@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20,5 +20,5 @@ const Attribute = {
     JSACTION: 'jsaction',
 };
 
-export { Attribute as A };
-//# sourceMappingURL=attribute-B17mgaqe.mjs.map
+export { Attribute };
+//# sourceMappingURL=attribute-BWp59EjE.mjs.map

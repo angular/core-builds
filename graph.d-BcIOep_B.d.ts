@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-1899358
+ * @license Angular v20.0.0-next.5+sha-3ea0163
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -191,5 +191,5 @@ declare function consumerDestroy(node: ReactiveNode): void;
 declare function runPostProducerCreatedFn(node: ReactiveNode): void;
 declare function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 
-export { SIGNAL as S, REACTIVE_NODE as b, defaultEquals as d, consumerAfterComputation as e, consumerBeforeComputation as f, consumerDestroy as g, consumerMarkDirty as h, consumerPollProducersForChange as i, getActiveConsumer as j, isInNotificationPhase as k, isReactive as l, producerIncrementEpoch as m, producerMarkClean as n, producerNotifyConsumers as o, producerAccessed as p, producerUpdateValueVersion as q, producerUpdatesAllowed as r, runPostProducerCreatedFn as s, setActiveConsumer as t, setPostProducerCreatedFn as u };
-export type { ReactiveNode as R, ValueEqualityFn as V, ReactiveHookFn as a, Reactive as c };
+export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
+export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn };
