@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-3ea0163
+ * @license Angular v20.0.0-next.5+sha-8d050b5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2176,8 +2176,6 @@ declare function computed<T>(computation: () => T, options?: CreateComputedOptio
 
 /**
  * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
- *
- * @developerPreview
  */
 declare function linkedSignal<D>(computation: () => D, options?: {
     equal?: ValueEqualityFn<NoInfer<D>>;
