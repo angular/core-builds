@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.5+sha-d7089d2
+ * @license Angular v19.2.5+sha-1b36f6e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -626,27 +626,11 @@ declare class FakeNavigation implements Navigation {
     dispose(): void;
     /** Returns whether this fake is disposed. */
     isDisposed(): boolean;
-    /** Implementation for all navigations and traversals. */
+    /**
+     * Implementation for all navigations and traversals.
+     * @returns true if the event was intercepted, otherwise false
+     */
     private userAgentNavigate;
-    /**
-     * Implementation for a push or replace navigation.
-     * https://whatpr.org/html/10919/browsing-the-web.html#url-and-history-update-steps
-     * https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation
-     */
-    private urlAndHistoryUpdateSteps;
-    /**
-     * Implementation for a traverse navigation.
-     *
-     * https://whatpr.org/html/10919/browsing-the-web.html#apply-the-traverse-history-step
-     * ...
-     * > Let updateDocument be an algorithm step which performs update document for history step application given targetEntry's document, targetEntry, changingNavigableContinuation's update-only, scriptHistoryLength, scriptHistoryIndex, navigationType, entriesForNavigationAPI, and previousEntry.
-     * > If targetEntry's document is equal to displayedDocument, then perform updateDocument.
-     * https://whatpr.org/html/10919/browsing-the-web.html#update-document-for-history-step-application
-     * which then goes to https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation
-     */
-    private userAgentTraverse;
-    /** https://whatpr.org/html/10919/nav-history-apis.html#update-the-navigation-api-entries-for-a-same-document-navigation */
-    private updateNavigationEntriesForSameDocumentNavigation;
     /** Utility method for finding entries with the given `key`. */
     private findEntry;
     set onnavigate(_handler: ((this: Navigation, ev: NavigateEvent) => any) | null);
