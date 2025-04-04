@@ -1,15 +1,15 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-8d050b5
+ * @license Angular v20.0.0-next.5+sha-92c4123
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-CuoiHqkc.js');
+var compiler = require('./compiler-BQ7R7w2v.js');
 var ts = require('typescript');
 var p = require('path');
-var checker = require('./checker-DqUKCGda.js');
+var checker = require('./checker-BRvGmaOO.js');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -59,7 +59,12 @@ class XmlParser extends compiler.Parser {
     }
     parse(source, url, options = {}) {
         // Blocks and let declarations aren't supported in an XML context.
-        return super.parse(source, url, { ...options, tokenizeBlocks: false, tokenizeLet: false });
+        return super.parse(source, url, {
+            ...options,
+            tokenizeBlocks: false,
+            tokenizeLet: false,
+            selectorlessEnabled: false,
+        });
     }
 }
 
@@ -283,6 +288,8 @@ class XliffParser {
     visitBlock(block, context) { }
     visitBlockParameter(parameter, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) { }
+    visitDirective(directive, context) { }
     _addError(node, message) {
         this._errors.push(new compiler.I18nError(node.sourceSpan, message));
     }
@@ -338,6 +345,12 @@ let XmlToI18n$1 = class XmlToI18n {
     visitBlock(block, context) { }
     visitBlockParameter(parameter, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) {
+        this._addError(component, 'Unexpected node');
+    }
+    visitDirective(directive, context) {
+        this._addError(directive, 'Unexpected node');
+    }
     _addError(node, message) {
         this._errors.push(new compiler.I18nError(node.sourceSpan, message));
     }
@@ -598,6 +611,8 @@ class Xliff2Parser {
     visitBlock(block, context) { }
     visitBlockParameter(parameter, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) { }
+    visitDirective(directive, context) { }
     _addError(node, message) {
         this._errors.push(new compiler.I18nError(node.sourceSpan, message));
     }
@@ -670,6 +685,12 @@ class XmlToI18n {
     visitBlock(block, context) { }
     visitBlockParameter(parameter, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) {
+        this._addError(component, 'Unexpected node');
+    }
+    visitDirective(directive, context) {
+        this._addError(directive, 'Unexpected node');
+    }
     _addError(node, message) {
         this._errors.push(new compiler.I18nError(node.sourceSpan, message));
     }
@@ -871,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -889,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -984,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1400,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1435,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1486,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1519,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1570,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-8d050b5'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.5+sha-92c4123'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -10849,7 +10870,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.0.0-next.5+sha-8d050b5');
+new compiler.Version('20.0.0-next.5+sha-92c4123');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -14059,6 +14080,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
         this.visitAll(element.references);
         this.visitAll(element.inputs);
         this.visitAll(element.attributes);
+        this.visitAll(element.directives);
         this.visitAll(element.children);
         this.visitAll(element.outputs);
     }
@@ -14067,6 +14089,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
         if (templateIdentifier !== null) {
             this.identifiers.add(templateIdentifier);
         }
+        this.visitAll(template.directives);
         this.visitAll(template.variables);
         this.visitAll(template.attributes);
         this.visitAll(template.templateAttrs);
@@ -14151,6 +14174,12 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
             this.identifiers.add(identifier);
         }
         this.visitExpression(decl.value);
+    }
+    visitComponent(component) {
+        throw new Error('TODO');
+    }
+    visitDirective(directive) {
+        throw new Error('TODO');
     }
     /** Creates an identifier for a template element or template node. */
     elementOrTemplateToIdentifier(node) {
@@ -14900,6 +14929,7 @@ class TemplateVisitor extends compiler.RecursiveAstVisitor {
         this.visitAllNodes(element.attributes);
         this.visitAllNodes(element.inputs);
         this.visitAllNodes(element.outputs);
+        this.visitAllNodes(element.directives);
         this.visitAllNodes(element.references);
         this.visitAllNodes(element.children);
     }
@@ -14913,6 +14943,7 @@ class TemplateVisitor extends compiler.RecursiveAstVisitor {
             this.visitAllNodes(template.inputs);
             this.visitAllNodes(template.outputs);
         }
+        this.visitAllNodes(template.directives);
         // TODO(crisbeto): remove this condition when deleting `canVisitStructuralAttributes`.
         if (this.check.canVisitStructuralAttributes || isInlineTemplate) {
             // `templateAttrs` aren't transferred over to the inner element so we always have to visit them.
@@ -14988,6 +15019,20 @@ class TemplateVisitor extends compiler.RecursiveAstVisitor {
     }
     visitLetDeclaration(decl) {
         this.visitAst(decl.value);
+    }
+    visitComponent(component) {
+        this.visitAllNodes(component.attributes);
+        this.visitAllNodes(component.inputs);
+        this.visitAllNodes(component.outputs);
+        this.visitAllNodes(component.directives);
+        this.visitAllNodes(component.references);
+        this.visitAllNodes(component.children);
+    }
+    visitDirective(directive) {
+        this.visitAllNodes(directive.attributes);
+        this.visitAllNodes(directive.inputs);
+        this.visitAllNodes(directive.outputs);
+        this.visitAllNodes(directive.references);
     }
     getDiagnostics(template) {
         this.diagnostics = [];
@@ -18717,7 +18762,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.5+sha-8d050b5` usually means that core is at head so it supports
+    // A version of `20.0.0-next.5+sha-92c4123` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

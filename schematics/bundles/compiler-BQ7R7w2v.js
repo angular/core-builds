@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-8d050b5
+ * @license Angular v20.0.0-next.5+sha-92c4123
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4915,17 +4915,19 @@ let Element$1 = class Element {
     attributes;
     inputs;
     outputs;
+    directives;
     children;
     references;
     sourceSpan;
     startSourceSpan;
     endSourceSpan;
     i18n;
-    constructor(name, attributes, inputs, outputs, children, references, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+    constructor(name, attributes, inputs, outputs, directives, children, references, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
         this.name = name;
         this.attributes = attributes;
         this.inputs = inputs;
         this.outputs = outputs;
+        this.directives = directives;
         this.children = children;
         this.references = references;
         this.sourceSpan = sourceSpan;
@@ -5224,11 +5226,70 @@ let LetDeclaration$1 = class LetDeclaration {
         return visitor.visitLetDeclaration(this);
     }
 };
+let Component$1 = class Component {
+    componentName;
+    tagName;
+    fullName;
+    attributes;
+    inputs;
+    outputs;
+    directives;
+    children;
+    references;
+    sourceSpan;
+    startSourceSpan;
+    endSourceSpan;
+    i18n;
+    constructor(componentName, tagName, fullName, attributes, inputs, outputs, directives, children, references, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+        this.componentName = componentName;
+        this.tagName = tagName;
+        this.fullName = fullName;
+        this.attributes = attributes;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.directives = directives;
+        this.children = children;
+        this.references = references;
+        this.sourceSpan = sourceSpan;
+        this.startSourceSpan = startSourceSpan;
+        this.endSourceSpan = endSourceSpan;
+        this.i18n = i18n;
+    }
+    visit(visitor) {
+        return visitor.visitComponent(this);
+    }
+};
+let Directive$1 = class Directive {
+    name;
+    attributes;
+    inputs;
+    outputs;
+    references;
+    sourceSpan;
+    startSourceSpan;
+    endSourceSpan;
+    i18n;
+    constructor(name, attributes, inputs, outputs, references, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+        this.name = name;
+        this.attributes = attributes;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.references = references;
+        this.sourceSpan = sourceSpan;
+        this.startSourceSpan = startSourceSpan;
+        this.endSourceSpan = endSourceSpan;
+        this.i18n = i18n;
+    }
+    visit(visitor) {
+        return visitor.visitDirective(this);
+    }
+};
 class Template {
     tagName;
     attributes;
     inputs;
     outputs;
+    directives;
     templateAttrs;
     children;
     references;
@@ -5242,11 +5303,12 @@ class Template {
     // `null` is a special case for when there is a structural directive on an `ng-template` so
     // the renderer can differentiate between the synthetic template and the one written in the
     // file.
-    tagName, attributes, inputs, outputs, templateAttrs, children, references, variables, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+    tagName, attributes, inputs, outputs, directives, templateAttrs, children, references, variables, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
         this.tagName = tagName;
         this.attributes = attributes;
         this.inputs = inputs;
         this.outputs = outputs;
+        this.directives = directives;
         this.templateAttrs = templateAttrs;
         this.children = children;
         this.references = references;
@@ -5265,13 +5327,17 @@ class Content {
     attributes;
     children;
     sourceSpan;
+    startSourceSpan;
+    endSourceSpan;
     i18n;
     name = 'ng-content';
-    constructor(selector, attributes, children, sourceSpan, i18n) {
+    constructor(selector, attributes, children, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
         this.selector = selector;
         this.attributes = attributes;
         this.children = children;
         this.sourceSpan = sourceSpan;
+        this.startSourceSpan = startSourceSpan;
+        this.endSourceSpan = endSourceSpan;
         this.i18n = i18n;
     }
     visit(visitor) {
@@ -5354,6 +5420,7 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
         visitAll$1(this, element.attributes);
         visitAll$1(this, element.inputs);
         visitAll$1(this, element.outputs);
+        visitAll$1(this, element.directives);
         visitAll$1(this, element.children);
         visitAll$1(this, element.references);
     }
@@ -5361,6 +5428,7 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
         visitAll$1(this, template.attributes);
         visitAll$1(this, template.inputs);
         visitAll$1(this, template.outputs);
+        visitAll$1(this, template.directives);
         visitAll$1(this, template.children);
         visitAll$1(this, template.references);
         visitAll$1(this, template.variables);
@@ -5401,6 +5469,20 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     }
     visitContent(content) {
         visitAll$1(this, content.children);
+    }
+    visitComponent(component) {
+        visitAll$1(this, component.attributes);
+        visitAll$1(this, component.inputs);
+        visitAll$1(this, component.outputs);
+        visitAll$1(this, component.directives);
+        visitAll$1(this, component.children);
+        visitAll$1(this, component.references);
+    }
+    visitDirective(directive) {
+        visitAll$1(this, directive.attributes);
+        visitAll$1(this, directive.inputs);
+        visitAll$1(this, directive.outputs);
+        visitAll$1(this, directive.references);
     }
     visitVariable(variable) { }
     visitReference(reference) { }
@@ -6028,8 +6110,8 @@ const I18N_ICU_VAR_PREFIX = 'VAR_';
 function isI18nAttribute(name) {
     return name === I18N_ATTR || name.startsWith(I18N_ATTR_PREFIX);
 }
-function hasI18nAttrs(element) {
-    return element.attrs.some((attr) => isI18nAttribute(attr.name));
+function hasI18nAttrs(node) {
+    return node.attrs.some((attr) => isI18nAttribute(attr.name));
 }
 function icuFromI18nMessage(message) {
     return message.nodes[0];
@@ -13423,13 +13505,15 @@ class Attribute extends NodeWithI18n {
 class Element extends NodeWithI18n {
     name;
     attrs;
+    directives;
     children;
     startSourceSpan;
     endSourceSpan;
-    constructor(name, attrs, children, sourceSpan, startSourceSpan, endSourceSpan = null, i18n) {
+    constructor(name, attrs, directives, children, sourceSpan, startSourceSpan, endSourceSpan = null, i18n) {
         super(sourceSpan, i18n);
         this.name = name;
         this.attrs = attrs;
+        this.directives = directives;
         this.children = children;
         this.startSourceSpan = startSourceSpan;
         this.endSourceSpan = endSourceSpan;
@@ -13467,6 +13551,47 @@ class Block extends NodeWithI18n {
     }
     visit(visitor, context) {
         return visitor.visitBlock(this, context);
+    }
+}
+class Component extends NodeWithI18n {
+    componentName;
+    tagName;
+    fullName;
+    attrs;
+    directives;
+    children;
+    startSourceSpan;
+    endSourceSpan;
+    constructor(componentName, tagName, fullName, attrs, directives, children, sourceSpan, startSourceSpan, endSourceSpan = null, i18n) {
+        super(sourceSpan, i18n);
+        this.componentName = componentName;
+        this.tagName = tagName;
+        this.fullName = fullName;
+        this.attrs = attrs;
+        this.directives = directives;
+        this.children = children;
+        this.startSourceSpan = startSourceSpan;
+        this.endSourceSpan = endSourceSpan;
+    }
+    visit(visitor, context) {
+        return visitor.visitComponent(this, context);
+    }
+}
+class Directive {
+    name;
+    attrs;
+    sourceSpan;
+    startSourceSpan;
+    endSourceSpan;
+    constructor(name, attrs, sourceSpan, startSourceSpan, endSourceSpan = null) {
+        this.name = name;
+        this.attrs = attrs;
+        this.sourceSpan = sourceSpan;
+        this.startSourceSpan = startSourceSpan;
+        this.endSourceSpan = endSourceSpan;
+    }
+    visit(visitor, context) {
+        return visitor.visitDirective(this, context);
     }
 }
 class BlockParameter {
@@ -13515,6 +13640,7 @@ class RecursiveVisitor {
     visitElement(ast, context) {
         this.visitChildren(context, (visit) => {
             visit(ast.attrs);
+            visit(ast.directives);
             visit(ast.children);
         });
     }
@@ -13535,6 +13661,17 @@ class RecursiveVisitor {
     }
     visitBlockParameter(ast, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) {
+        this.visitChildren(context, (visit) => {
+            visit(component.attrs);
+            visit(component.children);
+        });
+    }
+    visitDirective(directive, context) {
+        this.visitChildren(context, (visit) => {
+            visit(directive.attrs);
+        });
+    }
     visitChildren(context, cb) {
         let results = [];
         let t = this;
@@ -15738,11 +15875,13 @@ class _Tokenizer {
     _currentTokenStart = null;
     _currentTokenType = null;
     _expansionCaseStack = [];
+    _openDirectiveCount = 0;
     _inInterpolation = false;
     _preserveLineEndings;
     _i18nNormalizeLineEndingsInICUs;
     _tokenizeBlocks;
     _tokenizeLet;
+    _selectorlessEnabled;
     tokens = [];
     errors = [];
     nonNormalizedIcuExpressions = [];
@@ -15770,6 +15909,7 @@ class _Tokenizer {
         this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
         this._tokenizeBlocks = options.tokenizeBlocks ?? true;
         this._tokenizeLet = options.tokenizeLet ?? true;
+        this._selectorlessEnabled = options.selectorlessEnabled ?? false;
         try {
             this._cursor.init();
         }
@@ -15838,7 +15978,7 @@ class _Tokenizer {
                 this.handleError(e);
             }
         }
-        this._beginToken(33 /* TokenType.EOF */);
+        this._beginToken(41 /* TokenType.EOF */);
         this._endToken([]);
     }
     _getBlockName() {
@@ -16237,7 +16377,7 @@ class _Tokenizer {
         this._cursor.advance();
         this._endToken([content]);
     }
-    _consumePrefixAndName() {
+    _consumePrefixAndName(endPredicate) {
         const nameOrPrefixStart = this._cursor.clone();
         let prefix = '';
         while (this._cursor.peek() !== $COLON && !isPrefixEnd(this._cursor.peek())) {
@@ -16252,41 +16392,64 @@ class _Tokenizer {
         else {
             nameStart = nameOrPrefixStart;
         }
-        this._requireCharCodeUntilFn(isNameEnd, prefix === '' ? 0 : 1);
+        this._requireCharCodeUntilFn(endPredicate, prefix === '' ? 0 : 1);
         const name = this._cursor.getChars(nameStart);
         return [prefix, name];
     }
     _consumeTagOpen(start) {
         let tagName;
         let prefix;
-        let openTagToken;
+        let closingTagName;
+        let openToken;
         try {
-            if (!isAsciiLetter(this._cursor.peek())) {
-                throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(start));
-            }
-            openTagToken = this._consumeTagOpenStart(start);
-            prefix = openTagToken.parts[0];
-            tagName = openTagToken.parts[1];
-            this._attemptCharCodeUntilFn(isNotWhitespace);
-            while (this._cursor.peek() !== $SLASH &&
-                this._cursor.peek() !== $GT &&
-                this._cursor.peek() !== $LT &&
-                this._cursor.peek() !== $EOF) {
-                this._consumeAttributeName();
-                this._attemptCharCodeUntilFn(isNotWhitespace);
-                if (this._attemptCharCode($EQ)) {
-                    this._attemptCharCodeUntilFn(isNotWhitespace);
-                    this._consumeAttributeValue();
+            if (this._selectorlessEnabled && isSelectorlessNameStart(this._cursor.peek())) {
+                openToken = this._consumeComponentOpenStart(start);
+                [closingTagName, prefix, tagName] = openToken.parts;
+                if (prefix) {
+                    closingTagName += `:${prefix}`;
+                }
+                if (tagName) {
+                    closingTagName += `:${tagName}`;
                 }
                 this._attemptCharCodeUntilFn(isNotWhitespace);
             }
-            this._consumeTagOpenEnd();
+            else {
+                if (!isAsciiLetter(this._cursor.peek())) {
+                    throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(start));
+                }
+                openToken = this._consumeTagOpenStart(start);
+                prefix = openToken.parts[0];
+                tagName = closingTagName = openToken.parts[1];
+                this._attemptCharCodeUntilFn(isNotWhitespace);
+            }
+            while (!isAttributeTerminator(this._cursor.peek())) {
+                if (this._selectorlessEnabled && this._cursor.peek() === $AT) {
+                    const start = this._cursor.clone();
+                    const nameStart = start.clone();
+                    nameStart.advance();
+                    if (isSelectorlessNameStart(nameStart.peek())) {
+                        this._consumeDirective(start, nameStart);
+                    }
+                }
+                else {
+                    this._consumeAttribute();
+                }
+            }
+            if (openToken.type === 33 /* TokenType.COMPONENT_OPEN_START */) {
+                this._consumeComponentOpenEnd();
+            }
+            else {
+                this._consumeTagOpenEnd();
+            }
         }
         catch (e) {
             if (e instanceof _ControlFlowError) {
-                if (openTagToken) {
+                if (openToken) {
                     // We errored before we could close the opening tag, so it is incomplete.
-                    openTagToken.type = 4 /* TokenType.INCOMPLETE_TAG_OPEN */;
+                    openToken.type =
+                        openToken.type === 33 /* TokenType.COMPONENT_OPEN_START */
+                            ? 37 /* TokenType.INCOMPLETE_COMPONENT_OPEN */
+                            : 4 /* TokenType.INCOMPLETE_TAG_OPEN */;
                 }
                 else {
                     // When the start tag is invalid, assume we want a "<" as text.
@@ -16300,13 +16463,13 @@ class _Tokenizer {
         }
         const contentTokenType = this._getTagDefinition(tagName).getContentType(prefix);
         if (contentTokenType === exports.TagContentType.RAW_TEXT) {
-            this._consumeRawTextWithTagClose(prefix, tagName, false);
+            this._consumeRawTextWithTagClose(openToken, closingTagName, false);
         }
         else if (contentTokenType === exports.TagContentType.ESCAPABLE_RAW_TEXT) {
-            this._consumeRawTextWithTagClose(prefix, tagName, true);
+            this._consumeRawTextWithTagClose(openToken, closingTagName, true);
         }
     }
-    _consumeRawTextWithTagClose(prefix, tagName, consumeEntities) {
+    _consumeRawTextWithTagClose(openToken, tagName, consumeEntities) {
         this._consumeRawText(consumeEntities, () => {
             if (!this._attemptCharCode($LT))
                 return false;
@@ -16318,15 +16481,45 @@ class _Tokenizer {
             this._attemptCharCodeUntilFn(isNotWhitespace);
             return this._attemptCharCode($GT);
         });
-        this._beginToken(3 /* TokenType.TAG_CLOSE */);
+        this._beginToken(openToken.type === 33 /* TokenType.COMPONENT_OPEN_START */
+            ? 36 /* TokenType.COMPONENT_CLOSE */
+            : 3 /* TokenType.TAG_CLOSE */);
         this._requireCharCodeUntilFn((code) => code === $GT, 3);
         this._cursor.advance(); // Consume the `>`
-        this._endToken([prefix, tagName]);
+        this._endToken(openToken.parts);
     }
     _consumeTagOpenStart(start) {
         this._beginToken(0 /* TokenType.TAG_OPEN_START */, start);
-        const parts = this._consumePrefixAndName();
+        const parts = this._consumePrefixAndName(isNameEnd);
         return this._endToken(parts);
+    }
+    _consumeComponentOpenStart(start) {
+        this._beginToken(33 /* TokenType.COMPONENT_OPEN_START */, start);
+        const parts = this._consumeComponentName();
+        return this._endToken(parts);
+    }
+    _consumeComponentName() {
+        const nameStart = this._cursor.clone();
+        while (isSelectorlessNameChar(this._cursor.peek())) {
+            this._cursor.advance();
+        }
+        const name = this._cursor.getChars(nameStart);
+        let prefix = '';
+        let tagName = '';
+        if (this._cursor.peek() === $COLON) {
+            this._cursor.advance();
+            [prefix, tagName] = this._consumePrefixAndName(isNameEnd);
+        }
+        return [name, prefix, tagName];
+    }
+    _consumeAttribute() {
+        this._consumeAttributeName();
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+        if (this._attemptCharCode($EQ)) {
+            this._attemptCharCodeUntilFn(isNotWhitespace);
+            this._consumeAttributeValue();
+        }
+        this._attemptCharCodeUntilFn(isNotWhitespace);
     }
     _consumeAttributeName() {
         const attrNameStart = this._cursor.peek();
@@ -16334,7 +16527,33 @@ class _Tokenizer {
             throw this._createError(_unexpectedCharacterErrorMsg(attrNameStart), this._cursor.getSpan());
         }
         this._beginToken(14 /* TokenType.ATTR_NAME */);
-        const prefixAndName = this._consumePrefixAndName();
+        let nameEndPredicate;
+        if (this._openDirectiveCount > 0) {
+            // If we're parsing attributes inside of directive syntax, we have to terminate the name
+            // on the first non-matching closing paren. For example, if we have `@Dir(someAttr)`,
+            // `@Dir` and `(` will have already been captured as `DIRECTIVE_NAME` and `DIRECTIVE_OPEN`
+            // respectively, but the `)` will get captured as a part of the name for `someAttr`
+            // because normally that would be an event binding.
+            let openParens = 0;
+            nameEndPredicate = (code) => {
+                if (this._openDirectiveCount > 0) {
+                    if (code === $LPAREN) {
+                        openParens++;
+                    }
+                    else if (code === $RPAREN) {
+                        if (openParens === 0) {
+                            return true;
+                        }
+                        openParens--;
+                    }
+                }
+                return isNameEnd(code);
+            };
+        }
+        else {
+            nameEndPredicate = isNameEnd;
+        }
+        const prefixAndName = this._consumePrefixAndName(nameEndPredicate);
         this._endToken(prefixAndName);
     }
     _consumeAttributeValue() {
@@ -16365,10 +16584,32 @@ class _Tokenizer {
         this._requireCharCode($GT);
         this._endToken([]);
     }
+    _consumeComponentOpenEnd() {
+        const tokenType = this._attemptCharCode($SLASH)
+            ? 35 /* TokenType.COMPONENT_OPEN_END_VOID */
+            : 34 /* TokenType.COMPONENT_OPEN_END */;
+        this._beginToken(tokenType);
+        this._requireCharCode($GT);
+        this._endToken([]);
+    }
     _consumeTagClose(start) {
+        if (this._selectorlessEnabled) {
+            const clone = start.clone();
+            while (clone.peek() !== $GT && !isSelectorlessNameStart(clone.peek())) {
+                clone.advance();
+            }
+            if (isSelectorlessNameStart(clone.peek())) {
+                this._beginToken(36 /* TokenType.COMPONENT_CLOSE */, start);
+                const parts = this._consumeComponentName();
+                this._attemptCharCodeUntilFn(isNotWhitespace);
+                this._requireCharCode($GT);
+                this._endToken(parts);
+                return;
+            }
+        }
         this._beginToken(3 /* TokenType.TAG_CLOSE */, start);
         this._attemptCharCodeUntilFn(isNotWhitespace);
-        const prefixAndName = this._consumePrefixAndName();
+        const prefixAndName = this._consumePrefixAndName(isNameEnd);
         this._attemptCharCodeUntilFn(isNotWhitespace);
         this._requireCharCode($GT);
         this._endToken(prefixAndName);
@@ -16524,6 +16765,50 @@ class _Tokenizer {
         parts.push(this._getProcessedChars(expressionStart, this._cursor));
         this._endToken(parts);
     }
+    _consumeDirective(start, nameStart) {
+        this._requireCharCode($AT);
+        // Skip over the @ since it's not part of the name.
+        this._cursor.advance();
+        // Capture the rest of the name.
+        while (isSelectorlessNameChar(this._cursor.peek())) {
+            this._cursor.advance();
+        }
+        // Capture the opening token.
+        this._beginToken(38 /* TokenType.DIRECTIVE_NAME */, start);
+        const name = this._cursor.getChars(nameStart);
+        this._endToken([name]);
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+        // Optionally there might be attributes bound to the specific directive.
+        // Stop parsing if there's no opening character for them.
+        if (this._cursor.peek() !== $LPAREN) {
+            return;
+        }
+        this._openDirectiveCount++;
+        this._beginToken(39 /* TokenType.DIRECTIVE_OPEN */);
+        this._cursor.advance();
+        this._endToken([]);
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+        // Capture all the attributes until we hit a closing paren.
+        while (!isAttributeTerminator(this._cursor.peek()) && this._cursor.peek() !== $RPAREN) {
+            this._consumeAttribute();
+        }
+        // Trim any trailing whitespace.
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+        this._openDirectiveCount--;
+        if (this._cursor.peek() !== $RPAREN) {
+            // Stop parsing, instead of throwing, if we've hit the end of the tag.
+            // This can be handled better later when turning the tokens into AST.
+            if (this._cursor.peek() === $GT || this._cursor.peek() === $SLASH) {
+                return;
+            }
+            throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(start));
+        }
+        // Capture the closing token.
+        this._beginToken(40 /* TokenType.DIRECTIVE_CLOSE */);
+        this._cursor.advance();
+        this._endToken([]);
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+    }
     _getProcessedChars(start, end) {
         return this._processCarriageReturns(end.getChars(start));
     }
@@ -16638,6 +16923,15 @@ function isBlockNameChar(code) {
 }
 function isBlockParameterChar(code) {
     return code !== $SEMICOLON && isNotWhitespace(code);
+}
+function isSelectorlessNameStart(code) {
+    return code === $_ || (code >= $A && code <= $Z);
+}
+function isSelectorlessNameChar(code) {
+    return isAsciiLetter(code) || isDigit(code) || code === $_;
+}
+function isAttributeTerminator(code) {
+    return code === $SLASH || code === $GT || code === $LT || code === $EOF;
 }
 function mergeTextTokens(srcTokens) {
     const dstTokens = [];
@@ -16935,26 +17229,26 @@ let Parser$1 = class Parser {
 };
 class _TreeBuilder {
     tokens;
-    getTagDefinition;
+    tagDefinitionResolver;
     _index = -1;
     // `_peek` will be initialized by the call to `_advance()` in the constructor.
     _peek;
     _containerStack = [];
     rootNodes = [];
     errors = [];
-    constructor(tokens, getTagDefinition) {
+    constructor(tokens, tagDefinitionResolver) {
         this.tokens = tokens;
-        this.getTagDefinition = getTagDefinition;
+        this.tagDefinitionResolver = tagDefinitionResolver;
         this._advance();
     }
     build() {
-        while (this._peek.type !== 33 /* TokenType.EOF */) {
+        while (this._peek.type !== 41 /* TokenType.EOF */) {
             if (this._peek.type === 0 /* TokenType.TAG_OPEN_START */ ||
                 this._peek.type === 4 /* TokenType.INCOMPLETE_TAG_OPEN */) {
-                this._consumeStartTag(this._advance());
+                this._consumeElementStartTag(this._advance());
             }
             else if (this._peek.type === 3 /* TokenType.TAG_CLOSE */) {
-                this._consumeEndTag(this._advance());
+                this._consumeElementEndTag(this._advance());
             }
             else if (this._peek.type === 12 /* TokenType.CDATA_START */) {
                 this._closeVoidElement();
@@ -16992,6 +17286,13 @@ class _TreeBuilder {
             else if (this._peek.type === 32 /* TokenType.INCOMPLETE_LET */) {
                 this._closeVoidElement();
                 this._consumeIncompleteLet(this._advance());
+            }
+            else if (this._peek.type === 33 /* TokenType.COMPONENT_OPEN_START */ ||
+                this._peek.type === 37 /* TokenType.INCOMPLETE_COMPONENT_OPEN */) {
+                this._consumeComponentStartTag(this._advance());
+            }
+            else if (this._peek.type === 36 /* TokenType.COMPONENT_CLOSE */) {
+                this._consumeComponentEndTag(this._advance());
             }
             else {
                 // Skip all other tokens...
@@ -17066,9 +17367,9 @@ class _TreeBuilder {
         if (!exp)
             return null;
         const end = this._advance();
-        exp.push({ type: 33 /* TokenType.EOF */, parts: [], sourceSpan: end.sourceSpan });
+        exp.push({ type: 41 /* TokenType.EOF */, parts: [], sourceSpan: end.sourceSpan });
         // parse everything in between { and }
-        const expansionCaseParser = new _TreeBuilder(exp, this.getTagDefinition);
+        const expansionCaseParser = new _TreeBuilder(exp, this.tagDefinitionResolver);
         expansionCaseParser.build();
         if (expansionCaseParser.errors.length > 0) {
             this.errors = this.errors.concat(expansionCaseParser.errors);
@@ -17106,7 +17407,7 @@ class _TreeBuilder {
                     return null;
                 }
             }
-            if (this._peek.type === 33 /* TokenType.EOF */) {
+            if (this._peek.type === 41 /* TokenType.EOF */) {
                 this.errors.push(TreeError.create(null, start.sourceSpan, `Invalid ICU message. Missing '}'.`));
                 return null;
             }
@@ -17121,7 +17422,7 @@ class _TreeBuilder {
             const parent = this._getContainer();
             if (parent != null &&
                 parent.children.length === 0 &&
-                this.getTagDefinition(parent.name).ignoreFirstLf) {
+                this._getTagDefinition(parent)?.ignoreFirstLf) {
                 text = text.substring(1);
                 tokens[0] = { type: token.type, sourceSpan: token.sourceSpan, parts: [text] };
             }
@@ -17152,25 +17453,23 @@ class _TreeBuilder {
     }
     _closeVoidElement() {
         const el = this._getContainer();
-        if (el instanceof Element && this.getTagDefinition(el.name).isVoid) {
+        if (el !== null && this._getTagDefinition(el)?.isVoid) {
             this._containerStack.pop();
         }
     }
-    _consumeStartTag(startTagToken) {
-        const [prefix, name] = startTagToken.parts;
+    _consumeElementStartTag(startTagToken) {
         const attrs = [];
-        while (this._peek.type === 14 /* TokenType.ATTR_NAME */) {
-            attrs.push(this._consumeAttr(this._advance()));
-        }
-        const fullName = this._getElementFullName(prefix, name, this._getClosestParentElement());
+        const directives = [];
+        this._consumeAttributesAndDirectives(attrs, directives);
+        const fullName = this._getElementFullName(startTagToken, this._getClosestElementLikeParent());
         let selfClosing = false;
         // Note: There could have been a tokenizer error
         // so that we don't get a token for the end tag...
         if (this._peek.type === 2 /* TokenType.TAG_OPEN_END_VOID */) {
             this._advance();
             selfClosing = true;
-            const tagDef = this.getTagDefinition(fullName);
-            if (!(tagDef.canSelfClose || getNsPrefix(fullName) !== null || tagDef.isVoid)) {
+            const tagDef = this._getTagDefinition(fullName);
+            if (!(tagDef?.canSelfClose || getNsPrefix(fullName) !== null || tagDef?.isVoid)) {
                 this.errors.push(TreeError.create(fullName, startTagToken.sourceSpan, `Only void, custom and foreign elements can be self closed "${startTagToken.parts[1]}"`));
             }
         }
@@ -17182,10 +17481,10 @@ class _TreeBuilder {
         const span = new ParseSourceSpan(startTagToken.sourceSpan.start, end, startTagToken.sourceSpan.fullStart);
         // Create a separate `startSpan` because `span` will be modified when there is an `end` span.
         const startSpan = new ParseSourceSpan(startTagToken.sourceSpan.start, end, startTagToken.sourceSpan.fullStart);
-        const el = new Element(fullName, attrs, [], span, startSpan, undefined);
-        const parentEl = this._getContainer();
-        this._pushContainer(el, parentEl instanceof Element &&
-            this.getTagDefinition(parentEl.name).isClosedByChild(el.name));
+        const el = new Element(fullName, attrs, directives, [], span, startSpan, undefined);
+        const parent = this._getContainer();
+        const isClosedByChild = parent !== null && !!this._getTagDefinition(parent)?.isClosedByChild(el.name);
+        this._pushContainer(el, isClosedByChild);
         if (selfClosing) {
             // Elements that are self-closed have their `endSourceSpan` set to the full span, as the
             // element start tag also represents the end tag.
@@ -17198,6 +17497,73 @@ class _TreeBuilder {
             this.errors.push(TreeError.create(fullName, span, `Opening tag "${fullName}" not terminated.`));
         }
     }
+    _consumeComponentStartTag(startToken) {
+        const componentName = startToken.parts[0];
+        const attrs = [];
+        const directives = [];
+        this._consumeAttributesAndDirectives(attrs, directives);
+        const closestElement = this._getClosestElementLikeParent();
+        const tagName = this._getComponentTagName(startToken, closestElement);
+        const fullName = this._getComponentFullName(startToken, closestElement);
+        const selfClosing = this._peek.type === 35 /* TokenType.COMPONENT_OPEN_END_VOID */;
+        this._advance();
+        const end = this._peek.sourceSpan.fullStart;
+        const span = new ParseSourceSpan(startToken.sourceSpan.start, end, startToken.sourceSpan.fullStart);
+        const startSpan = new ParseSourceSpan(startToken.sourceSpan.start, end, startToken.sourceSpan.fullStart);
+        const node = new Component(componentName, tagName, fullName, attrs, directives, [], span, startSpan, undefined);
+        const parent = this._getContainer();
+        const isClosedByChild = parent !== null &&
+            node.tagName !== null &&
+            !!this._getTagDefinition(parent)?.isClosedByChild(node.tagName);
+        this._pushContainer(node, isClosedByChild);
+        if (selfClosing) {
+            this._popContainer(fullName, Component, span);
+        }
+        else if (startToken.type === 37 /* TokenType.INCOMPLETE_COMPONENT_OPEN */) {
+            this._popContainer(fullName, Component, null);
+            this.errors.push(TreeError.create(fullName, span, `Opening tag "${fullName}" not terminated.`));
+        }
+    }
+    _consumeAttributesAndDirectives(attributesResult, directivesResult) {
+        while (this._peek.type === 14 /* TokenType.ATTR_NAME */ ||
+            this._peek.type === 38 /* TokenType.DIRECTIVE_NAME */) {
+            if (this._peek.type === 38 /* TokenType.DIRECTIVE_NAME */) {
+                directivesResult.push(this._consumeDirective(this._peek));
+            }
+            else {
+                attributesResult.push(this._consumeAttr(this._advance()));
+            }
+        }
+    }
+    _consumeComponentEndTag(endToken) {
+        const fullName = this._getComponentFullName(endToken, this._getClosestElementLikeParent());
+        if (!this._popContainer(fullName, Component, endToken.sourceSpan)) {
+            const container = this._containerStack[this._containerStack.length - 1];
+            let suffix;
+            if (container instanceof Component && container.componentName === endToken.parts[0]) {
+                suffix = `, did you mean "${container.fullName}"?`;
+            }
+            else {
+                suffix = '. It may happen when the tag has already been closed by another tag.';
+            }
+            const errMsg = `Unexpected closing tag "${fullName}"${suffix}`;
+            this.errors.push(TreeError.create(fullName, endToken.sourceSpan, errMsg));
+        }
+    }
+    _getTagDefinition(nodeOrName) {
+        if (typeof nodeOrName === 'string') {
+            return this.tagDefinitionResolver(nodeOrName);
+        }
+        else if (nodeOrName instanceof Element) {
+            return this.tagDefinitionResolver(nodeOrName.name);
+        }
+        else if (nodeOrName instanceof Component && nodeOrName.tagName !== null) {
+            return this.tagDefinitionResolver(nodeOrName.tagName);
+        }
+        else {
+            return null;
+        }
+    }
     _pushContainer(node, isClosedByChild) {
         if (isClosedByChild) {
             this._containerStack.pop();
@@ -17205,9 +17571,9 @@ class _TreeBuilder {
         this._addToParent(node);
         this._containerStack.push(node);
     }
-    _consumeEndTag(endTagToken) {
-        const fullName = this._getElementFullName(endTagToken.parts[0], endTagToken.parts[1], this._getClosestParentElement());
-        if (this.getTagDefinition(fullName).isVoid) {
+    _consumeElementEndTag(endTagToken) {
+        const fullName = this._getElementFullName(endTagToken, this._getClosestElementLikeParent());
+        if (this._getTagDefinition(fullName)?.isVoid) {
             this.errors.push(TreeError.create(fullName, endTagToken.sourceSpan, `Void elements do not have end tags "${endTagToken.parts[1]}"`));
         }
         else if (!this._popContainer(fullName, Element, endTagToken.sourceSpan)) {
@@ -17225,7 +17591,8 @@ class _TreeBuilder {
         let unexpectedCloseTagDetected = false;
         for (let stackIndex = this._containerStack.length - 1; stackIndex >= 0; stackIndex--) {
             const node = this._containerStack[stackIndex];
-            if ((node.name === expectedName || expectedName === null) && node instanceof expectedType) {
+            const nodeName = node instanceof Component ? node.fullName : node.name;
+            if ((nodeName === expectedName || expectedName === null) && node instanceof expectedType) {
                 // Record the parse span with the element that is being closed. Any elements that are
                 // removed from the element stack at this point are closed implicitly, so they won't get
                 // an end source span (as there is no explicit closing element).
@@ -17235,8 +17602,7 @@ class _TreeBuilder {
                 return !unexpectedCloseTagDetected;
             }
             // Blocks and most elements are not self closing.
-            if (node instanceof Block ||
-                (node instanceof Element && !this.getTagDefinition(node.name).closedByParent)) {
+            if (node instanceof Block || !this._getTagDefinition(node)?.closedByParent) {
                 // Note that we encountered an unexpected close tag but continue processing the element
                 // stack so we can assign an `endSourceSpan` if there is a corresponding start tag for this
                 // end tag in the stack.
@@ -17295,6 +17661,31 @@ class _TreeBuilder {
             valueEnd &&
             new ParseSourceSpan(valueStartSpan.start, valueEnd, valueStartSpan.fullStart);
         return new Attribute(fullName, value, new ParseSourceSpan(attrName.sourceSpan.start, attrEnd, attrName.sourceSpan.fullStart), attrName.sourceSpan, valueSpan, valueTokens.length > 0 ? valueTokens : undefined, undefined);
+    }
+    _consumeDirective(nameToken) {
+        const attributes = [];
+        let startSourceSpanEnd = nameToken.sourceSpan.end;
+        let endSourceSpan = null;
+        this._advance();
+        if (this._peek.type === 39 /* TokenType.DIRECTIVE_OPEN */) {
+            // Capture the opening token in the start span.
+            startSourceSpanEnd = this._peek.sourceSpan.end;
+            this._advance();
+            // Cast here is necessary, because TS doesn't know that `_advance` changed `_peek`.
+            while (this._peek.type === 14 /* TokenType.ATTR_NAME */) {
+                attributes.push(this._consumeAttr(this._advance()));
+            }
+            if (this._peek.type === 40 /* TokenType.DIRECTIVE_CLOSE */) {
+                endSourceSpan = this._peek.sourceSpan;
+                this._advance();
+            }
+            else {
+                this.errors.push(TreeError.create(null, nameToken.sourceSpan, 'Unterminated directive definition'));
+            }
+        }
+        const startSourceSpan = new ParseSourceSpan(nameToken.sourceSpan.start, startSourceSpanEnd, nameToken.sourceSpan.fullStart);
+        const sourceSpan = new ParseSourceSpan(startSourceSpan.start, endSourceSpan === null ? nameToken.sourceSpan.end : endSourceSpan.end, startSourceSpan.fullStart);
+        return new Directive(nameToken.parts[0], attributes, sourceSpan, startSourceSpan, endSourceSpan);
     }
     _consumeBlockOpen(token) {
         const parameters = [];
@@ -17386,10 +17777,11 @@ class _TreeBuilder {
             ? this._containerStack[this._containerStack.length - 1]
             : null;
     }
-    _getClosestParentElement() {
+    _getClosestElementLikeParent() {
         for (let i = this._containerStack.length - 1; i > -1; i--) {
-            if (this._containerStack[i] instanceof Element) {
-                return this._containerStack[i];
+            const current = this._containerStack[i];
+            if (current instanceof Element || current instanceof Component) {
+                return current;
             }
         }
         return null;
@@ -17403,18 +17795,57 @@ class _TreeBuilder {
             parent.children.push(node);
         }
     }
-    _getElementFullName(prefix, localName, parentElement) {
-        if (prefix === '') {
-            prefix = this.getTagDefinition(localName).implicitNamespacePrefix || '';
-            if (prefix === '' && parentElement != null) {
-                const parentTagName = splitNsName(parentElement.name)[1];
-                const parentTagDefinition = this.getTagDefinition(parentTagName);
-                if (!parentTagDefinition.preventNamespaceInheritance) {
-                    prefix = getNsPrefix(parentElement.name);
+    _getElementFullName(token, parent) {
+        const prefix = this._getPrefix(token, parent);
+        return mergeNsAndName(prefix, token.parts[1]);
+    }
+    _getComponentFullName(token, parent) {
+        const componentName = token.parts[0];
+        const tagName = this._getComponentTagName(token, parent);
+        if (tagName === null) {
+            return componentName;
+        }
+        return tagName.startsWith(':') ? componentName + tagName : `${componentName}:${tagName}`;
+    }
+    _getComponentTagName(token, parent) {
+        const prefix = this._getPrefix(token, parent);
+        const tagName = token.parts[2];
+        if (!prefix && !tagName) {
+            return null;
+        }
+        else if (!prefix && tagName) {
+            return tagName;
+        }
+        else {
+            // TODO(crisbeto): re-evaluate this fallback. Maybe base it off the class name?
+            return mergeNsAndName(prefix, tagName || 'ng-component');
+        }
+    }
+    _getPrefix(token, parent) {
+        let prefix;
+        let tagName;
+        if (token.type === 33 /* TokenType.COMPONENT_OPEN_START */ ||
+            token.type === 37 /* TokenType.INCOMPLETE_COMPONENT_OPEN */ ||
+            token.type === 36 /* TokenType.COMPONENT_CLOSE */) {
+            prefix = token.parts[1];
+            tagName = token.parts[2];
+        }
+        else {
+            prefix = token.parts[0];
+            tagName = token.parts[1];
+        }
+        prefix = prefix || this._getTagDefinition(tagName)?.implicitNamespacePrefix || '';
+        if (!prefix && parent) {
+            const parentName = parent instanceof Element ? parent.name : parent.tagName;
+            if (parentName !== null) {
+                const parentTagName = splitNsName(parentName)[1];
+                const parentTagDefinition = this._getTagDefinition(parentTagName);
+                if (parentTagDefinition !== null && !parentTagDefinition.preventNamespaceInheritance) {
+                    prefix = getNsPrefix(parentName);
                 }
             }
         }
-        return mergeNsAndName(prefix, localName);
+        return prefix;
     }
 }
 function lastOnStack(stack, element) {
@@ -17493,11 +17924,11 @@ class WhitespaceVisitor {
         if (SKIP_WS_TRIM_TAGS.has(element.name) || hasPreserveWhitespacesAttr(element.attrs)) {
             // don't descent into elements where we need to preserve whitespaces
             // but still visit all attributes to eliminate one used as a market to preserve WS
-            const newElement = new Element(element.name, visitAllWithSiblings(this, element.attrs), element.children, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
+            const newElement = new Element(element.name, visitAllWithSiblings(this, element.attrs), visitAllWithSiblings(this, element.directives), element.children, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
             this.originalNodeMap?.set(newElement, element);
             return newElement;
         }
-        const newElement = new Element(element.name, element.attrs, visitAllWithSiblings(this, element.children), element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
+        const newElement = new Element(element.name, element.attrs, element.directives, visitAllWithSiblings(this, element.children), element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
         this.originalNodeMap?.set(newElement, element);
         return newElement;
     }
@@ -17570,6 +18001,22 @@ class WhitespaceVisitor {
     }
     visitLetDeclaration(decl, context) {
         return decl;
+    }
+    visitComponent(node, context) {
+        if ((node.tagName && SKIP_WS_TRIM_TAGS.has(node.tagName)) ||
+            hasPreserveWhitespacesAttr(node.attrs)) {
+            // don't descent into elements where we need to preserve whitespaces
+            // but still visit all attributes to eliminate one used as a market to preserve WS
+            const newElement = new Component(node.componentName, node.tagName, node.fullName, visitAllWithSiblings(this, node.attrs), visitAllWithSiblings(this, node.directives), node.children, node.sourceSpan, node.startSourceSpan, node.endSourceSpan, node.i18n);
+            this.originalNodeMap?.set(newElement, node);
+            return newElement;
+        }
+        const newElement = new Component(node.componentName, node.tagName, node.fullName, node.attrs, node.directives, visitAllWithSiblings(this, node.children), node.sourceSpan, node.startSourceSpan, node.endSourceSpan, node.i18n);
+        this.originalNodeMap?.set(newElement, node);
+        return newElement;
+    }
+    visitDirective(directive, context) {
+        return directive;
     }
     visit(_node, context) {
         // `visitAllWithSiblings` provides context necessary for ICU messages to be handled correctly.
@@ -20471,28 +20918,13 @@ class _I18nVisitor {
         return new Message(i18nodes, context.placeholderToContent, context.placeholderToMessage, meaning, description, customId);
     }
     visitElement(el, context) {
-        const children = visitAll(this, el.children, context);
-        const attrs = {};
-        el.attrs.forEach((attr) => {
-            // Do not visit the attributes, translatable ones are top-level ASTs
-            attrs[attr.name] = attr.value;
-        });
-        const isVoid = getHtmlTagDefinition(el.name).isVoid;
-        const startPhName = context.placeholderRegistry.getStartTagPlaceholderName(el.name, attrs, isVoid);
-        context.placeholderToContent[startPhName] = {
-            text: el.startSourceSpan.toString(),
-            sourceSpan: el.startSourceSpan,
-        };
-        let closePhName = '';
-        if (!isVoid) {
-            closePhName = context.placeholderRegistry.getCloseTagPlaceholderName(el.name);
-            context.placeholderToContent[closePhName] = {
-                text: `</${el.name}>`,
-                sourceSpan: el.endSourceSpan ?? el.sourceSpan,
-            };
-        }
-        const node = new TagPlaceholder(el.name, attrs, startPhName, closePhName, children, isVoid, el.sourceSpan, el.startSourceSpan, el.endSourceSpan);
-        return context.visitNodeFn(el, node);
+        return this._visitElementLike(el, context);
+    }
+    visitComponent(component, context) {
+        return this._visitElementLike(component, context);
+    }
+    visitDirective(directive, context) {
+        throw new Error('Unreachable code');
     }
     visitAttribute(attribute, context) {
         const node = attribute.valueTokens === undefined || attribute.valueTokens.length === 1
@@ -20565,6 +20997,41 @@ class _I18nVisitor {
     }
     visitLetDeclaration(decl, context) {
         return null;
+    }
+    _visitElementLike(node, context) {
+        const children = visitAll(this, node.children, context);
+        const attrs = {};
+        const visitAttribute = (attr) => {
+            // Do not visit the attributes, translatable ones are top-level ASTs
+            attrs[attr.name] = attr.value;
+        };
+        let nodeName;
+        let isVoid;
+        if (node instanceof Element) {
+            nodeName = node.name;
+            isVoid = getHtmlTagDefinition(node.name).isVoid;
+        }
+        else {
+            nodeName = node.fullName;
+            isVoid = node.tagName ? getHtmlTagDefinition(node.tagName).isVoid : false;
+        }
+        node.attrs.forEach(visitAttribute);
+        node.directives.forEach((dir) => dir.attrs.forEach(visitAttribute));
+        const startPhName = context.placeholderRegistry.getStartTagPlaceholderName(nodeName, attrs, isVoid);
+        context.placeholderToContent[startPhName] = {
+            text: node.startSourceSpan.toString(),
+            sourceSpan: node.startSourceSpan,
+        };
+        let closePhName = '';
+        if (!isVoid) {
+            closePhName = context.placeholderRegistry.getCloseTagPlaceholderName(nodeName);
+            context.placeholderToContent[closePhName] = {
+                text: `</${nodeName}>`,
+                sourceSpan: node.endSourceSpan ?? node.sourceSpan,
+            };
+        }
+        const i18nNode = new TagPlaceholder(nodeName, attrs, startPhName, closePhName, children, isVoid, node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
+        return context.visitNodeFn(node, i18nNode);
     }
     /**
      * Convert, text and interpolated tokens up into text and placeholder pieces.
@@ -20828,71 +21295,12 @@ class I18nMetaVisitor {
         return new ParseTreeResult(result, this._errors);
     }
     visitElement(element) {
-        let message = undefined;
-        if (hasI18nAttrs(element)) {
-            this.hasI18nMeta = true;
-            const attrs = [];
-            const attrsMeta = {};
-            for (const attr of element.attrs) {
-                if (attr.name === I18N_ATTR) {
-                    // root 'i18n' node attribute
-                    const i18n = element.i18n || attr.value;
-                    // Generate a new AST with whitespace trimmed, but also generate a map
-                    // to correlate each new node to its original so we can apply i18n
-                    // information to the original node based on the trimmed content.
-                    //
-                    // `WhitespaceVisitor` removes *insignificant* whitespace as well as
-                    // significant whitespace. Enabling this visitor should be conditional
-                    // on `preserveWhitespace` rather than `preserveSignificantWhitespace`,
-                    // however this would be a breaking change for existing behavior where
-                    // `preserveWhitespace` was not respected correctly when generating
-                    // message IDs. This is really a bug but one we need to keep to maintain
-                    // backwards compatibility.
-                    const originalNodeMap = new Map();
-                    const trimmedNodes = this.preserveSignificantWhitespace
-                        ? element.children
-                        : visitAllWithSiblings(new WhitespaceVisitor(false /* preserveSignificantWhitespace */, originalNodeMap), element.children);
-                    message = this._generateI18nMessage(trimmedNodes, i18n, setI18nRefs(originalNodeMap));
-                    if (message.nodes.length === 0) {
-                        // Ignore the message if it is empty.
-                        message = undefined;
-                    }
-                    // Store the message on the element
-                    element.i18n = message;
-                }
-                else if (attr.name.startsWith(I18N_ATTR_PREFIX)) {
-                    // 'i18n-*' attributes
-                    const name = attr.name.slice(I18N_ATTR_PREFIX.length);
-                    if (isTrustedTypesSink(element.name, name)) {
-                        this._reportError(attr, `Translating attribute '${name}' is disallowed for security reasons.`);
-                    }
-                    else {
-                        attrsMeta[name] = attr.value;
-                    }
-                }
-                else {
-                    // non-i18n attributes
-                    attrs.push(attr);
-                }
-            }
-            // set i18n meta for attributes
-            if (Object.keys(attrsMeta).length) {
-                for (const attr of attrs) {
-                    const meta = attrsMeta[attr.name];
-                    // do not create translation for empty attributes
-                    if (meta !== undefined && attr.value) {
-                        attr.i18n = this._generateI18nMessage([attr], attr.i18n || meta);
-                    }
-                }
-            }
-            if (!this.keepI18nAttrs) {
-                // update element's attributes,
-                // keeping only non-i18n related ones
-                element.attrs = attrs;
-            }
-        }
-        visitAll(this, element.children, message);
+        this._visitElementLike(element);
         return element;
+    }
+    visitComponent(component, context) {
+        this._visitElementLike(component);
+        return component;
     }
     visitExpansion(expansion, currentMessage) {
         let message;
@@ -20941,6 +21349,82 @@ class I18nMetaVisitor {
     }
     visitLetDeclaration(decl, context) {
         return decl;
+    }
+    visitDirective(directive, context) {
+        return directive;
+    }
+    _visitElementLike(node) {
+        let message = undefined;
+        if (hasI18nAttrs(node)) {
+            this.hasI18nMeta = true;
+            const attrs = [];
+            const attrsMeta = {};
+            for (const attr of node.attrs) {
+                if (attr.name === I18N_ATTR) {
+                    // root 'i18n' node attribute
+                    const i18n = node.i18n || attr.value;
+                    // Generate a new AST with whitespace trimmed, but also generate a map
+                    // to correlate each new node to its original so we can apply i18n
+                    // information to the original node based on the trimmed content.
+                    //
+                    // `WhitespaceVisitor` removes *insignificant* whitespace as well as
+                    // significant whitespace. Enabling this visitor should be conditional
+                    // on `preserveWhitespace` rather than `preserveSignificantWhitespace`,
+                    // however this would be a breaking change for existing behavior where
+                    // `preserveWhitespace` was not respected correctly when generating
+                    // message IDs. This is really a bug but one we need to keep to maintain
+                    // backwards compatibility.
+                    const originalNodeMap = new Map();
+                    const trimmedNodes = this.preserveSignificantWhitespace
+                        ? node.children
+                        : visitAllWithSiblings(new WhitespaceVisitor(false /* preserveSignificantWhitespace */, originalNodeMap), node.children);
+                    message = this._generateI18nMessage(trimmedNodes, i18n, setI18nRefs(originalNodeMap));
+                    if (message.nodes.length === 0) {
+                        // Ignore the message if it is empty.
+                        message = undefined;
+                    }
+                    // Store the message on the element
+                    node.i18n = message;
+                }
+                else if (attr.name.startsWith(I18N_ATTR_PREFIX)) {
+                    // 'i18n-*' attributes
+                    const name = attr.name.slice(I18N_ATTR_PREFIX.length);
+                    let isTrustedType;
+                    if (node instanceof Component) {
+                        isTrustedType = node.tagName === null ? false : isTrustedTypesSink(node.tagName, name);
+                    }
+                    else {
+                        isTrustedType = isTrustedTypesSink(node.name, name);
+                    }
+                    if (isTrustedType) {
+                        this._reportError(attr, `Translating attribute '${name}' is disallowed for security reasons.`);
+                    }
+                    else {
+                        attrsMeta[name] = attr.value;
+                    }
+                }
+                else {
+                    // non-i18n attributes
+                    attrs.push(attr);
+                }
+            }
+            // set i18n meta for attributes
+            if (Object.keys(attrsMeta).length) {
+                for (const attr of attrs) {
+                    const meta = attrsMeta[attr.name];
+                    // do not create translation for empty attributes
+                    if (meta !== undefined && attr.value) {
+                        attr.i18n = this._generateI18nMessage([attr], attr.i18n || meta);
+                    }
+                }
+            }
+            if (!this.keepI18nAttrs) {
+                // update element's attributes,
+                // keeping only non-i18n related ones
+                node.attrs = attrs;
+            }
+        }
+        visitAll(this, node.children, message);
     }
     /**
      * Parse the general form `meta` passed into extract the explicit metadata needed to create a
@@ -27357,15 +27841,22 @@ function isAnimationLabel(name) {
     return name[0] == '@';
 }
 function calcPossibleSecurityContexts(registry, selector, propName, isAttribute) {
-    const ctxs = [];
-    CssSelector.parse(selector).forEach((selector) => {
-        const elementNames = selector.element ? [selector.element] : registry.allKnownElementNames();
-        const notElementNames = new Set(selector.notSelectors
-            .filter((selector) => selector.isElementSelector())
-            .map((selector) => selector.element));
-        const possibleElementNames = elementNames.filter((elementName) => !notElementNames.has(elementName));
-        ctxs.push(...possibleElementNames.map((elementName) => registry.securityContext(elementName, propName, isAttribute)));
-    });
+    let ctxs;
+    const nameToContext = (elName) => registry.securityContext(elName, propName, isAttribute);
+    if (selector === null) {
+        ctxs = registry.allKnownElementNames().map(nameToContext);
+    }
+    else {
+        ctxs = [];
+        CssSelector.parse(selector).forEach((selector) => {
+            const elementNames = selector.element ? [selector.element] : registry.allKnownElementNames();
+            const notElementNames = new Set(selector.notSelectors
+                .filter((selector) => selector.isElementSelector())
+                .map((selector) => selector.element));
+            const possibleElementNames = elementNames.filter((elName) => !notElementNames.has(elName));
+            ctxs.push(...possibleElementNames.map(nameToContext));
+        });
+    }
     return ctxs.length === 0 ? [SecurityContext.NONE] : Array.from(new Set(ctxs)).sort();
 }
 /**
@@ -28450,6 +28941,17 @@ const BINDING_DELIMS = {
     EVENT: { start: '(', end: ')' },
 };
 const TEMPLATE_ATTR_PREFIX = '*';
+// TODO(crisbeto): any other tag names that shouldn't be allowed here?
+const UNSUPPORTED_SELECTORLESS_TAGS = new Set([
+    'link',
+    'style',
+    'script',
+    'ng-template',
+    'ng-container',
+    'ng-content',
+]);
+// TODO(crisbeto): any other attributes that should not be allowed here?
+const UNSUPPORTED_SELECTORLESS_DIRECTIVE_ATTRS = new Set(['ngProjectAs', 'ngNonBindable']);
 function htmlAstToRender3Ast(htmlNodes, bindingParser, options) {
     const transformer = new HtmlAstToIvyAst(bindingParser, options);
     const ivyNodes = visitAll(transformer, htmlNodes, htmlNodes);
@@ -28513,52 +29015,8 @@ class HtmlAstToIvyAst {
         }
         // Whether the element is a `<ng-template>`
         const isTemplateElement = isNgTemplate(element.name);
-        const parsedProperties = [];
-        const boundEvents = [];
-        const variables = [];
-        const references = [];
-        const attributes = [];
-        const i18nAttrsMeta = {};
-        const templateParsedProperties = [];
-        const templateVariables = [];
-        // Whether the element has any *-attribute
-        let elementHasInlineTemplate = false;
-        for (const attribute of element.attrs) {
-            let hasBinding = false;
-            const normalizedName = normalizeAttributeName(attribute.name);
-            // `*attr` defines template bindings
-            let isTemplateBinding = false;
-            if (attribute.i18n) {
-                i18nAttrsMeta[attribute.name] = attribute.i18n;
-            }
-            if (normalizedName.startsWith(TEMPLATE_ATTR_PREFIX)) {
-                // *-attributes
-                if (elementHasInlineTemplate) {
-                    this.reportError(`Can't have multiple template bindings on one element. Use only one attribute prefixed with *`, attribute.sourceSpan);
-                }
-                isTemplateBinding = true;
-                elementHasInlineTemplate = true;
-                const templateValue = attribute.value;
-                const templateKey = normalizedName.substring(TEMPLATE_ATTR_PREFIX.length);
-                const parsedVariables = [];
-                const absoluteValueOffset = attribute.valueSpan
-                    ? attribute.valueSpan.start.offset
-                    : // If there is no value span the attribute does not have a value, like `attr` in
-                        //`<div attr></div>`. In this case, point to one character beyond the last character of
-                        // the attribute name.
-                        attribute.sourceSpan.start.offset + attribute.name.length;
-                this.bindingParser.parseInlineTemplateBinding(templateKey, templateValue, attribute.sourceSpan, absoluteValueOffset, [], templateParsedProperties, parsedVariables, true /* isIvyAst */);
-                templateVariables.push(...parsedVariables.map((v) => new Variable(v.name, v.value, v.sourceSpan, v.keySpan, v.valueSpan)));
-            }
-            else {
-                // Check for variables, events, property bindings, interpolation
-                hasBinding = this.parseAttribute(isTemplateElement, attribute, [], parsedProperties, boundEvents, variables, references);
-            }
-            if (!hasBinding && !isTemplateBinding) {
-                // don't include the bindings as attributes as well in the AST
-                attributes.push(this.visitAttribute(attribute));
-            }
-        }
+        const { attributes, boundEvents, references, variables, templateVariables, elementHasInlineTemplate, parsedProperties, templateParsedProperties, i18nAttrsMeta, } = this.prepareAttributes(element.attrs, isTemplateElement);
+        const directives = this.extractDirectives(element);
         let children;
         if (preparsedElement.nonBindable) {
             // The `NonBindableVisitor` may need to return an array of nodes for blocks so we need
@@ -28573,44 +29031,24 @@ class HtmlAstToIvyAst {
         if (preparsedElement.type === PreparsedElementType.NG_CONTENT) {
             const selector = preparsedElement.selectAttr;
             const attrs = element.attrs.map((attr) => this.visitAttribute(attr));
-            parsedElement = new Content(selector, attrs, children, element.sourceSpan, element.i18n);
+            parsedElement = new Content(selector, attrs, children, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
             this.ngContentSelectors.push(selector);
         }
         else if (isTemplateElement) {
             // `<ng-template>`
-            const attrs = this.extractAttributes(element.name, parsedProperties, i18nAttrsMeta);
-            parsedElement = new Template(element.name, attributes, attrs.bound, boundEvents, [
+            const attrs = this.categorizePropertyAttributes(element.name, parsedProperties, i18nAttrsMeta);
+            parsedElement = new Template(element.name, attributes, attrs.bound, boundEvents, directives, [
             /* no template attributes */
             ], children, references, variables, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
         }
         else {
-            const attrs = this.extractAttributes(element.name, parsedProperties, i18nAttrsMeta);
-            parsedElement = new Element$1(element.name, attributes, attrs.bound, boundEvents, children, references, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
+            const attrs = this.categorizePropertyAttributes(element.name, parsedProperties, i18nAttrsMeta);
+            parsedElement = new Element$1(element.name, attributes, attrs.bound, boundEvents, directives, children, references, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, element.i18n);
         }
         if (elementHasInlineTemplate) {
             // If this node is an inline-template (e.g. has *ngFor) then we need to create a template
             // node that contains this node.
-            // Moreover, if the node is an element, then we need to hoist its attributes to the template
-            // node for matching against content projection selectors.
-            const attrs = this.extractAttributes('ng-template', templateParsedProperties, i18nAttrsMeta);
-            const templateAttrs = [];
-            attrs.literal.forEach((attr) => templateAttrs.push(attr));
-            attrs.bound.forEach((attr) => templateAttrs.push(attr));
-            const hoistedAttrs = parsedElement instanceof Element$1
-                ? {
-                    attributes: parsedElement.attributes,
-                    inputs: parsedElement.inputs,
-                    outputs: parsedElement.outputs,
-                }
-                : { attributes: [], inputs: [], outputs: [] };
-            // For <ng-template>s with structural directives on them, avoid passing i18n information to
-            // the wrapping template to prevent unnecessary i18n instructions from being generated. The
-            // necessary i18n meta information will be extracted from child elements.
-            const i18n = isTemplateElement && isI18nRootElement ? undefined : element.i18n;
-            const name = parsedElement instanceof Template ? null : parsedElement.name;
-            parsedElement = new Template(name, hoistedAttrs.attributes, hoistedAttrs.inputs, hoistedAttrs.outputs, templateAttrs, [parsedElement], [
-            /* no references */
-            ], templateVariables, element.sourceSpan, element.startSourceSpan, element.endSourceSpan, i18n);
+            parsedElement = this.wrapInTemplate(parsedElement, templateParsedProperties, templateVariables, i18nAttrsMeta, isTemplateElement, isI18nRootElement);
         }
         if (isI18nRootElement) {
             this.inI18nBlock = false;
@@ -28673,6 +29111,43 @@ class HtmlAstToIvyAst {
             this.reportError('@let declaration value cannot be empty', decl.valueSpan);
         }
         return new LetDeclaration$1(decl.name, value, decl.sourceSpan, decl.nameSpan, decl.valueSpan);
+    }
+    visitComponent(component) {
+        const isI18nRootElement = isI18nRootNode(component.i18n);
+        if (isI18nRootElement) {
+            if (this.inI18nBlock) {
+                this.reportError('Cannot mark a component as translatable inside of a translatable section. Please remove the nested i18n marker.', component.sourceSpan);
+            }
+            this.inI18nBlock = true;
+        }
+        if (component.tagName !== null && UNSUPPORTED_SELECTORLESS_TAGS.has(component.tagName)) {
+            this.reportError(`Tag name "${component.tagName}" cannot be used as a component tag`, component.startSourceSpan);
+            return null;
+        }
+        const { attributes, boundEvents, references, templateVariables, elementHasInlineTemplate, parsedProperties, templateParsedProperties, i18nAttrsMeta, } = this.prepareAttributes(component.attrs, false);
+        const directives = this.extractDirectives(component);
+        let children;
+        if (component.attrs.find((attr) => attr.name === 'ngNonBindable')) {
+            // The `NonBindableVisitor` may need to return an array of nodes for blocks so we need
+            // to flatten the array here. Avoid doing this for the `HtmlAstToIvyAst` since `flat` creates
+            // a new array.
+            children = visitAll(NON_BINDABLE_VISITOR, component.children).flat(Infinity);
+        }
+        else {
+            children = visitAll(this, component.children, component.children);
+        }
+        const attrs = this.categorizePropertyAttributes(component.tagName, parsedProperties, i18nAttrsMeta);
+        let node = new Component$1(component.componentName, component.tagName, component.fullName, attributes, attrs.bound, boundEvents, directives, children, references, component.sourceSpan, component.startSourceSpan, component.endSourceSpan, component.i18n);
+        if (elementHasInlineTemplate) {
+            node = this.wrapInTemplate(node, templateParsedProperties, templateVariables, i18nAttrsMeta, false, isI18nRootElement);
+        }
+        if (isI18nRootElement) {
+            this.inI18nBlock = false;
+        }
+        return node;
+    }
+    visitDirective() {
+        return null;
     }
     visitBlockParameter() {
         return null;
@@ -28750,8 +29225,8 @@ class HtmlAstToIvyAst {
         }
         return relatedBlocks;
     }
-    // convert view engine `ParsedProperty` to a format suitable for IVY
-    extractAttributes(elementName, properties, i18nPropsMeta) {
+    /** Splits up the property attributes depending on whether they're static or bound. */
+    categorizePropertyAttributes(elementName, properties, i18nPropsMeta) {
         const bound = [];
         const literal = [];
         properties.forEach((prop) => {
@@ -28770,6 +29245,65 @@ class HtmlAstToIvyAst {
             }
         });
         return { bound, literal };
+    }
+    prepareAttributes(attrs, isTemplateElement) {
+        const parsedProperties = [];
+        const boundEvents = [];
+        const variables = [];
+        const references = [];
+        const attributes = [];
+        const i18nAttrsMeta = {};
+        const templateParsedProperties = [];
+        const templateVariables = [];
+        // Whether the element has any *-attribute
+        let elementHasInlineTemplate = false;
+        for (const attribute of attrs) {
+            let hasBinding = false;
+            const normalizedName = normalizeAttributeName(attribute.name);
+            // `*attr` defines template bindings
+            let isTemplateBinding = false;
+            if (attribute.i18n) {
+                i18nAttrsMeta[attribute.name] = attribute.i18n;
+            }
+            if (normalizedName.startsWith(TEMPLATE_ATTR_PREFIX)) {
+                // *-attributes
+                if (elementHasInlineTemplate) {
+                    this.reportError(`Can't have multiple template bindings on one element. Use only one attribute prefixed with *`, attribute.sourceSpan);
+                }
+                isTemplateBinding = true;
+                elementHasInlineTemplate = true;
+                const templateValue = attribute.value;
+                const templateKey = normalizedName.substring(TEMPLATE_ATTR_PREFIX.length);
+                const parsedVariables = [];
+                const absoluteValueOffset = attribute.valueSpan
+                    ? attribute.valueSpan.start.offset
+                    : // If there is no value span the attribute does not have a value, like `attr` in
+                        //`<div attr></div>`. In this case, point to one character beyond the last character of
+                        // the attribute name.
+                        attribute.sourceSpan.start.offset + attribute.name.length;
+                this.bindingParser.parseInlineTemplateBinding(templateKey, templateValue, attribute.sourceSpan, absoluteValueOffset, [], templateParsedProperties, parsedVariables, true /* isIvyAst */);
+                templateVariables.push(...parsedVariables.map((v) => new Variable(v.name, v.value, v.sourceSpan, v.keySpan, v.valueSpan)));
+            }
+            else {
+                // Check for variables, events, property bindings, interpolation
+                hasBinding = this.parseAttribute(isTemplateElement, attribute, [], parsedProperties, boundEvents, variables, references);
+            }
+            if (!hasBinding && !isTemplateBinding) {
+                // don't include the bindings as attributes as well in the AST
+                attributes.push(this.visitAttribute(attribute));
+            }
+        }
+        return {
+            attributes,
+            boundEvents,
+            references,
+            variables,
+            templateVariables,
+            elementHasInlineTemplate,
+            parsedProperties,
+            templateParsedProperties,
+            i18nAttrsMeta,
+        };
     }
     parseAttribute(isTemplateElement, attribute, matchableAttributes, parsedProperties, boundEvents, variables, references) {
         const name = normalizeAttributeName(attribute.name);
@@ -28869,6 +29403,81 @@ class HtmlAstToIvyAst {
         const hasBinding = this.bindingParser.parsePropertyInterpolation(name, value, srcSpan, attribute.valueSpan, matchableAttributes, parsedProperties, keySpan, attribute.valueTokens ?? null);
         return hasBinding;
     }
+    extractDirectives(node) {
+        const elementName = node instanceof Component ? node.tagName : node.name;
+        const directives = [];
+        const seenDirectives = new Set();
+        for (const directive of node.directives) {
+            let invalid = false;
+            for (const attr of directive.attrs) {
+                if (attr.name.startsWith(TEMPLATE_ATTR_PREFIX)) {
+                    invalid = true;
+                    this.reportError(`Shorthand template syntax "${attr.name}" is not supported inside a directive context`, attr.sourceSpan);
+                }
+                else if (UNSUPPORTED_SELECTORLESS_DIRECTIVE_ATTRS.has(attr.name)) {
+                    invalid = true;
+                    this.reportError(`Attribute "${attr.name}" is not supported in a directive context`, attr.sourceSpan);
+                }
+            }
+            if (!invalid && seenDirectives.has(directive.name)) {
+                invalid = true;
+                this.reportError(`Cannot apply directive "${directive.name}" multiple times on the same element`, directive.sourceSpan);
+            }
+            if (invalid) {
+                continue;
+            }
+            const { attributes, parsedProperties, boundEvents, references, i18nAttrsMeta } = this.prepareAttributes(directive.attrs, false);
+            const { bound: inputs } = this.categorizePropertyAttributes(elementName, parsedProperties, i18nAttrsMeta);
+            for (const input of inputs) {
+                if (input.type !== exports.BindingType.Property && input.type !== exports.BindingType.TwoWay) {
+                    invalid = true;
+                    this.reportError('Binding is not supported in a directive context', input.sourceSpan);
+                }
+            }
+            if (invalid) {
+                continue;
+            }
+            seenDirectives.add(directive.name);
+            directives.push(new Directive$1(directive.name, attributes, inputs, boundEvents, references, directive.sourceSpan, directive.startSourceSpan, directive.endSourceSpan, undefined));
+        }
+        return directives;
+    }
+    wrapInTemplate(node, templateProperties, templateVariables, i18nAttrsMeta, isTemplateElement, isI18nRootElement) {
+        // We need to hoist the attributes of the node to the template for content projection purposes.
+        const attrs = this.categorizePropertyAttributes('ng-template', templateProperties, i18nAttrsMeta);
+        const templateAttrs = [];
+        attrs.literal.forEach((attr) => templateAttrs.push(attr));
+        attrs.bound.forEach((attr) => templateAttrs.push(attr));
+        const hoistedAttrs = {
+            attributes: [],
+            inputs: [],
+            outputs: [],
+        };
+        if (node instanceof Element$1 || node instanceof Component$1) {
+            hoistedAttrs.attributes.push(...node.attributes);
+            hoistedAttrs.inputs.push(...node.inputs);
+            hoistedAttrs.outputs.push(...node.outputs);
+        }
+        // For <ng-template>s with structural directives on them, avoid passing i18n information to
+        // the wrapping template to prevent unnecessary i18n instructions from being generated. The
+        // necessary i18n meta information will be extracted from child elements.
+        const i18n = isTemplateElement && isI18nRootElement ? undefined : node.i18n;
+        let name;
+        if (node instanceof Component$1) {
+            name = node.tagName;
+        }
+        else if (node instanceof Template) {
+            name = null;
+        }
+        else {
+            name = node.name;
+        }
+        return new Template(name, hoistedAttrs.attributes, hoistedAttrs.inputs, hoistedAttrs.outputs, [
+        // Do not copy over the directives.
+        ], templateAttrs, [node], [
+        // Do not copy over the references.
+        ], templateVariables, node.sourceSpan, node.startSourceSpan, node.endSourceSpan, i18n);
+    }
     _visitTextWithInterpolation(value, sourceSpan, interpolatedTokens, i18n) {
         const valueNoNgsp = replaceNgsp(value);
         const expr = this.bindingParser.parseInterpolation(valueNoNgsp, sourceSpan, interpolatedTokens);
@@ -28919,7 +29528,8 @@ class NonBindableVisitor {
         const children = visitAll(this, ast.children, null);
         return new Element$1(ast.name, visitAll(this, ast.attrs), 
         /* inputs */ [], 
-        /* outputs */ [], children, 
+        /* outputs */ [], 
+        /* directives */ [], children, 
         /* references */ [], ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
     }
     visitComment(comment) {
@@ -28954,6 +29564,17 @@ class NonBindableVisitor {
     }
     visitLetDeclaration(decl, context) {
         return new Text$3(`@let ${decl.name} = ${decl.value};`, decl.sourceSpan);
+    }
+    visitComponent(ast, context) {
+        const children = visitAll(this, ast.children, null);
+        return new Element$1(ast.fullName, visitAll(this, ast.attrs), 
+        /* inputs */ [], 
+        /* outputs */ [], 
+        /* directives */ [], children, 
+        /* references */ [], ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+    }
+    visitDirective(directive, context) {
+        return null;
     }
 }
 const NON_BINDABLE_VISITOR = new NonBindableVisitor();
@@ -29730,6 +30351,7 @@ class Scope {
         }
     }
     visitElement(element) {
+        element.directives.forEach((node) => node.visit(this));
         // `Element`s in the template may have `Reference`s which are captured in the scope.
         element.references.forEach((node) => this.visitReference(node));
         // Recurse into the `Element`'s children.
@@ -29737,6 +30359,7 @@ class Scope {
         this.elementsInScope.add(element);
     }
     visitTemplate(template) {
+        template.directives.forEach((node) => node.visit(this));
         // References on a <ng-template> are defined in the outer scope, so capture them before
         // processing the template's child scope.
         template.references.forEach((node) => this.visitReference(node));
@@ -29790,6 +30413,12 @@ class Scope {
     }
     visitLetDeclaration(decl) {
         this.maybeDeclare(decl);
+    }
+    visitComponent(component) {
+        throw new Error('TODO');
+    }
+    visitDirective(directive) {
+        throw new Error('TODO');
     }
     // Unused visitors.
     visitBoundAttribute(attr) { }
@@ -29892,6 +30521,10 @@ class DirectiveBinder {
         // First, determine the HTML shape of the node for the purpose of directive matching.
         // Do this by building up a `CssSelector` for the node.
         const cssSelector = createCssSelectorFromNode(node);
+        // TODO(crisbeto): account for selectorless directives here.
+        if (node.directives.length > 0) {
+            throw new Error('TODO');
+        }
         // Next, use the `SelectorMatcher` to get the list of directives on the node.
         const directives = [];
         this.matcher.match(cssSelector, (_selector, results) => directives.push(...results));
@@ -29990,6 +30623,12 @@ class DirectiveBinder {
     }
     visitContent(content) {
         content.children.forEach((child) => child.visit(this));
+    }
+    visitComponent(component) {
+        throw new Error('TODO');
+    }
+    visitDirective(directive) {
+        throw new Error('TODO');
     }
     // Unused visitors.
     visitVariable(variable) { }
@@ -30121,6 +30760,7 @@ class TemplateBinder extends RecursiveAstVisitor {
         // Visit the inputs, outputs, and children of the element.
         element.inputs.forEach(this.visitNode);
         element.outputs.forEach(this.visitNode);
+        element.directives.forEach(this.visitNode);
         element.children.forEach(this.visitNode);
         element.references.forEach(this.visitNode);
     }
@@ -30128,6 +30768,7 @@ class TemplateBinder extends RecursiveAstVisitor {
         // First, visit inputs, outputs and template attributes of the template node.
         template.inputs.forEach(this.visitNode);
         template.outputs.forEach(this.visitNode);
+        template.directives.forEach(this.visitNode);
         template.templateAttrs.forEach(this.visitNode);
         template.references.forEach(this.visitNode);
         // Next, recurse into the template.
@@ -30144,6 +30785,12 @@ class TemplateBinder extends RecursiveAstVisitor {
         if (this.rootNode !== null) {
             this.symbols.set(reference, this.rootNode);
         }
+    }
+    visitComponent(component) {
+        throw new Error('TODO');
+    }
+    visitDirective(directive) {
+        throw new Error('TODO');
     }
     // Unused template visitors
     visitText(text) { }
@@ -31197,7 +31844,7 @@ class _Visitor {
         this._init(_VisitorMode.Merge, interpolationConfig);
         this._translations = translations;
         // Construct a single fake root element
-        const wrapper = new Element('wrapper', [], nodes, undefined, undefined, undefined);
+        const wrapper = new Element('wrapper', [], [], nodes, undefined, undefined, undefined);
         const translatedNode = wrapper.visit(this, null);
         if (this._inI18nBlock) {
             this._reportError(nodes[nodes.length - 1], 'Unclosed block');
@@ -31283,66 +31930,7 @@ class _Visitor {
         return text;
     }
     visitElement(el, context) {
-        this._mayBeAddBlockChildren(el);
-        this._depth++;
-        const wasInI18nNode = this._inI18nNode;
-        const wasInImplicitNode = this._inImplicitNode;
-        let childNodes = [];
-        let translatedChildNodes = undefined;
-        // Extract:
-        // - top level nodes with the (implicit) "i18n" attribute if not already in a section
-        // - ICU messages
-        const i18nAttr = _getI18nAttr(el);
-        const i18nMeta = i18nAttr ? i18nAttr.value : '';
-        const isImplicit = this._implicitTags.some((tag) => el.name === tag) &&
-            !this._inIcu &&
-            !this._isInTranslatableSection;
-        const isTopLevelImplicit = !wasInImplicitNode && isImplicit;
-        this._inImplicitNode = wasInImplicitNode || isImplicit;
-        if (!this._isInTranslatableSection && !this._inIcu) {
-            if (i18nAttr || isTopLevelImplicit) {
-                this._inI18nNode = true;
-                const message = this._addMessage(el.children, i18nMeta);
-                translatedChildNodes = this._translateMessage(el, message);
-            }
-            if (this._mode == _VisitorMode.Extract) {
-                const isTranslatable = i18nAttr || isTopLevelImplicit;
-                if (isTranslatable)
-                    this._openTranslatableSection(el);
-                visitAll(this, el.children);
-                if (isTranslatable)
-                    this._closeTranslatableSection(el, el.children);
-            }
-        }
-        else {
-            if (i18nAttr || isTopLevelImplicit) {
-                this._reportError(el, 'Could not mark an element as translatable inside a translatable section');
-            }
-            if (this._mode == _VisitorMode.Extract) {
-                // Descend into child nodes for extraction
-                visitAll(this, el.children);
-            }
-        }
-        if (this._mode === _VisitorMode.Merge) {
-            const visitNodes = translatedChildNodes || el.children;
-            visitNodes.forEach((child) => {
-                const visited = child.visit(this, context);
-                if (visited && !this._isInTranslatableSection) {
-                    // Do not add the children from translatable sections (= i18n blocks here)
-                    // They will be added later in this loop when the block closes (i.e. on `<!-- /i18n -->`)
-                    childNodes = childNodes.concat(visited);
-                }
-            });
-        }
-        this._visitAttributesOf(el);
-        this._depth--;
-        this._inI18nNode = wasInI18nNode;
-        this._inImplicitNode = wasInImplicitNode;
-        if (this._mode === _VisitorMode.Merge) {
-            const translatedAttrs = this._translateAttributes(el);
-            return new Element(el.name, translatedAttrs, childNodes, el.sourceSpan, el.startSourceSpan, el.endSourceSpan);
-        }
-        return null;
+        return this._visitElementLike(el, context);
     }
     visitAttribute(attribute, context) {
         throw new Error('unreachable code');
@@ -31352,6 +31940,12 @@ class _Visitor {
     }
     visitBlockParameter(parameter, context) { }
     visitLetDeclaration(decl, context) { }
+    visitComponent(component, context) {
+        return this._visitElementLike(component, context);
+    }
+    visitDirective(directive, context) {
+        throw new Error('unreachable code');
+    }
     _init(mode, interpolationConfig) {
         this._mode = mode;
         this._inI18nBlock = false;
@@ -31369,13 +31963,82 @@ class _Visitor {
         /* retainEmptyTokens */ !this._preserveSignificantWhitespace, 
         /* preserveExpressionWhitespace */ this._preserveSignificantWhitespace);
     }
+    _visitElementLike(node, context) {
+        this._mayBeAddBlockChildren(node);
+        this._depth++;
+        const wasInI18nNode = this._inI18nNode;
+        const wasInImplicitNode = this._inImplicitNode;
+        let childNodes = [];
+        let translatedChildNodes = undefined;
+        // Extract:
+        // - top level nodes with the (implicit) "i18n" attribute if not already in a section
+        // - ICU messages
+        const nodeName = node instanceof Component ? node.tagName : node.name;
+        const i18nAttr = _getI18nAttr(node);
+        const i18nMeta = i18nAttr ? i18nAttr.value : '';
+        const isImplicit = this._implicitTags.some((tag) => nodeName === tag) &&
+            !this._inIcu &&
+            !this._isInTranslatableSection;
+        const isTopLevelImplicit = !wasInImplicitNode && isImplicit;
+        this._inImplicitNode = wasInImplicitNode || isImplicit;
+        if (!this._isInTranslatableSection && !this._inIcu) {
+            if (i18nAttr || isTopLevelImplicit) {
+                this._inI18nNode = true;
+                const message = this._addMessage(node.children, i18nMeta);
+                translatedChildNodes = this._translateMessage(node, message);
+            }
+            if (this._mode == _VisitorMode.Extract) {
+                const isTranslatable = i18nAttr || isTopLevelImplicit;
+                if (isTranslatable)
+                    this._openTranslatableSection(node);
+                visitAll(this, node.children);
+                if (isTranslatable)
+                    this._closeTranslatableSection(node, node.children);
+            }
+        }
+        else {
+            if (i18nAttr || isTopLevelImplicit) {
+                this._reportError(node, 'Could not mark an element as translatable inside a translatable section');
+            }
+            if (this._mode == _VisitorMode.Extract) {
+                // Descend into child nodes for extraction
+                visitAll(this, node.children);
+            }
+        }
+        if (this._mode === _VisitorMode.Merge) {
+            const visitNodes = translatedChildNodes || node.children;
+            visitNodes.forEach((child) => {
+                const visited = child.visit(this, context);
+                if (visited && !this._isInTranslatableSection) {
+                    // Do not add the children from translatable sections (= i18n blocks here)
+                    // They will be added later in this loop when the block closes (i.e. on `<!-- /i18n -->`)
+                    childNodes = childNodes.concat(visited);
+                }
+            });
+        }
+        this._visitAttributesOf(node);
+        this._depth--;
+        this._inI18nNode = wasInI18nNode;
+        this._inImplicitNode = wasInImplicitNode;
+        if (this._mode === _VisitorMode.Merge) {
+            if (node instanceof Element) {
+                return new Element(node.name, this._translateAttributes(node), this._translateDirectives(node), childNodes, node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
+            }
+            else {
+                return new Component(node.componentName, node.tagName, node.fullName, this._translateAttributes(node), this._translateDirectives(node), childNodes, node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
+            }
+        }
+        return null;
+    }
     // looks for translatable attributes
     _visitAttributesOf(el) {
         const explicitAttrNameToValue = {};
-        const implicitAttrNames = this._implicitAttrs[el.name] || [];
+        const implicitAttrNames = this._implicitAttrs[el instanceof Component ? el.tagName || '' : el.name] || [];
         el.attrs
-            .filter((attr) => attr.name.startsWith(_I18N_ATTR_PREFIX))
-            .forEach((attr) => (explicitAttrNameToValue[attr.name.slice(_I18N_ATTR_PREFIX.length)] = attr.value));
+            .filter((attr) => attr instanceof Attribute && attr.name.startsWith(_I18N_ATTR_PREFIX))
+            .forEach((attr) => {
+            explicitAttrNameToValue[attr.name.slice(_I18N_ATTR_PREFIX.length)] = attr.value;
+        });
         el.attrs.forEach((attr) => {
             if (attr.name in explicitAttrNameToValue) {
                 this._addMessage([attr], explicitAttrNameToValue[attr.name]);
@@ -31448,16 +32111,15 @@ class _Visitor {
         return [];
     }
     // translate the attributes of an element and remove i18n specific attributes
-    _translateAttributes(el) {
-        const attributes = el.attrs;
+    _translateAttributes(node) {
         const i18nParsedMessageMeta = {};
-        attributes.forEach((attr) => {
+        const translatedAttributes = [];
+        node.attrs.forEach((attr) => {
             if (attr.name.startsWith(_I18N_ATTR_PREFIX)) {
                 i18nParsedMessageMeta[attr.name.slice(_I18N_ATTR_PREFIX.length)] = _parseMessageMeta(attr.value);
             }
         });
-        const translatedAttributes = [];
-        attributes.forEach((attr) => {
+        node.attrs.forEach((attr) => {
             if (attr.name === _I18N_ATTR || attr.name.startsWith(_I18N_ATTR_PREFIX)) {
                 // strip i18n specific attributes
                 return;
@@ -31475,11 +32137,11 @@ class _Visitor {
                         translatedAttributes.push(new Attribute(attr.name, value, attr.sourceSpan, undefined /* keySpan */, undefined /* valueSpan */, undefined /* valueTokens */, undefined /* i18n */));
                     }
                     else {
-                        this._reportError(el, `Unexpected translation for attribute "${attr.name}" (id="${id || this._translations.digest(message)}")`);
+                        this._reportError(node, `Unexpected translation for attribute "${attr.name}" (id="${id || this._translations.digest(message)}")`);
                     }
                 }
                 else {
-                    this._reportError(el, `Translation unavailable for attribute "${attr.name}" (id="${id || this._translations.digest(message)}")`);
+                    this._reportError(node, `Translation unavailable for attribute "${attr.name}" (id="${id || this._translations.digest(message)}")`);
                 }
             }
             else {
@@ -31487,6 +32149,9 @@ class _Visitor {
             }
         });
         return translatedAttributes;
+    }
+    _translateDirectives(node) {
+        return node.directives.map((dir) => new Directive(dir.name, this._translateAttributes(dir), dir.sourceSpan, dir.startSourceSpan, dir.endSourceSpan));
     }
     /**
      * Add the node as a child of the block when:
@@ -31563,7 +32228,7 @@ function _isClosingComment(n) {
     return !!(n instanceof Comment && n.value && n.value === '/i18n');
 }
 function _getI18nAttr(p) {
-    return p.attrs.find((attr) => attr.name === _I18N_ATTR) || null;
+    return (p.attrs.find((attr) => attr instanceof Attribute && attr.name === _I18N_ATTR) || null);
 }
 function _parseMessageMeta(i18n) {
     if (!i18n)
@@ -31597,7 +32262,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.5+sha-8d050b5');
+new Version('20.0.0-next.5+sha-92c4123');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
