@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.2.5+sha-1b36f6e
+ * @license Angular v19.2.5+sha-e9a719e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { R as ReactiveNode, V as ValueEqualityFn, S as SIGNAL, a as SignalNode } from '../../weak_ref.d-DOjz-6fK.js';
-export { b as REACTIVE_NODE, c as Reactive, t as SIGNAL_NODE, u as SignalGetter, e as consumerAfterComputation, f as consumerBeforeComputation, g as consumerDestroy, h as consumerMarkDirty, i as consumerPollProducersForChange, v as createSignal, d as defaultEquals, j as getActiveConsumer, k as isInNotificationPhase, l as isReactive, p as producerAccessed, m as producerIncrementEpoch, n as producerMarkClean, o as producerNotifyConsumers, q as producerUpdateValueVersion, r as producerUpdatesAllowed, w as runPostSignalSetFn, s as setActiveConsumer, A as setAlternateWeakRefImpl, x as setPostSignalSetFn, y as signalSetFn, z as signalUpdateFn } from '../../weak_ref.d-DOjz-6fK.js';
+import { ReactiveNode, ValueEqualityFn, SIGNAL, SignalNode } from '../../weak_ref.d-DWHPG08n.js';
+export { REACTIVE_NODE, Reactive, SIGNAL_NODE, SignalGetter, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, signalSetFn, signalUpdateFn } from '../../weak_ref.d-DWHPG08n.js';
 
 /**
  * A computation, which derives a value from a declarative reactive expression.

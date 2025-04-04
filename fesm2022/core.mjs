@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.2.5+sha-1b36f6e
+ * @license Angular v19.2.5+sha-e9a719e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { v as SIGNAL_NODE, z as signalSetFn, S as SIGNAL, p as producerAccessed, k as getActiveConsumer, u as setActiveConsumer$1, w as createSignal, A as signalUpdateFn, a as consumerDestroy, R as REACTIVE_NODE, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation, f as createComputed, s as setThrowInvalidWriteToSignalError, C as untracked$1, i as isInNotificationPhase, g as createLinkedSignal, l as linkedSignalSetFn, h as linkedSignalUpdateFn } from './untracked-CS7WUAzb.mjs';
-export { B as ɵsetAlternateWeakRefImpl } from './untracked-CS7WUAzb.mjs';
+import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, getActiveConsumer, setActiveConsumer as setActiveConsumer$1, createSignal, signalUpdateFn, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError, untracked as untracked$1, isInNotificationPhase, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-BKcld_ew.mjs';
+export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './untracked-BKcld_ew.mjs';
 import { getCurrentInjector, NOT_FOUND as NOT_FOUND$1, setCurrentInjector } from './primitives/di.mjs';
 import { setActiveConsumer, createWatch } from '@angular/core/primitives/signals';
 import { NOT_FOUND as NOT_FOUND$2 } from '@angular/core/primitives/di';
@@ -17911,7 +17911,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.5+sha-1b36f6e']
+                ? ['ng-version', '19.2.5+sha-e9a719e']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34651,7 +34651,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.5+sha-1b36f6e');
+const VERSION = new Version('19.2.5+sha-e9a719e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

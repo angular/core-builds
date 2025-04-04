@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.2.5+sha-1b36f6e
+ * @license Angular v19.2.5+sha-e9a719e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { c as consumerMarkDirty, S as SIGNAL, a as consumerDestroy, i as isInNotificationPhase, b as consumerPollProducersForChange, d as consumerBeforeComputation, e as consumerAfterComputation, R as REACTIVE_NODE } from '../untracked-CS7WUAzb.mjs';
-export { v as SIGNAL_NODE, f as createComputed, g as createLinkedSignal, w as createSignal, j as defaultEquals, k as getActiveConsumer, m as isReactive, l as linkedSignalSetFn, h as linkedSignalUpdateFn, p as producerAccessed, n as producerIncrementEpoch, o as producerMarkClean, q as producerNotifyConsumers, r as producerUpdateValueVersion, t as producerUpdatesAllowed, x as runPostSignalSetFn, u as setActiveConsumer, B as setAlternateWeakRefImpl, y as setPostSignalSetFn, s as setThrowInvalidWriteToSignalError, z as signalSetFn, A as signalUpdateFn, C as untracked } from '../untracked-CS7WUAzb.mjs';
+import { consumerMarkDirty, SIGNAL, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, REACTIVE_NODE } from '../untracked-BKcld_ew.mjs';
+export { SIGNAL_NODE, createComputed, createLinkedSignal, createSignal, defaultEquals, getActiveConsumer, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked } from '../untracked-BKcld_ew.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {
     const node = Object.create(WATCH_NODE);

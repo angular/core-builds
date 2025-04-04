@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.5+sha-1b36f6e
+ * @license Angular v19.2.5+sha-e9a719e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -601,5 +601,5 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-export { signalUpdateFn as A, setAlternateWeakRefImpl as B, untracked as C, REACTIVE_NODE as R, SIGNAL as S, consumerDestroy as a, consumerPollProducersForChange as b, consumerMarkDirty as c, consumerBeforeComputation as d, consumerAfterComputation as e, createComputed as f, createLinkedSignal as g, linkedSignalUpdateFn as h, isInNotificationPhase as i, defaultEquals as j, getActiveConsumer as k, linkedSignalSetFn as l, isReactive as m, producerIncrementEpoch as n, producerMarkClean as o, producerAccessed as p, producerNotifyConsumers as q, producerUpdateValueVersion as r, setThrowInvalidWriteToSignalError as s, producerUpdatesAllowed as t, setActiveConsumer as u, SIGNAL_NODE as v, createSignal as w, runPostSignalSetFn as x, setPostSignalSetFn as y, signalSetFn as z };
-//# sourceMappingURL=untracked-CS7WUAzb.mjs.map
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createLinkedSignal, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, linkedSignalSetFn, linkedSignalUpdateFn, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn, untracked };
+//# sourceMappingURL=untracked-BKcld_ew.mjs.map

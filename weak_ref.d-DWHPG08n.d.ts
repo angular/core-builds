@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.5+sha-1b36f6e
+ * @license Angular v19.2.5+sha-e9a719e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -210,5 +210,5 @@ declare const SIGNAL_NODE: SignalNode<unknown>;
 
 declare function setAlternateWeakRefImpl(impl: unknown): void;
 
-export { setAlternateWeakRefImpl as A, SIGNAL as S, REACTIVE_NODE as b, defaultEquals as d, consumerAfterComputation as e, consumerBeforeComputation as f, consumerDestroy as g, consumerMarkDirty as h, consumerPollProducersForChange as i, getActiveConsumer as j, isInNotificationPhase as k, isReactive as l, producerIncrementEpoch as m, producerMarkClean as n, producerNotifyConsumers as o, producerAccessed as p, producerUpdateValueVersion as q, producerUpdatesAllowed as r, setActiveConsumer as s, SIGNAL_NODE as t, createSignal as v, runPostSignalSetFn as w, setPostSignalSetFn as x, signalSetFn as y, signalUpdateFn as z };
-export type { ReactiveNode as R, ValueEqualityFn as V, SignalNode as a, Reactive as c, SignalGetter as u };
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostSignalSetFn, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, signalSetFn, signalUpdateFn };
+export type { Reactive, ReactiveNode, SignalGetter, SignalNode, ValueEqualityFn };
