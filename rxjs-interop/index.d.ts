@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-d8e941b
+ * @license Angular v20.0.0-next.5+sha-5039ed0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -145,7 +145,7 @@ declare function toSignal<T, const U extends T>(source: Observable<T> | Subscrib
 }): Signal<T | U>;
 
 /**
- * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
+ * Operator which makes the application unstable until the observable emits, completes, errors, or is unsubscribed.
  *
  * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
  *
