@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.5+sha-00bbd9b
+ * @license Angular v19.2.5+sha-ae2fc18
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -256,7 +256,7 @@ function makeToSignalEqual(userEquality = Object.is) {
 }
 
 /**
- * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
+ * Operator which makes the application unstable until the observable emits, completes, errors, or is unsubscribed.
  *
  * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
  *
