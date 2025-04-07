@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-ae2fc18
+ * @license Angular v19.2.5+sha-3441f7b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 require('os');
 require('typescript');
-var checker = require('./checker-CQvNmpT3.js');
-require('./program-XYcLSXb1.js');
+var checker = require('./checker-DoX_7XCa.js');
+require('./program-CHFDWN5t.js');
 require('path');
 
 /**
@@ -17,7 +17,7 @@ require('path');
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.2.5+sha-ae2fc18');
+new checker.Version('19.2.5+sha-3441f7b');
 
 var LogLevel;
 (function (LogLevel) {

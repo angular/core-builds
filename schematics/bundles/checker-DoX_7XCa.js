@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-ae2fc18
+ * @license Angular v19.2.5+sha-3441f7b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1291,14 +1291,13 @@ class TemplateLiteralElementExpr extends Expression {
     constructor(text, sourceSpan, rawText) {
         super(STRING_TYPE, sourceSpan);
         this.text = text;
-        // If `rawText` is not provided, try to extract the raw string from its
-        // associated `sourceSpan`. If that is also not available, "fake" the raw
-        // string instead by escaping the following control sequences:
+        // If `rawText` is not provided, "fake" the raw string by escaping the following sequences:
         // - "\" would otherwise indicate that the next character is a control character.
         // - "`" and "${" are template string control sequences that would otherwise prematurely
         // indicate the end of the template literal element.
-        this.rawText =
-            rawText ?? sourceSpan?.toString() ?? escapeForTemplateLiteral(escapeSlashes(text));
+        // Note that we can't rely on the `sourceSpan` here, because it may be incorrect (see
+        // https://github.com/angular/angular/pull/60267#discussion_r1986402524).
+        this.rawText = rawText ?? escapeForTemplateLiteral(escapeSlashes(text));
     }
     visitExpression(visitor, context) {
         return visitor.visitTemplateLiteralElementExpr(this, context);
@@ -30728,7 +30727,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.5+sha-ae2fc18');
+new Version('19.2.5+sha-3441f7b');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32155,7 +32154,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CQvNmpT3.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DoX_7XCa.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
