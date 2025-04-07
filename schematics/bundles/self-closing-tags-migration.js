@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ var checker = require('./checker-BRvGmaOO.js');
 var compiler = require('./compiler-BQ7R7w2v.js');
 require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var property_name = require('./property_name-BBwFuqMe.js');
 require('@angular-devkit/core');
@@ -298,7 +298,7 @@ class AngularElementCollector extends compiler.RecursiveVisitor$1 {
     }
 }
 
-class SelfClosingTagsMigration extends run_in_devkit.TsurgeFunnelMigration {
+class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
     config;
     constructor(config = {}) {
         super();
@@ -314,7 +314,7 @@ class SelfClosingTagsMigration extends run_in_devkit.TsurgeFunnelMigration {
                 if (!ts.isClassDeclaration(node)) {
                     return;
                 }
-                const file = run_in_devkit.projectFile(node.getSourceFile(), info);
+                const file = project_paths.projectFile(node.getSourceFile(), info);
                 if (this.config.shouldMigrate && this.config.shouldMigrate(file) === false) {
                     return;
                 }
@@ -327,7 +327,7 @@ class SelfClosingTagsMigration extends run_in_devkit.TsurgeFunnelMigration {
                     }
                     const fileToMigrate = template.inline
                         ? file
-                        : run_in_devkit.projectFile(template.filePath, info);
+                        : project_paths.projectFile(template.filePath, info);
                     const end = template.start + template.content.length;
                     const replacements = [
                         prepareTextReplacement(fileToMigrate, migrated, template.start, end),
@@ -343,20 +343,20 @@ class SelfClosingTagsMigration extends run_in_devkit.TsurgeFunnelMigration {
                 });
             });
         }
-        return run_in_devkit.confirmAsSerializable({ tagReplacements });
+        return project_paths.confirmAsSerializable({ tagReplacements });
     }
     async combine(unitA, unitB) {
         const uniqueReplacements = removeDuplicateReplacements([
             ...unitA.tagReplacements,
             ...unitB.tagReplacements,
         ]);
-        return run_in_devkit.confirmAsSerializable({ tagReplacements: uniqueReplacements });
+        return project_paths.confirmAsSerializable({ tagReplacements: uniqueReplacements });
     }
     async globalMeta(combinedData) {
         const globalMeta = {
             tagReplacements: combinedData.tagReplacements,
         };
-        return run_in_devkit.confirmAsSerializable(globalMeta);
+        return project_paths.confirmAsSerializable(globalMeta);
     }
     async stats(globalMetadata) {
         const touchedFilesCount = globalMetadata.tagReplacements.length;
@@ -373,7 +373,7 @@ class SelfClosingTagsMigration extends run_in_devkit.TsurgeFunnelMigration {
     }
 }
 function prepareTextReplacement(file, replacement, start, end) {
-    return new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
+    return new project_paths.Replacement(file, new project_paths.TextUpdate({
         position: start,
         end: end,
         toInsert: replacement,
@@ -394,7 +394,7 @@ function removeDuplicateReplacements(replacements) {
 
 function migrate(options) {
     return async (tree, context) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: (fs) => new SelfClosingTagsMigration({
                 shouldMigrate: (file) => {
@@ -402,8 +402,13 @@ function migrate(options) {
                         !/(^|\/)node_modules\//.test(file.rootRelativePath));
                 },
             }),
-            beforeProgramCreation: (tsconfigPath) => {
-                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
             },
             beforeUnitAnalysis: (tsconfigPath) => {
                 context.logger.info(`Scanning for component tags: ${tsconfigPath}...`);

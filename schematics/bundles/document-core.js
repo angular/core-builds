@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,10 +10,10 @@ require('./compiler-BQ7R7w2v.js');
 require('typescript');
 var checker = require('./checker-BRvGmaOO.js');
 require('os');
-var apply_import_manager = require('./apply_import_manager-BaxMXD5g.js');
+var apply_import_manager = require('./apply_import_manager-DO1s35eE.js');
 require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
 var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -24,7 +24,7 @@ require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 /** Migration that moves the import of `DOCUMENT` from `core` to `common`. */
-class DocumentCoreMigration extends run_in_devkit.TsurgeFunnelMigration {
+class DocumentCoreMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const replacements = [];
         let importManager = null;
@@ -49,10 +49,10 @@ class DocumentCoreMigration extends run_in_devkit.TsurgeFunnelMigration {
         if (importManager !== null) {
             apply_import_manager.applyImportManagerChanges(importManager, replacements, info.sourceFiles, info);
         }
-        return run_in_devkit.confirmAsSerializable({ replacements });
+        return project_paths.confirmAsSerializable({ replacements });
     }
     async migrate(globalData) {
-        return run_in_devkit.confirmAsSerializable(globalData);
+        return project_paths.confirmAsSerializable(globalData);
     }
     async combine(unitA, unitB) {
         const seen = new Set();
@@ -67,10 +67,10 @@ class DocumentCoreMigration extends run_in_devkit.TsurgeFunnelMigration {
                 }
             });
         });
-        return run_in_devkit.confirmAsSerializable({ replacements: combined });
+        return project_paths.confirmAsSerializable({ replacements: combined });
     }
     async globalMeta(combinedData) {
-        return run_in_devkit.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
         return { counters: {} };
@@ -86,7 +86,7 @@ class DocumentCoreMigration extends run_in_devkit.TsurgeFunnelMigration {
  */
 function migrate() {
     return async (tree) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: () => new DocumentCoreMigration(),
         });

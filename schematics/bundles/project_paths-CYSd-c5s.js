@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var os = require('os');
-var ts = require('typescript');
-var checker = require('./checker-BRvGmaOO.js');
 var index = require('./index-BzVBAdce.js');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
+var os = require('os');
+var ts = require('typescript');
+var checker = require('./checker-BRvGmaOO.js');
 require('./compiler-BQ7R7w2v.js');
 require('path');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
@@ -34,8 +34,8 @@ function _interopNamespaceDefault(e) {
     return Object.freeze(n);
 }
 
-var os__namespace = /*#__PURE__*/_interopNamespaceDefault(os);
 var posixPath__namespace = /*#__PURE__*/_interopNamespaceDefault(posixPath);
+var os__namespace = /*#__PURE__*/_interopNamespaceDefault(os);
 
 /// <reference types="node" />
 class NgtscCompilerHost {
@@ -262,235 +262,6 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
 }
 
 /**
- * By default, Tsurge will always create an Angular compiler program
- * for projects analyzed and migrated. This works perfectly fine in
- * third-party where Tsurge migrations run in Angular CLI projects.
- *
- * In first party, when running against full Google3, creating an Angular
- * program for e.g. plain `ts_library` targets is overly expensive and
- * can result in out of memory issues for large TS targets. In 1P we can
- * reliably distinguish between TS and Angular targets via the `angularCompilerOptions`.
- */
-function google3UsePlainTsProgramIfNoKnownAngularOption() {
-    return process.env['GOOGLE3_TSURGE'] === '1';
-}
-
-/** Options that are good defaults for Tsurge migrations. */
-const defaultMigrationTsOptions = {
-    // Avoid checking libraries to speed up migrations.
-    skipLibCheck: true,
-    skipDefaultLibCheck: true,
-    noEmit: true,
-    // Does not apply to g3 and externally is enforced when the app is built by the compiler.
-    disableTypeScriptVersionCheck: true,
-};
-/**
- * Creates an instance of a TypeScript program for the given project.
- */
-function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
-    const program = ts.createProgram({
-        rootNames: tsconfig.rootNames,
-        options: {
-            ...tsconfig.options,
-            ...defaultMigrationTsOptions,
-            ...optionOverrides,
-        },
-    });
-    return {
-        ngCompiler: null,
-        program,
-        userOptions: tsconfig.options,
-        programAbsoluteRootFileNames: tsconfig.rootNames,
-        host: tsHost,
-    };
-}
-
-/**
- * Parses the configuration of the given TypeScript project and creates
- * an instance of the Angular compiler for the project.
- */
-function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
-    const ngtscProgram = new index.NgtscProgram(tsconfig.rootNames, {
-        ...tsconfig.options,
-        ...defaultMigrationTsOptions,
-        ...optionOverrides,
-    }, tsHost);
-    // Expose an easy way to debug-print ng semantic diagnostics.
-    if (process.env['DEBUG_NG_SEMANTIC_DIAGNOSTICS'] === '1') {
-        console.error(ts.formatDiagnosticsWithColorAndContext(ngtscProgram.getNgSemanticDiagnostics(), tsHost));
-    }
-    return {
-        ngCompiler: ngtscProgram.compiler,
-        program: ngtscProgram.getTsProgram(),
-        userOptions: tsconfig.options,
-        programAbsoluteRootFileNames: tsconfig.rootNames,
-        host: tsHost,
-    };
-}
-
-/** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
-const NO_INPUTS_ERROR_CODE = 18003;
-/** Parses the given tsconfig file, supporting Angular compiler options. */
-function parseTsconfigOrDie(absoluteTsconfigPath, fs) {
-    const tsconfig = readConfiguration(absoluteTsconfigPath, {}, fs);
-    // Skip the "No inputs found..." error since we don't want to interrupt the migration if a
-    // tsconfig doesn't match a file. This will result in an empty `Program` which is still valid.
-    const errors = tsconfig.errors.filter((diag) => diag.code !== NO_INPUTS_ERROR_CODE);
-    if (errors.length) {
-        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` + `${errors.map((e) => e.messageText)}`);
-    }
-    return tsconfig;
-}
-
-/** Creates the base program info for the given tsconfig path. */
-function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
-    if (fs === undefined) {
-        fs = new checker.NodeJSFileSystem();
-        checker.setFileSystem(fs);
-    }
-    const tsconfig = parseTsconfigOrDie(absoluteTsconfigPath, fs);
-    const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
-    // When enabled, use a plain TS program if we are sure it's not
-    // an Angular project based on the `tsconfig.json`.
-    if (google3UsePlainTsProgramIfNoKnownAngularOption() &&
-        tsconfig.options['_useHostForImportGeneration'] === undefined) {
-        return createPlainTsProgram(tsHost, tsconfig, optionOverrides);
-    }
-    return createNgtscProgram(tsHost, tsconfig, optionOverrides);
-}
-
-/**
- * @private
- *
- * Base class for the possible Tsurge migration variants.
- *
- * For example, this class exposes methods to conveniently create
- * TypeScript programs, while also allowing migration authors to override.
- */
-class TsurgeBaseMigration {
-    /**
-     * Advanced Tsurge users can override this method, but most of the time,
-     * overriding {@link prepareProgram} is more desirable.
-     *
-     * By default:
-     *  - In 3P: Ngtsc programs are being created.
-     *  - In 1P: Ngtsc or TS programs are created based on the Blaze target.
-     */
-    createProgram(tsconfigAbsPath, fs, optionOverrides) {
-        return createBaseProgramInfo(tsconfigAbsPath, fs, optionOverrides);
-    }
-    // Optional function to prepare the base `ProgramInfo` even further,
-    // for the analyze and migrate phases. E.g. determining source files.
-    prepareProgram(info) {
-        const fullProgramSourceFiles = [...info.program.getSourceFiles()];
-        const sourceFiles = fullProgramSourceFiles.filter((f) => !f.isDeclarationFile &&
-            // Note `isShim` will work for the initial program, but for TCB programs, the shims are no longer annotated.
-            !checker.isShim(f) &&
-            !f.fileName.endsWith('.ngtypecheck.ts'));
-        // Sort it by length in reverse order (longest first). This speeds up lookups,
-        // since there's no need to keep going through the array once a match is found.
-        const sortedRootDirs = checker.getRootDirs(info.host, info.userOptions).sort((a, b) => b.length - a.length);
-        // TODO: Consider also following TS's logic here, finding the common source root.
-        // See: Program#getCommonSourceDirectory.
-        const primaryRoot = checker.absoluteFrom(info.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? info.program.getCurrentDirectory());
-        return {
-            ...info,
-            sourceFiles,
-            fullProgramSourceFiles,
-            sortedRootDirs,
-            projectRoot: primaryRoot,
-        };
-    }
-}
-
-/**
- * A simpler variant of a {@link TsurgeComplexMigration} that does not
- * fan-out into multiple workers per compilation unit to compute
- * the final migration replacements.
- *
- * This is faster and less resource intensive as workers and TS programs
- * are only ever created once.
- *
- * This is commonly the case when migrations are refactored to eagerly
- * compute replacements in the analyze stage, and then leverage the
- * global unit data to filter replacements that turned out to be "invalid".
- */
-class TsurgeFunnelMigration extends TsurgeBaseMigration {
-}
-/**
- * Complex variant of a `Tsurge` migration.
- *
- * For example, every analyze worker may contribute to a list of TS
- * references that are later combined. The migrate phase can then compute actual
- * file updates for all individual compilation units, leveraging the global metadata
- * to e.g. see if there are any references from other compilation units that may be
- * problematic and prevent migration of a given file.
- */
-class TsurgeComplexMigration extends TsurgeBaseMigration {
-}
-
-/** A text replacement for the given file. */
-class Replacement {
-    projectFile;
-    update;
-    constructor(projectFile, update) {
-        this.projectFile = projectFile;
-        this.update = update;
-    }
-}
-/** An isolated text update that may be applied to a file. */
-class TextUpdate {
-    data;
-    constructor(data) {
-        this.data = data;
-    }
-}
-
-/** Confirms that the given data `T` is serializable. */
-function confirmAsSerializable(data) {
-    return data;
-}
-
-/**
- * Gets a project file instance for the given file.
- *
- * Use this helper for dealing with project paths throughout your
- * migration. The return type is serializable.
- *
- * See {@link ProjectFile}.
- */
-function projectFile(file, { sortedRootDirs, projectRoot }) {
-    const fs = checker.getFileSystem();
-    const filePath = fs.resolve(typeof file === 'string' ? file : file.fileName);
-    // Sorted root directories are sorted longest to shortest. First match
-    // is the appropriate root directory for ID computation.
-    for (const rootDir of sortedRootDirs) {
-        if (!isWithinBasePath(fs, rootDir, filePath)) {
-            continue;
-        }
-        return {
-            id: fs.relative(rootDir, filePath),
-            rootRelativePath: fs.relative(projectRoot, filePath),
-        };
-    }
-    // E.g. project directory may be `src/`, but files may be looked up
-    // from `node_modules/`. This is fine, but in those cases, no root
-    // directory matches.
-    const rootRelativePath = fs.relative(projectRoot, filePath);
-    return {
-        id: rootRelativePath,
-        rootRelativePath: rootRelativePath,
-    };
-}
-/**
- * Whether `path` is a descendant of the `base`?
- * E.g. `a/b/c` is within `a/b` but not within `a/x`.
- */
-function isWithinBasePath(fs, base, path) {
-    return checker.isLocalRelativePath(fs.relative(base, path));
-}
-
-/**
  * Angular compiler file system implementation that leverages an
  * CLI schematic virtual file tree.
  */
@@ -671,6 +442,174 @@ async function synchronouslyCombineUnitData(migration, unitDatas) {
     return combined;
 }
 
+/**
+ * By default, Tsurge will always create an Angular compiler program
+ * for projects analyzed and migrated. This works perfectly fine in
+ * third-party where Tsurge migrations run in Angular CLI projects.
+ *
+ * In first party, when running against full Google3, creating an Angular
+ * program for e.g. plain `ts_library` targets is overly expensive and
+ * can result in out of memory issues for large TS targets. In 1P we can
+ * reliably distinguish between TS and Angular targets via the `angularCompilerOptions`.
+ */
+function google3UsePlainTsProgramIfNoKnownAngularOption() {
+    return process.env['GOOGLE3_TSURGE'] === '1';
+}
+
+/** Options that are good defaults for Tsurge migrations. */
+const defaultMigrationTsOptions = {
+    // Avoid checking libraries to speed up migrations.
+    skipLibCheck: true,
+    skipDefaultLibCheck: true,
+    noEmit: true,
+    // Does not apply to g3 and externally is enforced when the app is built by the compiler.
+    disableTypeScriptVersionCheck: true,
+};
+/**
+ * Creates an instance of a TypeScript program for the given project.
+ */
+function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
+    const program = ts.createProgram({
+        rootNames: tsconfig.rootNames,
+        options: {
+            ...tsconfig.options,
+            ...defaultMigrationTsOptions,
+            ...optionOverrides,
+        },
+    });
+    return {
+        ngCompiler: null,
+        program,
+        userOptions: tsconfig.options,
+        programAbsoluteRootFileNames: tsconfig.rootNames,
+        host: tsHost,
+    };
+}
+
+/**
+ * Parses the configuration of the given TypeScript project and creates
+ * an instance of the Angular compiler for the project.
+ */
+function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
+    const ngtscProgram = new index.NgtscProgram(tsconfig.rootNames, {
+        ...tsconfig.options,
+        ...defaultMigrationTsOptions,
+        ...optionOverrides,
+    }, tsHost);
+    // Expose an easy way to debug-print ng semantic diagnostics.
+    if (process.env['DEBUG_NG_SEMANTIC_DIAGNOSTICS'] === '1') {
+        console.error(ts.formatDiagnosticsWithColorAndContext(ngtscProgram.getNgSemanticDiagnostics(), tsHost));
+    }
+    return {
+        ngCompiler: ngtscProgram.compiler,
+        program: ngtscProgram.getTsProgram(),
+        userOptions: tsconfig.options,
+        programAbsoluteRootFileNames: tsconfig.rootNames,
+        host: tsHost,
+    };
+}
+
+/** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
+const NO_INPUTS_ERROR_CODE = 18003;
+/** Parses the given tsconfig file, supporting Angular compiler options. */
+function parseTsconfigOrDie(absoluteTsconfigPath, fs) {
+    const tsconfig = readConfiguration(absoluteTsconfigPath, {}, fs);
+    // Skip the "No inputs found..." error since we don't want to interrupt the migration if a
+    // tsconfig doesn't match a file. This will result in an empty `Program` which is still valid.
+    const errors = tsconfig.errors.filter((diag) => diag.code !== NO_INPUTS_ERROR_CODE);
+    if (errors.length) {
+        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` + `${errors.map((e) => e.messageText)}`);
+    }
+    return tsconfig;
+}
+
+/** Creates the base program info for the given tsconfig path. */
+function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
+    if (fs === undefined) {
+        fs = new checker.NodeJSFileSystem();
+        checker.setFileSystem(fs);
+    }
+    const tsconfig = parseTsconfigOrDie(absoluteTsconfigPath, fs);
+    const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
+    // When enabled, use a plain TS program if we are sure it's not
+    // an Angular project based on the `tsconfig.json`.
+    if (google3UsePlainTsProgramIfNoKnownAngularOption() &&
+        tsconfig.options['_useHostForImportGeneration'] === undefined) {
+        return createPlainTsProgram(tsHost, tsconfig, optionOverrides);
+    }
+    return createNgtscProgram(tsHost, tsconfig, optionOverrides);
+}
+
+/**
+ * @private
+ *
+ * Base class for the possible Tsurge migration variants.
+ *
+ * For example, this class exposes methods to conveniently create
+ * TypeScript programs, while also allowing migration authors to override.
+ */
+class TsurgeBaseMigration {
+    /**
+     * Advanced Tsurge users can override this method, but most of the time,
+     * overriding {@link prepareProgram} is more desirable.
+     *
+     * By default:
+     *  - In 3P: Ngtsc programs are being created.
+     *  - In 1P: Ngtsc or TS programs are created based on the Blaze target.
+     */
+    createProgram(tsconfigAbsPath, fs, optionOverrides) {
+        return createBaseProgramInfo(tsconfigAbsPath, fs, optionOverrides);
+    }
+    // Optional function to prepare the base `ProgramInfo` even further,
+    // for the analyze and migrate phases. E.g. determining source files.
+    prepareProgram(info) {
+        const fullProgramSourceFiles = [...info.program.getSourceFiles()];
+        const sourceFiles = fullProgramSourceFiles.filter((f) => !f.isDeclarationFile &&
+            // Note `isShim` will work for the initial program, but for TCB programs, the shims are no longer annotated.
+            !checker.isShim(f) &&
+            !f.fileName.endsWith('.ngtypecheck.ts'));
+        // Sort it by length in reverse order (longest first). This speeds up lookups,
+        // since there's no need to keep going through the array once a match is found.
+        const sortedRootDirs = checker.getRootDirs(info.host, info.userOptions).sort((a, b) => b.length - a.length);
+        // TODO: Consider also following TS's logic here, finding the common source root.
+        // See: Program#getCommonSourceDirectory.
+        const primaryRoot = checker.absoluteFrom(info.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? info.program.getCurrentDirectory());
+        return {
+            ...info,
+            sourceFiles,
+            fullProgramSourceFiles,
+            sortedRootDirs,
+            projectRoot: primaryRoot,
+        };
+    }
+}
+
+/**
+ * A simpler variant of a {@link TsurgeComplexMigration} that does not
+ * fan-out into multiple workers per compilation unit to compute
+ * the final migration replacements.
+ *
+ * This is faster and less resource intensive as workers and TS programs
+ * are only ever created once.
+ *
+ * This is commonly the case when migrations are refactored to eagerly
+ * compute replacements in the analyze stage, and then leverage the
+ * global unit data to filter replacements that turned out to be "invalid".
+ */
+class TsurgeFunnelMigration extends TsurgeBaseMigration {
+}
+/**
+ * Complex variant of a `Tsurge` migration.
+ *
+ * For example, every analyze worker may contribute to a list of TS
+ * references that are later combined. The migrate phase can then compute actual
+ * file updates for all individual compilation units, leveraging the global metadata
+ * to e.g. see if there are any references from other compilation units that may be
+ * problematic and prevent migration of a given file.
+ */
+class TsurgeComplexMigration extends TsurgeBaseMigration {
+}
+
 /*!
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -678,24 +617,30 @@ async function synchronouslyCombineUnitData(migration, unitDatas) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.dev/license
  */
+exports.MigrationStage = void 0;
+(function (MigrationStage) {
+    /** The migration is analyzing an entrypoint */
+    MigrationStage[MigrationStage["Analysis"] = 0] = "Analysis";
+    /** The migration is about to migrate an entrypoint */
+    MigrationStage[MigrationStage["Migrate"] = 1] = "Migrate";
+})(exports.MigrationStage || (exports.MigrationStage = {}));
 /** Runs a Tsurge within an Angular Devkit context. */
 async function runMigrationInDevkit(config) {
     const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(config.tree);
     if (!buildPaths.length && !testPaths.length) {
         throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the migration.');
     }
+    const tsconfigPaths = [...buildPaths, ...testPaths];
     const fs = new DevkitMigrationFilesystem(config.tree);
     checker.setFileSystem(fs);
     const migration = config.getMigration(fs);
     const unitResults = [];
-    const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-        config.beforeProgramCreation?.(tsconfigPath);
+    const isFunnelMigration = migration instanceof TsurgeFunnelMigration;
+    for (const tsconfigPath of tsconfigPaths) {
+        config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Analysis);
         const baseInfo = migration.createProgram(tsconfigPath, fs);
         const info = migration.prepareProgram(baseInfo);
-        config.afterProgramCreation?.(info, fs);
-        return { info, tsconfigPath };
-    });
-    for (const { info, tsconfigPath } of programInfos) {
+        config.afterProgramCreation?.(info, fs, exports.MigrationStage.Analysis);
         config.beforeUnitAnalysis?.(tsconfigPath);
         unitResults.push(await migration.analyze(info));
     }
@@ -707,12 +652,16 @@ async function runMigrationInDevkit(config) {
     }
     const globalMeta = await migration.globalMeta(combined);
     let replacements;
-    if (migration instanceof TsurgeFunnelMigration) {
+    if (isFunnelMigration) {
         replacements = (await migration.migrate(globalMeta)).replacements;
     }
     else {
         replacements = [];
-        for (const { info } of programInfos) {
+        for (const tsconfigPath of tsconfigPaths) {
+            config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Migrate);
+            const baseInfo = migration.createProgram(tsconfigPath, fs);
+            const info = migration.prepareProgram(baseInfo);
+            config.afterProgramCreation?.(info, fs, exports.MigrationStage.Migrate);
             const result = await migration.migrate(globalMeta, info);
             replacements.push(...result.replacements);
         }
@@ -734,6 +683,67 @@ async function runMigrationInDevkit(config) {
         config.tree.commitUpdate(recorder);
     }
     config.whenDone?.(await migration.stats(globalMeta));
+}
+
+/** A text replacement for the given file. */
+class Replacement {
+    projectFile;
+    update;
+    constructor(projectFile, update) {
+        this.projectFile = projectFile;
+        this.update = update;
+    }
+}
+/** An isolated text update that may be applied to a file. */
+class TextUpdate {
+    data;
+    constructor(data) {
+        this.data = data;
+    }
+}
+
+/** Confirms that the given data `T` is serializable. */
+function confirmAsSerializable(data) {
+    return data;
+}
+
+/**
+ * Gets a project file instance for the given file.
+ *
+ * Use this helper for dealing with project paths throughout your
+ * migration. The return type is serializable.
+ *
+ * See {@link ProjectFile}.
+ */
+function projectFile(file, { sortedRootDirs, projectRoot }) {
+    const fs = checker.getFileSystem();
+    const filePath = fs.resolve(typeof file === 'string' ? file : file.fileName);
+    // Sorted root directories are sorted longest to shortest. First match
+    // is the appropriate root directory for ID computation.
+    for (const rootDir of sortedRootDirs) {
+        if (!isWithinBasePath(fs, rootDir, filePath)) {
+            continue;
+        }
+        return {
+            id: fs.relative(rootDir, filePath),
+            rootRelativePath: fs.relative(projectRoot, filePath),
+        };
+    }
+    // E.g. project directory may be `src/`, but files may be looked up
+    // from `node_modules/`. This is fine, but in those cases, no root
+    // directory matches.
+    const rootRelativePath = fs.relative(projectRoot, filePath);
+    return {
+        id: rootRelativePath,
+        rootRelativePath: rootRelativePath,
+    };
+}
+/**
+ * Whether `path` is a descendant of the `base`?
+ * E.g. `a/b/c` is within `a/b` but not within `a/x`.
+ */
+function isWithinBasePath(fs, base, path) {
+    return checker.isLocalRelativePath(fs.relative(base, path));
 }
 
 exports.Replacement = Replacement;

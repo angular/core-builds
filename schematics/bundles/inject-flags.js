@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,8 +12,8 @@ var checker = require('./checker-BRvGmaOO.js');
 require('./compiler-BQ7R7w2v.js');
 require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
-var apply_import_manager = require('./apply_import_manager-BaxMXD5g.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
+var apply_import_manager = require('./apply_import_manager-DO1s35eE.js');
 var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -32,7 +32,7 @@ const FLAGS_TO_FIELDS = {
     'SkipSelf': 'skipSelf',
 };
 /** Migration that replaces `InjectFlags` usages with object literals. */
-class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
+class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const locations = {};
         const importRemovals = {};
@@ -41,7 +41,7 @@ class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
             if (specifier === null) {
                 continue;
             }
-            const file = run_in_devkit.projectFile(sourceFile, info);
+            const file = project_paths.projectFile(sourceFile, info);
             const importManager = new checker.ImportManager();
             const importReplacements = [];
             // Always remove the `InjectFlags` since it has been removed from Angular.
@@ -73,7 +73,7 @@ class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
                 }
             });
         }
-        return run_in_devkit.confirmAsSerializable({ locations, importRemovals });
+        return project_paths.confirmAsSerializable({ locations, importRemovals });
     }
     async migrate(globalData) {
         const replacements = [];
@@ -84,12 +84,12 @@ class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
             // Declare a property for each flag, except for `default` which does not have a flag.
             const properties = flags.filter((flag) => flag !== 'default').map((flag) => `${flag}: true`);
             const toInsert = properties.length ? `{ ${properties.join(', ')} }` : '{}';
-            replacements.push(new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({ position, end, toInsert })));
+            replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({ position, end, toInsert })));
         }
-        return run_in_devkit.confirmAsSerializable({ replacements });
+        return project_paths.confirmAsSerializable({ replacements });
     }
     async combine(unitA, unitB) {
-        return run_in_devkit.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             locations: {
                 ...unitA.locations,
                 ...unitB.locations,
@@ -101,7 +101,7 @@ class InjectFlagsMigration extends run_in_devkit.TsurgeFunnelMigration {
         });
     }
     async globalMeta(combinedData) {
-        return run_in_devkit.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
         return { counters: {} };
@@ -138,7 +138,7 @@ function getInjectFlagsRootExpression(start) {
 
 function migrate() {
     return async (tree) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: () => new InjectFlagsMigration(),
         });

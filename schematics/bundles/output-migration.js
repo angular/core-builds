@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,9 +12,9 @@ var checker = require('./checker-BRvGmaOO.js');
 var compiler = require('./compiler-BQ7R7w2v.js');
 var index$1 = require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
-var apply_import_manager = require('./apply_import_manager-BaxMXD5g.js');
-var index = require('./index-BuDMsgPu.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
+var apply_import_manager = require('./apply_import_manager-DO1s35eE.js');
+var index = require('./index-brz8Qy4V.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -91,7 +91,7 @@ function getOutputDecorator(node, reflector) {
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
 /** Computes an unique ID for a given Angular `@Output` property. */
 function getUniqueIdForProperty(info, prop) {
-    const { id } = run_in_devkit.projectFile(prop.getSourceFile(), info);
+    const { id } = project_paths.projectFile(prop.getSourceFile(), info);
     id.replace(/\.d\.ts$/, '.ts');
     return `${id}@@${prop.parent.name ?? 'unknown-class'}@@${prop.name.getText()}`;
 }
@@ -174,7 +174,7 @@ function calculateImportReplacements(info, sourceFiles) {
         const importManager = new checker.ImportManager();
         const addOnly = [];
         const addRemove = [];
-        const file = run_in_devkit.projectFile(sf, info);
+        const file = project_paths.projectFile(sf, info);
         importManager.addImport({
             requestedFile: sf,
             exportModuleSpecifier: '@angular/core',
@@ -230,21 +230,21 @@ function calculatePipeCallReplacement(info, node) {
 }
 function prepareTextReplacementForNode(info, node, replacement, start) {
     const sf = node.getSourceFile();
-    return new run_in_devkit.Replacement(run_in_devkit.projectFile(sf, info), new run_in_devkit.TextUpdate({
+    return new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
         position: start ?? node.getStart(),
         end: node.getEnd(),
         toInsert: replacement,
     }));
 }
 function prepareTextReplacement(file, replacement, start, end) {
-    return new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
+    return new project_paths.Replacement(file, new project_paths.TextUpdate({
         position: start,
         end: end,
         toInsert: replacement,
     }));
 }
 
-class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
+class OutputMigration extends project_paths.TsurgeFunnelMigration {
     config;
     constructor(config = {}) {
         super();
@@ -295,7 +295,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
                             id: getUniqueIdForProperty(info, node),
                             aliasParam: outputDecorator.args?.at(0),
                         };
-                        const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
+                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                         if (this.config.shouldMigrate === undefined ||
                             this.config.shouldMigrate({
                                 key: outputDef.id,
@@ -323,7 +323,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
+                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                     addOutputReplacement(outputFieldReplacements, id, outputFile, calculateNextFnReplacement(info, node.expression.name));
                 }
             }
@@ -332,7 +332,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
                 const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
-                    const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
+                    const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                     if (ts.isExpressionStatement(node.parent)) {
                         addOutputReplacement(outputFieldReplacements, id, outputFile, calculateCompleteCallReplacement(info, node.parent));
                     }
@@ -351,7 +351,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     if (isTestFile) {
-                        const outputFile = run_in_devkit.projectFile(node.getSourceFile(), info);
+                        const outputFile = project_paths.projectFile(node.getSourceFile(), info);
                         addOutputReplacement(outputFieldReplacements, id, outputFile, ...calculatePipeCallReplacement(info, node));
                     }
                     else {
@@ -395,7 +395,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
         }
         // calculate import replacements but do so only for files that have output declarations
         const importReplacements = calculateImportReplacements(info, filesWithOutputDeclarations);
-        return run_in_devkit.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields: outputFieldReplacements,
             importReplacements,
@@ -425,7 +425,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
                 problematicUsages[declId] = unit.problematicUsages[declId];
             }
         }
-        return run_in_devkit.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             problematicDeclarationCount,
             outputFields,
             importReplacements,
@@ -447,7 +447,7 @@ class OutputMigration extends run_in_devkit.TsurgeFunnelMigration {
             }
         }
         // Noop here as we don't have any form of special global metadata.
-        return run_in_devkit.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         const detectedOutputs = new Set(Object.keys(globalMetadata.outputFields)).size +
@@ -506,7 +506,7 @@ function addOutputReplacement(outputFieldReplacements, outputId, file, ...replac
 
 function migrate(options) {
     return async (tree, context) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: (fs) => new OutputMigration({
                 shouldMigrate: (_, file) => {
@@ -514,8 +514,13 @@ function migrate(options) {
                         !/(^|\/)node_modules\//.test(file.rootRelativePath));
                 },
             }),
-            beforeProgramCreation: (tsconfigPath) => {
-                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
             },
             afterProgramCreation: (info, fs) => {
                 const analysisPath = fs.resolve(options.analysisDir);

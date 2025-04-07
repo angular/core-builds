@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ require('./checker-BRvGmaOO.js');
 require('./compiler-BQ7R7w2v.js');
 require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
 var imports = require('./imports-CIX-JgAN.js');
 var symbol = require('./symbol-VPWguRxr.js');
 require('@angular-devkit/core');
@@ -26,7 +26,7 @@ require('./project_tsconfig_paths-CDVxT6Ov.js');
 /** Name of the method being replaced. */
 const METHOD_NAME = 'get';
 /** Migration that replaces `TestBed.get` usages with `TestBed.inject`. */
-class TestBedGetMigration extends run_in_devkit.TsurgeFunnelMigration {
+class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const locations = [];
         for (const sourceFile of info.sourceFiles) {
@@ -40,24 +40,24 @@ class TestBedGetMigration extends run_in_devkit.TsurgeFunnelMigration {
                     node.name.text === METHOD_NAME &&
                     ts.isIdentifier(node.expression) &&
                     symbol.isReferenceToImport(typeChecker, node.expression, specifier)) {
-                    locations.push({ file: run_in_devkit.projectFile(sourceFile, info), position: node.name.getStart() });
+                    locations.push({ file: project_paths.projectFile(sourceFile, info), position: node.name.getStart() });
                 }
                 else {
                     node.forEachChild(walk);
                 }
             });
         }
-        return run_in_devkit.confirmAsSerializable({ locations });
+        return project_paths.confirmAsSerializable({ locations });
     }
     async migrate(globalData) {
         const replacements = globalData.locations.map(({ file, position }) => {
-            return new run_in_devkit.Replacement(file, new run_in_devkit.TextUpdate({
+            return new project_paths.Replacement(file, new project_paths.TextUpdate({
                 position: position,
                 end: position + METHOD_NAME.length,
                 toInsert: 'inject',
             }));
         });
-        return run_in_devkit.confirmAsSerializable({ replacements });
+        return project_paths.confirmAsSerializable({ replacements });
     }
     async combine(unitA, unitB) {
         const seen = new Set();
@@ -70,10 +70,10 @@ class TestBedGetMigration extends run_in_devkit.TsurgeFunnelMigration {
                 locations.push(location);
             }
         }
-        return run_in_devkit.confirmAsSerializable({ locations });
+        return project_paths.confirmAsSerializable({ locations });
     }
     async globalMeta(combinedData) {
-        return run_in_devkit.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
         return { counters: {} };
@@ -89,7 +89,7 @@ class TestBedGetMigration extends run_in_devkit.TsurgeFunnelMigration {
  */
 function migrate() {
     return async (tree) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: () => new TestBedGetMigration(),
         });

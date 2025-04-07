@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-CJvsuuRv.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-Cvc6zy0n.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-BRvGmaOO.js');
 require('./compiler-BQ7R7w2v.js');
 var index$1 = require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
-var index = require('./index-BuDMsgPu.js');
+var project_paths = require('./project_paths-CYSd-c5s.js');
+var index = require('./index-brz8Qy4V.js');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-BaxMXD5g.js');
+var apply_import_manager = require('./apply_import_manager-DO1s35eE.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./leading_space-D9nQ8UQC.js');
@@ -103,7 +103,7 @@ function getInputDescriptor(hostOrInfo, node) {
         className = node.parent.name?.text ?? '<anonymous>';
     }
     const info = hostOrInfo instanceof MigrationHost ? hostOrInfo.programInfo : hostOrInfo;
-    const file = run_in_devkit.projectFile(node.getSourceFile(), info);
+    const file = project_paths.projectFile(node.getSourceFile(), info);
     // Inputs may be detected in `.d.ts` files. Ensure that if the file IDs
     // match regardless of extension. E.g. `/google3/blaze-out/bin/my_file.ts` should
     // have the same ID as `/google3/my_file.ts`.
@@ -182,7 +182,7 @@ class KnownInputs {
         }
         const directiveInfo = this._classToDirectiveInfo.get(data.node.parent);
         const inputInfo = {
-            file: run_in_devkit.projectFile(data.node.getSourceFile(), this.programInfo),
+            file: project_paths.projectFile(data.node.getSourceFile(), this.programInfo),
             metadata: data.metadata,
             descriptor: data.descriptor,
             container: directiveInfo,
@@ -1036,7 +1036,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (leadingTodoText !== null) {
         replacements.push(migrate_ts_type_references.insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...migrate_ts_type_references.cutStringToLineLimit(leadingTodoText, 70).map((line) => migrate_ts_type_references.insertPrecedingLine(node, info, `//  ${line}`)));
     }
-    replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(node.getSourceFile(), info), new run_in_devkit.TextUpdate({
+    replacements.push(new project_paths.Replacement(project_paths.projectFile(node.getSourceFile(), info), new project_paths.TextUpdate({
         position: node.getStart(),
         end: node.getEnd(),
         toInsert: newPropertyText,
@@ -1154,7 +1154,7 @@ function pass7__migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new run_in_devkit.Replacement(reference.from.templateFile, new run_in_devkit.TextUpdate({
+        host.replacements.push(new project_paths.Replacement(reference.from.templateFile, new project_paths.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -1194,7 +1194,7 @@ function pass8__migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(bindingField.getSourceFile(), info), new run_in_devkit.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new project_paths.Replacement(project_paths.projectFile(bindingField.getSourceFile(), info), new project_paths.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -1257,7 +1257,7 @@ function filterIncompatibilitiesForBestEffortMode(knownInputs) {
  * Tsurge migration for migrating Angular `@Input()` declarations to
  * signal inputs, with support for batch execution.
  */
-class SignalInputMigration extends run_in_devkit.TsurgeComplexMigration {
+class SignalInputMigration extends project_paths.TsurgeComplexMigration {
     config;
     upgradedAnalysisPhaseResults = null;
     constructor(config = {}) {
@@ -1266,7 +1266,7 @@ class SignalInputMigration extends run_in_devkit.TsurgeComplexMigration {
     }
     // Override the default program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
-        return run_in_devkit.createBaseProgramInfo(tsconfigAbsPath, fs, {
+        return project_paths.createBaseProgramInfo(tsconfigAbsPath, fs, {
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -1338,13 +1338,13 @@ class SignalInputMigration extends run_in_devkit.TsurgeComplexMigration {
                 knownInputs,
             };
         }
-        return run_in_devkit.confirmAsSerializable(unitData);
+        return project_paths.confirmAsSerializable(unitData);
     }
     async combine(unitA, unitB) {
-        return run_in_devkit.confirmAsSerializable(combineCompilationUnitData(unitA, unitB));
+        return project_paths.confirmAsSerializable(combineCompilationUnitData(unitA, unitB));
     }
     async globalMeta(combinedData) {
-        return run_in_devkit.confirmAsSerializable(convertToGlobalMeta(combinedData));
+        return project_paths.confirmAsSerializable(convertToGlobalMeta(combinedData));
     }
     async migrate(globalMetadata, info, nonBatchData) {
         const knownInputs = nonBatchData?.knownInputs ?? new KnownInputs(info, this.config);
@@ -1434,7 +1434,7 @@ function createMigrationHost(info, config) {
 
 function migrate(options) {
     return async (tree, context) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             tree,
             getMigration: (fs) => new SignalInputMigration({
                 bestEffortMode: options.bestEffortMode,
@@ -1444,8 +1444,13 @@ function migrate(options) {
                         !/(^|\/)node_modules\//.test(input.file.rootRelativePath));
                 },
             }),
-            beforeProgramCreation: (tsconfigPath) => {
-                context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
             },
             afterProgramCreation: (info, fs) => {
                 const analysisPath = fs.resolve(options.analysisDir);

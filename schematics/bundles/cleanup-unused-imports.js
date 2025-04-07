@@ -1,29 +1,29 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-0ae1889
+ * @license Angular v20.0.0-next.5+sha-3d85d93
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
+require('@angular-devkit/core');
+require('node:path/posix');
+var project_paths = require('./project_paths-CYSd-c5s.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-BRvGmaOO.js');
 require('./compiler-BQ7R7w2v.js');
 var index = require('./index-BzVBAdce.js');
 require('path');
-var run_in_devkit = require('./run_in_devkit-iEii37wm.js');
-var apply_import_manager = require('./apply_import_manager-BaxMXD5g.js');
-require('@angular-devkit/core');
-require('node:path/posix');
+var apply_import_manager = require('./apply_import_manager-DO1s35eE.js');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 require('fs');
 require('module');
 require('url');
-require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 /** Migration that cleans up unused imports from a project. */
-class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
+class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     printer = ts.createPrinter();
     createProgram(tsconfigAbsPath, fs) {
         return super.createProgram(tsconfigAbsPath, fs, {
@@ -62,10 +62,10 @@ class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
             }
             this.generateReplacements(sourceFile, resolvedLocations, usageAnalysis, info, replacements);
         });
-        return run_in_devkit.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
+        return project_paths.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
     }
     async migrate(globalData) {
-        return run_in_devkit.confirmAsSerializable(globalData);
+        return project_paths.confirmAsSerializable(globalData);
     }
     async combine(unitA, unitB) {
         const combinedReplacements = [];
@@ -89,14 +89,14 @@ class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
                 }
             }
         });
-        return run_in_devkit.confirmAsSerializable({
+        return project_paths.confirmAsSerializable({
             replacements: combinedReplacements,
             removedIdentifiers: combinedRemovedIdentifiers,
             changedFiles: changedFileIds.size,
         });
     }
     async globalMeta(combinedData) {
-        return run_in_devkit.confirmAsSerializable(combinedData);
+        return project_paths.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
         return {
@@ -223,7 +223,7 @@ class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
         const importManager = new checker.ImportManager();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {
-            replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(sourceFile, info), new run_in_devkit.TextUpdate({
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: '[]',
@@ -232,7 +232,7 @@ class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
         // Filter out the unused identifiers from an array.
         partialRemovals.forEach((toRemove, node) => {
             const newNode = ts.factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
-            replacements.push(new run_in_devkit.Replacement(run_in_devkit.projectFile(sourceFile, info), new run_in_devkit.TextUpdate({
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                 position: node.getStart(),
                 end: node.getEnd(),
                 toInsert: this.printer.printNode(ts.EmitHint.Unspecified, newNode, sourceFile),
@@ -264,11 +264,16 @@ class UnusedImportsMigration extends run_in_devkit.TsurgeFunnelMigration {
 
 function migrate() {
     return async (tree, context) => {
-        await run_in_devkit.runMigrationInDevkit({
+        await project_paths.runMigrationInDevkit({
             getMigration: () => new UnusedImportsMigration(),
             tree,
-            beforeProgramCreation: (tsconfigPath) => {
-                context.logger.info(`Preparing analysis for ${tsconfigPath}`);
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
             },
             beforeUnitAnalysis: (tsconfigPath) => {
                 context.logger.info(`Scanning for unused imports using ${tsconfigPath}`);
