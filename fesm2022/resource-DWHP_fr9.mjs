@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.5+sha-6fa8d44
+ * @license Angular v20.0.0-next.5+sha-ba79f23
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, InjectionToken, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DxPVy4G1.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, InjectionToken, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-VSXfCzDX.mjs';
 import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-B6pMq7KS.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-Bz5WMeU1.mjs';
 
@@ -618,4 +618,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef, ResourceImpl, ResourceStatus, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-Cg681Eks.mjs.map
+//# sourceMappingURL=resource-DWHP_fr9.mjs.map
