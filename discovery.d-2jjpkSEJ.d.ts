@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-ba79f23
+ * @license Angular v20.0.0-next.5+sha-80a3258
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3033,8 +3033,6 @@ declare abstract class EffectScheduler {
 
 /**
  * A global reactive effect, which can be manually destroyed.
- *
- * @developerPreview
  */
 interface EffectRef {
     /**
@@ -3044,8 +3042,6 @@ interface EffectRef {
 }
 /**
  * Options passed to the `effect` function.
- *
- * @developerPreview
  */
 interface CreateEffectOptions {
     /**
@@ -3078,14 +3074,10 @@ interface CreateEffectOptions {
  * An effect can, optionally, register a cleanup function. If registered, the cleanup is executed
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
- *
- * @developerPreview
  */
 type EffectCleanupFn = () => void;
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
- *
- * @developerPreview
  */
 type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 /**
@@ -3103,8 +3095,6 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
- *
- * @developerPreview
  */
 declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
 interface EffectNode extends ReactiveNode, SchedulableEffect {

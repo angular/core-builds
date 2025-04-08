@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-ba79f23
+ * @license Angular v20.0.0-next.5+sha-80a3258
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -126,8 +126,6 @@ class EffectRefImpl {
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
- *
- * @developerPreview
  */
 function effect(effectFn, options) {
     ngDevMode &&
@@ -618,4 +616,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef, ResourceImpl, ResourceStatus, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-DWHP_fr9.mjs.map
+//# sourceMappingURL=resource-CPPwEcg7.mjs.map
