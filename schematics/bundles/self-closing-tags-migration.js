@@ -1,19 +1,17 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-dc193a7
+ * @license Angular v19.2.5+sha-9241615
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-iZscu21W.js');
-require('os');
 var ts = require('typescript');
+require('os');
 var checker = require('./checker-DoX_7XCa.js');
-require('./program-CHFDWN5t.js');
+require('./index-ofEaeznM.js');
 require('path');
+var project_paths = require('./project_paths-yQxZ2CYx.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var property_name = require('./property_name-BBwFuqMe.js');
 require('@angular-devkit/core');
@@ -21,6 +19,8 @@ require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 require('./imports-CIX-JgAN.js');
 
 /**
@@ -393,65 +393,40 @@ function removeDuplicateReplacements(replacements) {
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run self-closing tags migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new SelfClosingTagsMigration({
-            shouldMigrate: (file) => {
-                return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(file.rootRelativePath));
+        await project_paths.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new SelfClosingTagsMigration({
+                shouldMigrate: (file) => {
+                    return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for component tags: ${tsconfigPath}...`);
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            whenDone: ({ counters }) => {
+                const { touchedFilesCount, replacementCount } = counters;
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to self-closing tags 🎉`);
+                context.logger.info(`  -> Migrated ${replacementCount} components to self-closing tags in ${touchedFilesCount} component files.`);
             },
         });
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for component tags: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        const { counters: { touchedFilesCount, replacementCount }, } = await migration.stats(globalMeta);
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to self-closing tags 🎉`);
-        context.logger.info(`  -> Migrated ${replacementCount} components to self-closing tags in ${touchedFilesCount} component files.`);
     };
 }
 

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-dc193a7
+ * @license Angular v19.2.5+sha-9241615
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,9 +9,9 @@
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-DoX_7XCa.js');
-var program = require('./program-CHFDWN5t.js');
+var index = require('./index-ofEaeznM.js');
 require('path');
-var project_paths = require('./project_paths-iZscu21W.js');
+var project_paths = require('./project_paths-yQxZ2CYx.js');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -628,7 +628,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
  */
 function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLoader) {
     const classDecorators = reflector.getDecoratorsOfDeclaration(node);
-    const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+    const evaluator = new index.PartialEvaluator(reflector, checker$1, null);
     const ngDecorators = classDecorators !== null
         ? checker.getAngularDecorators(classDecorators, ['Component'], /* isAngularCore */ false)
         : [];
@@ -738,7 +738,7 @@ function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, reso
     if (tmplDef === null) {
         return null;
     }
-    return program.extractTemplate(node, tmplDef, evaluator, null, resourceLoader, {
+    return index.extractTemplate(node, tmplDef, evaluator, null, resourceLoader, {
         enableBlockSyntax: true,
         enableLetSyntax: true,
         usePoisonedData: true,

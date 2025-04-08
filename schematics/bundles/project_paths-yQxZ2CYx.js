@@ -1,18 +1,20 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-dc193a7
+ * @license Angular v19.2.5+sha-9241615
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
+var index = require('./index-ofEaeznM.js');
+var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-DoX_7XCa.js');
-var program = require('./program-CHFDWN5t.js');
 require('path');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
@@ -187,7 +189,7 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
                 errors: [error],
                 rootNames: [],
                 options: {},
-                emitFlags: program.EmitFlags.Default,
+                emitFlags: index.EmitFlags.Default,
             };
         }
         const existingCompilerOptions = {
@@ -198,12 +200,12 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
         };
         const parseConfigHost = createParseConfigHost(host, fs);
         const { options, errors, fileNames: rootNames, projectReferences, } = ts.parseJsonConfigFileContent(config, parseConfigHost, basePath, existingCompilerOptions, configFileName);
-        let emitFlags = program.EmitFlags.Default;
+        let emitFlags = index.EmitFlags.Default;
         if (!(options['skipMetadataEmit'] || options['flatModuleOutFile'])) {
-            emitFlags |= program.EmitFlags.Metadata;
+            emitFlags |= index.EmitFlags.Metadata;
         }
         if (options['skipTemplateCodegen']) {
-            emitFlags = emitFlags & ~program.EmitFlags.Codegen;
+            emitFlags = emitFlags & ~index.EmitFlags.Codegen;
         }
         return { project: projectFile, rootNames, projectReferences, options, errors, emitFlags };
     }
@@ -216,10 +218,10 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
                 start: undefined,
                 length: undefined,
                 source: 'angular',
-                code: program.UNKNOWN_ERROR_CODE,
+                code: index.UNKNOWN_ERROR_CODE,
             },
         ];
-        return { project: '', errors, rootNames: [], options: {}, emitFlags: program.EmitFlags.Default };
+        return { project: '', errors, rootNames: [], options: {}, emitFlags: index.EmitFlags.Default };
     }
 }
 function createParseConfigHost(host, fs = checker.getFileSystem()) {
@@ -488,7 +490,7 @@ function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
  * an instance of the Angular compiler for the project.
  */
 function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
-    const ngtscProgram = new program.NgtscProgram(tsconfig.rootNames, {
+    const ngtscProgram = new index.NgtscProgram(tsconfig.rootNames, {
         ...tsconfig.options,
         ...defaultMigrationTsOptions,
         ...optionOverrides,
@@ -607,6 +609,81 @@ class TsurgeFunnelMigration extends TsurgeBaseMigration {
 class TsurgeComplexMigration extends TsurgeBaseMigration {
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+exports.MigrationStage = void 0;
+(function (MigrationStage) {
+    /** The migration is analyzing an entrypoint */
+    MigrationStage[MigrationStage["Analysis"] = 0] = "Analysis";
+    /** The migration is about to migrate an entrypoint */
+    MigrationStage[MigrationStage["Migrate"] = 1] = "Migrate";
+})(exports.MigrationStage || (exports.MigrationStage = {}));
+/** Runs a Tsurge within an Angular Devkit context. */
+async function runMigrationInDevkit(config) {
+    const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(config.tree);
+    if (!buildPaths.length && !testPaths.length) {
+        throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the migration.');
+    }
+    const tsconfigPaths = [...buildPaths, ...testPaths];
+    const fs = new DevkitMigrationFilesystem(config.tree);
+    checker.setFileSystem(fs);
+    const migration = config.getMigration(fs);
+    const unitResults = [];
+    const isFunnelMigration = migration instanceof TsurgeFunnelMigration;
+    for (const tsconfigPath of tsconfigPaths) {
+        config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Analysis);
+        const baseInfo = migration.createProgram(tsconfigPath, fs);
+        const info = migration.prepareProgram(baseInfo);
+        config.afterProgramCreation?.(info, fs, exports.MigrationStage.Analysis);
+        config.beforeUnitAnalysis?.(tsconfigPath);
+        unitResults.push(await migration.analyze(info));
+    }
+    config.afterAllAnalyzed?.();
+    const combined = await synchronouslyCombineUnitData(migration, unitResults);
+    if (combined === null) {
+        config.afterAnalysisFailure?.();
+        return;
+    }
+    const globalMeta = await migration.globalMeta(combined);
+    let replacements;
+    if (isFunnelMigration) {
+        replacements = (await migration.migrate(globalMeta)).replacements;
+    }
+    else {
+        replacements = [];
+        for (const tsconfigPath of tsconfigPaths) {
+            config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Migrate);
+            const baseInfo = migration.createProgram(tsconfigPath, fs);
+            const info = migration.prepareProgram(baseInfo);
+            config.afterProgramCreation?.(info, fs, exports.MigrationStage.Migrate);
+            const result = await migration.migrate(globalMeta, info);
+            replacements.push(...result.replacements);
+        }
+    }
+    const replacementsPerFile = new Map();
+    const changesPerFile = groupReplacementsByFile(replacements);
+    for (const [file, changes] of changesPerFile) {
+        if (!replacementsPerFile.has(file)) {
+            replacementsPerFile.set(file, changes);
+        }
+    }
+    for (const [file, changes] of replacementsPerFile) {
+        const recorder = config.tree.beginUpdate(file);
+        for (const c of changes) {
+            recorder
+                .remove(c.data.position, c.data.end - c.data.position)
+                .insertRight(c.data.position, c.data.toInsert);
+        }
+        config.tree.commitUpdate(recorder);
+    }
+    config.whenDone?.(await migration.stats(globalMeta));
+}
+
 /** A text replacement for the given file. */
 class Replacement {
     projectFile;
@@ -668,13 +745,11 @@ function isWithinBasePath(fs, base, path) {
     return checker.isLocalRelativePath(fs.relative(base, path));
 }
 
-exports.DevkitMigrationFilesystem = DevkitMigrationFilesystem;
 exports.Replacement = Replacement;
 exports.TextUpdate = TextUpdate;
 exports.TsurgeComplexMigration = TsurgeComplexMigration;
 exports.TsurgeFunnelMigration = TsurgeFunnelMigration;
 exports.confirmAsSerializable = confirmAsSerializable;
 exports.createBaseProgramInfo = createBaseProgramInfo;
-exports.groupReplacementsByFile = groupReplacementsByFile;
 exports.projectFile = projectFile;
-exports.synchronouslyCombineUnitData = synchronouslyCombineUnitData;
+exports.runMigrationInDevkit = runMigrationInDevkit;

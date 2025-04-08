@@ -1,28 +1,28 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-dc193a7
+ * @license Angular v19.2.5+sha-9241615
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-iZscu21W.js');
-require('os');
-var ts = require('typescript');
 var checker = require('./checker-DoX_7XCa.js');
-var program = require('./program-CHFDWN5t.js');
+var ts = require('typescript');
+require('os');
+var index$1 = require('./index-ofEaeznM.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-Be37SgiG.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-BqHk5ZcI.js');
+var project_paths = require('./project_paths-yQxZ2CYx.js');
+var apply_import_manager = require('./apply_import_manager-CSdvwQBk.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BN0kIHUY.js');
 var assert = require('assert');
-var index = require('./index-B9kjLQx3.js');
+var index = require('./index-l5wgNcWE.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 require('./leading_space-D9nQ8UQC.js');
 
 /**
@@ -738,10 +738,10 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         if (templateTypeChecker !== null) {
             templateTypeChecker.generateAllTypeCheckBlocks();
         }
-        const { sourceFiles, program: program$1 } = info;
-        const checker$1 = program$1.getTypeChecker();
+        const { sourceFiles, program } = info;
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const res = {
             knownQueryFields: {},
             potentialProblematicQueries: {},
@@ -926,10 +926,10 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
             metaReader: null,
         };
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
-        const { program: program$1, sourceFiles } = info;
-        const checker$1 = program$1.getTypeChecker();
+        const { program, sourceFiles } = info;
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const replacements = [];
         const importManager = new checker.ImportManager();
         const printer = ts.createPrinter();
@@ -1118,84 +1118,61 @@ function updateFileState(stateMap, node, queryType) {
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal queries migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new SignalQueriesMigration({
-            bestEffortMode: options.bestEffortMode,
-            insertTodosForSkippedFields: options.insertTodos,
-            shouldMigrateQuery: (_query, file) => {
-                return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(file.rootRelativePath));
+        await project_paths.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new SignalQueriesMigration({
+                bestEffortMode: options.bestEffortMode,
+                insertTodosForSkippedFields: options.insertTodos,
+                shouldMigrateQuery: (_query, file) => {
+                    return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
+            },
+            afterProgramCreation: (info, fs) => {
+                const analysisPath = fs.resolve(options.analysisDir);
+                // Support restricting the analysis to subfolders for larger projects.
+                if (analysisPath !== '/') {
+                    info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                    info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for queries: ${tsconfigPath}...`);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            whenDone: ({ counters }) => {
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to signal queries 🎉`);
+                const { queriesCount, incompatibleQueries } = counters;
+                const migratedQueries = queriesCount - incompatibleQueries;
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to signal queries 🎉`);
+                context.logger.info(`  -> Migrated ${migratedQueries}/${queriesCount} queries.`);
+                if (incompatibleQueries > 0 && !options.insertTodos) {
+                    context.logger.warn(`To see why ${incompatibleQueries} queries couldn't be migrated`);
+                    context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
+                }
+                if (options.bestEffortMode) {
+                    context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
+                        `works as intended, and fix where necessary.`);
+                }
             },
         });
-        const analysisPath = fs.resolve(options.analysisDir);
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            // Support restricting the analysis to subfolders for larger projects.
-            if (analysisPath !== '/') {
-                info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-                info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-            }
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for queries: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta, info);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to signal queries 🎉`);
-        const { counters: { queriesCount, incompatibleQueries, multiQueries }, } = await migration.stats(globalMeta);
-        const migratedQueries = queriesCount - incompatibleQueries;
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to signal queries 🎉`);
-        context.logger.info(`  -> Migrated ${migratedQueries}/${queriesCount} queries.`);
-        if (incompatibleQueries > 0 && !options.insertTodos) {
-            context.logger.warn(`To see why ${incompatibleQueries} queries couldn't be migrated`);
-            context.logger.warn(`consider re-running with "--insert-todos" or "--best-effort-mode".`);
-        }
-        if (options.bestEffortMode) {
-            context.logger.warn(`You ran with best effort mode. Manually verify all code ` +
-                `works as intended, and fix where necessary.`);
-        }
     };
 }
 

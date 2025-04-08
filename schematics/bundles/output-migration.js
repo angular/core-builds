@@ -1,26 +1,26 @@
 'use strict';
 /**
- * @license Angular v19.2.5+sha-dc193a7
+ * @license Angular v19.2.5+sha-9241615
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var schematics = require('@angular-devkit/schematics');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
-var project_paths = require('./project_paths-iZscu21W.js');
-require('os');
 var ts = require('typescript');
+require('os');
 var checker = require('./checker-DoX_7XCa.js');
-var program = require('./program-CHFDWN5t.js');
+var index$1 = require('./index-ofEaeznM.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-Be37SgiG.js');
-var index = require('./index-B9kjLQx3.js');
+var project_paths = require('./project_paths-yQxZ2CYx.js');
+var apply_import_manager = require('./apply_import_manager-CSdvwQBk.js');
+var index = require('./index-l5wgNcWE.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.js');
 
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
@@ -250,15 +250,15 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         this.config = config;
     }
     async analyze(info) {
-        const { sourceFiles, program: program$1 } = info;
+        const { sourceFiles, program } = info;
         const outputFieldReplacements = {};
         const problematicUsages = {};
         let problematicDeclarationCount = 0;
         const filesWithOutputDeclarations = new Set();
-        const checker$1 = program$1.getTypeChecker();
+        const checker$1 = program.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const dtsReader = new program.DtsMetadataReader(checker$1, reflector);
-        const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
+        const dtsReader = new index$1.DtsMetadataReader(checker$1, reflector);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         // Pre-analyze the program and get access to the template type checker.
         // If we are processing a non-Angular target, there is no template info.
@@ -340,6 +340,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                     }
                 }
             }
+            addCommentForEmptyEmit(node, info, checker$1, reflector, dtsReader, outputFieldReplacements);
             // detect imports of test runners
             if (isTestRunnerImport(node)) {
                 isTestFile = true;
@@ -502,76 +503,105 @@ function addOutputReplacement(outputFieldReplacements, outputId, file, ...replac
     }
     existingReplacements.replacements.push(...replacements);
 }
+function addCommentForEmptyEmit(node, info, checker, reflector, dtsReader, outputFieldReplacements) {
+    if (!isEmptyEmitCall(node))
+        return;
+    const propertyAccess = getPropertyAccess(node);
+    if (!propertyAccess)
+        return;
+    const symbol = checker.getSymbolAtLocation(propertyAccess.name);
+    if (!symbol || !symbol.declarations?.length)
+        return;
+    const propertyDeclaration = isTargetOutputDeclaration(propertyAccess, checker, reflector, dtsReader);
+    if (!propertyDeclaration)
+        return;
+    const eventEmitterType = getEventEmitterArgumentType(propertyDeclaration);
+    if (!eventEmitterType)
+        return;
+    const id = getUniqueIdForProperty(info, propertyDeclaration);
+    const file = project_paths.projectFile(node.getSourceFile(), info);
+    const formatter = getFormatterText(node);
+    const todoReplacement = new project_paths.TextUpdate({
+        toInsert: `${formatter.indent}// TODO: The 'emit' function requires a mandatory ${eventEmitterType} argument\n`,
+        end: formatter.lineStartPos,
+        position: formatter.lineStartPos,
+    });
+    addOutputReplacement(outputFieldReplacements, id, file, new project_paths.Replacement(file, todoReplacement));
+}
+function isEmptyEmitCall(node) {
+    return (ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === 'emit' &&
+        node.arguments.length === 0);
+}
+function getPropertyAccess(node) {
+    const propertyAccessExpression = node.expression.expression;
+    return ts.isPropertyAccessExpression(propertyAccessExpression) ? propertyAccessExpression : null;
+}
+function getEventEmitterArgumentType(propertyDeclaration) {
+    const initializer = propertyDeclaration.initializer;
+    if (!initializer || !ts.isNewExpression(initializer))
+        return null;
+    const isEventEmitter = ts.isIdentifier(initializer.expression) && initializer.expression.getText() === 'EventEmitter';
+    if (!isEventEmitter)
+        return null;
+    const [typeArg] = initializer.typeArguments ?? [];
+    return typeArg ? typeArg.getText() : null;
+}
+function getFormatterText(node) {
+    const sourceFile = node.getSourceFile();
+    const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+    const lineStartPos = sourceFile.getPositionOfLineAndCharacter(line, 0);
+    const indent = sourceFile.text.slice(lineStartPos, node.getStart());
+    return { indent, lineStartPos };
+}
 
 function migrate(options) {
     return async (tree, context) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
-        if (!buildPaths.length && !testPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run output migration.');
-        }
-        const fs = new project_paths.DevkitMigrationFilesystem(tree);
-        checker.setFileSystem(fs);
-        const migration = new OutputMigration({
-            shouldMigrate: (_, file) => {
-                return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
-                    !/(^|\/)node_modules\//.test(file.rootRelativePath));
+        await project_paths.runMigrationInDevkit({
+            tree,
+            getMigration: (fs) => new OutputMigration({
+                shouldMigrate: (_, file) => {
+                    return (file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
+                        !/(^|\/)node_modules\//.test(file.rootRelativePath));
+                },
+            }),
+            beforeProgramCreation: (tsconfigPath, stage) => {
+                if (stage === project_paths.MigrationStage.Analysis) {
+                    context.logger.info(`Preparing analysis for: ${tsconfigPath}...`);
+                }
+                else {
+                    context.logger.info(`Running migration for: ${tsconfigPath}...`);
+                }
+            },
+            afterProgramCreation: (info, fs) => {
+                const analysisPath = fs.resolve(options.analysisDir);
+                // Support restricting the analysis to subfolders for larger projects.
+                if (analysisPath !== '/') {
+                    info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                    info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
+                }
+            },
+            beforeUnitAnalysis: (tsconfigPath) => {
+                context.logger.info(`Scanning for outputs: ${tsconfigPath}...`);
+            },
+            afterAllAnalyzed: () => {
+                context.logger.info(``);
+                context.logger.info(`Processing analysis data between targets...`);
+                context.logger.info(``);
+            },
+            afterAnalysisFailure: () => {
+                context.logger.error('Migration failed unexpectedly with no analysis data');
+            },
+            whenDone: ({ counters }) => {
+                const { detectedOutputs, problematicOutputs, successRate } = counters;
+                const migratedOutputs = detectedOutputs - problematicOutputs;
+                const successRatePercent = (successRate * 100).toFixed(2);
+                context.logger.info('');
+                context.logger.info(`Successfully migrated to outputs as functions 🎉`);
+                context.logger.info(`  -> Migrated ${migratedOutputs} out of ${detectedOutputs} detected outputs (${successRatePercent} %).`);
             },
         });
-        const analysisPath = fs.resolve(options.analysisDir);
-        const unitResults = [];
-        const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
-            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
-            // Support restricting the analysis to subfolders for larger projects.
-            if (analysisPath !== '/') {
-                info.sourceFiles = info.sourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-                info.fullProgramSourceFiles = info.fullProgramSourceFiles.filter((sf) => sf.fileName.startsWith(analysisPath));
-            }
-            return { info, tsconfigPath };
-        });
-        // Analyze phase. Treat all projects as compilation units as
-        // this allows us to support references between those.
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Scanning for outputs: ${tsconfigPath}..`);
-            unitResults.push(await migration.analyze(info));
-        }
-        context.logger.info(``);
-        context.logger.info(`Processing analysis data between targets..`);
-        context.logger.info(``);
-        const combined = await project_paths.synchronouslyCombineUnitData(migration, unitResults);
-        if (combined === null) {
-            context.logger.error('Migration failed unexpectedly with no analysis data');
-            return;
-        }
-        const globalMeta = await migration.globalMeta(combined);
-        const replacementsPerFile = new Map();
-        for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(globalMeta);
-            const changesPerFile = project_paths.groupReplacementsByFile(replacements);
-            for (const [file, changes] of changesPerFile) {
-                if (!replacementsPerFile.has(file)) {
-                    replacementsPerFile.set(file, changes);
-                }
-            }
-        }
-        context.logger.info(`Applying changes..`);
-        for (const [file, changes] of replacementsPerFile) {
-            const recorder = tree.beginUpdate(file);
-            for (const c of changes) {
-                recorder
-                    .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
-            }
-            tree.commitUpdate(recorder);
-        }
-        const { counters: { detectedOutputs, problematicOutputs, successRate }, } = await migration.stats(globalMeta);
-        const migratedOutputs = detectedOutputs - problematicOutputs;
-        const successRatePercent = (successRate * 100).toFixed(2);
-        context.logger.info('');
-        context.logger.info(`Successfully migrated to outputs as functions 🎉`);
-        context.logger.info(`  -> Migrated ${migratedOutputs} out of ${detectedOutputs} detected outputs (${successRatePercent} %).`);
     };
 }
 
