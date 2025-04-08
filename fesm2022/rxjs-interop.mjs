@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.5+sha-8b9df44
+ * @license Angular v19.2.5+sha-56db79a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -325,7 +325,10 @@ function rxResource(opts) {
                 resolve?.(stream);
                 resolve = undefined;
             }
-            sub = opts.loader(params).subscribe({
+            // loader is kept for backwards compatibility
+            const streamOrLoader = opts.stream ??
+                opts.loader;
+            sub = streamOrLoader(params).subscribe({
                 next: (value) => send({ value }),
                 error: (error) => send({ error }),
                 complete: () => {
