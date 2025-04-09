@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.6+sha-9f31947
+ * @license Angular v20.0.0-next.6+sha-36ae560
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2865,67 +2865,6 @@ interface TracingService<T extends TracingSnapshot> {
     wrapEventListener?<T extends Function>(element: HTMLElement, eventName: string, handler: T): T;
 }
 
-/**
- * The phase to run an `afterRender` or `afterNextRender` callback in.
- *
- * Callbacks in the same phase run in the order they are registered. Phases run in the
- * following order after each render:
- *
- *   1. `AfterRenderPhase.EarlyRead`
- *   2. `AfterRenderPhase.Write`
- *   3. `AfterRenderPhase.MixedReadWrite`
- *   4. `AfterRenderPhase.Read`
- *
- * Angular is unable to verify or enforce that phases are used correctly, and instead
- * relies on each developer to follow the guidelines documented for each value and
- * carefully choose the appropriate one, refactoring their code if necessary. By doing
- * so, Angular is better able to minimize the performance degradation associated with
- * manual DOM access, ensuring the best experience for the end users of your application
- * or library.
- *
- * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
- *   parameter to `afterRender` or `afterNextRender` instead of a function.
- */
-declare enum AfterRenderPhase {
-    /**
-     * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
-     * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
-     * custom layout that the browser doesn't natively support. Prefer the
-     * `AfterRenderPhase.Read` phase if reading can wait until after the write phase.
-     * **Never** write to the DOM in this phase.
-     *
-     * <div class="docs-alert docs-alert-important">
-     *
-     * Using this value can degrade performance.
-     * Instead, prefer using built-in browser functionality when possible.
-     *
-     * </div>
-     */
-    EarlyRead = 0,
-    /**
-     * Use `AfterRenderPhase.Write` for callbacks that only **write** to the DOM. **Never**
-     * read from the DOM in this phase.
-     */
-    Write = 1,
-    /**
-     * Use `AfterRenderPhase.MixedReadWrite` for callbacks that read from or write to the
-     * DOM, that haven't been refactored to use a different phase. **Never** use this phase if
-     * it is possible to divide the work among the other phases instead.
-     *
-     * <div class="docs-alert docs-alert-critical">
-     *
-     * Using this value can **significantly** degrade performance.
-     * Instead, prefer dividing work into the appropriate phase callbacks.
-     *
-     * </div>
-     */
-    MixedReadWrite = 2,
-    /**
-     * Use `AfterRenderPhase.Read` for callbacks that only **read** from the DOM. **Never**
-     * write to the DOM in this phase.
-     */
-    Read = 3
-}
 /**
  * A callback that runs after render.
  *
@@ -7379,5 +7318,5 @@ interface DeferBlockDetails extends DehydratedDeferBlock {
  */
 declare function getDeferBlocks(lView: LView, deferBlocks: DeferBlockDetails[]): void;
 
-export { APP_BOOTSTRAP_LISTENER, AfterRenderManager, AfterRenderPhase, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, Input, InputFlags, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, NoopNgZone, NotificationSource, Output, Pipe, PlatformRef, QueryFlags, QueryList, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, defineInjectable, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
+export { APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, Input, InputFlags, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, NoopNgZone, NotificationSource, Output, Pipe, PlatformRef, QueryFlags, QueryList, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, defineInjectable, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
