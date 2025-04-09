@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.5+sha-b8d9f95
+ * @license Angular v20.0.0-next.5+sha-df42976
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -341,6 +341,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                     }
                 }
             }
+            addCommentForEmptyEmit(node, info, checker$1, reflector, dtsReader, outputFieldReplacements);
             // detect imports of test runners
             if (isTestRunnerImport(node)) {
                 isTestFile = true;
@@ -502,6 +503,58 @@ function addOutputReplacement(outputFieldReplacements, outputId, file, ...replac
         };
     }
     existingReplacements.replacements.push(...replacements);
+}
+function addCommentForEmptyEmit(node, info, checker, reflector, dtsReader, outputFieldReplacements) {
+    if (!isEmptyEmitCall(node))
+        return;
+    const propertyAccess = getPropertyAccess(node);
+    if (!propertyAccess)
+        return;
+    const symbol = checker.getSymbolAtLocation(propertyAccess.name);
+    if (!symbol || !symbol.declarations?.length)
+        return;
+    const propertyDeclaration = isTargetOutputDeclaration(propertyAccess, checker, reflector, dtsReader);
+    if (!propertyDeclaration)
+        return;
+    const eventEmitterType = getEventEmitterArgumentType(propertyDeclaration);
+    if (!eventEmitterType)
+        return;
+    const id = getUniqueIdForProperty(info, propertyDeclaration);
+    const file = project_paths.projectFile(node.getSourceFile(), info);
+    const formatter = getFormatterText(node);
+    const todoReplacement = new project_paths.TextUpdate({
+        toInsert: `${formatter.indent}// TODO: The 'emit' function requires a mandatory ${eventEmitterType} argument\n`,
+        end: formatter.lineStartPos,
+        position: formatter.lineStartPos,
+    });
+    addOutputReplacement(outputFieldReplacements, id, file, new project_paths.Replacement(file, todoReplacement));
+}
+function isEmptyEmitCall(node) {
+    return (ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === 'emit' &&
+        node.arguments.length === 0);
+}
+function getPropertyAccess(node) {
+    const propertyAccessExpression = node.expression.expression;
+    return ts.isPropertyAccessExpression(propertyAccessExpression) ? propertyAccessExpression : null;
+}
+function getEventEmitterArgumentType(propertyDeclaration) {
+    const initializer = propertyDeclaration.initializer;
+    if (!initializer || !ts.isNewExpression(initializer))
+        return null;
+    const isEventEmitter = ts.isIdentifier(initializer.expression) && initializer.expression.getText() === 'EventEmitter';
+    if (!isEventEmitter)
+        return null;
+    const [typeArg] = initializer.typeArguments ?? [];
+    return typeArg ? typeArg.getText() : null;
+}
+function getFormatterText(node) {
+    const sourceFile = node.getSourceFile();
+    const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+    const lineStartPos = sourceFile.getPositionOfLineAndCharacter(line, 0);
+    const indent = sourceFile.text.slice(lineStartPos, node.getStart());
+    return { indent, lineStartPos };
 }
 
 function migrate(options) {
