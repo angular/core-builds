@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.5+sha-2b4fd9b
+ * @license Angular v20.0.0-next.5+sha-e50f8a2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -156,31 +156,15 @@ declare function toSignal<T, const U extends T>(source: Observable<T> | Subscrib
 declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
 
 /**
- * Like `ResourceOptions` but uses an RxJS-based `stream`.
- *
- * @experimental
- */
-interface RxResourceStreamOptions<T, R> extends BaseResourceOptions<T, R> {
-    stream: (params: ResourceLoaderParams<R>) => Observable<T>;
-}
-/**
  * Like `ResourceOptions` but uses an RxJS-based `loader`.
  *
  * @experimental
- * @deprecated Use `stream` instead of `loader`.
  */
-interface RxResourceLoaderOptions<T, R> extends BaseResourceOptions<T, R> {
-    /** @deprecated Use `stream` instead of `loader`. */
+interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     loader: (params: ResourceLoaderParams<R>) => Observable<T>;
 }
 /**
- * Like `ResourceOptions` but uses an RxJS-based `stream`.
- *
- * @experimental
- */
-type RxResourceOptions<T, R> = RxResourceStreamOptions<T, R> | RxResourceLoaderOptions<T, R>;
-/**
- * Like `resource` but uses an RxJS based `stream` which maps the request to an `Observable` of the
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
  * resource's value.
  *
  * @experimental
@@ -189,7 +173,7 @@ declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
     defaultValue: NoInfer<T>;
 }): ResourceRef<T>;
 /**
- * Like `resource` but uses an RxJS based `stream` which maps the request to an `Observable` of the
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
  * resource's value.
  *
  * @experimental
