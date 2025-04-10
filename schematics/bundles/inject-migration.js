@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.6+sha-5c575a8
+ * @license Angular v20.0.0-next.6+sha-11d441f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -373,7 +373,7 @@ function isInlineFunction(node) {
  * @param constructor Constructor declaration of the class being migrated.
  * @param localTypeChecker Type checker scoped to the current file.
  */
-function findUninitializedPropertiesToCombine(node, constructor, localTypeChecker) {
+function findUninitializedPropertiesToCombine(node, constructor, localTypeChecker, options) {
     let toCombine = null;
     let toHoist = [];
     const membersToDeclarations = new Map();
@@ -391,10 +391,13 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
     if (memberInitializers === null) {
         return null;
     }
+    const inlinableParameters = options._internalReplaceParameterReferencesInInitializers
+        ? findInlinableParameterReferences(constructor, localTypeChecker)
+        : new Set();
     for (const [name, decl] of membersToDeclarations.entries()) {
         if (memberInitializers.has(name)) {
             const initializer = memberInitializers.get(name);
-            if (!hasLocalReferences(initializer, constructor, localTypeChecker)) {
+            if (!hasLocalReferences(initializer, constructor, inlinableParameters, localTypeChecker)) {
                 toCombine ??= [];
                 toCombine.push({ declaration: membersToDeclarations.get(name), initializer });
             }
@@ -537,12 +540,69 @@ function getMemberInitializers(constructor) {
     return memberInitializers;
 }
 /**
+ * Checks if the node is an identifier that references a property from the given
+ * list. Returns the property if it is.
+ */
+function getIdentifierReferencingProperty(node, localTypeChecker, propertyNames, properties) {
+    if (!ts.isIdentifier(node) || !propertyNames.has(node.text)) {
+        return undefined;
+    }
+    const declarations = localTypeChecker.getSymbolAtLocation(node)?.declarations;
+    if (!declarations) {
+        return undefined;
+    }
+    for (const decl of declarations) {
+        if (properties.has(decl)) {
+            return decl;
+        }
+    }
+    return undefined;
+}
+/**
+ * Returns true if the node introduces a new `this` scope (so we can't
+ * reference the outer this).
+ */
+function introducesNewThisScope(node) {
+    return (ts.isFunctionDeclaration(node) ||
+        ts.isFunctionExpression(node) ||
+        ts.isMethodDeclaration(node) ||
+        ts.isClassDeclaration(node) ||
+        ts.isClassExpression(node));
+}
+/**
+ * Finds constructor parameter references which can be inlined as `this.prop`.
+ * - prop must be a readonly property
+ * - the reference can't be in a nested function where `this` might refer
+ *   to something else
+ */
+function findInlinableParameterReferences(constructorDeclaration, localTypeChecker) {
+    const eligibleProperties = constructorDeclaration.parameters.filter((p) => ts.isIdentifier(p.name) && p.modifiers?.some((s) => s.kind === ts.SyntaxKind.ReadonlyKeyword));
+    const eligibleNames = new Set(eligibleProperties.map((p) => p.name.text));
+    const eligiblePropertiesSet = new Set(eligibleProperties);
+    function walk(node, canReferenceThis) {
+        const property = getIdentifierReferencingProperty(node, localTypeChecker, eligibleNames, eligiblePropertiesSet);
+        if (property && !canReferenceThis) {
+            // The property is referenced in a nested context where
+            // we can't use `this`, so we can't inline it.
+            eligiblePropertiesSet.delete(property);
+        }
+        else if (introducesNewThisScope(node)) {
+            canReferenceThis = false;
+        }
+        ts.forEachChild(node, (child) => {
+            walk(child, canReferenceThis);
+        });
+    }
+    walk(constructorDeclaration, true);
+    return eligiblePropertiesSet;
+}
+/**
  * Determines if a node has references to local symbols defined in the constructor.
  * @param root Expression to check for local references.
  * @param constructor Constructor within which the expression is used.
  * @param localTypeChecker Type checker scoped to the current file.
  */
-function hasLocalReferences(root, constructor, localTypeChecker) {
+function hasLocalReferences(root, constructor, allowedParameters, localTypeChecker) {
     const sourceFile = root.getSourceFile();
     let hasLocalRefs = false;
     const walk = (node) => {
@@ -564,7 +624,8 @@ function hasLocalReferences(root, constructor, localTypeChecker) {
             // The source file check is a bit redundant since the type checker
             // is local to the file, but it's inexpensive and it can prevent
             // bugs in the future if we decide to use a full type checker.
-            decl.getSourceFile() === sourceFile &&
+            !allowedParameters.has(decl) &&
+                decl.getSourceFile() === sourceFile &&
                 decl.getStart() >= constructor.getStart() &&
                 decl.getEnd() <= constructor.getEnd() &&
                 !isInsideInlineFunction(decl, constructor));
@@ -628,7 +689,7 @@ function migrateFile(sourceFile, options) {
         const removedStatements = new Set();
         const removedMembers = new Set();
         if (options._internalCombineMemberInitializers) {
-            applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation);
+            applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation, options);
         }
         migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, afterInjectCalls, removedStatements, removedMembers, localTypeChecker, printer, tracker);
     });
@@ -1099,8 +1160,8 @@ function getNextPreservedStatement(startNode, removedStatements) {
  * @param afterInjectCalls Text that will be inserted after the newly-added `inject` calls.
  * @param memberIndentation Indentation string of the class' members.
  */
-function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation) {
-    const result = findUninitializedPropertiesToCombine(node, constructor, localTypeChecker);
+function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation, options) {
+    const result = findUninitializedPropertiesToCombine(node, constructor, localTypeChecker, options);
     if (result === null) {
         return;
     }
@@ -1113,21 +1174,25 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
     }
     result.toCombine.forEach(({ declaration, initializer }) => {
         const initializerStatement = nodes.closestNode(initializer, ts.isStatement);
+        // Strip comments if we are just going modify the node in-place.
+        const modifiers = preserveInitOrder
+            ? declaration.modifiers
+            : cloneModifiers(declaration.modifiers);
+        const name = preserveInitOrder ? declaration.name : cloneName(declaration.name);
+        const newProperty = ts.factory.createPropertyDeclaration(modifiers, name, declaration.questionToken, declaration.type, undefined);
+        const propText = printer.printNode(ts.EmitHint.Unspecified, newProperty, declaration.getSourceFile());
+        const initializerText = replaceParameterReferencesInInitializer(initializer, constructor, localTypeChecker);
+        const withInitializer = `${propText.slice(0, -1)} = ${initializerText};`;
         // If the initialization order is being preserved, we have to remove the original
         // declaration and re-declare it. Otherwise we can do the replacement in-place.
         if (preserveInitOrder) {
-            // Preserve comment in the new property since we are removing the entire node.
-            const newProperty = ts.factory.createPropertyDeclaration(declaration.modifiers, declaration.name, declaration.questionToken, declaration.type, initializer);
             tracker.removeNode(declaration, true);
             removedMembers.add(declaration);
-            afterInjectCalls.push(memberIndentation +
-                printer.printNode(ts.EmitHint.Unspecified, newProperty, declaration.getSourceFile()));
+            afterInjectCalls.push(memberIndentation + withInitializer);
         }
         else {
-            // Strip comments from the declaration since we are replacing just
-            // the node, not the leading comment.
-            const newProperty = ts.factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
-            tracker.replaceNode(declaration, newProperty);
+            const sourceFile = declaration.getSourceFile();
+            tracker.replaceText(sourceFile, declaration.getStart(), declaration.getWidth(), withInitializer);
         }
         // This should always be defined, but null check it just in case.
         if (initializerStatement) {
@@ -1144,6 +1209,30 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
     if (prependToClass.length > 0) {
         prependToClass.push('');
     }
+}
+function replaceParameterReferencesInInitializer(initializer, constructor, localTypeChecker) {
+    // 1. Collect the locations of identifier nodes that reference constructor parameters.
+    // 2. Add `this.` to those locations.
+    const insertLocations = [0];
+    function walk(node) {
+        if (ts.isIdentifier(node) &&
+            !(ts.isPropertyAccessExpression(node.parent) && node === node.parent.name) &&
+            localTypeChecker
+                .getSymbolAtLocation(node)
+                ?.declarations?.some((decl) => constructor.parameters.includes(decl))) {
+            insertLocations.push(node.getStart() - initializer.getStart());
+        }
+        ts.forEachChild(node, walk);
+    }
+    walk(initializer);
+    const initializerText = initializer.getText();
+    insertLocations.push(initializerText.length);
+    insertLocations.sort((a, b) => a - b);
+    const result = [];
+    for (let i = 0; i < insertLocations.length - 1; i++) {
+        result.push(initializerText.slice(insertLocations[i], insertLocations[i + 1]));
+    }
+    return result.join('this.');
 }
 
 function migrate(options) {
