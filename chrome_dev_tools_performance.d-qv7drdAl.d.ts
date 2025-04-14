@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.6+sha-84d359c
+ * @license Angular v20.0.0-next.6+sha-c1bcae9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -828,5 +828,20 @@ declare global {
     const ngI18nClosureMode: boolean;
 }
 
-export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
+type TimeStampName = string;
+type DevToolsColor = 'primary' | 'primary-light' | 'primary-dark' | 'secondary' | 'secondary-light' | 'secondary-dark' | 'tertiary' | 'tertiary-light' | 'tertiary-dark' | 'error';
+declare global {
+    interface Console {
+        timeStamp(label: string, start: TimeStampName, end?: TimeStampName, trackName?: string, trackGroup?: string, color?: DevToolsColor): void;
+    }
+}
+/**
+ * Start listening to the Angular's internal performance-related events and route those to the Chrome DevTools performance panel.
+ * This enables Angular-specific data visualization when recording a performance profile directly in the Chrome DevTools.
+ *
+ * @returns a function that can be invoked to stop sending profiling data.
+ */
+declare function enableProfiling(): () => void;
+
+export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
 export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, ImportedNgModuleProviders, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };

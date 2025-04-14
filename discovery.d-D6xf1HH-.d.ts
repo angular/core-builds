@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.6+sha-84d359c
+ * @license Angular v20.0.0-next.6+sha-c1bcae9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, ProcessProvidersFunction, ModuleWithProviders, Provider, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './ng_i18n_closure_mode.d-C9d2CaSt.js';
+import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, ProcessProvidersFunction, ModuleWithProviders, Provider, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d-qv7drdAl.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { SignalNode } from './signal.d-E0e5nW1p.js';
 import { ReactiveNode } from './graph.d-BcIOep_B.js';
