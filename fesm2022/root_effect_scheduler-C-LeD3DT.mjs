@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.6+sha-e24b6d5
+ * @license Angular v20.0.0-next.6+sha-65adb30
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3411,6 +3411,68 @@ class Injector {
 }
 
 /**
+ * A DI Token representing the main rendering context.
+ * In a browser and SSR this is the DOM Document.
+ * When using SSR, that document is created by [Domino](https://github.com/angular/domino).
+ *
+ * @publicApi
+ */
+const DOCUMENT = new InjectionToken(ngDevMode ? 'DocumentToken' : '');
+
+/**
+ * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
+ * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
+ * is injected in a component or directive, the callbacks run when that component or
+ * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @publicApi
+ */
+class DestroyRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static __NG_ELEMENT_ID__ = injectDestroyRef;
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static __NG_ENV_ID__ = (injector) => injector;
+}
+class NodeInjectorDestroyRef extends DestroyRef {
+    _lView;
+    constructor(_lView) {
+        super();
+        this._lView = _lView;
+    }
+    onDestroy(callback) {
+        const lView = this._lView;
+        // Checking if `lView` is already destroyed before storing the `callback` enhances
+        // safety and integrity for applications.
+        // If `lView` is destroyed, we call the `callback` immediately to ensure that
+        // any necessary cleanup is handled gracefully.
+        // With this approach, we're providing better reliability in managing resources.
+        // One of the use cases is `takeUntilDestroyed`, which aims to replace `takeUntil`
+        // in existing applications. While `takeUntil` can be safely called once the view
+        // is destroyed — resulting in no errors and finalizing the subscription depending
+        // on whether a subject or replay subject is used, replacing it with
+        // `takeUntilDestroyed` introduces a breaking change, as it throws an error if
+        // the `lView` is destroyed (https://github.com/angular/angular/issues/54527).
+        if (isDestroyed(lView)) {
+            callback();
+            // We return a "noop" callback, which, when executed, does nothing because
+            // we haven't stored anything on the `lView`, and thus there's nothing to remove.
+            return () => { };
+        }
+        storeLViewOnDestroy(lView, callback);
+        return () => removeLViewOnDestroy(lView, callback);
+    }
+}
+function injectDestroyRef() {
+    return new NodeInjectorDestroyRef(getLView());
+}
+
+/**
  * Provides a hook for centralized exception handling.
  *
  * The default implementation of `ErrorHandler` prints error messages to the `console`. To
@@ -3471,58 +3533,44 @@ const errorHandlerEnvironmentInitializer = {
     useValue: () => void inject(ErrorHandler),
     multi: true,
 };
-
+const globalErrorListeners = new InjectionToken(ngDevMode ? 'GlobalErrorListeners' : '', {
+    providedIn: 'root',
+    factory: () => {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+            return;
+        }
+        const window = inject(DOCUMENT).defaultView;
+        if (!window) {
+            return;
+        }
+        const errorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
+        const rejectionListener = (e) => {
+            errorHandler(e.reason);
+            e.preventDefault();
+        };
+        const errorListener = (e) => {
+            errorHandler(e.error);
+            e.preventDefault();
+        };
+        window.addEventListener('unhandledrejection', rejectionListener);
+        window.addEventListener('error', errorListener);
+        inject(DestroyRef).onDestroy(() => {
+            window.removeEventListener('error', errorListener);
+            window.removeEventListener('unhandledrejection', rejectionListener);
+        });
+    },
+});
 /**
- * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
- * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
- * is injected in a component or directive, the callbacks run when that component or
- * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ * Provides an environment initializer which forwards unhandled errors to the ErrorHandler.
+ *
+ * The listeners added are for the window's 'unhandledrejection' and 'error' events.
  *
  * @publicApi
  */
-class DestroyRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static __NG_ELEMENT_ID__ = injectDestroyRef;
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static __NG_ENV_ID__ = (injector) => injector;
-}
-class NodeInjectorDestroyRef extends DestroyRef {
-    _lView;
-    constructor(_lView) {
-        super();
-        this._lView = _lView;
-    }
-    onDestroy(callback) {
-        const lView = this._lView;
-        // Checking if `lView` is already destroyed before storing the `callback` enhances
-        // safety and integrity for applications.
-        // If `lView` is destroyed, we call the `callback` immediately to ensure that
-        // any necessary cleanup is handled gracefully.
-        // With this approach, we're providing better reliability in managing resources.
-        // One of the use cases is `takeUntilDestroyed`, which aims to replace `takeUntil`
-        // in existing applications. While `takeUntil` can be safely called once the view
-        // is destroyed — resulting in no errors and finalizing the subscription depending
-        // on whether a subject or replay subject is used, replacing it with
-        // `takeUntilDestroyed` introduces a breaking change, as it throws an error if
-        // the `lView` is destroyed (https://github.com/angular/angular/issues/54527).
-        if (isDestroyed(lView)) {
-            callback();
-            // We return a "noop" callback, which, when executed, does nothing because
-            // we haven't stored anything on the `lView`, and thus there's nothing to remove.
-            return () => { };
-        }
-        storeLViewOnDestroy(lView, callback);
-        return () => removeLViewOnDestroy(lView, callback);
-    }
-}
-function injectDestroyRef() {
-    return new NodeInjectorDestroyRef(getLView());
+function provideBrowserGlobalErrorListeners() {
+    return makeEnvironmentProviders([
+        provideEnvironmentInitializer(() => void inject(globalErrorListeners)),
+    ]);
 }
 
 /**
@@ -3843,5 +3891,5 @@ class ZoneAwareEffectScheduler {
     }
 }
 
-export { AFTER_RENDER_SEQUENCES_TO_ADD, CHILD_HEAD, CHILD_TAIL, CLEANUP, CONTAINER_HEADER_OFFSET, CONTEXT, ChangeDetectionScheduler, CheckNoChangesMode, DECLARATION_COMPONENT_VIEW, DECLARATION_LCONTAINER, DECLARATION_VIEW, DEHYDRATED_VIEWS, DestroyRef, EFFECTS, EFFECTS_TO_SCHEDULE, EMBEDDED_VIEW_INJECTOR, EMPTY_ARRAY, EMPTY_OBJ, ENVIRONMENT, ENVIRONMENT_INITIALIZER, EffectScheduler, EnvironmentInjector, ErrorHandler, FLAGS, HEADER_OFFSET, HOST, HYDRATION, ID, INJECTOR$1 as INJECTOR, INJECTOR as INJECTOR$1, INJECTOR_DEF_TYPES, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, InjectionToken, Injector, MATH_ML_NAMESPACE, MOVED_VIEWS, NATIVE, NEXT, NG_COMP_DEF, NG_DIR_DEF, NG_ELEMENT_ID, NG_FACTORY_DEF, NG_INJ_DEF, NG_MOD_DEF, NG_PIPE_DEF, NG_PROV_DEF, NodeInjectorDestroyRef, NullInjector, ON_DESTROY_HOOKS, PARENT, PREORDER_HOOK_FLAGS, PROVIDED_ZONELESS, PendingTasks, PendingTasksInternal, QUERIES, R3Injector, REACTIVE_TEMPLATE_CONSUMER, RENDERER, RuntimeError, SCHEDULE_IN_ROOT_ZONE, SVG_NAMESPACE, TVIEW, T_HOST, VIEW_REFS, ViewContext, XSS_SECURITY_URL, ZONELESS_ENABLED, ZONELESS_SCHEDULER_DISABLED, _global, addToArray, arrayEquals, arrayInsert2, arraySplice, assertComponentType, assertDefined, assertDirectiveDef, assertDomNode, assertElement, assertEqual, assertFirstCreatePass, assertFirstUpdatePass, assertFunction, assertGreaterThan, assertGreaterThanOrEqual, assertHasParent, assertInInjectionContext, assertIndexInDeclRange, assertIndexInExpandoRange, assertIndexInRange, assertInjectImplementationNotEqual, assertLContainer, assertLView, assertLessThan, assertNgModuleType, assertNodeInjector, assertNotDefined, assertNotEqual, assertNotInReactiveContext, assertNotReactive, assertNotSame, assertNumber, assertNumberInRange, assertOneOf, assertParentView, assertProjectionSlots, assertSame, assertString, assertTIcu, assertTNode, assertTNodeForLView, assertTNodeForTView, attachInjectFlag, concatStringsWithSpace, convertToBitFlags, createInjector, createInjectorWithoutInjectorInstances, debugStringifyTypeForError, decreaseElementDepthCount, deepForEach, defineInjectable, emitEffectCreatedEvent, emitInjectEvent, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, emitProviderConfiguredEvent, enterDI, enterSkipHydrationBlock, enterView, errorHandlerEnvironmentInitializer, fillProperties, flatten, formatRuntimeError, forwardRef, getBindingIndex, getBindingRoot, getBindingsEnabled, getClosureSafeProperty, getComponentDef, getComponentLViewByIndex, getConstant, getContextLView, getCurrentDirectiveDef, getCurrentDirectiveIndex, getCurrentParentTNode, getCurrentQueryIndex, getCurrentTNode, getCurrentTNodePlaceholderOk, getDirectiveDef, getElementDepthCount, getFactoryDef, getInjectableDef, getInjectorDef, getLView, getLViewParent, getNamespace, getNativeByIndex, getNativeByTNode, getNativeByTNodeOrNull, getNgModuleDef, getNullInjector, getOrCreateLViewCleanup, getOrCreateTViewCleanup, getPipeDef, getSelectedIndex, getSelectedTNode, getTNode, getTView, hasI18n, importProvidersFrom, increaseElementDepthCount, incrementBindingIndex, initNgDevMode, inject, injectRootLimpMode, internalImportProvidersFrom, isClassProvider, isComponentDef, isComponentHost, isContentQueryHost, isCreationMode, isCurrentTNodeParent, isDestroyed, isDirectiveHost, isEnvironmentProviders, isExhaustiveCheckNoChanges, isForwardRef, isInCheckNoChangesMode, isInI18nBlock, isInInjectionContext, isInSkipHydrationBlock, isInjectable, isLContainer, isLView, isProjectionTNode, isRefreshingViews, isRootView, isSignal, isSkipHydrationRootTNode, isStandalone, isTypeProvider, isWritableSignal, keyValueArrayGet, keyValueArrayIndexOf, keyValueArraySet, lastNodeWasCreated, leaveDI, leaveSkipHydrationBlock, leaveView, load, makeEnvironmentProviders, markAncestorsForTraversal, markViewForRefresh, newArray, nextBindingIndex, nextContextImpl, noop, provideEnvironmentInitializer, providerToFactory, removeFromArray, removeLViewOnDestroy, renderStringify, requiresRefreshOrTraversal, resetPreOrderHookFlags, resolveForwardRef, runInInjectionContext, runInInjectorProfilerContext, setBindingIndex, setBindingRootForHostBindings, setCurrentDirectiveIndex, setCurrentQueryIndex, setCurrentTNode, setCurrentTNodeAsNotParent, setInI18nBlock, setInjectImplementation, setInjectorProfiler, setInjectorProfilerContext, setIsInCheckNoChangesMode, setIsRefreshingViews, setSelectedIndex, signal, signalAsReadonlyFn, storeCleanupWithContext, storeLViewOnDestroy, stringify, stringifyForError, throwCyclicDependencyError, throwError, throwProviderNotFoundError, truncateMiddle, unwrapLView, unwrapRNode, updateAncestorTraversalFlagsOnAttach, viewAttachedToChangeDetector, viewAttachedToContainer, walkProviderTree, walkUpViews, wasLastNodeCreated, ɵunwrapWritableSignal, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinject, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView };
-//# sourceMappingURL=root_effect_scheduler-VSXfCzDX.mjs.map
+export { AFTER_RENDER_SEQUENCES_TO_ADD, CHILD_HEAD, CHILD_TAIL, CLEANUP, CONTAINER_HEADER_OFFSET, CONTEXT, ChangeDetectionScheduler, CheckNoChangesMode, DECLARATION_COMPONENT_VIEW, DECLARATION_LCONTAINER, DECLARATION_VIEW, DEHYDRATED_VIEWS, DOCUMENT, DestroyRef, EFFECTS, EFFECTS_TO_SCHEDULE, EMBEDDED_VIEW_INJECTOR, EMPTY_ARRAY, EMPTY_OBJ, ENVIRONMENT, ENVIRONMENT_INITIALIZER, EffectScheduler, EnvironmentInjector, ErrorHandler, FLAGS, HEADER_OFFSET, HOST, HYDRATION, ID, INJECTOR$1 as INJECTOR, INJECTOR as INJECTOR$1, INJECTOR_DEF_TYPES, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, InjectionToken, Injector, MATH_ML_NAMESPACE, MOVED_VIEWS, NATIVE, NEXT, NG_COMP_DEF, NG_DIR_DEF, NG_ELEMENT_ID, NG_FACTORY_DEF, NG_INJ_DEF, NG_MOD_DEF, NG_PIPE_DEF, NG_PROV_DEF, NodeInjectorDestroyRef, NullInjector, ON_DESTROY_HOOKS, PARENT, PREORDER_HOOK_FLAGS, PROVIDED_ZONELESS, PendingTasks, PendingTasksInternal, QUERIES, R3Injector, REACTIVE_TEMPLATE_CONSUMER, RENDERER, RuntimeError, SCHEDULE_IN_ROOT_ZONE, SVG_NAMESPACE, TVIEW, T_HOST, VIEW_REFS, ViewContext, XSS_SECURITY_URL, ZONELESS_ENABLED, ZONELESS_SCHEDULER_DISABLED, _global, addToArray, arrayEquals, arrayInsert2, arraySplice, assertComponentType, assertDefined, assertDirectiveDef, assertDomNode, assertElement, assertEqual, assertFirstCreatePass, assertFirstUpdatePass, assertFunction, assertGreaterThan, assertGreaterThanOrEqual, assertHasParent, assertInInjectionContext, assertIndexInDeclRange, assertIndexInExpandoRange, assertIndexInRange, assertInjectImplementationNotEqual, assertLContainer, assertLView, assertLessThan, assertNgModuleType, assertNodeInjector, assertNotDefined, assertNotEqual, assertNotInReactiveContext, assertNotReactive, assertNotSame, assertNumber, assertNumberInRange, assertOneOf, assertParentView, assertProjectionSlots, assertSame, assertString, assertTIcu, assertTNode, assertTNodeForLView, assertTNodeForTView, attachInjectFlag, concatStringsWithSpace, convertToBitFlags, createInjector, createInjectorWithoutInjectorInstances, debugStringifyTypeForError, decreaseElementDepthCount, deepForEach, defineInjectable, emitEffectCreatedEvent, emitInjectEvent, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, emitProviderConfiguredEvent, enterDI, enterSkipHydrationBlock, enterView, errorHandlerEnvironmentInitializer, fillProperties, flatten, formatRuntimeError, forwardRef, getBindingIndex, getBindingRoot, getBindingsEnabled, getClosureSafeProperty, getComponentDef, getComponentLViewByIndex, getConstant, getContextLView, getCurrentDirectiveDef, getCurrentDirectiveIndex, getCurrentParentTNode, getCurrentQueryIndex, getCurrentTNode, getCurrentTNodePlaceholderOk, getDirectiveDef, getElementDepthCount, getFactoryDef, getInjectableDef, getInjectorDef, getLView, getLViewParent, getNamespace, getNativeByIndex, getNativeByTNode, getNativeByTNodeOrNull, getNgModuleDef, getNullInjector, getOrCreateLViewCleanup, getOrCreateTViewCleanup, getPipeDef, getSelectedIndex, getSelectedTNode, getTNode, getTView, hasI18n, importProvidersFrom, increaseElementDepthCount, incrementBindingIndex, initNgDevMode, inject, injectRootLimpMode, internalImportProvidersFrom, isClassProvider, isComponentDef, isComponentHost, isContentQueryHost, isCreationMode, isCurrentTNodeParent, isDestroyed, isDirectiveHost, isEnvironmentProviders, isExhaustiveCheckNoChanges, isForwardRef, isInCheckNoChangesMode, isInI18nBlock, isInInjectionContext, isInSkipHydrationBlock, isInjectable, isLContainer, isLView, isProjectionTNode, isRefreshingViews, isRootView, isSignal, isSkipHydrationRootTNode, isStandalone, isTypeProvider, isWritableSignal, keyValueArrayGet, keyValueArrayIndexOf, keyValueArraySet, lastNodeWasCreated, leaveDI, leaveSkipHydrationBlock, leaveView, load, makeEnvironmentProviders, markAncestorsForTraversal, markViewForRefresh, newArray, nextBindingIndex, nextContextImpl, noop, provideBrowserGlobalErrorListeners, provideEnvironmentInitializer, providerToFactory, removeFromArray, removeLViewOnDestroy, renderStringify, requiresRefreshOrTraversal, resetPreOrderHookFlags, resolveForwardRef, runInInjectionContext, runInInjectorProfilerContext, setBindingIndex, setBindingRootForHostBindings, setCurrentDirectiveIndex, setCurrentQueryIndex, setCurrentTNode, setCurrentTNodeAsNotParent, setInI18nBlock, setInjectImplementation, setInjectorProfiler, setInjectorProfilerContext, setIsInCheckNoChangesMode, setIsRefreshingViews, setSelectedIndex, signal, signalAsReadonlyFn, storeCleanupWithContext, storeLViewOnDestroy, stringify, stringifyForError, throwCyclicDependencyError, throwError, throwProviderNotFoundError, truncateMiddle, unwrapLView, unwrapRNode, updateAncestorTraversalFlagsOnAttach, viewAttachedToChangeDetector, viewAttachedToContainer, walkProviderTree, walkUpViews, wasLastNodeCreated, ɵunwrapWritableSignal, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinject, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView };
+//# sourceMappingURL=root_effect_scheduler-C-LeD3DT.mjs.map
