@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.6+sha-aaf07d8
+ * @license Angular v19.2.6+sha-5cd8052
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3159,6 +3159,8 @@ class InternalNavigationTransition {
             this.finishedReject = reject;
             this.finishedResolve = resolve;
         });
+        // All rejections are handled.
+        this.finished.catch(() => { });
     }
 }
 /**
