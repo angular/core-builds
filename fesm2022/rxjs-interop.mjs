@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.7+sha-f838726
+ * @license Angular v20.0.0-next.7+sha-2f3f8d6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -240,7 +240,7 @@ function makeToSignalEqual(userEquality = Object.is) {
  *
  * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
  *
- * @experimental
+ * @developerPreview
  */
 function pendingUntilEvent(injector) {
     if (injector === undefined) {
