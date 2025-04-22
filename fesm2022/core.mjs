@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.7+sha-ea4a211
+ * @license Angular v19.2.7+sha-adac95c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1666,6 +1666,8 @@ function isStandalone(type) {
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
  * referenced in `@Component` in a component injector.
+ *
+ * @publicApi
  */
 function makeEnvironmentProviders(providers) {
     return {
@@ -17911,7 +17913,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.7+sha-ea4a211']
+                ? ['ng-version', '19.2.7+sha-adac95c']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34651,7 +34653,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.7+sha-ea4a211');
+const VERSION = new Version('19.2.7+sha-adac95c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

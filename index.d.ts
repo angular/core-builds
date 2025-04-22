@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.7+sha-ea4a211
+ * @license Angular v19.2.7+sha-adac95c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3098,6 +3098,8 @@ declare const NG_INJ_DEF: string;
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
  * referenced in `@Component` in a component injector.
+ *
+ * @publicApi
  */
 declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 /**
