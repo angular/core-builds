@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.7+sha-763e3ca
+ * @license Angular v19.2.7+sha-5555e9f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3241,7 +3241,7 @@ declare abstract class EnvironmentInjector implements Injector {
 }
 
 /**
- * A schema definition associated with an NgModule.
+ * A schema definition associated with a component or an NgModule.
  *
  * @see {@link NgModule}
  * @see {@link CUSTOM_ELEMENTS_SCHEMA}
