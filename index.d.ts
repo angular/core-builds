@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.7+sha-2c463a4
+ * @license Angular v20.0.0-next.7+sha-00dff8b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -325,6 +325,8 @@ declare const model: ModelFunction;
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
  * referenced in `@Component` in a component injector.
+ *
+ * @publicApi
  */
 declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 /**
