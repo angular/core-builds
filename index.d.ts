@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.7+sha-adac95c
+ * @license Angular v19.2.7+sha-3824519
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7081,7 +7081,7 @@ interface ComponentDecorator {
      *
      * ### Setting component outputs
      *
-     * The following example shows two event emitters that emit on an interval. One
+     * The following example shows two output function that emit on an interval. One
      * emits an output every second, while the other emits every five seconds.
      *
      * {@example core/ts/metadata/directives.ts region='component-output-interval'}
