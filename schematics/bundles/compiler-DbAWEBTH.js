@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.7+sha-cebb9d2
+ * @license Angular v20.0.0-next.7+sha-1b8e7ab
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -895,6 +895,7 @@ exports.BinaryOperator = void 0;
     BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
     BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
+    BinaryOperator[BinaryOperator["In"] = 19] = "In";
 })(exports.BinaryOperator || (exports.BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -3681,6 +3682,9 @@ class AbstractEmitterVisitor {
                 break;
             case exports.BinaryOperator.NullishCoalesce:
                 opStr = '??';
+                break;
+            case exports.BinaryOperator.In:
+                opStr = 'in';
                 break;
             default:
                 throw new Error(`Unknown operator ${ast.operator}`);
@@ -12038,6 +12042,7 @@ const BINARY_OPERATORS = new Map([
     ['??', exports.BinaryOperator.NullishCoalesce],
     ['||', exports.BinaryOperator.Or],
     ['+', exports.BinaryOperator.Plus],
+    ['in', exports.BinaryOperator.In],
 ]);
 function namespaceForKey(namespacePrefixKey) {
     const NAMESPACES = new Map([
@@ -18102,6 +18107,7 @@ const KEYWORDS = [
     'this',
     'typeof',
     'void',
+    'in',
 ];
 class Lexer {
     tokenize(text) {
@@ -18168,6 +18174,9 @@ class Token {
     }
     isKeywordVoid() {
         return this.type === TokenType.Keyword && this.strValue === 'void';
+    }
+    isKeywordIn() {
+        return this.type === TokenType.Keyword && this.strValue === 'in';
     }
     isError() {
         return this.type === TokenType.Error;
@@ -19212,16 +19221,17 @@ class _ParseAST {
         return result;
     }
     parseRelational() {
-        // '<', '>', '<=', '>='
+        // '<', '>', '<=', '>=', 'in'
         const start = this.inputIndex;
         let result = this.parseAdditive();
-        while (this.next.type == TokenType.Operator) {
+        while (this.next.type == TokenType.Operator || this.next.isKeywordIn) {
             const operator = this.next.strValue;
             switch (operator) {
                 case '<':
                 case '>':
                 case '<=':
                 case '>=':
+                case 'in':
                     this.advance();
                     const right = this.parseAdditive();
                     result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
@@ -19383,6 +19393,10 @@ class _ParseAST {
         else if (this.next.isKeywordFalse()) {
             this.advance();
             return new LiteralPrimitive(this.span(start), this.sourceSpan(start), false);
+        }
+        else if (this.next.isKeywordIn()) {
+            this.advance();
+            return new LiteralPrimitive(this.span(start), this.sourceSpan(start), 'in');
         }
         else if (this.next.isKeywordThis()) {
             this.advance();
@@ -32263,7 +32277,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.7+sha-cebb9d2');
+new Version('20.0.0-next.7+sha-1b8e7ab');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

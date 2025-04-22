@@ -1,20 +1,20 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.7+sha-cebb9d2
+ * @license Angular v20.0.0-next.7+sha-1b8e7ab
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('./compiler-BaCbbux6.js');
+require('./compiler-DbAWEBTH.js');
 var ts = require('typescript');
-var checker = require('./checker-_f5wM7PH.js');
+var checker = require('./checker-D2F6kcQ-.js');
 require('os');
 var assert = require('assert');
-var index = require('./index-YGZjMC-7.js');
-var project_paths = require('./project_paths-7VKknjLv.js');
+var index = require('./index-CqPl3bda.js');
+var project_paths = require('./project_paths-BJSSkXdx.js');
 var leading_space = require('./leading_space-D9nQ8UQC.js');
-require('./index-BxV8KgQe.js');
+require('./index-Buqwvw3x.js');
 require('path');
 
 /**
@@ -158,6 +158,7 @@ var BinaryOperator;
     BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
     BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
+    BinaryOperator[BinaryOperator["In"] = 19] = "In";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {

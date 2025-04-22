@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.7+sha-cebb9d2
+ * @license Angular v20.0.0-next.7+sha-1b8e7ab
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-BaCbbux6.js');
+var compiler = require('./compiler-DbAWEBTH.js');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -981,7 +981,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-_f5wM7PH.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-D2F6kcQ-.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -6074,6 +6074,7 @@ const BINARY_OPERATORS$1 = new Map([
     [compiler.BinaryOperator.Plus, '+'],
     [compiler.BinaryOperator.NullishCoalesce, '??'],
     [compiler.BinaryOperator.Exponentiation, '**'],
+    [compiler.BinaryOperator.In, 'in'],
 ]);
 class ExpressionTranslatorVisitor {
     factory;
@@ -6798,6 +6799,7 @@ const BINARY_OPERATORS = {
     '||': ts.SyntaxKind.BarBarToken,
     '+': ts.SyntaxKind.PlusToken,
     '??': ts.SyntaxKind.QuestionQuestionToken,
+    'in': ts.SyntaxKind.InKeyword,
 };
 const VAR_TYPES = {
     'const': ts.NodeFlags.Const,
@@ -12403,6 +12405,7 @@ const BINARY_OPS = new Map([
     ['&', ts.SyntaxKind.AmpersandToken],
     ['|', ts.SyntaxKind.BarToken],
     ['??', ts.SyntaxKind.QuestionQuestionToken],
+    ['in', ts.SyntaxKind.InKeyword],
 ]);
 /**
  * Convert an `AST` to TypeScript code directly, without going through an intermediate `Expression`
