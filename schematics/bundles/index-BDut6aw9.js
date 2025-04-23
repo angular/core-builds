@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.7+sha-1b8e7ab
+ * @license Angular v20.0.0-next.7+sha-c990265
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -892,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -910,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1005,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1421,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1456,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1507,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1540,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1591,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-1b8e7ab'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -2582,6 +2582,7 @@ class DtsMetadataReader {
             name,
             nameExpr: null,
             isStandalone,
+            isPure: null, // The DTS has no idea about that
             decorator: null,
             isExplicitlyDeferred: false,
         };
@@ -10821,6 +10822,7 @@ class PipeDecoratorHandler {
             isStandalone: analysis.meta.isStandalone,
             decorator: analysis.decorator,
             isExplicitlyDeferred: false,
+            isPure: analysis.meta.pure,
         });
         this.injectableRegistry.registerInjectable(node, {
             ctorDeps: analysis.meta.deps,
@@ -10870,7 +10872,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.0.0-next.7+sha-1b8e7ab');
+new compiler.Version('20.0.0-next.7+sha-c990265');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -12634,6 +12636,8 @@ class PipeExtractor extends ClassExtractor {
             pipeName: this.metadata.name,
             entryType: EntryType.Pipe,
             isStandalone: this.metadata.isStandalone,
+            usage: extractPipeSyntax(this.metadata, this.declaration),
+            isPure: this.metadata.isPure,
         };
     }
 }
@@ -12678,6 +12682,21 @@ function extractClass(classDeclaration, metadataReader, typeChecker) {
 function extractInterface(declaration, typeChecker) {
     const extractor = new ClassExtractor(declaration, typeChecker);
     return extractor.extract();
+}
+function extractPipeSyntax(metadata, classDeclaration) {
+    const transformParams = classDeclaration.members.find((member) => {
+        return (ts.isMethodDeclaration(member) &&
+            member.name &&
+            ts.isIdentifier(member.name) &&
+            member.name.getText() === 'transform');
+    });
+    let paramNames = transformParams.parameters
+        // value is the first argument, it's already referenced before the pipe
+        .slice(1)
+        .map((param) => {
+        return param.name.getText();
+    });
+    return `{{ value_expression | ${metadata.name}${paramNames.length ? ':' + paramNames.join(':') : ''} }}`;
 }
 
 /** Name of the tag indicating that an object literal should be shown as an enum in docs. */
@@ -18780,7 +18799,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.7+sha-1b8e7ab` usually means that core is at head so it supports
+    // A version of `20.0.0-next.7+sha-c990265` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
