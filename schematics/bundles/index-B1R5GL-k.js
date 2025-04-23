@@ -1,15 +1,15 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.7+sha-c990265
+ * @license Angular v20.0.0-next.7+sha-5efc692
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-DbAWEBTH.js');
+var compiler = require('./compiler-BEZ6sUQS.js');
 var ts = require('typescript');
 var p = require('path');
-var checker = require('./checker-D2F6kcQ-.js');
+var checker = require('./checker-DV96LHWz.js');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -892,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -910,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1005,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1421,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1456,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1507,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1540,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1591,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-c990265'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.7+sha-5efc692'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -9472,6 +9472,7 @@ class ComponentDecoratorHandler {
                 }
             }
         }
+        // TODO(crisbeto): implement for selectorless.
         const binder = new compiler.R3TargetBinder(matcher);
         const boundTemplate = binder.bind({ template: analysis.template.diagNodes });
         context.addComponent({
@@ -9494,6 +9495,7 @@ class ComponentDecoratorHandler {
             // Don't type-check components that had errors in their scopes, unless requested.
             return;
         }
+        // TODO(crisbeto): implement for selectorless.
         const binder = new compiler.R3TargetBinder(scope.matcher);
         const templateContext = {
             nodes: meta.template.diagNodes,
@@ -10296,6 +10298,7 @@ function createTargetBinder(dependencies) {
             matcher.addSelectables(compiler.CssSelector.parse(dep.selector), [dep]);
         }
     }
+    // TODO(crisbeto): implement for selectorless.
     return new compiler.R3TargetBinder(matcher);
 }
 /**
@@ -10872,7 +10875,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.0.0-next.7+sha-c990265');
+new compiler.Version('20.0.0-next.7+sha-5efc692');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -12161,11 +12164,7 @@ class FunctionExtractor {
         // TODO: is there any real situation in which the signature would not be available here?
         //     Is void a better type?
         const signature = this.typeChecker.getSignatureFromDeclaration(this.exportDeclaration);
-        const returnType = signature
-            ? this.typeChecker.typeToString(this.typeChecker.getReturnTypeOfSignature(signature), undefined, 
-            // This ensures that e.g. `T | undefined` is not reduced to `T`.
-            ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation)
-            : 'unknown';
+        const returnType = signature ? extractReturnType(signature, this.typeChecker) : 'unknown';
         const implementation = findImplementationOfFunction(this.exportDeclaration, this.typeChecker) ??
             this.exportDeclaration;
         const type = this.typeChecker.getTypeAtLocation(this.exportDeclaration);
@@ -12249,10 +12248,17 @@ function extractCallSignatures(name, typeChecker, type) {
         jsdocTags: extractJsDocTags(decl),
         params: extractAllParams(decl.parameters, typeChecker),
         rawComment: extractRawJsDoc(decl),
-        returnType: typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature), undefined, 
-        // This ensures that e.g. `T | undefined` is not reduced to `T`.
-        ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation),
+        returnType: extractReturnType(signature, typeChecker),
     }));
+}
+function extractReturnType(signature, typeChecker) {
+    // Handling Type Predicates
+    if (signature?.declaration?.type && ts.isTypePredicateNode(signature.declaration.type)) {
+        return signature.declaration.type.getText();
+    }
+    return typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature), undefined, 
+    // This ensures that e.g. `T | undefined` is not reduced to `T`.
+    ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation);
 }
 /** Finds the implementation of the given function declaration overload signature. */
 function findImplementationOfFunction(node, typeChecker) {
@@ -14203,6 +14209,9 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
     }
     /** Creates an identifier for a template element or template node. */
     elementOrTemplateToIdentifier(node) {
+        if (node instanceof compiler.Component || node instanceof compiler.Directive) {
+            throw new Error('TODO');
+        }
         // If this node has already been seen, return the cached result.
         if (this.elementAndTemplateIdentifierCache.has(node)) {
             return this.elementAndTemplateIdentifierCache.get(node);
@@ -14280,7 +14289,10 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
             if (refTarget) {
                 let node = null;
                 let directive = null;
-                if (refTarget instanceof compiler.Element || refTarget instanceof compiler.Template) {
+                if (refTarget instanceof compiler.Element ||
+                    refTarget instanceof compiler.Template ||
+                    refTarget instanceof compiler.Component ||
+                    refTarget instanceof compiler.Directive) {
                     node = this.elementOrTemplateToIdentifier(refTarget);
                 }
                 else {
@@ -18799,7 +18811,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.7+sha-c990265` usually means that core is at head so it supports
+    // A version of `20.0.0-next.7+sha-5efc692` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
