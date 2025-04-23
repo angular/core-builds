@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-57794f0
+ * @license Angular v20.0.0-next.8+sha-4bcf183
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -84,44 +84,29 @@ interface OutputOptions {
 declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
 
 /**
- * Status of a `Resource`.
+ * String value capturing the status of a `Resource`.
+ *
+ * Possible statuses are:
+ *
+ * `idle` - The resource has no valid request and will not perform any loading. `value()` will be
+ * `undefined`.
+ *
+ * `loading` - The resource is currently loading a new value as a result of a change in its reactive
+ * dependencies. `value()` will be `undefined`.
+ *
+ * `reloading` - The resource is currently reloading a fresh value for the same reactive
+ * dependencies. `value()` will continue to return the previously fetched value during the reloading
+ * operation.
+ *
+ * `error` - Loading failed with an error. `value()` will be `undefined`.
+ *
+ * `resolved` - Loading has completed and the resource has the value returned from the loader.
+ *
+ * `local` - The resource's value was set locally via `.set()` or `.update()`.
  *
  * @experimental
  */
-declare enum ResourceStatus {
-    /**
-     * The resource has no valid request and will not perform any loading.
-     *
-     * `value()` will be `undefined`.
-     */
-    Idle = 0,
-    /**
-     * Loading failed with an error.
-     *
-     * `value()` will be `undefined`.
-     */
-    Error = 1,
-    /**
-     * The resource is currently loading a new value as a result of a change in its `request`.
-     *
-     * `value()` will be `undefined`.
-     */
-    Loading = 2,
-    /**
-     * The resource is currently reloading a fresh value for the same request.
-     *
-     * `value()` will continue to return the previously fetched value during the reloading operation.
-     */
-    Reloading = 3,
-    /**
-     * Loading has completed and the resource has the value returned from the loader.
-     */
-    Resolved = 4,
-    /**
-     * The resource's value was set locally via `.set()` or `.update()`.
-     */
-    Local = 5
-}
+type ResourceStatus = 'idle' | 'error' | 'loading' | 'reloading' | 'resolved' | 'local';
 /**
  * A Resource is an asynchronous dependency (for example, the results of an API call) that is
  * managed and delivered through signals.
@@ -204,7 +189,7 @@ interface ResourceRef<T> extends WritableResource<T> {
  * @experimental
  */
 interface ResourceLoaderParams<R> {
-    request: Exclude<NoInfer<R>, undefined>;
+    params: NoInfer<Exclude<R, undefined>>;
     abortSignal: AbortSignal;
     previous: {
         status: ResourceStatus;
@@ -234,7 +219,7 @@ interface BaseResourceOptions<T, R> {
      *
      * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
      */
-    request?: () => R;
+    params?: () => R;
     /**
      * The value which will be returned from the resource when a server value is unavailable, such as
      * when the resource is still loading, or in an error state.
@@ -293,5 +278,5 @@ type ResourceStreamItem<T> = {
     error: unknown;
 };
 
-export { OutputEmitterRef, ResourceStatus, getOutputDestroyRef, output };
-export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceRef, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
+export { OutputEmitterRef, getOutputDestroyRef, output };
+export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceRef, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };

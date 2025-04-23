@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-57794f0
+ * @license Angular v20.0.0-next.8+sha-4bcf183
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-BZMWiScf.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-DhKtse7l.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-5VZgOAGr.mjs';
 import './primitives/di.mjs';
 import './signal-B6pMq7KS.mjs';
 import '@angular/core/primitives/di';
@@ -303,7 +303,12 @@ function rxResource(opts) {
                 resolve?.(stream);
                 resolve = undefined;
             }
-            sub = opts.loader(params).subscribe({
+            // TODO(alxhub): remove after g3 updated to rename loader -> stream
+            const streamFn = opts.stream ?? opts.loader;
+            if (streamFn === undefined) {
+                throw new Error(`Must provide \`stream\` option.`);
+            }
+            sub = streamFn(params).subscribe({
                 next: (value) => send({ value }),
                 error: (error) => send({ error }),
                 complete: () => {

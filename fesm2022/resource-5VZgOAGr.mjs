@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-57794f0
+ * @license Angular v20.0.0-next.8+sha-4bcf183
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -283,47 +283,6 @@ function createRootEffect(fn, scheduler, notifier) {
     return node;
 }
 
-/**
- * Status of a `Resource`.
- *
- * @experimental
- */
-var ResourceStatus;
-(function (ResourceStatus) {
-    /**
-     * The resource has no valid request and will not perform any loading.
-     *
-     * `value()` will be `undefined`.
-     */
-    ResourceStatus[ResourceStatus["Idle"] = 0] = "Idle";
-    /**
-     * Loading failed with an error.
-     *
-     * `value()` will be `undefined`.
-     */
-    ResourceStatus[ResourceStatus["Error"] = 1] = "Error";
-    /**
-     * The resource is currently loading a new value as a result of a change in its `request`.
-     *
-     * `value()` will be `undefined`.
-     */
-    ResourceStatus[ResourceStatus["Loading"] = 2] = "Loading";
-    /**
-     * The resource is currently reloading a fresh value for the same request.
-     *
-     * `value()` will continue to return the previously fetched value during the reloading operation.
-     */
-    ResourceStatus[ResourceStatus["Reloading"] = 3] = "Reloading";
-    /**
-     * Loading has completed and the resource has the value returned from the loader.
-     */
-    ResourceStatus[ResourceStatus["Resolved"] = 4] = "Resolved";
-    /**
-     * The resource's value was set locally via `.set()` or `.update()`.
-     */
-    ResourceStatus[ResourceStatus["Local"] = 5] = "Local";
-})(ResourceStatus || (ResourceStatus = {}));
-
 const identityFn = (v) => v;
 function linkedSignal(optionsOrComputation, options) {
     if (typeof optionsOrComputation === 'function') {
@@ -349,8 +308,9 @@ function upgradeLinkedSignalGetter(getter) {
 
 function resource(options) {
     options?.injector || assertInInjectionContext(resource);
-    const request = (options.request ?? (() => null));
-    return new ResourceImpl(request, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
+    const oldNameForParams = options.request;
+    const params = (options.params ?? oldNameForParams ?? (() => null));
+    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -366,7 +326,7 @@ class BaseWritableResource {
     update(updateFn) {
         this.set(updateFn(untracked(this.value)));
     }
-    isLoading = computed(() => this.status() === ResourceStatus.Loading || this.status() === ResourceStatus.Reloading);
+    isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading');
     hasValue() {
         return this.value() !== undefined;
     }
@@ -418,12 +378,12 @@ class ResourceImpl extends BaseWritableResource {
             source: this.extRequest,
             // Compute the state of the resource given a change in status.
             computation: (extRequest, previous) => {
-                const status = extRequest.request === undefined ? ResourceStatus.Idle : ResourceStatus.Loading;
+                const status = extRequest.request === undefined ? 'idle' : 'loading';
                 if (!previous) {
                     return {
                         extRequest,
                         status,
-                        previousStatus: ResourceStatus.Idle,
+                        previousStatus: 'idle',
                         stream: undefined,
                     };
                 }
@@ -462,15 +422,14 @@ class ResourceImpl extends BaseWritableResource {
         }
         const current = untracked(this.value);
         const state = untracked(this.state);
-        if (state.status === ResourceStatus.Local &&
-            (this.equal ? this.equal(current, value) : current === value)) {
+        if (state.status === 'local' && (this.equal ? this.equal(current, value) : current === value)) {
             return;
         }
         // Enter Local state with the user-defined value.
         this.state.set({
             extRequest: state.extRequest,
-            status: ResourceStatus.Local,
-            previousStatus: ResourceStatus.Local,
+            status: 'local',
+            previousStatus: 'local',
             stream: signal({ value }),
         });
         // We're departing from whatever state the resource was in previously, so cancel any in-progress
@@ -480,7 +439,7 @@ class ResourceImpl extends BaseWritableResource {
     reload() {
         // We don't want to restart in-progress loads.
         const { status } = untracked(this.state);
-        if (status === ResourceStatus.Idle || status === ResourceStatus.Loading) {
+        if (status === 'idle' || status === 'loading') {
             return false;
         }
         // Increment the request reload to trigger the `state` linked signal to switch us to `Reload`
@@ -494,8 +453,8 @@ class ResourceImpl extends BaseWritableResource {
         // Destroyed resources enter Idle state.
         this.state.set({
             extRequest: { request: undefined, reload: 0 },
-            status: ResourceStatus.Idle,
-            previousStatus: ResourceStatus.Idle,
+            status: 'idle',
+            previousStatus: 'idle',
             stream: undefined,
         });
     }
@@ -508,7 +467,7 @@ class ResourceImpl extends BaseWritableResource {
             // Nothing to load (and we should already be in a non-loading state).
             return;
         }
-        else if (currentStatus !== ResourceStatus.Loading) {
+        else if (currentStatus !== 'loading') {
             // We're not in a loading or reloading state, so this loading request is stale.
             return;
         }
@@ -532,6 +491,8 @@ class ResourceImpl extends BaseWritableResource {
             // which side of the `await` they are.
             const stream = await untracked(() => {
                 return this.loaderFn({
+                    params: extRequest.request,
+                    // TODO(alxhub): cleanup after g3 removal of `request` alias.
                     request: extRequest.request,
                     abortSignal,
                     previous: {
@@ -546,8 +507,8 @@ class ResourceImpl extends BaseWritableResource {
             }
             this.state.set({
                 extRequest,
-                status: ResourceStatus.Resolved,
-                previousStatus: ResourceStatus.Resolved,
+                status: 'resolved',
+                previousStatus: 'resolved',
                 stream,
             });
         }
@@ -557,8 +518,8 @@ class ResourceImpl extends BaseWritableResource {
             }
             this.state.set({
                 extRequest,
-                status: ResourceStatus.Resolved,
-                previousStatus: ResourceStatus.Error,
+                status: 'resolved',
+                previousStatus: 'error',
                 stream: signal({ error: err }),
             });
         }
@@ -603,10 +564,10 @@ function isStreamingResourceOptions(options) {
  */
 function projectStatusOfState(state) {
     switch (state.status) {
-        case ResourceStatus.Loading:
-            return state.extRequest.reload === 0 ? ResourceStatus.Loading : ResourceStatus.Reloading;
-        case ResourceStatus.Resolved:
-            return isResolved(untracked(state.stream)) ? ResourceStatus.Resolved : ResourceStatus.Error;
+        case 'loading':
+            return state.extRequest.reload === 0 ? 'loading' : 'reloading';
+        case 'resolved':
+            return isResolved(untracked(state.stream)) ? 'resolved' : 'error';
         default:
             return state.status;
     }
@@ -615,5 +576,5 @@ function isResolved(state) {
     return state.error === undefined;
 }
 
-export { OutputEmitterRef, ResourceImpl, ResourceStatus, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-DhKtse7l.mjs.map
+export { OutputEmitterRef, ResourceImpl, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
+//# sourceMappingURL=resource-5VZgOAGr.mjs.map

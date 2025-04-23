@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.8+sha-57794f0
+ * @license Angular v20.0.0-next.8+sha-4bcf183
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { OutputRef, DestroyRef, Signal, Injector } from '../chrome_dev_tools_performance.d-qv7drdAl.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-KjtSQajV.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-B58KU5QT.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { ValueEqualityFn } from '../graph.d-BcIOep_B.js';
 import '../event_dispatcher.d-DlbccpYq.js';
@@ -161,7 +161,7 @@ declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunc
  * @experimental
  */
 interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
-    loader: (params: ResourceLoaderParams<R>) => Observable<T>;
+    stream: (params: ResourceLoaderParams<R>) => Observable<T>;
 }
 /**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
