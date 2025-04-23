@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.2.7+sha-7d29809
+ * @license Angular v19.2.7+sha-beba3c7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var index = require('./index-B7BZvtZ5.js');
+var index = require('./index-CAJ-Rm56.js');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');

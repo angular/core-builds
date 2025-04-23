@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.7+sha-7d29809
+ * @license Angular v19.2.7+sha-beba3c7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1007,7 +1007,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1025,7 +1025,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1120,7 +1120,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1536,7 +1536,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1571,7 +1571,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1622,7 +1622,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1655,7 +1655,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1706,7 +1706,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.7+sha-7d29809'));
+    definitionMap.set('version', checker.literal('19.2.7+sha-beba3c7'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -10730,7 +10730,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.2.7+sha-7d29809');
+new checker.Version('19.2.7+sha-beba3c7');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -12019,11 +12019,7 @@ class FunctionExtractor {
         // TODO: is there any real situation in which the signature would not be available here?
         //     Is void a better type?
         const signature = this.typeChecker.getSignatureFromDeclaration(this.exportDeclaration);
-        const returnType = signature
-            ? this.typeChecker.typeToString(this.typeChecker.getReturnTypeOfSignature(signature), undefined, 
-            // This ensures that e.g. `T | undefined` is not reduced to `T`.
-            ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation)
-            : 'unknown';
+        const returnType = signature ? extractReturnType(signature, this.typeChecker) : 'unknown';
         const implementation = findImplementationOfFunction(this.exportDeclaration, this.typeChecker) ??
             this.exportDeclaration;
         const type = this.typeChecker.getTypeAtLocation(this.exportDeclaration);
@@ -12107,10 +12103,17 @@ function extractCallSignatures(name, typeChecker, type) {
         jsdocTags: extractJsDocTags(decl),
         params: extractAllParams(decl.parameters, typeChecker),
         rawComment: extractRawJsDoc(decl),
-        returnType: typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature), undefined, 
-        // This ensures that e.g. `T | undefined` is not reduced to `T`.
-        ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation),
+        returnType: extractReturnType(signature, typeChecker),
     }));
+}
+function extractReturnType(signature, typeChecker) {
+    // Handling Type Predicates
+    if (signature?.declaration?.type && ts.isTypePredicateNode(signature.declaration.type)) {
+        return signature.declaration.type.getText();
+    }
+    return typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature), undefined, 
+    // This ensures that e.g. `T | undefined` is not reduced to `T`.
+    ts.TypeFormatFlags.NoTypeReduction | ts.TypeFormatFlags.NoTruncation);
 }
 /** Finds the implementation of the given function declaration overload signature. */
 function findImplementationOfFunction(node, typeChecker) {
@@ -18582,7 +18585,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.7+sha-7d29809` usually means that core is at head so it supports
+    // A version of `19.2.7+sha-beba3c7` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
