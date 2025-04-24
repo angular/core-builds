@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-e6c14f9
+ * @license Angular v20.0.0-next.8+sha-c2987d8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3991,6 +3991,11 @@ interface LViewEnvironment {
     sanitizer: Sanitizer | null;
     /** Scheduler for change detection to notify when application state changes. */
     changeDetectionScheduler: ChangeDetectionScheduler | null;
+    /**
+     * Whether `ng-reflect-*` attributes should be produced in dev mode
+     * (always disabled in prod mode).
+     */
+    ngReflect: boolean;
 }
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 declare const enum LViewFlags {
