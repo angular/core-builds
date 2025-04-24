@@ -1,15 +1,15 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.8+sha-c2987d8
+ * @license Angular v20.0.0-next.8+sha-e711f99
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-BEZ6sUQS.js');
+var compiler = require('./compiler-D0Vc0aFl.js');
 var ts = require('typescript');
 var p = require('path');
-var checker = require('./checker-DV96LHWz.js');
+var checker = require('./checker-PhgsLsdk.js');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -892,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -910,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1005,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1421,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1456,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1507,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1540,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1591,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-c2987d8'));
+    definitionMap.set('version', compiler.literal('20.0.0-next.8+sha-e711f99'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -7917,6 +7917,7 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
         escapedString,
         enableBlockSyntax: options.enableBlockSyntax,
         enableLetSyntax: options.enableLetSyntax,
+        enableSelectorless: options.enableSelectorless,
     };
     const parsedTemplate = compiler.parseTemplate(sourceStr, sourceMapUrl ?? '', {
         ...commonParseOptions,
@@ -8880,7 +8881,8 @@ class ComponentDecoratorHandler {
     enableHmr;
     implicitStandaloneValue;
     typeCheckHostBindings;
-    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr, implicitStandaloneValue, typeCheckHostBindings) {
+    enableSelectorless;
+    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr, implicitStandaloneValue, typeCheckHostBindings, enableSelectorless) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -8925,12 +8927,14 @@ class ComponentDecoratorHandler {
         this.enableHmr = enableHmr;
         this.implicitStandaloneValue = implicitStandaloneValue;
         this.typeCheckHostBindings = typeCheckHostBindings;
+        this.enableSelectorless = enableSelectorless;
         this.extractTemplateOptions = {
             enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
             i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
             usePoisonedData: this.usePoisonedData,
             enableBlockSyntax: this.enableBlockSyntax,
             enableLetSyntax: this.enableLetSyntax,
+            enableSelectorless: this.enableSelectorless,
             preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
         };
         // Dependencies can't be deferred during HMR, because the HMR update module can't have
@@ -9199,6 +9203,7 @@ class ComponentDecoratorHandler {
                     usePoisonedData: this.usePoisonedData,
                     enableBlockSyntax: this.enableBlockSyntax,
                     enableLetSyntax: this.enableLetSyntax,
+                    enableSelectorless: this.enableSelectorless,
                     preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
                 }, this.compilationMode);
                 if (this.compilationMode === checker.CompilationMode.LOCAL &&
@@ -10875,7 +10880,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.0.0-next.8+sha-c2987d8');
+new compiler.Version('20.0.0-next.8+sha-e711f99');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -18811,7 +18816,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.0.0-next.8+sha-c2987d8` usually means that core is at head so it supports
+    // A version of `20.0.0-next.8+sha-e711f99` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -18926,6 +18931,7 @@ class NgCompiler {
     angularCoreVersion;
     enableHmr;
     implicitStandaloneValue;
+    enableSelectorless;
     /**
      * `NgCompiler` can be reused for multiple compilations (for resource-only changes), and each
      * new compilation uses a fresh `PerfRecorder`. Thus, classes created with a lifespan of the
@@ -18970,6 +18976,7 @@ class NgCompiler {
         // TODO(crisbeto): remove this flag and base `enableBlockSyntax` on the `angularCoreVersion`.
         this.enableBlockSyntax = options['_enableBlockSyntax'] ?? true;
         this.enableLetSyntax = options['_enableLetSyntax'] ?? true;
+        this.enableSelectorless = options['_enableSelectorless'] ?? false;
         // Standalone by default is enabled since v19. We need to toggle it here,
         // because the language service extension may be running with the latest
         // version of the compiler against an older version of Angular.
@@ -19462,6 +19469,7 @@ class NgCompiler {
                 unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
                 checkTwoWayBoundEvents,
+                selectorlessEnabled: this.enableSelectorless,
             };
         }
         else {
@@ -19496,6 +19504,7 @@ class NgCompiler {
                 unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
                 checkTwoWayBoundEvents,
+                selectorlessEnabled: this.enableSelectorless,
             };
         }
         // Apply explicitly configured strictness flags on top of the default configuration
@@ -19750,7 +19759,7 @@ class NgCompiler {
         const jitDeclarationRegistry = new JitDeclarationRegistry();
         // Set up the IvyCompilation, which manages state for the Ivy transformer.
         const handlers = [
-            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr, this.implicitStandaloneValue, typeCheckHostBindings),
+            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr, this.implicitStandaloneValue, typeCheckHostBindings, this.enableSelectorless),
             // TODO(alxhub): understand why the cast here is necessary (something to do with `null`
             // not being assignable to `unknown` when wrapped in `Readonly`).
             new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, typeCheckScopeRegistry, compilationMode, jitDeclarationRegistry, resourceRegistry, !!this.options.strictStandalone, this.implicitStandaloneValue, this.usePoisonedData, typeCheckHostBindings),

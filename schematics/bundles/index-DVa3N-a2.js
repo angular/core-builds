@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.8+sha-c2987d8
+ * @license Angular v20.0.0-next.8+sha-e711f99
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DV96LHWz.js');
-var compiler = require('./compiler-BEZ6sUQS.js');
-var index = require('./index-B1R5GL-k.js');
+var checker = require('./checker-PhgsLsdk.js');
+var compiler = require('./compiler-D0Vc0aFl.js');
+var index = require('./index-DAoic_GQ.js');
 require('path');
-var project_paths = require('./project_paths-B-Nevd-p.js');
+var project_paths = require('./project_paths-CXSBOkDO.js');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -745,6 +745,7 @@ function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, reso
         usePoisonedData: true,
         enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat !== false,
         i18nNormalizeLineEndingsInICUs: options.i18nNormalizeLineEndingsInICUs === true,
+        enableSelectorless: false,
     }, checker.CompilationMode.FULL).nodes;
 }
 
