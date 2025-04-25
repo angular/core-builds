@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-ccc5cc0
+ * @license Angular v20.0.0-next.8+sha-d5fd734
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -446,12 +446,6 @@ interface TestBed {
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
-    /**
-     * Execute any pending effects.
-     *
-     * @deprecated use `TestBed.tick()` instead
-     */
-    flushEffects(): void;
     /**
      * Execute any pending work required to synchronize model to the UI.
      *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-ccc5cc0
+ * @license Angular v20.0.0-next.8+sha-d5fd734
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1872,9 +1872,6 @@ class TestBedImpl {
     static get ngModule() {
         return TestBedImpl.INSTANCE.ngModule;
     }
-    static flushEffects() {
-        return TestBedImpl.INSTANCE.flushEffects();
-    }
     static tick() {
         return TestBedImpl.INSTANCE.tick();
     }
@@ -2198,14 +2195,6 @@ class TestBedImpl {
         finally {
             testRenderer.removeAllRootElements?.();
         }
-    }
-    /**
-     * Execute any pending effects.
-     *
-     * @deprecated use `TestBed.tick()` instead
-     */
-    flushEffects() {
-        this.inject(EffectScheduler).flush();
     }
     /**
      * Execute any pending work required to synchronize model to the UI.
