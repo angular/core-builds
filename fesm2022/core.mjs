@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-d5fd734
+ * @license Angular v20.0.0-next.8+sha-05a03d3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -622,7 +622,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-next.8+sha-d5fd734');
+const VERSION = new Version('20.0.0-next.8+sha-05a03d3');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -4100,8 +4100,8 @@ function ɵɵngDeclarePipe(decl) {
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
 }
 
-const NOT_SET = Symbol('NOT_SET');
-const EMPTY_CLEANUP_SET = new Set();
+const NOT_SET = /* @__PURE__ */ Symbol('NOT_SET');
+const EMPTY_CLEANUP_SET = /* @__PURE__ */ new Set();
 const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
     ...SIGNAL_NODE,
     consumerIsAlwaysLive: true,
