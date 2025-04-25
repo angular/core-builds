@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-e27d983
+ * @license Angular v19.2.8+sha-81f6556
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17913,7 +17913,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.8+sha-e27d983']
+                ? ['ng-version', '19.2.8+sha-81f6556']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34653,7 +34653,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.8+sha-e27d983');
+const VERSION = new Version('19.2.8+sha-81f6556');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40198,8 +40198,8 @@ function ɵɵngDeclarePipe(decl) {
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
 }
 
-const NOT_SET = Symbol('NOT_SET');
-const EMPTY_CLEANUP_SET = new Set();
+const NOT_SET = /* @__PURE__ */ Symbol('NOT_SET');
+const EMPTY_CLEANUP_SET = /* @__PURE__ */ new Set();
 const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
     ...SIGNAL_NODE,
     consumerIsAlwaysLive: true,
