@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-7680a27
+ * @license Angular v20.0.0-next.8+sha-2445946
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -528,7 +528,6 @@ declare class MetadataOverrider {
  * things like traversal delay.
  */
 declare class FakeNavigation implements Navigation {
-    private readonly window;
     /**
      * The fake implementation of an entries array. Only same-document entries
      * allowed.
@@ -570,7 +569,10 @@ declare class FakeNavigation implements Navigation {
     get currentEntry(): FakeNavigationHistoryEntry;
     get canGoBack(): boolean;
     get canGoForward(): boolean;
-    constructor(window: Window, startURL: `http${string}`);
+    private readonly createEventTarget;
+    private readonly _window;
+    get window(): Pick<Window, 'addEventListener' | 'removeEventListener'>;
+    constructor(doc: Document, startURL: `http${string}`);
     /**
      * Sets the initial entry.
      */

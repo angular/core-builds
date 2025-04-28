@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.8+sha-7680a27
+ * @license Angular v20.0.0-next.8+sha-2445946
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NgZone, Injectable, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-L7KXkewa.mjs';
+import { DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NgZone, Injectable, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-DLmM0fsR.mjs';
 import { CONTAINER_HEADER_OFFSET, InjectionToken, inject as inject$1, EnvironmentInjector, ErrorHandler, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-BZMWiScf.mjs';
 import * as i0 from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
@@ -2322,7 +2322,6 @@ const __core_private_testing_placeholder__ = '';
  * things like traversal delay.
  */
 class FakeNavigation {
-    window;
     /**
      * The fake implementation of an entries array. Only same-document entries
      * allowed.
@@ -2380,9 +2379,30 @@ class FakeNavigation {
     get canGoForward() {
         return this.currentEntryIndex < this.entriesArr.length - 1;
     }
-    constructor(window, startURL) {
-        this.window = window;
-        this.eventTarget = this.window.document.createElement('div');
+    createEventTarget;
+    _window;
+    get window() {
+        return this._window;
+    }
+    constructor(doc, startURL) {
+        this.createEventTarget = () => {
+            try {
+                // `document.createElement` because NodeJS `EventTarget` is
+                // incompatible with Domino's `Event`. That is, attempting to
+                // dispatch an event created by Domino's patched `Event` will
+                // throw an error since it is not an instance of a real Node
+                // `Event`.
+                return doc.createElement('div');
+            }
+            catch {
+                // Fallback to a basic EventTarget if `document.createElement`
+                // fails. This can happen with tests that pass in a value for document
+                // that is stubbed.
+                return new EventTarget();
+            }
+        };
+        this._window = document.defaultView ?? this.createEventTarget();
+        this.eventTarget = this.createEventTarget();
         // First entry.
         this.setInitialEntryForTesting(startURL);
     }
@@ -2394,7 +2414,7 @@ class FakeNavigation {
             throw new Error('setInitialEntryForTesting can only be called before any ' + 'navigation has occurred');
         }
         const currentInitialEntry = this.entriesArr[0];
-        this.entriesArr[0] = new FakeNavigationHistoryEntry(this.window.document.createElement('div'), new URL(url).toString(), {
+        this.entriesArr[0] = new FakeNavigationHistoryEntry(this.eventTarget, new URL(url).toString(), {
             index: 0,
             key: currentInitialEntry?.key ?? String(this.nextKey++),
             id: currentInitialEntry?.id ?? String(this.nextId++),
@@ -2661,8 +2681,7 @@ class FakeNavigation {
     /** Cleans up resources. */
     dispose() {
         // Recreate eventTarget to release current listeners.
-        // `document.createElement` because NodeJS `EventTarget` is incompatible with Domino's `Event`.
-        this.eventTarget = this.window.document.createElement('div');
+        this.eventTarget = this.createEventTarget();
         this.disposed = true;
     }
     /** Returns whether this fake is disposed. */
@@ -2721,10 +2740,10 @@ class FakeNavigation {
         const popStateEvent = createPopStateEvent({
             state: navigateEvent.destination.getHistoryState(),
         });
-        this.window.dispatchEvent(popStateEvent);
+        this._window.dispatchEvent(popStateEvent);
         if (navigateEvent.hashChange) {
             const hashchangeEvent = createHashChangeEvent(oldUrl, this.currentEntry.url);
-            this.window.dispatchEvent(hashchangeEvent);
+            this._window.dispatchEvent(hashchangeEvent);
         }
     }
     /**
@@ -2751,7 +2770,7 @@ class FakeNavigation {
         if (navigationType === 'push' || navigationType === 'replace') {
             const index = this.currentEntryIndex;
             const key = navigationType === 'push' ? String(this.nextKey++) : this.currentEntry.key;
-            const newNHE = new FakeNavigationHistoryEntry(this.window.document.createElement('div'), destination.url, {
+            const newNHE = new FakeNavigationHistoryEntry(this.eventTarget, destination.url, {
                 id: String(this.nextId++),
                 key,
                 index,
