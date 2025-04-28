@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-d8204bf
+ * @license Angular v20.0.0-next.8+sha-7680a27
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3063,7 +3063,7 @@ declare class ViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRefInterfa
     private _cdRefInjectingView?;
     private _appRef;
     private _attachedToViewContainer;
-    private readonly exhaustive;
+    private exhaustive?;
     get rootNodes(): any[];
     constructor(
     /**
