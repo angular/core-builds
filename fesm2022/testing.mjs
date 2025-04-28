@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-2c9bdc3
+ * @license Angular v19.2.8+sha-9c4591c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2310,7 +2310,6 @@ const __core_private_testing_placeholder__ = '';
  * things like traversal delay.
  */
 class FakeNavigation {
-    window;
     /**
      * The fake implementation of an entries array. Only same-document entries
      * allowed.
@@ -2368,9 +2367,30 @@ class FakeNavigation {
     get canGoForward() {
         return this.currentEntryIndex < this.entriesArr.length - 1;
     }
-    constructor(window, startURL) {
-        this.window = window;
-        this.eventTarget = this.window.document.createElement('div');
+    createEventTarget;
+    _window;
+    get window() {
+        return this._window;
+    }
+    constructor(doc, startURL) {
+        this.createEventTarget = () => {
+            try {
+                // `document.createElement` because NodeJS `EventTarget` is
+                // incompatible with Domino's `Event`. That is, attempting to
+                // dispatch an event created by Domino's patched `Event` will
+                // throw an error since it is not an instance of a real Node
+                // `Event`.
+                return doc.createElement('div');
+            }
+            catch {
+                // Fallback to a basic EventTarget if `document.createElement`
+                // fails. This can happen with tests that pass in a value for document
+                // that is stubbed.
+                return new EventTarget();
+            }
+        };
+        this._window = document.defaultView ?? this.createEventTarget();
+        this.eventTarget = this.createEventTarget();
         // First entry.
         this.setInitialEntryForTesting(startURL);
     }
@@ -2382,7 +2402,7 @@ class FakeNavigation {
             throw new Error('setInitialEntryForTesting can only be called before any ' + 'navigation has occurred');
         }
         const currentInitialEntry = this.entriesArr[0];
-        this.entriesArr[0] = new FakeNavigationHistoryEntry(this.window.document.createElement('div'), new URL(url).toString(), {
+        this.entriesArr[0] = new FakeNavigationHistoryEntry(this.eventTarget, new URL(url).toString(), {
             index: 0,
             key: currentInitialEntry?.key ?? String(this.nextKey++),
             id: currentInitialEntry?.id ?? String(this.nextId++),
@@ -2649,8 +2669,7 @@ class FakeNavigation {
     /** Cleans up resources. */
     dispose() {
         // Recreate eventTarget to release current listeners.
-        // `document.createElement` because NodeJS `EventTarget` is incompatible with Domino's `Event`.
-        this.eventTarget = this.window.document.createElement('div');
+        this.eventTarget = this.createEventTarget();
         this.disposed = true;
     }
     /** Returns whether this fake is disposed. */
@@ -2709,10 +2728,10 @@ class FakeNavigation {
         const popStateEvent = createPopStateEvent({
             state: navigateEvent.destination.getHistoryState(),
         });
-        this.window.dispatchEvent(popStateEvent);
+        this._window.dispatchEvent(popStateEvent);
         if (navigateEvent.hashChange) {
             const hashchangeEvent = createHashChangeEvent(oldUrl, this.currentEntry.url);
-            this.window.dispatchEvent(hashchangeEvent);
+            this._window.dispatchEvent(hashchangeEvent);
         }
     }
     /**
@@ -2739,7 +2758,7 @@ class FakeNavigation {
         if (navigationType === 'push' || navigationType === 'replace') {
             const index = this.currentEntryIndex;
             const key = navigationType === 'push' ? String(this.nextKey++) : this.currentEntry.key;
-            const newNHE = new FakeNavigationHistoryEntry(this.window.document.createElement('div'), destination.url, {
+            const newNHE = new FakeNavigationHistoryEntry(this.eventTarget, destination.url, {
                 id: String(this.nextId++),
                 key,
                 index,
