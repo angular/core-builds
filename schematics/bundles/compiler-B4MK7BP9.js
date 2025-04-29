@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.8+sha-1003308
+ * @license Angular v20.0.0-next.8+sha-adaecba
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30284,7 +30284,6 @@ class R3TargetBinder {
             throw new Error('Empty bound targets are not supported');
         }
         const directives = new Map();
-        const ownedDirectives = new Map();
         const eagerDirectives = [];
         const missingDirectives = new Set();
         const bindings = new Map();
@@ -30307,7 +30306,9 @@ class R3TargetBinder {
             //   - bindings: Map of inputs, outputs, and attributes to the directive/element that claims
             //     them. TODO(alxhub): handle multiple directives claiming an input/output/etc.
             //   - references: Map of #references to their targets.
-            DirectiveBinder.apply(target.template, this.directiveMatcher, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references);
+            if (this.directiveMatcher !== null) {
+                DirectiveBinder.apply(target.template, this.directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references);
+            }
             // Finally, run the TemplateBinder to bind references, variables, and other entities within the
             // template. This extracts all the metadata that doesn't depend on directive matching.
             TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
@@ -30317,7 +30318,7 @@ class R3TargetBinder {
         if (target.host) {
             TemplateBinder.applyWithScope(target.host, Scope.apply(target.host), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
         }
-        return new R3BoundTarget(target, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
+        return new R3BoundTarget(target, directives, eagerDirectives, missingDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
     }
 }
 /**
@@ -30528,17 +30529,15 @@ class Scope {
 class DirectiveBinder {
     directiveMatcher;
     directives;
-    ownedDirectives;
     eagerDirectives;
     missingDirectives;
     bindings;
     references;
     // Indicates whether we are visiting elements within a `defer` block
     isInDeferBlock = false;
-    constructor(directiveMatcher, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references) {
+    constructor(directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references) {
         this.directiveMatcher = directiveMatcher;
         this.directives = directives;
-        this.ownedDirectives = ownedDirectives;
         this.eagerDirectives = eagerDirectives;
         this.missingDirectives = missingDirectives;
         this.bindings = bindings;
@@ -30556,8 +30555,8 @@ class DirectiveBinder {
      * map which resolves #references (`Reference`s) within the template to the named directive or
      * template node.
      */
-    static apply(template, directiveMatcher, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references) {
-        const matcher = new DirectiveBinder(directiveMatcher, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references);
+    static apply(template, directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references) {
+        const matcher = new DirectiveBinder(directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references);
         matcher.ingest(template);
     }
     ingest(template) {
@@ -30615,62 +30614,34 @@ class DirectiveBinder {
     visitComponent(node) {
         if (this.directiveMatcher instanceof SelectorlessMatcher) {
             const componentMatches = this.directiveMatcher.match(node.componentName);
-            const directives = [];
             if (componentMatches.length > 0) {
-                directives.push(...componentMatches);
-                this.ownedDirectives.set(node, componentMatches);
+                this.trackSelectorlessMatchesAndDirectives(node, componentMatches);
             }
             else {
                 this.missingDirectives.add(node.componentName);
             }
-            for (const directive of node.directives) {
-                const directiveMetas = this.directiveMatcher.match(directive.name);
-                if (directiveMetas.length > 0) {
-                    directives.push(...directiveMetas);
-                    this.ownedDirectives.set(directive, directiveMetas);
-                }
-                else {
-                    this.missingDirectives.add(directive.name);
-                }
-            }
-            this.trackMatchedDirectives(node, directives);
-            this.trackSelectorlessBindings(node, componentMatches);
         }
         node.directives.forEach((directive) => directive.visit(this));
         node.children.forEach((child) => child.visit(this));
     }
     visitDirective(node) {
-        const directives = this.directiveMatcher instanceof SelectorlessMatcher
-            ? this.directiveMatcher.match(node.name)
-            : null;
-        if (directives !== null && directives.length > 0) {
-            this.trackSelectorlessBindings(node, directives);
+        if (this.directiveMatcher instanceof SelectorlessMatcher) {
+            const directives = this.directiveMatcher.match(node.name);
+            if (directives.length > 0) {
+                this.trackSelectorlessMatchesAndDirectives(node, directives);
+            }
+            else {
+                this.missingDirectives.add(node.name);
+            }
         }
     }
     visitElementOrTemplate(node) {
-        const directives = [];
         if (this.directiveMatcher instanceof SelectorMatcher) {
-            // First, determine the HTML shape of the node for the purpose of directive matching.
-            // Do this by building up a `CssSelector` for the node.
+            const directives = [];
             const cssSelector = createCssSelectorFromNode(node);
-            this.directiveMatcher.match(cssSelector, (_selector, results) => {
-                directives.push(...results);
-            });
-            this.trackSelectorMatchedBindings(node, directives);
+            this.directiveMatcher.match(cssSelector, (_, results) => directives.push(...results));
+            this.trackSelectorBasedBindingsAndDirectives(node, directives);
         }
-        else {
-            for (const directive of node.directives) {
-                const matchedDirectives = this.directiveMatcher.match(directive.name);
-                if (matchedDirectives.length > 0) {
-                    directives.push(...matchedDirectives);
-                    this.ownedDirectives.set(directive, matchedDirectives);
-                }
-                else {
-                    this.missingDirectives.add(directive.name);
-                }
-            }
-        }
-        this.trackMatchedDirectives(node, directives);
         node.directives.forEach((directive) => directive.visit(this));
         node.children.forEach((child) => child.visit(this));
     }
@@ -30682,26 +30653,28 @@ class DirectiveBinder {
             }
         }
     }
-    trackSelectorlessBindings(node, metas) {
-        if (metas.length === 0) {
+    trackSelectorlessMatchesAndDirectives(node, directives) {
+        if (directives.length === 0) {
             return;
         }
+        this.trackMatchedDirectives(node, directives);
         const setBinding = (meta, attribute, ioType) => {
             if (meta[ioType].hasBindingPropertyName(attribute.name)) {
                 this.bindings.set(attribute, meta);
             }
         };
-        for (const meta of metas) {
-            node.inputs.forEach((input) => setBinding(meta, input, 'inputs'));
-            node.attributes.forEach((attr) => setBinding(meta, attr, 'inputs'));
-            node.outputs.forEach((output) => setBinding(meta, output, 'outputs'));
+        for (const directive of directives) {
+            node.inputs.forEach((input) => setBinding(directive, input, 'inputs'));
+            node.attributes.forEach((attr) => setBinding(directive, attr, 'inputs'));
+            node.outputs.forEach((output) => setBinding(directive, output, 'outputs'));
         }
         // TODO(crisbeto): currently it's unclear how references should behave under selectorless,
         // given that there's one named class which can bring in multiple host directives.
         // For the time being only register the first directive as the reference target.
-        node.references.forEach((ref) => this.references.set(ref, { directive: metas[0], node: node }));
+        node.references.forEach((ref) => this.references.set(ref, { directive: directives[0], node: node }));
     }
-    trackSelectorMatchedBindings(node, directives) {
+    trackSelectorBasedBindingsAndDirectives(node, directives) {
+        this.trackMatchedDirectives(node, directives);
         // Resolve any references that are created on this node.
         node.references.forEach((ref) => {
             let dirTarget = null;
@@ -31034,7 +31007,6 @@ class TemplateBinder extends RecursiveAstVisitor {
 class R3BoundTarget {
     target;
     directives;
-    ownedDirectives;
     eagerDirectives;
     missingDirectives;
     bindings;
@@ -31049,10 +31021,9 @@ class R3BoundTarget {
     deferredBlocks;
     /** Map of deferred blocks to their scope. */
     deferredScopes;
-    constructor(target, directives, ownedDirectives, eagerDirectives, missingDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, rawDeferred) {
+    constructor(target, directives, eagerDirectives, missingDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, rawDeferred) {
         this.target = target;
         this.directives = directives;
-        this.ownedDirectives = ownedDirectives;
         this.eagerDirectives = eagerDirectives;
         this.missingDirectives = missingDirectives;
         this.bindings = bindings;
@@ -31169,9 +31140,6 @@ class R3BoundTarget {
             }
         }
         return false;
-    }
-    getOwnedDirectives(node) {
-        return this.ownedDirectives.get(node) || null;
     }
     referencedDirectiveExists(name) {
         return !this.missingDirectives.has(name);
@@ -31680,7 +31648,7 @@ function parseJitTemplate(template, typeName, sourceMapUrl, preserveWhitespaces,
         const errors = parsed.errors.map((err) => err.toString()).join(', ');
         throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
     }
-    const binder = new R3TargetBinder(new SelectorMatcher());
+    const binder = new R3TargetBinder(null);
     const boundTarget = binder.bind({ template: parsed.nodes });
     return {
         template: parsed,
@@ -32398,7 +32366,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-next.8+sha-1003308');
+new Version('20.0.0-next.8+sha-adaecba');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

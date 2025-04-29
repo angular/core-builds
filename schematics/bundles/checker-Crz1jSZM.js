@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.8+sha-1003308
+ * @license Angular v20.0.0-next.8+sha-adaecba
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-D0Vc0aFl.js');
+var compiler = require('./compiler-B4MK7BP9.js');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -1000,7 +1000,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DGW3t0tw.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Crz1jSZM.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -13205,15 +13205,9 @@ class TcbTemplateBodyOp extends TcbOp {
         // By default the guard is simply `true`.
         let guard = null;
         const directiveGuards = [];
-        // If selectorless is enabled, the inputs are derived from the individual directive nodes
-        // which need to be accumulated. Otherwise they're derived from the template itself.
-        if (this.tcb.env.config.selectorlessEnabled) {
-            for (const directive of this.template.directives) {
-                this.addDirectiveGuards(directiveGuards, directive, this.tcb.boundTarget.getOwnedDirectives(directive));
-            }
-        }
-        else {
-            this.addDirectiveGuards(directiveGuards, this.template, this.tcb.boundTarget.getDirectivesOfNode(this.template));
+        this.addDirectiveGuards(directiveGuards, this.template, this.tcb.boundTarget.getDirectivesOfNode(this.template));
+        for (const directive of this.template.directives) {
+            this.addDirectiveGuards(directiveGuards, directive, this.tcb.boundTarget.getDirectivesOfNode(directive));
         }
         // If there are any guards from directives, use them instead.
         if (directiveGuards.length > 0) {
@@ -14982,9 +14976,7 @@ class Scope {
         const claimedInputs = new Set();
         // Don't resolve directives when selectorless is enabled and treat all the inputs on the element
         // as unclaimed. In selectorless the inputs are defined either in component or directive nodes.
-        const directives = this.tcb.env.config.selectorlessEnabled
-            ? null
-            : this.tcb.boundTarget.getDirectivesOfNode(node);
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
         if (directives === null || directives.length === 0) {
             // If there are no directives, then all inputs are unclaimed inputs, so queue an operation
             // to add them if needed.
@@ -15031,9 +15023,7 @@ class Scope {
         // Don't resolve directives when selectorless is enabled and treat all the outputs on the
         // element as unclaimed. In selectorless the outputs are defined either in component or
         // directive nodes.
-        const directives = this.tcb.env.config.selectorlessEnabled
-            ? null
-            : this.tcb.boundTarget.getDirectivesOfNode(node);
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
         if (directives === null || directives.length === 0) {
             // If there are no directives, then all outputs are unclaimed outputs, so queue an operation
             // to add them if needed.
@@ -15060,11 +15050,11 @@ class Scope {
     }
     appendInputsOfSelectorlessNode(node) {
         // Only resolve the directives that were brought in by this specific directive.
-        const ownedDirectives = this.tcb.boundTarget.getOwnedDirectives(node);
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
         const claimedInputs = new Set();
-        if (ownedDirectives !== null && ownedDirectives.length > 0) {
+        if (directives !== null && directives.length > 0) {
             const dirMap = new Map();
-            for (const dir of ownedDirectives) {
+            for (const dir of directives) {
                 this.appendDirectiveInputs(dir, node, dirMap);
                 for (const propertyName of dir.inputs.propertyNames) {
                     claimedInputs.add(propertyName);
@@ -15092,10 +15082,10 @@ class Scope {
     }
     appendOutputsOfSelectorlessNode(node) {
         // Only resolve the directives that were brought in by this specific directive.
-        const ownedDirectives = this.tcb.boundTarget.getOwnedDirectives(node);
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
         const claimedOutputs = new Set();
-        if (ownedDirectives !== null && ownedDirectives.length > 0) {
-            for (const dir of ownedDirectives) {
+        if (directives !== null && directives.length > 0) {
+            for (const dir of directives) {
                 this.opQueue.push(new TcbDirectiveOutputsOp(this.tcb, this, node, dir));
                 for (const outputProperty of dir.outputs.propertyNames) {
                     claimedOutputs.add(outputProperty);
@@ -15147,10 +15137,10 @@ class Scope {
                 continue;
             }
             // Check that the class is a directive class.
-            const ownedDirectives = this.tcb.boundTarget.getOwnedDirectives(directive);
-            if (ownedDirectives === null ||
-                ownedDirectives.length === 0 ||
-                ownedDirectives.some((dir) => dir.isComponent)) {
+            const directives = this.tcb.boundTarget.getDirectivesOfNode(directive);
+            if (directives === null ||
+                directives.length === 0 ||
+                directives.some((dir) => dir.isComponent)) {
                 this.tcb.oobRecorder.incorrectTemplateDependencyType(this.tcb.id, directive);
                 continue;
             }
@@ -15166,7 +15156,14 @@ class Scope {
             }
             if (node instanceof compiler.Element) {
                 const claimedInputs = new Set();
-                const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
+                let directives = this.tcb.boundTarget.getDirectivesOfNode(node);
+                for (const dirNode of node.directives) {
+                    const directiveResults = this.tcb.boundTarget.getDirectivesOfNode(dirNode);
+                    if (directiveResults !== null && directiveResults.length > 0) {
+                        directives ??= [];
+                        directives.push(...directiveResults);
+                    }
+                }
                 let hasDirectives;
                 if (directives === null || directives.length === 0) {
                     hasDirectives = false;
@@ -15213,10 +15210,10 @@ class Scope {
             return;
         }
         // Check that the class is a component.
-        const ownedDirectives = this.tcb.boundTarget.getOwnedDirectives(node);
-        if (ownedDirectives === null ||
-            ownedDirectives.length === 0 ||
-            !ownedDirectives.some((dir) => dir.isComponent)) {
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
+        if (directives === null ||
+            directives.length === 0 ||
+            directives.every((dir) => !dir.isComponent)) {
             this.tcb.oobRecorder.incorrectTemplateDependencyType(this.tcb.id, node);
             return;
         }
