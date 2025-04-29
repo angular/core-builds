@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-next.8+sha-42cad28
+ * @license Angular v20.0.0-next.8+sha-888f9c2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -510,6 +510,10 @@ exports.ErrorCode = void 0;
      */
     ErrorCode[ErrorCode["UNINVOKED_TRACK_FUNCTION"] = 8115] = "UNINVOKED_TRACK_FUNCTION";
     /**
+     * A structural directive is used in a template, but the directive is not imported.
+     */
+    ErrorCode[ErrorCode["MISSING_STRUCTURAL_DIRECTIVE"] = 8116] = "MISSING_STRUCTURAL_DIRECTIVE";
+    /**
      * The template type-checking engine would need to generate an inline type check block for a
      * component, but the current type-checking environment doesn't support it.
      */
@@ -658,6 +662,7 @@ exports.ExtendedTemplateDiagnosticName = void 0;
     ExtendedTemplateDiagnosticName["NULLISH_COALESCING_NOT_NULLABLE"] = "nullishCoalescingNotNullable";
     ExtendedTemplateDiagnosticName["OPTIONAL_CHAIN_NOT_NULLABLE"] = "optionalChainNotNullable";
     ExtendedTemplateDiagnosticName["MISSING_CONTROL_FLOW_DIRECTIVE"] = "missingControlFlowDirective";
+    ExtendedTemplateDiagnosticName["MISSING_STRUCTURAL_DIRECTIVE"] = "missingStructuralDirective";
     ExtendedTemplateDiagnosticName["TEXT_ATTRIBUTE_NOT_BINDING"] = "textAttributeNotBinding";
     ExtendedTemplateDiagnosticName["UNINVOKED_FUNCTION_IN_EVENT_BINDING"] = "uninvokedFunctionInEventBinding";
     ExtendedTemplateDiagnosticName["MISSING_NGFOROF_LET"] = "missingNgForOfLet";
@@ -995,7 +1000,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-PhgsLsdk.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DGW3t0tw.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -11629,12 +11634,16 @@ function isInHostBindingTcb(node) {
     return false;
 }
 function findTypeCheckBlock(file, id, isDiagnosticRequest) {
+    // This prioritised-level statements using a breadth-first search
+    // This is usually sufficient to find the TCB we're looking for
     for (const stmt of file.statements) {
         if (ts.isFunctionDeclaration(stmt) && getTypeCheckId(stmt, file, isDiagnosticRequest) === id) {
             return stmt;
         }
     }
-    return null;
+    // In case the TCB we're looking for is nested (which is not common)
+    // eg: when a directive is declared inside a function, as it can happen in test files
+    return findNodeInFile(file, (node) => ts.isFunctionDeclaration(node) && getTypeCheckId(node, file, isDiagnosticRequest) === id);
 }
 /**
  * Traverses up the AST starting from the given node to extract the source location from comments
@@ -11703,6 +11712,15 @@ function checkIfGenericTypeBoundsCanBeEmitted(node, reflector, env) {
     // Generic type parameters are considered context free if they can be emitted into any context.
     const emitter = new TypeParameterEmitter(node.typeParameters, reflector);
     return emitter.canEmit((ref) => env.canReferenceType(ref));
+}
+function findNodeInFile(file, predicate) {
+    const visit = (node) => {
+        if (predicate(node)) {
+            return node;
+        }
+        return ts.forEachChild(node, visit) ?? null;
+    };
+    return ts.forEachChild(file, visit) ?? null;
 }
 
 function generateTypeCtorDeclarationFn(env, meta, nodeTypeRef, typeParams) {
@@ -16468,7 +16486,26 @@ class SymbolBuilder {
         if (directives === null) {
             return null;
         }
-        return directives.find((m) => m.ref.node === directiveDeclaration) ?? null;
+        const directive = directives.find((m) => m.ref.node === directiveDeclaration);
+        if (directive) {
+            return directive;
+        }
+        const originalFile = directiveDeclaration.getSourceFile()[NgOriginalFile];
+        if (originalFile !== undefined) {
+            // This is a preliminary check ahead of a more expensive search
+            const hasPotentialCandidate = directives.find((m) => m.ref.node.name.text === directiveDeclaration.name?.text);
+            if (hasPotentialCandidate) {
+                // In case the TCB has been inlined,
+                // We will look for a matching class
+                // If we find one, we look for it in the directives array
+                const classWithSameName = findMatchingDirective(originalFile, directiveDeclaration);
+                if (classWithSameName !== null) {
+                    return directives.find((m) => m.ref.node === classWithSameName) ?? null;
+                }
+            }
+        }
+        // Really nothing was found
+        return null;
     }
     getDirectiveModule(declaration) {
         const scope = this.componentScopeReader.getScopeForComponent(declaration);
@@ -16966,6 +17003,37 @@ function unwrapSignalInputWriteTAccessor(expr) {
         fieldExpr: expr.expression,
         typeExpr: expr,
     };
+}
+/**
+ * Looks for a class declaration in the original source file that matches a given directive
+ * from the type check source file.
+ *
+ * @param originalSourceFile The original source where the runtime code resides
+ * @param directiveDeclarationInTypeCheckSourceFile The directive from the type check source file
+ */
+function findMatchingDirective(originalSourceFile, directiveDeclarationInTypeCheckSourceFile) {
+    const className = directiveDeclarationInTypeCheckSourceFile.name?.text ?? '';
+    // We build an index of the class declarations with the same name
+    // To then compare the indexes to confirm we found the right class declaration
+    const ogClasses = collectClassesWithName(originalSourceFile, className);
+    const typecheckClasses = collectClassesWithName(directiveDeclarationInTypeCheckSourceFile.getSourceFile(), className);
+    return ogClasses[typecheckClasses.indexOf(directiveDeclarationInTypeCheckSourceFile)] ?? null;
+}
+/**
+ * Builds a list of class declarations of a given name
+ * Is used as a index based reference to compare class declarations
+ * between the typecheck source file and the original source file
+ */
+function collectClassesWithName(sourceFile, className) {
+    const classes = [];
+    function visit(node) {
+        if (ts.isClassDeclaration(node) && node.name?.text === className) {
+            classes.push(node);
+        }
+        ts.forEachChild(node, visit);
+    }
+    sourceFile.forEachChild(visit);
+    return classes;
 }
 
 const REGISTRY = new compiler.DomElementSchemaRegistry();
