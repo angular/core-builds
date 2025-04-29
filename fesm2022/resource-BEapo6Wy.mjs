@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.0-next.8+sha-2445946
+ * @license Angular v20.0.0-next.8+sha-42cad28
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, InjectionToken, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-BZMWiScf.mjs';
-import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-B6pMq7KS.mjs';
-import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-Bz5WMeU1.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, InjectionToken, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DTKVhAd7.mjs';
+import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-CVVPheSN.mjs';
+import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-BLZYODu2.mjs';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -577,4 +577,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-5VZgOAGr.mjs.map
+//# sourceMappingURL=resource-BEapo6Wy.mjs.map
