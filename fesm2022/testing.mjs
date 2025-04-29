@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-09cc394
+ * @license Angular v20.0.0-next.8+sha-b250bb0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3238,5 +3238,5 @@ class InternalNavigationResult {
     }
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
 //# sourceMappingURL=testing.mjs.map

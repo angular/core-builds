@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.8+sha-09cc394
+ * @license Angular v20.0.0-next.8+sha-b250bb0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -501,6 +501,7 @@ declare class InjectSetupWrapper {
 declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;
 declare function withModule(moduleDef: TestModuleMetadata, fn: Function): () => any;
 
+declare function getCleanupHook(expectedTeardownValue: boolean): VoidFunction;
 /**
  * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
  * investigation.
@@ -682,5 +683,5 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispose(): void;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
 export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata };
