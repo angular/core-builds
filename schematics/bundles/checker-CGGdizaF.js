@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.9+sha-400dbc5
+ * @license Angular v19.2.9+sha-c6148bd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3027,28 +3027,26 @@ function stringify(token) {
         return token;
     }
     if (Array.isArray(token)) {
-        return '[' + token.map(stringify).join(', ') + ']';
+        return `[${token.map(stringify).join(', ')}]`;
     }
     if (token == null) {
         return '' + token;
     }
-    if (token.overriddenName) {
-        return `${token.overriddenName}`;
-    }
-    if (token.name) {
-        return `${token.name}`;
+    const name = token.overriddenName || token.name;
+    if (name) {
+        return `${name}`;
     }
     if (!token.toString) {
         return 'object';
     }
     // WARNING: do not try to `JSON.stringify(token)` here
     // see https://github.com/angular/angular/issues/23440
-    const res = token.toString();
-    if (res == null) {
-        return '' + res;
+    const result = token.toString();
+    if (result == null) {
+        return '' + result;
     }
-    const newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+    const newLineIndex = result.indexOf('\n');
+    return newLineIndex >= 0 ? result.slice(0, newLineIndex) : result;
 }
 class Version {
     full;
@@ -30728,7 +30726,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.9+sha-400dbc5');
+new Version('19.2.9+sha-c6148bd');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32155,7 +32153,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BNmiXJIJ.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CGGdizaF.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
