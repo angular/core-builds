@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.9+sha-a2eaea0
+ * @license Angular v19.2.9+sha-400dbc5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17944,7 +17944,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.9+sha-a2eaea0']
+                ? ['ng-version', '19.2.9+sha-400dbc5']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -23912,8 +23912,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         }
     }
     // Indicate that an application is not stable and has a pending task.
-    const pendingTasks = injector.get(PendingTasksInternal);
-    const taskId = pendingTasks.add();
+    const removeTask = injector.get(PendingTasks).add();
     // The `dependenciesFn` might be `null` when all dependencies within
     // a given defer block were eagerly referenced elsewhere in a file,
     // thus no dynamic `import()`s were produced.
@@ -23921,7 +23920,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         tDetails.loadingPromise = Promise.resolve().then(() => {
             tDetails.loadingPromise = null;
             tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
-            pendingTasks.remove(taskId);
+            removeTask();
         });
         return tDetails.loadingPromise;
     }
@@ -23949,10 +23948,6 @@ function triggerResourceLoading(tDetails, lView, tNode) {
                 break;
             }
         }
-        // Loading is completed, we no longer need the loading Promise
-        // and a pending task should also be removed.
-        tDetails.loadingPromise = null;
-        pendingTasks.remove(taskId);
         if (failed) {
             tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
             if (tDetails.errorTmplIndex === null) {
@@ -23981,7 +23976,12 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             }
         }
     });
-    return tDetails.loadingPromise;
+    return tDetails.loadingPromise.finally(() => {
+        // Loading is completed, we no longer need the loading Promise
+        // and a pending task should also be removed.
+        tDetails.loadingPromise = null;
+        removeTask();
+    });
 }
 /**
  * Defines whether we should proceed with triggering a given defer block.
@@ -34683,7 +34683,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.9+sha-a2eaea0');
+const VERSION = new Version('19.2.9+sha-400dbc5');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
