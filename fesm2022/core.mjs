@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-dbb8702
+ * @license Angular v19.2.8+sha-d67ced6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17944,7 +17944,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.8+sha-dbb8702']
+                ? ['ng-version', '19.2.8+sha-d67ced6']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -30139,15 +30139,12 @@ function isOutputSubscribable(value) {
     return (value != null && typeof value.subscribe === 'function');
 }
 
-/**
- * Contains a reference to a function that disables event replay feature
- * for server-side rendered applications. This function is overridden with
- * an actual implementation when the event replay feature is enabled via
- * `withEventReplay()` call.
- */
-let stashEventListener = (el, eventName, listenerFn) => { };
-function setStashFn(fn) {
-    stashEventListener = fn;
+const stashEventListeners = new Map();
+function setStashFn(appId, fn) {
+    stashEventListeners.set(appId, fn);
+}
+function clearStashFn(appId) {
+    stashEventListeners.delete(appId);
 }
 /**
  * Adds an event listener to the current node.
@@ -30286,7 +30283,9 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         }
         else {
             listenerFn = wrapListener(tNode, lView, listenerFn);
-            stashEventListener(target, eventName, listenerFn);
+            const appId = lView[INJECTOR].get(APP_ID);
+            const stashEventListener = stashEventListeners.get(appId);
+            stashEventListener?.(target, eventName, listenerFn);
             const cleanupFn = renderer.listen(target, eventName, listenerFn);
             ngDevMode && ngDevMode.rendererAddEventListener++;
             lCleanup.push(listenerFn, cleanupFn);
@@ -34684,7 +34683,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.8+sha-dbb8702');
+const VERSION = new Version('19.2.8+sha-d67ced6');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38187,7 +38186,8 @@ function withEventReplay() {
                 if (!appsWithEventReplay.has(appRef)) {
                     const jsActionMap = inject(JSACTION_BLOCK_ELEMENT_MAP);
                     if (shouldEnableEventReplay(injector)) {
-                        setStashFn((rEl, eventName, listenerFn) => {
+                        const appId = injector.get(APP_ID);
+                        setStashFn(appId, (rEl, eventName, listenerFn) => {
                             // If a user binds to a ng-container and uses a directive that binds using a host listener,
                             // this element could be a comment node. So we need to ensure we have an actual element
                             // node before stashing anything.
@@ -38203,7 +38203,6 @@ function withEventReplay() {
         }, {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                const appId = inject(APP_ID);
                 const appRef = inject(ApplicationRef);
                 const { injector } = appRef;
                 return () => {
@@ -38218,6 +38217,7 @@ function withEventReplay() {
                         appsWithEventReplay.delete(appRef);
                         // Ensure that we're always safe calling this in the browser.
                         if (typeof ngServerMode !== 'undefined' && !ngServerMode) {
+                            const appId = injector.get(APP_ID);
                             // `_ejsa` should be deleted when the app is destroyed, ensuring that
                             // no elements are still captured in the global list and are not prevented
                             // from being garbage collected.
@@ -38225,7 +38225,7 @@ function withEventReplay() {
                             // Clean up the reference to the function set by the environment initializer,
                             // as the function closure may capture injected elements and prevent them
                             // from being properly garbage collected.
-                            setStashFn(() => { });
+                            clearStashFn(appId);
                         }
                     });
                     // Kick off event replay logic once hydration for the initial part
