@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-a554208
+ * @license Angular v19.2.8+sha-dbb8702
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5902,8 +5902,26 @@ class NodeInjectorDestroyRef extends DestroyRef {
         this._lView = _lView;
     }
     onDestroy(callback) {
-        storeLViewOnDestroy(this._lView, callback);
-        return () => removeLViewOnDestroy(this._lView, callback);
+        const lView = this._lView;
+        // Checking if `lView` is already destroyed before storing the `callback` enhances
+        // safety and integrity for applications.
+        // If `lView` is destroyed, we call the `callback` immediately to ensure that
+        // any necessary cleanup is handled gracefully.
+        // With this approach, we're providing better reliability in managing resources.
+        // One of the use cases is `takeUntilDestroyed`, which aims to replace `takeUntil`
+        // in existing applications. While `takeUntil` can be safely called once the view
+        // is destroyed — resulting in no errors and finalizing the subscription depending
+        // on whether a subject or replay subject is used, replacing it with
+        // `takeUntilDestroyed` introduces a breaking change, as it throws an error if
+        // the `lView` is destroyed (https://github.com/angular/angular/issues/54527).
+        if (isDestroyed(lView)) {
+            callback();
+            // We return a "noop" callback, which, when executed, does nothing because
+            // we haven't stored anything on the `lView`, and thus there's nothing to remove.
+            return () => { };
+        }
+        storeLViewOnDestroy(lView, callback);
+        return () => removeLViewOnDestroy(lView, callback);
     }
 }
 function injectDestroyRef() {
@@ -17926,7 +17944,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.8+sha-a554208']
+                ? ['ng-version', '19.2.8+sha-dbb8702']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34666,7 +34684,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.8+sha-a554208');
+const VERSION = new Version('19.2.8+sha-dbb8702');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39600,14 +39618,6 @@ function effect(effectFn, options) {
     }
     return effectRef;
 }
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-/* @__PURE__ */ new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
 const BASE_EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
     ...REACTIVE_NODE,
