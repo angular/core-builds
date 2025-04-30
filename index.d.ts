@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-6b76bca
+ * @license Angular v19.2.8+sha-a554208
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4736,6 +4736,14 @@ declare abstract class RendererFactory2 {
  * renders a template into DOM. You can use custom rendering to intercept
  * rendering calls, or to render to something other than DOM.
  *
+ * <div class="docs-alert docs-alert-important">
+ * <p>
+ * Please be aware that usage of `Renderer2`, in context of accessing DOM elements, provides no
+ * extra security which makes it equivalent to
+ * {@link /best-practices/security#direct-use-of-the-dom-apis-and-explicit-sanitization-calls Security vulnerabilities}.
+ * </p>
+ * </div>
+ *
  * Create your custom renderer using `RendererFactory2`.
  *
  * Use a custom renderer to bypass Angular's templating and
@@ -8758,12 +8766,13 @@ declare const defaultKeyValueDiffers: KeyValueDiffers;
  */
 declare class ElementRef<T = any> {
     /**
-     * <div class="callout is-critical">
+     * <div class="docs-alert docs-alert-important">
      *   <header>Use with caution</header>
      *   <p>
      *    Use this API as the last resort when direct access to DOM is needed. Use templating and
-     *    data-binding provided by Angular instead. Alternatively you can take a look at
-     *    {@link Renderer2} which provides an API that can be safely used.
+     *    data-binding provided by Angular instead. If used, it is recommended in combination with
+     *    {@link /best-practices/security#direct-use-of-the-dom-apis-and-explicit-sanitization-calls DomSanitizer}
+     *    for maxiumum security;
      *   </p>
      * </div>
      */
