@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.1.0-next.0+sha-c1e46c5
+ * @license Angular v20.1.0-next.0+sha-9b96fcc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NgZone, Injectable, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-sP8Ihhla.mjs';
+import { DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NgZone, Injectable, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-DvN3po9d.mjs';
 import { CONTAINER_HEADER_OFFSET, InjectionToken, inject as inject$1, EnvironmentInjector, ErrorHandler, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-C95A9imp.mjs';
 import * as i0 from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
@@ -2282,41 +2282,6 @@ function withModule(moduleDef, fn) {
 }
 
 /**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
- */
-// Reset the test providers and the fake async zone before each test.
-// We keep a guard because somehow this file can make it into a bundle and be executed
-// beforeEach is only defined when executing the tests
-globalThis.beforeEach?.(getCleanupHook(false));
-// We provide both a `beforeEach` and `afterEach`, because the updated behavior for
-// tearing down the module is supposed to run after the test so that we can associate
-// teardown errors with the correct test.
-// We keep a guard because somehow this file can make it into a bundle and be executed
-// afterEach is only defined when executing the tests
-globalThis.afterEach?.(getCleanupHook(true));
-function getCleanupHook(expectedTeardownValue) {
-    return () => {
-        const testBed = TestBedImpl.INSTANCE;
-        if (testBed.shouldTearDownTestingModule() === expectedTeardownValue) {
-            testBed.resetTestingModule();
-            resetFakeAsyncZoneIfExists();
-        }
-    };
-}
-/**
- * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
- * investigation.
- *
- * A work around is to mark it as `@codeGenApi` for now and investigate later.
- *
- * @codeGenApi
- */
-// TODO(iminar): Remove this code in a safe way.
-const __core_private_testing_placeholder__ = '';
-
-/**
  * Fake implementation of user agent history and navigation behavior. This is a
  * high-fidelity implementation of browser behavior that attempts to emulate
  * things like traversal delay.
@@ -3238,5 +3203,30 @@ class InternalNavigationResult {
     }
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
+/**
+ * Public Test Library for unit testing Angular applications. Assumes that you are running
+ * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
+ * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
+ */
+// Reset the test providers and the fake async zone before each test.
+// We keep a guard because somehow this file can make it into a bundle and be executed
+// beforeEach is only defined when executing the tests
+globalThis.beforeEach?.(getCleanupHook(false));
+// We provide both a `beforeEach` and `afterEach`, because the updated behavior for
+// tearing down the module is supposed to run after the test so that we can associate
+// teardown errors with the correct test.
+// We keep a guard because somehow this file can make it into a bundle and be executed
+// afterEach is only defined when executing the tests
+globalThis.afterEach?.(getCleanupHook(true));
+function getCleanupHook(expectedTeardownValue) {
+    return () => {
+        const testBed = TestBedImpl.INSTANCE;
+        if (testBed.shouldTearDownTestingModule() === expectedTeardownValue) {
+            testBed.resetTestingModule();
+            resetFakeAsyncZoneIfExists();
+        }
+    };
+}
+
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
 //# sourceMappingURL=testing.mjs.map

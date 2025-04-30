@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-c1e46c5
+ * @license Angular v20.1.0-next.0+sha-9b96fcc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3065,28 +3065,26 @@ function stringify(token) {
         return token;
     }
     if (Array.isArray(token)) {
-        return '[' + token.map(stringify).join(', ') + ']';
+        return `[${token.map(stringify).join(', ')}]`;
     }
     if (token == null) {
         return '' + token;
     }
-    if (token.overriddenName) {
-        return `${token.overriddenName}`;
-    }
-    if (token.name) {
-        return `${token.name}`;
+    const name = token.overriddenName || token.name;
+    if (name) {
+        return `${name}`;
     }
     if (!token.toString) {
         return 'object';
     }
     // WARNING: do not try to `JSON.stringify(token)` here
     // see https://github.com/angular/angular/issues/23440
-    const res = token.toString();
-    if (res == null) {
-        return '' + res;
+    const result = token.toString();
+    if (result == null) {
+        return '' + result;
     }
-    const newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+    const newLineIndex = result.indexOf('\n');
+    return newLineIndex >= 0 ? result.slice(0, newLineIndex) : result;
 }
 class Version {
     full;
@@ -32366,7 +32364,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-c1e46c5');
+new Version('20.1.0-next.0+sha-9b96fcc');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
