@@ -1,12 +1,18 @@
 /**
- * @license Angular v18.1.0-next.0+sha-87c5f3c
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v20.0.0-next.9+sha-f4d60ff
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, computed } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-C95A9imp.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-aJC_NNLX.mjs';
+import './primitives/di.mjs';
+import './signal-CVVPheSN.mjs';
+import '@angular/core/primitives/di';
+import '@angular/core/primitives/signals';
+import './untracked-BLZYODu2.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -16,7 +22,7 @@ import { takeUntil } from 'rxjs/operators';
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
- * @developerPreview
+ * @publicApi
  */
 function takeUntilDestroyed(destroyRef) {
     if (!destroyRef) {
@@ -39,17 +45,18 @@ function takeUntilDestroyed(destroyRef) {
  * @internal
  */
 class OutputFromObservableRef {
+    source;
+    destroyed = false;
+    destroyRef = inject(DestroyRef);
     constructor(source) {
         this.source = source;
-        this.destroyed = false;
-        this.destroyRef = inject(DestroyRef);
         this.destroyRef.onDestroy(() => {
             this.destroyed = true;
         });
     }
     subscribe(callbackFn) {
         if (this.destroyed) {
-            throw new ɵRuntimeError(953 /* ɵRuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
+            throw new RuntimeError(953 /* ɵRuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
                 'Unexpected subscription to destroyed `OutputRef`. ' +
                     'The owning directive/component is destroyed.');
         }
@@ -84,7 +91,7 @@ class OutputFromObservableRef {
  * }
  * ```
  *
- * @developerPreview
+ * @publicApi
  */
 function outputFromObservable(observable, opts) {
     ngDevMode && assertInInjectionContext(outputFromObservable);
@@ -97,10 +104,10 @@ function outputFromObservable(observable, opts) {
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
- * @developerPreview
+ * @publicApi
  */
 function outputToObservable(ref) {
-    const destroyRef = ɵgetOutputDestroyRef(ref);
+    const destroyRef = getOutputDestroyRef(ref);
     return new Observable((observer) => {
         // Complete the observable upon directive/component destroy.
         // Note: May be `undefined` if an `EventEmitter` is declared outside
@@ -118,7 +125,7 @@ function outputToObservable(ref) {
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
- * @developerPreview
+ * @publicApi
  */
 function toObservable(source, options) {
     !options?.injector && assertInInjectionContext(toObservable);
@@ -163,28 +170,28 @@ function toObservable(source, options) {
  * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
  * option can be specified instead, which disables the automatic subscription teardown. No injection
  * context is needed in this configuration as well.
- *
- * @developerPreview
  */
 function toSignal(source, options) {
-    ngDevMode &&
+    typeof ngDevMode !== 'undefined' &&
+        ngDevMode &&
         assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +
             'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;
     requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
     const cleanupRef = requiresCleanup
-        ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef)
+        ? (options?.injector?.get(DestroyRef) ?? inject(DestroyRef))
         : null;
+    const equal = makeToSignalEqual(options?.equal);
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be
     // the same - the returned signal gives values of type `T`.
     let state;
     if (options?.requireSync) {
         // Initially the signal is in a `NoValue` state.
-        state = signal({ kind: 0 /* StateKind.NoValue */ });
+        state = signal({ kind: 0 /* StateKind.NoValue */ }, { equal });
     }
     else {
         // If an initial value was passed, use it. Otherwise, use `undefined` as the initial value.
-        state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue });
+        state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue }, { equal });
     }
     // Note: This code cannot run inside a reactive context (see assertion above). If we'd support
     // this, we would subscribe to the observable outside of the current reactive context, avoiding
@@ -195,18 +202,14 @@ function toSignal(source, options) {
     const sub = source.subscribe({
         next: (value) => state.set({ kind: 1 /* StateKind.Value */, value }),
         error: (error) => {
-            if (options?.rejectErrors) {
-                // Kick the error back to RxJS. It will be caught and rethrown in a macrotask, which causes
-                // the error to end up as an uncaught exception.
-                throw error;
-            }
             state.set({ kind: 2 /* StateKind.Error */, error });
         },
         // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
         // "complete".
     });
-    if (ngDevMode && options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
-        throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+    if (options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
+        throw new RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
     // Unsubscribe when the current context is destroyed, if requested.
     cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
@@ -221,15 +224,104 @@ function toSignal(source, options) {
                 throw current.error;
             case 0 /* StateKind.NoValue */:
                 // This shouldn't really happen because the error is thrown on creation.
-                // TODO(alxhub): use a RuntimeError when we finalize the error semantics
-                throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+                throw new RuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+                    '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
         }
-    });
+    }, { equal: options?.equal });
+}
+function makeToSignalEqual(userEquality = Object.is) {
+    return (a, b) => a.kind === 1 /* StateKind.Value */ && b.kind === 1 /* StateKind.Value */ && userEquality(a.value, b.value);
 }
 
 /**
- * Generated bundle index. Do not edit.
+ * Operator which makes the application unstable until the observable emits, completes, errors, or is unsubscribed.
+ *
+ * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
+ *
+ * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
+ *
+ * @developerPreview
  */
+function pendingUntilEvent(injector) {
+    if (injector === undefined) {
+        assertInInjectionContext(pendingUntilEvent);
+        injector = inject(Injector);
+    }
+    const taskService = injector.get(PendingTasks);
+    return (sourceObservable) => {
+        return new Observable((originalSubscriber) => {
+            // create a new task on subscription
+            const removeTask = taskService.add();
+            let cleanedUp = false;
+            function cleanupTask() {
+                if (cleanedUp) {
+                    return;
+                }
+                removeTask();
+                cleanedUp = true;
+            }
+            const innerSubscription = sourceObservable.subscribe({
+                next: (v) => {
+                    originalSubscriber.next(v);
+                    cleanupTask();
+                },
+                complete: () => {
+                    originalSubscriber.complete();
+                    cleanupTask();
+                },
+                error: (e) => {
+                    originalSubscriber.error(e);
+                    cleanupTask();
+                },
+            });
+            innerSubscription.add(() => {
+                originalSubscriber.unsubscribe();
+                cleanupTask();
+            });
+            return innerSubscription;
+        });
+    };
+}
 
-export { outputFromObservable, outputToObservable, takeUntilDestroyed, toObservable, toSignal };
+function rxResource(opts) {
+    opts?.injector || assertInInjectionContext(rxResource);
+    return resource({
+        ...opts,
+        loader: undefined,
+        stream: (params) => {
+            let sub;
+            // Track the abort listener so it can be removed if the Observable completes (as a memory
+            // optimization).
+            const onAbort = () => sub.unsubscribe();
+            params.abortSignal.addEventListener('abort', onAbort);
+            // Start off stream as undefined.
+            const stream = signal({ value: undefined });
+            let resolve;
+            const promise = new Promise((r) => (resolve = r));
+            function send(value) {
+                stream.set(value);
+                resolve?.(stream);
+                resolve = undefined;
+            }
+            // TODO(alxhub): remove after g3 updated to rename loader -> stream
+            const streamFn = opts.stream ?? opts.loader;
+            if (streamFn === undefined) {
+                throw new Error(`Must provide \`stream\` option.`);
+            }
+            sub = streamFn(params).subscribe({
+                next: (value) => send({ value }),
+                error: (error) => send({ error }),
+                complete: () => {
+                    if (resolve) {
+                        send({ error: new Error('Resource completed before producing a value') });
+                    }
+                    params.abortSignal.removeEventListener('abort', onAbort);
+                },
+            });
+            return promise;
+        },
+    });
+}
+
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal };
 //# sourceMappingURL=rxjs-interop.mjs.map

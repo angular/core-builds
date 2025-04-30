@@ -1,14 +1,25 @@
 {
   "schematics": {
-    "invalid-two-way-bindings": {
-      "version": "18.0.0",
-      "description": "Updates two-way bindings that have an invalid expression to use the longform expression instead.",
-      "factory": "./migrations/invalid-two-way-bindings/bundle"
+    "inject-flags": {
+      "version": "20.0.0",
+      "description": "Replaces usages of the deprecated InjectFlags enum",
+      "factory": "./bundles/inject-flags#migrate"
     },
-    "migration-http-providers": {
-      "version": "18.0.0",
-      "description": "Replace deprecated HTTP related modules with provider functions",
-      "factory": "./migrations/http-providers/bundle"
+    "test-bed-get": {
+      "version": "20.0.0",
+      "description": "Replaces usages of the deprecated TestBed.get method with TestBed.inject",
+      "factory": "./bundles/test-bed-get#migrate"
+    },
+    "control-flow-migration": {
+      "version": "20.0.0",
+      "description": "Converts the entire application to block control flow syntax",
+      "factory": "./bundles/control-flow-migration#migrate",
+      "optional": true
+    },
+    "document-core": {
+      "version": "20.0.0",
+      "description": "Moves imports of `DOCUMENT` from `@angular/common` to `@angular/core`",
+      "factory": "./bundles/document-core#migrate"
     }
   }
 }

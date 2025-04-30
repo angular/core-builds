@@ -1,18 +1,14 @@
 /**
- * @license Angular v18.1.0-next.0+sha-87c5f3c
- * (c) 2010-2024 Google LLC. https://angular.io/
+ * @license Angular v20.0.0-next.9+sha-f4d60ff
+ * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-import { DestroyRef } from '@angular/core';
-import { Injector } from '@angular/core';
-import { MonoTypeOperatorFunction } from 'rxjs';
-import { Observable } from 'rxjs';
-import { OutputOptions } from '@angular/core';
-import { OutputRef } from '@angular/core';
-import { Signal } from '@angular/core';
-import { Subscribable } from 'rxjs';
+import { OutputRef, DestroyRef, Signal, Injector } from '../chrome_dev_tools_performance.d-qv7drdAl.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-B58KU5QT.js';
+import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
+import { ValueEqualityFn } from '../graph.d-BcIOep_B.js';
+import '../event_dispatcher.d-DlbccpYq.js';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
@@ -36,9 +32,9 @@ import { Subscribable } from 'rxjs';
  * }
  * ```
  *
- * @developerPreview
+ * @publicApi
  */
-export declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
+declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
 
 /**
  * Converts an Angular output declared via `output()` or `outputFromObservable()`
@@ -46,9 +42,9 @@ export declare function outputFromObservable<T>(observable: Observable<T>, opts?
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
- * @developerPreview
+ * @publicApi
  */
-export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
+declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -58,27 +54,16 @@ export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
- * @developerPreview
+ * @publicApi
  */
-export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
-
-/**
- * Exposes the value of an Angular `Signal` as an RxJS `Observable`.
- *
- * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
- *
- * `toObservable` must be called in an injection context unless an injector is provided via options.
- *
- * @developerPreview
- */
-export declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
+declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
 
 /**
  * Options for `toObservable`.
  *
- * @developerPreview
+ * @publicApi
  */
-export declare interface ToObservableOptions {
+interface ToObservableOptions {
     /**
      * The `Injector` to use when creating the underlying `effect` which watches the signal.
      *
@@ -87,35 +72,23 @@ export declare interface ToObservableOptions {
      */
     injector?: Injector;
 }
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
-    initialValue?: undefined;
-    requireSync?: false;
-}): Signal<T | undefined>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
-    initialValue?: null;
-    requireSync?: false;
-}): Signal<T | null>;
-
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
-    initialValue?: undefined;
-    requireSync: true;
-}): Signal<T>;
-
-export declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
-    initialValue: U;
-    requireSync?: false;
-}): Signal<T | U>;
+/**
+ * Exposes the value of an Angular `Signal` as an RxJS `Observable`.
+ *
+ * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
+ *
+ * `toObservable` must be called in an injection context unless an injector is provided via options.
+ *
+ * @publicApi
+ */
+declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
 /**
  * Options for `toSignal`.
  *
  * @publicApi
  */
-export declare interface ToSignalOptions {
+interface ToSignalOptions<T> {
     /**
      * Initial value for the signal produced by `toSignal`.
      *
@@ -147,14 +120,65 @@ export declare interface ToSignalOptions {
      */
     manualCleanup?: boolean;
     /**
-     * Whether `toSignal` should throw errors from the Observable error channel back to RxJS, where
-     * they'll be processed as uncaught exceptions.
+     * A comparison function which defines equality for values emitted by the observable.
      *
-     * In practice, this means that the signal returned by `toSignal` will keep returning the last
-     * good value forever, as Observables which error produce no further values. This option emulates
-     * the behavior of the `async` pipe.
+     * Equality comparisons are executed against the initial value if one is provided.
      */
-    rejectErrors?: boolean;
+    equal?: ValueEqualityFn<T>;
 }
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | undefined>> & {
+    initialValue?: undefined;
+    requireSync?: false;
+}): Signal<T | undefined>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | null>> & {
+    initialValue?: null;
+    requireSync?: false;
+}): Signal<T | null>;
+declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T>> & {
+    initialValue?: undefined;
+    requireSync: true;
+}): Signal<T>;
+declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | U>> & {
+    initialValue: U;
+    requireSync?: false;
+}): Signal<T | U>;
 
-export { }
+/**
+ * Operator which makes the application unstable until the observable emits, completes, errors, or is unsubscribed.
+ *
+ * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
+ *
+ * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
+ *
+ * @developerPreview
+ */
+declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
+
+/**
+ * Like `ResourceOptions` but uses an RxJS-based `loader`.
+ *
+ * @experimental
+ */
+interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
+    stream: (params: ResourceLoaderParams<R>) => Observable<T>;
+}
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value.
+ *
+ * @experimental
+ */
+declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
+    defaultValue: NoInfer<T>;
+}): ResourceRef<T>;
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value.
+ *
+ * @experimental
+ */
+declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
+
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal };
+export type { RxResourceOptions, ToObservableOptions, ToSignalOptions };
