@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-next.8+sha-2bddce2
+ * @license Angular v20.0.0-next.8+sha-624be2e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, InjectionToken, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DTKVhAd7.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-C95A9imp.mjs';
 import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-CVVPheSN.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-BLZYODu2.mjs';
 
@@ -171,14 +171,6 @@ function effect(effectFn, options) {
     }
     return effectRef;
 }
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-/* @__PURE__ */ new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
 const BASE_EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
     ...REACTIVE_NODE,
@@ -577,4 +569,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-BEapo6Wy.mjs.map
+//# sourceMappingURL=resource-aJC_NNLX.mjs.map
