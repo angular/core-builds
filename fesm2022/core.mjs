@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.8+sha-222ae18
+ * @license Angular v19.2.8+sha-946b844
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6097,9 +6097,13 @@ class EventEmitter_ extends Subject {
         return (value) => {
             const taskId = this.pendingTasks?.add();
             setTimeout(() => {
-                fn(value);
-                if (taskId !== undefined) {
-                    this.pendingTasks?.remove(taskId);
+                try {
+                    fn(value);
+                }
+                finally {
+                    if (taskId !== undefined) {
+                        this.pendingTasks?.remove(taskId);
+                    }
                 }
             });
         };
@@ -17913,7 +17917,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.8+sha-222ae18']
+                ? ['ng-version', '19.2.8+sha-946b844']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34653,7 +34657,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.8+sha-222ae18');
+const VERSION = new Version('19.2.8+sha-946b844');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
