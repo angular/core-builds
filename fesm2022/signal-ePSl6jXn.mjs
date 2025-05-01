@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.9+sha-840c679
+ * @license Angular v20.0.0-next.9+sha-c276981
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -400,7 +400,7 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
         producerRecomputeValue(node) {
             if (node.value === COMPUTING) {
                 // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
+                throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Detected cycle in computations.' : '');
             }
             const oldValue = node.value;
             node.value = COMPUTING;
@@ -529,4 +529,4 @@ function signalValueChanged(node) {
 }
 
 export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
-//# sourceMappingURL=signal-CVVPheSN.mjs.map
+//# sourceMappingURL=signal-ePSl6jXn.mjs.map
