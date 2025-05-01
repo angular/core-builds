@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.1.0-next.0+sha-d2cb0b9
+ * @license Angular v20.1.0-next.0+sha-6bc9d45
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, producerAccessed, ERRORED, defaultEquals, UNSET, REACTIVE_NODE, COMPUTING, consumerBeforeComputation, consumerAfterComputation, runPostProducerCreatedFn, setActiveConsumer } from './signal-CVVPheSN.mjs';
+import { SIGNAL, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, producerAccessed, ERRORED, defaultEquals, UNSET, REACTIVE_NODE, COMPUTING, consumerBeforeComputation, consumerAfterComputation, runPostProducerCreatedFn, setActiveConsumer } from './signal-ePSl6jXn.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
     const node = Object.create(LINKED_SIGNAL_NODE);
@@ -61,7 +61,7 @@ const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
         producerRecomputeValue(node) {
             if (node.value === COMPUTING) {
                 // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
+                throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Detected cycle in computations.' : '');
             }
             const oldValue = node.value;
             node.value = COMPUTING;
@@ -114,4 +114,4 @@ function untracked(nonReactiveReadsFn) {
 }
 
 export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked };
-//# sourceMappingURL=untracked-BLZYODu2.mjs.map
+//# sourceMappingURL=untracked-2ouAFbCz.mjs.map

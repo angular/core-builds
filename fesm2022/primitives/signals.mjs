@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.1.0-next.0+sha-d2cb0b9
+ * @license Angular v20.1.0-next.0+sha-6bc9d45
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { consumerMarkDirty, SIGNAL, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, REACTIVE_NODE } from '../signal-CVVPheSN.mjs';
-export { SIGNAL_NODE, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal-CVVPheSN.mjs';
-export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked-BLZYODu2.mjs';
+import { consumerMarkDirty, SIGNAL, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, REACTIVE_NODE } from '../signal-ePSl6jXn.mjs';
+export { SIGNAL_NODE, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal-ePSl6jXn.mjs';
+export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked-2ouAFbCz.mjs';
 export { setAlternateWeakRefImpl } from '../weak_ref-BaIq-pgY.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {
@@ -38,7 +38,9 @@ function createWatch(fn, schedule, allowSignalWrites) {
             return;
         }
         if (isInNotificationPhase()) {
-            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
+            throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode
+                ? 'Schedulers cannot synchronously execute watches while scheduling.'
+                : '');
         }
         node.dirty = false;
         if (node.hasRun && !consumerPollProducersForChange(node)) {
