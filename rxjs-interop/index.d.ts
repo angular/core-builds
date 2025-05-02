@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-next.9+sha-bbdb166
+ * @license Angular v20.0.0-next.9+sha-782c6e1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { OutputRef, DestroyRef, Signal, Injector } from '../chrome_dev_tools_performance.d-qv7drdAl.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-B58KU5QT.js';
+import { OutputRef, DestroyRef, Signal, Injector } from '../chrome_dev_tools_performance.d-B0FzTuRf.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-CRxC7NlU.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { ValueEqualityFn } from '../graph.d-BcIOep_B.js';
 import '../event_dispatcher.d-DlbccpYq.js';
@@ -32,7 +32,7 @@ import '../event_dispatcher.d-DlbccpYq.js';
  * }
  * ```
  *
- * @publicApi
+ * @publicApi 19.0
  */
 declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
 
@@ -42,7 +42,7 @@ declare function outputFromObservable<T>(observable: Observable<T>, opts?: Outpu
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
- * @publicApi
+ * @publicApi 19.0
  */
 declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
 
@@ -54,14 +54,14 @@ declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
- * @publicApi
+ * @publicApi 19.0
  */
 declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
 
 /**
  * Options for `toObservable`.
  *
- * @publicApi
+ * @publicApi 20.0
  */
 interface ToObservableOptions {
     /**
@@ -79,14 +79,14 @@ interface ToObservableOptions {
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
- * @publicApi
+ * @publicApi 20.0
  */
 declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
 /**
  * Options for `toSignal`.
  *
- * @publicApi
+ * @publicApi 20.0
  */
 interface ToSignalOptions<T> {
     /**
@@ -151,7 +151,7 @@ declare function toSignal<T, const U extends T>(source: Observable<T> | Subscrib
  *
  * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
  *
- * @developerPreview
+ * @developerPreview 20.0
  */
 declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
 

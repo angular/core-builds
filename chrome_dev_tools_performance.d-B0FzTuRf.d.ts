@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-next.9+sha-bbdb166
+ * @license Angular v20.0.0-next.9+sha-782c6e1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,12 +14,16 @@ import { EventContract } from './event_dispatcher.d-DlbccpYq.js';
  * call it.
  *
  * Ordinary values can be turned into `Signal`s with the `signal` function.
+ *
+ * @publicApi 17.0
  */
 type Signal<T> = (() => T) & {
     [SIGNAL]: unknown;
 };
 /**
  * Checks if the given `value` is a reactive `Signal`.
+ *
+ * @publicApi 17.0
  */
 declare function isSignal(value: unknown): value is Signal<unknown>;
 /**
@@ -31,6 +35,8 @@ type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 declare const ɵWRITABLE_SIGNAL: unique symbol;
 /**
  * A `Signal` with a value that can be mutated via a setter interface.
+ *
+ * @publicApi 17.0
  */
 interface WritableSignal<T> extends Signal<T> {
     [ɵWRITABLE_SIGNAL]: T;
