@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.9+sha-a4512ae
+ * @license Angular v19.2.9+sha-9685469
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11029,7 +11029,7 @@ declare abstract class ViewContainerRef {
      */
     abstract createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, index?: number): EmbeddedViewRef<C>;
     /**
-     * Instantiates a single component and inserts its host view into this container.
+     * Instantiates a component and inserts its host view into this view container.
      *
      * @param componentType Component Type to use.
      * @param options An object that contains extra parameters:
