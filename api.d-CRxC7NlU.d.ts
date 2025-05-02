@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.1.0-next.0+sha-8828a84
+ * @license Angular v20.1.0-next.0+sha-5fe726d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, ValueEqualityFn, Injector } from './chrome_dev_tools_performance.d-qv7drdAl.js';
+import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, ValueEqualityFn, Injector } from './chrome_dev_tools_performance.d-B0FzTuRf.js';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -34,7 +34,7 @@ declare function getOutputDestroyRef(ref: OutputRef<unknown>): DestroyRef | unde
 /**
  * Options for declaring an output.
  *
- * @publicAPI
+ * @publicApi 19.0
  */
 interface OutputOptions {
     alias?: string;
@@ -79,7 +79,7 @@ interface OutputOptions {
  * }
  * ```
  * @initializerApiFunction {"showTypesInSignaturePreview": true}
- * @publicAPI
+ * @publicApi 19.0
  */
 declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
 

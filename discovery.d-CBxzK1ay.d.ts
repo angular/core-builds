@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.1.0-next.0+sha-8828a84
+ * @license Angular v20.1.0-next.0+sha-5fe726d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, ProcessProvidersFunction, ModuleWithProviders, Provider, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d-qv7drdAl.js';
+import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, ProcessProvidersFunction, ModuleWithProviders, Provider, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d-B0FzTuRf.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { SignalNode } from './signal.d-D6VJ67xi.js';
 import { ReactiveNode } from './graph.d-BcIOep_B.js';
@@ -2972,6 +2972,8 @@ declare abstract class EffectScheduler {
 
 /**
  * A global reactive effect, which can be manually destroyed.
+ *
+ * @publicApi 20.0
  */
 interface EffectRef {
     /**
@@ -2981,6 +2983,8 @@ interface EffectRef {
 }
 /**
  * Options passed to the `effect` function.
+ *
+ * @publicApi 20.0
  */
 interface CreateEffectOptions {
     /**
@@ -3013,10 +3017,14 @@ interface CreateEffectOptions {
  * An effect can, optionally, register a cleanup function. If registered, the cleanup is executed
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
+ *
+ * @publicApi 20.0
  */
 type EffectCleanupFn = () => void;
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
+ *
+ * @publicApi 20.0
  */
 type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 /**
@@ -3034,6 +3042,8 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
+ *
+ * @publicApi 20.0
  */
 declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
 interface EffectNode extends ReactiveNode, SchedulableEffect {

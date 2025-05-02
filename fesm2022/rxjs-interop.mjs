@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.1.0-next.0+sha-8828a84
+ * @license Angular v20.1.0-next.0+sha-5fe726d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-D63DjV_m.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-D4SatBQ8.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-B_EWGyLU.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-nrAenwIA.mjs';
 import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
 import '@angular/core/primitives/di';
@@ -22,7 +22,7 @@ import './untracked-2ouAFbCz.mjs';
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
- * @publicApi
+ * @publicApi 19.0
  */
 function takeUntilDestroyed(destroyRef) {
     if (!destroyRef) {
@@ -91,7 +91,7 @@ class OutputFromObservableRef {
  * }
  * ```
  *
- * @publicApi
+ * @publicApi 19.0
  */
 function outputFromObservable(observable, opts) {
     ngDevMode && assertInInjectionContext(outputFromObservable);
@@ -104,7 +104,7 @@ function outputFromObservable(observable, opts) {
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
- * @publicApi
+ * @publicApi 19.0
  */
 function outputToObservable(ref) {
     const destroyRef = getOutputDestroyRef(ref);
@@ -125,7 +125,7 @@ function outputToObservable(ref) {
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
- * @publicApi
+ * @publicApi 20.0
  */
 function toObservable(source, options) {
     !options?.injector && assertInInjectionContext(toObservable);
@@ -240,7 +240,7 @@ function makeToSignalEqual(userEquality = Object.is) {
  *
  * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
  *
- * @developerPreview
+ * @developerPreview 20.0
  */
 function pendingUntilEvent(injector) {
     if (injector === undefined) {
