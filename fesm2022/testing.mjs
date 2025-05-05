@@ -1,20 +1,20 @@
 /**
- * @license Angular v20.1.0-next.0+sha-d8532bc
+ * @license Angular v20.1.0-next.0+sha-e7f5aa2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import { CONTAINER_HEADER_OFFSET, InjectionToken, inject as inject$1, EnvironmentInjector, ErrorHandler, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-B_EWGyLU.mjs';
 import { Subscription } from 'rxjs';
 import { DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NgZone, Injectable, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-3mmnD06K.mjs';
-import { CONTAINER_HEADER_OFFSET, InjectionToken, inject as inject$1, EnvironmentInjector, ErrorHandler, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-B_EWGyLU.mjs';
 import * as i0 from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
+import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
+import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
 import 'rxjs/operators';
 import './attribute-BWp59EjE.mjs';
-import './primitives/di.mjs';
-import '@angular/core/primitives/di';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
