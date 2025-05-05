@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-310e5ff
+ * @license Angular v20.1.0-next.0+sha-2c17145
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-BSv6JWRF.js');
+var compiler = require('./compiler-COFP8tds.js');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -171,6 +171,10 @@ exports.ErrorCode = void 0;
      * class used as a component).
      */
     ErrorCode[ErrorCode["INCORRECT_NAMED_TEMPLATE_DEPENDENCY_TYPE"] = 2025] = "INCORRECT_NAMED_TEMPLATE_DEPENDENCY_TYPE";
+    /**
+     * Raised for `@Component` fields that aren't supported in a selectorless context.
+     */
+    ErrorCode[ErrorCode["UNSUPPORTED_SELECTORLESS_COMPONENT_FIELD"] = 2026] = "UNSUPPORTED_SELECTORLESS_COMPONENT_FIELD";
     ErrorCode[ErrorCode["SYMBOL_NOT_EXPORTED"] = 3001] = "SYMBOL_NOT_EXPORTED";
     /**
      * Raised when a relationship between directives and/or pipes would cause a cyclic import to be
@@ -1000,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BAl7CJ0l.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CrYP6hli.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -7308,6 +7312,7 @@ exports.ComponentScopeKind = void 0;
 (function (ComponentScopeKind) {
     ComponentScopeKind[ComponentScopeKind["NgModule"] = 0] = "NgModule";
     ComponentScopeKind[ComponentScopeKind["Standalone"] = 1] = "Standalone";
+    ComponentScopeKind[ComponentScopeKind["Selectorless"] = 2] = "Selectorless";
 })(exports.ComponentScopeKind || (exports.ComponentScopeKind = {}));
 
 /**
@@ -12284,7 +12289,7 @@ class OutOfBandDiagnosticRecorderImpl {
         `Cannot find name "${node instanceof compiler.Directive ? node.name : node.componentName}".`));
     }
     incorrectTemplateDependencyType(id, node) {
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INCORRECT_NAMED_TEMPLATE_DEPENDENCY_TYPE), `Incorrect reference type. Type must be an ${node instanceof compiler.Component ? '@Component' : '@Directive'}.`));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INCORRECT_NAMED_TEMPLATE_DEPENDENCY_TYPE), `Incorrect reference type. Type must be a standalone ${node instanceof compiler.Component ? '@Component' : '@Directive'}.`));
     }
     unclaimedDirectiveBinding(id, directive, node) {
         const errorMsg = `Directive ${directive.name} does not have an ` +
@@ -15140,7 +15145,7 @@ class Scope {
             const directives = this.tcb.boundTarget.getDirectivesOfNode(directive);
             if (directives === null ||
                 directives.length === 0 ||
-                directives.some((dir) => dir.isComponent)) {
+                directives.some((dir) => dir.isComponent || !dir.isStandalone)) {
                 this.tcb.oobRecorder.incorrectTemplateDependencyType(this.tcb.id, directive);
                 continue;
             }
@@ -15213,7 +15218,7 @@ class Scope {
         const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
         if (directives === null ||
             directives.length === 0 ||
-            directives.every((dir) => !dir.isComponent)) {
+            directives.every((dir) => !dir.isComponent || !dir.isStandalone)) {
             this.tcb.oobRecorder.incorrectTemplateDependencyType(this.tcb.id, node);
             return;
         }
@@ -17476,12 +17481,19 @@ class TemplateTypeCheckerImpl {
         return builder;
     }
     getPotentialTemplateDirectives(component) {
+        const scope = this.getComponentScope(component);
+        // Don't resolve directives for selectorless components since they're already in the file.
+        if (scope?.kind === exports.ComponentScopeKind.Selectorless) {
+            return [];
+        }
         const typeChecker = this.programDriver.getProgram().getTypeChecker();
-        const inScopeDirectives = this.getScopeData(component)?.directives ?? [];
         const resultingDirectives = new Map();
-        // First, all in scope directives can be used.
-        for (const d of inScopeDirectives) {
-            resultingDirectives.set(d.ref.node, d);
+        if (scope !== null) {
+            const inScopeDirectives = this.getScopeData(component, scope)?.directives ?? [];
+            // First, all in scope directives can be used.
+            for (const d of inScopeDirectives) {
+                resultingDirectives.set(d.ref.node, d);
+            }
         }
         // Any additional directives found from the global registry can be used, but are not in scope.
         // In the future, we can also walk other registries for .d.ts files, or traverse the
@@ -17500,12 +17512,19 @@ class TemplateTypeCheckerImpl {
         return Array.from(resultingDirectives.values());
     }
     getPotentialPipes(component) {
+        const scope = this.getComponentScope(component);
+        // Don't resolve pipes for selectorless components since they're already in the file.
+        if (scope?.kind === exports.ComponentScopeKind.Selectorless) {
+            return [];
+        }
         // Very similar to the above `getPotentialTemplateDirectives`, but on pipes.
         const typeChecker = this.programDriver.getProgram().getTypeChecker();
-        const inScopePipes = this.getScopeData(component)?.pipes ?? [];
         const resultingPipes = new Map();
-        for (const p of inScopePipes) {
-            resultingPipes.set(p.ref.node, p);
+        if (scope !== null) {
+            const inScopePipes = this.getScopeData(component, scope)?.pipes ?? [];
+            for (const p of inScopePipes) {
+                resultingPipes.set(p.ref.node, p);
+            }
         }
         for (const pipeClass of this.localMetaReader.getKnown(exports.MetaKind.Pipe)) {
             const pipeMeta = this.metaReader.getPipeMetadata(new Reference(pipeClass));
@@ -17669,16 +17688,15 @@ class TemplateTypeCheckerImpl {
         }
         return imports;
     }
-    getScopeData(component) {
-        if (this.scopeCache.has(component)) {
-            return this.scopeCache.get(component);
-        }
+    getComponentScope(component) {
         if (!isNamedClassDeclaration(component)) {
             throw new Error(`AssertionError: components must have names`);
         }
-        const scope = this.componentScopeReader.getScopeForComponent(component);
-        if (scope === null) {
-            return null;
+        return this.componentScopeReader.getScopeForComponent(component);
+    }
+    getScopeData(component, scope) {
+        if (this.scopeCache.has(component)) {
+            return this.scopeCache.get(component);
         }
         const dependencies = scope.kind === exports.ComponentScopeKind.NgModule
             ? scope.compilation.dependencies

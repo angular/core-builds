@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-310e5ff
+ * @license Angular v20.1.0-next.0+sha-2c17145
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30304,9 +30304,7 @@ class R3TargetBinder {
             //   - bindings: Map of inputs, outputs, and attributes to the directive/element that claims
             //     them. TODO(alxhub): handle multiple directives claiming an input/output/etc.
             //   - references: Map of #references to their targets.
-            if (this.directiveMatcher !== null) {
-                DirectiveBinder.apply(target.template, this.directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references);
-            }
+            DirectiveBinder.apply(target.template, this.directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references);
             // Finally, run the TemplateBinder to bind references, variables, and other entities within the
             // template. This extracts all the metadata that doesn't depend on directive matching.
             TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
@@ -30639,6 +30637,13 @@ class DirectiveBinder {
             const cssSelector = createCssSelectorFromNode(node);
             this.directiveMatcher.match(cssSelector, (_, results) => directives.push(...results));
             this.trackSelectorBasedBindingsAndDirectives(node, directives);
+        }
+        else {
+            node.references.forEach((ref) => {
+                if (ref.value.trim() === '') {
+                    this.references.set(ref, node);
+                }
+            });
         }
         node.directives.forEach((directive) => directive.visit(this));
         node.children.forEach((child) => child.visit(this));
@@ -32364,7 +32369,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-310e5ff');
+new Version('20.1.0-next.0+sha-2c17145');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32476,6 +32481,7 @@ exports.SafeCall = SafeCall;
 exports.SafeKeyedRead = SafeKeyedRead;
 exports.SafePropertyRead = SafePropertyRead;
 exports.SelectorMatcher = SelectorMatcher;
+exports.SelectorlessMatcher = SelectorlessMatcher;
 exports.Serializer = Serializer;
 exports.SwitchBlock = SwitchBlock;
 exports.Tag = Tag;
