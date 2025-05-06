@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.9+sha-e9e1c43
+ * @license Angular v19.2.9+sha-c081e04
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2140,7 +2140,7 @@ class R3Injector extends EnvironmentInjector {
                 }
                 // If a record was found, get the instance for it and return it.
                 if (record != null /* NOT null || undefined */) {
-                    return this.hydrate(token, record);
+                    return this.hydrate(token, record, flags);
                 }
             }
             // Select the next injector based on the Self flag - if self is set, the next injector is
@@ -2263,7 +2263,7 @@ class R3Injector extends EnvironmentInjector {
         }
         this.records.set(token, record);
     }
-    hydrate(token, record) {
+    hydrate(token, record, flags) {
         const prevConsumer = setActiveConsumer(null);
         try {
             if (record.value === CIRCULAR) {
@@ -2273,12 +2273,12 @@ class R3Injector extends EnvironmentInjector {
                 record.value = CIRCULAR;
                 if (ngDevMode) {
                     runInInjectorProfilerContext(this, token, () => {
-                        record.value = record.factory();
+                        record.value = record.factory(undefined, flags);
                         emitInstanceCreatedByInjectorEvent(record.value);
                     });
                 }
                 else {
-                    record.value = record.factory();
+                    record.value = record.factory(undefined, flags);
                 }
             }
             if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
@@ -2379,7 +2379,7 @@ function providerToFactory(provider, ngModuleType, providers) {
             factory = () => provider.useFactory(...injectArgs(provider.deps || []));
         }
         else if (isExistingProvider(provider)) {
-            factory = () => ɵɵinject(resolveForwardRef(provider.useExisting));
+            factory = (_, flags) => ɵɵinject(resolveForwardRef(provider.useExisting), flags !== undefined && flags & InjectFlags.Optional ? InjectFlags.Optional : undefined);
         }
         else {
             const classRef = resolveForwardRef(provider &&
@@ -5245,7 +5245,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
     const isHostSpecialCase = flags & InjectFlags.Host && hostTElementNode === tNode;
     const injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
-        return getNodeInjectable(lView, currentTView, injectableIdx, tNode);
+        return getNodeInjectable(lView, currentTView, injectableIdx, tNode, flags);
     }
     else {
         return NOT_FOUND;
@@ -5295,7 +5295,7 @@ function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, 
  * cached `injectable`. Otherwise if it detects that the value is still a factory it
  * instantiates the `injectable` and caches the value.
  */
-function getNodeInjectable(lView, tView, index, tNode) {
+function getNodeInjectable(lView, tView, index, tNode, flags) {
     let value = lView[index];
     const tData = tView.data;
     if (value instanceof NodeInjectorFactory) {
@@ -5322,7 +5322,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
         ngDevMode &&
             assertEqual(success, true, "Because flags do not contain `SkipSelf' we expect this to always succeed.");
         try {
-            value = lView[index] = factory.factory(undefined, tData, lView, tNode);
+            value = lView[index] = factory.factory(undefined, flags, tData, lView, tNode);
             ngDevMode && emitInstanceCreatedByInjectorEvent(value);
             // This code path is hit for both directives and providers.
             // For perf reasons, we want to avoid searching for hooks on providers.
@@ -17944,7 +17944,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.9+sha-e9e1c43']
+                ? ['ng-version', '19.2.9+sha-c081e04']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -32422,7 +32422,7 @@ function indexOf(item, arr, begin, end) {
 /**
  * Use this with `multi` `providers`.
  */
-function multiProvidersFactoryResolver(_, tData, lData, tNode) {
+function multiProvidersFactoryResolver(_, flags, tData, lData, tNode) {
     return multiResolve(this.multi, []);
 }
 /**
@@ -32430,7 +32430,7 @@ function multiProvidersFactoryResolver(_, tData, lData, tNode) {
  *
  * This factory knows how to concatenate itself with the existing `multi` `providers`.
  */
-function multiViewProvidersFactoryResolver(_, tData, lView, tNode) {
+function multiViewProvidersFactoryResolver(_, _flags, _tData, lView, tNode) {
     const factories = this.multi;
     let result;
     if (this.providerFactory) {
@@ -34683,7 +34683,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.9+sha-e9e1c43');
+const VERSION = new Version('19.2.9+sha-c081e04');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
