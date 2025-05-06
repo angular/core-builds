@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-a2b6163
+ * @license Angular v20.1.0-next.0+sha-583b9a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1950,7 +1950,7 @@ class R3Injector extends EnvironmentInjector {
                 }
                 // If a record was found, get the instance for it and return it.
                 if (record != null /* NOT null || undefined */) {
-                    return this.hydrate(token, record);
+                    return this.hydrate(token, record, flags);
                 }
             }
             // Select the next injector based on the Self flag - if self is set, the next injector is
@@ -2077,7 +2077,7 @@ class R3Injector extends EnvironmentInjector {
         }
         this.records.set(token, record);
     }
-    hydrate(token, record) {
+    hydrate(token, record, flags) {
         const prevConsumer = setActiveConsumer(null);
         try {
             if (record.value === CIRCULAR) {
@@ -2088,12 +2088,12 @@ class R3Injector extends EnvironmentInjector {
                 if (ngDevMode) {
                     runInInjectorProfilerContext(this, token, () => {
                         emitInjectorToCreateInstanceEvent(token);
-                        record.value = record.factory();
+                        record.value = record.factory(undefined, flags);
                         emitInstanceCreatedByInjectorEvent(record.value);
                     });
                 }
                 else {
-                    record.value = record.factory();
+                    record.value = record.factory(undefined, flags);
                 }
             }
             if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
@@ -2194,7 +2194,9 @@ function providerToFactory(provider, ngModuleType, providers) {
             factory = () => provider.useFactory(...injectArgs(provider.deps || []));
         }
         else if (isExistingProvider(provider)) {
-            factory = () => ɵɵinject(resolveForwardRef(provider.useExisting));
+            factory = (_, flags) => ɵɵinject(resolveForwardRef(provider.useExisting), flags !== undefined && flags & 8 /* InternalInjectFlags.Optional */
+                ? 8 /* InternalInjectFlags.Optional */
+                : undefined);
         }
         else {
             const classRef = resolveForwardRef(provider &&
@@ -3909,4 +3911,4 @@ class ZoneAwareEffectScheduler {
 }
 
 export { AFTER_RENDER_SEQUENCES_TO_ADD, CHILD_HEAD, CHILD_TAIL, CLEANUP, CONTAINER_HEADER_OFFSET, CONTEXT, ChangeDetectionScheduler, CheckNoChangesMode, DECLARATION_COMPONENT_VIEW, DECLARATION_LCONTAINER, DECLARATION_VIEW, DEHYDRATED_VIEWS, DOCUMENT, DestroyRef, EFFECTS, EFFECTS_TO_SCHEDULE, EMBEDDED_VIEW_INJECTOR, EMPTY_ARRAY, EMPTY_OBJ, ENVIRONMENT, ENVIRONMENT_INITIALIZER, EffectScheduler, EnvironmentInjector, ErrorHandler, FLAGS, HEADER_OFFSET, HOST, HYDRATION, ID, INJECTOR$1 as INJECTOR, INJECTOR as INJECTOR$1, INJECTOR_DEF_TYPES, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, InjectionToken, Injector, MATH_ML_NAMESPACE, MOVED_VIEWS, NATIVE, NEXT, NG_COMP_DEF, NG_DIR_DEF, NG_ELEMENT_ID, NG_FACTORY_DEF, NG_INJ_DEF, NG_MOD_DEF, NG_PIPE_DEF, NG_PROV_DEF, NodeInjectorDestroyRef, NullInjector, ON_DESTROY_HOOKS, PARENT, PREORDER_HOOK_FLAGS, PROVIDED_ZONELESS, PendingTasks, PendingTasksInternal, QUERIES, R3Injector, REACTIVE_TEMPLATE_CONSUMER, RENDERER, RuntimeError, SCHEDULE_IN_ROOT_ZONE, SVG_NAMESPACE, TVIEW, T_HOST, VIEW_REFS, ViewContext, XSS_SECURITY_URL, ZONELESS_ENABLED, ZONELESS_SCHEDULER_DISABLED, _global, addToArray, arrayEquals, arrayInsert2, arraySplice, assertComponentType, assertDefined, assertDirectiveDef, assertDomNode, assertElement, assertEqual, assertFirstCreatePass, assertFirstUpdatePass, assertFunction, assertGreaterThan, assertGreaterThanOrEqual, assertHasParent, assertInInjectionContext, assertIndexInDeclRange, assertIndexInExpandoRange, assertIndexInRange, assertInjectImplementationNotEqual, assertLContainer, assertLView, assertLessThan, assertNgModuleType, assertNodeInjector, assertNotDefined, assertNotEqual, assertNotInReactiveContext, assertNotReactive, assertNotSame, assertNumber, assertNumberInRange, assertOneOf, assertParentView, assertProjectionSlots, assertSame, assertString, assertTIcu, assertTNode, assertTNodeForLView, assertTNodeForTView, attachInjectFlag, concatStringsWithSpace, convertToBitFlags, createInjector, createInjectorWithoutInjectorInstances, debugStringifyTypeForError, decreaseElementDepthCount, deepForEach, defineInjectable, emitEffectCreatedEvent, emitInjectEvent, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, emitProviderConfiguredEvent, enterDI, enterSkipHydrationBlock, enterView, errorHandlerEnvironmentInitializer, fillProperties, flatten, formatRuntimeError, forwardRef, getBindingIndex, getBindingRoot, getBindingsEnabled, getClosureSafeProperty, getComponentDef, getComponentLViewByIndex, getConstant, getContextLView, getCurrentDirectiveDef, getCurrentDirectiveIndex, getCurrentParentTNode, getCurrentQueryIndex, getCurrentTNode, getCurrentTNodePlaceholderOk, getDirectiveDef, getDirectiveDefOrThrow, getElementDepthCount, getFactoryDef, getInjectableDef, getInjectorDef, getLView, getLViewParent, getNamespace, getNativeByIndex, getNativeByTNode, getNativeByTNodeOrNull, getNgModuleDef, getNgModuleDefOrThrow, getNullInjector, getOrCreateLViewCleanup, getOrCreateTViewCleanup, getPipeDef, getSelectedIndex, getSelectedTNode, getTNode, getTView, hasI18n, importProvidersFrom, increaseElementDepthCount, incrementBindingIndex, initNgDevMode, inject, injectRootLimpMode, internalImportProvidersFrom, isClassProvider, isComponentDef, isComponentHost, isContentQueryHost, isCreationMode, isCurrentTNodeParent, isDestroyed, isDirectiveHost, isEnvironmentProviders, isExhaustiveCheckNoChanges, isForwardRef, isInCheckNoChangesMode, isInI18nBlock, isInInjectionContext, isInSkipHydrationBlock, isInjectable, isLContainer, isLView, isProjectionTNode, isRefreshingViews, isRootView, isSignal, isSkipHydrationRootTNode, isStandalone, isTypeProvider, isWritableSignal, keyValueArrayGet, keyValueArrayIndexOf, keyValueArraySet, lastNodeWasCreated, leaveDI, leaveSkipHydrationBlock, leaveView, load, makeEnvironmentProviders, markAncestorsForTraversal, markViewForRefresh, newArray, nextBindingIndex, nextContextImpl, noop, provideBrowserGlobalErrorListeners, provideEnvironmentInitializer, providerToFactory, removeFromArray, removeLViewOnDestroy, renderStringify, requiresRefreshOrTraversal, resetPreOrderHookFlags, resolveForwardRef, runInInjectionContext, runInInjectorProfilerContext, setBindingIndex, setBindingRootForHostBindings, setCurrentDirectiveIndex, setCurrentQueryIndex, setCurrentTNode, setCurrentTNodeAsNotParent, setInI18nBlock, setInjectImplementation, setInjectorProfiler, setInjectorProfilerContext, setIsInCheckNoChangesMode, setIsRefreshingViews, setSelectedIndex, signal, signalAsReadonlyFn, storeCleanupWithContext, storeLViewOnDestroy, stringify, stringifyForError, throwCyclicDependencyError, throwError, throwProviderNotFoundError, truncateMiddle, unwrapLView, unwrapRNode, updateAncestorTraversalFlagsOnAttach, viewAttachedToChangeDetector, viewAttachedToContainer, walkProviderTree, walkUpViews, wasLastNodeCreated, ɵunwrapWritableSignal, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinject, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView };
-//# sourceMappingURL=root_effect_scheduler-B_EWGyLU.mjs.map
+//# sourceMappingURL=root_effect_scheduler-DykAAPJ3.mjs.map
