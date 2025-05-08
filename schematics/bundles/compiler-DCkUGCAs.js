@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-ce5a943
+ * @license Angular v20.1.0-next.0+sha-0558575
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4244,15 +4244,31 @@ class KeyedWrite extends AST {
         return visitor.visitKeyedWrite(this, context);
     }
 }
+/** Possible types for a pipe. */
+exports.BindingPipeType = void 0;
+(function (BindingPipeType) {
+    /**
+     * Pipe is being referenced by its name, for example:
+     * `@Pipe({name: 'foo'}) class FooPipe` and `{{123 | foo}}`.
+     */
+    BindingPipeType[BindingPipeType["ReferencedByName"] = 0] = "ReferencedByName";
+    /**
+     * Pipe is being referenced by its class name, for example:
+     * `@Pipe() class FooPipe` and `{{123 | FooPipe}}`.
+     */
+    BindingPipeType[BindingPipeType["ReferencedDirectly"] = 1] = "ReferencedDirectly";
+})(exports.BindingPipeType || (exports.BindingPipeType = {}));
 class BindingPipe extends ASTWithName {
     exp;
     name;
     args;
-    constructor(span, sourceSpan, exp, name, args, nameSpan) {
+    type;
+    constructor(span, sourceSpan, exp, name, args, type, nameSpan) {
         super(span, sourceSpan, nameSpan);
         this.exp = exp;
         this.name = name;
         this.args = args;
+        this.type = type;
     }
     visit(visitor, context = null) {
         return visitor.visitPipe(this, context);
@@ -5511,7 +5527,7 @@ function visitAll$1(visitor, nodes) {
     const result = [];
     if (visitor.visit) {
         for (const node of nodes) {
-            visitor.visit(node) || node.visit(visitor);
+            visitor.visit(node);
         }
     }
     else {
@@ -18625,15 +18641,17 @@ class TemplateBindingParseResult {
 }
 class Parser {
     _lexer;
+    _supportsDirectPipeReferences;
     errors = [];
-    constructor(_lexer) {
+    constructor(_lexer, _supportsDirectPipeReferences = false) {
         this._lexer = _lexer;
+        this._supportsDirectPipeReferences = _supportsDirectPipeReferences;
     }
     parseAction(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
         this._checkNoInterpolation(input, location, interpolationConfig);
         const sourceToLex = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
-        const ast = new _ParseAST(input, location, absoluteOffset, tokens, 1 /* ParseFlags.Action */, this.errors, 0).parseChain();
+        const ast = new _ParseAST(input, location, absoluteOffset, tokens, 1 /* ParseFlags.Action */, this.errors, 0, this._supportsDirectPipeReferences).parseChain();
         return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
     }
     parseBinding(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
@@ -18661,7 +18679,7 @@ class Parser {
         this._checkNoInterpolation(input, location, interpolationConfig);
         const sourceToLex = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
-        return new _ParseAST(input, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0).parseChain();
+        return new _ParseAST(input, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0, this._supportsDirectPipeReferences).parseChain();
     }
     /**
      * Parse microsyntax template expression and return a list of bindings or
@@ -18691,7 +18709,7 @@ class Parser {
      */
     parseTemplateBindings(templateKey, templateValue, templateUrl, absoluteKeyOffset, absoluteValueOffset) {
         const tokens = this._lexer.tokenize(templateValue);
-        const parser = new _ParseAST(templateValue, templateUrl, absoluteValueOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0 /* relative offset */);
+        const parser = new _ParseAST(templateValue, templateUrl, absoluteValueOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0 /* relative offset */, this._supportsDirectPipeReferences);
         return parser.parseTemplateBindings({
             source: templateKey,
             span: new AbsoluteSourceSpan(absoluteKeyOffset, absoluteKeyOffset + templateKey.length),
@@ -18706,7 +18724,7 @@ class Parser {
             const expressionText = expressions[i].text;
             const sourceToLex = this._stripComments(expressionText);
             const tokens = this._lexer.tokenize(sourceToLex);
-            const ast = new _ParseAST(input, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, offsets[i]).parseChain();
+            const ast = new _ParseAST(input, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, offsets[i], this._supportsDirectPipeReferences).parseChain();
             expressionNodes.push(ast);
         }
         return this.createInterpolationAst(strings.map((s) => s.text), expressionNodes, input, location, absoluteOffset);
@@ -18719,7 +18737,7 @@ class Parser {
     parseInterpolationExpression(expression, location, absoluteOffset) {
         const sourceToLex = this._stripComments(expression);
         const tokens = this._lexer.tokenize(sourceToLex);
-        const ast = new _ParseAST(expression, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0).parseChain();
+        const ast = new _ParseAST(expression, location, absoluteOffset, tokens, 0 /* ParseFlags.None */, this.errors, 0, this._supportsDirectPipeReferences).parseChain();
         const strings = ['', '']; // The prefix and suffix strings are both empty
         return this.createInterpolationAst(strings, [ast], expression, location, absoluteOffset);
     }
@@ -18902,6 +18920,7 @@ class _ParseAST {
     parseFlags;
     errors;
     offset;
+    supportsDirectPipeReferences;
     rparensExpected = 0;
     rbracketsExpected = 0;
     rbracesExpected = 0;
@@ -18912,7 +18931,7 @@ class _ParseAST {
     // and may change for subsequent expressions visited by the parser.
     sourceSpanCache = new Map();
     index = 0;
-    constructor(input, location, absoluteOffset, tokens, parseFlags, errors, offset) {
+    constructor(input, location, absoluteOffset, tokens, parseFlags, errors, offset, supportsDirectPipeReferences) {
         this.input = input;
         this.location = location;
         this.absoluteOffset = absoluteOffset;
@@ -18920,6 +18939,7 @@ class _ParseAST {
         this.parseFlags = parseFlags;
         this.errors = errors;
         this.offset = offset;
+        this.supportsDirectPipeReferences = supportsDirectPipeReferences;
     }
     peek(offset) {
         const i = this.index + offset;
@@ -19148,7 +19168,18 @@ class _ParseAST {
                     // If there are additional expressions beyond the name, then the artificial end for the
                     // name is no longer relevant.
                 }
-                result = new BindingPipe(this.span(start), this.sourceSpan(start, fullSpanEnd), result, nameId, args, nameSpan);
+                let type;
+                if (this.supportsDirectPipeReferences) {
+                    const charCode = nameId.charCodeAt(0);
+                    type =
+                        charCode === $_ || (charCode >= $A && charCode <= $Z)
+                            ? exports.BindingPipeType.ReferencedDirectly
+                            : exports.BindingPipeType.ReferencedByName;
+                }
+                else {
+                    type = exports.BindingPipeType.ReferencedByName;
+                }
+                result = new BindingPipe(this.span(start), this.sourceSpan(start, fullSpanEnd), result, nameId, args, type, nameSpan);
             } while (this.consumeOptionalOperator('|'));
         }
         return result;
@@ -29645,7 +29676,8 @@ const LEADING_TRIVIA_CHARS = [' ', '\n', '\r', '\t'];
  */
 function parseTemplate(template, templateUrl, options = {}) {
     const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
-    const bindingParser = makeBindingParser(interpolationConfig);
+    const selectorlessEnabled = options.enableSelectorless ?? false;
+    const bindingParser = makeBindingParser(interpolationConfig, selectorlessEnabled);
     const htmlParser = new HtmlParser();
     const parseResult = htmlParser.parse(template, templateUrl, {
         leadingTriviaChars: LEADING_TRIVIA_CHARS,
@@ -29653,7 +29685,7 @@ function parseTemplate(template, templateUrl, options = {}) {
         tokenizeExpansionForms: true,
         tokenizeBlocks: options.enableBlockSyntax ?? true,
         tokenizeLet: options.enableLetSyntax ?? true,
-        selectorlessEnabled: options.enableSelectorless ?? false,
+        selectorlessEnabled,
     });
     if (!options.alwaysAttemptHtmlToR3AstConversion &&
         parseResult.errors &&
@@ -29752,8 +29784,8 @@ const elementRegistry = new DomElementSchemaRegistry();
 /**
  * Construct a `BindingParser` with a default configuration.
  */
-function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, []);
+function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, selectorlessEnabled = false) {
+    return new BindingParser(new Parser(new Lexer(), selectorlessEnabled), interpolationConfig, elementRegistry, []);
 }
 
 const COMPONENT_VARIABLE = '%COMP%';
@@ -30263,6 +30295,132 @@ function compileDeferResolverFunction(meta) {
     return arrowFn([], literalArr(depExpressions));
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Visitor that traverses all template and expression AST nodes in a template.
+ * Useful for cases where every single node needs to be visited.
+ */
+class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
+    visit(node) {
+        if (node instanceof ASTWithSource) {
+            this.visit(node.ast);
+        }
+        else {
+            node.visit(this);
+        }
+    }
+    visitElement(element) {
+        this.visitAllTemplateNodes(element.attributes);
+        this.visitAllTemplateNodes(element.inputs);
+        this.visitAllTemplateNodes(element.outputs);
+        this.visitAllTemplateNodes(element.directives);
+        this.visitAllTemplateNodes(element.references);
+        this.visitAllTemplateNodes(element.children);
+    }
+    visitTemplate(template) {
+        this.visitAllTemplateNodes(template.attributes);
+        this.visitAllTemplateNodes(template.inputs);
+        this.visitAllTemplateNodes(template.outputs);
+        this.visitAllTemplateNodes(template.directives);
+        this.visitAllTemplateNodes(template.templateAttrs);
+        this.visitAllTemplateNodes(template.variables);
+        this.visitAllTemplateNodes(template.references);
+        this.visitAllTemplateNodes(template.children);
+    }
+    visitContent(content) {
+        this.visitAllTemplateNodes(content.children);
+    }
+    visitBoundAttribute(attribute) {
+        this.visit(attribute.value);
+    }
+    visitBoundEvent(attribute) {
+        this.visit(attribute.handler);
+    }
+    visitBoundText(text) {
+        this.visit(text.value);
+    }
+    visitIcu(icu) {
+        Object.keys(icu.vars).forEach((key) => this.visit(icu.vars[key]));
+        Object.keys(icu.placeholders).forEach((key) => this.visit(icu.placeholders[key]));
+    }
+    visitDeferredBlock(deferred) {
+        deferred.visitAll(this);
+    }
+    visitDeferredTrigger(trigger) {
+        if (trigger instanceof BoundDeferredTrigger) {
+            this.visit(trigger.value);
+        }
+    }
+    visitDeferredBlockPlaceholder(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitDeferredBlockError(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitDeferredBlockLoading(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitSwitchBlock(block) {
+        this.visit(block.expression);
+        this.visitAllTemplateNodes(block.cases);
+    }
+    visitSwitchBlockCase(block) {
+        block.expression && this.visit(block.expression);
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitForLoopBlock(block) {
+        block.item.visit(this);
+        this.visitAllTemplateNodes(block.contextVariables);
+        this.visit(block.expression);
+        this.visitAllTemplateNodes(block.children);
+        block.empty?.visit(this);
+    }
+    visitForLoopBlockEmpty(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitIfBlock(block) {
+        this.visitAllTemplateNodes(block.branches);
+    }
+    visitIfBlockBranch(block) {
+        block.expression && this.visit(block.expression);
+        block.expressionAlias?.visit(this);
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitLetDeclaration(decl) {
+        this.visit(decl.value);
+    }
+    visitComponent(component) {
+        this.visitAllTemplateNodes(component.attributes);
+        this.visitAllTemplateNodes(component.inputs);
+        this.visitAllTemplateNodes(component.outputs);
+        this.visitAllTemplateNodes(component.directives);
+        this.visitAllTemplateNodes(component.references);
+        this.visitAllTemplateNodes(component.children);
+    }
+    visitDirective(directive) {
+        this.visitAllTemplateNodes(directive.attributes);
+        this.visitAllTemplateNodes(directive.inputs);
+        this.visitAllTemplateNodes(directive.outputs);
+        this.visitAllTemplateNodes(directive.references);
+    }
+    visitVariable(variable) { }
+    visitReference(reference) { }
+    visitTextAttribute(attribute) { }
+    visitText(text) { }
+    visitUnknownBlock(block) { }
+    visitAllTemplateNodes(nodes) {
+        for (const node of nodes) {
+            this.visit(node);
+        }
+    }
+}
+
 /**
  * Processes `Target`s with a given set of directives and performs a binding operation, which
  * returns an object similar to TypeScript's `ts.TypeChecker` that contains knowledge about the
@@ -30747,7 +30905,7 @@ class DirectiveBinder {
  * Expressions are visited by the superclass `RecursiveAstVisitor`, with custom logic provided
  * by overridden methods from that visitor.
  */
-class TemplateBinder extends RecursiveAstVisitor {
+class TemplateBinder extends CombinedRecursiveAstVisitor {
     bindings;
     symbols;
     usedPipes;
@@ -30757,7 +30915,7 @@ class TemplateBinder extends RecursiveAstVisitor {
     scope;
     rootNode;
     level;
-    visitNode;
+    visitNode = (node) => node.visit(this);
     constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level) {
         super();
         this.bindings = bindings;
@@ -30769,19 +30927,6 @@ class TemplateBinder extends RecursiveAstVisitor {
         this.scope = scope;
         this.rootNode = rootNode;
         this.level = level;
-        // Save a bit of processing time by constructing this closure in advance.
-        this.visitNode = (node) => node.visit(this);
-    }
-    // This method is defined to reconcile the type of TemplateBinder since both
-    // RecursiveAstVisitor and Visitor define the visit() method in their
-    // interfaces.
-    visit(node, context) {
-        if (node instanceof AST) {
-            node.visit(this, context);
-        }
-        else {
-            node.visit(this);
-        }
     }
     /**
      * Process a template and extract metadata about expressions and symbols within.
@@ -30850,14 +30995,6 @@ class TemplateBinder extends RecursiveAstVisitor {
             nodeOrNodes.forEach(this.visitNode);
         }
     }
-    visitElement(element) {
-        // Visit the inputs, outputs, and children of the element.
-        element.inputs.forEach(this.visitNode);
-        element.outputs.forEach(this.visitNode);
-        element.directives.forEach(this.visitNode);
-        element.children.forEach(this.visitNode);
-        element.references.forEach(this.visitNode);
-    }
     visitTemplate(template) {
         // First, visit inputs, outputs and template attributes of the template node.
         template.inputs.forEach(this.visitNode);
@@ -30880,34 +31017,6 @@ class TemplateBinder extends RecursiveAstVisitor {
             this.symbols.set(reference, this.rootNode);
         }
     }
-    visitComponent(component) {
-        component.inputs.forEach(this.visitNode);
-        component.outputs.forEach(this.visitNode);
-        component.directives.forEach(this.visitNode);
-        component.children.forEach(this.visitNode);
-        component.references.forEach(this.visitNode);
-    }
-    visitDirective(directive) {
-        directive.inputs.forEach(this.visitNode);
-        directive.outputs.forEach(this.visitNode);
-        directive.references.forEach(this.visitNode);
-    }
-    // Unused template visitors
-    visitText(text) { }
-    visitTextAttribute(attribute) { }
-    visitUnknownBlock(block) { }
-    visitDeferredTrigger() { }
-    visitIcu(icu) {
-        Object.keys(icu.vars).forEach((key) => icu.vars[key].visit(this));
-        Object.keys(icu.placeholders).forEach((key) => icu.placeholders[key].visit(this));
-    }
-    // The remaining visitors are concerned with processing AST expressions within template bindings
-    visitBoundAttribute(attribute) {
-        attribute.value.visit(this);
-    }
-    visitBoundEvent(event) {
-        event.handler.visit(this);
-    }
     visitDeferredBlock(deferred) {
         this.ingestScopedNode(deferred);
         deferred.triggers.when?.value.visit(this);
@@ -30927,10 +31036,6 @@ class TemplateBinder extends RecursiveAstVisitor {
     visitDeferredBlockLoading(block) {
         this.ingestScopedNode(block);
     }
-    visitSwitchBlock(block) {
-        block.expression.visit(this);
-        block.cases.forEach(this.visitNode);
-    }
     visitSwitchBlockCase(block) {
         block.expression?.visit(this);
         this.ingestScopedNode(block);
@@ -30943,9 +31048,6 @@ class TemplateBinder extends RecursiveAstVisitor {
     visitForLoopBlockEmpty(block) {
         this.ingestScopedNode(block);
     }
-    visitIfBlock(block) {
-        block.branches.forEach((node) => node.visit(this));
-    }
     visitIfBlockBranch(block) {
         block.expression?.visit(this);
         this.ingestScopedNode(block);
@@ -30953,11 +31055,8 @@ class TemplateBinder extends RecursiveAstVisitor {
     visitContent(content) {
         this.ingestScopedNode(content);
     }
-    visitBoundText(text) {
-        text.value.visit(this);
-    }
     visitLetDeclaration(decl) {
-        decl.value.visit(this);
+        super.visitLetDeclaration(decl);
         if (this.rootNode !== null) {
             this.symbols.set(decl, this.rootNode);
         }
@@ -32369,7 +32468,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-ce5a943');
+new Version('20.1.0-next.0+sha-0558575');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32404,7 +32503,6 @@ exports.Binary = Binary;
 exports.BindingPipe = BindingPipe;
 exports.BlockPlaceholder = BlockPlaceholder;
 exports.BoundAttribute = BoundAttribute;
-exports.BoundDeferredTrigger = BoundDeferredTrigger;
 exports.BoundEvent = BoundEvent;
 exports.BoundText = BoundText;
 exports.CR = CR;
@@ -32412,6 +32510,7 @@ exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
 exports.Call = Call;
 exports.Chain = Chain;
 exports.CloneVisitor = CloneVisitor;
+exports.CombinedRecursiveAstVisitor = CombinedRecursiveAstVisitor;
 exports.Component = Component$1;
 exports.Conditional = Conditional;
 exports.ConstantPool = ConstantPool;

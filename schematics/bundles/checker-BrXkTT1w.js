@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-ce5a943
+ * @license Angular v20.1.0-next.0+sha-0558575
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-COFP8tds.js');
+var compiler = require('./compiler-DCkUGCAs.js');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CrYP6hli.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BrXkTT1w.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -12286,7 +12286,8 @@ class OutOfBandDiagnosticRecorderImpl {
     missingNamedTemplateDependency(id, node) {
         this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_NAMED_TEMPLATE_DEPENDENCY), 
         // Wording is meant to mimic the wording TS uses in their diagnostic for missing symbols.
-        `Cannot find name "${node instanceof compiler.Directive ? node.name : node.componentName}".`));
+        `Cannot find name "${node instanceof compiler.Directive ? node.name : node.componentName}". ` +
+            `Selectorless references are only supported to classes or non-type import statements.`));
     }
     incorrectTemplateDependencyType(id, node) {
         this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.INCORRECT_NAMED_TEMPLATE_DEPENDENCY_TYPE), `Incorrect reference type. Type must be a standalone ${node instanceof compiler.Component ? '@Component' : '@Directive'}.`));

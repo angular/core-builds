@@ -1,15 +1,15 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-ce5a943
+ * @license Angular v20.1.0-next.0+sha-0558575
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-COFP8tds.js');
+var compiler = require('./compiler-DCkUGCAs.js');
 var ts = require('typescript');
 var p = require('path');
-var checker = require('./checker-CrYP6hli.js');
+var checker = require('./checker-BrXkTT1w.js');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -892,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -910,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1005,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1421,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1456,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1507,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1540,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1591,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-ce5a943'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-0558575'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5950,34 +5950,25 @@ class SelectorlessComponentScopeReader {
                 continue;
             }
             for (const stmt of current.statements) {
-                switch (true) {
-                    case ts.isImportDeclaration(stmt):
-                        if (stmt.importClause !== undefined && !stmt.importClause.isTypeOnly) {
-                            const clause = stmt.importClause;
-                            if (clause.namedBindings !== undefined && ts.isNamedImports(clause.namedBindings)) {
-                                for (const element of clause.namedBindings.elements) {
-                                    if (!element.isTypeOnly) {
-                                        result.set(element.name.text, element.name);
-                                    }
-                                }
-                            }
-                            if (clause.name !== undefined) {
-                                result.set(clause.name.text, clause.name);
-                            }
-                        }
-                        break;
-                    case ts.isVariableStatement(stmt):
-                        for (const decl of stmt.declarationList.declarations) {
-                            if (ts.isIdentifier(decl.name) &&
-                                decl.initializer !== undefined &&
-                                ts.isIdentifier(decl.initializer)) {
-                                result.set(decl.name.text, decl.initializer);
+                if (this.reflector.isClass(stmt)) {
+                    result.set(stmt.name.text, stmt.name);
+                    continue;
+                }
+                if (ts.isImportDeclaration(stmt) &&
+                    stmt.importClause !== undefined &&
+                    !stmt.importClause.isTypeOnly) {
+                    const clause = stmt.importClause;
+                    if (clause.namedBindings !== undefined && ts.isNamedImports(clause.namedBindings)) {
+                        for (const element of clause.namedBindings.elements) {
+                            if (!element.isTypeOnly) {
+                                result.set(element.name.text, element.name);
                             }
                         }
-                        break;
-                    case this.reflector.isClass(stmt):
-                        result.set(stmt.name.text, stmt.name);
-                        break;
+                    }
+                    if (clause.name !== undefined) {
+                        result.set(clause.name.text, clause.name);
+                    }
+                    continue;
                 }
             }
             current = current.parent;
@@ -9005,133 +8996,26 @@ function analyzeTemplateForSelectorless(template) {
  * Visitor that traverses all the template nodes and
  * expressions to look for selectorless references.
  */
-class SelectorlessDirectivesAnalyzer extends compiler.RecursiveAstVisitor {
+class SelectorlessDirectivesAnalyzer extends compiler.CombinedRecursiveAstVisitor {
     symbols = null;
     visit(node) {
-        // TODO(crisbeto): consider capitalized pipes as "selectorless" for now.
-        // We should introduce a different AST node for them in the parser.
-        if (node instanceof compiler.BindingPipe && node.name[0].toUpperCase() === node.name[0]) {
+        if (node instanceof compiler.BindingPipe && node.type === compiler.BindingPipeType.ReferencedDirectly) {
             this.trackSymbol(node.name);
         }
-        node.visit(this);
+        super.visit(node);
+    }
+    visitComponent(component) {
+        this.trackSymbol(component.componentName);
+        super.visitComponent(component);
+    }
+    visitDirective(directive) {
+        this.trackSymbol(directive.name);
+        super.visitDirective(directive);
     }
     trackSymbol(name) {
         this.symbols ??= new Set();
         this.symbols.add(name);
     }
-    visitAllNodes(nodes) {
-        for (const node of nodes) {
-            this.visit(node);
-        }
-    }
-    visitAst(ast) {
-        if (ast instanceof compiler.ASTWithSource) {
-            ast = ast.ast;
-        }
-        this.visit(ast);
-    }
-    visitComponent(component) {
-        this.trackSymbol(component.componentName);
-        this.visitAllNodes(component.attributes);
-        this.visitAllNodes(component.inputs);
-        this.visitAllNodes(component.outputs);
-        this.visitAllNodes(component.directives);
-        this.visitAllNodes(component.references);
-        this.visitAllNodes(component.children);
-    }
-    visitDirective(directive) {
-        this.trackSymbol(directive.name);
-        this.visitAllNodes(directive.attributes);
-        this.visitAllNodes(directive.inputs);
-        this.visitAllNodes(directive.outputs);
-        this.visitAllNodes(directive.references);
-    }
-    visitElement(element) {
-        this.visitAllNodes(element.attributes);
-        this.visitAllNodes(element.inputs);
-        this.visitAllNodes(element.outputs);
-        this.visitAllNodes(element.directives);
-        this.visitAllNodes(element.references);
-        this.visitAllNodes(element.children);
-    }
-    visitTemplate(template) {
-        this.visitAllNodes(template.attributes);
-        this.visitAllNodes(template.inputs);
-        this.visitAllNodes(template.outputs);
-        this.visitAllNodes(template.directives);
-        this.visitAllNodes(template.templateAttrs);
-        this.visitAllNodes(template.variables);
-        this.visitAllNodes(template.references);
-        this.visitAllNodes(template.children);
-    }
-    visitContent(content) {
-        this.visitAllNodes(content.children);
-    }
-    visitBoundAttribute(attribute) {
-        this.visitAst(attribute.value);
-    }
-    visitBoundEvent(attribute) {
-        this.visitAst(attribute.handler);
-    }
-    visitBoundText(text) {
-        this.visitAst(text.value);
-    }
-    visitIcu(icu) {
-        Object.keys(icu.vars).forEach((key) => this.visit(icu.vars[key]));
-        Object.keys(icu.placeholders).forEach((key) => this.visit(icu.placeholders[key]));
-    }
-    visitDeferredBlock(deferred) {
-        deferred.visitAll(this);
-    }
-    visitDeferredTrigger(trigger) {
-        if (trigger instanceof compiler.BoundDeferredTrigger) {
-            this.visitAst(trigger.value);
-        }
-    }
-    visitDeferredBlockPlaceholder(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitDeferredBlockError(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitDeferredBlockLoading(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitSwitchBlock(block) {
-        this.visitAst(block.expression);
-        this.visitAllNodes(block.cases);
-    }
-    visitSwitchBlockCase(block) {
-        block.expression && this.visitAst(block.expression);
-        this.visitAllNodes(block.children);
-    }
-    visitForLoopBlock(block) {
-        block.item.visit(this);
-        this.visitAllNodes(block.contextVariables);
-        this.visitAst(block.expression);
-        this.visitAllNodes(block.children);
-        block.empty?.visit(this);
-    }
-    visitForLoopBlockEmpty(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitIfBlock(block) {
-        this.visitAllNodes(block.branches);
-    }
-    visitIfBlockBranch(block) {
-        block.expression && this.visitAst(block.expression);
-        block.expressionAlias?.visit(this);
-        this.visitAllNodes(block.children);
-    }
-    visitLetDeclaration(decl) {
-        this.visitAst(decl.value);
-    }
-    // Unused
-    visitText() { }
-    visitVariable() { }
-    visitReference() { }
-    visitTextAttribute() { }
-    visitUnknownBlock() { }
 }
 
 const EMPTY_ARRAY = [];
@@ -9994,7 +9878,7 @@ class ComponentDecoratorHandler {
         if (perComponentDeferredDeps !== null) {
             removeDeferrableTypesFromComponentDecorator(analysis, perComponentDeferredDeps);
         }
-        const def = compiler.compileComponentFromMetadata(meta, pool, compiler.makeBindingParser());
+        const def = compiler.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
             ? compileComponentClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
@@ -10062,7 +9946,7 @@ class ComponentDecoratorHandler {
             removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
         }
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, compiler.FactoryTarget.Component));
-        const def = compiler.compileComponentFromMetadata(meta, pool, compiler.makeBindingParser());
+        const def = compiler.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
             ? compileComponentClassMetadata(analysis.classMetadata, deferrableTypes).toStmt()
@@ -10092,7 +9976,7 @@ class ComponentDecoratorHandler {
             defer,
         };
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, compiler.FactoryTarget.Component));
-        const def = compiler.compileComponentFromMetadata(meta, pool, compiler.makeBindingParser());
+        const def = compiler.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const classMetadata = analysis.classMetadata !== null
             ? compileComponentClassMetadata(analysis.classMetadata, null).toStmt()
             : null;
@@ -10686,6 +10570,10 @@ class ComponentDecoratorHandler {
         }
         throw new Error(`Invalid deferBlockDepsEmitMode. Cannot compile deferred block metadata.`);
     }
+    /** Creates a new binding parser. */
+    getNewBindingParser() {
+        return compiler.makeBindingParser(undefined, this.enableSelectorless);
+    }
 }
 function createMatcherFromScope(scope, hostDirectivesResolver) {
     if (scope.kind === checker.ComponentScopeKind.Selectorless) {
@@ -11265,7 +11153,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.1.0-next.0+sha-ce5a943');
+new compiler.Version('20.1.0-next.0+sha-0558575');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -14330,6 +14218,8 @@ var IdentifierKind;
     IdentifierKind[IdentifierKind["Reference"] = 5] = "Reference";
     IdentifierKind[IdentifierKind["Variable"] = 6] = "Variable";
     IdentifierKind[IdentifierKind["LetDeclaration"] = 7] = "LetDeclaration";
+    IdentifierKind[IdentifierKind["Component"] = 8] = "Component";
+    IdentifierKind[IdentifierKind["Directive"] = 9] = "Directive";
 })(IdentifierKind || (IdentifierKind = {}));
 /**
  * Describes the absolute byte offsets of a text anchor in a source code.
@@ -14360,108 +14250,19 @@ class IndexingContext {
 }
 
 /**
- * Visits the AST of an Angular template syntax expression, finding interesting
- * entities (variable references, etc.). Creates an array of Entities found in
- * the expression, with the location of the Entities being relative to the
- * expression.
- *
- * Visiting `text {{prop}}` will return
- * `[TopLevelIdentifier {name: 'prop', span: {start: 7, end: 11}}]`.
- */
-class ExpressionVisitor extends compiler.RecursiveAstVisitor {
-    expressionStr;
-    absoluteOffset;
-    boundTemplate;
-    targetToIdentifier;
-    identifiers = [];
-    errors = [];
-    constructor(expressionStr, absoluteOffset, boundTemplate, targetToIdentifier) {
-        super();
-        this.expressionStr = expressionStr;
-        this.absoluteOffset = absoluteOffset;
-        this.boundTemplate = boundTemplate;
-        this.targetToIdentifier = targetToIdentifier;
-    }
-    /**
-     * Returns identifiers discovered in an expression.
-     *
-     * @param ast expression AST to visit
-     * @param source expression AST source code
-     * @param absoluteOffset absolute byte offset from start of the file to the start of the AST
-     * source code.
-     * @param boundTemplate bound target of the entire template, which can be used to query for the
-     * entities expressions target.
-     * @param targetToIdentifier closure converting a template target node to its identifier.
-     */
-    static getIdentifiers(ast, source, absoluteOffset, boundTemplate, targetToIdentifier) {
-        const visitor = new ExpressionVisitor(source, absoluteOffset, boundTemplate, targetToIdentifier);
-        visitor.visit(ast);
-        return { identifiers: visitor.identifiers, errors: visitor.errors };
-    }
-    visit(ast) {
-        ast.visit(this);
-    }
-    visitPropertyRead(ast, context) {
-        this.visitIdentifier(ast, IdentifierKind.Property);
-        super.visitPropertyRead(ast, context);
-    }
-    visitPropertyWrite(ast, context) {
-        this.visitIdentifier(ast, IdentifierKind.Property);
-        super.visitPropertyWrite(ast, context);
-    }
-    /**
-     * Visits an identifier, adding it to the identifier store if it is useful for indexing.
-     *
-     * @param ast expression AST the identifier is in
-     * @param kind identifier kind
-     */
-    visitIdentifier(ast, kind) {
-        // The definition of a non-top-level property such as `bar` in `{{foo.bar}}` is currently
-        // impossible to determine by an indexer and unsupported by the indexing module.
-        // The indexing module also does not currently support references to identifiers declared in the
-        // template itself, which have a non-null expression target.
-        if (!(ast.receiver instanceof compiler.ImplicitReceiver)) {
-            return;
-        }
-        // The source span of the requested AST starts at a location that is offset from the expression.
-        let identifierStart = ast.sourceSpan.start - this.absoluteOffset;
-        if (ast instanceof compiler.PropertyRead || ast instanceof compiler.PropertyWrite) {
-            // For `PropertyRead` and `PropertyWrite`, the identifier starts at the `nameSpan`, not
-            // necessarily the `sourceSpan`.
-            identifierStart = ast.nameSpan.start - this.absoluteOffset;
-        }
-        if (!this.expressionStr.substring(identifierStart).startsWith(ast.name)) {
-            this.errors.push(new Error(`Impossible state: "${ast.name}" not found in "${this.expressionStr}" at location ${identifierStart}`));
-            return;
-        }
-        // Join the relative position of the expression within a node with the absolute position
-        // of the node to get the absolute position of the expression in the source code.
-        const absoluteStart = this.absoluteOffset + identifierStart;
-        const span = new AbsoluteSourceSpan(absoluteStart, absoluteStart + ast.name.length);
-        const targetAst = this.boundTemplate.getExpressionTarget(ast);
-        const target = targetAst ? this.targetToIdentifier(targetAst) : null;
-        const identifier = {
-            name: ast.name,
-            span,
-            kind,
-            target,
-        };
-        this.identifiers.push(identifier);
-    }
-}
-/**
  * Visits the AST of a parsed Angular template. Discovers and stores
  * identifiers of interest, deferring to an `ExpressionVisitor` as needed.
  */
-let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor {
+let TemplateVisitor$1 = class TemplateVisitor extends compiler.CombinedRecursiveAstVisitor {
     boundTemplate;
     // Identifiers of interest found in the template.
     identifiers = new Set();
     errors = [];
+    currentAstWithSource = null;
     // Map of targets in a template to their identifiers.
     targetIdentifierCache = new Map();
     // Map of elements and templates to their identifiers.
-    elementAndTemplateIdentifierCache = new Map();
+    directiveHostIdentifierCache = new Map();
     /**
      * Creates a template visitor for a bound template target. The bound target can be used when
      * deferred to the expression visitor to get information about the target of an expression.
@@ -14473,138 +14274,81 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
         this.boundTemplate = boundTemplate;
     }
     /**
-     * Visits a node in the template.
-     *
-     * @param node node to visit
-     */
-    visit(node) {
-        node.visit(this);
-    }
-    visitAll(nodes) {
-        nodes.forEach((node) => this.visit(node));
-    }
-    /**
      * Add an identifier for an HTML element and visit its children recursively.
      *
      * @param element
      */
     visitElement(element) {
-        const elementIdentifier = this.elementOrTemplateToIdentifier(element);
+        const elementIdentifier = this.directiveHostToIdentifier(element);
         if (elementIdentifier !== null) {
             this.identifiers.add(elementIdentifier);
         }
-        this.visitAll(element.references);
-        this.visitAll(element.inputs);
-        this.visitAll(element.attributes);
-        this.visitAll(element.directives);
-        this.visitAll(element.children);
-        this.visitAll(element.outputs);
+        super.visitElement(element);
     }
     visitTemplate(template) {
-        const templateIdentifier = this.elementOrTemplateToIdentifier(template);
+        const templateIdentifier = this.directiveHostToIdentifier(template);
         if (templateIdentifier !== null) {
             this.identifiers.add(templateIdentifier);
         }
-        this.visitAll(template.directives);
-        this.visitAll(template.variables);
-        this.visitAll(template.attributes);
-        this.visitAll(template.templateAttrs);
-        this.visitAll(template.children);
-        this.visitAll(template.references);
-    }
-    visitBoundAttribute(attribute) {
-        // If the bound attribute has no value, it cannot have any identifiers in the value expression.
-        if (attribute.valueSpan === undefined) {
-            return;
-        }
-        const { identifiers, errors } = ExpressionVisitor.getIdentifiers(attribute.value, attribute.valueSpan.toString(), attribute.valueSpan.start.offset, this.boundTemplate, this.targetToIdentifier.bind(this));
-        identifiers.forEach((id) => this.identifiers.add(id));
-        this.errors.push(...errors);
-    }
-    visitBoundEvent(attribute) {
-        this.visitExpression(attribute.handler);
-    }
-    visitBoundText(text) {
-        this.visitExpression(text.value);
+        super.visitTemplate(template);
     }
     visitReference(reference) {
         const referenceIdentifier = this.targetToIdentifier(reference);
-        if (referenceIdentifier === null) {
-            return;
+        if (referenceIdentifier !== null) {
+            this.identifiers.add(referenceIdentifier);
         }
-        this.identifiers.add(referenceIdentifier);
+        super.visitReference(reference);
     }
     visitVariable(variable) {
         const variableIdentifier = this.targetToIdentifier(variable);
-        if (variableIdentifier === null) {
-            return;
+        if (variableIdentifier !== null) {
+            this.identifiers.add(variableIdentifier);
         }
-        this.identifiers.add(variableIdentifier);
-    }
-    visitDeferredBlock(deferred) {
-        deferred.visitAll(this);
-    }
-    visitDeferredBlockPlaceholder(block) {
-        this.visitAll(block.children);
-    }
-    visitDeferredBlockError(block) {
-        this.visitAll(block.children);
-    }
-    visitDeferredBlockLoading(block) {
-        this.visitAll(block.children);
-    }
-    visitDeferredTrigger(trigger) {
-        if (trigger instanceof compiler.BoundDeferredTrigger) {
-            this.visitExpression(trigger.value);
-        }
-    }
-    visitSwitchBlock(block) {
-        this.visitExpression(block.expression);
-        this.visitAll(block.cases);
-    }
-    visitSwitchBlockCase(block) {
-        block.expression && this.visitExpression(block.expression);
-        this.visitAll(block.children);
-    }
-    visitForLoopBlock(block) {
-        block.item.visit(this);
-        this.visitAll(block.contextVariables);
-        this.visitExpression(block.expression);
-        this.visitAll(block.children);
-        block.empty?.visit(this);
-    }
-    visitForLoopBlockEmpty(block) {
-        this.visitAll(block.children);
-    }
-    visitIfBlock(block) {
-        this.visitAll(block.branches);
-    }
-    visitIfBlockBranch(block) {
-        block.expression && this.visitExpression(block.expression);
-        block.expressionAlias?.visit(this);
-        this.visitAll(block.children);
+        super.visitVariable(variable);
     }
     visitLetDeclaration(decl) {
         const identifier = this.targetToIdentifier(decl);
         if (identifier !== null) {
             this.identifiers.add(identifier);
         }
-        this.visitExpression(decl.value);
+        super.visitLetDeclaration(decl);
     }
     visitComponent(component) {
-        throw new Error('TODO');
+        const identifier = this.directiveHostToIdentifier(component);
+        if (identifier !== null) {
+            this.identifiers.add(identifier);
+        }
+        super.visitComponent(component);
     }
     visitDirective(directive) {
-        throw new Error('TODO');
+        const identifier = this.directiveHostToIdentifier(directive);
+        if (identifier !== null) {
+            this.identifiers.add(identifier);
+        }
+        super.visitDirective(directive);
+    }
+    visitPropertyRead(ast) {
+        this.visitIdentifier(ast, IdentifierKind.Property);
+        super.visitPropertyRead(ast, null);
+    }
+    visitPropertyWrite(ast) {
+        this.visitIdentifier(ast, IdentifierKind.Property);
+        super.visitPropertyWrite(ast, null);
+    }
+    visitBoundAttribute(attribute) {
+        const previous = this.currentAstWithSource;
+        this.currentAstWithSource = {
+            source: attribute.valueSpan?.toString() || null,
+            absoluteOffset: attribute.valueSpan ? attribute.valueSpan.start.offset : -1,
+        };
+        this.visit(attribute.value instanceof compiler.ASTWithSource ? attribute.value.ast : attribute.value);
+        this.currentAstWithSource = previous;
     }
     /** Creates an identifier for a template element or template node. */
-    elementOrTemplateToIdentifier(node) {
-        if (node instanceof compiler.Component || node instanceof compiler.Directive) {
-            throw new Error('TODO');
-        }
+    directiveHostToIdentifier(node) {
         // If this node has already been seen, return the cached result.
-        if (this.elementAndTemplateIdentifierCache.has(node)) {
-            return this.elementAndTemplateIdentifierCache.get(node);
+        if (this.directiveHostIdentifierCache.has(node)) {
+            return this.directiveHostIdentifierCache.get(node);
         }
         let name;
         let kind;
@@ -14612,14 +14356,23 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
             name = node.tagName ?? 'ng-template';
             kind = IdentifierKind.Template;
         }
-        else {
+        else if (node instanceof compiler.Element) {
             name = node.name;
             kind = IdentifierKind.Element;
+        }
+        else if (node instanceof compiler.Component) {
+            name = node.fullName;
+            kind = IdentifierKind.Component;
+        }
+        else {
+            name = node.name;
+            kind = IdentifierKind.Directive;
         }
         // Namespaced elements have a particular format for `node.name` that needs to be handled.
         // For example, an `<svg>` element has a `node.name` of `':svg:svg'`.
         // TODO(alxhub): properly handle namespaced elements
-        if (name.startsWith(':')) {
+        if ((node instanceof compiler.Template || node instanceof compiler.Element) &&
+            name.startsWith(':')) {
             name = name.split(':').pop();
         }
         const sourceSpan = node.startSourceSpan;
@@ -14654,7 +14407,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
             })),
             // cast b/c pre-TypeScript 3.5 unions aren't well discriminated
         };
-        this.elementAndTemplateIdentifierCache.set(node, identifier);
+        this.directiveHostIdentifierCache.set(node, identifier);
         return identifier;
     }
     /** Creates an identifier for a template reference or template variable target. */
@@ -14683,10 +14436,10 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
                     refTarget instanceof compiler.Template ||
                     refTarget instanceof compiler.Component ||
                     refTarget instanceof compiler.Directive) {
-                    node = this.elementOrTemplateToIdentifier(refTarget);
+                    node = this.directiveHostToIdentifier(refTarget);
                 }
                 else {
-                    node = this.elementOrTemplateToIdentifier(refTarget.node);
+                    node = this.directiveHostToIdentifier(refTarget.node);
                     directive = refTarget.directive.ref.node;
                 }
                 if (node === null) {
@@ -14736,16 +14489,60 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
      *
      * @param node node whose expression to visit
      */
-    visitExpression(ast) {
-        // Only include ASTs that have information about their source and absolute source spans.
-        if (ast instanceof compiler.ASTWithSource && ast.source !== null) {
-            // Make target to identifier mapping closure stateful to this visitor instance.
-            const targetToIdentifier = this.targetToIdentifier.bind(this);
-            const absoluteOffset = ast.sourceSpan.start;
-            const { identifiers, errors } = ExpressionVisitor.getIdentifiers(ast, ast.source, absoluteOffset, this.boundTemplate, targetToIdentifier);
-            identifiers.forEach((id) => this.identifiers.add(id));
-            this.errors.push(...errors);
+    visit(node) {
+        if (node instanceof compiler.ASTWithSource) {
+            const previous = this.currentAstWithSource;
+            this.currentAstWithSource = { source: node.source, absoluteOffset: node.sourceSpan.start };
+            super.visit(node.ast);
+            this.currentAstWithSource = previous;
         }
+        else {
+            super.visit(node);
+        }
+    }
+    /**
+     * Visits an identifier, adding it to the identifier store if it is useful for indexing.
+     *
+     * @param ast expression AST the identifier is in
+     * @param kind identifier kind
+     */
+    visitIdentifier(ast, kind) {
+        // Only handle identifiers in expressions that have a source location.
+        if (this.currentAstWithSource === null || this.currentAstWithSource.source === null) {
+            return;
+        }
+        // The definition of a non-top-level property such as `bar` in `{{foo.bar}}` is currently
+        // impossible to determine by an indexer and unsupported by the indexing module.
+        // The indexing module also does not currently support references to identifiers declared in the
+        // template itself, which have a non-null expression target.
+        if (!(ast.receiver instanceof compiler.ImplicitReceiver)) {
+            return;
+        }
+        const { absoluteOffset, source: expressionStr } = this.currentAstWithSource;
+        // The source span of the requested AST starts at a location that is offset from the expression.
+        let identifierStart = ast.sourceSpan.start - absoluteOffset;
+        if (ast instanceof compiler.PropertyRead || ast instanceof compiler.PropertyWrite) {
+            // For `PropertyRead` and `PropertyWrite`, the identifier starts at the `nameSpan`, not
+            // necessarily the `sourceSpan`.
+            identifierStart = ast.nameSpan.start - absoluteOffset;
+        }
+        if (!expressionStr.substring(identifierStart).startsWith(ast.name)) {
+            this.errors.push(new Error(`Impossible state: "${ast.name}" not found in "${expressionStr}" at location ${identifierStart}`));
+            return;
+        }
+        // Join the relative position of the expression within a node with the absolute position
+        // of the node to get the absolute position of the expression in the source code.
+        const absoluteStart = absoluteOffset + identifierStart;
+        const span = new AbsoluteSourceSpan(absoluteStart, absoluteStart + ast.name.length);
+        const targetAst = this.boundTemplate.getExpressionTarget(ast);
+        const target = targetAst ? this.targetToIdentifier(targetAst) : null;
+        const identifier = {
+            name: ast.name,
+            span,
+            kind,
+            target,
+        };
+        this.identifiers.add(identifier);
     }
 };
 /**
@@ -14757,7 +14554,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends compiler.RecursiveVisitor 
 function getTemplateIdentifiers(boundTemplate) {
     const visitor = new TemplateVisitor$1(boundTemplate);
     if (boundTemplate.target.template !== undefined) {
-        visitor.visitAll(boundTemplate.target.template);
+        compiler.visitAll(visitor, boundTemplate.target.template);
     }
     return { identifiers: visitor.identifiers, errors: visitor.errors };
 }
@@ -15327,7 +15124,7 @@ class TemplateCheckWithVisitor {
 /**
  * Visits all nodes in a template (TmplAstNode and AST) and calls `visitNode` for each one.
  */
-class TemplateVisitor extends compiler.RecursiveAstVisitor {
+class TemplateVisitor extends compiler.CombinedRecursiveAstVisitor {
     ctx;
     component;
     check;
@@ -15338,133 +15135,33 @@ class TemplateVisitor extends compiler.RecursiveAstVisitor {
         this.component = component;
         this.check = check;
     }
-    visit(node, context) {
+    visit(node) {
         this.diagnostics.push(...this.check.visitNode(this.ctx, this.component, node));
-        node.visit(this);
-    }
-    visitAllNodes(nodes) {
-        for (const node of nodes) {
-            this.visit(node);
-        }
-    }
-    visitAst(ast) {
-        if (ast instanceof compiler.ASTWithSource) {
-            ast = ast.ast;
-        }
-        this.visit(ast);
-    }
-    visitElement(element) {
-        this.visitAllNodes(element.attributes);
-        this.visitAllNodes(element.inputs);
-        this.visitAllNodes(element.outputs);
-        this.visitAllNodes(element.directives);
-        this.visitAllNodes(element.references);
-        this.visitAllNodes(element.children);
+        super.visit(node);
     }
     visitTemplate(template) {
         const isInlineTemplate = template.tagName === 'ng-template';
-        this.visitAllNodes(template.attributes);
+        this.visitAllTemplateNodes(template.attributes);
         if (isInlineTemplate) {
             // Only visit input/outputs if this isn't an inline template node generated for a structural
             // directive (like `<div *ngIf></div>`). These nodes would be visited when the underlying
             // element of an inline template node is processed.
-            this.visitAllNodes(template.inputs);
-            this.visitAllNodes(template.outputs);
+            this.visitAllTemplateNodes(template.inputs);
+            this.visitAllTemplateNodes(template.outputs);
         }
-        this.visitAllNodes(template.directives);
+        this.visitAllTemplateNodes(template.directives);
         // TODO(crisbeto): remove this condition when deleting `canVisitStructuralAttributes`.
         if (this.check.canVisitStructuralAttributes || isInlineTemplate) {
             // `templateAttrs` aren't transferred over to the inner element so we always have to visit them.
-            this.visitAllNodes(template.templateAttrs);
+            this.visitAllTemplateNodes(template.templateAttrs);
         }
-        this.visitAllNodes(template.variables);
-        this.visitAllNodes(template.references);
-        this.visitAllNodes(template.children);
-    }
-    visitContent(content) {
-        this.visitAllNodes(content.children);
-    }
-    visitVariable(variable) { }
-    visitReference(reference) { }
-    visitTextAttribute(attribute) { }
-    visitUnknownBlock(block) { }
-    visitBoundAttribute(attribute) {
-        this.visitAst(attribute.value);
-    }
-    visitBoundEvent(attribute) {
-        this.visitAst(attribute.handler);
-    }
-    visitText(text) { }
-    visitBoundText(text) {
-        this.visitAst(text.value);
-    }
-    visitIcu(icu) {
-        Object.keys(icu.vars).forEach((key) => this.visit(icu.vars[key]));
-        Object.keys(icu.placeholders).forEach((key) => this.visit(icu.placeholders[key]));
-    }
-    visitDeferredBlock(deferred) {
-        deferred.visitAll(this);
-    }
-    visitDeferredTrigger(trigger) {
-        if (trigger instanceof compiler.BoundDeferredTrigger) {
-            this.visitAst(trigger.value);
-        }
-    }
-    visitDeferredBlockPlaceholder(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitDeferredBlockError(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitDeferredBlockLoading(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitSwitchBlock(block) {
-        this.visitAst(block.expression);
-        this.visitAllNodes(block.cases);
-    }
-    visitSwitchBlockCase(block) {
-        block.expression && this.visitAst(block.expression);
-        this.visitAllNodes(block.children);
-    }
-    visitForLoopBlock(block) {
-        block.item.visit(this);
-        this.visitAllNodes(block.contextVariables);
-        this.visitAst(block.expression);
-        this.visitAllNodes(block.children);
-        block.empty?.visit(this);
-    }
-    visitForLoopBlockEmpty(block) {
-        this.visitAllNodes(block.children);
-    }
-    visitIfBlock(block) {
-        this.visitAllNodes(block.branches);
-    }
-    visitIfBlockBranch(block) {
-        block.expression && this.visitAst(block.expression);
-        block.expressionAlias?.visit(this);
-        this.visitAllNodes(block.children);
-    }
-    visitLetDeclaration(decl) {
-        this.visitAst(decl.value);
-    }
-    visitComponent(component) {
-        this.visitAllNodes(component.attributes);
-        this.visitAllNodes(component.inputs);
-        this.visitAllNodes(component.outputs);
-        this.visitAllNodes(component.directives);
-        this.visitAllNodes(component.references);
-        this.visitAllNodes(component.children);
-    }
-    visitDirective(directive) {
-        this.visitAllNodes(directive.attributes);
-        this.visitAllNodes(directive.inputs);
-        this.visitAllNodes(directive.outputs);
-        this.visitAllNodes(directive.references);
+        this.visitAllTemplateNodes(template.variables);
+        this.visitAllTemplateNodes(template.references);
+        this.visitAllTemplateNodes(template.children);
     }
     getDiagnostics(template) {
         this.diagnostics = [];
-        this.visitAllNodes(template);
+        this.visitAllTemplateNodes(template);
         return this.diagnostics;
     }
 }
@@ -19263,7 +18960,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.1.0-next.0+sha-ce5a943` usually means that core is at head so it supports
+    // A version of `20.1.0-next.0+sha-0558575` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
