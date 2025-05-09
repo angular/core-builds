@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-69bfece
+ * @license Angular v20.0.0-rc.0+sha-345d3d8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32364,7 +32364,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-rc.0+sha-69bfece');
+new Version('20.0.0-rc.0+sha-345d3d8');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
