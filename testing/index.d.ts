@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.0+sha-5b77cf5
+ * @license Angular v20.0.0-rc.0+sha-3d9cb63
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -38,7 +38,7 @@ declare function waitForAsync(fn: Function): (done: any) => any;
 declare class DeferBlockFixture {
     private block;
     private componentFixture;
-    /** @nodoc */
+    /** @docs-private */
     constructor(block: DeferBlockDetails, componentFixture: ComponentFixture<unknown>);
     /**
      * Renders the specified state of the defer fixture.
@@ -91,7 +91,7 @@ declare class ComponentFixture<T> {
     private autoDetect;
     private subscriptions;
     ngZone: NgZone | null;
-    /** @nodoc */
+    /** @docs-private */
     constructor(componentRef: ComponentRef<T>);
     /**
      * Trigger a change detection cycle for the component.
