@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3c9b8d9
+ * @license Angular v20.1.0-next.0+sha-cda9636
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BrXkTT1w.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Ne1G6Xxq.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -8940,6 +8940,8 @@ exports.SymbolKind = void 0;
     SymbolKind[SymbolKind["DomBinding"] = 9] = "DomBinding";
     SymbolKind[SymbolKind["Pipe"] = 10] = "Pipe";
     SymbolKind[SymbolKind["LetDeclaration"] = 11] = "LetDeclaration";
+    SymbolKind[SymbolKind["SelectorlessComponent"] = 12] = "SelectorlessComponent";
+    SymbolKind[SymbolKind["SelectorlessDirective"] = 13] = "SelectorlessDirective";
 })(exports.SymbolKind || (exports.SymbolKind = {}));
 
 /**
@@ -16342,6 +16344,12 @@ class SymbolBuilder {
         else if (node instanceof compiler.Element) {
             symbol = this.getSymbolOfElement(node);
         }
+        else if (node instanceof compiler.Component) {
+            symbol = this.getSymbolOfSelectorlessComponent(node);
+        }
+        else if (node instanceof compiler.Directive) {
+            symbol = this.getSymbolOfSelectorlessDirective(node);
+        }
         else if (node instanceof compiler.Template) {
             symbol = this.getSymbolOfAstTemplate(node);
         }
@@ -16392,8 +16400,38 @@ class SymbolBuilder {
             templateNode: element,
         };
     }
-    getDirectivesOfNode(element) {
-        const elementSourceSpan = element.startSourceSpan ?? element.sourceSpan;
+    getSymbolOfSelectorlessComponent(node) {
+        const directives = this.getDirectivesOfNode(node);
+        const primaryDirective = directives.find((dir) => !dir.isHostDirective && dir.isComponent) ?? null;
+        if (primaryDirective === null) {
+            return null;
+        }
+        return {
+            tsType: primaryDirective.tsType,
+            tsSymbol: primaryDirective.tsSymbol,
+            tcbLocation: primaryDirective.tcbLocation,
+            kind: exports.SymbolKind.SelectorlessComponent,
+            directives,
+            templateNode: node,
+        };
+    }
+    getSymbolOfSelectorlessDirective(node) {
+        const directives = this.getDirectivesOfNode(node);
+        const primaryDirective = directives.find((dir) => !dir.isHostDirective && !dir.isComponent) ?? null;
+        if (primaryDirective === null) {
+            return null;
+        }
+        return {
+            tsType: primaryDirective.tsType,
+            tsSymbol: primaryDirective.tsSymbol,
+            tcbLocation: primaryDirective.tcbLocation,
+            kind: exports.SymbolKind.SelectorlessDirective,
+            directives,
+            templateNode: node,
+        };
+    }
+    getDirectivesOfNode(templateNode) {
+        const elementSourceSpan = templateNode.startSourceSpan ?? templateNode.sourceSpan;
         const tcbSourceFile = this.typeCheckBlock.getSourceFile();
         // directives could be either:
         // - var _t1: TestDir /*T:D*/ = null! as TestDir;
@@ -16406,6 +16444,7 @@ class SymbolBuilder {
             filter: isDirectiveDeclaration,
         });
         const symbols = [];
+        const seenDirectives = new Set();
         for (const node of nodes) {
             const symbol = this.getSymbolOfTsNode(node.parent);
             if (symbol === null ||
@@ -16413,11 +16452,14 @@ class SymbolBuilder {
                 !ts.isClassDeclaration(symbol.tsSymbol.valueDeclaration)) {
                 continue;
             }
-            const meta = this.getDirectiveMeta(element, symbol.tsSymbol.valueDeclaration);
-            if (meta !== null && meta.selector !== null) {
-                const ref = new Reference(symbol.tsSymbol.valueDeclaration);
+            const declaration = symbol.tsSymbol.valueDeclaration;
+            const meta = this.getDirectiveMeta(templateNode, declaration);
+            // Host directives will be added as identifiers with the same offset as the host
+            // which means that they'll get added twice. De-duplicate them to avoid confusion.
+            if (meta !== null && !seenDirectives.has(declaration)) {
+                const ref = new Reference(declaration);
                 if (meta.hostDirectives !== null) {
-                    this.addHostDirectiveSymbols(element, meta.hostDirectives, symbols);
+                    this.addHostDirectiveSymbols(templateNode, meta.hostDirectives, symbols, seenDirectives);
                 }
                 const directiveSymbol = {
                     ...symbol,
@@ -16425,30 +16467,32 @@ class SymbolBuilder {
                     tsSymbol: symbol.tsSymbol,
                     selector: meta.selector,
                     isComponent: meta.isComponent,
-                    ngModule: this.getDirectiveModule(symbol.tsSymbol.valueDeclaration),
+                    ngModule: this.getDirectiveModule(declaration),
                     kind: exports.SymbolKind.Directive,
                     isStructural: meta.isStructural,
                     isInScope: true,
                     isHostDirective: false,
                 };
                 symbols.push(directiveSymbol);
+                seenDirectives.add(declaration);
             }
         }
         return symbols;
     }
-    addHostDirectiveSymbols(host, hostDirectives, symbols) {
+    addHostDirectiveSymbols(host, hostDirectives, symbols, seenDirectives) {
         for (const current of hostDirectives) {
             if (!isHostDirectiveMetaForGlobalMode(current)) {
                 throw new Error('Impossible state: typecheck code path in local compilation mode.');
             }
-            if (!ts.isClassDeclaration(current.directive.node)) {
+            const node = current.directive.node;
+            if (!ts.isClassDeclaration(node) || seenDirectives.has(node)) {
                 continue;
             }
-            const symbol = this.getSymbolOfTsNode(current.directive.node);
-            const meta = this.getDirectiveMeta(host, current.directive.node);
+            const symbol = this.getSymbolOfTsNode(node);
+            const meta = this.getDirectiveMeta(host, node);
             if (meta !== null && symbol !== null && isSymbolWithValueDeclaration(symbol.tsSymbol)) {
                 if (meta.hostDirectives !== null) {
-                    this.addHostDirectiveSymbols(host, meta.hostDirectives, symbols);
+                    this.addHostDirectiveSymbols(host, meta.hostDirectives, symbols, seenDirectives);
                 }
                 const directiveSymbol = {
                     ...symbol,
@@ -16459,12 +16503,13 @@ class SymbolBuilder {
                     exposedOutputs: current.outputs,
                     selector: meta.selector,
                     isComponent: meta.isComponent,
-                    ngModule: this.getDirectiveModule(current.directive.node),
+                    ngModule: this.getDirectiveModule(node),
                     kind: exports.SymbolKind.Directive,
                     isStructural: meta.isStructural,
                     isInScope: true,
                 };
                 symbols.push(directiveSymbol);
+                seenDirectives.add(node);
             }
         }
     }
@@ -16473,16 +16518,19 @@ class SymbolBuilder {
         // `getDirectivesOfNode` will not return the directives intended for an element
         // on a microsyntax template, for example `<div *ngFor="let user of users;" dir>`,
         // the `dir` will be skipped, but it's needed in language service.
-        const firstChild = host.children[0];
-        if (firstChild instanceof compiler.Element) {
-            const isMicrosyntaxTemplate = host instanceof compiler.Template && sourceSpanEqual(firstChild.sourceSpan, host.sourceSpan);
-            if (isMicrosyntaxTemplate) {
-                const firstChildDirectives = this.typeCheckData.boundTarget.getDirectivesOfNode(firstChild);
-                if (firstChildDirectives !== null && directives !== null) {
-                    directives = directives.concat(firstChildDirectives);
-                }
-                else {
-                    directives = directives ?? firstChildDirectives;
+        if (!(host instanceof compiler.Directive)) {
+            const firstChild = host.children[0];
+            if (firstChild instanceof compiler.Element) {
+                const isMicrosyntaxTemplate = host instanceof compiler.Template &&
+                    sourceSpanEqual(firstChild.sourceSpan, host.sourceSpan);
+                if (isMicrosyntaxTemplate) {
+                    const firstChildDirectives = this.typeCheckData.boundTarget.getDirectivesOfNode(firstChild);
+                    if (firstChildDirectives !== null && directives !== null) {
+                        directives = directives.concat(firstChildDirectives);
+                    }
+                    else {
+                        directives = directives ?? firstChildDirectives;
+                    }
                 }
             }
         }
@@ -16686,9 +16734,7 @@ class SymbolBuilder {
     getDirectiveSymbolForAccessExpression(fieldAccessExpr, { isComponent, selector, isStructural }) {
         // In all cases, `_t1["index"]` or `_t1.index`, `node.expression` is _t1.
         const tsSymbol = this.getTypeChecker().getSymbolAtLocation(fieldAccessExpr.expression);
-        if (tsSymbol?.declarations === undefined ||
-            tsSymbol.declarations.length === 0 ||
-            selector === null) {
+        if (tsSymbol?.declarations === undefined || tsSymbol.declarations.length === 0) {
             return null;
         }
         const [declaration] = tsSymbol.declarations;
