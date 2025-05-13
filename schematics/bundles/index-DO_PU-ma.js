@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-810b0a7
+ * @license Angular v20.1.0-next.0+sha-c34efcc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-Ne1G6Xxq.js');
-var compiler = require('./compiler-DCkUGCAs.js');
-var index = require('./index-C0nQu5v7.js');
+var checker = require('./checker-CFlmJEzl.js');
+var compiler = require('./compiler-CcAtNxeb.js');
+var index = require('./index-D0FgIlaw.js');
 require('path');
-var project_paths = require('./project_paths-CtmXzSrm.js');
+var project_paths = require('./project_paths-DF71Bm3E.js');
 
 function getMemberName(member) {
     if (member.name === undefined) {
