@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.10+sha-7be6e5d
+ * @license Angular v19.2.10+sha-899cb4a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -674,8 +674,12 @@ function getInjectorDef(type) {
 const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
 const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
 // We need to keep these around so we can read off old defs if new defs are unavailable
-const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
-const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
+const NG_INJECTABLE_DEF = getClosureSafeProperty({
+    ngInjectableDef: getClosureSafeProperty,
+});
+const NG_INJECTOR_DEF = getClosureSafeProperty({
+    ngInjectorDef: getClosureSafeProperty,
+});
 
 /**
  * Creates a token that can be used in a DI Provider.
@@ -899,7 +903,9 @@ const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty })
  * bloom filter bit for DI.
  */
 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
-const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
+const NG_ELEMENT_ID = getClosureSafeProperty({
+    __NG_ELEMENT_ID__: getClosureSafeProperty,
+});
 /**
  * The `NG_ENV_ID` field on a DI token indicates special processing in the `EnvironmentInjector`:
  * getting such tokens from the `EnvironmentInjector` will bypass the standard DI resolution
@@ -17944,7 +17950,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.10+sha-7be6e5d']
+                ? ['ng-version', '19.2.10+sha-899cb4a']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -34683,7 +34689,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.10+sha-7be6e5d');
+const VERSION = new Version('19.2.10+sha-899cb4a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
