@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.0+sha-ed9a1d4
+ * @license Angular v20.0.0-rc.0+sha-c1b9d3e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Subscription } from 'rxjs';
 import { inject as inject$1, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-B_EWGyLU.mjs';
 import * as i0 from '@angular/core';
-import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-3mmnD06K.mjs';
+import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-CV7S5yUx.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
@@ -879,9 +879,7 @@ class TestBedCompiler {
             moduleDef.rethrowApplicationErrors ?? RETHROW_APPLICATION_ERRORS_DEFAULT;
     }
     overrideModule(ngModule, override) {
-        {
-            depsTracker.clearScopeCacheFor(ngModule);
-        }
+        depsTracker.clearScopeCacheFor(ngModule);
         this.overriddenModules.add(ngModule);
         // Compile the module right away.
         this.resolvers.module.addOverride(ngModule, override);
@@ -1097,9 +1095,7 @@ class TestBedCompiler {
                 throw invalidTypeError(declaration.name, 'Component');
             }
             this.maybeStoreNgDef(NG_COMP_DEF, declaration);
-            {
-                depsTracker.clearScopeCacheFor(declaration);
-            }
+            depsTracker.clearScopeCacheFor(declaration);
             compileComponent(declaration, metadata);
         });
         this.pendingComponents.clear();
@@ -1132,9 +1128,7 @@ class TestBedCompiler {
             const affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
             if (affectedModules.size > 0) {
                 affectedModules.forEach((moduleType) => {
-                    {
-                        depsTracker.clearScopeCacheFor(moduleType);
-                    }
+                    depsTracker.clearScopeCacheFor(moduleType);
                 });
             }
         }
@@ -1455,9 +1449,7 @@ class TestBedCompiler {
         });
         // Restore initial component/directive/pipe defs
         this.initialNgDefs.forEach((defs, type) => {
-            {
-                depsTracker.clearScopeCacheFor(type);
-            }
+            depsTracker.clearScopeCacheFor(type);
             defs.forEach((descriptor, prop) => {
                 if (!descriptor) {
                     // Delete operations are generally undesirable since they have performance
