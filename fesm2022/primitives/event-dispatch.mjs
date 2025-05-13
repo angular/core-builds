@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-dd25f3d
+ * @license Angular v20.1.0-next.0+sha-810b0a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1080,7 +1080,8 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfoWrapper) 
 }
 
 /** An internal symbol used to indicate whether propagation should be stopped or not. */
-const PROPAGATION_STOPPED_SYMBOL = /* @__PURE__ */ Symbol.for('propagationStopped');
+const PROPAGATION_STOPPED_SYMBOL = 
+/* @__PURE__ */ Symbol.for('propagationStopped');
 /** Extra event phases beyond what the browser provides. */
 const EventPhase = {
     REPLAY: 101,
