@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.10+sha-ac77e30
+ * @license Angular v19.2.10+sha-3047638
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17950,7 +17950,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.10+sha-ac77e30']
+                ? ['ng-version', '19.2.10+sha-3047638']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -22567,6 +22567,7 @@ function getSignalGraph(injector) {
     return getNodesAndEdgesFromSignalMap(signalDependenciesMap);
 }
 
+/// <reference path="../../../../goog.d.ts" />
 /**
  * This file introduces series of globally accessible debug tools
  * to allow for the Angular debugging story to function.
@@ -34689,7 +34690,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.10+sha-ac77e30');
+const VERSION = new Version('19.2.10+sha-3047638');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35338,6 +35339,7 @@ function provideExperimentalZonelessChangeDetection() {
     ]);
 }
 
+/// <reference path="../../../goog.d.ts" />
 /**
  * Work out the locale from the potential global properties.
  *
