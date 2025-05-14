@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-68d774f
+ * @license Angular v20.1.0-next.0+sha-e62fb35
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BXjPz7Ty.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BOtc6u4U.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -7735,7 +7735,7 @@ const QUERY_TYPES = new Set(queryDecoratorNames);
  * appear in the declarations of an `NgModule` and additional verification is done when processing
  * the module.
  */
-function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone, implicitStandaloneValue) {
+function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone, implicitStandaloneValue, emitDeclarationOnly) {
     let directive;
     if (decorator.args === null || decorator.args.length === 0) {
         directive = new Map();
@@ -7761,8 +7761,8 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     const coreModule = isCore ? undefined : '@angular/core';
     // Construct the map of inputs both from the @Directive/@Component
     // decorator, and the decorated fields.
-    const inputsFromMeta = parseInputsArray(clazz, directive, evaluator, reflector, refEmitter, compilationMode);
-    const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromMeta, decorator);
+    const inputsFromMeta = parseInputsArray(clazz, directive, evaluator, reflector, refEmitter, compilationMode, emitDeclarationOnly);
+    const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromMeta, decorator, emitDeclarationOnly);
     const inputs = ClassPropertyMapping.fromMappedObject({ ...inputsFromMeta, ...inputsFromFields });
     // And outputs.
     const outputsFromMeta = parseOutputsArray(directive, evaluator);
@@ -7872,7 +7872,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     const rawHostDirectives = directive.get('hostDirectives') || null;
     const hostDirectives = rawHostDirectives === null
         ? null
-        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, createForwardRefResolver(isCore));
+        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, createForwardRefResolver(isCore), emitDeclarationOnly);
     if (compilationMode !== exports.CompilationMode.LOCAL && hostDirectives !== null) {
         // In global compilation mode where we do type checking, the template type-checker will need to
         // import host directive types, so add them as referenced by `clazz`. This will ensure that
@@ -8220,7 +8220,7 @@ function parseMappingString(value) {
     return [bindingPropertyName ?? fieldName, fieldName];
 }
 /** Parses the `inputs` array of a directive/component decorator. */
-function parseInputsArray(clazz, decoratorMetadata, evaluator, reflector, refEmitter, compilationMode) {
+function parseInputsArray(clazz, decoratorMetadata, evaluator, reflector, refEmitter, compilationMode, emitDeclarationOnly) {
     const inputsField = decoratorMetadata.get('inputs');
     if (inputsField === undefined) {
         return {};
@@ -8258,7 +8258,7 @@ function parseInputsArray(clazz, decoratorMetadata, evaluator, reflector, refEmi
                 if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference)) {
                     throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
                 }
-                transform = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter, compilationMode);
+                transform = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter, compilationMode, emitDeclarationOnly);
             }
             inputs[name] = {
                 classPropertyName: name,
@@ -8287,7 +8287,7 @@ function tryGetDecoratorOnMember(member, decoratorName, isCore) {
     }
     return null;
 }
-function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode) {
+function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode, emitDeclarationOnly) {
     const classPropertyName = member.name;
     const decorator = tryGetDecoratorOnMember(member, 'Input', isCore);
     const signalInputMapping = tryParseSignalInputMapping(member, reflector, importTracker);
@@ -8325,7 +8325,7 @@ function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTr
             if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference)) {
                 throw createValueHasWrongTypeError(optionsNode, transformValue, `Input transform must be a function`);
             }
-            transform = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter, compilationMode);
+            transform = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter, compilationMode, emitDeclarationOnly);
         }
         return {
             isSignal: false,
@@ -8345,11 +8345,11 @@ function tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTr
     return null;
 }
 /** Parses the class members that declare inputs (via decorator or initializer). */
-function parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromClassDecorator, classDecorator) {
+function parseInputFields(clazz, members, evaluator, reflector, importTracker, refEmitter, isCore, compilationMode, inputsFromClassDecorator, classDecorator, emitDeclarationOnly) {
     const inputs = {};
     for (const member of members) {
         const classPropertyName = member.name;
-        const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode);
+        const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, importTracker, isCore, refEmitter, compilationMode, emitDeclarationOnly);
         if (inputMapping === null) {
             continue;
         }
@@ -8375,7 +8375,22 @@ function parseInputFields(clazz, members, evaluator, reflector, importTracker, r
  * automatically captured in the type of the `InputSignal`.
  *
  */
-function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter, compilationMode) {
+function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter, compilationMode, emitDeclarationOnly) {
+    if (emitDeclarationOnly) {
+        const chain = {
+            messageText: '@Input decorators with a transform function are not supported in experimental declaration-only emission mode',
+            category: ts.DiagnosticCategory.Error,
+            code: 0,
+            next: [
+                {
+                    messageText: `Consider converting '${clazz.name.text}.${classPropertyName}' to an input signal`,
+                    category: ts.DiagnosticCategory.Message,
+                    code: 0,
+                },
+            ],
+        };
+        throw new FatalDiagnosticError(exports.ErrorCode.DECORATOR_UNEXPECTED, value.node, chain);
+    }
     // In local compilation mode we can skip type checking the function args. This is because usually
     // the type check is done in a separate build which runs in full compilation mode. So here we skip
     // all the diagnostics.
@@ -8653,7 +8668,7 @@ function getHostBindingErrorNode(error, hostExpr) {
  * Extracts and prepares the host directives metadata from an array literal expression.
  * @param rawHostDirectives Expression that defined the `hostDirectives`.
  */
-function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver) {
+function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver, emitDeclarationOnly) {
     const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
     if (!Array.isArray(resolved)) {
         throw createValueHasWrongTypeError(rawHostDirectives, resolved, 'hostDirectives must be an array');
@@ -8680,6 +8695,9 @@ function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, fo
             if (!ts.isIdentifier(hostReference.node) &&
                 !ts.isPropertyAccessExpression(hostReference.node)) {
                 throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
+            }
+            if (emitDeclarationOnly) {
+                throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, 'External references in host directives are not supported in experimental declaration-only emission mode');
             }
             directive = new compiler.WrappedNodeExpr(hostReference.node);
         }
