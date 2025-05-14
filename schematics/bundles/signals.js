@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4108efa
+ * @license Angular v20.1.0-next.0+sha-a07413a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,15 +18,15 @@ require('fs');
 require('module');
 require('path');
 require('url');
-require('./index-COSf8gFI.js');
-require('./project_paths-Ch-vpvhI.js');
+require('./index-0yez7iJ4.js');
+require('./project_paths-DN8CcsBA.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./project_tsconfig_paths-CDVxT6Ov.js');
-require('./apply_import_manager-DndUXwmX.js');
-require('./migrate_ts_type_references-Dk8ChGSV.js');
+require('./apply_import_manager-DqHJovTR.js');
+require('./migrate_ts_type_references-DLD5DUnl.js');
 require('assert');
-require('./index-B0l39BK6.js');
+require('./index-f-8SWCuA.js');
 require('./leading_space-D9nQ8UQC.js');
 
 function migrate(options) {
