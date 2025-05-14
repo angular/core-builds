@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1093,15 +1093,13 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 fieldIncompatibleCounts[key]++;
             }
         }
-        return {
-            counters: {
-                queriesCount,
-                multiQueries,
-                incompatibleQueries,
-                ...fieldIncompatibleCounts,
-                ...classIncompatibleCounts,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            queriesCount,
+            multiQueries,
+            incompatibleQueries,
+            ...fieldIncompatibleCounts,
+            ...classIncompatibleCounts,
+        });
     }
 }
 /**
@@ -1156,10 +1154,9 @@ function migrate(options) {
                 context.logger.info(`Processing analysis data between targets...`);
                 context.logger.info(``);
             },
-            whenDone: ({ counters }) => {
+            whenDone: ({ queriesCount, incompatibleQueries }) => {
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal queries 🎉`);
-                const { queriesCount, incompatibleQueries } = counters;
                 const migratedQueries = queriesCount - incompatibleQueries;
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal queries 🎉`);

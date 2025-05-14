@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -456,13 +456,11 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         const problematicOutputs = new Set(Object.keys(globalMetadata.problematicUsages)).size +
             globalMetadata.problematicDeclarationCount;
         const successRate = detectedOutputs > 0 ? (detectedOutputs - problematicOutputs) / detectedOutputs : 1;
-        return {
-            counters: {
-                detectedOutputs,
-                problematicOutputs,
-                successRate,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            detectedOutputs,
+            problematicOutputs,
+            successRate,
+        });
     }
     async migrate(globalData) {
         const migratedFiles = new Set();
@@ -594,8 +592,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { detectedOutputs, problematicOutputs, successRate } = counters;
+            whenDone: ({ detectedOutputs, problematicOutputs, successRate }) => {
                 const migratedOutputs = detectedOutputs - problematicOutputs;
                 const successRatePercent = (successRate * 100).toFixed(2);
                 context.logger.info('');

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -99,12 +99,10 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable(combinedData);
     }
     async stats(globalMetadata) {
-        return {
-            counters: {
-                removedImports: globalMetadata.removedIdentifiers.length,
-                changedFiles: globalMetadata.changedFiles,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            removedImports: globalMetadata.removedIdentifiers.length,
+            changedFiles: globalMetadata.changedFiles,
+        });
     }
     /** Gets an ID that can be used to look up a node based on its location. */
     getNodeID(start, length) {
@@ -281,8 +279,7 @@ function migrate() {
             afterAnalysisFailure: () => {
                 context.logger.error('Schematic failed unexpectedly with no analysis data');
             },
-            whenDone: (stats) => {
-                const { removedImports, changedFiles } = stats.counters;
+            whenDone: ({ removedImports, changedFiles }) => {
                 let statsMessage;
                 if (removedImports === 0) {
                     statsMessage = 'Schematic could not find unused imports in the project';

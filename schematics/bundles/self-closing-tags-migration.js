@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -361,12 +361,10 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
     async stats(globalMetadata) {
         const touchedFilesCount = globalMetadata.tagReplacements.length;
         const replacementCount = globalMetadata.tagReplacements.reduce((acc, cur) => acc + cur.replacementCount, 0);
-        return {
-            counters: {
-                touchedFilesCount,
-                replacementCount,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            touchedFilesCount,
+            replacementCount,
+        });
     }
     async migrate(globalData) {
         return { replacements: globalData.tagReplacements.flatMap(({ replacements }) => replacements) };
@@ -421,8 +419,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { touchedFilesCount, replacementCount } = counters;
+            whenDone: ({ touchedFilesCount, replacementCount }) => {
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to self-closing tags 🎉`);
                 context.logger.info(`  -> Migrated ${replacementCount} components to self-closing tags in ${touchedFilesCount} component files.`);

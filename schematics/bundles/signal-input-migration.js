@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1397,15 +1397,13 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
                 classIncompatibleCounts[key]++;
             }
         }
-        return {
-            counters: {
-                fullCompilationInputs,
-                sourceInputs,
-                incompatibleInputs,
-                ...fieldIncompatibleCounts,
-                ...classIncompatibleCounts,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            fullCompilationInputs,
+            sourceInputs,
+            incompatibleInputs,
+            ...fieldIncompatibleCounts,
+            ...classIncompatibleCounts,
+        });
     }
 }
 /**
@@ -1471,8 +1469,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { sourceInputs, incompatibleInputs } = counters;
+            whenDone: ({ sourceInputs, incompatibleInputs }) => {
                 const migratedInputs = sourceInputs - incompatibleInputs;
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal inputs 🎉`);

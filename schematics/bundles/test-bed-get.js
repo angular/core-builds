@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.0+sha-12afed8
+ * @license Angular v20.0.0-rc.0+sha-d7a1c19
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -76,7 +76,7 @@ class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
-        return { counters: {} };
+        return project_paths.confirmAsSerializable({});
     }
 }
 
