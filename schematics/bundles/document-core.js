@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('./compiler-CcAtNxeb.js');
+require('./compiler-CaMIUh11.js');
 require('typescript');
-var checker = require('./checker-CFlmJEzl.js');
+var checker = require('./checker-BXjPz7Ty.js');
 require('os');
-var apply_import_manager = require('./apply_import_manager-BnZC2APu.js');
-require('./index-D0FgIlaw.js');
+var apply_import_manager = require('./apply_import_manager-DndUXwmX.js');
+require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
 var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -73,7 +73,7 @@ class DocumentCoreMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
-        return { counters: {} };
+        return project_paths.confirmAsSerializable({});
     }
 }
 

@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-bEOHR9Mq.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-Dk8ChGSV.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CFlmJEzl.js');
-require('./compiler-CcAtNxeb.js');
-var index$1 = require('./index-D0FgIlaw.js');
+var checker = require('./checker-BXjPz7Ty.js');
+require('./compiler-CaMIUh11.js');
+var index$1 = require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
-var index = require('./index-DO_PU-ma.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
+var index = require('./index-B0l39BK6.js');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-BnZC2APu.js');
+var apply_import_manager = require('./apply_import_manager-DndUXwmX.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./leading_space-D9nQ8UQC.js');
@@ -1397,15 +1397,13 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
                 classIncompatibleCounts[key]++;
             }
         }
-        return {
-            counters: {
-                fullCompilationInputs,
-                sourceInputs,
-                incompatibleInputs,
-                ...fieldIncompatibleCounts,
-                ...classIncompatibleCounts,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            fullCompilationInputs,
+            sourceInputs,
+            incompatibleInputs,
+            ...fieldIncompatibleCounts,
+            ...classIncompatibleCounts,
+        });
     }
 }
 /**
@@ -1471,8 +1469,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { sourceInputs, incompatibleInputs } = counters;
+            whenDone: ({ sourceInputs, incompatibleInputs }) => {
                 const migratedInputs = sourceInputs - incompatibleInputs;
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal inputs 🎉`);

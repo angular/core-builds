@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-require('./checker-CFlmJEzl.js');
-require('./compiler-CcAtNxeb.js');
-require('./index-D0FgIlaw.js');
+require('./checker-BXjPz7Ty.js');
+require('./compiler-CaMIUh11.js');
+require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
 var imports = require('./imports-CIX-JgAN.js');
 var symbol = require('./symbol-VPWguRxr.js');
 require('@angular-devkit/core');
@@ -76,7 +76,7 @@ class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
-        return { counters: {} };
+        return project_paths.confirmAsSerializable({});
     }
 }
 

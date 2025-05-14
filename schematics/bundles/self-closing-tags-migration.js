@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CFlmJEzl.js');
-var compiler = require('./compiler-CcAtNxeb.js');
-require('./index-D0FgIlaw.js');
+var checker = require('./checker-BXjPz7Ty.js');
+var compiler = require('./compiler-CaMIUh11.js');
+require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
 var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
 var property_name = require('./property_name-BBwFuqMe.js');
 require('@angular-devkit/core');
@@ -263,13 +263,9 @@ class AngularElementCollector extends compiler.RecursiveVisitor$1 {
         super();
     }
     visitElement(element) {
-        const isHtmlTag = ALL_HTML_TAGS.includes(element.name);
-        if (isHtmlTag) {
-            return;
-        }
-        const hasNoContent = this.elementHasNoContent(element);
-        const hasNoClosingTag = this.elementHasNoClosingTag(element);
-        if (hasNoContent && !hasNoClosingTag) {
+        if (!element.isSelfClosing &&
+            !ALL_HTML_TAGS.includes(element.name) &&
+            this.elementHasNoContent(element)) {
             this.elements.push({
                 tagName: element.name,
                 start: element.sourceSpan.start.offset,
@@ -287,14 +283,6 @@ class AngularElementCollector extends compiler.RecursiveVisitor$1 {
             return child instanceof compiler.Text && /^\s*$/.test(child.value);
         }
         return false;
-    }
-    elementHasNoClosingTag(element) {
-        const { startSourceSpan, endSourceSpan } = element;
-        if (!endSourceSpan) {
-            return true;
-        }
-        return (startSourceSpan.start.offset === endSourceSpan.start.offset &&
-            startSourceSpan.end.offset === endSourceSpan.end.offset);
     }
 }
 
@@ -361,12 +349,10 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
     async stats(globalMetadata) {
         const touchedFilesCount = globalMetadata.tagReplacements.length;
         const replacementCount = globalMetadata.tagReplacements.reduce((acc, cur) => acc + cur.replacementCount, 0);
-        return {
-            counters: {
-                touchedFilesCount,
-                replacementCount,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            touchedFilesCount,
+            replacementCount,
+        });
     }
     async migrate(globalData) {
         return { replacements: globalData.tagReplacements.flatMap(({ replacements }) => replacements) };
@@ -421,8 +407,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { touchedFilesCount, replacementCount } = counters;
+            whenDone: ({ touchedFilesCount, replacementCount }) => {
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to self-closing tags 🎉`);
                 context.logger.info(`  -> Migrated ${replacementCount} components to self-closing tags in ${touchedFilesCount} component files.`);

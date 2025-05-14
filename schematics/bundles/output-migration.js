@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,13 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CFlmJEzl.js');
-var compiler = require('./compiler-CcAtNxeb.js');
-var index$1 = require('./index-D0FgIlaw.js');
+var checker = require('./checker-BXjPz7Ty.js');
+var compiler = require('./compiler-CaMIUh11.js');
+var index$1 = require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
-var apply_import_manager = require('./apply_import_manager-BnZC2APu.js');
-var index = require('./index-DO_PU-ma.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
+var apply_import_manager = require('./apply_import_manager-DndUXwmX.js');
+var index = require('./index-B0l39BK6.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -456,13 +456,11 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         const problematicOutputs = new Set(Object.keys(globalMetadata.problematicUsages)).size +
             globalMetadata.problematicDeclarationCount;
         const successRate = detectedOutputs > 0 ? (detectedOutputs - problematicOutputs) / detectedOutputs : 1;
-        return {
-            counters: {
-                detectedOutputs,
-                problematicOutputs,
-                successRate,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            detectedOutputs,
+            problematicOutputs,
+            successRate,
+        });
     }
     async migrate(globalData) {
         const migratedFiles = new Set();
@@ -594,8 +592,7 @@ function migrate(options) {
             afterAnalysisFailure: () => {
                 context.logger.error('Migration failed unexpectedly with no analysis data');
             },
-            whenDone: ({ counters }) => {
-                const { detectedOutputs, problematicOutputs, successRate } = counters;
+            whenDone: ({ detectedOutputs, problematicOutputs, successRate }) => {
                 const migratedOutputs = detectedOutputs - problematicOutputs;
                 const successRatePercent = (successRate * 100).toFixed(2);
                 context.logger.info('');

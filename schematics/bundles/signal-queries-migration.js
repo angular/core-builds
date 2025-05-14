@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-CcAtNxeb.js');
+var compiler = require('./compiler-CaMIUh11.js');
 var ts = require('typescript');
-var checker = require('./checker-CFlmJEzl.js');
+var checker = require('./checker-BXjPz7Ty.js');
 require('os');
-var index$1 = require('./index-D0FgIlaw.js');
+var index$1 = require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
-var apply_import_manager = require('./apply_import_manager-BnZC2APu.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-bEOHR9Mq.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
+var apply_import_manager = require('./apply_import_manager-DndUXwmX.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-Dk8ChGSV.js');
 var assert = require('assert');
-var index = require('./index-DO_PU-ma.js');
+var index = require('./index-B0l39BK6.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -1093,15 +1093,13 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 fieldIncompatibleCounts[key]++;
             }
         }
-        return {
-            counters: {
-                queriesCount,
-                multiQueries,
-                incompatibleQueries,
-                ...fieldIncompatibleCounts,
-                ...classIncompatibleCounts,
-            },
-        };
+        return project_paths.confirmAsSerializable({
+            queriesCount,
+            multiQueries,
+            incompatibleQueries,
+            ...fieldIncompatibleCounts,
+            ...classIncompatibleCounts,
+        });
     }
 }
 /**
@@ -1156,10 +1154,9 @@ function migrate(options) {
                 context.logger.info(`Processing analysis data between targets...`);
                 context.logger.info(``);
             },
-            whenDone: ({ counters }) => {
+            whenDone: ({ queriesCount, incompatibleQueries }) => {
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal queries 🎉`);
-                const { queriesCount, incompatibleQueries } = counters;
                 const migratedQueries = queriesCount - incompatibleQueries;
                 context.logger.info('');
                 context.logger.info(`Successfully migrated to signal queries 🎉`);

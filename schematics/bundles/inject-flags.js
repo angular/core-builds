@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4058f8d
+ * @license Angular v20.1.0-next.0+sha-3aef3e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,12 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CFlmJEzl.js');
-require('./compiler-CcAtNxeb.js');
-require('./index-D0FgIlaw.js');
+var checker = require('./checker-BXjPz7Ty.js');
+require('./compiler-CaMIUh11.js');
+require('./index-COSf8gFI.js');
 require('path');
-var project_paths = require('./project_paths-DF71Bm3E.js');
-var apply_import_manager = require('./apply_import_manager-BnZC2APu.js');
+var project_paths = require('./project_paths-Ch-vpvhI.js');
+var apply_import_manager = require('./apply_import_manager-DndUXwmX.js');
 var imports = require('./imports-CIX-JgAN.js');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -104,7 +104,7 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable(combinedData);
     }
     async stats() {
-        return { counters: {} };
+        return project_paths.confirmAsSerializable({});
     }
 }
 /** Gets an ID that can be used to look up a node based on its location. */
