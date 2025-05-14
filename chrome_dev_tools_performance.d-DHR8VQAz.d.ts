@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.0+sha-592a754
+ * @license Angular v20.0.0-rc.0+sha-1055354
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -829,6 +829,8 @@ interface EventContractDetails {
     instance?: EventContract;
 }
 declare const JSACTION_EVENT_CONTRACT: InjectionToken<EventContractDetails>;
+/** Shorthand for an event listener callback function to reduce duplication. */
+type EventCallback = (event?: any) => any;
 
 declare global {
     const ngI18nClosureMode: boolean;
@@ -850,4 +852,4 @@ declare global {
 declare function enableProfiling(): () => void;
 
 export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
-export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, ImportedNgModuleProviders, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
+export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, EventCallback, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, ImportedNgModuleProviders, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
