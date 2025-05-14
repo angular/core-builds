@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.2.10+sha-c92c34d
+ * @license Angular v19.2.10+sha-42f203e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState as _DeferBlockState, ɵtriggerResourceLoading as _triggerResourceLoading, ɵrenderDeferBlockState as _renderDeferBlockState, ɵCONTAINER_HEADER_OFFSET as _CONTAINER_HEADER_OFFSET, ɵgetDeferBlocks as _getDeferBlocks, InjectionToken, ɵDeferBlockBehavior as _DeferBlockBehavior, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone as _NoopNgZone, ApplicationRef, ɵPendingTasksInternal as _PendingTasksInternal, ɵZONELESS_ENABLED as _ZONELESS_ENABLED, ɵChangeDetectionScheduler as _ChangeDetectionScheduler, ɵEffectScheduler as _EffectScheduler, ɵMicrotaskEffectScheduler as _MicrotaskEffectScheduler, getDebugNode, RendererFactory2, ɵstringify as _stringify, Pipe, Directive, Component, NgModule, ɵReflectionCapabilities as _ReflectionCapabilities, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT as _USE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker as _depsTracker, ɵgetInjectableDef as _getInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution as _isComponentDefPendingResolution, ɵgetAsyncClassMetadataFn as _getAsyncClassMetadataFn, ɵresolveComponentResources as _resolveComponentResources, ɵRender3NgModuleRef as _Render3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID as _DEFAULT_LOCALE_ID, ɵsetLocaleId as _setLocaleId, ɵRender3ComponentFactory as _Render3ComponentFactory, ɵNG_COMP_DEF as _NG_COMP_DEF, ɵcompileComponent as _compileComponent, ɵNG_DIR_DEF as _NG_DIR_DEF, ɵcompileDirective as _compileDirective, ɵNG_PIPE_DEF as _NG_PIPE_DEF, ɵcompilePipe as _compilePipe, ɵNG_MOD_DEF as _NG_MOD_DEF, ɵpatchComponentDefWithScope as _patchComponentDefWithScope, ɵNG_INJ_DEF as _NG_INJ_DEF, ɵcompileNgModuleDefs as _compileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue as _clearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue as _restoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection as _internalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl as _ChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG as _DEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER as _INTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵtransitiveScopesFor as _transitiveScopesFor, ɵgenerateStandaloneInDeclarationsError as _generateStandaloneInDeclarationsError, ɵNgModuleFactory as _NgModuleFactory, ModuleWithComponentFactories, ɵisEnvironmentProviders as _isEnvironmentProviders, ɵconvertToBitFlags as _convertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest as _setAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents as _resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible as _flushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { inject as inject$1, NgZone, ErrorHandler, Injectable, ɵDeferBlockState as _DeferBlockState, ɵtriggerResourceLoading as _triggerResourceLoading, ɵrenderDeferBlockState as _renderDeferBlockState, ɵCONTAINER_HEADER_OFFSET as _CONTAINER_HEADER_OFFSET, ɵgetDeferBlocks as _getDeferBlocks, InjectionToken, ɵDeferBlockBehavior as _DeferBlockBehavior, ɵNoopNgZone as _NoopNgZone, ApplicationRef, ɵPendingTasksInternal as _PendingTasksInternal, ɵZONELESS_ENABLED as _ZONELESS_ENABLED, ɵChangeDetectionScheduler as _ChangeDetectionScheduler, ɵEffectScheduler as _EffectScheduler, ɵMicrotaskEffectScheduler as _MicrotaskEffectScheduler, getDebugNode, RendererFactory2, ɵstringify as _stringify, Pipe, Directive, Component, NgModule, ɵReflectionCapabilities as _ReflectionCapabilities, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT as _USE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker as _depsTracker, ɵgetInjectableDef as _getInjectableDef, resolveForwardRef, ɵisComponentDefPendingResolution as _isComponentDefPendingResolution, ɵgetAsyncClassMetadataFn as _getAsyncClassMetadataFn, ɵresolveComponentResources as _resolveComponentResources, ɵRender3NgModuleRef as _Render3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID as _DEFAULT_LOCALE_ID, ɵsetLocaleId as _setLocaleId, ɵRender3ComponentFactory as _Render3ComponentFactory, ɵNG_COMP_DEF as _NG_COMP_DEF, ɵcompileComponent as _compileComponent, ɵNG_DIR_DEF as _NG_DIR_DEF, ɵcompileDirective as _compileDirective, ɵNG_PIPE_DEF as _NG_PIPE_DEF, ɵcompilePipe as _compilePipe, ɵNG_MOD_DEF as _NG_MOD_DEF, ɵpatchComponentDefWithScope as _patchComponentDefWithScope, ɵNG_INJ_DEF as _NG_INJ_DEF, ɵcompileNgModuleDefs as _compileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue as _clearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue as _restoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection as _internalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl as _ChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG as _DEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER as _INTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵtransitiveScopesFor as _transitiveScopesFor, ɵgenerateStandaloneInDeclarationsError as _generateStandaloneInDeclarationsError, ɵNgModuleFactory as _NgModuleFactory, ModuleWithComponentFactories, ɵisEnvironmentProviders as _isEnvironmentProviders, ɵconvertToBitFlags as _convertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest as _setAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents as _resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible as _flushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -45,6 +45,38 @@ function waitForAsync(fn) {
     };
 }
 
+const RETHROW_APPLICATION_ERRORS_DEFAULT = true;
+class TestBedApplicationErrorHandler {
+    zone = inject$1(NgZone);
+    userErrorHandler = inject$1(ErrorHandler);
+    whenStableRejectFunctions = new Set();
+    handleError(e) {
+        try {
+            this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
+        }
+        catch (userError) {
+            e = userError;
+        }
+        // Instead of throwing the error when there are outstanding `fixture.whenStable` promises,
+        // reject those promises with the error. This allows developers to write
+        // expectAsync(fix.whenStable()).toBeRejected();
+        if (this.whenStableRejectFunctions.size > 0) {
+            for (const fn of this.whenStableRejectFunctions.values()) {
+                fn(e);
+            }
+            this.whenStableRejectFunctions.clear();
+        }
+        else {
+            throw e;
+        }
+    }
+    static ɵfac = function TestBedApplicationErrorHandler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || TestBedApplicationErrorHandler)(); };
+    static ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: TestBedApplicationErrorHandler, factory: TestBedApplicationErrorHandler.ɵfac });
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(TestBedApplicationErrorHandler, [{
+        type: Injectable
+    }], null, null); })();
+
 /**
  * Represents an individual defer block for testing purposes.
  *
@@ -53,7 +85,7 @@ function waitForAsync(fn) {
 class DeferBlockFixture {
     block;
     componentFixture;
-    /** @nodoc */
+    /** @docs-private */
     constructor(block, componentFixture) {
         this.block = block;
         this.componentFixture = componentFixture;
@@ -150,38 +182,6 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
-const RETHROW_APPLICATION_ERRORS_DEFAULT = true;
-class TestBedApplicationErrorHandler {
-    zone = inject$1(NgZone);
-    userErrorHandler = inject$1(ErrorHandler);
-    whenStableRejectFunctions = new Set();
-    handleError(e) {
-        try {
-            this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
-        }
-        catch (userError) {
-            e = userError;
-        }
-        // Instead of throwing the error when there are outstanding `fixture.whenStable` promises,
-        // reject those promises with the error. This allows developers to write
-        // expectAsync(fix.whenStable()).toBeRejected();
-        if (this.whenStableRejectFunctions.size > 0) {
-            for (const fn of this.whenStableRejectFunctions.values()) {
-                fn(e);
-            }
-            this.whenStableRejectFunctions.clear();
-        }
-        else {
-            throw e;
-        }
-    }
-    static ɵfac = function TestBedApplicationErrorHandler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || TestBedApplicationErrorHandler)(); };
-    static ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: TestBedApplicationErrorHandler, factory: TestBedApplicationErrorHandler.ɵfac });
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(TestBedApplicationErrorHandler, [{
-        type: Injectable
-    }], null, null); })();
-
 /**
  * Fixture for debugging and testing a component.
  *
@@ -235,7 +235,7 @@ class ComponentFixture {
     subscriptions = new Subscription();
     // TODO(atscott): Remove this from public API
     ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
-    /** @nodoc */
+    /** @docs-private */
     constructor(componentRef) {
         this.componentRef = componentRef;
         this.changeDetectorRef = componentRef.changeDetectorRef;
@@ -1867,7 +1867,7 @@ class TestBedImpl {
     /**
      * Internal-only flag to indicate whether a module
      * scoping queue has been checked and flushed already.
-     * @nodoc
+     * @docs-private
      */
     globalCompilationChecked = false;
     /**
