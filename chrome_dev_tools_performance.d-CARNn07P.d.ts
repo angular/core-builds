@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-rc.0+sha-7cb903f
+ * @license Angular v20.0.0-rc.0+sha-a21de80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { SIGNAL } from './graph.d-BcIOep_B.js';
-import { EventContract } from './event_dispatcher.d-DlbccpYq.js';
+import { EventContract } from './event_dispatcher.d-BReQpZfC.js';
 
 /**
  * A reactive value which notifies consumers of any changes.
@@ -584,32 +584,6 @@ interface ModuleWithProviders<T> {
  * @deprecated replaced by `EnvironmentProviders`
  */
 type ImportedNgModuleProviders = EnvironmentProviders;
-
-declare global {
-    /**
-     * Values of ngDevMode
-     * Depending on the current state of the application, ngDevMode may have one of several values.
-     *
-     * For convenience, the “truthy” value which enables dev mode is also an object which contains
-     * Angular’s performance counters. This is not necessary, but cuts down on boilerplate for the
-     * perf counters.
-     *
-     * ngDevMode may also be set to false. This can happen in one of a few ways:
-     * - The user explicitly sets `window.ngDevMode = false` somewhere in their app.
-     * - The user calls `enableProdMode()`.
-     * - The URL contains a `ngDevMode=false` text.
-     * Finally, ngDevMode may not have been defined at all.
-     */
-    const ngDevMode: null | NgDevModePerfCounters;
-    interface NgDevModePerfCounters {
-        hydratedNodes: number;
-        hydratedComponents: number;
-        dehydratedViewsRemoved: number;
-        dehydratedViewsCleanupRuns: number;
-        componentsSkippedHydration: number;
-        deferBlocksWithIncrementalHydration: number;
-    }
-}
 
 /**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a

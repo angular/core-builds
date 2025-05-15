@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-rc.0+sha-7cb903f
+ * @license Angular v20.0.0-rc.0+sha-a21de80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, ValueEqualityFn, Injector } from './chrome_dev_tools_performance.d-DHR8VQAz.js';
+import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, ValueEqualityFn, Injector } from './chrome_dev_tools_performance.d-CARNn07P.js';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
