@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-1191e62
+ * @license Angular v19.2.11+sha-82e5449
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9354,6 +9354,56 @@ function invokeListeners(event, currentTarget) {
         handler(event);
     }
 }
+const stashEventListeners = new Map();
+/**
+ * Registers a stashing function for a specific application ID.
+ *
+ * @param appId The unique identifier for the application instance.
+ * @param fn The stashing function to associate with this app ID.
+ * @returns A cleanup function that removes the stashing function when called.
+ */
+function setStashFn(appId, fn) {
+    stashEventListeners.set(appId, fn);
+    return () => stashEventListeners.delete(appId);
+}
+/**
+ * Indicates whether the stashing code was added, prevents adding it multiple times.
+ */
+let isStashEventListenerImplEnabled = false;
+let _stashEventListenerImpl = (lView, target, eventName, listenerFn) => { };
+/**
+ * Optionally stashes an event listener for later replay during hydration.
+ *
+ * This function delegates to an internal `_stashEventListenerImpl`, which may
+ * be a no-op unless the event replay feature is enabled. When active, this
+ * allows capturing event listener metadata before hydration completes, so that
+ * user interactions during SSR can be replayed.
+ *
+ * @param lView The logical view (LView) where the listener is being registered.
+ * @param target The DOM element or event target the listener is attached to.
+ * @param eventName The name of the event being listened for (e.g., 'click').
+ * @param listenerFn The event handler that was registered.
+ */
+function stashEventListenerImpl(lView, target, eventName, listenerFn) {
+    _stashEventListenerImpl(lView, target, eventName, listenerFn);
+}
+/**
+ * Enables the event listener stashing logic in a tree-shakable way.
+ *
+ * This function lazily sets the implementation of `_stashEventListenerImpl`
+ * so that it becomes active only when `withEventReplay` is invoked. This ensures
+ * that the stashing logic is excluded from production builds unless needed.
+ */
+function enableStashEventListenerImpl() {
+    if (!isStashEventListenerImplEnabled) {
+        _stashEventListenerImpl = (lView, target, eventName, listenerFn) => {
+            const appId = lView[INJECTOR].get(APP_ID);
+            const stashEventListener = stashEventListeners.get(appId);
+            stashEventListener?.(target, eventName, listenerFn);
+        };
+        isStashEventListenerImplEnabled = true;
+    }
+}
 
 /**
  * An internal injection token to reference `DehydratedBlockRegistry` implementation
@@ -17950,7 +18000,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.11+sha-1191e62']
+                ? ['ng-version', '19.2.11+sha-82e5449']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -30146,13 +30196,6 @@ function isOutputSubscribable(value) {
     return (value != null && typeof value.subscribe === 'function');
 }
 
-const stashEventListeners = new Map();
-function setStashFn(appId, fn) {
-    stashEventListeners.set(appId, fn);
-}
-function clearStashFn(appId) {
-    stashEventListeners.delete(appId);
-}
 /**
  * Adds an event listener to the current node.
  *
@@ -30290,9 +30333,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         }
         else {
             listenerFn = wrapListener(tNode, lView, listenerFn);
-            const appId = lView[INJECTOR].get(APP_ID);
-            const stashEventListener = stashEventListeners.get(appId);
-            stashEventListener?.(target, eventName, listenerFn);
+            stashEventListenerImpl(lView, target, eventName, listenerFn);
             const cleanupFn = renderer.listen(target, eventName, listenerFn);
             ngDevMode && ngDevMode.rendererAddEventListener++;
             lCleanup.push(listenerFn, cleanupFn);
@@ -34690,7 +34731,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.11+sha-1191e62');
+const VERSION = new Version('19.2.11+sha-82e5449');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38194,8 +38235,9 @@ function withEventReplay() {
                 if (!appsWithEventReplay.has(appRef)) {
                     const jsActionMap = inject(JSACTION_BLOCK_ELEMENT_MAP);
                     if (shouldEnableEventReplay(injector)) {
+                        enableStashEventListenerImpl();
                         const appId = injector.get(APP_ID);
-                        setStashFn(appId, (rEl, eventName, listenerFn) => {
+                        const clearStashFn = setStashFn(appId, (rEl, eventName, listenerFn) => {
                             // If a user binds to a ng-container and uses a directive that binds using a host listener,
                             // this element could be a comment node. So we need to ensure we have an actual element
                             // node before stashing anything.
@@ -38204,6 +38246,10 @@ function withEventReplay() {
                             sharedStashFunction(rEl, eventName, listenerFn);
                             sharedMapFunction(rEl, jsActionMap);
                         });
+                        // Clean up the reference to the function set by the environment initializer,
+                        // as the function closure may capture injected elements and prevent them
+                        // from being properly garbage collected.
+                        appRef.onDestroy(clearStashFn);
                     }
                 }
             },
@@ -38230,10 +38276,6 @@ function withEventReplay() {
                             // no elements are still captured in the global list and are not prevented
                             // from being garbage collected.
                             clearAppScopedEarlyEventContract(appId);
-                            // Clean up the reference to the function set by the environment initializer,
-                            // as the function closure may capture injected elements and prevent them
-                            // from being properly garbage collected.
-                            clearStashFn(appId);
                         }
                     });
                     // Kick off event replay logic once hydration for the initial part
