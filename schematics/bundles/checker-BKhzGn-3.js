@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.11+sha-ae503b7
+ * @license Angular v19.2.11+sha-1191e62
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30726,7 +30726,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.11+sha-ae503b7');
+new Version('19.2.11+sha-1191e62');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32153,7 +32153,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CGGdizaF.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BKhzGn-3.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32956,14 +32956,14 @@ exports.ClassMemberKind = void 0;
     ClassMemberKind[ClassMemberKind["Method"] = 4] = "Method";
 })(exports.ClassMemberKind || (exports.ClassMemberKind = {}));
 /** Possible access levels of a class member. */
-var ClassMemberAccessLevel;
+exports.ClassMemberAccessLevel = void 0;
 (function (ClassMemberAccessLevel) {
     ClassMemberAccessLevel[ClassMemberAccessLevel["PublicWritable"] = 0] = "PublicWritable";
     ClassMemberAccessLevel[ClassMemberAccessLevel["PublicReadonly"] = 1] = "PublicReadonly";
     ClassMemberAccessLevel[ClassMemberAccessLevel["Protected"] = 2] = "Protected";
     ClassMemberAccessLevel[ClassMemberAccessLevel["Private"] = 3] = "Private";
     ClassMemberAccessLevel[ClassMemberAccessLevel["EcmaScriptPrivate"] = 4] = "EcmaScriptPrivate";
-})(ClassMemberAccessLevel || (ClassMemberAccessLevel = {}));
+})(exports.ClassMemberAccessLevel || (exports.ClassMemberAccessLevel = {}));
 /** Indicates that a declaration is referenced through an ambient type. */
 const AmbientImport = {};
 
@@ -33242,15 +33242,15 @@ function isIdentifier(node) {
  */
 function classMemberAccessLevelToString(level) {
     switch (level) {
-        case ClassMemberAccessLevel.EcmaScriptPrivate:
+        case exports.ClassMemberAccessLevel.EcmaScriptPrivate:
             return 'ES private';
-        case ClassMemberAccessLevel.Private:
+        case exports.ClassMemberAccessLevel.Private:
             return 'private';
-        case ClassMemberAccessLevel.Protected:
+        case exports.ClassMemberAccessLevel.Protected:
             return 'protected';
-        case ClassMemberAccessLevel.PublicReadonly:
+        case exports.ClassMemberAccessLevel.PublicReadonly:
             return 'public readonly';
-        case ClassMemberAccessLevel.PublicWritable:
+        case exports.ClassMemberAccessLevel.PublicWritable:
         default:
             return 'public';
     }
@@ -33754,7 +33754,7 @@ function extractModifiersOfMember(node) {
     const modifiers = ts.getModifiers(node);
     let isStatic = false;
     let isReadonly = false;
-    let accessLevel = ClassMemberAccessLevel.PublicWritable;
+    let accessLevel = exports.ClassMemberAccessLevel.PublicWritable;
     if (modifiers !== undefined) {
         for (const modifier of modifiers) {
             switch (modifier.kind) {
@@ -33762,10 +33762,10 @@ function extractModifiersOfMember(node) {
                     isStatic = true;
                     break;
                 case ts.SyntaxKind.PrivateKeyword:
-                    accessLevel = ClassMemberAccessLevel.Private;
+                    accessLevel = exports.ClassMemberAccessLevel.Private;
                     break;
                 case ts.SyntaxKind.ProtectedKeyword:
-                    accessLevel = ClassMemberAccessLevel.Protected;
+                    accessLevel = exports.ClassMemberAccessLevel.Protected;
                     break;
                 case ts.SyntaxKind.ReadonlyKeyword:
                     isReadonly = true;
@@ -33773,11 +33773,11 @@ function extractModifiersOfMember(node) {
             }
         }
     }
-    if (isReadonly && accessLevel === ClassMemberAccessLevel.PublicWritable) {
-        accessLevel = ClassMemberAccessLevel.PublicReadonly;
+    if (isReadonly && accessLevel === exports.ClassMemberAccessLevel.PublicWritable) {
+        accessLevel = exports.ClassMemberAccessLevel.PublicReadonly;
     }
     if (node.name !== undefined && ts.isPrivateIdentifier(node.name)) {
-        accessLevel = ClassMemberAccessLevel.EcmaScriptPrivate;
+        accessLevel = exports.ClassMemberAccessLevel.EcmaScriptPrivate;
     }
     return { accessLevel, isStatic };
 }
@@ -38625,9 +38625,9 @@ const INPUT_INITIALIZER_FN = {
     // cases where the input is intentionally not part of the public API, programmatically.
     // Note: `private` is omitted intentionally as this would be a conceptual confusion point.
     allowedAccessLevels: [
-        ClassMemberAccessLevel.PublicWritable,
-        ClassMemberAccessLevel.PublicReadonly,
-        ClassMemberAccessLevel.Protected,
+        exports.ClassMemberAccessLevel.PublicWritable,
+        exports.ClassMemberAccessLevel.PublicReadonly,
+        exports.ClassMemberAccessLevel.Protected,
     ],
 };
 /**
@@ -38666,9 +38666,9 @@ const MODEL_INITIALIZER_FN = {
     // accessing `protected` or `private` members works at runtime, so we can allow
     // cases where the input is intentionally not part of the public API, programmatically.
     allowedAccessLevels: [
-        ClassMemberAccessLevel.PublicWritable,
-        ClassMemberAccessLevel.PublicReadonly,
-        ClassMemberAccessLevel.Protected,
+        exports.ClassMemberAccessLevel.PublicWritable,
+        exports.ClassMemberAccessLevel.PublicReadonly,
+        exports.ClassMemberAccessLevel.Protected,
     ],
 };
 /**
@@ -38711,9 +38711,9 @@ function tryParseSignalModelMapping(member, reflector, importTracker) {
 // component API, programmatically.
 // Note: `private` is omitted intentionally as this would be a conceptual confusion point.
 const allowedAccessLevels = [
-    ClassMemberAccessLevel.PublicWritable,
-    ClassMemberAccessLevel.PublicReadonly,
-    ClassMemberAccessLevel.Protected,
+    exports.ClassMemberAccessLevel.PublicWritable,
+    exports.ClassMemberAccessLevel.PublicReadonly,
+    exports.ClassMemberAccessLevel.Protected,
 ];
 /** Possible functions that can declare an output. */
 const OUTPUT_INITIALIZER_FNS = [
@@ -38776,10 +38776,10 @@ const QUERY_INITIALIZER_FNS = queryFunctionNames.map((fnName) => ({
     // Support for ES private fields requires special caution and complexity when partial
     // output is linked— hence not supported. TS private members are allowed in static blocks.
     allowedAccessLevels: [
-        ClassMemberAccessLevel.PublicWritable,
-        ClassMemberAccessLevel.PublicReadonly,
-        ClassMemberAccessLevel.Protected,
-        ClassMemberAccessLevel.Private,
+        exports.ClassMemberAccessLevel.PublicWritable,
+        exports.ClassMemberAccessLevel.PublicReadonly,
+        exports.ClassMemberAccessLevel.Protected,
+        exports.ClassMemberAccessLevel.Private,
     ],
 }));
 // The `descendants` option is enabled by default, except for content children.
