@@ -1,8 +1,57 @@
 /**
- * @license Angular v19.2.10+sha-dfd068d
+ * @license Angular v19.2.10+sha-f2d6e59
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
+
+declare global {
+    /**
+     * Values of ngDevMode
+     * Depending on the current state of the application, ngDevMode may have one of several values.
+     *
+     * For convenience, the “truthy” value which enables dev mode is also an object which contains
+     * Angular’s performance counters. This is not necessary, but cuts down on boilerplate for the
+     * perf counters.
+     *
+     * ngDevMode may also be set to false. This can happen in one of a few ways:
+     * - The user explicitly sets `window.ngDevMode = false` somewhere in their app.
+     * - The user calls `enableProdMode()`.
+     * - The URL contains a `ngDevMode=false` text.
+     * Finally, ngDevMode may not have been defined at all.
+     */
+    const ngDevMode: null | NgDevModePerfCounters;
+    interface NgDevModePerfCounters {
+        namedConstructors: boolean;
+        firstCreatePass: number;
+        tNode: number;
+        tView: number;
+        rendererCreateTextNode: number;
+        rendererSetText: number;
+        rendererCreateElement: number;
+        rendererAddEventListener: number;
+        rendererSetAttribute: number;
+        rendererRemoveAttribute: number;
+        rendererSetProperty: number;
+        rendererSetClassName: number;
+        rendererAddClass: number;
+        rendererRemoveClass: number;
+        rendererSetStyle: number;
+        rendererRemoveStyle: number;
+        rendererDestroy: number;
+        rendererDestroyNode: number;
+        rendererMoveNode: number;
+        rendererRemoveNode: number;
+        rendererAppendChild: number;
+        rendererInsertBefore: number;
+        rendererCreateComment: number;
+        hydratedNodes: number;
+        hydratedComponents: number;
+        dehydratedViewsRemoved: number;
+        dehydratedViewsCleanupRuns: number;
+        componentsSkippedHydration: number;
+        deferBlocksWithIncrementalHydration: number;
+    }
+}
 
 /**
  * Records information about the action that should handle a given `Event`.

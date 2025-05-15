@@ -1,13 +1,13 @@
 /**
- * @license Angular v19.2.10+sha-dfd068d
+ * @license Angular v19.2.10+sha-f2d6e59
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { SIGNAL, SignalNode, ReactiveNode, ValueEqualityFn as ValueEqualityFn$1 } from './weak_ref.d-DWHPG08n.js';
 export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './weak_ref.d-DWHPG08n.js';
+import { EventContract } from './event_dispatcher.d-K56StcHr.js';
 import { Observable, Subject, Subscription, BehaviorSubject, Subscribable } from 'rxjs';
-import { EventContract } from './event_dispatcher.d-DlbccpYq.js';
 import * as _angular_core from '@angular/core';
 export { NavigateEvent as ɵNavigateEvent, Navigation as ɵNavigation, NavigationCurrentEntryChangeEvent as ɵNavigationCurrentEntryChangeEvent, NavigationDestination as ɵNavigationDestination, NavigationHistoryEntry as ɵNavigationHistoryEntry, NavigationInterceptOptions as ɵNavigationInterceptOptions, NavigationNavigateOptions as ɵNavigationNavigateOptions, NavigationOptions as ɵNavigationOptions, NavigationReloadOptions as ɵNavigationReloadOptions, NavigationResult as ɵNavigationResult, NavigationTransition as ɵNavigationTransition, NavigationTypeString as ɵNavigationTypeString, NavigationUpdateCurrentEntryOptions as ɵNavigationUpdateCurrentEntryOptions } from './navigation_types.d-fAxd92YV.js';
 export { setCurrentInjector as ɵsetCurrentInjector } from './primitives/di/index.js';
@@ -2711,55 +2711,6 @@ declare const enum LContainerFlags {
      * This flag, once set, is never unset for the `LContainer`.
      */
     HasTransplantedViews = 2
-}
-
-declare global {
-    /**
-     * Values of ngDevMode
-     * Depending on the current state of the application, ngDevMode may have one of several values.
-     *
-     * For convenience, the “truthy” value which enables dev mode is also an object which contains
-     * Angular’s performance counters. This is not necessary, but cuts down on boilerplate for the
-     * perf counters.
-     *
-     * ngDevMode may also be set to false. This can happen in one of a few ways:
-     * - The user explicitly sets `window.ngDevMode = false` somewhere in their app.
-     * - The user calls `enableProdMode()`.
-     * - The URL contains a `ngDevMode=false` text.
-     * Finally, ngDevMode may not have been defined at all.
-     */
-    const ngDevMode: null | NgDevModePerfCounters;
-    interface NgDevModePerfCounters {
-        namedConstructors: boolean;
-        firstCreatePass: number;
-        tNode: number;
-        tView: number;
-        rendererCreateTextNode: number;
-        rendererSetText: number;
-        rendererCreateElement: number;
-        rendererAddEventListener: number;
-        rendererSetAttribute: number;
-        rendererRemoveAttribute: number;
-        rendererSetProperty: number;
-        rendererSetClassName: number;
-        rendererAddClass: number;
-        rendererRemoveClass: number;
-        rendererSetStyle: number;
-        rendererRemoveStyle: number;
-        rendererDestroy: number;
-        rendererDestroyNode: number;
-        rendererMoveNode: number;
-        rendererRemoveNode: number;
-        rendererAppendChild: number;
-        rendererInsertBefore: number;
-        rendererCreateComment: number;
-        hydratedNodes: number;
-        hydratedComponents: number;
-        dehydratedViewsRemoved: number;
-        dehydratedViewsCleanupRuns: number;
-        componentsSkippedHydration: number;
-        deferBlocksWithIncrementalHydration: number;
-    }
 }
 
 /**
