@@ -1,8 +1,34 @@
 /**
- * @license Angular v20.1.0-next.0+sha-31abc9d
+ * @license Angular v20.1.0-next.0+sha-ff62ff1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
+
+declare global {
+    /**
+     * Values of ngDevMode
+     * Depending on the current state of the application, ngDevMode may have one of several values.
+     *
+     * For convenience, the “truthy” value which enables dev mode is also an object which contains
+     * Angular’s performance counters. This is not necessary, but cuts down on boilerplate for the
+     * perf counters.
+     *
+     * ngDevMode may also be set to false. This can happen in one of a few ways:
+     * - The user explicitly sets `window.ngDevMode = false` somewhere in their app.
+     * - The user calls `enableProdMode()`.
+     * - The URL contains a `ngDevMode=false` text.
+     * Finally, ngDevMode may not have been defined at all.
+     */
+    const ngDevMode: null | NgDevModePerfCounters;
+    interface NgDevModePerfCounters {
+        hydratedNodes: number;
+        hydratedComponents: number;
+        dehydratedViewsRemoved: number;
+        dehydratedViewsCleanupRuns: number;
+        componentsSkippedHydration: number;
+        deferBlocksWithIncrementalHydration: number;
+    }
+}
 
 /**
  * Records information about the action that should handle a given `Event`.
