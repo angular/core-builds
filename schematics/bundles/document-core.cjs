@@ -1,27 +1,27 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3dd2f82
+ * @license Angular v20.1.0-next.0+sha-dce4978
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('./compiler-CaMIUh11.js');
+require('./compiler-CaMIUh11.cjs');
 require('typescript');
-var checker = require('./checker-ClrgfrO0.js');
+var checker = require('./checker-CZZ08sCe.cjs');
 require('os');
-var apply_import_manager = require('./apply_import_manager-BVPU-k9j.js');
-require('./index-C9WFlaAn.js');
+var apply_import_manager = require('./apply_import_manager-CMiFJMOe.cjs');
+require('./index-jaLit4R6.cjs');
 require('path');
-var project_paths = require('./project_paths-T5WaD4XD.js');
-var imports = require('./imports-CIX-JgAN.js');
+var project_paths = require('./project_paths-Rj_JgGwz.cjs');
+var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.js');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Migration that moves the import of `DOCUMENT` from `core` to `common`. */
 class DocumentCoreMigration extends project_paths.TsurgeFunnelMigration {

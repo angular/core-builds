@@ -1,30 +1,30 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3dd2f82
+ * @license Angular v20.1.0-next.0+sha-dce4978
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-CaMIUh11.js');
+var compiler = require('./compiler-CaMIUh11.cjs');
 var ts = require('typescript');
-var checker = require('./checker-ClrgfrO0.js');
+var checker = require('./checker-CZZ08sCe.cjs');
 require('os');
-var index$1 = require('./index-C9WFlaAn.js');
+var index$1 = require('./index-jaLit4R6.cjs');
 require('path');
-var project_paths = require('./project_paths-T5WaD4XD.js');
-var apply_import_manager = require('./apply_import_manager-BVPU-k9j.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-vMSwSbeP.js');
+var project_paths = require('./project_paths-Rj_JgGwz.cjs');
+var apply_import_manager = require('./apply_import_manager-CMiFJMOe.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-D-YiD_Oz.cjs');
 var assert = require('assert');
-var index = require('./index-CEva5DhQ.js');
+var index = require('./index-CPtfXRxd.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.js');
-require('./leading_space-D9nQ8UQC.js');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('./leading_space-D9nQ8UQC.cjs');
 
 /**
  * Phase that migrates Angular host binding references to

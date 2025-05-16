@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3dd2f82
+ * @license Angular v20.1.0-next.0+sha-dce4978
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,21 +8,21 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-ClrgfrO0.js');
-var compiler = require('./compiler-CaMIUh11.js');
-require('./index-C9WFlaAn.js');
+var checker = require('./checker-CZZ08sCe.cjs');
+var compiler = require('./compiler-CaMIUh11.cjs');
+require('./index-jaLit4R6.cjs');
 require('path');
-var project_paths = require('./project_paths-T5WaD4XD.js');
-var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
-var property_name = require('./property_name-BBwFuqMe.js');
+var project_paths = require('./project_paths-Rj_JgGwz.cjs');
+var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
+var property_name = require('./property_name-BBwFuqMe.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.js');
-require('./imports-CIX-JgAN.js');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('./imports-CIX-JgAN.cjs');
 
 /**
  * Unwraps a given expression TypeScript node. Expressions can be wrapped within multiple
