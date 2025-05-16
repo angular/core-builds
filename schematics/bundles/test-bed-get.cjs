@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-693006e
+ * @license Angular v20.1.0-next.0+sha-13e3966
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ require('./checker-CZZ08sCe.cjs');
 require('./compiler-CaMIUh11.cjs');
 require('./index-jaLit4R6.cjs');
 require('path');
-var project_paths = require('./project_paths-Rj_JgGwz.cjs');
+var project_paths = require('./project_paths-vlSfVUno.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 require('@angular-devkit/core');
