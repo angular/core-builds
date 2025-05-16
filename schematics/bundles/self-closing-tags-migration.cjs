@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-4916675
+ * @license Angular v20.0.0-rc.1+sha-cf92f0d-with-local-changes
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,9 +10,9 @@ var ts = require('typescript');
 require('os');
 var checker = require('./checker-C4hSR1KC.cjs');
 var compiler = require('./compiler-CWuG67kz.cjs');
-require('./index-ByI8ZMEQ.cjs');
+require('./index-CzdlVfCg.cjs');
 require('path');
-var project_paths = require('./project_paths-GImt_czT.cjs');
+var project_paths = require('./project_paths-Gk3GIvw4.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('@angular-devkit/core');
@@ -346,11 +346,9 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable({ tagReplacements });
     }
     async combine(unitA, unitB) {
-        const uniqueReplacements = removeDuplicateReplacements([
-            ...unitA.tagReplacements,
-            ...unitB.tagReplacements,
-        ]);
-        return project_paths.confirmAsSerializable({ tagReplacements: uniqueReplacements });
+        return project_paths.confirmAsSerializable({
+            tagReplacements: [...unitA.tagReplacements, ...unitB.tagReplacements],
+        });
     }
     async globalMeta(combinedData) {
         const globalMeta = {
@@ -376,18 +374,6 @@ function prepareTextReplacement(file, replacement, start, end) {
         end: end,
         toInsert: replacement,
     }));
-}
-function removeDuplicateReplacements(replacements) {
-    const uniqueFiles = new Set();
-    const result = [];
-    for (const replacement of replacements) {
-        const fileId = replacement.file.id;
-        if (!uniqueFiles.has(fileId)) {
-            uniqueFiles.add(fileId);
-            result.push(replacement);
-        }
-    }
-    return result;
 }
 
 function migrate(options) {

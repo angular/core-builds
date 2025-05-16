@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-4916675
+ * @license Angular v20.0.0-rc.1+sha-cf92f0d-with-local-changes
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,14 +8,14 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-GImt_czT.cjs');
+var project_paths = require('./project_paths-Gk3GIvw4.cjs');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-C4hSR1KC.cjs');
 require('./compiler-CWuG67kz.cjs');
-var index = require('./index-ByI8ZMEQ.cjs');
+var index = require('./index-CzdlVfCg.cjs');
 require('path');
-var apply_import_manager = require('./apply_import_manager-TmalY_AR.cjs');
+var apply_import_manager = require('./apply_import_manager-DfNs-OUr.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('fs');
@@ -38,61 +38,42 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const nodePositions = new Map();
         const replacements = [];
-        const removedIdentifiers = [];
+        let removedImports = 0;
         let changedFiles = 0;
         info.ngCompiler?.getDiagnostics().forEach((diag) => {
             if (diag.file !== undefined &&
                 diag.start !== undefined &&
                 diag.length !== undefined &&
                 diag.code === checker.ngErrorCode(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS)) {
+                // Skip files that aren't owned by this compilation unit.
+                if (!info.sourceFiles.includes(diag.file)) {
+                    return;
+                }
                 if (!nodePositions.has(diag.file)) {
                     nodePositions.set(diag.file, new Set());
                 }
-                nodePositions.get(diag.file).add(this.getNodeID(diag.start, diag.length));
+                nodePositions.get(diag.file).add(this.getNodeKey(diag.start, diag.length));
             }
         });
         nodePositions.forEach((locations, sourceFile) => {
             const resolvedLocations = this.resolveRemovalLocations(sourceFile, locations);
             const usageAnalysis = this.analyzeUsages(sourceFile, resolvedLocations);
             if (resolvedLocations.allRemovedIdentifiers.size > 0) {
+                removedImports += resolvedLocations.allRemovedIdentifiers.size;
                 changedFiles++;
-                resolvedLocations.allRemovedIdentifiers.forEach((identifier) => {
-                    removedIdentifiers.push(this.getNodeID(identifier.getStart(), identifier.getWidth()));
-                });
             }
             this.generateReplacements(sourceFile, resolvedLocations, usageAnalysis, info, replacements);
         });
-        return project_paths.confirmAsSerializable({ replacements, removedIdentifiers, changedFiles });
+        return project_paths.confirmAsSerializable({ replacements, removedImports, changedFiles });
     }
     async migrate(globalData) {
         return project_paths.confirmAsSerializable(globalData);
     }
     async combine(unitA, unitB) {
-        const combinedReplacements = [];
-        const combinedRemovedIdentifiers = [];
-        const seenReplacements = new Set();
-        const seenIdentifiers = new Set();
-        const changedFileIds = new Set();
-        [unitA, unitB].forEach((unit) => {
-            for (const replacement of unit.replacements) {
-                const key = this.getReplacementID(replacement);
-                changedFileIds.add(replacement.projectFile.id);
-                if (!seenReplacements.has(key)) {
-                    seenReplacements.add(key);
-                    combinedReplacements.push(replacement);
-                }
-            }
-            for (const identifier of unit.removedIdentifiers) {
-                if (!seenIdentifiers.has(identifier)) {
-                    seenIdentifiers.add(identifier);
-                    combinedRemovedIdentifiers.push(identifier);
-                }
-            }
-        });
         return project_paths.confirmAsSerializable({
-            replacements: combinedReplacements,
-            removedIdentifiers: combinedRemovedIdentifiers,
-            changedFiles: changedFileIds.size,
+            replacements: [...unitA.replacements, ...unitB.replacements],
+            removedImports: unitA.removedImports + unitB.removedImports,
+            changedFiles: unitA.changedFiles + unitB.changedFiles,
         });
     }
     async globalMeta(combinedData) {
@@ -100,18 +81,13 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     }
     async stats(globalMetadata) {
         return project_paths.confirmAsSerializable({
-            removedImports: globalMetadata.removedIdentifiers.length,
+            removedImports: globalMetadata.removedImports,
             changedFiles: globalMetadata.changedFiles,
         });
     }
-    /** Gets an ID that can be used to look up a node based on its location. */
-    getNodeID(start, length) {
+    /** Gets a key that can be used to look up a node based on its location. */
+    getNodeKey(start, length) {
         return `${start}/${length}`;
-    }
-    /** Gets a unique ID for a replacement. */
-    getReplacementID(replacement) {
-        const { position, end, toInsert } = replacement.update.data;
-        return replacement.projectFile.id + '/' + position + '/' + end + '/' + toInsert;
     }
     /**
      * Resolves a set of node locations to the actual AST nodes that need to be migrated.
@@ -134,7 +110,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             if (!parent) {
                 return;
             }
-            if (locations.has(this.getNodeID(node.getStart(), node.getWidth()))) {
+            if (locations.has(this.getNodeKey(node.getStart(), node.getWidth()))) {
                 // When the entire array needs to be cleared, the diagnostic is
                 // reported on the property assignment, rather than an array element.
                 if (ts.isPropertyAssignment(parent) &&
@@ -143,7 +119,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
                     result.fullRemovals.add(parent.initializer);
                     parent.initializer.elements.forEach((element) => {
                         if (ts.isIdentifier(element)) {
-                            result.allRemovedIdentifiers.add(element);
+                            result.allRemovedIdentifiers.add(element.text);
                         }
                     });
                 }
@@ -152,7 +128,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
                         result.partialRemovals.set(parent, new Set());
                     }
                     result.partialRemovals.get(parent).add(node);
-                    result.allRemovedIdentifiers.add(node);
+                    result.allRemovedIdentifiers.add(node.text);
                 }
             }
         };
@@ -246,13 +222,8 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             names.forEach((symbolName, localName) => {
                 // Note that in the `identifierCounts` lookup both zero and undefined
                 // are valid and mean that the identifiers isn't being used anymore.
-                if (!identifierCounts.get(localName)) {
-                    for (const identifier of allRemovedIdentifiers) {
-                        if (identifier.text === localName) {
-                            importManager.removeImport(sourceFile, symbolName, moduleName);
-                            break;
-                        }
-                    }
+                if (allRemovedIdentifiers.has(localName) && !identifierCounts.get(localName)) {
+                    importManager.removeImport(sourceFile, symbolName, moduleName);
                 }
             });
         });
