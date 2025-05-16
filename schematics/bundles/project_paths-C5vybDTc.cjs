@@ -1,20 +1,20 @@
 'use strict';
 /**
- * @license Angular v19.2.11+sha-74e39ea
+ * @license Angular v19.2.11+sha-7d0db3d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var index = require('./index-B-EcOcOF.js');
+var index = require('./index-CS4y_Wnf.cjs');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-BKhzGn-3.js');
+var checker = require('./checker-B2lF4IY4.cjs');
 require('path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
