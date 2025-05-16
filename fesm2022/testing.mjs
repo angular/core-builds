@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-bd2a5b9
+ * @license Angular v19.2.11+sha-94f5a4b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -411,7 +411,7 @@ function resetFakeAsyncZone() {
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
 function resetFakeAsyncZoneIfExists() {
-    if (fakeAsyncTestModule) {
+    if (fakeAsyncTestModule && Zone['ProxyZoneSpec']?.isLoaded()) {
         fakeAsyncTestModule.resetFakeAsyncZone();
     }
 }
