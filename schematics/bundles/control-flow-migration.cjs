@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-494d32a
+ * @license Angular v20.0.0-rc.1+sha-4916675
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,10 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-CAfDJO3W.js');
-var compiler = require('./compiler-CWuG67kz.js');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
+var compiler = require('./compiler-CWuG67kz.cjs');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('@angular-devkit/core');
 
 function lookupIdentifiersInSourceFile(sourceFile, names) {

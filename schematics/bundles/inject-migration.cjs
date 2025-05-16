@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-494d32a
+ * @license Angular v20.0.0-rc.1+sha-4916675
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,15 +8,15 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var change_tracker = require('./change_tracker-BbtquDqR.js');
-var compiler_host = require('./compiler_host-CAfDJO3W.js');
+var change_tracker = require('./change_tracker-BvdMxn6Q.cjs');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-DznZ5jMl.js');
-var imports = require('./imports-CIX-JgAN.js');
-var nodes = require('./nodes-B16H9JUd.js');
-var leading_space = require('./leading_space-D9nQ8UQC.js');
-require('./compiler-CWuG67kz.js');
-require('./checker-C-1ft_Lg.js');
+var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
+var imports = require('./imports-CIX-JgAN.cjs');
+var nodes = require('./nodes-B16H9JUd.cjs');
+var leading_space = require('./leading_space-D9nQ8UQC.cjs');
+require('./compiler-CWuG67kz.cjs');
+require('./checker-C4hSR1KC.cjs');
 require('os');
 require('fs');
 require('module');

@@ -1,27 +1,27 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-494d32a
+ * @license Angular v20.0.0-rc.1+sha-4916675
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('./compiler-CWuG67kz.js');
+require('./compiler-CWuG67kz.cjs');
 require('typescript');
-var checker = require('./checker-C-1ft_Lg.js');
+var checker = require('./checker-C4hSR1KC.cjs');
 require('os');
-var apply_import_manager = require('./apply_import_manager-EccGqvnZ.js');
-require('./index-B2aQBzGV.js');
+var apply_import_manager = require('./apply_import_manager-TmalY_AR.cjs');
+require('./index-ByI8ZMEQ.cjs');
 require('path');
-var project_paths = require('./project_paths-DDAlTEip.js');
-var imports = require('./imports-CIX-JgAN.js');
+var project_paths = require('./project_paths-GImt_czT.cjs');
+var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.js');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Migration that moves the import of `DOCUMENT` from `core` to `common`. */
 class DocumentCoreMigration extends project_paths.TsurgeFunnelMigration {

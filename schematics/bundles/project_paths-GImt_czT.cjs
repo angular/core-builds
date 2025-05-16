@@ -1,21 +1,21 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-494d32a
+ * @license Angular v20.0.0-rc.1+sha-4916675
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var index = require('./index-B2aQBzGV.js');
+var index = require('./index-ByI8ZMEQ.cjs');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-C-1ft_Lg.js');
-require('./compiler-CWuG67kz.js');
+var checker = require('./checker-C4hSR1KC.cjs');
+require('./compiler-CWuG67kz.cjs');
 require('path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.js');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
