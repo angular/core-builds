@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-a0be4c1
+ * @license Angular v20.1.0-next.0+sha-1a31c11
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2313,7 +2313,7 @@ declare function afterEveryRender<E = never, W = never, M = never>(spec: {
     write?: (...args: ɵFirstAvailable<[E]>) => W;
     mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
     read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+}, options?: AfterRenderOptions): AfterRenderRef;
 /**
  * Register a callback to be invoked each time the application finishes rendering, during the
  * `mixedReadWrite` phase.
@@ -2451,7 +2451,7 @@ declare function afterNextRender<E = never, W = never, M = never>(spec: {
     write?: (...args: ɵFirstAvailable<[E]>) => W;
     mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
     read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+}, options?: AfterRenderOptions): AfterRenderRef;
 /**
  * Register a callback to be invoked the next time the application finishes rendering, during the
  * `mixedReadWrite` phase.
@@ -2541,7 +2541,7 @@ type ɵFirstAvailableSignal<T extends unknown[]> = T extends [infer H, ...infer 
  *
  * @publicApi
  */
-declare function afterRenderEffect(callback: (onCleanup: EffectCleanupRegisterFn) => void, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+declare function afterRenderEffect(callback: (onCleanup: EffectCleanupRegisterFn) => void, options?: AfterRenderOptions): AfterRenderRef;
 /**
  * Register effects that, when triggered, are invoked when the application finishes rendering,
  * during the specified phases. The available phases are:
@@ -2607,7 +2607,7 @@ declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
     write?: (...args: [...ɵFirstAvailableSignal<[E]>, EffectCleanupRegisterFn]) => W;
     mixedReadWrite?: (...args: [...ɵFirstAvailableSignal<[W, E]>, EffectCleanupRegisterFn]) => M;
     read?: (...args: [...ɵFirstAvailableSignal<[M, W, E]>, EffectCleanupRegisterFn]) => void;
-}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+}, options?: AfterRenderOptions): AfterRenderRef;
 
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
