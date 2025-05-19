@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-2b3c89d
+ * @license Angular v20.1.0-next.0+sha-feb571c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -820,6 +820,10 @@ declare global {
 /**
  * Start listening to the Angular's internal performance-related events and route those to the Chrome DevTools performance panel.
  * This enables Angular-specific data visualization when recording a performance profile directly in the Chrome DevTools.
+ *
+ * Note: integration is enabled in the development mode only, this operation is noop in the production mode.
+ *
+ * @experimental
  *
  * @returns a function that can be invoked to stop sending profiling data.
  */
