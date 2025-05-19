@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-7d0db3d
+ * @license Angular v19.2.11+sha-9aedd30
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3290,6 +3290,16 @@ function getTNode(tView, index) {
 function load(view, index) {
     ngDevMode && assertIndexInRange(view, index);
     return view[index];
+}
+/** Store a value in the `data` at a given `index`. */
+function store(tView, lView, index, value) {
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    if (index >= tView.data.length) {
+        tView.data[index] = null;
+        tView.blueprint[index] = null;
+    }
+    lView[index] = value;
 }
 function getComponentLViewByIndex(nodeIndex, hostView) {
     // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
@@ -18000,7 +18010,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.11+sha-7d0db3d']
+                ? ['ng-version', '19.2.11+sha-9aedd30']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -31095,16 +31105,6 @@ function ɵɵqueryAdvance(indexOffset = 1) {
     setCurrentQueryIndex(getCurrentQueryIndex() + indexOffset);
 }
 
-/** Store a value in the `data` at a given `index`. */
-function store(tView, lView, index, value) {
-    // We don't store any static data for local variables, so the first time
-    // we see the template, we should store as null to avoid a sparse array
-    if (index >= tView.data.length) {
-        tView.data[index] = null;
-        tView.blueprint[index] = null;
-    }
-    lView[index] = value;
-}
 /**
  * Retrieves a local reference from the current contextViewData.
  *
@@ -34731,7 +34731,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.11+sha-7d0db3d');
+const VERSION = new Version('19.2.11+sha-9aedd30');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

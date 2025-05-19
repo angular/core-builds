@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-7d0db3d
+ * @license Angular v19.2.11+sha-9aedd30
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15630,8 +15630,6 @@ declare function ɵɵviewQuerySignal(target: Signal<unknown>, predicate: Provide
  */
 declare function ɵɵqueryAdvance(indexOffset?: number): void;
 
-/** Store a value in the `data` at a given `index`. */
-declare function store<T>(tView: TView, lView: LView, index: number, value: T): void;
 /**
  * Retrieves a local reference from the current contextViewData.
  *
@@ -16963,6 +16961,9 @@ type ImportMetaExtended = ImportMeta & {
  * @codeGenApi
  */
 declare function ɵɵreplaceMetadata(type: Type$1<unknown>, applyMetadata: (...args: [Type$1<unknown>, unknown[], ...unknown[]]) => void, namespaces: unknown[], locals: unknown[], importMeta?: ImportMetaExtended | null, id?: string | null): void;
+
+/** Store a value in the `data` at a given `index`. */
+declare function store<T>(tView: TView, lView: LView, index: number, value: T): void;
 
 /**
  * Tell ivy what the `document` is for this platform.
