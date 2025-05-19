@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-41be5ee
+ * @license Angular v20.1.0-next.0+sha-bdbf616
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7431,7 +7431,11 @@ function tupleOfTypes(types) {
 function compilePipeFromMetadata(metadata) {
     const definitionMapValues = [];
     // e.g. `name: 'myPipe'`
-    definitionMapValues.push({ key: 'name', value: literal(metadata.pipeName), quoted: false });
+    definitionMapValues.push({
+        key: 'name',
+        value: literal(metadata.pipeName ?? metadata.name),
+        quoted: false,
+    });
     // e.g. `type: MyPipe`
     definitionMapValues.push({ key: 'type', value: metadata.type.value, quoted: false });
     // e.g. `pure: true`
@@ -32521,7 +32525,7 @@ var FactoryTarget;
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-41be5ee');
+new Version('20.1.0-next.0+sha-bdbf616');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

@@ -1,15 +1,15 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-41be5ee
+ * @license Angular v20.1.0-next.0+sha-bdbf616
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-CaMIUh11.cjs');
+var compiler = require('./compiler-CE_UC0KP.cjs');
 var ts = require('typescript');
 var p = require('path');
-var checker = require('./checker-CZZ08sCe.cjs');
+var checker = require('./checker-YrM3rMH-.cjs');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -892,7 +892,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -910,7 +910,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler.literal(null));
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1005,7 +1005,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler.literal(minVersion));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1421,7 +1421,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1456,7 +1456,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1507,7 +1507,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1540,7 +1540,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1591,7 +1591,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler.DefinitionMap();
     definitionMap.set('minVersion', compiler.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-41be5ee'));
+    definitionMap.set('version', compiler.literal('20.1.0-next.0+sha-bdbf616'));
     definitionMap.set('ngImport', compiler.importExpr(compiler.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1599,7 +1599,7 @@ function createPipeDefinitionMap(meta) {
         definitionMap.set('isStandalone', compiler.literal(meta.isStandalone));
     }
     // e.g. `name: "myPipe"`
-    definitionMap.set('name', compiler.literal(meta.pipeName));
+    definitionMap.set('name', compiler.literal(meta.pipeName ?? meta.name));
     if (meta.pure === false) {
         // e.g. `pure: false`
         definitionMap.set('pure', compiler.literal(meta.pure));
@@ -2574,11 +2574,12 @@ class DtsMetadataReader {
             return null;
         }
         const type = def.type.typeArguments[1];
-        if (!ts.isLiteralTypeNode(type) || !ts.isStringLiteral(type.literal)) {
+        if (!ts.isLiteralTypeNode(type) ||
+            (!ts.isStringLiteral(type.literal) && type.literal.kind !== ts.SyntaxKind.NullKeyword)) {
             // The type metadata was the wrong type.
             return null;
         }
-        const name = type.literal.text;
+        const name = ts.isStringLiteral(type.literal) ? type.literal.text : null;
         const isStandalone = def.type.typeArguments.length > 2 && (checker.readBooleanType(def.type.typeArguments[2]) ?? false);
         return {
             kind: checker.MetaKind.Pipe,
@@ -6072,7 +6073,7 @@ class TypeCheckScopeRegistry {
                 if (dep.kind === checker.MetaKind.Directive) {
                     directives.push(dep);
                 }
-                else if (dep.kind === checker.MetaKind.Pipe) {
+                else if (dep.kind === checker.MetaKind.Pipe && dep.name !== null) {
                     pipes.set(dep.name, dep);
                 }
             }
@@ -10076,7 +10077,7 @@ class ComponentDecoratorHandler {
             const scopeDeps = isModuleScope ? scope.compilation.dependencies : scope.dependencies;
             for (const dep of scopeDeps) {
                 // Outside of selectorless the pipes are referred to by their defined name.
-                if (dep.kind === checker.MetaKind.Pipe) {
+                if (dep.kind === checker.MetaKind.Pipe && dep.name !== null) {
                     pipes.set(dep.name, dep);
                 }
                 dependencies.push(dep);
@@ -10113,7 +10114,7 @@ class ComponentDecoratorHandler {
             allDependencies = [...explicitlyDeferredDependencies, ...dependencies];
             const deferBlockMatcher = new compiler.SelectorMatcher();
             for (const dep of allDependencies) {
-                if (dep.kind === checker.MetaKind.Pipe) {
+                if (dep.kind === checker.MetaKind.Pipe && dep.name !== null) {
                     pipes.set(dep.name, dep);
                 }
                 else if (dep.kind === checker.MetaKind.Directive && dep.selector !== null) {
@@ -11076,41 +11077,49 @@ class PipeDecoratorHandler {
         if (decorator.args === null) {
             throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_NOT_CALLED, decorator.node, `@Pipe must be called`);
         }
-        if (decorator.args.length !== 1) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, '@Pipe must have exactly one argument');
-        }
-        const meta = checker.unwrapExpression(decorator.args[0]);
-        if (!ts.isObjectLiteralExpression(meta)) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, '@Pipe must have a literal argument');
-        }
-        const pipe = checker.reflectObjectLiteral(meta);
-        if (!pipe.has('name')) {
-            throw new checker.FatalDiagnosticError(checker.ErrorCode.PIPE_MISSING_NAME, meta, `@Pipe decorator is missing name field`);
-        }
-        const pipeNameExpr = pipe.get('name');
-        const pipeName = this.evaluator.evaluate(pipeNameExpr);
-        if (typeof pipeName !== 'string') {
-            throw checker.createValueHasWrongTypeError(pipeNameExpr, pipeName, `@Pipe.name must be a string`);
-        }
+        const meta = decorator.args.length === 0 ||
+            // TODO(crisbeto): temporary for testing until we've changed
+            // the pipe public API not to require a name.
+            (ts.isNonNullExpression(decorator.args[0]) &&
+                decorator.args[0].expression.kind === ts.SyntaxKind.NullKeyword)
+            ? null
+            : checker.unwrapExpression(decorator.args[0]);
+        let pipeName = null;
+        let pipeNameExpr = null;
         let pure = true;
-        if (pipe.has('pure')) {
-            const expr = pipe.get('pure');
-            const pureValue = this.evaluator.evaluate(expr);
-            if (typeof pureValue !== 'boolean') {
-                throw checker.createValueHasWrongTypeError(expr, pureValue, `@Pipe.pure must be a boolean`);
-            }
-            pure = pureValue;
-        }
         let isStandalone = this.implicitStandaloneValue;
-        if (pipe.has('standalone')) {
-            const expr = pipe.get('standalone');
-            const resolved = this.evaluator.evaluate(expr);
-            if (typeof resolved !== 'boolean') {
-                throw checker.createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
+        if (meta !== null) {
+            if (!ts.isObjectLiteralExpression(meta)) {
+                throw new checker.FatalDiagnosticError(checker.ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, '@Pipe must have a literal argument');
             }
-            isStandalone = resolved;
-            if (!isStandalone && this.strictStandalone) {
-                throw new checker.FatalDiagnosticError(checker.ErrorCode.NON_STANDALONE_NOT_ALLOWED, expr, `Only standalone pipes are allowed when 'strictStandalone' is enabled.`);
+            const pipe = checker.reflectObjectLiteral(meta);
+            if (!pipe.has('name')) {
+                throw new checker.FatalDiagnosticError(checker.ErrorCode.PIPE_MISSING_NAME, meta, `@Pipe decorator is missing name field`);
+            }
+            pipeNameExpr = pipe.get('name');
+            const evaluatedName = this.evaluator.evaluate(pipeNameExpr);
+            if (typeof evaluatedName !== 'string') {
+                throw checker.createValueHasWrongTypeError(pipeNameExpr, evaluatedName, `@Pipe.name must be a string`);
+            }
+            pipeName = evaluatedName;
+            if (pipe.has('pure')) {
+                const expr = pipe.get('pure');
+                const pureValue = this.evaluator.evaluate(expr);
+                if (typeof pureValue !== 'boolean') {
+                    throw checker.createValueHasWrongTypeError(expr, pureValue, `@Pipe.pure must be a boolean`);
+                }
+                pure = pureValue;
+            }
+            if (pipe.has('standalone')) {
+                const expr = pipe.get('standalone');
+                const resolved = this.evaluator.evaluate(expr);
+                if (typeof resolved !== 'boolean') {
+                    throw checker.createValueHasWrongTypeError(expr, resolved, `standalone flag must be a boolean`);
+                }
+                isStandalone = resolved;
+                if (!isStandalone && this.strictStandalone) {
+                    throw new checker.FatalDiagnosticError(checker.ErrorCode.NON_STANDALONE_NOT_ALLOWED, expr, `Only standalone pipes are allowed when 'strictStandalone' is enabled.`);
+                }
             }
         }
         return {
@@ -11133,7 +11142,7 @@ class PipeDecoratorHandler {
         };
     }
     symbol(node, analysis) {
-        return new PipeSymbol(node, analysis.meta.pipeName);
+        return new PipeSymbol(node, analysis.meta.pipeName ?? analysis.meta.name);
     }
     register(node, analysis) {
         const ref = new checker.Reference(node);
@@ -11195,7 +11204,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler.Version('20.1.0-next.0+sha-41be5ee');
+new compiler.Version('20.1.0-next.0+sha-bdbf616');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16218,6 +16227,7 @@ class UnusedStandaloneImportsRule {
             const pipeMeta = this.templateTypeChecker.getPipeMetadata(currentNode);
             if (pipeMeta !== null &&
                 pipeMeta.isStandalone &&
+                pipeMeta.name !== null &&
                 !usedPipes.has(pipeMeta.name) &&
                 !this.isPotentialSharedReference(current, rawImports)) {
                 unused ??= [];
@@ -19048,7 +19058,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.1.0-next.0+sha-41be5ee` usually means that core is at head so it supports
+    // A version of `20.1.0-next.0+sha-bdbf616` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -19211,7 +19221,7 @@ class NgCompiler {
         this.enableLetSyntax = options['_enableLetSyntax'] ?? true;
         this.enableSelectorless = options['_enableSelectorless'] ?? false;
         this.emitDeclarationOnly =
-            !!options.emitDeclarationOnly && !!options._geminiAllowEmitDeclarationOnly;
+            !!options.emitDeclarationOnly && !!options._experimentalAllowEmitDeclarationOnly;
         // Standalone by default is enabled since v19. We need to toggle it here,
         // because the language service extension may be running with the latest
         // version of the compiler against an older version of Angular.

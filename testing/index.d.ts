@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-41be5ee
+ * @license Angular v20.1.0-next.0+sha-bdbf616
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -107,8 +107,16 @@ declare class ComponentFixture<T> {
      * Also runs detectChanges once so that any existing change is detected.
      *
      * @param autoDetect Whether to autodetect changes. By default, `true`.
+     * @deprecated For `autoDetect: true`, use `autoDetectChanges()`.
+     * We have not seen a use-case for `autoDetect: false` but `changeDetectorRef.detach()` is a close equivalent.
      */
-    autoDetectChanges(autoDetect?: boolean): void;
+    autoDetectChanges(autoDetect: boolean): void;
+    /**
+     * Enables automatically synchronizing the view, as it would in an application.
+     *
+     * Also runs detectChanges once so that any existing change is detected.
+     */
+    autoDetectChanges(): void;
     /**
      * Return whether the fixture is currently stable or has async tasks that have not been completed
      * yet.
