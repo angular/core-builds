@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-6290000
+ * @license Angular v20.0.0-rc.1+sha-5d35288
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,9 +14,9 @@ var index$1 = require('./index-CzdlVfCg.cjs');
 require('path');
 var project_paths = require('./project_paths-Gk3GIvw4.cjs');
 var apply_import_manager = require('./apply_import_manager-DfNs-OUr.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-CIy53Bss.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-DMtV3ufj.cjs');
 var assert = require('assert');
-var index = require('./index-BLvDxT-t.cjs');
+var index = require('./index-C3weIoWM.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');

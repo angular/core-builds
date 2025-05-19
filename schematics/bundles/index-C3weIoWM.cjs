@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-6290000
+ * @license Angular v20.0.0-rc.1+sha-5d35288
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -845,24 +845,33 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
         return;
     }
     let target = undefined;
-    // Resolve binding elements to their declaration symbol.
-    // Commonly inputs are accessed via object expansion. e.g. `const {input} = this;`.
-    if (ts.isBindingElement(node.parent)) {
-        // Skip binding elements that are using spread.
-        if (node.parent.dotDotDotToken !== undefined) {
-            return;
+    try {
+        // Resolve binding elements to their declaration symbol.
+        // Commonly inputs are accessed via object expansion. e.g. `const {input} = this;`.
+        if (ts.isBindingElement(node.parent)) {
+            // Skip binding elements that are using spread.
+            if (node.parent.dotDotDotToken !== undefined) {
+                return;
+            }
+            const bindingInfo = resolveBindingElement(node.parent);
+            if (bindingInfo === null) {
+                // The declaration could not be resolved. Skip analyzing this.
+                return;
+            }
+            const bindingType = checker.getTypeAtLocation(bindingInfo.pattern);
+            const resolved = lookupPropertyAccess(checker, bindingType, [bindingInfo.propertyName]);
+            target = resolved?.symbol;
         }
-        const bindingInfo = resolveBindingElement(node.parent);
-        if (bindingInfo === null) {
-            // The declaration could not be resolved. Skip analyzing this.
-            return;
+        else {
+            target = checker.getSymbolAtLocation(node);
         }
-        const bindingType = checker.getTypeAtLocation(bindingInfo.pattern);
-        const resolved = lookupPropertyAccess(checker, bindingType, [bindingInfo.propertyName]);
-        target = resolved?.symbol;
     }
-    else {
-        target = checker.getSymbolAtLocation(node);
+    catch (e) {
+        console.error('Unexpected error while trying to resolve identifier reference:');
+        console.error(e);
+        // Gracefully skip analyzing. This can happen when e.g. a reference is named similar
+        // to an input, but is dependant on `.d.ts` that is not necessarily available (clutz dts).
+        return;
     }
     noTargetSymbolCheck: if (target === undefined) {
         if (ts.isPropertyAccessExpression(node.parent) && node.parent.name === node) {
