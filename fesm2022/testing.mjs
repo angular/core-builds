@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-de602b4
+ * @license Angular v20.0.0-rc.1+sha-650bac5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -324,6 +324,9 @@ class ComponentFixture {
         this.changeDetectorRef.checkNoChanges();
     }
     autoDetectChanges(autoDetect = true) {
+        if (!autoDetect && this.zonelessEnabled) {
+            throw new Error('Cannot set autoDetect to false with zoneless change detection.');
+        }
         if (this._noZoneOptionIsSet && !this.zonelessEnabled) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set.');
         }
