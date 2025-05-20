@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-af19705
+ * @license Angular v19.2.11+sha-c0c69a5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -210,6 +210,7 @@ function toSignal(source, options) {
         // If an initial value was passed, use it. Otherwise, use `undefined` as the initial value.
         state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue }, { equal });
     }
+    let destroyUnregisterFn;
     // Note: This code cannot run inside a reactive context (see assertion above). If we'd support
     // this, we would subscribe to the observable outside of the current reactive context, avoiding
     // that side-effect signal reads/writes are attribute to the current consumer. The current
@@ -226,6 +227,9 @@ function toSignal(source, options) {
             }
             state.set({ kind: 2 /* StateKind.Error */, error });
         },
+        complete: () => {
+            destroyUnregisterFn?.();
+        },
         // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
         // "complete".
     });
@@ -234,7 +238,7 @@ function toSignal(source, options) {
             '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
     // Unsubscribe when the current context is destroyed, if requested.
-    cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
+    destroyUnregisterFn = cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
     // The actual returned signal is a `computed` of the `State` signal, which maps the various states
     // to either values or errors.
     return computed(() => {
