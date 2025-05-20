@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-fc14ca5
+ * @license Angular v20.1.0-next.0+sha-c7420df
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -495,6 +495,28 @@ function parserSelectorToR3Selector(selector) {
 function parseSelectorToR3Selector(selector) {
     return selector ? CssSelector.parse(selector).map(parserSelectorToR3Selector) : [];
 }
+
+exports.FactoryTarget = void 0;
+(function (FactoryTarget) {
+    FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
+    FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
+    FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
+    FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
+    FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
+})(exports.FactoryTarget || (exports.FactoryTarget = {}));
+var R3TemplateDependencyKind;
+(function (R3TemplateDependencyKind) {
+    R3TemplateDependencyKind[R3TemplateDependencyKind["Directive"] = 0] = "Directive";
+    R3TemplateDependencyKind[R3TemplateDependencyKind["Pipe"] = 1] = "Pipe";
+    R3TemplateDependencyKind[R3TemplateDependencyKind["NgModule"] = 2] = "NgModule";
+})(R3TemplateDependencyKind || (R3TemplateDependencyKind = {}));
+var ViewEncapsulation;
+(function (ViewEncapsulation) {
+    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+    // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
+    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+})(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
  * A lazily created TextEncoder instance for converting strings into UTF-8 bytes
@@ -3882,14 +3904,6 @@ var R3FactoryDelegateType;
     R3FactoryDelegateType[R3FactoryDelegateType["Class"] = 0] = "Class";
     R3FactoryDelegateType[R3FactoryDelegateType["Function"] = 1] = "Function";
 })(R3FactoryDelegateType || (R3FactoryDelegateType = {}));
-exports.FactoryTarget = void 0;
-(function (FactoryTarget) {
-    FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
-    FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
-    FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
-    FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
-    FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
-})(exports.FactoryTarget || (exports.FactoryTarget = {}));
 /**
  * Construct a factory function expression for the given `R3FactoryMetadata`.
  */
@@ -32511,21 +32525,12 @@ function isAttrNode(ast) {
     return ast.length === 1 && ast[0] instanceof Attribute;
 }
 
-var FactoryTarget;
-(function (FactoryTarget) {
-    FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
-    FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
-    FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
-    FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
-    FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
-})(FactoryTarget || (FactoryTarget = {}));
-
 /**
  * @module
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-fc14ca5');
+new Version('20.1.0-next.0+sha-c7420df');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
