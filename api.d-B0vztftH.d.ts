@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-0503362
+ * @license Angular v20.0.0-rc.1+sha-6e79eaf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -118,7 +118,7 @@ type ResourceStatus = 'idle' | 'error' | 'loading' | 'reloading' | 'resolved' | 
  */
 interface Resource<T> {
     /**
-     * The current value of the `Resource`, or `undefined` if there is no current value.
+     * The current value of the `Resource`, or throws an error if the resource is in an error state.
      */
     readonly value: Signal<T>;
     /**
@@ -129,7 +129,7 @@ interface Resource<T> {
     /**
      * When in the `error` state, this returns the last known error from the `Resource`.
      */
-    readonly error: Signal<unknown>;
+    readonly error: Signal<Error | undefined>;
     /**
      * Whether this resource is loading a new value (or reloading the existing one).
      */
@@ -140,15 +140,6 @@ interface Resource<T> {
      * This function is reactive.
      */
     hasValue(): this is Resource<Exclude<T, undefined>>;
-    /**
-     * Instructs the resource to re-load any asynchronous dependency it may have.
-     *
-     * Note that the resource will not enter its reloading state until the actual backend request is
-     * made.
-     *
-     * @returns true if a reload was initiated, false if a reload was unnecessary or unsupported
-     */
-    reload(): boolean;
 }
 /**
  * A `Resource` with a mutable value.
@@ -169,6 +160,15 @@ interface WritableResource<T> extends Resource<T> {
      */
     update(updater: (value: T) => T): void;
     asReadonly(): Resource<T>;
+    /**
+     * Instructs the resource to re-load any asynchronous dependency it may have.
+     *
+     * Note that the resource will not enter its reloading state until the actual backend request is
+     * made.
+     *
+     * @returns true if a reload was initiated, false if a reload was unnecessary or unsupported
+     */
+    reload(): boolean;
 }
 /**
  * A `WritableResource` created through the `resource` function.
@@ -222,7 +222,7 @@ interface BaseResourceOptions<T, R> {
     params?: () => R;
     /**
      * The value which will be returned from the resource when a server value is unavailable, such as
-     * when the resource is still loading, or in an error state.
+     * when the resource is still loading.
      */
     defaultValue?: NoInfer<T>;
     /**
@@ -275,7 +275,7 @@ type ResourceOptions<T, R> = PromiseResourceOptions<T, R> | StreamingResourceOpt
 type ResourceStreamItem<T> = {
     value: T;
 } | {
-    error: unknown;
+    error: Error;
 };
 
 export { OutputEmitterRef, getOutputDestroyRef, output };

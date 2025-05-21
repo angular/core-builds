@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-0503362
+ * @license Angular v20.0.0-rc.1+sha-6e79eaf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { OutputRef, DestroyRef, Signal, Injector } from '../chrome_dev_tools_performance.d-DvzAxqBc.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-DOeE49um.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-B0vztftH.js';
 import '../event_dispatcher.d-BReQpZfC.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { ValueEqualityFn } from '../graph.d-BcIOep_B.js';
