@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-b0ee7ff
+ * @license Angular v20.1.0-next.0+sha-5a4ca62
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -543,6 +543,8 @@ interface ContentChildFunction {
  *   headerRequired = contentChild.required(MyHeader);            // Signal<MyHeader>
  * }
  * ```
+ *
+ * Note: By default `descendants` is `true` which means the query will not traverse all descendants in the same template.
  *
  * @initializerApiFunction
  * @publicApi 19.0

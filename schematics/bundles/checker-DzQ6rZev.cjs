@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-b0ee7ff
+ * @license Angular v20.1.0-next.0+sha-5a4ca62
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CMF6LVQo.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DzQ6rZev.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -17159,6 +17159,7 @@ class TemplateTypeCheckerImpl {
      */
     elementTagCache = new Map();
     isComplete = false;
+    priorResultsAdopted = false;
     constructor(originalProgram, programDriver, typeCheckAdapter, config, refEmitter, reflector, compilerHost, priorBuild, metaReader, localMetaReader, ngModuleIndex, componentScopeReader, typeCheckScopeRegistry, perf) {
         this.originalProgram = originalProgram;
         this.programDriver = programDriver;
@@ -17406,26 +17407,36 @@ class TemplateTypeCheckerImpl {
         this.completionCache.set(component, engine);
         return engine;
     }
-    maybeAdoptPriorResultsForFile(sf) {
-        const sfPath = absoluteFromSourceFile(sf);
-        if (this.state.has(sfPath)) {
-            const existingResults = this.state.get(sfPath);
-            if (existingResults.isComplete) {
-                // All data for this file has already been generated, so no need to adopt anything.
-                return;
-            }
-        }
-        const previousResults = this.priorBuild.priorTypeCheckingResultsFor(sf);
-        if (previousResults === null || !previousResults.isComplete) {
+    maybeAdoptPriorResults() {
+        if (this.priorResultsAdopted) {
             return;
         }
-        this.perf.eventCount(exports.PerfEvent.ReuseTypeCheckFile);
-        this.state.set(sfPath, previousResults);
+        for (const sf of this.originalProgram.getSourceFiles()) {
+            if (sf.isDeclarationFile || isShim(sf)) {
+                continue;
+            }
+            const sfPath = absoluteFromSourceFile(sf);
+            if (this.state.has(sfPath)) {
+                const existingResults = this.state.get(sfPath);
+                if (existingResults.isComplete) {
+                    // All data for this file has already been generated, so no need to adopt anything.
+                    continue;
+                }
+            }
+            const previousResults = this.priorBuild.priorTypeCheckingResultsFor(sf);
+            if (previousResults === null || !previousResults.isComplete) {
+                continue;
+            }
+            this.perf.eventCount(exports.PerfEvent.ReuseTypeCheckFile);
+            this.state.set(sfPath, previousResults);
+        }
+        this.priorResultsAdopted = true;
     }
     ensureAllShimsForAllFiles() {
         if (this.isComplete) {
             return;
         }
+        this.maybeAdoptPriorResults();
         this.perf.inPhase(exports.PerfPhase.TcbGeneration, () => {
             const host = new WholeProgramTypeCheckingHost(this);
             const ctx = this.newContext(host);
@@ -17433,7 +17444,6 @@ class TemplateTypeCheckerImpl {
                 if (sf.isDeclarationFile || isShim(sf)) {
                     continue;
                 }
-                this.maybeAdoptPriorResultsForFile(sf);
                 const sfPath = absoluteFromSourceFile(sf);
                 const fileData = this.getFileData(sfPath);
                 if (fileData.isComplete) {
@@ -17447,8 +17457,8 @@ class TemplateTypeCheckerImpl {
         });
     }
     ensureAllShimsForOneFile(sf) {
+        this.maybeAdoptPriorResults();
         this.perf.inPhase(exports.PerfPhase.TcbGeneration, () => {
-            this.maybeAdoptPriorResultsForFile(sf);
             const sfPath = absoluteFromSourceFile(sf);
             const fileData = this.getFileData(sfPath);
             if (fileData.isComplete) {
@@ -17463,10 +17473,10 @@ class TemplateTypeCheckerImpl {
         });
     }
     ensureShimForComponent(component) {
+        this.maybeAdoptPriorResults();
         const sf = component.getSourceFile();
         const sfPath = absoluteFromSourceFile(sf);
         const shimPath = TypeCheckShimGenerator.shimFor(sfPath);
-        this.maybeAdoptPriorResultsForFile(sf);
         const fileData = this.getFileData(sfPath);
         if (fileData.shimData.has(shimPath)) {
             // All data for this component is available.
