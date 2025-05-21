@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-d97892a
+ * @license Angular v20.0.0-rc.1+sha-c9b7a0b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -387,7 +387,7 @@ function contentChildRequiredFn(locator, opts) {
  * }
  * ```
  *
- * Note: By default `descendants` is `true` which means the query will not traverse all descendants in the same template.
+ * Note: By default `descendants` is `true` which means the query will traverse all descendants in the same template.
  *
  * @initializerApiFunction
  * @publicApi 19.0
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-rc.1+sha-d97892a');
+const VERSION = new Version('20.0.0-rc.1+sha-c9b7a0b');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
