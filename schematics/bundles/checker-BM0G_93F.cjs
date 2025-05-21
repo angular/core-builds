@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.11+sha-8f9b05e
+ * @license Angular v19.2.11+sha-44bb328
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2829,6 +2829,10 @@ class Identifiers {
     static forwardRef = { name: 'forwardRef', moduleName: CORE };
     static resolveForwardRef = { name: 'resolveForwardRef', moduleName: CORE };
     static replaceMetadata = { name: 'ɵɵreplaceMetadata', moduleName: CORE };
+    static getReplaceMetadataURL = {
+        name: 'ɵɵgetReplaceMetadataURL',
+        moduleName: CORE,
+    };
     static ɵɵdefineInjectable = { name: 'ɵɵdefineInjectable', moduleName: CORE };
     static declareInjectable = { name: 'ɵɵngDeclareInjectable', moduleName: CORE };
     static InjectableDeclaration = {
@@ -30726,7 +30730,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.11+sha-8f9b05e');
+new Version('19.2.11+sha-44bb328');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32153,7 +32157,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-WzomkuMa.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BM0G_93F.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -48258,7 +48262,6 @@ exports.IcuPlaceholder = IcuPlaceholder;
 exports.Identifiers = Identifiers;
 exports.ImplicitReceiver = ImplicitReceiver;
 exports.ImportManager = ImportManager;
-exports.InstantiateExpr = InstantiateExpr;
 exports.Interpolation = Interpolation$1;
 exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;

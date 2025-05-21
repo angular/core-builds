@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.2.11+sha-8f9b05e
+ * @license Angular v19.2.11+sha-44bb328
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-WzomkuMa.cjs');
+var checker = require('./checker-BM0G_93F.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -912,23 +912,21 @@ function compileHmrInitializer(meta) {
     ]);
     // (m) => m.default && ɵɵreplaceMetadata(...)
     const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], defaultRead.and(replaceCall));
-    // '<url>?c=' + id + '&t=' + encodeURIComponent(t)
-    const urlValue = checker.literal(`./@ng/component?c=`)
-        .plus(checker.variable(idName))
-        .plus(checker.literal('&t='))
-        .plus(checker.variable('encodeURIComponent').callFn([checker.variable(timestampName)]));
-    // import.meta.url
-    const urlBase = checker.variable('import').prop('meta').prop('url');
-    // new URL(urlValue, urlBase).href
-    const urlHref = new checker.InstantiateExpr(checker.variable('URL'), [urlValue, urlBase]).prop('href');
+    // getReplaceMetadataURL(id, timestamp, import.meta.url)
+    const url = checker.importExpr(checker.Identifiers.getReplaceMetadataURL)
+        .callFn([
+        checker.variable(idName),
+        checker.variable(timestampName),
+        checker.variable('import').prop('meta').prop('url'),
+    ]);
     // function Cmp_HmrLoad(t) {
-    //   import(/* @vite-ignore */ urlHref).then((m) => m.default && replaceMetadata(...));
+    //   import(/* @vite-ignore */ url).then((m) => m.default && replaceMetadata(...));
     // }
     const importCallback = new checker.DeclareFunctionStmt(importCallbackName, [new checker.FnParam(timestampName)], [
         // The vite-ignore special comment is required to prevent Vite from generating a superfluous
         // warning for each usage within the development code. If Vite provides a method to
         // programmatically avoid this warning in the future, this added comment can be removed here.
-        new checker.DynamicImportExpr(urlHref, null, '@vite-ignore')
+        new checker.DynamicImportExpr(url, null, '@vite-ignore')
             .prop('then')
             .callFn([replaceCallback])
             .toStmt(),
@@ -1007,7 +1005,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1025,7 +1023,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1120,7 +1118,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1536,7 +1534,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1571,7 +1569,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1622,7 +1620,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1655,7 +1653,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1706,7 +1704,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.11+sha-8f9b05e'));
+    definitionMap.set('version', checker.literal('19.2.11+sha-44bb328'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -10732,7 +10730,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.2.11+sha-8f9b05e');
+new checker.Version('19.2.11+sha-44bb328');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -18587,7 +18585,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.11+sha-8f9b05e` usually means that core is at head so it supports
+    // A version of `19.2.11+sha-44bb328` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
