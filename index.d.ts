@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-0104a69
+ * @license Angular v19.2.11+sha-8f9b05e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12055,7 +12055,8 @@ declare class Testability implements PublicTestability {
     private registry;
     private _isZoneStable;
     private _callbacks;
-    private taskTrackingZone;
+    private _taskTrackingZone;
+    private _destroyRef?;
     constructor(_ngZone: NgZone, registry: TestabilityRegistry, testabilityGetter: GetTestability);
     private _watchAngularEvents;
     /**

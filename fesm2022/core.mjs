@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-0104a69
+ * @license Angular v19.2.11+sha-8f9b05e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18010,7 +18010,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.2.11+sha-0104a69']
+                ? ['ng-version', '19.2.11+sha-8f9b05e']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -22753,10 +22753,16 @@ class Testability {
     registry;
     _isZoneStable = true;
     _callbacks = [];
-    taskTrackingZone = null;
+    _taskTrackingZone = null;
+    _destroyRef;
     constructor(_ngZone, registry, testabilityGetter) {
         this._ngZone = _ngZone;
         this.registry = registry;
+        // Attempt to retrieve a `DestroyRef` optionally.
+        // For backwards compatibility reasons, this cannot be required.
+        if (isInInjectionContext()) {
+            this._destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
+        }
         // If there was no Testability logic registered in the global scope
         // before, register the current testability getter as a global one.
         if (!_testabilityGetter) {
@@ -22765,26 +22771,28 @@ class Testability {
         }
         this._watchAngularEvents();
         _ngZone.run(() => {
-            this.taskTrackingZone =
+            this._taskTrackingZone =
                 typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
         });
     }
     _watchAngularEvents() {
-        this._ngZone.onUnstable.subscribe({
+        const onUnstableSubscription = this._ngZone.onUnstable.subscribe({
             next: () => {
                 this._isZoneStable = false;
             },
         });
-        this._ngZone.runOutsideAngular(() => {
-            this._ngZone.onStable.subscribe({
-                next: () => {
-                    NgZone.assertNotInAngularZone();
-                    queueMicrotask(() => {
-                        this._isZoneStable = true;
-                        this._runCallbacksIfReady();
-                    });
-                },
-            });
+        const onStableSubscription = this._ngZone.runOutsideAngular(() => this._ngZone.onStable.subscribe({
+            next: () => {
+                NgZone.assertNotInAngularZone();
+                queueMicrotask(() => {
+                    this._isZoneStable = true;
+                    this._runCallbacksIfReady();
+                });
+            },
+        }));
+        this._destroyRef?.onDestroy(() => {
+            onUnstableSubscription.unsubscribe();
+            onStableSubscription.unsubscribe();
         });
     }
     /**
@@ -22817,11 +22825,11 @@ class Testability {
         }
     }
     getPendingTasks() {
-        if (!this.taskTrackingZone) {
+        if (!this._taskTrackingZone) {
             return [];
         }
         // Copy the tasks data so that we don't leak tasks.
-        return this.taskTrackingZone.macroTasks.map((t) => {
+        return this._taskTrackingZone.macroTasks.map((t) => {
             return {
                 source: t.source,
                 // From TaskTrackingZone:
@@ -22854,7 +22862,7 @@ class Testability {
      *    and no further updates will be issued.
      */
     whenStable(doneCb, timeout, updateCb) {
-        if (updateCb && !this.taskTrackingZone) {
+        if (updateCb && !this._taskTrackingZone) {
             throw new Error('Task tracking zone is required when passing an update callback to ' +
                 'whenStable(). Is "zone.js/plugins/task-tracking" loaded?');
         }
@@ -34731,7 +34739,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.11+sha-0104a69');
+const VERSION = new Version('19.2.11+sha-8f9b05e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
