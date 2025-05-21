@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-e7656b8
+ * @license Angular v20.1.0-next.0+sha-1123b31
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,13 @@
 
 require('./compiler-XrJo7C8x.cjs');
 var ts = require('typescript');
-var checker = require('./checker-B8x32YgW.cjs');
+var checker = require('./checker-BJkIBSBT.cjs');
 require('os');
 var assert = require('assert');
-var index = require('./index-D46AWSwU.cjs');
-var project_paths = require('./project_paths-CZw1SC_e.cjs');
+var index = require('./index-IRnFbNnL.cjs');
+var project_paths = require('./project_paths-bFYzxobI.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-iADupMsk.cjs');
+require('./index-DJVgYZBx.cjs');
 require('path');
 
 /**

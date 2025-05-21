@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-e7656b8
+ * @license Angular v20.1.0-next.0+sha-1123b31
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B8x32YgW.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BJkIBSBT.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -7872,7 +7872,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     const rawHostDirectives = directive.get('hostDirectives') || null;
     const hostDirectives = rawHostDirectives === null
         ? null
-        : extractHostDirectives(rawHostDirectives, evaluator, compilationMode, createForwardRefResolver(isCore), emitDeclarationOnly);
+        : extractHostDirectives(rawHostDirectives, evaluator, reflector, compilationMode, createForwardRefResolver(isCore), emitDeclarationOnly);
     if (compilationMode !== exports.CompilationMode.LOCAL && hostDirectives !== null) {
         // In global compilation mode where we do type checking, the template type-checker will need to
         // import host directive types, so add them as referenced by `clazz`. This will ensure that
@@ -8668,7 +8668,7 @@ function getHostBindingErrorNode(error, hostExpr) {
  * Extracts and prepares the host directives metadata from an array literal expression.
  * @param rawHostDirectives Expression that defined the `hostDirectives`.
  */
-function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, forwardRefResolver, emitDeclarationOnly) {
+function extractHostDirectives(rawHostDirectives, evaluator, reflector, compilationMode, forwardRefResolver, emitDeclarationOnly) {
     const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
     if (!Array.isArray(resolved)) {
         throw createValueHasWrongTypeError(rawHostDirectives, resolved, 'hostDirectives must be an array');
@@ -8694,12 +8694,28 @@ function extractHostDirectives(rawHostDirectives, evaluator, compilationMode, fo
             // forward ref for imported symbols?!)
             if (!ts.isIdentifier(hostReference.node) &&
                 !ts.isPropertyAccessExpression(hostReference.node)) {
-                throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
+                const compilationModeName = emitDeclarationOnly
+                    ? 'experimental declaration-only emission'
+                    : 'local compilation';
+                throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In ${compilationModeName} mode, host directive cannot be an expression. Use an identifier instead`);
             }
             if (emitDeclarationOnly) {
-                throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, 'External references in host directives are not supported in experimental declaration-only emission mode');
+                if (ts.isIdentifier(hostReference.node)) {
+                    const importInfo = reflector.getImportOfIdentifier(hostReference.node);
+                    if (importInfo) {
+                        directive = new compiler.ExternalReference(importInfo.from, importInfo.name);
+                    }
+                    else {
+                        throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In experimental declaration-only emission mode, host directive cannot use indirect external indentifiers. Use a direct external identifier instead`);
+                    }
+                }
+                else {
+                    throw new FatalDiagnosticError(exports.ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In experimental declaration-only emission mode, host directive cannot be an expression. Use an identifier instead`);
+                }
             }
-            directive = new compiler.WrappedNodeExpr(hostReference.node);
+            else {
+                directive = new compiler.WrappedNodeExpr(hostReference.node);
+            }
         }
         else if (hostReference instanceof Reference) {
             directive = hostReference;
@@ -8738,6 +8754,12 @@ function toHostDirectiveMetadata(hostDirective, context, refEmitter) {
     let directive;
     if (hostDirective.directive instanceof Reference) {
         directive = toR3Reference(hostDirective.directive.node, hostDirective.directive, context, refEmitter);
+    }
+    else if (hostDirective.directive instanceof compiler.ExternalReference) {
+        directive = {
+            value: new compiler.ExternalExpr(hostDirective.directive),
+            type: new compiler.ExternalExpr(hostDirective.directive),
+        };
     }
     else {
         directive = {
