@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-373480c
+ * @license Angular v20.1.0-next.0+sha-f68001d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -544,7 +544,7 @@ interface ContentChildFunction {
  * }
  * ```
  *
- * Note: By default `descendants` is `true` which means the query will not traverse all descendants in the same template.
+ * Note: By default `descendants` is `true` which means the query will traverse all descendants in the same template.
  *
  * @initializerApiFunction
  * @publicApi 19.0
