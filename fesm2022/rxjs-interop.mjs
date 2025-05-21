@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.11+sha-126efc9
+ * @license Angular v19.2.11+sha-21e5f07
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -331,7 +331,10 @@ function rxResource(opts) {
             }
             sub = opts.loader(params).subscribe({
                 next: (value) => send({ value }),
-                error: (error) => send({ error }),
+                error: (error) => {
+                    send({ error });
+                    params.abortSignal.removeEventListener('abort', onAbort);
+                },
                 complete: () => {
                     if (resolve) {
                         send({ error: new Error('Resource completed before producing a value') });
