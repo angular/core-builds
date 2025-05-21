@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.1+sha-3cc0910
+ * @license Angular v20.0.0-rc.1+sha-4e5d6de
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -525,10 +525,10 @@ function parseTsconfigOrDie(absoluteTsconfigPath, fs) {
 
 /** Creates the base program info for the given tsconfig path. */
 function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
-    if (fs === undefined) {
-        fs = new checker.NodeJSFileSystem();
-        checker.setFileSystem(fs);
-    }
+    // Make sure the FS becomes globally available. Some code paths
+    // of the Angular compiler, or tsconfig parsing aren't leveraging
+    // the specified file system.
+    checker.setFileSystem(fs);
     const tsconfig = parseTsconfigOrDie(absoluteTsconfigPath, fs);
     const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
     // When enabled, use a plain TS program if we are sure it's not

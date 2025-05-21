@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-3cc0910
+ * @license Angular v20.0.0-rc.1+sha-4e5d6de
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3478,7 +3478,9 @@ declare function getNgModuleById<T>(id: string): Type$1<T>;
  *
  * @publicApi
  */
-declare abstract class TemplateRef<C> {
+declare class TemplateRef<C> {
+    private _declarationLView;
+    private _declarationTContainer;
     /**
      * The anchor element in the parent view for this embedded view.
      *
@@ -3490,7 +3492,7 @@ declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    abstract readonly elementRef: ElementRef;
+    readonly elementRef: ElementRef;
     /**
      * Instantiates an unattached embedded view based on this template.
      * @param context The data-binding context of the embedded view, as declared
@@ -3498,7 +3500,7 @@ declare abstract class TemplateRef<C> {
      * @param injector Injector to be used within the embedded view.
      * @returns The new embedded view object.
      */
-    abstract createEmbeddedView(context: C, injector?: Injector): EmbeddedViewRef<C>;
+    createEmbeddedView(context: C, injector?: Injector): EmbeddedViewRef<C>;
 }
 
 /**
