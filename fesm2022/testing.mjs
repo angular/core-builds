@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-abdade9
+ * @license Angular v20.0.0-rc.1+sha-d97892a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Subscription } from 'rxjs';
 import { inject as inject$1, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext } from './root_effect_scheduler-DhMGsWpv.mjs';
 import * as i0 from '@angular/core';
-import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-CC0nmNSC.mjs';
+import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, getAsyncClassMetadataFn, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, Compiler, DEFER_BLOCK_CONFIG, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node-B-__oEPt.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
@@ -253,13 +253,15 @@ class ComponentFixture {
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
+        this._testAppRef.allTestViews.add(this.componentRef.hostView);
         if (this.autoDetect) {
-            this._testAppRef.externalTestViews.add(this.componentRef.hostView);
+            this._testAppRef.autoDetectTestViews.add(this.componentRef.hostView);
             this.scheduler?.notify(8 /* ɵNotificationSource.ViewAttached */);
             this.scheduler?.notify(0 /* ɵNotificationSource.MarkAncestorsForTraversal */);
         }
         this.componentRef.hostView.onDestroy(() => {
-            this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
+            this._testAppRef.allTestViews.delete(this.componentRef.hostView);
+            this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
         });
         // Create subscriptions outside the NgZone so that the callbacks run outside
         // of NgZone.
@@ -293,13 +295,11 @@ class ComponentFixture {
             }
             if (this.zonelessEnabled) {
                 try {
-                    this._testAppRef.externalTestViews.add(this.componentRef.hostView);
+                    this._testAppRef.includeAllTestViews = true;
                     this._appRef.tick();
                 }
                 finally {
-                    if (!this.autoDetect) {
-                        this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
-                    }
+                    this._testAppRef.includeAllTestViews = false;
                 }
             }
             else {
@@ -330,13 +330,11 @@ class ComponentFixture {
         if (this._noZoneOptionIsSet && !this.zonelessEnabled) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set.');
         }
-        if (autoDetect !== this.autoDetect) {
-            if (autoDetect) {
-                this._testAppRef.externalTestViews.add(this.componentRef.hostView);
-            }
-            else {
-                this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
-            }
+        if (autoDetect) {
+            this._testAppRef.autoDetectTestViews.add(this.componentRef.hostView);
+        }
+        else {
+            this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
         }
         this.autoDetect = autoDetect;
         this.detectChanges();
@@ -400,7 +398,8 @@ class ComponentFixture {
      */
     destroy() {
         this.subscriptions.unsubscribe();
-        this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
+        this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
+        this._testAppRef.allTestViews.delete(this.componentRef.hostView);
         if (!this._isDestroyed) {
             this.componentRef.destroy();
             this._isDestroyed = true;
@@ -2201,7 +2200,18 @@ class TestBedImpl {
      * @publicApi
      */
     tick() {
-        this.inject(ApplicationRef).tick();
+        const appRef = this.inject(ApplicationRef);
+        try {
+            // TODO(atscott): ApplicationRef.tick should set includeAllTestViews to true itself rather than doing this here and in ComponentFixture
+            // The behavior should be that TestBed.tick, ComponentFixture.detectChanges, and ApplicationRef.tick all result in the test fixtures
+            // getting synchronized, regardless of whether they are autoDetect: true.
+            // Automatic scheduling (zone or zoneless) will call _tick which will _not_ include fixtures with autoDetect: false
+            appRef.includeAllTestViews = true;
+            appRef.tick();
+        }
+        finally {
+            appRef.includeAllTestViews = false;
+        }
     }
 }
 /**
