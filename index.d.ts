@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-46af023
+ * @license Angular v20.1.0-next.0+sha-e7656b8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4904,7 +4904,9 @@ declare const enum RuntimeErrorCode {
     LOOP_TRACK_DUPLICATE_KEYS = -955,
     LOOP_TRACK_RECREATE = -956,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
-    RUNTIME_DEPS_ORPHAN_COMPONENT = 981
+    RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
+    MUST_PROVIDE_STREAM_OPTION = 990,
+    RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = 991
 }
 /**
  * Class that represents a runtime error.
