@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-fa5d7ff
+ * @license Angular v20.1.0-next.0+sha-9416483
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26,7 +26,7 @@ import './untracked-2ouAFbCz.mjs';
  */
 function takeUntilDestroyed(destroyRef) {
     if (!destroyRef) {
-        assertInInjectionContext(takeUntilDestroyed);
+        ngDevMode && assertInInjectionContext(takeUntilDestroyed);
         destroyRef = inject(DestroyRef);
     }
     const destroyed$ = new Observable((observer) => {
@@ -128,7 +128,9 @@ function outputToObservable(ref) {
  * @publicApi 20.0
  */
 function toObservable(source, options) {
-    !options?.injector && assertInInjectionContext(toObservable);
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(toObservable);
+    }
     const injector = options?.injector ?? inject(Injector);
     const subject = new ReplaySubject(1);
     const watcher = effect(() => {
@@ -248,7 +250,7 @@ function makeToSignalEqual(userEquality = Object.is) {
  */
 function pendingUntilEvent(injector) {
     if (injector === undefined) {
-        assertInInjectionContext(pendingUntilEvent);
+        ngDevMode && assertInInjectionContext(pendingUntilEvent);
         injector = inject(Injector);
     }
     const taskService = injector.get(PendingTasks);
