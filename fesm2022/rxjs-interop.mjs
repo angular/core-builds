@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-e74266b
+ * @license Angular v20.0.0-rc.1+sha-47f4a8e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-DhMGsWpv.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-BCPO3IoS.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-PMxrgCGv.mjs';
 import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
 import '@angular/core/primitives/di';
@@ -179,7 +179,9 @@ function toSignal(source, options) {
         assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +
             'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;
-    requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
+    if (ngDevMode && requiresCleanup && !options?.injector) {
+        assertInInjectionContext(toSignal);
+    }
     const cleanupRef = requiresCleanup
         ? (options?.injector?.get(DestroyRef) ?? inject(DestroyRef))
         : null;
@@ -290,7 +292,9 @@ function pendingUntilEvent(injector) {
 }
 
 function rxResource(opts) {
-    opts?.injector || assertInInjectionContext(rxResource);
+    if (ngDevMode && !opts?.injector) {
+        assertInInjectionContext(rxResource);
+    }
     return resource({
         ...opts,
         loader: undefined,
@@ -312,14 +316,16 @@ function rxResource(opts) {
             // TODO(alxhub): remove after g3 updated to rename loader -> stream
             const streamFn = opts.stream ?? opts.loader;
             if (streamFn === undefined) {
-                throw new Error(`Must provide \`stream\` option.`);
+                throw new RuntimeError(990 /* ɵRuntimeErrorCode.MUST_PROVIDE_STREAM_OPTION */, ngDevMode && `Must provide \`stream\` option.`);
             }
             sub = streamFn(params).subscribe({
                 next: (value) => send({ value }),
                 error: (error) => send({ error }),
                 complete: () => {
                     if (resolve) {
-                        send({ error: new Error('Resource completed before producing a value') });
+                        send({
+                            error: new RuntimeError(991 /* ɵRuntimeErrorCode.RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE */, ngDevMode && 'Resource completed before producing a value'),
+                        });
                     }
                     params.abortSignal.removeEventListener('abort', onAbort);
                 },

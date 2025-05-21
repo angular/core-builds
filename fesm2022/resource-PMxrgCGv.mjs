@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-e74266b
+ * @license Angular v20.0.0-rc.1+sha-47f4a8e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -133,7 +133,9 @@ function effect(effectFn, options) {
     ngDevMode &&
         assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
             'effect inside the component constructor.');
-    !options?.injector && assertInInjectionContext(effect);
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(effect);
+    }
     if (ngDevMode && options?.allowSignalWrites !== undefined) {
         console.warn(`The 'allowSignalWrites' flag is deprecated and no longer impacts effect() (writes are always allowed)`);
     }
@@ -301,7 +303,9 @@ function upgradeLinkedSignalGetter(getter) {
 }
 
 function resource(options) {
-    options?.injector || assertInInjectionContext(resource);
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(resource);
+    }
     const oldNameForParams = options.request;
     const params = (options.params ?? oldNameForParams ?? (() => null));
     return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
@@ -571,4 +575,4 @@ function isResolved(state) {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-BCPO3IoS.mjs.map
+//# sourceMappingURL=resource-PMxrgCGv.mjs.map
