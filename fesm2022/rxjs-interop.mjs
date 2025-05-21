@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-bde1b5e
+ * @license Angular v20.1.0-next.0+sha-905194f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-B9TxQ-zk.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource } from './resource-Co16cvOz.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-DHGIE0nu.mjs';
 import './primitives/di.mjs';
 import './signal-ePSl6jXn.mjs';
 import '@angular/core/primitives/di';
@@ -321,7 +321,7 @@ function rxResource(opts) {
             sub = streamFn(params).subscribe({
                 next: (value) => send({ value }),
                 error: (error) => {
-                    send({ error });
+                    send({ error: encapsulateResourceError(error) });
                     params.abortSignal.removeEventListener('abort', onAbort);
                 },
                 complete: () => {

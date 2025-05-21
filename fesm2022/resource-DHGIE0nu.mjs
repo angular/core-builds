@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-bde1b5e
+ * @license Angular v20.1.0-next.0+sha-905194f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -302,13 +302,19 @@ function upgradeLinkedSignalGetter(getter) {
     return upgradedGetter;
 }
 
+/**
+ * Whether a `Resource.value()` should throw an error when the resource is in the error state.
+ *
+ * This internal flag is being used to gradually roll out this behavior.
+ */
+const RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
 function resource(options) {
     if (ngDevMode && !options?.injector) {
         assertInInjectionContext(resource);
     }
     const oldNameForParams = options.request;
     const params = (options.params ?? oldNameForParams ?? (() => null));
-    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
+    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -321,11 +327,18 @@ class BaseWritableResource {
         this.value.update = this.update.bind(this);
         this.value.asReadonly = signalAsReadonlyFn;
     }
+    isError = computed(() => this.status() === 'error');
     update(updateFn) {
         this.set(updateFn(untracked(this.value)));
     }
     isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading');
     hasValue() {
+        // Note: we specifically read `isError()` instead of `status()` here to avoid triggering
+        // reactive consumers which read `hasValue()`. This way, if `hasValue()` is used inside of an
+        // effect, it doesn't cause the effect to rerun on every status change.
+        if (this.isError()) {
+            return false;
+        }
         return this.value() !== undefined;
     }
     asReadonly() {
@@ -337,7 +350,6 @@ class BaseWritableResource {
  */
 class ResourceImpl extends BaseWritableResource {
     loaderFn;
-    defaultValue;
     equal;
     pendingTasks;
     /**
@@ -353,16 +365,30 @@ class ResourceImpl extends BaseWritableResource {
     pendingController;
     resolvePendingTask = undefined;
     destroyed = false;
-    constructor(request, loaderFn, defaultValue, equal, injector) {
+    constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
         super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
         // `WritableSignal` that delegates to `ResourceImpl.set`.
         computed(() => {
             const streamValue = this.state().stream?.();
-            return streamValue && isResolved(streamValue) ? streamValue.value : this.defaultValue;
+            if (!streamValue) {
+                return defaultValue;
+            }
+            // Prevents `hasValue()` from throwing an error when a reload happened in the error state
+            if (this.state().status === 'loading' && this.error()) {
+                return defaultValue;
+            }
+            if (!isResolved(streamValue)) {
+                if (throwErrorsFromValue) {
+                    throw new ResourceValueError(this.error());
+                }
+                else {
+                    return defaultValue;
+                }
+            }
+            return streamValue.value;
         }, { equal }));
         this.loaderFn = loaderFn;
-        this.defaultValue = defaultValue;
         this.equal = equal;
         // Extend `request()` to include a writable reload signal.
         this.extRequest = linkedSignal({
@@ -518,7 +544,7 @@ class ResourceImpl extends BaseWritableResource {
                 extRequest,
                 status: 'resolved',
                 previousStatus: 'error',
-                stream: signal({ error: err }),
+                stream: signal({ error: encapsulateResourceError(err) }),
             });
         }
         finally {
@@ -550,7 +576,7 @@ function getLoader(options) {
             return signal({ value: await options.loader(params) });
         }
         catch (err) {
-            return signal({ error: err });
+            return signal({ error: encapsulateResourceError(err) });
         }
     };
 }
@@ -565,7 +591,7 @@ function projectStatusOfState(state) {
         case 'loading':
             return state.extRequest.reload === 0 ? 'loading' : 'reloading';
         case 'resolved':
-            return isResolved(untracked(state.stream)) ? 'resolved' : 'error';
+            return isResolved(state.stream()) ? 'resolved' : 'error';
         default:
             return state.status;
     }
@@ -573,6 +599,26 @@ function projectStatusOfState(state) {
 function isResolved(state) {
     return state.error === undefined;
 }
+function encapsulateResourceError(error) {
+    if (error instanceof Error) {
+        return error;
+    }
+    return new ResourceWrappedError(error);
+}
+class ResourceValueError extends Error {
+    constructor(error) {
+        super(ngDevMode
+            ? `Resource is currently in an error state (see Error.cause for details): ${error.message}`
+            : error.message, { cause: error });
+    }
+}
+class ResourceWrappedError extends Error {
+    constructor(error) {
+        super(ngDevMode
+            ? `Resource returned an error that's not an Error instance: ${String(error)}. Check this error's .cause for the actual error.`
+            : String(error), { cause: error });
+    }
+}
 
-export { OutputEmitterRef, ResourceImpl, computed, effect, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-Co16cvOz.mjs.map
+export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+//# sourceMappingURL=resource-DHGIE0nu.mjs.map
