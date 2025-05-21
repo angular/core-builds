@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-216222f
+ * @license Angular v20.1.0-next.0+sha-373480c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -320,7 +320,10 @@ function rxResource(opts) {
             }
             sub = streamFn(params).subscribe({
                 next: (value) => send({ value }),
-                error: (error) => send({ error }),
+                error: (error) => {
+                    send({ error });
+                    params.abortSignal.removeEventListener('abort', onAbort);
+                },
                 complete: () => {
                     if (resolve) {
                         send({

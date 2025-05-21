@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-216222f
+ * @license Angular v20.1.0-next.0+sha-373480c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14070,9 +14070,11 @@ function getBinding(lView, bindingIndex) {
  *          `CheckNoChangesMode`)
  */
 function bindingUpdated(lView, bindingIndex, value) {
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     ngDevMode &&
         assertLessThan(bindingIndex, lView.length, `Slot should have been initialized to NO_CHANGE`);
+    if (value === NO_CHANGE) {
+        return false;
+    }
     const oldValue = lView[bindingIndex];
     if (Object.is(oldValue, value)) {
         return false;
@@ -14474,7 +14476,7 @@ function twoWayBinding(publicName, value) {
     // are here to help us catch it if something changes in the future.
     ngDevMode && assertNotDefined(input.create, 'Unexpected `create` callback in inputBinding');
     ngDevMode && assertNotDefined(output.update, 'Unexpected `update` callback in outputBinding');
-    return {
+    const binding = {
         [BINDING]: {
             kind: 'twoWay',
             requiredVars: input[BINDING].requiredVars + output[BINDING].requiredVars,
@@ -14486,6 +14488,7 @@ function twoWayBinding(publicName, value) {
         create: output.create,
         update: input.update,
     };
+    return binding;
 }
 
 class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
@@ -14672,7 +14675,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.1.0-next.0+sha-216222f']
+        ? ['ng-version', '20.1.0-next.0+sha-373480c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -19879,12 +19882,17 @@ class ApplicationRef {
     tracingSnapshot = null;
     // Needed for ComponentFixture temporarily during migration of autoDetect behavior
     // Eventually the hostView of the fixture should just attach to ApplicationRef.
-    externalTestViews = new Set();
+    allTestViews = new Set();
+    autoDetectTestViews = new Set();
+    includeAllTestViews = false;
     /** @internal */
     afterTick = new Subject();
     /** @internal */
     get allViews() {
-        return [...this.externalTestViews.keys(), ...this._views];
+        return [
+            ...(this.includeAllTestViews ? this.allTestViews : this.autoDetectTestViews).keys(),
+            ...this._views,
+        ];
     }
     /**
      * Indicates whether this instance was destroyed.
@@ -21616,391 +21624,6 @@ function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
             renderStringify(v7) +
             suffix
         : NO_CHANGE;
-}
-
-/**
- *
- * Update an interpolated attribute on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate1('title', 'prefix', v0, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate1;
-}
-/**
- *
- * Update an interpolated attribute on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate2;
-}
-/**
- *
- * Update an interpolated attribute on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate3(
- * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate3;
-}
-/**
- *
- * Update an interpolated attribute on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate4(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate4;
-}
-/**
- *
- * Update an interpolated attribute on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate5(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate5;
-}
-/**
- *
- * Update an interpolated attribute on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate6(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate6;
-}
-/**
- *
- * Update an interpolated attribute on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate7(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate7;
-}
-/**
- *
- * Update an interpolated attribute on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate8(
- *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * @param attrName The name of the attribute to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
-        ngDevMode &&
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix ?? '');
-    }
-    return ɵɵattributeInterpolate8;
-}
-/**
- * Update an interpolated attribute on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolateV(
- *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *
- * @param attrName The name of the attribute to update.
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
-    const lView = getLView();
-    const interpolated = interpolationV(lView, values);
-    if (interpolated !== NO_CHANGE) {
-        const tNode = getSelectedTNode();
-        elementAttributeInternal(tNode, lView, attrName, interpolated, sanitizer, namespace);
-        if (ngDevMode) {
-            const interpolationInBetween = [values[0]]; // prefix
-            for (let i = 2; i < values.length; i += 2) {
-                interpolationInBetween.push(values[i]);
-            }
-            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
-        }
-    }
-    return ɵɵattributeInterpolateV;
 }
 
 function toTStylingRange(prev, next) {
@@ -28474,6 +28097,188 @@ function ɵɵattachSourceLocations(templatePath, locations) {
     }
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Interpolate a value with a single bound value and no prefixes or suffixes.
+ *
+ * @param v0 Value checked for change.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate(v0) {
+    return interpolation1(getLView(), '', v0, '');
+}
+/**
+ * Interpolate a value with a single bound value.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate1(prefix, v0, suffix = '') {
+    return interpolation1(getLView(), prefix, v0, suffix);
+}
+/**
+ * Interpolate a value with two bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate2(prefix, v0, i0, v1, suffix = '') {
+    return interpolation2(getLView(), prefix, v0, i0, v1, suffix);
+}
+/**
+ * Interpolate a value with three bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate3(prefix, v0, i0, v1, i1, v2, suffix = '') {
+    return interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
+}
+/**
+ * Interpolate a value with four bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix = '') {
+    return interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+}
+/**
+ * Interpolate a value with five bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix = '') {
+    return interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+}
+/**
+ * Interpolate a value with six bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix = '') {
+    return interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+}
+/**
+ * Interpolate a value with seven bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix = '') {
+    return interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+}
+/**
+ * Interpolate a value with eight bound values.
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param i6 Static value used for concatenation only.
+ * @param v7 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix = '') {
+    return interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+}
+/**
+ * Interpolate a value with nine or more bound values.
+ *
+ * @param values The collection of values and the strings in-between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @returns Interpolated string or NO_CHANGE if none of the bound values have changed.
+ * @codeGenApi
+ */
+function ɵɵinterpolateV(values) {
+    return interpolationV(getLView(), values);
+}
+
 /**
  * Resolves the providers which are defined in the DirectiveDef.
  *
@@ -29722,15 +29527,6 @@ function resetProjectionState(tNode) {
  */
 const angularCoreEnv = (() => ({
     'ɵɵattribute': ɵɵattribute,
-    'ɵɵattributeInterpolate1': ɵɵattributeInterpolate1,
-    'ɵɵattributeInterpolate2': ɵɵattributeInterpolate2,
-    'ɵɵattributeInterpolate3': ɵɵattributeInterpolate3,
-    'ɵɵattributeInterpolate4': ɵɵattributeInterpolate4,
-    'ɵɵattributeInterpolate5': ɵɵattributeInterpolate5,
-    'ɵɵattributeInterpolate6': ɵɵattributeInterpolate6,
-    'ɵɵattributeInterpolate7': ɵɵattributeInterpolate7,
-    'ɵɵattributeInterpolate8': ɵɵattributeInterpolate8,
-    'ɵɵattributeInterpolateV': ɵɵattributeInterpolateV,
     'ɵɵdefineComponent': ɵɵdefineComponent,
     'ɵɵdefineDirective': ɵɵdefineDirective,
     'ɵɵdefineInjectable': __defineInjectable,
@@ -29901,6 +29697,16 @@ const angularCoreEnv = (() => ({
     'ɵɵstoreLet': ɵɵstoreLet,
     'ɵɵreadContextLet': ɵɵreadContextLet,
     'ɵɵattachSourceLocations': ɵɵattachSourceLocations,
+    'ɵɵinterpolate': ɵɵinterpolate,
+    'ɵɵinterpolate1': ɵɵinterpolate1,
+    'ɵɵinterpolate2': ɵɵinterpolate2,
+    'ɵɵinterpolate3': ɵɵinterpolate3,
+    'ɵɵinterpolate4': ɵɵinterpolate4,
+    'ɵɵinterpolate5': ɵɵinterpolate5,
+    'ɵɵinterpolate6': ɵɵinterpolate6,
+    'ɵɵinterpolate7': ɵɵinterpolate7,
+    'ɵɵinterpolate8': ɵɵinterpolate8,
+    'ɵɵinterpolateV': ɵɵinterpolateV,
     'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
     'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
     'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
@@ -31036,7 +30842,8 @@ class NgZoneChangeDetectionScheduler {
                 }
                 this.zone.run(() => {
                     try {
-                        this.applicationRef.tick();
+                        this.applicationRef.dirtyFlags |= 1 /* ApplicationRefDirtyFlags.ViewTreeGlobal */;
+                        this.applicationRef._tick();
                     }
                     catch (e) {
                         this.applicationErrorHandler(e);
@@ -32306,5 +32113,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomProperty, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
-//# sourceMappingURL=debug_node-z72cGzzE.mjs.map
+export { AFTER_RENDER_PHASES, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomProperty, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+//# sourceMappingURL=debug_node-BhzM6Go9.mjs.map

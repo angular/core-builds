@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-216222f
+ * @license Angular v20.1.0-next.0+sha-373480c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5624,16 +5624,7 @@ declare const BINDING: unique symbol;
  * For example, `inputBinding('value', () => 123)` creates an input binding.
  */
 interface Binding {
-    readonly [BINDING]: {
-        readonly kind: string;
-        readonly requiredVars: number;
-    };
-    /** Target index (in a view's registry) to which to apply the binding. */
-    readonly targetIdx?: number;
-    /** Callback that will be invoked during creation. */
-    create?(): void;
-    /** Callback that will be invoked during updates. */
-    update?(): void;
+    readonly [BINDING]: unknown;
 }
 /**
  * Represents a dynamically-created directive with bindings targeting it specifically.
@@ -6539,7 +6530,9 @@ declare class ApplicationRef {
     private readonly afterRenderManager;
     private readonly zonelessEnabled;
     private readonly rootEffectScheduler;
-    private externalTestViews;
+    private allTestViews;
+    private autoDetectTestViews;
+    private includeAllTestViews;
     /**
      * Indicates whether this instance was destroyed.
      */

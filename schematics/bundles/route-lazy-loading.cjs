@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-216222f
+ * @license Angular v20.1.0-next.0+sha-373480c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,13 @@
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var change_tracker = require('./change_tracker-DmzD7KyF.cjs');
+var change_tracker = require('./change_tracker-Bbt8VdVn.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
-var checker = require('./checker-BJkIBSBT.cjs');
+var checker = require('./checker-5F4SPkyc.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
-require('./compiler-XrJo7C8x.cjs');
+require('./compiler-CwIAJJiH.cjs');
 require('os');
 require('@angular-devkit/core');
 require('module');
