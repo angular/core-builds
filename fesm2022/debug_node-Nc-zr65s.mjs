@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-c0f27a5
+ * @license Angular v20.0.0-rc.1+sha-0503362
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, throwCyclicDependencyError, stringifyForError, setInjectorProfilerContext, setInjectImplementation, enterDI, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, assertDirectiveDef, leaveDI, isRootView, assertTNodeForLView, runInInjectorProfilerContext, getCurrentTNode, getLView, throwProviderNotFoundError, assertNodeInjector, injectRootLimpMode, assertIndexInRange, TVIEW, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, INJECTOR$1 as INJECTOR, isComponentDef, isComponentHost, convertToBitFlags, NG_FACTORY_DEF, isForwardRef, getFactoryDef, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, unwrapRNode, assertLView, HOST, getLViewParent, CHILD_HEAD, NEXT, isLContainer, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, ViewContext, assertIndexInDeclRange, getTNode, isDestroyed, removeLViewOnDestroy, storeLViewOnDestroy, walkUpViews, assertLContainer, CONTAINER_HEADER_OFFSET, getNativeByIndex, assertElement, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, HYDRATION, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, setCurrentDirectiveIndex, stringify, getCurrentDirectiveIndex, unwrapLView, assertNotReactive, enterView, QUERIES, leaveView, isCreationMode, DECLARATION_LCONTAINER, MOVED_VIEWS, NATIVE, assertProjectionSlots, assertParentView, REACTIVE_TEMPLATE_CONSUMER, ON_DESTROY_HOOKS, assertFunction, EFFECTS, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, isRefreshingViews, CheckNoChangesMode, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, getCurrentParentTNode, assertTNodeForTView, setCurrentTNode, getCurrentTNodePlaceholderOk, isCurrentTNodeParent, isInSkipHydrationBlock as isInSkipHydrationBlock$1, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, isDirectiveHost, assertNotDefined, getSelectedTNode, nextBindingIndex, debugStringifyTypeForError, getDirectiveDefOrThrow, assertComponentType, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, wasLastNodeCreated, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, incrementBindingIndex, getBindingIndex, keyValueArrayIndexOf, keyValueArrayGet, getCurrentDirectiveDef, keyValueArraySet, assertHasParent, getElementDepthCount, getNamespace, enterSkipHydrationBlock, increaseElementDepthCount, setCurrentTNodeAsNotParent, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler-DhMGsWpv.mjs';
+import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, throwCyclicDependencyError, stringifyForError, setInjectorProfilerContext, setInjectImplementation, enterDI, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, assertDirectiveDef, leaveDI, isRootView, assertTNodeForLView, runInInjectorProfilerContext, getCurrentTNode, getLView, throwProviderNotFoundError, assertNodeInjector, injectRootLimpMode, assertIndexInRange, TVIEW, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, INJECTOR$1 as INJECTOR, isComponentDef, isComponentHost, convertToBitFlags, NG_FACTORY_DEF, isForwardRef, getFactoryDef, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, unwrapRNode, assertLView, HOST, getLViewParent, CHILD_HEAD, NEXT, isLContainer, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, HYDRATION, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, setCurrentDirectiveIndex, stringify, getCurrentDirectiveIndex, unwrapLView, assertNotReactive, enterView, QUERIES, leaveView, isCreationMode, assertLContainer, DECLARATION_LCONTAINER, isDestroyed, MOVED_VIEWS, NATIVE, assertProjectionSlots, CONTAINER_HEADER_OFFSET, assertParentView, REACTIVE_TEMPLATE_CONSUMER, ON_DESTROY_HOOKS, assertFunction, EFFECTS, AFTER_RENDER_SEQUENCES_TO_ADD, markViewForRefresh, markAncestorsForTraversal, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, isRefreshingViews, CheckNoChangesMode, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, getCurrentParentTNode, assertTNodeForTView, setCurrentTNode, getCurrentTNodePlaceholderOk, isCurrentTNodeParent, isInSkipHydrationBlock as isInSkipHydrationBlock$1, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, isDirectiveHost, assertNotDefined, getSelectedTNode, nextBindingIndex, getTNode, debugStringifyTypeForError, getDirectiveDefOrThrow, ChangeDetectionScheduler, assertComponentType, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, wasLastNodeCreated, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, incrementBindingIndex, getBindingIndex, keyValueArrayIndexOf, keyValueArrayGet, getCurrentDirectiveDef, keyValueArraySet, assertHasParent, getElementDepthCount, getNamespace, enterSkipHydrationBlock, increaseElementDepthCount, setCurrentTNodeAsNotParent, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler-BgGHQ80j.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal-ePSl6jXn.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -3833,1132 +3833,6 @@ const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(ngDevMode ? 'JSACTION_BLOC
     factory: () => new Map(),
 });
 
-/** Actions that are supported by the tracing framework. */
-var TracingAction;
-(function (TracingAction) {
-    TracingAction[TracingAction["CHANGE_DETECTION"] = 0] = "CHANGE_DETECTION";
-    TracingAction[TracingAction["AFTER_NEXT_RENDER"] = 1] = "AFTER_NEXT_RENDER";
-})(TracingAction || (TracingAction = {}));
-/**
- * Injection token for a `TracingService`, optionally provided.
- */
-const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
-
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
-}
-
-const SCHEDULE_IN_ROOT_ZONE_DEFAULT = false;
-
-class EventEmitter_ extends Subject {
-    // tslint:disable-next-line:require-internal-with-underscore
-    __isAsync;
-    destroyRef = undefined;
-    pendingTasks = undefined;
-    constructor(isAsync = false) {
-        super();
-        this.__isAsync = isAsync;
-        // Attempt to retrieve a `DestroyRef` and `PendingTasks` optionally.
-        // For backwards compatibility reasons, this cannot be required.
-        if (isInInjectionContext()) {
-            // `DestroyRef` is optional because it is not available in all contexts.
-            // But it is useful to properly complete the `EventEmitter` if used with `outputToObservable`
-            // when the component/directive is destroyed. (See `outputToObservable` for more details.)
-            this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
-            this.pendingTasks = inject(PendingTasksInternal, { optional: true }) ?? undefined;
-        }
-    }
-    emit(value) {
-        const prevConsumer = setActiveConsumer(null);
-        try {
-            super.next(value);
-        }
-        finally {
-            setActiveConsumer(prevConsumer);
-        }
-    }
-    subscribe(observerOrNext, error, complete) {
-        let nextFn = observerOrNext;
-        let errorFn = error || (() => null);
-        let completeFn = complete;
-        if (observerOrNext && typeof observerOrNext === 'object') {
-            const observer = observerOrNext;
-            nextFn = observer.next?.bind(observer);
-            errorFn = observer.error?.bind(observer);
-            completeFn = observer.complete?.bind(observer);
-        }
-        if (this.__isAsync) {
-            errorFn = this.wrapInTimeout(errorFn);
-            if (nextFn) {
-                nextFn = this.wrapInTimeout(nextFn);
-            }
-            if (completeFn) {
-                completeFn = this.wrapInTimeout(completeFn);
-            }
-        }
-        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
-        if (observerOrNext instanceof Subscription) {
-            observerOrNext.add(sink);
-        }
-        return sink;
-    }
-    wrapInTimeout(fn) {
-        return (value) => {
-            const taskId = this.pendingTasks?.add();
-            setTimeout(() => {
-                try {
-                    fn(value);
-                }
-                finally {
-                    if (taskId !== undefined) {
-                        this.pendingTasks?.remove(taskId);
-                    }
-                }
-            });
-        };
-    }
-}
-/**
- * @publicApi
- */
-const EventEmitter = EventEmitter_;
-
-/**
- * Gets a scheduling function that runs the callback after the first of setTimeout and
- * requestAnimationFrame resolves.
- *
- * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
- * This ensures that the create and update passes of a change detection always happen
- * in the same frame.
- * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
- * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
- * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
- * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
- * prevent it from being used alone. First, it does not run in background tabs, which would
- * prevent Angular from initializing an application when opened in a new tab (for example).
- * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
- * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
- * are written with several updates and asserts in the form of "update; await stable; assert;".
- * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
- * interaction into a single change detection. Importantly, this reduces view tree traversals when
- * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
- * then be interleaves between each event.
- *
- * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
- * best of both worlds.
- *
- * @returns a function to cancel the scheduled callback
- */
-function scheduleCallbackWithRafRace(callback) {
-    let timeoutId;
-    let animationFrameId;
-    function cleanup() {
-        callback = noop;
-        try {
-            if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
-                cancelAnimationFrame(animationFrameId);
-            }
-            if (timeoutId !== undefined) {
-                clearTimeout(timeoutId);
-            }
-        }
-        catch {
-            // Clearing/canceling can fail in tests due to the timing of functions being patched and unpatched
-            // Just ignore the errors - we protect ourselves from this issue by also making the callback a no-op.
-        }
-    }
-    timeoutId = setTimeout(() => {
-        callback();
-        cleanup();
-    });
-    if (typeof requestAnimationFrame === 'function') {
-        animationFrameId = requestAnimationFrame(() => {
-            callback();
-            cleanup();
-        });
-    }
-    return () => cleanup();
-}
-function scheduleCallbackWithMicrotask(callback) {
-    queueMicrotask(() => callback());
-    return () => {
-        callback = noop;
-    };
-}
-
-class AsyncStackTaggingZoneSpec {
-    createTask;
-    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
-        this.name = 'asyncStackTagging for ' + namePrefix;
-        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
-    }
-    // ZoneSpec implementation below.
-    name;
-    onScheduleTask(delegate, _current, target, task) {
-        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
-        return delegate.scheduleTask(target, task);
-    }
-    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
-        let ret;
-        if (task.consoleTask) {
-            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
-        }
-        else {
-            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
-        }
-        return ret;
-    }
-}
-
-const isAngularZoneProperty = 'isAngularZone';
-const angularZoneInstanceIdProperty = isAngularZoneProperty + '_ID';
-let ngZoneInstanceId = 0;
-/**
- * An injectable service for executing work inside or outside of the Angular zone.
- *
- * The most common use of this service is to optimize performance when starting a work consisting of
- * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
- * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
- * can reenter the Angular zone via {@link #run}.
- *
- * <!-- TODO: add/fix links to:
- *   - docs explaining zones and the use of zones in Angular and change-detection
- *   - link to runOutsideAngular/run (throughout this file!)
- *   -->
- *
- * @usageNotes
- * ### Example
- *
- * ```ts
- * import {Component, NgZone} from '@angular/core';
- * import {NgIf} from '@angular/common';
- *
- * @Component({
- *   selector: 'ng-zone-demo',
- *   template: `
- *     <h2>Demo: NgZone</h2>
- *
- *     <p>Progress: {{progress}}%</p>
- *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
- *
- *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
- *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
- *   `,
- * })
- * export class NgZoneDemo {
- *   progress: number = 0;
- *   label: string;
- *
- *   constructor(private _ngZone: NgZone) {}
- *
- *   // Loop inside the Angular zone
- *   // so the UI DOES refresh after each setTimeout cycle
- *   processWithinAngularZone() {
- *     this.label = 'inside';
- *     this.progress = 0;
- *     this._increaseProgress(() => console.log('Inside Done!'));
- *   }
- *
- *   // Loop outside of the Angular zone
- *   // so the UI DOES NOT refresh after each setTimeout cycle
- *   processOutsideOfAngularZone() {
- *     this.label = 'outside';
- *     this.progress = 0;
- *     this._ngZone.runOutsideAngular(() => {
- *       this._increaseProgress(() => {
- *         // reenter the Angular zone and display done
- *         this._ngZone.run(() => { console.log('Outside Done!'); });
- *       });
- *     });
- *   }
- *
- *   _increaseProgress(doneCallback: () => void) {
- *     this.progress += 1;
- *     console.log(`Current progress: ${this.progress}%`);
- *
- *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
- *     } else {
- *       doneCallback();
- *     }
- *   }
- * }
- * ```
- *
- * @publicApi
- */
-class NgZone {
-    hasPendingMacrotasks = false;
-    hasPendingMicrotasks = false;
-    /**
-     * Whether there are no outstanding microtasks or macrotasks.
-     */
-    isStable = true;
-    /**
-     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-     */
-    onUnstable = new EventEmitter(false);
-    /**
-     * Notifies when there is no more microtasks enqueued in the current VM Turn.
-     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-     * For this reason this event can fire multiple times per VM Turn.
-     */
-    onMicrotaskEmpty = new EventEmitter(false);
-    /**
-     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-     * implies we are about to relinquish VM turn.
-     * This event gets called just once.
-     */
-    onStable = new EventEmitter(false);
-    /**
-     * Notifies that an error has been delivered.
-     */
-    onError = new EventEmitter(false);
-    constructor(options) {
-        const { enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, scheduleInRootZone = SCHEDULE_IN_ROOT_ZONE_DEFAULT, } = options;
-        if (typeof Zone == 'undefined') {
-            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
-        }
-        Zone.assertZonePatched();
-        const self = this;
-        self._nesting = 0;
-        self._outer = self._inner = Zone.current;
-        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
-        // where the async operation is scheduled. For more details, refer
-        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
-        // And we only import this AsyncStackTaggingZoneSpec in development mode,
-        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
-        if (ngDevMode) {
-            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
-        }
-        if (Zone['TaskTrackingZoneSpec']) {
-            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']());
-        }
-        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
-            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
-        }
-        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
-        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
-        self.shouldCoalesceEventChangeDetection =
-            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
-        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
-        self.callbackScheduled = false;
-        self.scheduleInRootZone = scheduleInRootZone;
-        forkInnerZoneWithAngularBehavior(self);
-    }
-    /**
-      This method checks whether the method call happens within an Angular Zone instance.
-    */
-    static isInAngularZone() {
-        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
-        return typeof Zone !== 'undefined' && Zone.current.get(isAngularZoneProperty) === true;
-    }
-    /**
-      Assures that the method is called within the Angular Zone, otherwise throws an error.
-    */
-    static assertInAngularZone() {
-        if (!NgZone.isInAngularZone()) {
-            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
-        }
-    }
-    /**
-      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
-    */
-    static assertNotInAngularZone() {
-        if (NgZone.isInAngularZone()) {
-            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
-        }
-    }
-    /**
-     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
-     * the function.
-     *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    run(fn, applyThis, applyArgs) {
-        return this._inner.run(fn, applyThis, applyArgs);
-    }
-    /**
-     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
-     * returned by the function.
-     *
-     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    runTask(fn, applyThis, applyArgs, name) {
-        const zone = this._inner;
-        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
-        try {
-            return zone.runTask(task, applyThis, applyArgs);
-        }
-        finally {
-            zone.cancelTask(task);
-        }
-    }
-    /**
-     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
-     * rethrown.
-     */
-    runGuarded(fn, applyThis, applyArgs) {
-        return this._inner.runGuarded(fn, applyThis, applyArgs);
-    }
-    /**
-     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
-     * the function.
-     *
-     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
-     * work that
-     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * outside of the Angular zone.
-     *
-     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
-     */
-    runOutsideAngular(fn) {
-        return this._outer.run(fn);
-    }
-}
-const EMPTY_PAYLOAD = {};
-function checkStable(zone) {
-    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
-    // re-entry. The case is:
-    //
-    // @Component({...})
-    // export class AppComponent {
-    // constructor(private ngZone: NgZone) {
-    //   this.ngZone.onStable.subscribe(() => {
-    //     this.ngZone.run(() => console.log('stable'););
-    //   });
-    // }
-    //
-    // The onStable subscriber run another function inside ngZone
-    // which causes `checkStable()` re-entry.
-    // But this fix causes some issues in g3, so this fix will be
-    // launched in another PR.
-    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
-        try {
-            zone._nesting++;
-            zone.onMicrotaskEmpty.emit(null);
-        }
-        finally {
-            zone._nesting--;
-            if (!zone.hasPendingMicrotasks) {
-                try {
-                    zone.runOutsideAngular(() => zone.onStable.emit(null));
-                }
-                finally {
-                    zone.isStable = true;
-                }
-            }
-        }
-    }
-}
-function delayChangeDetectionForEvents(zone) {
-    /**
-     * We also need to check _nesting here
-     * Consider the following case with shouldCoalesceRunChangeDetection = true
-     *
-     * ngZone.run(() => {});
-     * ngZone.run(() => {});
-     *
-     * We want the two `ngZone.run()` only trigger one change detection
-     * when shouldCoalesceRunChangeDetection is true.
-     * And because in this case, change detection run in async way(requestAnimationFrame),
-     * so we also need to check the _nesting here to prevent multiple
-     * change detections.
-     */
-    if (zone.isCheckStableRunning || zone.callbackScheduled) {
-        return;
-    }
-    zone.callbackScheduled = true;
-    function scheduleCheckStable() {
-        scheduleCallbackWithRafRace(() => {
-            zone.callbackScheduled = false;
-            updateMicroTaskStatus(zone);
-            zone.isCheckStableRunning = true;
-            checkStable(zone);
-            zone.isCheckStableRunning = false;
-        });
-    }
-    if (zone.scheduleInRootZone) {
-        Zone.root.run(() => {
-            scheduleCheckStable();
-        });
-    }
-    else {
-        zone._outer.run(() => {
-            scheduleCheckStable();
-        });
-    }
-    updateMicroTaskStatus(zone);
-}
-function forkInnerZoneWithAngularBehavior(zone) {
-    const delayChangeDetectionForEventsDelegate = () => {
-        delayChangeDetectionForEvents(zone);
-    };
-    const instanceId = ngZoneInstanceId++;
-    zone._inner = zone._inner.fork({
-        name: 'angular',
-        properties: {
-            [isAngularZoneProperty]: true,
-            [angularZoneInstanceIdProperty]: instanceId,
-            [angularZoneInstanceIdProperty + instanceId]: true,
-        },
-        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
-            // Prevent triggering change detection when the flag is detected.
-            if (shouldBeIgnoredByZone(applyArgs)) {
-                return delegate.invokeTask(target, task, applyThis, applyArgs);
-            }
-            try {
-                onEnter(zone);
-                return delegate.invokeTask(target, task, applyThis, applyArgs);
-            }
-            finally {
-                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
-                    zone.shouldCoalesceRunChangeDetection) {
-                    delayChangeDetectionForEventsDelegate();
-                }
-                onLeave(zone);
-            }
-        },
-        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
-            try {
-                onEnter(zone);
-                return delegate.invoke(target, callback, applyThis, applyArgs, source);
-            }
-            finally {
-                if (zone.shouldCoalesceRunChangeDetection &&
-                    // Do not delay change detection when the task is the scheduler's tick.
-                    // We need to synchronously trigger the stability logic so that the
-                    // zone-based scheduler can prevent a duplicate ApplicationRef.tick
-                    // by first checking if the scheduler tick is running. This does seem a bit roundabout,
-                    // but we _do_ still want to trigger all the correct events when we exit the zone.run
-                    // (`onMicrotaskEmpty` and `onStable` _should_ emit; developers can have code which
-                    // relies on these events happening after change detection runs).
-                    // Note: `zone.callbackScheduled` is already in delayChangeDetectionForEventsDelegate
-                    // but is added here as well to prevent reads of applyArgs when not necessary
-                    !zone.callbackScheduled &&
-                    !isSchedulerTick(applyArgs)) {
-                    delayChangeDetectionForEventsDelegate();
-                }
-                onLeave(zone);
-            }
-        },
-        onHasTask: (delegate, current, target, hasTaskState) => {
-            delegate.hasTask(target, hasTaskState);
-            if (current === target) {
-                // We are only interested in hasTask events which originate from our zone
-                // (A child hasTask event is not interesting to us)
-                if (hasTaskState.change == 'microTask') {
-                    zone._hasPendingMicrotasks = hasTaskState.microTask;
-                    updateMicroTaskStatus(zone);
-                    checkStable(zone);
-                }
-                else if (hasTaskState.change == 'macroTask') {
-                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
-                }
-            }
-        },
-        onHandleError: (delegate, current, target, error) => {
-            delegate.handleError(target, error);
-            zone.runOutsideAngular(() => zone.onError.emit(error));
-            return false;
-        },
-    });
-}
-function updateMicroTaskStatus(zone) {
-    if (zone._hasPendingMicrotasks ||
-        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
-            zone.callbackScheduled === true)) {
-        zone.hasPendingMicrotasks = true;
-    }
-    else {
-        zone.hasPendingMicrotasks = false;
-    }
-}
-function onEnter(zone) {
-    zone._nesting++;
-    if (zone.isStable) {
-        zone.isStable = false;
-        zone.onUnstable.emit(null);
-    }
-}
-function onLeave(zone) {
-    zone._nesting--;
-    checkStable(zone);
-}
-/**
- * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
- * to framework to perform rendering.
- */
-class NoopNgZone {
-    hasPendingMicrotasks = false;
-    hasPendingMacrotasks = false;
-    isStable = true;
-    onUnstable = new EventEmitter();
-    onMicrotaskEmpty = new EventEmitter();
-    onStable = new EventEmitter();
-    onError = new EventEmitter();
-    run(fn, applyThis, applyArgs) {
-        return fn.apply(applyThis, applyArgs);
-    }
-    runGuarded(fn, applyThis, applyArgs) {
-        return fn.apply(applyThis, applyArgs);
-    }
-    runOutsideAngular(fn) {
-        return fn();
-    }
-    runTask(fn, applyThis, applyArgs, name) {
-        return fn.apply(applyThis, applyArgs);
-    }
-}
-function shouldBeIgnoredByZone(applyArgs) {
-    return hasApplyArgsData(applyArgs, '__ignore_ng_zone__');
-}
-function isSchedulerTick(applyArgs) {
-    return hasApplyArgsData(applyArgs, '__scheduler_tick__');
-}
-function hasApplyArgsData(applyArgs, key) {
-    if (!Array.isArray(applyArgs)) {
-        return false;
-    }
-    // We should only ever get 1 arg passed through to invokeTask.
-    // Short circuit here incase that behavior changes.
-    if (applyArgs.length !== 1) {
-        return false;
-    }
-    return applyArgs[0]?.data?.[key] === true;
-}
-function getNgZone(ngZoneToUse = 'zone.js', options) {
-    if (ngZoneToUse === 'noop') {
-        return new NoopNgZone();
-    }
-    if (ngZoneToUse === 'zone.js') {
-        return new NgZone(options);
-    }
-    return ngZoneToUse;
-}
-
-class AfterRenderManager {
-    impl = null;
-    execute() {
-        this.impl?.execute();
-    }
-    /** @nocollapse */
-    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
-        token: AfterRenderManager,
-        providedIn: 'root',
-        factory: () => new AfterRenderManager(),
-    });
-}
-const AFTER_RENDER_PHASES = /* @__PURE__ **/ (() => [
-    0 /* AfterRenderPhase.EarlyRead */,
-    1 /* AfterRenderPhase.Write */,
-    2 /* AfterRenderPhase.MixedReadWrite */,
-    3 /* AfterRenderPhase.Read */,
-])();
-class AfterRenderImpl {
-    ngZone = inject(NgZone);
-    scheduler = inject(ChangeDetectionScheduler);
-    errorHandler = inject(ErrorHandler, { optional: true });
-    /** Current set of active sequences. */
-    sequences = new Set();
-    /** Tracks registrations made during the current set of executions. */
-    deferredRegistrations = new Set();
-    /** Whether the `AfterRenderManager` is currently executing hooks. */
-    executing = false;
-    constructor() {
-        // Inject the tracing service to make sure it's initialized.
-        inject(TracingService, { optional: true });
-    }
-    /**
-     * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
-     * might be scheduled.
-     */
-    execute() {
-        const hasSequencesToExecute = this.sequences.size > 0;
-        if (hasSequencesToExecute) {
-            profiler(16 /* ProfilerEvent.AfterRenderHooksStart */);
-        }
-        this.executing = true;
-        for (const phase of AFTER_RENDER_PHASES) {
-            for (const sequence of this.sequences) {
-                if (sequence.erroredOrDestroyed || !sequence.hooks[phase]) {
-                    continue;
-                }
-                try {
-                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => {
-                        const hookFn = sequence.hooks[phase];
-                        const value = hookFn(sequence.pipelinedValue);
-                        return value;
-                    }, sequence.snapshot));
-                }
-                catch (err) {
-                    sequence.erroredOrDestroyed = true;
-                    this.errorHandler?.handleError(err);
-                }
-            }
-        }
-        this.executing = false;
-        // Cleanup step to reset sequence state and also collect one-shot sequences for removal.
-        for (const sequence of this.sequences) {
-            sequence.afterRun();
-            if (sequence.once) {
-                this.sequences.delete(sequence);
-                // Destroy the sequence so its on destroy callbacks can be cleaned up
-                // immediately, instead of waiting until the injector is destroyed.
-                sequence.destroy();
-            }
-        }
-        for (const sequence of this.deferredRegistrations) {
-            this.sequences.add(sequence);
-        }
-        if (this.deferredRegistrations.size > 0) {
-            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
-        }
-        this.deferredRegistrations.clear();
-        if (hasSequencesToExecute) {
-            profiler(17 /* ProfilerEvent.AfterRenderHooksEnd */);
-        }
-    }
-    register(sequence) {
-        const { view } = sequence;
-        if (view !== undefined) {
-            // Delay adding it to the manager, add it to the view instead.
-            (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
-            // Mark the view for traversal to ensure we eventually schedule the afterNextRender.
-            markAncestorsForTraversal(view);
-            view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
-        }
-        else if (!this.executing) {
-            this.addSequence(sequence);
-        }
-        else {
-            this.deferredRegistrations.add(sequence);
-        }
-    }
-    addSequence(sequence) {
-        this.sequences.add(sequence);
-        // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
-        // new render hook that needs to run.
-        this.scheduler.notify(7 /* NotificationSource.RenderHook */);
-    }
-    unregister(sequence) {
-        if (this.executing && this.sequences.has(sequence)) {
-            // We can't remove an `AfterRenderSequence` in the middle of iteration.
-            // Instead, mark it as destroyed so it doesn't run any more, and mark it as one-shot so it'll
-            // be removed at the end of the current execution.
-            sequence.erroredOrDestroyed = true;
-            sequence.pipelinedValue = undefined;
-            sequence.once = true;
-        }
-        else {
-            // It's safe to directly remove this sequence.
-            this.sequences.delete(sequence);
-            this.deferredRegistrations.delete(sequence);
-        }
-    }
-    maybeTrace(fn, snapshot) {
-        // Only trace the execution if the snapshot is defined.
-        return snapshot ? snapshot.run(TracingAction.AFTER_NEXT_RENDER, fn) : fn();
-    }
-    /** @nocollapse */
-    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
-        token: AfterRenderImpl,
-        providedIn: 'root',
-        factory: () => new AfterRenderImpl(),
-    });
-}
-class AfterRenderSequence {
-    impl;
-    hooks;
-    view;
-    once;
-    snapshot;
-    /**
-     * Whether this sequence errored or was destroyed during this execution, and hooks should no
-     * longer run for it.
-     */
-    erroredOrDestroyed = false;
-    /**
-     * The value returned by the last hook execution (if any), ready to be pipelined into the next
-     * one.
-     */
-    pipelinedValue = undefined;
-    unregisterOnDestroy;
-    constructor(impl, hooks, view, once, destroyRef, snapshot = null) {
-        this.impl = impl;
-        this.hooks = hooks;
-        this.view = view;
-        this.once = once;
-        this.snapshot = snapshot;
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
-    }
-    afterRun() {
-        this.erroredOrDestroyed = false;
-        this.pipelinedValue = undefined;
-        // Clear the tracing snapshot after the initial run. This snapshot only
-        // associates the initial run of the hook with the context that created it.
-        // Follow-up runs are independent of that initial context and have different
-        // triggers.
-        this.snapshot?.dispose();
-        this.snapshot = null;
-    }
-    destroy() {
-        this.impl.unregister(this);
-        this.unregisterOnDestroy?.();
-        const scheduled = this.view?.[AFTER_RENDER_SEQUENCES_TO_ADD];
-        if (scheduled) {
-            this.view[AFTER_RENDER_SEQUENCES_TO_ADD] = scheduled.filter((s) => s !== this);
-        }
-    }
-}
-
-function afterEveryRender(callbackOrSpec, options) {
-    ngDevMode &&
-        assertNotInReactiveContext(afterEveryRender, 'Call `afterEveryRender` outside of a reactive context. For example, schedule the render ' +
-            'callback inside the component constructor`.');
-    if (ngDevMode && !options?.injector) {
-        assertInInjectionContext(afterEveryRender);
-    }
-    const injector = options?.injector ?? inject(Injector);
-    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performanceMarkFeature('NgAfterRender');
-    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ false);
-}
-function afterNextRender(callbackOrSpec, options) {
-    !options?.injector && assertInInjectionContext(afterNextRender);
-    const injector = options?.injector ?? inject(Injector);
-    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performanceMarkFeature('NgAfterNextRender');
-    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ true);
-}
-function getHooks(callbackOrSpec) {
-    if (callbackOrSpec instanceof Function) {
-        return [undefined, undefined, /* MixedReadWrite */ callbackOrSpec, undefined];
-    }
-    else {
-        return [
-            callbackOrSpec.earlyRead,
-            callbackOrSpec.write,
-            callbackOrSpec.mixedReadWrite,
-            callbackOrSpec.read,
-        ];
-    }
-}
-/**
- * Shared implementation for `afterEveryRender` and `afterNextRender`.
- */
-function afterEveryRenderImpl(callbackOrSpec, injector, options, once) {
-    const manager = injector.get(AfterRenderManager);
-    // Lazily initialize the handler implementation, if necessary. This is so that it can be
-    // tree-shaken if `afterEveryRender` and `afterNextRender` aren't used.
-    manager.impl ??= injector.get(AfterRenderImpl);
-    const tracing = injector.get(TracingService, null, { optional: true });
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const viewContext = injector.get(ViewContext, null, { optional: true });
-    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec), viewContext?.view, once, destroyRef, tracing?.snapshot(null));
-    manager.impl.register(sequence);
-    return sequence;
-}
-/** `AfterRenderRef` that does nothing. */
-const NOOP_AFTER_RENDER_REF = {
-    destroy() { },
-};
-
-/**
- * Describes the state of defer block dependency loading.
- */
-var DeferDependenciesLoadingState;
-(function (DeferDependenciesLoadingState) {
-    /** Initial state, dependency loading is not yet triggered */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["NOT_STARTED"] = 0] = "NOT_STARTED";
-    /** Dependency loading is in progress */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 1] = "IN_PROGRESS";
-    /** Dependency loading has completed successfully */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 2] = "COMPLETE";
-    /** Dependency loading has failed */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
-})(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
-/** Slot index where `minimum` parameter value is stored. */
-const MINIMUM_SLOT = 0;
-/** Slot index where `after` parameter value is stored. */
-const LOADING_AFTER_SLOT = 1;
-/**
- * Describes the current state of this defer block instance.
- *
- * @publicApi
- */
-var DeferBlockState;
-(function (DeferBlockState) {
-    /** The placeholder block content is rendered */
-    DeferBlockState[DeferBlockState["Placeholder"] = 0] = "Placeholder";
-    /** The loading block content is rendered */
-    DeferBlockState[DeferBlockState["Loading"] = 1] = "Loading";
-    /** The main content block content is rendered */
-    DeferBlockState[DeferBlockState["Complete"] = 2] = "Complete";
-    /** The error block content is rendered */
-    DeferBlockState[DeferBlockState["Error"] = 3] = "Error";
-})(DeferBlockState || (DeferBlockState = {}));
-/**
- * Describes the initial state of this defer block instance.
- *
- * Note: this state is internal only and *must* be represented
- * with a number lower than any value in the `DeferBlockState` enum.
- */
-var DeferBlockInternalState;
-(function (DeferBlockInternalState) {
-    /** Initial state. Nothing is rendered yet. */
-    DeferBlockInternalState[DeferBlockInternalState["Initial"] = -1] = "Initial";
-})(DeferBlockInternalState || (DeferBlockInternalState = {}));
-const NEXT_DEFER_BLOCK_STATE = 0;
-// Note: it's *important* to keep the state in this slot, because this slot
-// is used by runtime logic to differentiate between LViews, LContainers and
-// other types (see `isLView` and `isLContainer` functions). In case of defer
-// blocks, this slot would always be a number.
-const DEFER_BLOCK_STATE = 1;
-const STATE_IS_FROZEN_UNTIL = 2;
-const LOADING_AFTER_CLEANUP_FN = 3;
-const TRIGGER_CLEANUP_FNS = 4;
-const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
-const SSR_UNIQUE_ID = 6;
-const SSR_BLOCK_STATE = 7;
-const ON_COMPLETE_FNS = 8;
-const HYDRATE_TRIGGER_CLEANUP_FNS = 9;
-/**
- * Options for configuring defer blocks behavior.
- * @publicApi
- */
-var DeferBlockBehavior;
-(function (DeferBlockBehavior) {
-    /**
-     * Manual triggering mode for defer blocks. Provides control over when defer blocks render
-     * and which state they render.
-     */
-    DeferBlockBehavior[DeferBlockBehavior["Manual"] = 0] = "Manual";
-    /**
-     * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
-     * This is the default behavior in test environments.
-     */
-    DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
-})(DeferBlockBehavior || (DeferBlockBehavior = {}));
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-/**
- * Registers a cleanup function associated with a prefetching trigger
- * or a regular trigger of a defer block.
- */
-function storeTriggerCleanupFn(type, lDetails, cleanupFn) {
-    const key = getCleanupFnKeyByType(type);
-    if (lDetails[key] === null) {
-        lDetails[key] = [];
-    }
-    lDetails[key].push(cleanupFn);
-}
-/**
- * Invokes registered cleanup functions either for prefetch or for regular triggers.
- */
-function invokeTriggerCleanupFns(type, lDetails) {
-    const key = getCleanupFnKeyByType(type);
-    const cleanupFns = lDetails[key];
-    if (cleanupFns !== null) {
-        for (const cleanupFn of cleanupFns) {
-            cleanupFn();
-        }
-        lDetails[key] = null;
-    }
-}
-/**
- * Invokes registered cleanup functions for prefetch, hydrate, and regular triggers.
- */
-function invokeAllTriggerCleanupFns(lDetails) {
-    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
-    invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
-    invokeTriggerCleanupFns(2 /* TriggerType.Hydrate */, lDetails);
-}
-function getCleanupFnKeyByType(type) {
-    let key = TRIGGER_CLEANUP_FNS;
-    if (type === 1 /* TriggerType.Prefetch */) {
-        key = PREFETCH_TRIGGER_CLEANUP_FNS;
-    }
-    else if (type === 2 /* TriggerType.Hydrate */) {
-        key = HYDRATE_TRIGGER_CLEANUP_FNS;
-    }
-    return key;
-}
-
-/**
- * Calculates a data slot index for defer block info (either static or
- * instance-specific), given an index of a defer instruction.
- */
-function getDeferBlockDataIndex(deferBlockIndex) {
-    // Instance state is located at the *next* position
-    // after the defer block slot in an LView or TView.data.
-    return deferBlockIndex + 1;
-}
-/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
-function getLDeferBlockDetails(lView, tNode) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return lView[slotIndex];
-}
-/** Stores a defer block instance state in LView. */
-function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    lView[slotIndex] = lDetails;
-}
-/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
-function getTDeferBlockDetails(tView, tNode) {
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return tView.data[slotIndex];
-}
-/** Stores a defer block static info in `TView.data`. */
-function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    tView.data[slotIndex] = deferBlockConfig;
-}
-function getTemplateIndexForState(newState, hostLView, tNode) {
-    const tView = hostLView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    switch (newState) {
-        case DeferBlockState.Complete:
-            return tDetails.primaryTmplIndex;
-        case DeferBlockState.Loading:
-            return tDetails.loadingTmplIndex;
-        case DeferBlockState.Error:
-            return tDetails.errorTmplIndex;
-        case DeferBlockState.Placeholder:
-            return tDetails.placeholderTmplIndex;
-        default:
-            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
-            return null;
-    }
-}
-/**
- * Returns a minimum amount of time that a given state should be rendered for,
- * taking into account `minimum` parameter value. If the `minimum` value is
- * not specified - returns `null`.
- */
-function getMinimumDurationForState(tDetails, currentState) {
-    if (currentState === DeferBlockState.Placeholder) {
-        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    else if (currentState === DeferBlockState.Loading) {
-        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    return null;
-}
-/** Retrieves the value of the `after` parameter on the @loading block. */
-function getLoadingBlockAfter(tDetails) {
-    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
-}
-/**
- * Adds downloaded dependencies into a directive or a pipe registry,
- * making sure that a dependency doesn't yet exist in the registry.
- */
-function addDepsToRegistry(currentDeps, newDeps) {
-    if (!currentDeps || currentDeps.length === 0) {
-        return newDeps;
-    }
-    const currentDepSet = new Set(currentDeps);
-    for (const dep of newDeps) {
-        currentDepSet.add(dep);
-    }
-    // If `currentDeps` is the same length, there were no new deps and can
-    // return the original array.
-    return currentDeps.length === currentDepSet.size ? currentDeps : Array.from(currentDepSet);
-}
-/** Retrieves a TNode that represents main content of a defer block. */
-function getPrimaryBlockTNode(tView, tDetails) {
-    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
-    return getTNode(tView, adjustedIndex);
-}
-/**
- * Asserts whether all dependencies for a defer block are loaded.
- * Always run this function (in dev mode) before rendering a defer
- * block in completed state.
- */
-function assertDeferredDependenciesLoaded(tDetails) {
-    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
-}
-/**
- * Determines if a given value matches the expected structure of a defer block
- *
- * We can safely rely on the primaryTmplIndex because every defer block requires
- * that a primary template exists. All the other template options are optional.
- */
-function isTDeferBlockDetails(value) {
-    return (value !== null &&
-        typeof value === 'object' &&
-        typeof value.primaryTmplIndex === 'number');
-}
-/**
- * Whether a given TNode represents a defer block.
- */
-function isDeferBlock(tView, tNode) {
-    let tDetails = null;
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    // Check if a slot index is in the reasonable range.
-    // Note: we do `-1` on the right border, since defer block details are stored
-    // in the `n+1` slot, see `getDeferBlockDataIndex` for more info.
-    if (HEADER_OFFSET < slotIndex && slotIndex < tView.bindingStartIndex) {
-        tDetails = getTDeferBlockDetails(tView, tNode);
-    }
-    return !!tDetails && isTDeferBlockDetails(tDetails);
-}
-/**
- * Tracks debugging information about a trigger.
- * @param tView TView in which the trigger is declared.
- * @param tNode TNode on which the trigger is declared.
- * @param textRepresentation Text representation of the trigger to be used for debugging purposes.
- */
-function trackTriggerForDebugging(tView, tNode, textRepresentation) {
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    tDetails.debug ??= {};
-    tDetails.debug.triggers ??= new Set();
-    tDetails.debug.triggers.add(textRepresentation);
-}
-
 /*!
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -4998,6 +3872,8 @@ class DeferEventEntry {
  * Registers an interaction trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is interacted with.
+ * @return cleanup function which removes trigger Element from interactionTriggers map
+ * and interaction event listeners from the trigger Element
  */
 function onInteraction(trigger, callback) {
     let entry = interactionTriggers.get(trigger);
@@ -5036,6 +3912,8 @@ function onInteraction(trigger, callback) {
  * Registers a hover trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is hovered over.
+ * @return cleanup function which removes trigger element from hoverTriggers map
+ * and removes hover interaction event listeners from the trigger element
  */
 function onHover(trigger, callback) {
     let entry = hoverTriggers.get(trigger);
@@ -5060,35 +3938,38 @@ function onHover(trigger, callback) {
     };
 }
 /**
+ * Used to create an IntersectionObserver instance.
+ * @return IntersectionObserver that is used by onViewport
+ */
+function createIntersectionObserver() {
+    return new IntersectionObserver((entries) => {
+        for (const current of entries) {
+            if (current.isIntersecting && viewportTriggers.has(current.target)) {
+                viewportTriggers.get(current.target).listener();
+            }
+        }
+    });
+}
+/**
  * Registers a viewport trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger comes into the viewport.
- * @param injector Injector that can be used by the trigger to resolve DI tokens.
+ * @param observerFactoryFn Factory function which returns an IntersectionObserver
+ * @return cleanup function which removes trigger Element from viewportTriggers map
+ * and tells the intersection observer to stop observing trigger Element and set
+ * intersectionObserver to null if there are no more Elements to observe
  */
-function onViewport(trigger, callback, injector) {
-    const ngZone = injector.get(NgZone);
+function onViewport(trigger, callback, observerFactoryFn) {
     let entry = viewportTriggers.get(trigger);
-    intersectionObserver =
-        intersectionObserver ||
-            ngZone.runOutsideAngular(() => {
-                return new IntersectionObserver((entries) => {
-                    for (const current of entries) {
-                        // Only invoke the callbacks if the specific element is intersecting.
-                        if (current.isIntersecting && viewportTriggers.has(current.target)) {
-                            ngZone.run(viewportTriggers.get(current.target).listener);
-                        }
-                    }
-                });
-            });
+    intersectionObserver = intersectionObserver || observerFactoryFn();
     if (!entry) {
         entry = new DeferEventEntry();
-        ngZone.runOutsideAngular(() => intersectionObserver.observe(trigger));
+        intersectionObserver.observe(trigger);
         viewportTriggers.set(trigger, entry);
         observedViewportElements++;
     }
     entry.callbacks.add(callback);
     return () => {
-        // It's possible that a different cleanup callback fully removed this element already.
         if (!viewportTriggers.has(trigger)) {
             return;
         }
@@ -5103,110 +3984,6 @@ function onViewport(trigger, callback, injector) {
             intersectionObserver = null;
         }
     };
-}
-/**
- * Helper function to get the LView in which a deferred block's trigger is rendered.
- * @param deferredHostLView LView in which the deferred block is defined.
- * @param deferredTNode TNode defining the deferred block.
- * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
- *   A negative value means that the trigger is inside the block's placeholder, while an undefined
- *   value means that the trigger is in the same LView as the deferred block.
- */
-function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
-    // The trigger is in the same view, we don't need to traverse.
-    if (walkUpTimes == null) {
-        return deferredHostLView;
-    }
-    // A positive value or zero means that the trigger is in a parent view.
-    if (walkUpTimes >= 0) {
-        return walkUpViews(walkUpTimes, deferredHostLView);
-    }
-    // If the value is negative, it means that the trigger is inside the placeholder.
-    const deferredContainer = deferredHostLView[deferredTNode.index];
-    ngDevMode && assertLContainer(deferredContainer);
-    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
-    // We need to null check, because the placeholder might not have been rendered yet.
-    if (ngDevMode && triggerLView !== null) {
-        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
-        assertLView(triggerLView);
-    }
-    return triggerLView;
-}
-/**
- * Gets the element that a deferred block's trigger is pointing to.
- * @param triggerLView LView in which the trigger is defined.
- * @param triggerIndex Index at which the trigger element should've been rendered.
- */
-function getTriggerElement(triggerLView, triggerIndex) {
-    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
-    ngDevMode && assertElement(element);
-    return element;
-}
-/**
- * Registers a DOM-node based trigger.
- * @param initialLView LView in which the defer block is rendered.
- * @param tNode TNode representing the defer block.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
- * @param registerFn Function that will register the DOM events.
- * @param callback Callback to be invoked when the trigger receives the event that should render
- *     the deferred block.
- * @param type Trigger type to distinguish between regular and prefetch triggers.
- */
-function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
-    const injector = initialLView[INJECTOR];
-    const zone = injector.get(NgZone);
-    let poll;
-    function pollDomTrigger() {
-        // If the initial view was destroyed, we don't need to do anything.
-        if (isDestroyed(initialLView)) {
-            poll.destroy();
-            return;
-        }
-        const lDetails = getLDeferBlockDetails(initialLView, tNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        // If the block was loaded before the trigger was resolved, we don't need to do anything.
-        if (renderedState !== DeferBlockInternalState.Initial &&
-            renderedState !== DeferBlockState.Placeholder) {
-            poll.destroy();
-            return;
-        }
-        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
-        // Keep polling until we resolve the trigger's LView.
-        if (!triggerLView) {
-            // Keep polling.
-            return;
-        }
-        poll.destroy();
-        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
-        if (isDestroyed(triggerLView)) {
-            return;
-        }
-        const element = getTriggerElement(triggerLView, triggerIndex);
-        const cleanup = registerFn(element, () => {
-            // `pollDomTrigger` runs outside the zone (because of `afterNextRender`) and registers its
-            // listeners outside the zone, so we jump back into the zone prior to running the callback.
-            zone.run(() => {
-                if (initialLView !== triggerLView) {
-                    removeLViewOnDestroy(triggerLView, cleanup);
-                }
-                callback();
-            });
-        }, injector);
-        // The trigger and deferred block might be in different LViews.
-        // For the main LView the cleanup would happen as a part of
-        // `storeTriggerCleanupFn` logic. For trigger LView we register
-        // a cleanup function there to remove event handlers in case an
-        // LView gets destroyed before a trigger is invoked.
-        if (initialLView !== triggerLView) {
-            storeLViewOnDestroy(triggerLView, cleanup);
-        }
-        storeTriggerCleanupFn(type, lDetails, cleanup);
-    }
-    // Begin polling for the trigger.
-    poll = afterEveryRender({ read: pollDomTrigger }, { injector });
 }
 
 const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
@@ -14609,7 +13386,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.0-rc.1+sha-c0f27a5']
+        ? ['ng-version', '20.0.0-rc.1+sha-0503362']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -15911,6 +14688,23 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
     return attrValue;
 }
 
+const markedFeatures = new Set();
+// tslint:disable:ban
+/**
+ * A guarded `performance.mark` for feature marking.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
+    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
+}
+
 /**
  * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
  * Provides access to the `NgModule` instance and related objects.
@@ -17060,6 +15854,1238 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
 }
 function enableLocateOrCreateContainerAnchorImpl() {
     _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
+}
+
+/**
+ * Describes the state of defer block dependency loading.
+ */
+var DeferDependenciesLoadingState;
+(function (DeferDependenciesLoadingState) {
+    /** Initial state, dependency loading is not yet triggered */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["NOT_STARTED"] = 0] = "NOT_STARTED";
+    /** Dependency loading is in progress */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 1] = "IN_PROGRESS";
+    /** Dependency loading has completed successfully */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 2] = "COMPLETE";
+    /** Dependency loading has failed */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
+})(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
+/** Slot index where `minimum` parameter value is stored. */
+const MINIMUM_SLOT = 0;
+/** Slot index where `after` parameter value is stored. */
+const LOADING_AFTER_SLOT = 1;
+/**
+ * Describes the current state of this defer block instance.
+ *
+ * @publicApi
+ */
+var DeferBlockState;
+(function (DeferBlockState) {
+    /** The placeholder block content is rendered */
+    DeferBlockState[DeferBlockState["Placeholder"] = 0] = "Placeholder";
+    /** The loading block content is rendered */
+    DeferBlockState[DeferBlockState["Loading"] = 1] = "Loading";
+    /** The main content block content is rendered */
+    DeferBlockState[DeferBlockState["Complete"] = 2] = "Complete";
+    /** The error block content is rendered */
+    DeferBlockState[DeferBlockState["Error"] = 3] = "Error";
+})(DeferBlockState || (DeferBlockState = {}));
+/**
+ * Describes the initial state of this defer block instance.
+ *
+ * Note: this state is internal only and *must* be represented
+ * with a number lower than any value in the `DeferBlockState` enum.
+ */
+var DeferBlockInternalState;
+(function (DeferBlockInternalState) {
+    /** Initial state. Nothing is rendered yet. */
+    DeferBlockInternalState[DeferBlockInternalState["Initial"] = -1] = "Initial";
+})(DeferBlockInternalState || (DeferBlockInternalState = {}));
+const NEXT_DEFER_BLOCK_STATE = 0;
+// Note: it's *important* to keep the state in this slot, because this slot
+// is used by runtime logic to differentiate between LViews, LContainers and
+// other types (see `isLView` and `isLContainer` functions). In case of defer
+// blocks, this slot would always be a number.
+const DEFER_BLOCK_STATE = 1;
+const STATE_IS_FROZEN_UNTIL = 2;
+const LOADING_AFTER_CLEANUP_FN = 3;
+const TRIGGER_CLEANUP_FNS = 4;
+const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
+const SSR_UNIQUE_ID = 6;
+const SSR_BLOCK_STATE = 7;
+const ON_COMPLETE_FNS = 8;
+const HYDRATE_TRIGGER_CLEANUP_FNS = 9;
+/**
+ * Options for configuring defer blocks behavior.
+ * @publicApi
+ */
+var DeferBlockBehavior;
+(function (DeferBlockBehavior) {
+    /**
+     * Manual triggering mode for defer blocks. Provides control over when defer blocks render
+     * and which state they render.
+     */
+    DeferBlockBehavior[DeferBlockBehavior["Manual"] = 0] = "Manual";
+    /**
+     * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
+     * This is the default behavior in test environments.
+     */
+    DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
+})(DeferBlockBehavior || (DeferBlockBehavior = {}));
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Registers a cleanup function associated with a prefetching trigger
+ * or a regular trigger of a defer block.
+ */
+function storeTriggerCleanupFn(type, lDetails, cleanupFn) {
+    const key = getCleanupFnKeyByType(type);
+    if (lDetails[key] === null) {
+        lDetails[key] = [];
+    }
+    lDetails[key].push(cleanupFn);
+}
+/**
+ * Invokes registered cleanup functions either for prefetch or for regular triggers.
+ */
+function invokeTriggerCleanupFns(type, lDetails) {
+    const key = getCleanupFnKeyByType(type);
+    const cleanupFns = lDetails[key];
+    if (cleanupFns !== null) {
+        for (const cleanupFn of cleanupFns) {
+            cleanupFn();
+        }
+        lDetails[key] = null;
+    }
+}
+/**
+ * Invokes registered cleanup functions for prefetch, hydrate, and regular triggers.
+ */
+function invokeAllTriggerCleanupFns(lDetails) {
+    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
+    invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
+    invokeTriggerCleanupFns(2 /* TriggerType.Hydrate */, lDetails);
+}
+function getCleanupFnKeyByType(type) {
+    let key = TRIGGER_CLEANUP_FNS;
+    if (type === 1 /* TriggerType.Prefetch */) {
+        key = PREFETCH_TRIGGER_CLEANUP_FNS;
+    }
+    else if (type === 2 /* TriggerType.Hydrate */) {
+        key = HYDRATE_TRIGGER_CLEANUP_FNS;
+    }
+    return key;
+}
+
+/** Actions that are supported by the tracing framework. */
+var TracingAction;
+(function (TracingAction) {
+    TracingAction[TracingAction["CHANGE_DETECTION"] = 0] = "CHANGE_DETECTION";
+    TracingAction[TracingAction["AFTER_NEXT_RENDER"] = 1] = "AFTER_NEXT_RENDER";
+})(TracingAction || (TracingAction = {}));
+/**
+ * Injection token for a `TracingService`, optionally provided.
+ */
+const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
+
+const SCHEDULE_IN_ROOT_ZONE_DEFAULT = false;
+
+class EventEmitter_ extends Subject {
+    // tslint:disable-next-line:require-internal-with-underscore
+    __isAsync;
+    destroyRef = undefined;
+    pendingTasks = undefined;
+    constructor(isAsync = false) {
+        super();
+        this.__isAsync = isAsync;
+        // Attempt to retrieve a `DestroyRef` and `PendingTasks` optionally.
+        // For backwards compatibility reasons, this cannot be required.
+        if (isInInjectionContext()) {
+            // `DestroyRef` is optional because it is not available in all contexts.
+            // But it is useful to properly complete the `EventEmitter` if used with `outputToObservable`
+            // when the component/directive is destroyed. (See `outputToObservable` for more details.)
+            this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
+            this.pendingTasks = inject(PendingTasksInternal, { optional: true }) ?? undefined;
+        }
+    }
+    emit(value) {
+        const prevConsumer = setActiveConsumer(null);
+        try {
+            super.next(value);
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    subscribe(observerOrNext, error, complete) {
+        let nextFn = observerOrNext;
+        let errorFn = error || (() => null);
+        let completeFn = complete;
+        if (observerOrNext && typeof observerOrNext === 'object') {
+            const observer = observerOrNext;
+            nextFn = observer.next?.bind(observer);
+            errorFn = observer.error?.bind(observer);
+            completeFn = observer.complete?.bind(observer);
+        }
+        if (this.__isAsync) {
+            errorFn = this.wrapInTimeout(errorFn);
+            if (nextFn) {
+                nextFn = this.wrapInTimeout(nextFn);
+            }
+            if (completeFn) {
+                completeFn = this.wrapInTimeout(completeFn);
+            }
+        }
+        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
+        if (observerOrNext instanceof Subscription) {
+            observerOrNext.add(sink);
+        }
+        return sink;
+    }
+    wrapInTimeout(fn) {
+        return (value) => {
+            const taskId = this.pendingTasks?.add();
+            setTimeout(() => {
+                try {
+                    fn(value);
+                }
+                finally {
+                    if (taskId !== undefined) {
+                        this.pendingTasks?.remove(taskId);
+                    }
+                }
+            });
+        };
+    }
+}
+/**
+ * @publicApi
+ */
+const EventEmitter = EventEmitter_;
+
+/**
+ * Gets a scheduling function that runs the callback after the first of setTimeout and
+ * requestAnimationFrame resolves.
+ *
+ * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
+ * This ensures that the create and update passes of a change detection always happen
+ * in the same frame.
+ * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
+ * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
+ * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
+ * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
+ * prevent it from being used alone. First, it does not run in background tabs, which would
+ * prevent Angular from initializing an application when opened in a new tab (for example).
+ * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
+ * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
+ * are written with several updates and asserts in the form of "update; await stable; assert;".
+ * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
+ * interaction into a single change detection. Importantly, this reduces view tree traversals when
+ * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
+ * then be interleaves between each event.
+ *
+ * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
+ * best of both worlds.
+ *
+ * @returns a function to cancel the scheduled callback
+ */
+function scheduleCallbackWithRafRace(callback) {
+    let timeoutId;
+    let animationFrameId;
+    function cleanup() {
+        callback = noop;
+        try {
+            if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
+                cancelAnimationFrame(animationFrameId);
+            }
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+            }
+        }
+        catch {
+            // Clearing/canceling can fail in tests due to the timing of functions being patched and unpatched
+            // Just ignore the errors - we protect ourselves from this issue by also making the callback a no-op.
+        }
+    }
+    timeoutId = setTimeout(() => {
+        callback();
+        cleanup();
+    });
+    if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(() => {
+            callback();
+            cleanup();
+        });
+    }
+    return () => cleanup();
+}
+function scheduleCallbackWithMicrotask(callback) {
+    queueMicrotask(() => callback());
+    return () => {
+        callback = noop;
+    };
+}
+
+class AsyncStackTaggingZoneSpec {
+    createTask;
+    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
+        this.name = 'asyncStackTagging for ' + namePrefix;
+        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
+    }
+    // ZoneSpec implementation below.
+    name;
+    onScheduleTask(delegate, _current, target, task) {
+        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
+        return delegate.scheduleTask(target, task);
+    }
+    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
+        let ret;
+        if (task.consoleTask) {
+            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
+        }
+        else {
+            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
+        }
+        return ret;
+    }
+}
+
+const isAngularZoneProperty = 'isAngularZone';
+const angularZoneInstanceIdProperty = isAngularZoneProperty + '_ID';
+let ngZoneInstanceId = 0;
+/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```ts
+ * import {Component, NgZone} from '@angular/core';
+ * import {NgIf} from '@angular/common';
+ *
+ * @Component({
+ *   selector: 'ng-zone-demo',
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+class NgZone {
+    hasPendingMacrotasks = false;
+    hasPendingMicrotasks = false;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    isStable = true;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    onUnstable = new EventEmitter(false);
+    /**
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    onMicrotaskEmpty = new EventEmitter(false);
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    onStable = new EventEmitter(false);
+    /**
+     * Notifies that an error has been delivered.
+     */
+    onError = new EventEmitter(false);
+    constructor(options) {
+        const { enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, scheduleInRootZone = SCHEDULE_IN_ROOT_ZONE_DEFAULT, } = options;
+        if (typeof Zone == 'undefined') {
+            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
+        }
+        Zone.assertZonePatched();
+        const self = this;
+        self._nesting = 0;
+        self._outer = self._inner = Zone.current;
+        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
+        // where the async operation is scheduled. For more details, refer
+        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
+        // And we only import this AsyncStackTaggingZoneSpec in development mode,
+        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
+        if (ngDevMode) {
+            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
+        }
+        if (Zone['TaskTrackingZoneSpec']) {
+            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']());
+        }
+        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
+            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
+        }
+        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
+        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
+        self.shouldCoalesceEventChangeDetection =
+            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
+        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
+        self.callbackScheduled = false;
+        self.scheduleInRootZone = scheduleInRootZone;
+        forkInnerZoneWithAngularBehavior(self);
+    }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
+    static isInAngularZone() {
+        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
+        return typeof Zone !== 'undefined' && Zone.current.get(isAngularZoneProperty) === true;
+    }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
+    static assertInAngularZone() {
+        if (!NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
+        }
+    }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
+    static assertNotInAngularZone() {
+        if (NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
+        }
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    run(fn, applyThis, applyArgs) {
+        return this._inner.run(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask(fn, applyThis, applyArgs, name) {
+        const zone = this._inner;
+        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        try {
+            return zone.runTask(task, applyThis, applyArgs);
+        }
+        finally {
+            zone.cancelTask(task);
+        }
+    }
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded(fn, applyThis, applyArgs) {
+        return this._inner.runGuarded(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular(fn) {
+        return this._outer.run(fn);
+    }
+}
+const EMPTY_PAYLOAD = {};
+function checkStable(zone) {
+    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+    // re-entry. The case is:
+    //
+    // @Component({...})
+    // export class AppComponent {
+    // constructor(private ngZone: NgZone) {
+    //   this.ngZone.onStable.subscribe(() => {
+    //     this.ngZone.run(() => console.log('stable'););
+    //   });
+    // }
+    //
+    // The onStable subscriber run another function inside ngZone
+    // which causes `checkStable()` re-entry.
+    // But this fix causes some issues in g3, so this fix will be
+    // launched in another PR.
+    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        try {
+            zone._nesting++;
+            zone.onMicrotaskEmpty.emit(null);
+        }
+        finally {
+            zone._nesting--;
+            if (!zone.hasPendingMicrotasks) {
+                try {
+                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                }
+                finally {
+                    zone.isStable = true;
+                }
+            }
+        }
+    }
+}
+function delayChangeDetectionForEvents(zone) {
+    /**
+     * We also need to check _nesting here
+     * Consider the following case with shouldCoalesceRunChangeDetection = true
+     *
+     * ngZone.run(() => {});
+     * ngZone.run(() => {});
+     *
+     * We want the two `ngZone.run()` only trigger one change detection
+     * when shouldCoalesceRunChangeDetection is true.
+     * And because in this case, change detection run in async way(requestAnimationFrame),
+     * so we also need to check the _nesting here to prevent multiple
+     * change detections.
+     */
+    if (zone.isCheckStableRunning || zone.callbackScheduled) {
+        return;
+    }
+    zone.callbackScheduled = true;
+    function scheduleCheckStable() {
+        scheduleCallbackWithRafRace(() => {
+            zone.callbackScheduled = false;
+            updateMicroTaskStatus(zone);
+            zone.isCheckStableRunning = true;
+            checkStable(zone);
+            zone.isCheckStableRunning = false;
+        });
+    }
+    if (zone.scheduleInRootZone) {
+        Zone.root.run(() => {
+            scheduleCheckStable();
+        });
+    }
+    else {
+        zone._outer.run(() => {
+            scheduleCheckStable();
+        });
+    }
+    updateMicroTaskStatus(zone);
+}
+function forkInnerZoneWithAngularBehavior(zone) {
+    const delayChangeDetectionForEventsDelegate = () => {
+        delayChangeDetectionForEvents(zone);
+    };
+    const instanceId = ngZoneInstanceId++;
+    zone._inner = zone._inner.fork({
+        name: 'angular',
+        properties: {
+            [isAngularZoneProperty]: true,
+            [angularZoneInstanceIdProperty]: instanceId,
+            [angularZoneInstanceIdProperty + instanceId]: true,
+        },
+        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+            // Prevent triggering change detection when the flag is detected.
+            if (shouldBeIgnoredByZone(applyArgs)) {
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            try {
+                onEnter(zone);
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            finally {
+                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
+                    zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+            try {
+                onEnter(zone);
+                return delegate.invoke(target, callback, applyThis, applyArgs, source);
+            }
+            finally {
+                if (zone.shouldCoalesceRunChangeDetection &&
+                    // Do not delay change detection when the task is the scheduler's tick.
+                    // We need to synchronously trigger the stability logic so that the
+                    // zone-based scheduler can prevent a duplicate ApplicationRef.tick
+                    // by first checking if the scheduler tick is running. This does seem a bit roundabout,
+                    // but we _do_ still want to trigger all the correct events when we exit the zone.run
+                    // (`onMicrotaskEmpty` and `onStable` _should_ emit; developers can have code which
+                    // relies on these events happening after change detection runs).
+                    // Note: `zone.callbackScheduled` is already in delayChangeDetectionForEventsDelegate
+                    // but is added here as well to prevent reads of applyArgs when not necessary
+                    !zone.callbackScheduled &&
+                    !isSchedulerTick(applyArgs)) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onHasTask: (delegate, current, target, hasTaskState) => {
+            delegate.hasTask(target, hasTaskState);
+            if (current === target) {
+                // We are only interested in hasTask events which originate from our zone
+                // (A child hasTask event is not interesting to us)
+                if (hasTaskState.change == 'microTask') {
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
+                    checkStable(zone);
+                }
+                else if (hasTaskState.change == 'macroTask') {
+                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
+                }
+            }
+        },
+        onHandleError: (delegate, current, target, error) => {
+            delegate.handleError(target, error);
+            zone.runOutsideAngular(() => zone.onError.emit(error));
+            return false;
+        },
+    });
+}
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
+            zone.callbackScheduled === true)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
+}
+function onEnter(zone) {
+    zone._nesting++;
+    if (zone.isStable) {
+        zone.isStable = false;
+        zone.onUnstable.emit(null);
+    }
+}
+function onLeave(zone) {
+    zone._nesting--;
+    checkStable(zone);
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+class NoopNgZone {
+    hasPendingMicrotasks = false;
+    hasPendingMacrotasks = false;
+    isStable = true;
+    onUnstable = new EventEmitter();
+    onMicrotaskEmpty = new EventEmitter();
+    onStable = new EventEmitter();
+    onError = new EventEmitter();
+    run(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runGuarded(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runOutsideAngular(fn) {
+        return fn();
+    }
+    runTask(fn, applyThis, applyArgs, name) {
+        return fn.apply(applyThis, applyArgs);
+    }
+}
+function shouldBeIgnoredByZone(applyArgs) {
+    return hasApplyArgsData(applyArgs, '__ignore_ng_zone__');
+}
+function isSchedulerTick(applyArgs) {
+    return hasApplyArgsData(applyArgs, '__scheduler_tick__');
+}
+function hasApplyArgsData(applyArgs, key) {
+    if (!Array.isArray(applyArgs)) {
+        return false;
+    }
+    // We should only ever get 1 arg passed through to invokeTask.
+    // Short circuit here incase that behavior changes.
+    if (applyArgs.length !== 1) {
+        return false;
+    }
+    return applyArgs[0]?.data?.[key] === true;
+}
+function getNgZone(ngZoneToUse = 'zone.js', options) {
+    if (ngZoneToUse === 'noop') {
+        return new NoopNgZone();
+    }
+    if (ngZoneToUse === 'zone.js') {
+        return new NgZone(options);
+    }
+    return ngZoneToUse;
+}
+
+class AfterRenderManager {
+    impl = null;
+    execute() {
+        this.impl?.execute();
+    }
+    /** @nocollapse */
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
+        token: AfterRenderManager,
+        providedIn: 'root',
+        factory: () => new AfterRenderManager(),
+    });
+}
+const AFTER_RENDER_PHASES = /* @__PURE__ **/ (() => [
+    0 /* AfterRenderPhase.EarlyRead */,
+    1 /* AfterRenderPhase.Write */,
+    2 /* AfterRenderPhase.MixedReadWrite */,
+    3 /* AfterRenderPhase.Read */,
+])();
+class AfterRenderImpl {
+    ngZone = inject(NgZone);
+    scheduler = inject(ChangeDetectionScheduler);
+    errorHandler = inject(ErrorHandler, { optional: true });
+    /** Current set of active sequences. */
+    sequences = new Set();
+    /** Tracks registrations made during the current set of executions. */
+    deferredRegistrations = new Set();
+    /** Whether the `AfterRenderManager` is currently executing hooks. */
+    executing = false;
+    constructor() {
+        // Inject the tracing service to make sure it's initialized.
+        inject(TracingService, { optional: true });
+    }
+    /**
+     * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
+     * might be scheduled.
+     */
+    execute() {
+        const hasSequencesToExecute = this.sequences.size > 0;
+        if (hasSequencesToExecute) {
+            profiler(16 /* ProfilerEvent.AfterRenderHooksStart */);
+        }
+        this.executing = true;
+        for (const phase of AFTER_RENDER_PHASES) {
+            for (const sequence of this.sequences) {
+                if (sequence.erroredOrDestroyed || !sequence.hooks[phase]) {
+                    continue;
+                }
+                try {
+                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => {
+                        const hookFn = sequence.hooks[phase];
+                        const value = hookFn(sequence.pipelinedValue);
+                        return value;
+                    }, sequence.snapshot));
+                }
+                catch (err) {
+                    sequence.erroredOrDestroyed = true;
+                    this.errorHandler?.handleError(err);
+                }
+            }
+        }
+        this.executing = false;
+        // Cleanup step to reset sequence state and also collect one-shot sequences for removal.
+        for (const sequence of this.sequences) {
+            sequence.afterRun();
+            if (sequence.once) {
+                this.sequences.delete(sequence);
+                // Destroy the sequence so its on destroy callbacks can be cleaned up
+                // immediately, instead of waiting until the injector is destroyed.
+                sequence.destroy();
+            }
+        }
+        for (const sequence of this.deferredRegistrations) {
+            this.sequences.add(sequence);
+        }
+        if (this.deferredRegistrations.size > 0) {
+            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
+        }
+        this.deferredRegistrations.clear();
+        if (hasSequencesToExecute) {
+            profiler(17 /* ProfilerEvent.AfterRenderHooksEnd */);
+        }
+    }
+    register(sequence) {
+        const { view } = sequence;
+        if (view !== undefined) {
+            // Delay adding it to the manager, add it to the view instead.
+            (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
+            // Mark the view for traversal to ensure we eventually schedule the afterNextRender.
+            markAncestorsForTraversal(view);
+            view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+        }
+        else if (!this.executing) {
+            this.addSequence(sequence);
+        }
+        else {
+            this.deferredRegistrations.add(sequence);
+        }
+    }
+    addSequence(sequence) {
+        this.sequences.add(sequence);
+        // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
+        // new render hook that needs to run.
+        this.scheduler.notify(7 /* NotificationSource.RenderHook */);
+    }
+    unregister(sequence) {
+        if (this.executing && this.sequences.has(sequence)) {
+            // We can't remove an `AfterRenderSequence` in the middle of iteration.
+            // Instead, mark it as destroyed so it doesn't run any more, and mark it as one-shot so it'll
+            // be removed at the end of the current execution.
+            sequence.erroredOrDestroyed = true;
+            sequence.pipelinedValue = undefined;
+            sequence.once = true;
+        }
+        else {
+            // It's safe to directly remove this sequence.
+            this.sequences.delete(sequence);
+            this.deferredRegistrations.delete(sequence);
+        }
+    }
+    maybeTrace(fn, snapshot) {
+        // Only trace the execution if the snapshot is defined.
+        return snapshot ? snapshot.run(TracingAction.AFTER_NEXT_RENDER, fn) : fn();
+    }
+    /** @nocollapse */
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
+        token: AfterRenderImpl,
+        providedIn: 'root',
+        factory: () => new AfterRenderImpl(),
+    });
+}
+class AfterRenderSequence {
+    impl;
+    hooks;
+    view;
+    once;
+    snapshot;
+    /**
+     * Whether this sequence errored or was destroyed during this execution, and hooks should no
+     * longer run for it.
+     */
+    erroredOrDestroyed = false;
+    /**
+     * The value returned by the last hook execution (if any), ready to be pipelined into the next
+     * one.
+     */
+    pipelinedValue = undefined;
+    unregisterOnDestroy;
+    constructor(impl, hooks, view, once, destroyRef, snapshot = null) {
+        this.impl = impl;
+        this.hooks = hooks;
+        this.view = view;
+        this.once = once;
+        this.snapshot = snapshot;
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    afterRun() {
+        this.erroredOrDestroyed = false;
+        this.pipelinedValue = undefined;
+        // Clear the tracing snapshot after the initial run. This snapshot only
+        // associates the initial run of the hook with the context that created it.
+        // Follow-up runs are independent of that initial context and have different
+        // triggers.
+        this.snapshot?.dispose();
+        this.snapshot = null;
+    }
+    destroy() {
+        this.impl.unregister(this);
+        this.unregisterOnDestroy?.();
+        const scheduled = this.view?.[AFTER_RENDER_SEQUENCES_TO_ADD];
+        if (scheduled) {
+            this.view[AFTER_RENDER_SEQUENCES_TO_ADD] = scheduled.filter((s) => s !== this);
+        }
+    }
+}
+
+function afterEveryRender(callbackOrSpec, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(afterEveryRender, 'Call `afterEveryRender` outside of a reactive context. For example, schedule the render ' +
+            'callback inside the component constructor`.');
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(afterEveryRender);
+    }
+    const injector = options?.injector ?? inject(Injector);
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performanceMarkFeature('NgAfterRender');
+    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ false);
+}
+function afterNextRender(callbackOrSpec, options) {
+    !options?.injector && assertInInjectionContext(afterNextRender);
+    const injector = options?.injector ?? inject(Injector);
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performanceMarkFeature('NgAfterNextRender');
+    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ true);
+}
+function getHooks(callbackOrSpec) {
+    if (callbackOrSpec instanceof Function) {
+        return [undefined, undefined, /* MixedReadWrite */ callbackOrSpec, undefined];
+    }
+    else {
+        return [
+            callbackOrSpec.earlyRead,
+            callbackOrSpec.write,
+            callbackOrSpec.mixedReadWrite,
+            callbackOrSpec.read,
+        ];
+    }
+}
+/**
+ * Shared implementation for `afterEveryRender` and `afterNextRender`.
+ */
+function afterEveryRenderImpl(callbackOrSpec, injector, options, once) {
+    const manager = injector.get(AfterRenderManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterEveryRender` and `afterNextRender` aren't used.
+    manager.impl ??= injector.get(AfterRenderImpl);
+    const tracing = injector.get(TracingService, null, { optional: true });
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const viewContext = injector.get(ViewContext, null, { optional: true });
+    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec), viewContext?.view, once, destroyRef, tracing?.snapshot(null));
+    manager.impl.register(sequence);
+    return sequence;
+}
+/** `AfterRenderRef` that does nothing. */
+const NOOP_AFTER_RENDER_REF = {
+    destroy() { },
+};
+
+/**
+ * Calculates a data slot index for defer block info (either static or
+ * instance-specific), given an index of a defer instruction.
+ */
+function getDeferBlockDataIndex(deferBlockIndex) {
+    // Instance state is located at the *next* position
+    // after the defer block slot in an LView or TView.data.
+    return deferBlockIndex + 1;
+}
+/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
+function getLDeferBlockDetails(lView, tNode) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return lView[slotIndex];
+}
+/** Stores a defer block instance state in LView. */
+function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    lView[slotIndex] = lDetails;
+}
+/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
+function getTDeferBlockDetails(tView, tNode) {
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return tView.data[slotIndex];
+}
+/** Stores a defer block static info in `TView.data`. */
+function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    tView.data[slotIndex] = deferBlockConfig;
+}
+function getTemplateIndexForState(newState, hostLView, tNode) {
+    const tView = hostLView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    switch (newState) {
+        case DeferBlockState.Complete:
+            return tDetails.primaryTmplIndex;
+        case DeferBlockState.Loading:
+            return tDetails.loadingTmplIndex;
+        case DeferBlockState.Error:
+            return tDetails.errorTmplIndex;
+        case DeferBlockState.Placeholder:
+            return tDetails.placeholderTmplIndex;
+        default:
+            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
+            return null;
+    }
+}
+/**
+ * Returns a minimum amount of time that a given state should be rendered for,
+ * taking into account `minimum` parameter value. If the `minimum` value is
+ * not specified - returns `null`.
+ */
+function getMinimumDurationForState(tDetails, currentState) {
+    if (currentState === DeferBlockState.Placeholder) {
+        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    else if (currentState === DeferBlockState.Loading) {
+        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    return null;
+}
+/** Retrieves the value of the `after` parameter on the @loading block. */
+function getLoadingBlockAfter(tDetails) {
+    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
+}
+/**
+ * Adds downloaded dependencies into a directive or a pipe registry,
+ * making sure that a dependency doesn't yet exist in the registry.
+ */
+function addDepsToRegistry(currentDeps, newDeps) {
+    if (!currentDeps || currentDeps.length === 0) {
+        return newDeps;
+    }
+    const currentDepSet = new Set(currentDeps);
+    for (const dep of newDeps) {
+        currentDepSet.add(dep);
+    }
+    // If `currentDeps` is the same length, there were no new deps and can
+    // return the original array.
+    return currentDeps.length === currentDepSet.size ? currentDeps : Array.from(currentDepSet);
+}
+/** Retrieves a TNode that represents main content of a defer block. */
+function getPrimaryBlockTNode(tView, tDetails) {
+    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
+    return getTNode(tView, adjustedIndex);
+}
+/**
+ * Asserts whether all dependencies for a defer block are loaded.
+ * Always run this function (in dev mode) before rendering a defer
+ * block in completed state.
+ */
+function assertDeferredDependenciesLoaded(tDetails) {
+    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
+}
+/**
+ * Determines if a given value matches the expected structure of a defer block
+ *
+ * We can safely rely on the primaryTmplIndex because every defer block requires
+ * that a primary template exists. All the other template options are optional.
+ */
+function isTDeferBlockDetails(value) {
+    return (value !== null &&
+        typeof value === 'object' &&
+        typeof value.primaryTmplIndex === 'number');
+}
+/**
+ * Whether a given TNode represents a defer block.
+ */
+function isDeferBlock(tView, tNode) {
+    let tDetails = null;
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    // Check if a slot index is in the reasonable range.
+    // Note: we do `-1` on the right border, since defer block details are stored
+    // in the `n+1` slot, see `getDeferBlockDataIndex` for more info.
+    if (HEADER_OFFSET < slotIndex && slotIndex < tView.bindingStartIndex) {
+        tDetails = getTDeferBlockDetails(tView, tNode);
+    }
+    return !!tDetails && isTDeferBlockDetails(tDetails);
+}
+/**
+ * Tracks debugging information about a trigger.
+ * @param tView TView in which the trigger is declared.
+ * @param tNode TNode on which the trigger is declared.
+ * @param textRepresentation Text representation of the trigger to be used for debugging purposes.
+ */
+function trackTriggerForDebugging(tView, tNode, textRepresentation) {
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    tDetails.debug ??= {};
+    tDetails.debug.triggers ??= new Set();
+    tDetails.debug.triggers.add(textRepresentation);
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Wrapper for onViewport trigger with angular specific Injector for resolving NgZone instance
+ * and creating an IntersectionObserver which can run outside of Angular zone.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger comes into the viewport.
+ * @param injector Injector that can be used by the trigger to resolve DI tokens.
+ */
+function onViewportWrapper(trigger, callback, injector) {
+    const ngZone = injector.get(NgZone);
+    return onViewport(trigger, () => ngZone.run(callback), () => ngZone.runOutsideAngular(() => createIntersectionObserver()));
+}
+/**
+ * Helper function to get the LView in which a deferred block's trigger is rendered.
+ * @param deferredHostLView LView in which the deferred block is defined.
+ * @param deferredTNode TNode defining the deferred block.
+ * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
+ *   A negative value means that the trigger is inside the block's placeholder, while an undefined
+ *   value means that the trigger is in the same LView as the deferred block.
+ */
+function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
+    // The trigger is in the same view, we don't need to traverse.
+    if (walkUpTimes == null) {
+        return deferredHostLView;
+    }
+    // A positive value or zero means that the trigger is in a parent view.
+    if (walkUpTimes >= 0) {
+        return walkUpViews(walkUpTimes, deferredHostLView);
+    }
+    // If the value is negative, it means that the trigger is inside the placeholder.
+    const deferredContainer = deferredHostLView[deferredTNode.index];
+    ngDevMode && assertLContainer(deferredContainer);
+    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
+    // We need to null check, because the placeholder might not have been rendered yet.
+    if (ngDevMode && triggerLView !== null) {
+        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
+        assertLView(triggerLView);
+    }
+    return triggerLView;
+}
+/**
+ * Gets the element that a deferred block's trigger is pointing to.
+ * @param triggerLView LView in which the trigger is defined.
+ * @param triggerIndex Index at which the trigger element should've been rendered.
+ */
+function getTriggerElement(triggerLView, triggerIndex) {
+    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
+    ngDevMode && assertElement(element);
+    return element;
+}
+/**
+ * Registers a DOM-node based trigger.
+ * @param initialLView LView in which the defer block is rendered.
+ * @param tNode TNode representing the defer block.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
+ * @param registerFn Function that will register the DOM events.
+ * @param callback Callback to be invoked when the trigger receives the event that should render
+ *     the deferred block.
+ * @param type Trigger type to distinguish between regular and prefetch triggers.
+ */
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
+    const injector = initialLView[INJECTOR];
+    const zone = injector.get(NgZone);
+    let poll;
+    function pollDomTrigger() {
+        // If the initial view was destroyed, we don't need to do anything.
+        if (isDestroyed(initialLView)) {
+            poll.destroy();
+            return;
+        }
+        const lDetails = getLDeferBlockDetails(initialLView, tNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        // If the block was loaded before the trigger was resolved, we don't need to do anything.
+        if (renderedState !== DeferBlockInternalState.Initial &&
+            renderedState !== DeferBlockState.Placeholder) {
+            poll.destroy();
+            return;
+        }
+        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
+        // Keep polling until we resolve the trigger's LView.
+        if (!triggerLView) {
+            // Keep polling.
+            return;
+        }
+        poll.destroy();
+        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
+        if (isDestroyed(triggerLView)) {
+            return;
+        }
+        const element = getTriggerElement(triggerLView, triggerIndex);
+        const cleanup = registerFn(element, () => {
+            // `pollDomTrigger` runs outside the zone (because of `afterNextRender`) and registers its
+            // listeners outside the zone, so we jump back into the zone prior to running the callback.
+            zone.run(() => {
+                if (initialLView !== triggerLView) {
+                    removeLViewOnDestroy(triggerLView, cleanup);
+                }
+                callback();
+            });
+        }, injector);
+        // The trigger and deferred block might be in different LViews.
+        // For the main LView the cleanup would happen as a part of
+        // `storeTriggerCleanupFn` logic. For trigger LView we register
+        // a cleanup function there to remove event handlers in case an
+        // LView gets destroyed before a trigger is invoked.
+        if (initialLView !== triggerLView) {
+            storeLViewOnDestroy(triggerLView, cleanup);
+        }
+        storeTriggerCleanupFn(type, lDetails, cleanup);
+    }
+    // Begin polling for the trigger.
+    poll = afterEveryRender({ read: pollDomTrigger }, { injector });
 }
 
 /**
@@ -20738,7 +20764,7 @@ function setViewportTriggers(injector, elementTriggers) {
     if (elementTriggers.length > 0) {
         const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
         for (let elementTrigger of elementTriggers) {
-            const cleanupFn = onViewport(elementTrigger.el, () => triggerHydrationFromBlockName(injector, elementTrigger.blockName), injector);
+            const cleanupFn = onViewportWrapper(elementTrigger.el, () => triggerHydrationFromBlockName(injector, elementTrigger.blockName), injector);
             registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
         }
     }
@@ -21306,7 +21332,7 @@ function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
     renderPlaceholder(lView, tNode);
     // Avoid adding event listeners when this instruction is invoked on the server.
     if (!(typeof ngServerMode !== 'undefined' && ngServerMode)) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(0 /* TriggerType.Regular */, lView, tNode), 0 /* TriggerType.Regular */);
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerDeferBlock(0 /* TriggerType.Regular */, lView, tNode), 0 /* TriggerType.Regular */);
     }
 }
 /**
@@ -21326,7 +21352,7 @@ function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
     }
 }
 /**
@@ -32152,4 +32178,4 @@ function getDebugNode(nativeNode) {
 }
 
 export { AFTER_RENDER_PHASES, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomProperty, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
-//# sourceMappingURL=debug_node-B-__oEPt.mjs.map
+//# sourceMappingURL=debug_node-Nc-zr65s.mjs.map
