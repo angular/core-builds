@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-6bf6dbc
+ * @license Angular v20.1.0-next.0+sha-46af023
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2889,6 +2889,10 @@ class Identifiers {
     static forwardRef = { name: 'forwardRef', moduleName: CORE };
     static resolveForwardRef = { name: 'resolveForwardRef', moduleName: CORE };
     static replaceMetadata = { name: 'ɵɵreplaceMetadata', moduleName: CORE };
+    static getReplaceMetadataURL = {
+        name: 'ɵɵgetReplaceMetadataURL',
+        moduleName: CORE,
+    };
     static ɵɵdefineInjectable = { name: 'ɵɵdefineInjectable', moduleName: CORE };
     static declareInjectable = { name: 'ɵɵngDeclareInjectable', moduleName: CORE };
     static InjectableDeclaration = {
@@ -32530,7 +32534,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-6bf6dbc');
+new Version('20.1.0-next.0+sha-46af023');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -32608,7 +32612,6 @@ exports.Identifiers = Identifiers;
 exports.IfBlock = IfBlock;
 exports.IfBlockBranch = IfBlockBranch;
 exports.ImplicitReceiver = ImplicitReceiver;
-exports.InstantiateExpr = InstantiateExpr;
 exports.Interpolation = Interpolation$1;
 exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
