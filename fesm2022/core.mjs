@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.1+sha-3b564e7
+ * @license Angular v20.0.0-rc.1+sha-0a82e58
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -387,6 +387,8 @@ function contentChildRequiredFn(locator, opts) {
  * }
  * ```
  *
+ * Note: By default `descendants` is `true` which means the query will not traverse all descendants in the same template.
+ *
  * @initializerApiFunction
  * @publicApi 19.0
  */
@@ -413,6 +415,8 @@ const contentChild = (() => {
  *   headerEl = contentChildren<ElementRef>('h');   // Signal<ReadonlyArray<ElementRef>>
  * }
  * ```
+ *
+ * Note: By default `descendants` is `false` which means the query will not traverse all descendants in the same template.
  *
  * @initializerApiFunction
  * @publicApi 19.0
@@ -622,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.0-rc.1+sha-3b564e7');
+const VERSION = new Version('20.0.0-rc.1+sha-0a82e58');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
