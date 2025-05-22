@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-687e018
+ * @license Angular v20.1.0-next.0+sha-396b543
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9790,8 +9790,11 @@ declare function getInjectorResolutionPath(injector: Injector): Injector[];
 
 interface DebugSignalGraphNode {
     kind: string;
+    id: string;
+    epoch: number;
     label?: string;
     value?: unknown;
+    debuggableFn?: () => unknown;
 }
 interface DebugSignalGraphEdge {
     /**
