@@ -1,21 +1,21 @@
 'use strict';
 /**
- * @license Angular v19.2.12+sha-0a51f36
+ * @license Angular v19.2.12+sha-2ae69f7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-CjGOIOBV.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-Czrg1gcB.cjs');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-5pyJrZ9G.cjs');
 var index$1 = require('./index-BIvVb6in.cjs');
 require('path');
-var project_paths = require('./project_paths-HwOMxrvM.cjs');
-var index = require('./index-DZhSIkG9.cjs');
+var project_paths = require('./project_paths-CyWVEsbT.cjs');
+var index = require('./index-BPhQoCcF.cjs');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-Celp9ClC.cjs');
+var apply_import_manager = require('./apply_import_manager-QQDfWa1Z.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./leading_space-D9nQ8UQC.cjs');
@@ -1263,9 +1263,8 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
         super();
         this.config = config;
     }
-    // Override the default program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
-        return project_paths.createBaseProgramInfo(tsconfigAbsPath, fs, {
+        return super.createProgram(tsconfigAbsPath, fs, {
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -1275,8 +1274,11 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
             strictTemplates: true,
         });
     }
-    prepareProgram(baseInfo) {
-        const info = super.prepareProgram(baseInfo);
+    /**
+     * Prepares the program for this migration with additional custom
+     * fields to allow for batch-mode testing.
+     */
+    _prepareProgram(info) {
         // Optional filter for testing. Allows for simulation of parallel execution
         // even if some tsconfig's have overlap due to sharing of TS sources.
         // (this is commonly not the case in g3 where deps are `.d.ts` files).
@@ -1285,7 +1287,7 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
         // Optional replacement filter. Allows parallel execution in case
         // some tsconfig's have overlap due to sharing of TS sources.
         // (this is commonly not the case in g3 where deps are `.d.ts` files).
-        !limitToRootNamesOnly || info.programAbsoluteRootFileNames.includes(f.fileName));
+        !limitToRootNamesOnly || info.__programAbsoluteRootFileNames.includes(f.fileName));
         return {
             ...info,
             sourceFiles: filteredSourceFiles,
@@ -1295,11 +1297,12 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
     prepareAnalysisDeps(info) {
         const analysisInfo = {
             ...info,
-            ...prepareAnalysisInfo(info.program, info.ngCompiler, info.programAbsoluteRootFileNames),
+            ...prepareAnalysisInfo(info.program, info.ngCompiler, info.__programAbsoluteRootFileNames),
         };
         return analysisInfo;
     }
     async analyze(info) {
+        info = this._prepareProgram(info);
         const analysisDeps = this.prepareAnalysisDeps(info);
         const knownInputs = new KnownInputs(info, this.config);
         const result = new MigrationResult();
@@ -1346,6 +1349,7 @@ class SignalInputMigration extends project_paths.TsurgeComplexMigration {
         return project_paths.confirmAsSerializable(convertToGlobalMeta(combinedData));
     }
     async migrate(globalMetadata, info, nonBatchData) {
+        info = this._prepareProgram(info);
         const knownInputs = nonBatchData?.knownInputs ?? new KnownInputs(info, this.config);
         const result = nonBatchData?.result ?? new MigrationResult();
         const host = nonBatchData?.host ?? createMigrationHost(info, this.config);

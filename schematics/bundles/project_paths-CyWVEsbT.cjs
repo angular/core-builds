@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.12+sha-0a51f36
+ * @license Angular v19.2.12+sha-2ae69f7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -480,7 +480,7 @@ function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
         ngCompiler: null,
         program,
         userOptions: tsconfig.options,
-        programAbsoluteRootFileNames: tsconfig.rootNames,
+        __programAbsoluteRootFileNames: tsconfig.rootNames,
         host: tsHost,
     };
 }
@@ -503,7 +503,7 @@ function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
         ngCompiler: ngtscProgram.compiler,
         program: ngtscProgram.getTsProgram(),
         userOptions: tsconfig.options,
-        programAbsoluteRootFileNames: tsconfig.rootNames,
+        __programAbsoluteRootFileNames: tsconfig.rootNames,
         host: tsHost,
     };
 }
@@ -538,6 +538,33 @@ function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
     }
     return createNgtscProgram(tsHost, tsconfig, optionOverrides);
 }
+/**
+ * Creates the {@link ProgramInfo} from the given base information.
+ *
+ * This function purely exists to support custom programs that are
+ * intended to be injected into Tsurge migrations. e.g. for language
+ * service refactorings.
+ */
+function getProgramInfoFromBaseInfo(baseInfo) {
+    const fullProgramSourceFiles = [...baseInfo.program.getSourceFiles()];
+    const sourceFiles = fullProgramSourceFiles.filter((f) => !f.isDeclarationFile &&
+        // Note `isShim` will work for the initial program, but for TCB programs, the shims are no longer annotated.
+        !checker.isShim(f) &&
+        !f.fileName.endsWith('.ngtypecheck.ts'));
+    // Sort it by length in reverse order (longest first). This speeds up lookups,
+    // since there's no need to keep going through the array once a match is found.
+    const sortedRootDirs = checker.getRootDirs(baseInfo.host, baseInfo.userOptions).sort((a, b) => b.length - a.length);
+    // TODO: Consider also following TS's logic here, finding the common source root.
+    // See: Program#getCommonSourceDirectory.
+    const primaryRoot = checker.absoluteFrom(baseInfo.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? baseInfo.program.getCurrentDirectory());
+    return {
+        ...baseInfo,
+        sourceFiles,
+        fullProgramSourceFiles,
+        sortedRootDirs,
+        projectRoot: primaryRoot,
+    };
+}
 
 /**
  * @private
@@ -549,37 +576,14 @@ function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
  */
 class TsurgeBaseMigration {
     /**
-     * Advanced Tsurge users can override this method, but most of the time,
-     * overriding {@link prepareProgram} is more desirable.
+     * Creates the TypeScript program for a given compilation unit.
      *
      * By default:
      *  - In 3P: Ngtsc programs are being created.
      *  - In 1P: Ngtsc or TS programs are created based on the Blaze target.
      */
-    createProgram(tsconfigAbsPath, fs, optionOverrides) {
-        return createBaseProgramInfo(tsconfigAbsPath, fs, optionOverrides);
-    }
-    // Optional function to prepare the base `ProgramInfo` even further,
-    // for the analyze and migrate phases. E.g. determining source files.
-    prepareProgram(info) {
-        const fullProgramSourceFiles = [...info.program.getSourceFiles()];
-        const sourceFiles = fullProgramSourceFiles.filter((f) => !f.isDeclarationFile &&
-            // Note `isShim` will work for the initial program, but for TCB programs, the shims are no longer annotated.
-            !checker.isShim(f) &&
-            !f.fileName.endsWith('.ngtypecheck.ts'));
-        // Sort it by length in reverse order (longest first). This speeds up lookups,
-        // since there's no need to keep going through the array once a match is found.
-        const sortedRootDirs = checker.getRootDirs(info.host, info.userOptions).sort((a, b) => b.length - a.length);
-        // TODO: Consider also following TS's logic here, finding the common source root.
-        // See: Program#getCommonSourceDirectory.
-        const primaryRoot = checker.absoluteFrom(info.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? info.program.getCurrentDirectory());
-        return {
-            ...info,
-            sourceFiles,
-            fullProgramSourceFiles,
-            sortedRootDirs,
-            projectRoot: primaryRoot,
-        };
+    createProgram(tsconfigAbsPath, fs, optionsOverride) {
+        return getProgramInfoFromBaseInfo(createBaseProgramInfo(tsconfigAbsPath, fs, optionsOverride));
     }
 }
 
@@ -635,10 +639,11 @@ async function runMigrationInDevkit(config) {
     const migration = config.getMigration(fs);
     const unitResults = [];
     const isFunnelMigration = migration instanceof TsurgeFunnelMigration;
+    const compilationUnitAssignments = new Map();
     for (const tsconfigPath of tsconfigPaths) {
         config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Analysis);
-        const baseInfo = migration.createProgram(tsconfigPath, fs);
-        const info = migration.prepareProgram(baseInfo);
+        const info = migration.createProgram(tsconfigPath, fs);
+        modifyProgramInfoToEnsureNonOverlappingFiles(tsconfigPath, info, compilationUnitAssignments);
         config.afterProgramCreation?.(info, fs, exports.MigrationStage.Analysis);
         config.beforeUnitAnalysis?.(tsconfigPath);
         unitResults.push(await migration.analyze(info));
@@ -658,8 +663,8 @@ async function runMigrationInDevkit(config) {
         replacements = [];
         for (const tsconfigPath of tsconfigPaths) {
             config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Migrate);
-            const baseInfo = migration.createProgram(tsconfigPath, fs);
-            const info = migration.prepareProgram(baseInfo);
+            const info = migration.createProgram(tsconfigPath, fs);
+            modifyProgramInfoToEnsureNonOverlappingFiles(tsconfigPath, info, compilationUnitAssignments);
             config.afterProgramCreation?.(info, fs, exports.MigrationStage.Migrate);
             const result = await migration.migrate(globalMeta, info);
             replacements.push(...result.replacements);
@@ -682,6 +687,31 @@ async function runMigrationInDevkit(config) {
         config.tree.commitUpdate(recorder);
     }
     config.whenDone?.(await migration.stats(globalMeta));
+}
+/**
+ * Special logic for devkit migrations. In the Angular CLI, or in 3P precisely,
+ * projects can have tsconfigs with overlapping source files. i.e. two tsconfigs
+ * like e.g. build or test include the same `ts.SourceFile` (`.ts`). Migrations
+ * should never have 2+ compilation units with overlapping source files as this
+ * can result in duplicated replacements or analysis— hence we only ever assign a
+ * source file to a compilation unit *once*.
+ *
+ * Note that this is fine as we expect Tsurge migrations to work together as
+ * isolated compilation units— so it shouldn't matter if worst case a `.ts`
+ * file ends up in the e.g. test program.
+ */
+function modifyProgramInfoToEnsureNonOverlappingFiles(tsconfigPath, info, compilationUnitAssignments) {
+    const sourceFiles = [];
+    for (const sf of info.sourceFiles) {
+        const assignment = compilationUnitAssignments.get(sf.fileName);
+        // File is already assigned to a different compilation unit.
+        if (assignment !== undefined && assignment !== tsconfigPath) {
+            continue;
+        }
+        compilationUnitAssignments.set(sf.fileName, tsconfigPath);
+        sourceFiles.push(sf);
+    }
+    info.sourceFiles = sourceFiles;
 }
 
 /** A text replacement for the given file. */
@@ -750,6 +780,5 @@ exports.TextUpdate = TextUpdate;
 exports.TsurgeComplexMigration = TsurgeComplexMigration;
 exports.TsurgeFunnelMigration = TsurgeFunnelMigration;
 exports.confirmAsSerializable = confirmAsSerializable;
-exports.createBaseProgramInfo = createBaseProgramInfo;
 exports.projectFile = projectFile;
 exports.runMigrationInDevkit = runMigrationInDevkit;

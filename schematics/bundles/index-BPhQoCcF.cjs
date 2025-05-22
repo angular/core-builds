@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.12+sha-0a51f36
+ * @license Angular v19.2.12+sha-2ae69f7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ require('os');
 var checker = require('./checker-5pyJrZ9G.cjs');
 var index = require('./index-BIvVb6in.cjs');
 require('path');
-var project_paths = require('./project_paths-HwOMxrvM.cjs');
+var project_paths = require('./project_paths-CyWVEsbT.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {

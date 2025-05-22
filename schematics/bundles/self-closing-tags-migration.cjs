@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.12+sha-0a51f36
+ * @license Angular v19.2.12+sha-2ae69f7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ require('os');
 var checker = require('./checker-5pyJrZ9G.cjs');
 require('./index-BIvVb6in.cjs');
 require('path');
-var project_paths = require('./project_paths-HwOMxrvM.cjs');
+var project_paths = require('./project_paths-CyWVEsbT.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('@angular-devkit/core');
@@ -345,11 +345,9 @@ class SelfClosingTagsMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable({ tagReplacements });
     }
     async combine(unitA, unitB) {
-        const uniqueReplacements = removeDuplicateReplacements([
-            ...unitA.tagReplacements,
-            ...unitB.tagReplacements,
-        ]);
-        return project_paths.confirmAsSerializable({ tagReplacements: uniqueReplacements });
+        return project_paths.confirmAsSerializable({
+            tagReplacements: [...unitA.tagReplacements, ...unitB.tagReplacements],
+        });
     }
     async globalMeta(combinedData) {
         const globalMeta = {
@@ -377,18 +375,6 @@ function prepareTextReplacement(file, replacement, start, end) {
         end: end,
         toInsert: replacement,
     }));
-}
-function removeDuplicateReplacements(replacements) {
-    const uniqueFiles = new Set();
-    const result = [];
-    for (const replacement of replacements) {
-        const fileId = replacement.file.id;
-        if (!uniqueFiles.has(fileId)) {
-            uniqueFiles.add(fileId);
-            result.push(replacement);
-        }
-    }
-    return result;
 }
 
 function migrate(options) {
