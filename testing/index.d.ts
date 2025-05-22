@@ -1,9 +1,10 @@
 /**
- * @license Angular v19.2.12+sha-e38cc41
+ * @license Angular v19.2.12+sha-a6d5479
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import * as _angular_core from '@angular/core';
 import { ɵDeferBlockDetails as _DeferBlockDetails, ɵDeferBlockState as _DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, ɵDeferBlockBehavior as _DeferBlockBehavior, InjectionToken, PlatformRef, Type, ProviderToken, InjectOptions, InjectFlags, NgModule, Component, Directive, Pipe } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from '../navigation_types.d-fAxd92YV.js';
@@ -688,5 +689,16 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispose(): void;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+declare class Log<T = string> {
+    logItems: T[];
+    constructor();
+    add(value: T): void;
+    fn(value: T): () => void;
+    clear(): void;
+    result(): string;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<Log<any>, never>;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<Log<any>>;
+}
+
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider };
 export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata };

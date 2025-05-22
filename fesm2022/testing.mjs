@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.12+sha-e38cc41
+ * @license Angular v19.2.12+sha-a6d5479
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3226,5 +3226,31 @@ class InternalNavigationResult {
     }
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, MetadataOverrider as ɵMetadataOverrider };
+class Log {
+    logItems;
+    constructor() {
+        this.logItems = [];
+    }
+    add(value) {
+        this.logItems.push(value);
+    }
+    fn(value) {
+        return () => {
+            this.logItems.push(value);
+        };
+    }
+    clear() {
+        this.logItems = [];
+    }
+    result() {
+        return this.logItems.join('; ');
+    }
+    static ɵfac = function Log_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Log)(); };
+    static ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: Log, factory: Log.ɵfac });
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(Log, [{
+        type: Injectable
+    }], () => [], null); })();
+
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
