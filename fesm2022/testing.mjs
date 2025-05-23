@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-e33444e
+ * @license Angular v20.1.0-next.0+sha-4356e85
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -408,9 +408,17 @@ class ComponentFixture {
 }
 
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
-const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
-const fakeAsyncTestModuleNotLoadedErrorMessage = `zone-testing.js is needed for the fakeAsync() test helper but could not be found.
-        Please make sure that your environment includes zone.js/testing`;
+function getFakeAsyncTestModule() {
+    return _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+}
+function withFakeAsyncTestModule(fn) {
+    const fakeAsyncTestModule = getFakeAsyncTestModule();
+    if (!fakeAsyncTestModule) {
+        throw new Error(`zone-testing.js is needed for the fakeAsync() test helper but could not be found.
+        Please make sure that your environment includes zone.js/testing`);
+    }
+    return fn(fakeAsyncTestModule);
+}
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -418,14 +426,11 @@ const fakeAsyncTestModuleNotLoadedErrorMessage = `zone-testing.js is needed for 
  * @publicApi
  */
 function resetFakeAsyncZone() {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.resetFakeAsyncZone();
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    withFakeAsyncTestModule((v) => v.resetFakeAsyncZone());
 }
 function resetFakeAsyncZoneIfExists() {
-    if (fakeAsyncTestModule && Zone['ProxyZoneSpec']?.isLoaded()) {
-        fakeAsyncTestModule.resetFakeAsyncZone();
+    if (getFakeAsyncTestModule() && Zone['ProxyZoneSpec']?.isLoaded()) {
+        getFakeAsyncTestModule().resetFakeAsyncZone();
     }
 }
 /**
@@ -453,10 +458,7 @@ function resetFakeAsyncZoneIfExists() {
  * @publicApi
  */
 function fakeAsync(fn, options) {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.fakeAsync(fn, options);
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    return withFakeAsyncTestModule((v) => v.fakeAsync(fn, options));
 }
 /**
  * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone.
@@ -525,10 +527,7 @@ function fakeAsync(fn, options) {
 function tick(millis = 0, tickOptions = {
     processNewMacroTasksSynchronously: true,
 }) {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.tick(millis, tickOptions);
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    return withFakeAsyncTestModule((m) => m.tick(millis, tickOptions));
 }
 /**
  * Flushes any pending microtasks and simulates the asynchronous passage of time for the timers in
@@ -542,10 +541,7 @@ function tick(millis = 0, tickOptions = {
  * @publicApi
  */
 function flush(maxTurns) {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.flush(maxTurns);
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    return withFakeAsyncTestModule((m) => m.flush(maxTurns));
 }
 /**
  * Discard all remaining periodic tasks.
@@ -553,10 +549,7 @@ function flush(maxTurns) {
  * @publicApi
  */
 function discardPeriodicTasks() {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.discardPeriodicTasks();
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    return withFakeAsyncTestModule((m) => m.discardPeriodicTasks());
 }
 /**
  * Flush any pending microtasks.
@@ -564,10 +557,7 @@ function discardPeriodicTasks() {
  * @publicApi
  */
 function flushMicrotasks() {
-    if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.flushMicrotasks();
-    }
-    throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+    return withFakeAsyncTestModule((m) => m.flushMicrotasks());
 }
 
 let _nextReferenceId = 0;
