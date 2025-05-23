@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0-rc.2+sha-f400e9c
+ * @license Angular v20.0.0-rc.2+sha-5bdd291
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -453,7 +453,7 @@ function resetFakeAsyncZoneIfExists() {
  * @publicApi
  */
 function fakeAsync(fn, options) {
-    if (fakeAsyncTestModule && Zone['ProxyZoneSpec']?.isLoaded()) {
+    if (fakeAsyncTestModule) {
         return fakeAsyncTestModule.fakeAsync(fn, options);
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
