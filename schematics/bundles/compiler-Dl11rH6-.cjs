@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.2+sha-d366a98
+ * @license Angular v20.0.0-rc.2+sha-2f1f6ee
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18139,8 +18139,7 @@ class _Scanner {
     length;
     peek = 0;
     index = -1;
-    literalInterpolationDepth = 0;
-    braceDepth = 0;
+    braceStack = [];
     constructor(input) {
         this.input = input;
         this.length = input.length;
@@ -18248,18 +18247,17 @@ class _Scanner {
         return newOperatorToken(start, this.index, str);
     }
     scanOpenBrace(start, code) {
-        this.braceDepth++;
+        this.braceStack.push('expression');
         this.advance();
         return newCharacterToken(start, this.index, code);
     }
     scanCloseBrace(start, code) {
         this.advance();
-        if (this.braceDepth === 0 && this.literalInterpolationDepth > 0) {
-            this.literalInterpolationDepth--;
+        const currentBrace = this.braceStack.pop();
+        if (currentBrace === 'interpolation') {
             this.tokens.push(newOperatorToken(start, this.index, '}'));
             return this.scanTemplateLiteralPart(this.index);
         }
-        this.braceDepth--;
         return newCharacterToken(start, this.index, code);
     }
     /**
@@ -18402,7 +18400,7 @@ class _Scanner {
                 this.advance();
                 // @ts-expect-error
                 if (this.peek === $LBRACE) {
-                    this.literalInterpolationDepth++;
+                    this.braceStack.push('interpolation');
                     this.tokens.push(new StringToken(start, dollar, buffer + this.input.substring(marker, dollar), StringTokenKind.TemplateLiteralPart));
                     this.advance();
                     return newOperatorToken(dollar, this.index, this.input.substring(dollar, this.index));
@@ -32147,7 +32145,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.0-rc.2+sha-d366a98');
+new Version('20.0.0-rc.2+sha-2f1f6ee');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

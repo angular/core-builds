@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.2+sha-d366a98
+ * @license Angular v20.0.0-rc.2+sha-2f1f6ee
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,14 +8,15 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-BbveLayx.cjs');
+var project_paths = require('./project_paths-BPBAn_A2.cjs');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-BAI95mTr.cjs');
-require('./compiler-C4LHhK1Q.cjs');
-var index = require('./index-B3j9aTWA.cjs');
+var checker = require('./checker-BHgMyU8j.cjs');
+require('./compiler-Dl11rH6-.cjs');
+var index = require('./index-DPvX-lSh.cjs');
 require('path');
-var apply_import_manager = require('./apply_import_manager-B7OorLZL.cjs');
+var apply_import_manager = require('./apply_import_manager-Bqnvtho4.cjs');
+var leading_space = require('./leading_space-D9nQ8UQC.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('fs');
@@ -195,6 +196,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         const { fullRemovals, partialRemovals, allRemovedIdentifiers } = removalLocations;
         const { importedSymbols, identifierCounts } = usages;
         const importManager = new checker.ImportManager();
+        const sourceText = sourceFile.getFullText();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {
             replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
@@ -204,13 +206,10 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             })));
         });
         // Filter out the unused identifiers from an array.
-        partialRemovals.forEach((toRemove, node) => {
-            const newNode = ts.factory.updateArrayLiteralExpression(node, node.elements.filter((el) => !toRemove.has(el)));
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
-                position: node.getStart(),
-                end: node.getEnd(),
-                toInsert: this.printer.printNode(ts.EmitHint.Unspecified, newNode, sourceFile),
-            })));
+        partialRemovals.forEach((toRemove, parent) => {
+            toRemove.forEach((node) => {
+                replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), getArrayElementRemovalUpdate(node, parent, sourceText)));
+            });
         });
         // Attempt to clean up unused import declarations. Note that this isn't foolproof, because we
         // do the matching based on identifier text, rather than going through the type checker which
@@ -229,6 +228,45 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
         });
         apply_import_manager.applyImportManagerChanges(importManager, replacements, [sourceFile], info);
     }
+}
+/** Generates a `TextUpdate` for the removal of an array element. */
+function getArrayElementRemovalUpdate(node, parent, sourceText) {
+    let position = node.getStart();
+    let end = node.getEnd();
+    let toInsert = '';
+    const whitespaceOrLineFeed = /\s/;
+    // Usually the way we'd remove the nodes would be to recreate the `parent` while excluding
+    // the nodes that should be removed. The problem with this is that it'll strip out comments
+    // inside the array which can have special meaning internally. We work around it by removing
+    // only the node's own offsets. This comes with another problem in that it won't remove the commas
+    // that separate array elements which in turn can look weird if left in place (e.g.
+    // `[One, Two, Three, Four]` can turn into `[One,,Four]`). To account for them, we start with the
+    // node's end offset and then expand it to include trailing commas, whitespace and line breaks.
+    for (let i = end; i < sourceText.length; i++) {
+        if (sourceText[i] === ',' || whitespaceOrLineFeed.test(sourceText[i])) {
+            end++;
+        }
+        else {
+            break;
+        }
+    }
+    // If we're removing the last element in the array, adjust the starting offset so that
+    // it includes the previous comma on the same line. This avoids turning something like
+    // `[One, Two, Three]` into `[One,]`. We only do this within the same like, because
+    // trailing comma at the end of the line is fine.
+    if (parent.elements[parent.elements.length - 1] === node) {
+        for (let i = position - 1; i >= 0; i--) {
+            if (sourceText[i] === ',' || sourceText[i] === ' ') {
+                position--;
+            }
+            else {
+                break;
+            }
+        }
+        // Replace the node with its leading whitespace to preserve the formatting.
+        toInsert = leading_space.getLeadingLineWhitespaceOfNode(node);
+    }
+    return new project_paths.TextUpdate({ position, end, toInsert });
 }
 
 function migrate() {
