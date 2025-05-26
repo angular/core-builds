@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.0.0-rc.2+sha-556413d
+ * @license Angular v20.0.0-rc.2+sha-d366a98
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-DPq1iS19.cjs');
+var compiler = require('./compiler-C4LHhK1Q.cjs');
 var ts = require('typescript');
-var checker = require('./checker-BF4XByNi.cjs');
+var checker = require('./checker-BAI95mTr.cjs');
 require('os');
-var index$1 = require('./index-Bc7o7LRp.cjs');
+var index$1 = require('./index-B3j9aTWA.cjs');
 require('path');
-var project_paths = require('./project_paths-BfIX0JUc.cjs');
-var apply_import_manager = require('./apply_import_manager-Cz1lXkWB.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-lqbTJO-O.cjs');
+var project_paths = require('./project_paths-BbveLayx.cjs');
+var apply_import_manager = require('./apply_import_manager-B7OorLZL.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-C9J2fqsy.cjs');
 var assert = require('assert');
-var index = require('./index-Ce1jRp3R.cjs');
+var index = require('./index-BL0VdxOc.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
