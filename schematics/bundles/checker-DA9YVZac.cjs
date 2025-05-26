@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-82327f2
+ * @license Angular v20.1.0-next.0+sha-04656d0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-CwIAJJiH.cjs');
+var compiler = require('./compiler-dFpiknpC.cjs');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -1004,7 +1004,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-5F4SPkyc.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DA9YVZac.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -6073,11 +6073,11 @@ function createImportReference(asTypeReference, ref) {
     }
 }
 
-const UNARY_OPERATORS$1 = new Map([
+const UNARY_OPERATORS$1 = /* @__PURE__ */ new Map([
     [compiler.UnaryOperator.Minus, '-'],
     [compiler.UnaryOperator.Plus, '+'],
 ]);
-const BINARY_OPERATORS$1 = new Map([
+const BINARY_OPERATORS$1 = /* @__PURE__ */ new Map([
     [compiler.BinaryOperator.And, '&&'],
     [compiler.BinaryOperator.Bigger, '>'],
     [compiler.BinaryOperator.BiggerEquals, '>='],
@@ -6797,12 +6797,12 @@ var PureAnnotation;
     PureAnnotation["CLOSURE"] = "* @pureOrBreakMyCode ";
     PureAnnotation["TERSER"] = "@__PURE__";
 })(PureAnnotation || (PureAnnotation = {}));
-const UNARY_OPERATORS = {
+const UNARY_OPERATORS = /* @__PURE__ */ (() => ({
     '+': ts.SyntaxKind.PlusToken,
     '-': ts.SyntaxKind.MinusToken,
     '!': ts.SyntaxKind.ExclamationToken,
-};
-const BINARY_OPERATORS = {
+}))();
+const BINARY_OPERATORS = /* @__PURE__ */ (() => ({
     '&&': ts.SyntaxKind.AmpersandAmpersandToken,
     '>': ts.SyntaxKind.GreaterThanToken,
     '>=': ts.SyntaxKind.GreaterThanEqualsToken,
@@ -6823,12 +6823,12 @@ const BINARY_OPERATORS = {
     '+': ts.SyntaxKind.PlusToken,
     '??': ts.SyntaxKind.QuestionQuestionToken,
     'in': ts.SyntaxKind.InKeyword,
-};
-const VAR_TYPES = {
+}))();
+const VAR_TYPES = /* @__PURE__ */ (() => ({
     'const': ts.NodeFlags.Const,
     'let': ts.NodeFlags.Let,
     'var': ts.NodeFlags.None,
-};
+}))();
 /**
  * A TypeScript flavoured implementation of the AstFactory.
  */

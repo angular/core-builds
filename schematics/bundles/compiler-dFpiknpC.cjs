@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-82327f2
+ * @license Angular v20.1.0-next.0+sha-04656d0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2565,116 +2565,8 @@ class Identifiers {
     };
     static elementContainer = { name: 'ɵɵelementContainer', moduleName: CORE };
     static styleMap = { name: 'ɵɵstyleMap', moduleName: CORE };
-    static styleMapInterpolate1 = {
-        name: 'ɵɵstyleMapInterpolate1',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate2 = {
-        name: 'ɵɵstyleMapInterpolate2',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate3 = {
-        name: 'ɵɵstyleMapInterpolate3',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate4 = {
-        name: 'ɵɵstyleMapInterpolate4',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate5 = {
-        name: 'ɵɵstyleMapInterpolate5',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate6 = {
-        name: 'ɵɵstyleMapInterpolate6',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate7 = {
-        name: 'ɵɵstyleMapInterpolate7',
-        moduleName: CORE,
-    };
-    static styleMapInterpolate8 = {
-        name: 'ɵɵstyleMapInterpolate8',
-        moduleName: CORE,
-    };
-    static styleMapInterpolateV = {
-        name: 'ɵɵstyleMapInterpolateV',
-        moduleName: CORE,
-    };
     static classMap = { name: 'ɵɵclassMap', moduleName: CORE };
-    static classMapInterpolate1 = {
-        name: 'ɵɵclassMapInterpolate1',
-        moduleName: CORE,
-    };
-    static classMapInterpolate2 = {
-        name: 'ɵɵclassMapInterpolate2',
-        moduleName: CORE,
-    };
-    static classMapInterpolate3 = {
-        name: 'ɵɵclassMapInterpolate3',
-        moduleName: CORE,
-    };
-    static classMapInterpolate4 = {
-        name: 'ɵɵclassMapInterpolate4',
-        moduleName: CORE,
-    };
-    static classMapInterpolate5 = {
-        name: 'ɵɵclassMapInterpolate5',
-        moduleName: CORE,
-    };
-    static classMapInterpolate6 = {
-        name: 'ɵɵclassMapInterpolate6',
-        moduleName: CORE,
-    };
-    static classMapInterpolate7 = {
-        name: 'ɵɵclassMapInterpolate7',
-        moduleName: CORE,
-    };
-    static classMapInterpolate8 = {
-        name: 'ɵɵclassMapInterpolate8',
-        moduleName: CORE,
-    };
-    static classMapInterpolateV = {
-        name: 'ɵɵclassMapInterpolateV',
-        moduleName: CORE,
-    };
     static styleProp = { name: 'ɵɵstyleProp', moduleName: CORE };
-    static stylePropInterpolate1 = {
-        name: 'ɵɵstylePropInterpolate1',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate2 = {
-        name: 'ɵɵstylePropInterpolate2',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate3 = {
-        name: 'ɵɵstylePropInterpolate3',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate4 = {
-        name: 'ɵɵstylePropInterpolate4',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate5 = {
-        name: 'ɵɵstylePropInterpolate5',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate6 = {
-        name: 'ɵɵstylePropInterpolate6',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate7 = {
-        name: 'ɵɵstylePropInterpolate7',
-        moduleName: CORE,
-    };
-    static stylePropInterpolate8 = {
-        name: 'ɵɵstylePropInterpolate8',
-        moduleName: CORE,
-    };
-    static stylePropInterpolateV = {
-        name: 'ɵɵstylePropInterpolateV',
-        moduleName: CORE,
-    };
     static interpolate = {
         name: 'ɵɵinterpolate',
         moduleName: CORE,
@@ -2830,46 +2722,6 @@ class Identifiers {
     static pipeBindV = { name: 'ɵɵpipeBindV', moduleName: CORE };
     static domProperty = { name: 'ɵɵdomProperty', moduleName: CORE };
     static property = { name: 'ɵɵproperty', moduleName: CORE };
-    static propertyInterpolate = {
-        name: 'ɵɵpropertyInterpolate',
-        moduleName: CORE,
-    };
-    static propertyInterpolate1 = {
-        name: 'ɵɵpropertyInterpolate1',
-        moduleName: CORE,
-    };
-    static propertyInterpolate2 = {
-        name: 'ɵɵpropertyInterpolate2',
-        moduleName: CORE,
-    };
-    static propertyInterpolate3 = {
-        name: 'ɵɵpropertyInterpolate3',
-        moduleName: CORE,
-    };
-    static propertyInterpolate4 = {
-        name: 'ɵɵpropertyInterpolate4',
-        moduleName: CORE,
-    };
-    static propertyInterpolate5 = {
-        name: 'ɵɵpropertyInterpolate5',
-        moduleName: CORE,
-    };
-    static propertyInterpolate6 = {
-        name: 'ɵɵpropertyInterpolate6',
-        moduleName: CORE,
-    };
-    static propertyInterpolate7 = {
-        name: 'ɵɵpropertyInterpolate7',
-        moduleName: CORE,
-    };
-    static propertyInterpolate8 = {
-        name: 'ɵɵpropertyInterpolate8',
-        moduleName: CORE,
-    };
-    static propertyInterpolateV = {
-        name: 'ɵɵpropertyInterpolateV',
-        moduleName: CORE,
-    };
     static i18n = { name: 'ɵɵi18n', moduleName: CORE };
     static i18nAttributes = { name: 'ɵɵi18nAttributes', moduleName: CORE };
     static i18nExp = { name: 'ɵɵi18nExp', moduleName: CORE };
@@ -11931,15 +11783,6 @@ const CHAIN_COMPATIBILITY = new Map([
     [Identifiers.listener, Identifiers.listener],
     [Identifiers.property, Identifiers.property],
     [Identifiers.styleProp, Identifiers.styleProp],
-    [Identifiers.stylePropInterpolate1, Identifiers.stylePropInterpolate1],
-    [Identifiers.stylePropInterpolate2, Identifiers.stylePropInterpolate2],
-    [Identifiers.stylePropInterpolate3, Identifiers.stylePropInterpolate3],
-    [Identifiers.stylePropInterpolate4, Identifiers.stylePropInterpolate4],
-    [Identifiers.stylePropInterpolate5, Identifiers.stylePropInterpolate5],
-    [Identifiers.stylePropInterpolate6, Identifiers.stylePropInterpolate6],
-    [Identifiers.stylePropInterpolate7, Identifiers.stylePropInterpolate7],
-    [Identifiers.stylePropInterpolate8, Identifiers.stylePropInterpolate8],
-    [Identifiers.stylePropInterpolateV, Identifiers.stylePropInterpolateV],
     [Identifiers.syntheticHostListener, Identifiers.syntheticHostListener],
     [Identifiers.syntheticHostProperty, Identifiers.syntheticHostProperty],
     [Identifiers.templateCreate, Identifiers.templateCreate],
@@ -12023,11 +11866,11 @@ function chainOperationsInList(opList) {
 }
 
 /**
- * Attribute interpolations of the form `[attr.foo]="{{foo}}""` should be "collapsed" into a plain
- * attribute instruction, instead of an `attributeInterpolate` instruction.
+ * Attribute or style interpolations of the form `[attr.foo]="{{foo}}""` should be "collapsed"
+ * into a plain instruction, instead of an interpolated one.
  *
- * (We cannot do this for singleton property interpolations, because `propertyInterpolate`
- * stringifies its expression.)
+ * (We cannot do this for singleton property interpolations,
+ * because they need to stringify their expressions)
  *
  * The reification step is also capable of performing this transformation, but doing it early in the
  * pipeline allows other phases to accurately know what instruction will be emitted.
@@ -12035,7 +11878,10 @@ function chainOperationsInList(opList) {
 function collapseSingletonInterpolations(job) {
     for (const unit of job.units) {
         for (const op of unit.update) {
-            const eligibleOpKind = op.kind === OpKind.Attribute;
+            const eligibleOpKind = op.kind === OpKind.Attribute ||
+                op.kind === OpKind.StyleProp ||
+                op.kind == OpKind.StyleMap ||
+                op.kind === OpKind.ClassMap;
             if (eligibleOpKind &&
                 op.expression instanceof Interpolation &&
                 op.expression.strings.length === 2 &&
@@ -18325,8 +18171,7 @@ class _Scanner {
     length;
     peek = 0;
     index = -1;
-    literalInterpolationDepth = 0;
-    braceDepth = 0;
+    braceStack = [];
     constructor(input) {
         this.input = input;
         this.length = input.length;
@@ -18434,18 +18279,17 @@ class _Scanner {
         return newOperatorToken(start, this.index, str);
     }
     scanOpenBrace(start, code) {
-        this.braceDepth++;
+        this.braceStack.push('expression');
         this.advance();
         return newCharacterToken(start, this.index, code);
     }
     scanCloseBrace(start, code) {
         this.advance();
-        if (this.braceDepth === 0 && this.literalInterpolationDepth > 0) {
-            this.literalInterpolationDepth--;
+        const currentBrace = this.braceStack.pop();
+        if (currentBrace === 'interpolation') {
             this.tokens.push(newOperatorToken(start, this.index, '}'));
             return this.scanTemplateLiteralPart(this.index);
         }
-        this.braceDepth--;
         return newCharacterToken(start, this.index, code);
     }
     /**
@@ -18588,7 +18432,7 @@ class _Scanner {
                 this.advance();
                 // @ts-expect-error
                 if (this.peek === $LBRACE) {
-                    this.literalInterpolationDepth++;
+                    this.braceStack.push('interpolation');
                     this.tokens.push(new StringToken(start, dollar, buffer + this.input.substring(marker, dollar), StringTokenKind.TemplateLiteralPart));
                     this.advance();
                     return newOperatorToken(dollar, this.index, this.input.substring(dollar, this.index));
@@ -23464,7 +23308,13 @@ function i18nAttributes(slot, i18nAttributesConfig) {
     return call(Identifiers.i18nAttributes, args, null);
 }
 function property(name, expression, sanitizer, sourceSpan) {
-    const args = [literal(name), expression];
+    const args = [literal(name)];
+    if (expression instanceof Interpolation) {
+        args.push(interpolationToExpression(expression, sourceSpan));
+    }
+    else {
+        args.push(expression);
+    }
     if (sanitizer !== null) {
         args.push(sanitizer);
     }
@@ -23477,8 +23327,14 @@ function twoWayProperty(name, expression, sanitizer, sourceSpan) {
     }
     return call(Identifiers.twoWayProperty, args, sourceSpan);
 }
-function attribute(name, expression, sanitizer, namespace) {
-    const args = [literal(name), expression];
+function attribute(name, expression, sanitizer, namespace, sourceSpan) {
+    const args = [literal(name)];
+    if (expression instanceof Interpolation) {
+        args.push(interpolationToExpression(expression, sourceSpan));
+    }
+    else {
+        args.push(expression);
+    }
     if (sanitizer !== null || namespace !== null) {
         args.push(sanitizer ?? literal(null));
     }
@@ -23488,7 +23344,13 @@ function attribute(name, expression, sanitizer, namespace) {
     return call(Identifiers.attribute, args, null);
 }
 function styleProp(name, expression, unit, sourceSpan) {
-    const args = [literal(name), expression];
+    const args = [literal(name)];
+    if (expression instanceof Interpolation) {
+        args.push(interpolationToExpression(expression, sourceSpan));
+    }
+    else {
+        args.push(expression);
+    }
     if (unit !== null) {
         args.push(literal(unit));
     }
@@ -23498,10 +23360,16 @@ function classProp(name, expression, sourceSpan) {
     return call(Identifiers.classProp, [literal(name), expression], sourceSpan);
 }
 function styleMap(expression, sourceSpan) {
-    return call(Identifiers.styleMap, [expression], sourceSpan);
+    const value = expression instanceof Interpolation
+        ? interpolationToExpression(expression, sourceSpan)
+        : expression;
+    return call(Identifiers.styleMap, [value], sourceSpan);
 }
 function classMap(expression, sourceSpan) {
-    return call(Identifiers.classMap, [expression], sourceSpan);
+    const value = expression instanceof Interpolation
+        ? interpolationToExpression(expression, sourceSpan)
+        : expression;
+    return call(Identifiers.classMap, [value], sourceSpan);
 }
 const PIPE_BINDINGS = [
     Identifiers.pipeBind1,
@@ -23528,35 +23396,6 @@ function i18nExp(expr, sourceSpan) {
 }
 function i18nApply(slot, sourceSpan) {
     return call(Identifiers.i18nApply, [literal(slot)], sourceSpan);
-}
-function propertyInterpolate(name, strings, expressions, sanitizer, sourceSpan) {
-    const interpolationArgs = collateInterpolationArgs(strings, expressions);
-    const extraArgs = [];
-    if (sanitizer !== null) {
-        extraArgs.push(sanitizer);
-    }
-    return callVariadicInstruction(PROPERTY_INTERPOLATE_CONFIG, [literal(name)], interpolationArgs, extraArgs, sourceSpan);
-}
-function attributeInterpolate(name, strings, expressions, sanitizer, namespace, sourceSpan) {
-    const interpolationArgs = collateInterpolationArgs(strings, expressions);
-    const value = callVariadicInstructionExpr(VALUE_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
-    return attribute(name, value, sanitizer, namespace);
-}
-function stylePropInterpolate(name, strings, expressions, unit, sourceSpan) {
-    const interpolationArgs = collateInterpolationArgs(strings, expressions);
-    const extraArgs = [];
-    if (unit !== null) {
-        extraArgs.push(literal(unit));
-    }
-    return callVariadicInstruction(STYLE_PROP_INTERPOLATE_CONFIG, [literal(name)], interpolationArgs, extraArgs, sourceSpan);
-}
-function styleMapInterpolate(strings, expressions, sourceSpan) {
-    const interpolationArgs = collateInterpolationArgs(strings, expressions);
-    return callVariadicInstruction(STYLE_MAP_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
-}
-function classMapInterpolate(strings, expressions, sourceSpan) {
-    const interpolationArgs = collateInterpolationArgs(strings, expressions);
-    return callVariadicInstruction(CLASS_MAP_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
 }
 function domProperty(name, expression, sanitizer, sourceSpan) {
     const args = [literal(name), expression];
@@ -23595,6 +23434,10 @@ function collateInterpolationArgs(strings, expressions) {
     }
     return interpolationArgs;
 }
+function interpolationToExpression(interpolation, sourceSpan) {
+    const interpolationArgs = collateInterpolationArgs(interpolation.strings, interpolation.expressions);
+    return callVariadicInstructionExpr(VALUE_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
+}
 function call(instruction, args, sourceSpan) {
     const expr = importExpr(instruction).callFn(args, sourceSpan);
     return createStatementOp(new ExpressionStatement(expr, sourceSpan));
@@ -23629,29 +23472,6 @@ const TEXT_INTERPOLATE_CONFIG = {
         return (n - 1) / 2;
     },
 };
-/**
- * `InterpolationConfig` for the `propertyInterpolate` instruction.
- */
-const PROPERTY_INTERPOLATE_CONFIG = {
-    constant: [
-        Identifiers.propertyInterpolate,
-        Identifiers.propertyInterpolate1,
-        Identifiers.propertyInterpolate2,
-        Identifiers.propertyInterpolate3,
-        Identifiers.propertyInterpolate4,
-        Identifiers.propertyInterpolate5,
-        Identifiers.propertyInterpolate6,
-        Identifiers.propertyInterpolate7,
-        Identifiers.propertyInterpolate8,
-    ],
-    variable: Identifiers.propertyInterpolateV,
-    mapping: (n) => {
-        if (n % 2 === 0) {
-            throw new Error(`Expected odd number of arguments`);
-        }
-        return (n - 1) / 2;
-    },
-};
 const VALUE_INTERPOLATE_CONFIG = {
     constant: [
         Identifiers.interpolate,
@@ -23665,75 +23485,6 @@ const VALUE_INTERPOLATE_CONFIG = {
         Identifiers.interpolate8,
     ],
     variable: Identifiers.interpolateV,
-    mapping: (n) => {
-        if (n % 2 === 0) {
-            throw new Error(`Expected odd number of arguments`);
-        }
-        return (n - 1) / 2;
-    },
-};
-/**
- * `InterpolationConfig` for the `stylePropInterpolate` instruction.
- */
-const STYLE_PROP_INTERPOLATE_CONFIG = {
-    constant: [
-        Identifiers.styleProp,
-        Identifiers.stylePropInterpolate1,
-        Identifiers.stylePropInterpolate2,
-        Identifiers.stylePropInterpolate3,
-        Identifiers.stylePropInterpolate4,
-        Identifiers.stylePropInterpolate5,
-        Identifiers.stylePropInterpolate6,
-        Identifiers.stylePropInterpolate7,
-        Identifiers.stylePropInterpolate8,
-    ],
-    variable: Identifiers.stylePropInterpolateV,
-    mapping: (n) => {
-        if (n % 2 === 0) {
-            throw new Error(`Expected odd number of arguments`);
-        }
-        return (n - 1) / 2;
-    },
-};
-/**
- * `InterpolationConfig` for the `styleMapInterpolate` instruction.
- */
-const STYLE_MAP_INTERPOLATE_CONFIG = {
-    constant: [
-        Identifiers.styleMap,
-        Identifiers.styleMapInterpolate1,
-        Identifiers.styleMapInterpolate2,
-        Identifiers.styleMapInterpolate3,
-        Identifiers.styleMapInterpolate4,
-        Identifiers.styleMapInterpolate5,
-        Identifiers.styleMapInterpolate6,
-        Identifiers.styleMapInterpolate7,
-        Identifiers.styleMapInterpolate8,
-    ],
-    variable: Identifiers.styleMapInterpolateV,
-    mapping: (n) => {
-        if (n % 2 === 0) {
-            throw new Error(`Expected odd number of arguments`);
-        }
-        return (n - 1) / 2;
-    },
-};
-/**
- * `InterpolationConfig` for the `classMapInterpolate` instruction.
- */
-const CLASS_MAP_INTERPOLATE_CONFIG = {
-    constant: [
-        Identifiers.classMap,
-        Identifiers.classMapInterpolate1,
-        Identifiers.classMapInterpolate2,
-        Identifiers.classMapInterpolate3,
-        Identifiers.classMapInterpolate4,
-        Identifiers.classMapInterpolate5,
-        Identifiers.classMapInterpolate6,
-        Identifiers.classMapInterpolate7,
-        Identifiers.classMapInterpolate8,
-    ],
-    variable: Identifiers.classMapInterpolateV,
     mapping: (n) => {
         if (n % 2 === 0) {
             throw new Error(`Expected odd number of arguments`);
@@ -24045,42 +23796,22 @@ function reifyUpdateOperations(_unit, ops) {
                 OpList.replace(op, advance(op.delta, op.sourceSpan));
                 break;
             case OpKind.Property:
-                if (op.expression instanceof Interpolation) {
-                    OpList.replace(op, propertyInterpolate(op.name, op.expression.strings, op.expression.expressions, op.sanitizer, op.sourceSpan));
-                }
-                else {
-                    OpList.replace(op, property(op.name, op.expression, op.sanitizer, op.sourceSpan));
-                }
+                OpList.replace(op, property(op.name, op.expression, op.sanitizer, op.sourceSpan));
                 break;
             case OpKind.TwoWayProperty:
                 OpList.replace(op, twoWayProperty(op.name, op.expression, op.sanitizer, op.sourceSpan));
                 break;
             case OpKind.StyleProp:
-                if (op.expression instanceof Interpolation) {
-                    OpList.replace(op, stylePropInterpolate(op.name, op.expression.strings, op.expression.expressions, op.unit, op.sourceSpan));
-                }
-                else {
-                    OpList.replace(op, styleProp(op.name, op.expression, op.unit, op.sourceSpan));
-                }
+                OpList.replace(op, styleProp(op.name, op.expression, op.unit, op.sourceSpan));
                 break;
             case OpKind.ClassProp:
                 OpList.replace(op, classProp(op.name, op.expression, op.sourceSpan));
                 break;
             case OpKind.StyleMap:
-                if (op.expression instanceof Interpolation) {
-                    OpList.replace(op, styleMapInterpolate(op.expression.strings, op.expression.expressions, op.sourceSpan));
-                }
-                else {
-                    OpList.replace(op, styleMap(op.expression, op.sourceSpan));
-                }
+                OpList.replace(op, styleMap(op.expression, op.sourceSpan));
                 break;
             case OpKind.ClassMap:
-                if (op.expression instanceof Interpolation) {
-                    OpList.replace(op, classMapInterpolate(op.expression.strings, op.expression.expressions, op.sourceSpan));
-                }
-                else {
-                    OpList.replace(op, classMap(op.expression, op.sourceSpan));
-                }
+                OpList.replace(op, classMap(op.expression, op.sourceSpan));
                 break;
             case OpKind.I18nExpression:
                 OpList.replace(op, i18nExp(op.expression, op.sourceSpan));
@@ -24092,12 +23823,7 @@ function reifyUpdateOperations(_unit, ops) {
                 OpList.replace(op, textInterpolate(op.interpolation.strings, op.interpolation.expressions, op.sourceSpan));
                 break;
             case OpKind.Attribute:
-                if (op.expression instanceof Interpolation) {
-                    OpList.replace(op, attributeInterpolate(op.name, op.expression.strings, op.expression.expressions, op.sanitizer, op.namespace, op.sourceSpan));
-                }
-                else {
-                    OpList.replace(op, attribute(op.name, op.expression, op.sanitizer, op.namespace));
-                }
+                OpList.replace(op, attribute(op.name, op.expression, op.sanitizer, op.namespace, op.sourceSpan));
                 break;
             case OpKind.DomProperty:
                 if (op.expression instanceof Interpolation) {
@@ -25595,13 +25321,20 @@ function countVariables(job) {
 function varsUsedByOp(op) {
     let slots;
     switch (op.kind) {
-        case OpKind.Property:
-        case OpKind.DomProperty:
         case OpKind.Attribute:
             // All of these bindings use 1 variable slot, plus 1 slot for every interpolated expression,
             // if any.
             slots = 1;
             if (op.expression instanceof Interpolation && !isSingletonInterpolation(op.expression)) {
+                slots += op.expression.expressions.length;
+            }
+            return slots;
+        case OpKind.Property:
+        case OpKind.DomProperty:
+            slots = 1;
+            // We need to assign a slot even for singleton interpolations, because the
+            // runtime needs to store both the raw value and the stringified one.
+            if (op.expression instanceof Interpolation) {
                 slots += op.expression.expressions.length;
             }
             return slots;
@@ -32532,7 +32265,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-82327f2');
+new Version('20.1.0-next.0+sha-04656d0');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //

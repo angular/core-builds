@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.1.0-next.0+sha-82327f2
+ * @license Angular v20.1.0-next.0+sha-04656d0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, throwCyclicDependencyError, stringifyForError, setInjectorProfilerContext, setInjectImplementation, enterDI, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, assertDirectiveDef, leaveDI, isRootView, assertTNodeForLView, runInInjectorProfilerContext, getCurrentTNode, getLView, throwProviderNotFoundError, assertNodeInjector, injectRootLimpMode, assertIndexInRange, TVIEW, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, INJECTOR$1 as INJECTOR, isComponentDef, isComponentHost, convertToBitFlags, NG_FACTORY_DEF, isForwardRef, getFactoryDef, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, unwrapRNode, assertLView, HOST, getLViewParent, CHILD_HEAD, NEXT, isLContainer, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, formatRuntimeError, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, concatStringsWithSpace, assertGreaterThanOrEqual, isInI18nBlock, getCurrentParentTNode, assertTNodeForTView, setCurrentTNode, assertNotSame, getCurrentTNodePlaceholderOk, isCurrentTNodeParent, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, isDestroyed, assertLContainer, MOVED_VIEWS, NATIVE, assertProjectionSlots, CONTAINER_HEADER_OFFSET, assertParentView, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, INTERNAL_APPLICATION_ERROR_HANDLER, setCurrentTNodeAsNotParent, assertHasParent, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, stringify, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, AFTER_RENDER_SEQUENCES_TO_ADD, markViewForRefresh, markAncestorsForTraversal, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, isRefreshingViews, CheckNoChangesMode, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, getSelectedTNode, nextBindingIndex, getTNode, debugStringifyTypeForError, getDirectiveDefOrThrow, ChangeDetectionScheduler, assertComponentType, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, incrementBindingIndex, getBindingIndex, keyValueArrayIndexOf, keyValueArrayGet, getCurrentDirectiveDef, keyValueArraySet, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler-B9TxQ-zk.mjs';
+import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, throwCyclicDependencyError, stringifyForError, setInjectorProfilerContext, setInjectImplementation, enterDI, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, assertDirectiveDef, leaveDI, isRootView, assertTNodeForLView, runInInjectorProfilerContext, getCurrentTNode, getLView, throwProviderNotFoundError, assertNodeInjector, injectRootLimpMode, assertIndexInRange, TVIEW, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, INJECTOR$1 as INJECTOR, isComponentDef, isComponentHost, convertToBitFlags, NG_FACTORY_DEF, isForwardRef, getFactoryDef, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, unwrapRNode, assertLView, HOST, getLViewParent, CHILD_HEAD, NEXT, isLContainer, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, formatRuntimeError, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, concatStringsWithSpace, assertGreaterThanOrEqual, isInI18nBlock, getCurrentParentTNode, assertTNodeForTView, setCurrentTNode, assertNotSame, getCurrentTNodePlaceholderOk, isCurrentTNodeParent, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, isDestroyed, assertLContainer, MOVED_VIEWS, NATIVE, assertProjectionSlots, CONTAINER_HEADER_OFFSET, assertParentView, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, INTERNAL_APPLICATION_ERROR_HANDLER, setCurrentTNodeAsNotParent, assertHasParent, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, stringify, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, AFTER_RENDER_SEQUENCES_TO_ADD, markViewForRefresh, markAncestorsForTraversal, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, isRefreshingViews, CheckNoChangesMode, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, getSelectedTNode, nextBindingIndex, getTNode, debugStringifyTypeForError, getDirectiveDefOrThrow, ChangeDetectionScheduler, assertComponentType, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler-B9TxQ-zk.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal-ePSl6jXn.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -13452,7 +13452,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.1.0-next.0+sha-82327f2']
+        ? ['ng-version', '20.1.0-next.0+sha-04656d0']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21484,1872 +21484,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     return ɵɵattribute;
 }
 
-/**
- * Create interpolation bindings with a variable number of expressions.
- *
- * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
- * Those are faster because there is no need to create an array of expressions and iterate over it.
- *
- * `values`:
- * - has static text at even indexes,
- * - has evaluated expressions at odd indexes.
- *
- * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- */
-function interpolationV(lView, values) {
-    ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
-    let isBindingUpdated = false;
-    let bindingIndex = getBindingIndex();
-    for (let i = 1; i < values.length; i += 2) {
-        // Check if bindings (odd indexes) have changed
-        isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
-    }
-    setBindingIndex(bindingIndex);
-    if (!isBindingUpdated) {
-        return NO_CHANGE;
-    }
-    // Build the updated content
-    let content = values[0];
-    for (let i = 1; i < values.length; i += 2) {
-        // The condition is to prevent an out-of-bound read
-        content += renderStringify(values[i]) + (i + 1 !== values.length ? values[i + 1] : '');
-    }
-    return content;
-}
-/**
- * Creates an interpolation binding with 1 expression.
- *
- * @param prefix static value used for concatenation only.
- * @param v0 value checked for change.
- * @param suffix static value used for concatenation only.
- */
-function interpolation1(lView, prefix, v0, suffix = '') {
-    const different = bindingUpdated(lView, nextBindingIndex(), v0);
-    return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 2 expressions.
- */
-function interpolation2(lView, prefix, v0, i0, v1, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    const different = bindingUpdated2(lView, bindingIndex, v0, v1);
-    incrementBindingIndex(2);
-    return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 3 expressions.
- */
-function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
-    incrementBindingIndex(3);
-    return different
-        ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix
-        : NO_CHANGE;
-}
-/**
- * Create an interpolation binding with 4 expressions.
- */
-function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    incrementBindingIndex(4);
-    return different
-        ? prefix +
-            renderStringify(v0) +
-            i0 +
-            renderStringify(v1) +
-            i1 +
-            renderStringify(v2) +
-            i2 +
-            renderStringify(v3) +
-            suffix
-        : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 5 expressions.
- */
-function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
-    incrementBindingIndex(5);
-    return different
-        ? prefix +
-            renderStringify(v0) +
-            i0 +
-            renderStringify(v1) +
-            i1 +
-            renderStringify(v2) +
-            i2 +
-            renderStringify(v3) +
-            i3 +
-            renderStringify(v4) +
-            suffix
-        : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 6 expressions.
- */
-function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
-    incrementBindingIndex(6);
-    return different
-        ? prefix +
-            renderStringify(v0) +
-            i0 +
-            renderStringify(v1) +
-            i1 +
-            renderStringify(v2) +
-            i2 +
-            renderStringify(v3) +
-            i3 +
-            renderStringify(v4) +
-            i4 +
-            renderStringify(v5) +
-            suffix
-        : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 7 expressions.
- */
-function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
-    incrementBindingIndex(7);
-    return different
-        ? prefix +
-            renderStringify(v0) +
-            i0 +
-            renderStringify(v1) +
-            i1 +
-            renderStringify(v2) +
-            i2 +
-            renderStringify(v3) +
-            i3 +
-            renderStringify(v4) +
-            i4 +
-            renderStringify(v5) +
-            i5 +
-            renderStringify(v6) +
-            suffix
-        : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 8 expressions.
- */
-function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix = '') {
-    const bindingIndex = getBindingIndex();
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
-    incrementBindingIndex(8);
-    return different
-        ? prefix +
-            renderStringify(v0) +
-            i0 +
-            renderStringify(v1) +
-            i1 +
-            renderStringify(v2) +
-            i2 +
-            renderStringify(v3) +
-            i3 +
-            renderStringify(v4) +
-            i4 +
-            renderStringify(v5) +
-            i5 +
-            renderStringify(v6) +
-            i6 +
-            renderStringify(v7) +
-            suffix
-        : NO_CHANGE;
-}
-
-function toTStylingRange(prev, next) {
-    ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((prev << 17 /* StylingRange.PREV_SHIFT */) | (next << 2 /* StylingRange.NEXT_SHIFT */));
-}
-function getTStylingRangePrev(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange >> 17 /* StylingRange.PREV_SHIFT */) & 32767 /* StylingRange.UNSIGNED_MASK */;
-}
-function getTStylingRangePrevDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) == 2 /* StylingRange.PREV_DUPLICATE */;
-}
-function setTStylingRangePrev(tStylingRange, previous) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & 131071 /* StylingRange.PREV_MASK */) |
-        (previous << 17 /* StylingRange.PREV_SHIFT */));
-}
-function setTStylingRangePrevDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange | 2 /* StylingRange.PREV_DUPLICATE */);
-}
-function getTStylingRangeNext(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 131068 /* StylingRange.NEXT_MASK */) >> 2 /* StylingRange.NEXT_SHIFT */;
-}
-function setTStylingRangeNext(tStylingRange, next) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & -131069 /* StylingRange.NEXT_MASK */) | //
-        (next << 2 /* StylingRange.NEXT_SHIFT */));
-}
-function getTStylingRangeNextDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 1 /* StylingRange.NEXT_DUPLICATE */) === 1 /* StylingRange.NEXT_DUPLICATE */;
-}
-function setTStylingRangeNextDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange | 1 /* StylingRange.NEXT_DUPLICATE */);
-}
-
-/**
- * Insert new `tStyleValue` at `TData` and link existing style bindings such that we maintain linked
- * list of styles and compute the duplicate flag.
- *
- * Note: this function is executed during `firstUpdatePass` only to populate the `TView.data`.
- *
- * The function works by keeping track of `tStylingRange` which contains two pointers pointing to
- * the head/tail of the template portion of the styles.
- *  - if `isHost === false` (we are template) then insertion is at tail of `TStylingRange`
- *  - if `isHost === true` (we are host binding) then insertion is at head of `TStylingRange`
- *
- * @param tData The `TData` to insert into.
- * @param tNode `TNode` associated with the styling element.
- * @param tStylingKey See `TStylingKey`.
- * @param index location of where `tStyleValue` should be stored (and linked into list.)
- * @param isHostBinding `true` if the insertion is for a `hostBinding`. (insertion is in front of
- *               template.)
- * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
- *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
- */
-function insertTStylingBinding(tData, tNode, tStylingKeyWithStatic, index, isHostBinding, isClassBinding) {
-    ngDevMode && assertFirstUpdatePass(getTView());
-    let tBindings = isClassBinding ? tNode.classBindings : tNode.styleBindings;
-    let tmplHead = getTStylingRangePrev(tBindings);
-    let tmplTail = getTStylingRangeNext(tBindings);
-    tData[index] = tStylingKeyWithStatic;
-    let isKeyDuplicateOfStatic = false;
-    let tStylingKey;
-    if (Array.isArray(tStylingKeyWithStatic)) {
-        // We are case when the `TStylingKey` contains static fields as well.
-        const staticKeyValueArray = tStylingKeyWithStatic;
-        tStylingKey = staticKeyValueArray[1]; // unwrap.
-        // We need to check if our key is present in the static so that we can mark it as duplicate.
-        if (tStylingKey === null ||
-            keyValueArrayIndexOf(staticKeyValueArray, tStylingKey) > 0) {
-            // tStylingKey is present in the statics, need to mark it as duplicate.
-            isKeyDuplicateOfStatic = true;
-        }
-    }
-    else {
-        tStylingKey = tStylingKeyWithStatic;
-    }
-    if (isHostBinding) {
-        // We are inserting host bindings
-        // If we don't have template bindings then `tail` is 0.
-        const hasTemplateBindings = tmplTail !== 0;
-        // This is important to know because that means that the `head` can't point to the first
-        // template bindings (there are none.) Instead the head points to the tail of the template.
-        if (hasTemplateBindings) {
-            // template head's "prev" will point to last host binding or to 0 if no host bindings yet
-            const previousNode = getTStylingRangePrev(tData[tmplHead + 1]);
-            tData[index + 1] = toTStylingRange(previousNode, tmplHead);
-            // if a host binding has already been registered, we need to update the next of that host
-            // binding to point to this one
-            if (previousNode !== 0) {
-                // We need to update the template-tail value to point to us.
-                tData[previousNode + 1] = setTStylingRangeNext(tData[previousNode + 1], index);
-            }
-            // The "previous" of the template binding head should point to this host binding
-            tData[tmplHead + 1] = setTStylingRangePrev(tData[tmplHead + 1], index);
-        }
-        else {
-            tData[index + 1] = toTStylingRange(tmplHead, 0);
-            // if a host binding has already been registered, we need to update the next of that host
-            // binding to point to this one
-            if (tmplHead !== 0) {
-                // We need to update the template-tail value to point to us.
-                tData[tmplHead + 1] = setTStylingRangeNext(tData[tmplHead + 1], index);
-            }
-            // if we don't have template, the head points to template-tail, and needs to be advanced.
-            tmplHead = index;
-        }
-    }
-    else {
-        // We are inserting in template section.
-        // We need to set this binding's "previous" to the current template tail
-        tData[index + 1] = toTStylingRange(tmplTail, 0);
-        ngDevMode &&
-            assertEqual(tmplHead !== 0 && tmplTail === 0, false, 'Adding template bindings after hostBindings is not allowed.');
-        if (tmplHead === 0) {
-            tmplHead = index;
-        }
-        else {
-            // We need to update the previous value "next" to point to this binding
-            tData[tmplTail + 1] = setTStylingRangeNext(tData[tmplTail + 1], index);
-        }
-        tmplTail = index;
-    }
-    // Now we need to update / compute the duplicates.
-    // Starting with our location search towards head (least priority)
-    if (isKeyDuplicateOfStatic) {
-        tData[index + 1] = setTStylingRangePrevDuplicate(tData[index + 1]);
-    }
-    markDuplicates(tData, tStylingKey, index, true);
-    markDuplicates(tData, tStylingKey, index, false);
-    markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding);
-    tBindings = toTStylingRange(tmplHead, tmplTail);
-    if (isClassBinding) {
-        tNode.classBindings = tBindings;
-    }
-    else {
-        tNode.styleBindings = tBindings;
-    }
-}
-/**
- * Look into the residual styling to see if the current `tStylingKey` is duplicate of residual.
- *
- * @param tNode `TNode` where the residual is stored.
- * @param tStylingKey `TStylingKey` to store.
- * @param tData `TData` associated with the current `LView`.
- * @param index location of where `tStyleValue` should be stored (and linked into list.)
- * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
- *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
- */
-function markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding) {
-    const residual = isClassBinding ? tNode.residualClasses : tNode.residualStyles;
-    if (residual != null /* or undefined */ &&
-        typeof tStylingKey == 'string' &&
-        keyValueArrayIndexOf(residual, tStylingKey) >= 0) {
-        // We have duplicate in the residual so mark ourselves as duplicate.
-        tData[index + 1] = setTStylingRangeNextDuplicate(tData[index + 1]);
-    }
-}
-/**
- * Marks `TStyleValue`s as duplicates if another style binding in the list has the same
- * `TStyleValue`.
- *
- * NOTE: this function is intended to be called twice once with `isPrevDir` set to `true` and once
- * with it set to `false` to search both the previous as well as next items in the list.
- *
- * No duplicate case
- * ```
- *   [style.color]
- *   [style.width.px] <<- index
- *   [style.height.px]
- * ```
- *
- * In the above case adding `[style.width.px]` to the existing `[style.color]` produces no
- * duplicates because `width` is not found in any other part of the linked list.
- *
- * Duplicate case
- * ```
- *   [style.color]
- *   [style.width.em]
- *   [style.width.px] <<- index
- * ```
- * In the above case adding `[style.width.px]` will produce a duplicate with `[style.width.em]`
- * because `width` is found in the chain.
- *
- * Map case 1
- * ```
- *   [style.width.px]
- *   [style.color]
- *   [style]  <<- index
- * ```
- * In the above case adding `[style]` will produce a duplicate with any other bindings because
- * `[style]` is a Map and as such is fully dynamic and could produce `color` or `width`.
- *
- * Map case 2
- * ```
- *   [style]
- *   [style.width.px]
- *   [style.color]  <<- index
- * ```
- * In the above case adding `[style.color]` will produce a duplicate because there is already a
- * `[style]` binding which is a Map and as such is fully dynamic and could produce `color` or
- * `width`.
- *
- * NOTE: Once `[style]` (Map) is added into the system all things are mapped as duplicates.
- * NOTE: We use `style` as example, but same logic is applied to `class`es as well.
- *
- * @param tData `TData` where the linked list is stored.
- * @param tStylingKey `TStylingKeyPrimitive` which contains the value to compare to other keys in
- *        the linked list.
- * @param index Starting location in the linked list to search from
- * @param isPrevDir Direction.
- *        - `true` for previous (lower priority);
- *        - `false` for next (higher priority).
- */
-function markDuplicates(tData, tStylingKey, index, isPrevDir) {
-    const tStylingAtIndex = tData[index + 1];
-    const isMap = tStylingKey === null;
-    let cursor = isPrevDir
-        ? getTStylingRangePrev(tStylingAtIndex)
-        : getTStylingRangeNext(tStylingAtIndex);
-    let foundDuplicate = false;
-    // We keep iterating as long as we have a cursor
-    // AND either:
-    // - we found what we are looking for, OR
-    // - we are a map in which case we have to continue searching even after we find what we were
-    //   looking for since we are a wild card and everything needs to be flipped to duplicate.
-    while (cursor !== 0 && (foundDuplicate === false || isMap)) {
-        ngDevMode && assertIndexInRange(tData, cursor);
-        const tStylingValueAtCursor = tData[cursor];
-        const tStyleRangeAtCursor = tData[cursor + 1];
-        if (isStylingMatch(tStylingValueAtCursor, tStylingKey)) {
-            foundDuplicate = true;
-            tData[cursor + 1] = isPrevDir
-                ? setTStylingRangeNextDuplicate(tStyleRangeAtCursor)
-                : setTStylingRangePrevDuplicate(tStyleRangeAtCursor);
-        }
-        cursor = isPrevDir
-            ? getTStylingRangePrev(tStyleRangeAtCursor)
-            : getTStylingRangeNext(tStyleRangeAtCursor);
-    }
-    if (foundDuplicate) {
-        // if we found a duplicate, than mark ourselves.
-        tData[index + 1] = isPrevDir
-            ? setTStylingRangePrevDuplicate(tStylingAtIndex)
-            : setTStylingRangeNextDuplicate(tStylingAtIndex);
-    }
-}
-/**
- * Determines if two `TStylingKey`s are a match.
- *
- * When computing whether a binding contains a duplicate, we need to compare if the instruction
- * `TStylingKey` has a match.
- *
- * Here are examples of `TStylingKey`s which match given `tStylingKeyCursor` is:
- * - `color`
- *    - `color`    // Match another color
- *    - `null`     // That means that `tStylingKey` is a `classMap`/`styleMap` instruction
- *    - `['', 'color', 'other', true]` // wrapped `color` so match
- *    - `['', null, 'other', true]`       // wrapped `null` so match
- *    - `['', 'width', 'color', 'value']` // wrapped static value contains a match on `'color'`
- * - `null`       // `tStylingKeyCursor` always match as it is `classMap`/`styleMap` instruction
- *
- * @param tStylingKeyCursor
- * @param tStylingKey
- */
-function isStylingMatch(tStylingKeyCursor, tStylingKey) {
-    ngDevMode &&
-        assertNotEqual(Array.isArray(tStylingKey), true, "Expected that 'tStylingKey' has been unwrapped");
-    if (tStylingKeyCursor === null || // If the cursor is `null` it means that we have map at that
-        // location so we must assume that we have a match.
-        tStylingKey == null || // If `tStylingKey` is `null` then it is a map therefor assume that it
-        // contains a match.
-        (Array.isArray(tStylingKeyCursor) ? tStylingKeyCursor[1] : tStylingKeyCursor) === tStylingKey // If the keys match explicitly than we are a match.
-    ) {
-        return true;
-    }
-    else if (Array.isArray(tStylingKeyCursor) && typeof tStylingKey === 'string') {
-        // if we did not find a match, but `tStylingKeyCursor` is `KeyValueArray` that means cursor has
-        // statics and we need to check those as well.
-        return keyValueArrayIndexOf(tStylingKeyCursor, tStylingKey) >= 0; // see if we are matching the key
-    }
-    return false;
-}
-
-// Global state of the parser. (This makes parser non-reentrant, but that is not an issue)
-const parserState = {
-    textEnd: 0,
-    key: 0,
-    keyEnd: 0,
-    value: 0,
-    valueEnd: 0,
-};
-/**
- * Retrieves the last parsed `key` of style.
- * @param text the text to substring the key from.
- */
-function getLastParsedKey(text) {
-    return text.substring(parserState.key, parserState.keyEnd);
-}
-/**
- * Retrieves the last parsed `value` of style.
- * @param text the text to substring the key from.
- */
-function getLastParsedValue(text) {
-    return text.substring(parserState.value, parserState.valueEnd);
-}
-/**
- * Initializes `className` string for parsing and parses the first token.
- *
- * This function is intended to be used in this format:
- * ```ts
- * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
- *   const key = getLastParsedKey();
- *   ...
- * }
- * ```
- * @param text `className` to parse
- * @returns index where the next invocation of `parseClassNameNext` should resume.
- */
-function parseClassName(text) {
-    resetParserState(text);
-    return parseClassNameNext(text, consumeWhitespace(text, 0, parserState.textEnd));
-}
-/**
- * Parses next `className` token.
- *
- * This function is intended to be used in this format:
- * ```ts
- * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
- *   const key = getLastParsedKey();
- *   ...
- * }
- * ```
- *
- * @param text `className` to parse
- * @param index where the parsing should resume.
- * @returns index where the next invocation of `parseClassNameNext` should resume.
- */
-function parseClassNameNext(text, index) {
-    const end = parserState.textEnd;
-    if (end === index) {
-        return -1;
-    }
-    index = parserState.keyEnd = consumeClassToken(text, (parserState.key = index), end);
-    return consumeWhitespace(text, index, end);
-}
-/**
- * Initializes `cssText` string for parsing and parses the first key/values.
- *
- * This function is intended to be used in this format:
- * ```ts
- * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
- *   const key = getLastParsedKey();
- *   const value = getLastParsedValue();
- *   ...
- * }
- * ```
- * @param text `cssText` to parse
- * @returns index where the next invocation of `parseStyleNext` should resume.
- */
-function parseStyle(text) {
-    resetParserState(text);
-    return parseStyleNext(text, consumeWhitespace(text, 0, parserState.textEnd));
-}
-/**
- * Parses the next `cssText` key/values.
- *
- * This function is intended to be used in this format:
- * ```ts
- * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
- *   const key = getLastParsedKey();
- *   const value = getLastParsedValue();
- *   ...
- * }
- *
- * @param text `cssText` to parse
- * @param index where the parsing should resume.
- * @returns index where the next invocation of `parseStyleNext` should resume.
- */
-function parseStyleNext(text, startIndex) {
-    const end = parserState.textEnd;
-    let index = (parserState.key = consumeWhitespace(text, startIndex, end));
-    if (end === index) {
-        // we reached an end so just quit
-        return -1;
-    }
-    index = parserState.keyEnd = consumeStyleKey(text, index, end);
-    index = consumeSeparator(text, index, end, 58 /* CharCode.COLON */);
-    index = parserState.value = consumeWhitespace(text, index, end);
-    index = parserState.valueEnd = consumeStyleValue(text, index, end);
-    return consumeSeparator(text, index, end, 59 /* CharCode.SEMI_COLON */);
-}
-/**
- * Reset the global state of the styling parser.
- * @param text The styling text to parse.
- */
-function resetParserState(text) {
-    parserState.key = 0;
-    parserState.keyEnd = 0;
-    parserState.value = 0;
-    parserState.valueEnd = 0;
-    parserState.textEnd = text.length;
-}
-/**
- * Returns index of next non-whitespace character.
- *
- * @param text Text to scan
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index of next non-whitespace character (May be the same as `start` if no whitespace at
- *          that location.)
- */
-function consumeWhitespace(text, startIndex, endIndex) {
-    while (startIndex < endIndex && text.charCodeAt(startIndex) <= 32 /* CharCode.SPACE */) {
-        startIndex++;
-    }
-    return startIndex;
-}
-/**
- * Returns index of last char in class token.
- *
- * @param text Text to scan
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index after last char in class token.
- */
-function consumeClassToken(text, startIndex, endIndex) {
-    while (startIndex < endIndex && text.charCodeAt(startIndex) > 32 /* CharCode.SPACE */) {
-        startIndex++;
-    }
-    return startIndex;
-}
-/**
- * Consumes all of the characters belonging to style key and token.
- *
- * @param text Text to scan
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index after last style key character.
- */
-function consumeStyleKey(text, startIndex, endIndex) {
-    let ch;
-    while (startIndex < endIndex &&
-        ((ch = text.charCodeAt(startIndex)) === 45 /* CharCode.DASH */ ||
-            ch === 95 /* CharCode.UNDERSCORE */ ||
-            ((ch & -33 /* CharCode.UPPER_CASE */) >= 65 /* CharCode.A */ && (ch & -33 /* CharCode.UPPER_CASE */) <= 90 /* CharCode.Z */) ||
-            (ch >= 48 /* CharCode.ZERO */ && ch <= 57 /* CharCode.NINE */))) {
-        startIndex++;
-    }
-    return startIndex;
-}
-/**
- * Consumes all whitespace and the separator `:` after the style key.
- *
- * @param text Text to scan
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index after separator and surrounding whitespace.
- */
-function consumeSeparator(text, startIndex, endIndex, separator) {
-    startIndex = consumeWhitespace(text, startIndex, endIndex);
-    if (startIndex < endIndex) {
-        if (ngDevMode && text.charCodeAt(startIndex) !== separator) {
-            malformedStyleError(text, String.fromCharCode(separator), startIndex);
-        }
-        startIndex++;
-    }
-    return startIndex;
-}
-/**
- * Consumes style value honoring `url()` and `""` text.
- *
- * @param text Text to scan
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index after last style value character.
- */
-function consumeStyleValue(text, startIndex, endIndex) {
-    let ch1 = -1; // 1st previous character
-    let ch2 = -1; // 2nd previous character
-    let ch3 = -1; // 3rd previous character
-    let i = startIndex;
-    let lastChIndex = i;
-    while (i < endIndex) {
-        const ch = text.charCodeAt(i++);
-        if (ch === 59 /* CharCode.SEMI_COLON */) {
-            return lastChIndex;
-        }
-        else if (ch === 34 /* CharCode.DOUBLE_QUOTE */ || ch === 39 /* CharCode.SINGLE_QUOTE */) {
-            lastChIndex = i = consumeQuotedText(text, ch, i, endIndex);
-        }
-        else if (startIndex === i - 4 && // We have seen only 4 characters so far "URL(" (Ignore "foo_URL()")
-            ch3 === 85 /* CharCode.U */ &&
-            ch2 === 82 /* CharCode.R */ &&
-            ch1 === 76 /* CharCode.L */ &&
-            ch === 40 /* CharCode.OPEN_PAREN */) {
-            lastChIndex = i = consumeQuotedText(text, 41 /* CharCode.CLOSE_PAREN */, i, endIndex);
-        }
-        else if (ch > 32 /* CharCode.SPACE */) {
-            // if we have a non-whitespace character then capture its location
-            lastChIndex = i;
-        }
-        ch3 = ch2;
-        ch2 = ch1;
-        ch1 = ch & -33 /* CharCode.UPPER_CASE */;
-    }
-    return lastChIndex;
-}
-/**
- * Consumes all of the quoted characters.
- *
- * @param text Text to scan
- * @param quoteCharCode CharCode of either `"` or `'` quote or `)` for `url(...)`.
- * @param startIndex Starting index of character where the scan should start.
- * @param endIndex Ending index of character where the scan should end.
- * @returns Index after quoted characters.
- */
-function consumeQuotedText(text, quoteCharCode, startIndex, endIndex) {
-    let ch1 = -1; // 1st previous character
-    let index = startIndex;
-    while (index < endIndex) {
-        const ch = text.charCodeAt(index++);
-        if (ch == quoteCharCode && ch1 !== 92 /* CharCode.BACK_SLASH */) {
-            return index;
-        }
-        if (ch == 92 /* CharCode.BACK_SLASH */ && ch1 === 92 /* CharCode.BACK_SLASH */) {
-            // two back slashes cancel each other out. For example `"\\"` should properly end the
-            // quotation. (It should not assume that the last `"` is escaped.)
-            ch1 = 0;
-        }
-        else {
-            ch1 = ch;
-        }
-    }
-    throw ngDevMode
-        ? malformedStyleError(text, String.fromCharCode(quoteCharCode), endIndex)
-        : new Error();
-}
-function malformedStyleError(text, expecting, index) {
-    ngDevMode && assertEqual(typeof text === 'string', true, 'String expected here');
-    throw throwError(`Malformed style at location ${index} in string '` +
-        text.substring(0, index) +
-        '[>>' +
-        text.substring(index, index + 1) +
-        '<<]' +
-        text.slice(index + 1) +
-        `'. Expecting '${expecting}'.`);
-}
-
-/**
- * Update a property on a selected element.
- *
- * Operates on the element selected by index via the {@link select} instruction.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
- *
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @returns This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
- *
- * @codeGenApi
- */
-function ɵɵproperty(propName, value, sanitizer) {
-    const lView = getLView();
-    const bindingIndex = nextBindingIndex();
-    if (bindingUpdated(lView, bindingIndex, value)) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, value, lView[RENDERER], sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
-    }
-    return ɵɵproperty;
-}
-/**
- * Given `<div style="..." my-dir>` and `MyDir` with `@Input('style')` we need to write to
- * directive input.
- */
-function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
-    // We support both 'class' and `className` hence the fallback.
-    setAllInputsForProperty(tNode, tView, lView, isClassBased ? 'class' : 'style', value);
-}
-
-/**
- * Update a style binding on an element with the provided value.
- *
- * If the style value is falsy then it will be removed from the element
- * (or assigned a different value depending if there are any styles placed
- * on the element with `styleMap` or any static styles that are
- * present from when the element was created with `styling`).
- *
- * Note that the styling element is updated as part of `stylingApply`.
- *
- * @param prop A valid CSS property.
- * @param value New value to write (`null` or an empty string to remove).
- * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *
- * Note that this will apply the provided style value to the host element if this function is called
- * within a host binding function.
- *
- * @codeGenApi
- */
-function ɵɵstyleProp(prop, value, suffix) {
-    checkStylingProperty(prop, value, suffix, false);
-    return ɵɵstyleProp;
-}
-/**
- * Update a class binding on an element with the provided value.
- *
- * This instruction is meant to handle the `[class.foo]="exp"` case and,
- * therefore, the class binding itself must already be allocated using
- * `styling` within the creation block.
- *
- * @param prop A valid CSS class (only one).
- * @param value A true/false value which will turn the class on or off.
- *
- * Note that this will apply the provided class value to the host element if this function
- * is called within a host binding function.
- *
- * @codeGenApi
- */
-function ɵɵclassProp(className, value) {
-    checkStylingProperty(className, value, null, true);
-    return ɵɵclassProp;
-}
-/**
- * Update style bindings using an object literal on an element.
- *
- * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
- * When styles are applied to the element they will then be updated with respect to
- * any styles/classes set via `styleProp`. If any styles are set to falsy
- * then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until `stylingApply` is called.
- *
- * @param styles A key/value style map of the styles that will be applied to the given element.
- *        Any missing styles (that have already been applied to the element beforehand) will be
- *        removed (unset) from the element's styling.
- *
- * Note that this will apply the provided styleMap value to the host element if this function
- * is called within a host binding.
- *
- * @codeGenApi
- */
-function ɵɵstyleMap(styles) {
-    checkStylingMap(styleKeyValueArraySet, styleStringParser, styles, false);
-}
-/**
- * Parse text as style and add values to KeyValueArray.
- *
- * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only referenced from `ɵɵstyleMap`.
- *
- * @param keyValueArray KeyValueArray to add parsed values to.
- * @param text text to parse.
- */
-function styleStringParser(keyValueArray, text) {
-    for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i)) {
-        styleKeyValueArraySet(keyValueArray, getLastParsedKey(text), getLastParsedValue(text));
-    }
-}
-/**
- * Update class bindings using an object literal or class-string on an element.
- *
- * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
- * When classes are applied to the element they will then be updated with
- * respect to any styles/classes set via `classProp`. If any
- * classes are set to falsy then they will be removed from the element.
- *
- * Note that the styling instruction will not be applied until `stylingApply` is called.
- * Note that this will the provided classMap value to the host element if this function is called
- * within a host binding.
- *
- * @param classes A key/value map or string of CSS classes that will be added to the
- *        given element. Any missing classes (that have already been applied to the element
- *        beforehand) will be removed (unset) from the element's list of CSS classes.
- *
- * @codeGenApi
- */
-function ɵɵclassMap(classes) {
-    checkStylingMap(classKeyValueArraySet, classStringParser, classes, true);
-}
-/**
- * Parse text as class and add values to KeyValueArray.
- *
- * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only referenced from `ɵɵclassMap`.
- *
- * @param keyValueArray KeyValueArray to add parsed values to.
- * @param text text to parse.
- */
-function classStringParser(keyValueArray, text) {
-    for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
-        keyValueArraySet(keyValueArray, getLastParsedKey(text), true);
-    }
-}
-/**
- * Common code between `ɵɵclassProp` and `ɵɵstyleProp`.
- *
- * @param prop property name.
- * @param value binding value.
- * @param suffix suffix for the property (e.g. `em` or `px`)
- * @param isClassBased `true` if `class` change (`false` if `style`)
- */
-function checkStylingProperty(prop, value, suffix, isClassBased) {
-    const lView = getLView();
-    const tView = getTView();
-    // Styling instructions use 2 slots per binding.
-    // 1. one for the value / TStylingKey
-    // 2. one for the intermittent-value / TStylingRange
-    const bindingIndex = incrementBindingIndex(2);
-    if (tView.firstUpdatePass) {
-        stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
-    }
-    if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
-        const tNode = tView.data[getSelectedIndex()];
-        updateStyling(tView, tNode, lView, lView[RENDERER], prop, (lView[bindingIndex + 1] = normalizeSuffix(value, suffix)), isClassBased, bindingIndex);
-    }
-}
-/**
- * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
- *
- * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
- *        function so that `style` can be processed. This is done for tree shaking purposes.
- * @param stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
- *        have different parsers.)
- * @param value bound value from application
- * @param isClassBased `true` if `class` change (`false` if `style`)
- */
-function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
-    const tView = getTView();
-    const bindingIndex = incrementBindingIndex(2);
-    if (tView.firstUpdatePass) {
-        stylingFirstUpdatePass(tView, null, bindingIndex, isClassBased);
-    }
-    const lView = getLView();
-    if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
-        // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
-        // if so as not to read unnecessarily.
-        const tNode = tView.data[getSelectedIndex()];
-        if (hasStylingInputShadow(tNode, isClassBased) && !isInHostBindings(tView, bindingIndex)) {
-            if (ngDevMode) {
-                // verify that if we are shadowing then `TData` is appropriately marked so that we skip
-                // processing this binding in styling resolution.
-                const tStylingKey = tView.data[bindingIndex];
-                assertEqual(Array.isArray(tStylingKey) ? tStylingKey[1] : tStylingKey, false, "Styling linked list shadow input should be marked as 'false'");
-            }
-            // VE does not concatenate the static portion like we are doing here.
-            // Instead VE just ignores the static completely if dynamic binding is present.
-            // Because of locality we have already set the static portion because we don't know if there
-            // is a dynamic portion until later. If we would ignore the static portion it would look like
-            // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
-            // thing as it would think that the static portion was removed. For this reason we
-            // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
-            let staticPrefix = isClassBased ? tNode.classesWithoutHost : tNode.stylesWithoutHost;
-            ngDevMode &&
-                isClassBased === false &&
-                staticPrefix !== null &&
-                assertEqual(staticPrefix.endsWith(';'), true, "Expecting static portion to end with ';'");
-            if (staticPrefix !== null) {
-                // We want to make sure that falsy values of `value` become empty strings.
-                value = concatStringsWithSpace(staticPrefix, value ? value : '');
-            }
-            // Given `<div [style] my-dir>` such that `my-dir` has `@Input('style')`.
-            // This takes over the `[style]` binding. (Same for `[class]`)
-            setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased);
-        }
-        else {
-            updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], (lView[bindingIndex + 1] = toStylingKeyValueArray(keyValueArraySet, stringParser, value)), isClassBased, bindingIndex);
-        }
-    }
-}
-/**
- * Determines when the binding is in `hostBindings` section
- *
- * @param tView Current `TView`
- * @param bindingIndex index of binding which we would like if it is in `hostBindings`
- */
-function isInHostBindings(tView, bindingIndex) {
-    // All host bindings are placed after the expando section.
-    return bindingIndex >= tView.expandoStartIndex;
-}
-/**
- * Collects the necessary information to insert the binding into a linked list of style bindings
- * using `insertTStylingBinding`.
- *
- * @param tView `TView` where the binding linked list will be stored.
- * @param tStylingKey Property/key of the binding.
- * @param bindingIndex Index of binding associated with the `prop`
- * @param isClassBased `true` if `class` change (`false` if `style`)
- */
-function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
-    ngDevMode && assertFirstUpdatePass(tView);
-    const tData = tView.data;
-    if (tData[bindingIndex + 1] === null) {
-        // The above check is necessary because we don't clear first update pass until first successful
-        // (no exception) template execution. This prevents the styling instruction from double adding
-        // itself to the list.
-        // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
-        // if so as not to read unnecessarily.
-        const tNode = tData[getSelectedIndex()];
-        ngDevMode && assertDefined(tNode, 'TNode expected');
-        const isHostBindings = isInHostBindings(tView, bindingIndex);
-        if (hasStylingInputShadow(tNode, isClassBased) && tStylingKey === null && !isHostBindings) {
-            // `tStylingKey === null` implies that we are either `[style]` or `[class]` binding.
-            // If there is a directive which uses `@Input('style')` or `@Input('class')` than
-            // we need to neutralize this binding since that directive is shadowing it.
-            // We turn this into a noop by setting the key to `false`
-            tStylingKey = false;
-        }
-        tStylingKey = wrapInStaticStylingKey(tData, tNode, tStylingKey, isClassBased);
-        insertTStylingBinding(tData, tNode, tStylingKey, bindingIndex, isHostBindings, isClassBased);
-    }
-}
-/**
- * Adds static styling information to the binding if applicable.
- *
- * The linked list of styles not only stores the list and keys, but also stores static styling
- * information on some of the keys. This function determines if the key should contain the styling
- * information and computes it.
- *
- * See `TStylingStatic` for more details.
- *
- * @param tData `TData` where the linked list is stored.
- * @param tNode `TNode` for which the styling is being computed.
- * @param stylingKey `TStylingKeyPrimitive` which may need to be wrapped into `TStylingKey`
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function wrapInStaticStylingKey(tData, tNode, stylingKey, isClassBased) {
-    const hostDirectiveDef = getCurrentDirectiveDef(tData);
-    let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
-    if (hostDirectiveDef === null) {
-        // We are in template node.
-        // If template node already had styling instruction then it has already collected the static
-        // styling and there is no need to collect them again. We know that we are the first styling
-        // instruction because the `TNode.*Bindings` points to 0 (nothing has been inserted yet).
-        const isFirstStylingInstructionInTemplate = (isClassBased ? tNode.classBindings : tNode.styleBindings) === 0;
-        if (isFirstStylingInstructionInTemplate) {
-            // It would be nice to be able to get the statics from `mergeAttrs`, however, at this point
-            // they are already merged and it would not be possible to figure which property belongs where
-            // in the priority.
-            stylingKey = collectStylingFromDirectives(null, tData, tNode, stylingKey, isClassBased);
-            stylingKey = collectStylingFromTAttrs(stylingKey, tNode.attrs, isClassBased);
-            // We know that if we have styling binding in template we can't have residual.
-            residual = null;
-        }
-    }
-    else {
-        // We are in host binding node and there was no binding instruction in template node.
-        // This means that we need to compute the residual.
-        const directiveStylingLast = tNode.directiveStylingLast;
-        const isFirstStylingInstructionInHostBinding = directiveStylingLast === -1 || tData[directiveStylingLast] !== hostDirectiveDef;
-        if (isFirstStylingInstructionInHostBinding) {
-            stylingKey = collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased);
-            if (residual === null) {
-                // - If `null` than either:
-                //    - Template styling instruction already ran and it has consumed the static
-                //      styling into its `TStylingKey` and so there is no need to update residual. Instead
-                //      we need to update the `TStylingKey` associated with the first template node
-                //      instruction. OR
-                //    - Some other styling instruction ran and determined that there are no residuals
-                let templateStylingKey = getTemplateHeadTStylingKey(tData, tNode, isClassBased);
-                if (templateStylingKey !== undefined && Array.isArray(templateStylingKey)) {
-                    // Only recompute if `templateStylingKey` had static values. (If no static value found
-                    // then there is nothing to do since this operation can only produce less static keys, not
-                    // more.)
-                    templateStylingKey = collectStylingFromDirectives(null, tData, tNode, templateStylingKey[1] /* unwrap previous statics */, isClassBased);
-                    templateStylingKey = collectStylingFromTAttrs(templateStylingKey, tNode.attrs, isClassBased);
-                    setTemplateHeadTStylingKey(tData, tNode, isClassBased, templateStylingKey);
-                }
-            }
-            else {
-                // We only need to recompute residual if it is not `null`.
-                // - If existing residual (implies there was no template styling). This means that some of
-                //   the statics may have moved from the residual to the `stylingKey` and so we have to
-                //   recompute.
-                // - If `undefined` this is the first time we are running.
-                residual = collectResidual(tData, tNode, isClassBased);
-            }
-        }
-    }
-    if (residual !== undefined) {
-        isClassBased ? (tNode.residualClasses = residual) : (tNode.residualStyles = residual);
-    }
-    return stylingKey;
-}
-/**
- * Retrieve the `TStylingKey` for the template styling instruction.
- *
- * This is needed since `hostBinding` styling instructions are inserted after the template
- * instruction. While the template instruction needs to update the residual in `TNode` the
- * `hostBinding` instructions need to update the `TStylingKey` of the template instruction because
- * the template instruction is downstream from the `hostBindings` instructions.
- *
- * @param tData `TData` where the linked list is stored.
- * @param tNode `TNode` for which the styling is being computed.
- * @param isClassBased `true` if `class` (`false` if `style`)
- * @return `TStylingKey` if found or `undefined` if not found.
- */
-function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
-    const bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
-    if (getTStylingRangeNext(bindings) === 0) {
-        // There does not seem to be a styling instruction in the `template`.
-        return undefined;
-    }
-    return tData[getTStylingRangePrev(bindings)];
-}
-/**
- * Update the `TStylingKey` of the first template instruction in `TNode`.
- *
- * Logically `hostBindings` styling instructions are of lower priority than that of the template.
- * However, they execute after the template styling instructions. This means that they get inserted
- * in front of the template styling instructions.
- *
- * If we have a template styling instruction and a new `hostBindings` styling instruction is
- * executed it means that it may need to steal static fields from the template instruction. This
- * method allows us to update the first template instruction `TStylingKey` with a new value.
- *
- * Assume:
- * ```angular-ts
- * <div my-dir style="color: red" [style.color]="tmplExp"></div>
- *
- * @Directive({
- *   host: {
- *     'style': 'width: 100px',
- *     '[style.color]': 'dirExp',
- *   }
- * })
- * class MyDir {}
- * ```
- *
- * when `[style.color]="tmplExp"` executes it creates this data structure.
- * ```ts
- *  ['', 'color', 'color', 'red', 'width', '100px'],
- * ```
- *
- * The reason for this is that the template instruction does not know if there are styling
- * instructions and must assume that there are none and must collect all of the static styling.
- * (both
- * `color' and 'width`)
- *
- * When `'[style.color]': 'dirExp',` executes we need to insert a new data into the linked list.
- * ```ts
- *  ['', 'color', 'width', '100px'],  // newly inserted
- *  ['', 'color', 'color', 'red', 'width', '100px'], // this is wrong
- * ```
- *
- * Notice that the template statics is now wrong as it incorrectly contains `width` so we need to
- * update it like so:
- * ```ts
- *  ['', 'color', 'width', '100px'],
- *  ['', 'color', 'color', 'red'],    // UPDATE
- * ```
- *
- * @param tData `TData` where the linked list is stored.
- * @param tNode `TNode` for which the styling is being computed.
- * @param isClassBased `true` if `class` (`false` if `style`)
- * @param tStylingKey New `TStylingKey` which is replacing the old one.
- */
-function setTemplateHeadTStylingKey(tData, tNode, isClassBased, tStylingKey) {
-    const bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
-    ngDevMode &&
-        assertNotEqual(getTStylingRangeNext(bindings), 0, 'Expecting to have at least one template styling binding.');
-    tData[getTStylingRangePrev(bindings)] = tStylingKey;
-}
-/**
- * Collect all static values after the current `TNode.directiveStylingLast` index.
- *
- * Collect the remaining styling information which has not yet been collected by an existing
- * styling instruction.
- *
- * @param tData `TData` where the `DirectiveDefs` are stored.
- * @param tNode `TNode` which contains the directive range.
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function collectResidual(tData, tNode, isClassBased) {
-    let residual = undefined;
-    const directiveEnd = tNode.directiveEnd;
-    ngDevMode &&
-        assertNotEqual(tNode.directiveStylingLast, -1, 'By the time this function gets called at least one hostBindings-node styling instruction must have executed.');
-    // We add `1 + tNode.directiveStart` because we need to skip the current directive (as we are
-    // collecting things after the last `hostBindings` directive which had a styling instruction.)
-    for (let i = 1 + tNode.directiveStylingLast; i < directiveEnd; i++) {
-        const attrs = tData[i].hostAttrs;
-        residual = collectStylingFromTAttrs(residual, attrs, isClassBased);
-    }
-    return collectStylingFromTAttrs(residual, tNode.attrs, isClassBased);
-}
-/**
- * Collect the static styling information with lower priority than `hostDirectiveDef`.
- *
- * (This is opposite of residual styling.)
- *
- * @param hostDirectiveDef `DirectiveDef` for which we want to collect lower priority static
- *        styling. (Or `null` if template styling)
- * @param tData `TData` where the linked list is stored.
- * @param tNode `TNode` for which the styling is being computed.
- * @param stylingKey Existing `TStylingKey` to update or wrap.
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased) {
-    // We need to loop because there can be directives which have `hostAttrs` but don't have
-    // `hostBindings` so this loop catches up to the current directive..
-    let currentDirective = null;
-    const directiveEnd = tNode.directiveEnd;
-    let directiveStylingLast = tNode.directiveStylingLast;
-    if (directiveStylingLast === -1) {
-        directiveStylingLast = tNode.directiveStart;
-    }
-    else {
-        directiveStylingLast++;
-    }
-    while (directiveStylingLast < directiveEnd) {
-        currentDirective = tData[directiveStylingLast];
-        ngDevMode && assertDefined(currentDirective, 'expected to be defined');
-        stylingKey = collectStylingFromTAttrs(stylingKey, currentDirective.hostAttrs, isClassBased);
-        if (currentDirective === hostDirectiveDef)
-            break;
-        directiveStylingLast++;
-    }
-    if (hostDirectiveDef !== null) {
-        // we only advance the styling cursor if we are collecting data from host bindings.
-        // Template executes before host bindings and so if we would update the index,
-        // host bindings would not get their statics.
-        tNode.directiveStylingLast = directiveStylingLast;
-    }
-    return stylingKey;
-}
-/**
- * Convert `TAttrs` into `TStylingStatic`.
- *
- * @param stylingKey existing `TStylingKey` to update or wrap.
- * @param attrs `TAttributes` to process.
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
-    const desiredMarker = isClassBased ? 1 /* AttributeMarker.Classes */ : 2 /* AttributeMarker.Styles */;
-    let currentMarker = -1 /* AttributeMarker.ImplicitAttributes */;
-    if (attrs !== null) {
-        for (let i = 0; i < attrs.length; i++) {
-            const item = attrs[i];
-            if (typeof item === 'number') {
-                currentMarker = item;
-            }
-            else {
-                if (currentMarker === desiredMarker) {
-                    if (!Array.isArray(stylingKey)) {
-                        stylingKey = stylingKey === undefined ? [] : ['', stylingKey];
-                    }
-                    keyValueArraySet(stylingKey, item, isClassBased ? true : attrs[++i]);
-                }
-            }
-        }
-    }
-    return stylingKey === undefined ? null : stylingKey;
-}
-/**
- * Convert user input to `KeyValueArray`.
- *
- * This function takes user input which could be `string`, Object literal, or iterable and converts
- * it into a consistent representation. The output of this is `KeyValueArray` (which is an array
- * where
- * even indexes contain keys and odd indexes contain values for those keys).
- *
- * The advantage of converting to `KeyValueArray` is that we can perform diff in an input
- * independent
- * way.
- * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
- * applied)
- *
- * The fact that `KeyValueArray` is sorted is very important because it allows us to compute the
- * difference in linear fashion without the need to allocate any additional data.
- *
- * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
- * which values need to be deleted, over the new `Map` to determine additions, and we would have to
- * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
- *
- * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
- *        function so that `style` can be processed. This is done
- *        for tree shaking purposes.
- * @param stringParser The parser is passed in so that it will be tree shakable. See
- *        `styleStringParser` and `classStringParser`
- * @param value The value to parse/convert to `KeyValueArray`
- */
-function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
-    if (value == null /*|| value === undefined */ || value === '')
-        return EMPTY_ARRAY;
-    const styleKeyValueArray = [];
-    const unwrappedValue = unwrapSafeValue(value);
-    if (Array.isArray(unwrappedValue)) {
-        for (let i = 0; i < unwrappedValue.length; i++) {
-            keyValueArraySet(styleKeyValueArray, unwrappedValue[i], true);
-        }
-    }
-    else if (typeof unwrappedValue === 'object') {
-        for (const key in unwrappedValue) {
-            if (unwrappedValue.hasOwnProperty(key)) {
-                keyValueArraySet(styleKeyValueArray, key, unwrappedValue[key]);
-            }
-        }
-    }
-    else if (typeof unwrappedValue === 'string') {
-        stringParser(styleKeyValueArray, unwrappedValue);
-    }
-    else {
-        ngDevMode &&
-            throwError('Unsupported styling type: ' + typeof unwrappedValue + ' (' + unwrappedValue + ')');
-    }
-    return styleKeyValueArray;
-}
-/**
- * Set a `value` for a `key`.
- *
- * See: `keyValueArraySet` for details
- *
- * @param keyValueArray KeyValueArray to add to.
- * @param key Style key to add.
- * @param value The value to set.
- */
-function styleKeyValueArraySet(keyValueArray, key, value) {
-    keyValueArraySet(keyValueArray, key, unwrapSafeValue(value));
-}
-/**
- * Class-binding-specific function for setting the `value` for a `key`.
- *
- * See: `keyValueArraySet` for details
- *
- * @param keyValueArray KeyValueArray to add to.
- * @param key Style key to add.
- * @param value The value to set.
- */
-function classKeyValueArraySet(keyValueArray, key, value) {
-    // We use `classList.add` to eventually add the CSS classes to the DOM node. Any value passed into
-    // `add` is stringified and added to the `class` attribute, e.g. even null, undefined or numbers
-    // will be added. Stringify the key here so that our internal data structure matches the value in
-    // the DOM. The only exceptions are empty strings and strings that contain spaces for which
-    // the browser throws an error. We ignore such values, because the error is somewhat cryptic.
-    const stringKey = String(key);
-    if (stringKey !== '' && !stringKey.includes(' ')) {
-        keyValueArraySet(keyValueArray, stringKey, value);
-    }
-}
-/**
- * Update map based styling.
- *
- * Map based styling could be anything which contains more than one binding. For example `string`,
- * or object literal. Dealing with all of these types would complicate the logic so
- * instead this function expects that the complex input is first converted into normalized
- * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
- * very cheap to compute deltas between the previous and current value.
- *
- * @param tView Associated `TView.data` contains the linked list of binding priorities.
- * @param tNode `TNode` where the binding is located.
- * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
- * @param renderer Renderer to use if any updates.
- * @param oldKeyValueArray Previous value represented as `KeyValueArray`
- * @param newKeyValueArray Current value represented as `KeyValueArray`
- * @param isClassBased `true` if `class` (`false` if `style`)
- * @param bindingIndex Binding index of the binding.
- */
-function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
-    if (oldKeyValueArray === NO_CHANGE) {
-        // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
-        oldKeyValueArray = EMPTY_ARRAY;
-    }
-    let oldIndex = 0;
-    let newIndex = 0;
-    let oldKey = 0 < oldKeyValueArray.length ? oldKeyValueArray[0] : null;
-    let newKey = 0 < newKeyValueArray.length ? newKeyValueArray[0] : null;
-    while (oldKey !== null || newKey !== null) {
-        ngDevMode && assertLessThan(oldIndex, 999, 'Are we stuck in infinite loop?');
-        ngDevMode && assertLessThan(newIndex, 999, 'Are we stuck in infinite loop?');
-        const oldValue = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex + 1] : undefined;
-        const newValue = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex + 1] : undefined;
-        let setKey = null;
-        let setValue = undefined;
-        if (oldKey === newKey) {
-            // UPDATE: Keys are equal => new value is overwriting old value.
-            oldIndex += 2;
-            newIndex += 2;
-            if (oldValue !== newValue) {
-                setKey = newKey;
-                setValue = newValue;
-            }
-        }
-        else if (newKey === null || (oldKey !== null && oldKey < newKey)) {
-            // DELETE: oldKey key is missing or we did not find the oldKey in the newValue
-            // (because the keyValueArray is sorted and `newKey` is found later alphabetically).
-            // `"background" < "color"` so we need to delete `"background"` because it is not found in the
-            // new array.
-            oldIndex += 2;
-            setKey = oldKey;
-        }
-        else {
-            // CREATE: newKey's is earlier alphabetically than oldKey's (or no oldKey) => we have new key.
-            // `"color" > "background"` so we need to add `color` because it is in new array but not in
-            // old array.
-            ngDevMode && assertDefined(newKey, 'Expecting to have a valid key');
-            newIndex += 2;
-            setKey = newKey;
-            setValue = newValue;
-        }
-        if (setKey !== null) {
-            updateStyling(tView, tNode, lView, renderer, setKey, setValue, isClassBased, bindingIndex);
-        }
-        oldKey = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex] : null;
-        newKey = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex] : null;
-    }
-}
-/**
- * Update a simple (property name) styling.
- *
- * This function takes `prop` and updates the DOM to that value. The function takes the binding
- * value as well as binding priority into consideration to determine which value should be written
- * to DOM. (For example it may be determined that there is a higher priority overwrite which blocks
- * the DOM write, or if the value goes to `undefined` a lower priority overwrite may be consulted.)
- *
- * @param tView Associated `TView.data` contains the linked list of binding priorities.
- * @param tNode `TNode` where the binding is located.
- * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
- * @param renderer Renderer to use if any updates.
- * @param prop Either style property name or a class name.
- * @param value Either style value for `prop` or `true`/`false` if `prop` is class.
- * @param isClassBased `true` if `class` (`false` if `style`)
- * @param bindingIndex Binding index of the binding.
- */
-function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased, bindingIndex) {
-    if (!(tNode.type & 3 /* TNodeType.AnyRNode */)) {
-        // It is possible to have styling on non-elements (such as ng-container).
-        // This is rare, but it does happen. In such a case, just ignore the binding.
-        return;
-    }
-    const tData = tView.data;
-    const tRange = tData[bindingIndex + 1];
-    const higherPriorityValue = getTStylingRangeNextDuplicate(tRange)
-        ? findStylingValue(tData, tNode, lView, prop, getTStylingRangeNext(tRange), isClassBased)
-        : undefined;
-    if (!isStylingValuePresent(higherPriorityValue)) {
-        // We don't have a next duplicate, or we did not find a duplicate value.
-        if (!isStylingValuePresent(value)) {
-            // We should delete current value or restore to lower priority value.
-            if (getTStylingRangePrevDuplicate(tRange)) {
-                // We have a possible prev duplicate, let's retrieve it.
-                value = findStylingValue(tData, null, lView, prop, bindingIndex, isClassBased);
-            }
-        }
-        const rNode = getNativeByIndex(getSelectedIndex(), lView);
-        applyStyling(renderer, isClassBased, rNode, prop, value);
-    }
-}
-/**
- * Search for styling value with higher priority which is overwriting current value, or a
- * value of lower priority to which we should fall back if the value is `undefined`.
- *
- * When value is being applied at a location, related values need to be consulted.
- * - If there is a higher priority binding, we should be using that one instead.
- *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp1`
- *   requires that we check `exp2` to see if it is set to value other than `undefined`.
- * - If there is a lower priority binding and we are changing to `undefined`
- *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp2` to
- *   `undefined` requires that we check `exp1` (and static values) and use that as new value.
- *
- * NOTE: The styling stores two values.
- * 1. The raw value which came from the application is stored at `index + 0` location. (This value
- *    is used for dirty checking).
- * 2. The normalized value is stored at `index + 1`.
- *
- * @param tData `TData` used for traversing the priority.
- * @param tNode `TNode` to use for resolving static styling. Also controls search direction.
- *   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
- *      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
- *   - `null` search prev and go all the way to end. Return last value where
- *     `isStylingValuePresent(value)` is true.
- * @param lView `LView` used for retrieving the actual values.
- * @param prop Property which we are interested in.
- * @param index Starting index in the linked list of styling bindings where the search should start.
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
-    // `TNode` to use for resolving static styling. Also controls search direction.
-    //   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
-    //      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
-    //   - `null` search prev and go all the way to end. Return last value where
-    //     `isStylingValuePresent(value)` is true.
-    const isPrevDirection = tNode === null;
-    let value = undefined;
-    while (index > 0) {
-        const rawKey = tData[index];
-        const containsStatics = Array.isArray(rawKey);
-        // Unwrap the key if we contain static values.
-        const key = containsStatics ? rawKey[1] : rawKey;
-        const isStylingMap = key === null;
-        let valueAtLViewIndex = lView[index + 1];
-        if (valueAtLViewIndex === NO_CHANGE) {
-            // In firstUpdatePass the styling instructions create a linked list of styling.
-            // On subsequent passes it is possible for a styling instruction to try to read a binding
-            // which
-            // has not yet executed. In that case we will find `NO_CHANGE` and we should assume that
-            // we have `undefined` (or empty array in case of styling-map instruction) instead. This
-            // allows the resolution to apply the value (which may later be overwritten when the
-            // binding actually executes.)
-            valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
-        }
-        let currentValue = isStylingMap
-            ? keyValueArrayGet(valueAtLViewIndex, prop)
-            : key === prop
-                ? valueAtLViewIndex
-                : undefined;
-        if (containsStatics && !isStylingValuePresent(currentValue)) {
-            currentValue = keyValueArrayGet(rawKey, prop);
-        }
-        if (isStylingValuePresent(currentValue)) {
-            value = currentValue;
-            if (isPrevDirection) {
-                return value;
-            }
-        }
-        const tRange = tData[index + 1];
-        index = isPrevDirection ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
-    }
-    if (tNode !== null) {
-        // in case where we are going in next direction AND we did not find anything, we need to
-        // consult residual styling
-        let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
-        if (residual != null /** OR residual !=== undefined */) {
-            value = keyValueArrayGet(residual, prop);
-        }
-    }
-    return value;
-}
-/**
- * Determines if the binding value should be used (or if the value is 'undefined' and hence priority
- * resolution should be used.)
- *
- * @param value Binding style value.
- */
-function isStylingValuePresent(value) {
-    // Currently only `undefined` value is considered non-binding. That is `undefined` says I don't
-    // have an opinion as to what this binding should be and you should consult other bindings by
-    // priority to determine the valid value.
-    // This is extracted into a single function so that we have a single place to control this.
-    return value !== undefined;
-}
-/**
- * Normalizes and/or adds a suffix to the value.
- *
- * If value is `null`/`undefined` no suffix is added
- * @param value
- * @param suffix
- */
-function normalizeSuffix(value, suffix) {
-    if (value == null || value === '') ;
-    else if (typeof suffix === 'string') {
-        value = value + suffix;
-    }
-    else if (typeof value === 'object') {
-        value = stringify(unwrapSafeValue(value));
-    }
-    return value;
-}
-/**
- * Tests if the `TNode` has input shadow.
- *
- * An input shadow is when a directive steals (shadows) the input by using `@Input('style')` or
- * `@Input('class')` as input.
- *
- * @param tNode `TNode` which we would like to see if it has shadow.
- * @param isClassBased `true` if `class` (`false` if `style`)
- */
-function hasStylingInputShadow(tNode, isClassBased) {
-    return (tNode.flags & (isClassBased ? 8 /* TNodeFlags.hasClassInput */ : 16 /* TNodeFlags.hasStyleInput */)) !== 0;
-}
-
-/**
- *
- * Update an interpolated class on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div class="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate1('prefix', v0, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate2('prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate3(
- * 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate4(
- * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate5(
- * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate6(
- *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate7(
- *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- *
- * Update an interpolated class on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolate8(
- *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-/**
- * Update an interpolated class on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵclassMapInterpolateV(
- *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *.
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @codeGenApi
- */
-function ɵɵclassMapInterpolateV(values) {
-    const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
-}
-
 /*!
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -24092,6 +22226,44 @@ function getExistingTNode(tView, index) {
     const tNode = getTNode(tView, index);
     ngDevMode && assertTNode(tNode);
     return tNode;
+}
+
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+function ɵɵproperty(propName, value, sanitizer) {
+    const lView = getLView();
+    const bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, value)) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        setPropertyAndInputs(tNode, lView, propName, value, lView[RENDERER], sanitizer);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
+    }
+    return ɵɵproperty;
+}
+/**
+ * Given `<div style="..." my-dir>` and `MyDir` with `@Input('style')` we need to write to
+ * directive input.
+ */
+function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
+    // We support both 'class' and `className` hence the fallback.
+    setAllInputsForProperty(tNode, tView, lView, isClassBased ? 'class' : 'style', value);
 }
 
 /**
@@ -26398,469 +24570,6 @@ function insertFallbackContent(lView, tView, fallbackIndex) {
 }
 
 /**
- *
- * Update an interpolated property on an element with a lone bound value
- *
- * Used when the value passed to a property has 1 interpolated value in it, an no additional text
- * surrounds that interpolated value:
- *
- * ```html
- * <div title="{{v0}}"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate('title', v0);
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
-    ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
-    return ɵɵpropertyInterpolate;
-}
-/**
- *
- * Update an interpolated property on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div title="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate1;
-}
-/**
- *
- * Update an interpolated property on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate2;
-}
-/**
- *
- * Update an interpolated property on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate3(
- * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate3;
-}
-/**
- *
- * Update an interpolated property on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate4(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate4;
-}
-/**
- *
- * Update an interpolated property on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate5(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate5;
-}
-/**
- *
- * Update an interpolated property on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate6(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate6;
-}
-/**
- *
- * Update an interpolated property on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate7(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate7;
-}
-/**
- *
- * Update an interpolated property on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate8(
- *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix ?? '');
-    }
-    return ɵɵpropertyInterpolate8;
-}
-/**
- * Update an interpolated property on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolateV(
- *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update.
- * @param values The collection of values and the strings in between those values, beginning with a
- * string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        setPropertyAndInputs(tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer);
-        if (ngDevMode) {
-            const interpolationInBetween = [values[0]]; // prefix
-            for (let i = 2; i < values.length; i += 2) {
-                interpolationInBetween.push(values[i]);
-            }
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
-        }
-    }
-    return ɵɵpropertyInterpolateV;
-}
-
-/**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
  *
@@ -26985,661 +24694,1350 @@ function ɵɵreference(index) {
     return load(contextLView, HEADER_OFFSET + index);
 }
 
-/**
- *
- * Update an interpolated style on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div style="key: {{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate1('key: ', v0, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate1(prefix, v0, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function toTStylingRange(prev, next) {
+    ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return ((prev << 17 /* StylingRange.PREV_SHIFT */) | (next << 2 /* StylingRange.NEXT_SHIFT */));
 }
-/**
- *
- * Update an interpolated style on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate2('key: ', v0, '; key1: ', v1, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate2(prefix, v0, i0, v1, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function getTStylingRangePrev(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange >> 17 /* StylingRange.PREV_SHIFT */) & 32767 /* StylingRange.UNSIGNED_MASK */;
 }
-/**
- *
- * Update an interpolated style on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key2: {{v1}}; key2: {{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate3(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function getTStylingRangePrevDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) == 2 /* StylingRange.PREV_DUPLICATE */;
 }
-/**
- *
- * Update an interpolated style on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate4(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function setTStylingRangePrev(tStylingRange, previous) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return ((tStylingRange & 131071 /* StylingRange.PREV_MASK */) |
+        (previous << 17 /* StylingRange.PREV_SHIFT */));
 }
-/**
- *
- * Update an interpolated style on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate5(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function setTStylingRangePrevDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange | 2 /* StylingRange.PREV_DUPLICATE */);
 }
-/**
- *
- * Update an interpolated style on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}};
- *             key5: {{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate6(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function getTStylingRangeNext(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 131068 /* StylingRange.NEXT_MASK */) >> 2 /* StylingRange.NEXT_SHIFT */;
 }
-/**
- *
- * Update an interpolated style on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *             key6: {{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate7(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    '; key6: ', v6, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function setTStylingRangeNext(tStylingRange, next) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return ((tStylingRange & -131069 /* StylingRange.NEXT_MASK */) | //
+        (next << 2 /* StylingRange.NEXT_SHIFT */));
 }
-/**
- *
- * Update an interpolated style on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *             key6: {{v6}}; key7: {{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate8(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    '; key6: ', v6, '; key7: ', v7, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function getTStylingRangeNextDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 1 /* StylingRange.NEXT_DUPLICATE */) === 1 /* StylingRange.NEXT_DUPLICATE */;
 }
-/**
- * Update an interpolated style on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  class="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *         key6: {{v6}}; key7: {{v7}}; key8: {{v8}}; key9: {{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolateV(
- *    ['key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *     '; key6: ', v6, '; key7: ', v7, '; key8: ', v8, '; key9: ', v9, 'suffix']);
- * ```
- *.
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '; key2: ', value1, '; key2: ', value2, ..., value99, 'suffix']`)
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolateV(values) {
-    const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    ɵɵstyleMap(interpolatedValue);
+function setTStylingRangeNextDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange | 1 /* StylingRange.NEXT_DUPLICATE */);
 }
 
 /**
+ * Insert new `tStyleValue` at `TData` and link existing style bindings such that we maintain linked
+ * list of styles and compute the duplicate flag.
  *
- * Update an interpolated style property on an element with single bound value surrounded by text.
+ * Note: this function is executed during `firstUpdatePass` only to populate the `TView.data`.
  *
- * Used when the value passed to a property has 1 interpolated value in it:
+ * The function works by keeping track of `tStylingRange` which contains two pointers pointing to
+ * the head/tail of the template portion of the styles.
+ *  - if `isHost === false` (we are template) then insertion is at tail of `TStylingRange`
+ *  - if `isHost === true` (we are host binding) then insertion is at head of `TStylingRange`
  *
- * ```html
- * <div style.color="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate1(0, 'prefix', v0, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param tData The `TData` to insert into.
+ * @param tNode `TNode` associated with the styling element.
+ * @param tStylingKey See `TStylingKey`.
+ * @param index location of where `tStyleValue` should be stored (and linked into list.)
+ * @param isHostBinding `true` if the insertion is for a `hostBinding`. (insertion is in front of
+ *               template.)
+ * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
+ *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
  */
-function ɵɵstylePropInterpolate1(prop, prefix, v0, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate1;
+function insertTStylingBinding(tData, tNode, tStylingKeyWithStatic, index, isHostBinding, isClassBinding) {
+    ngDevMode && assertFirstUpdatePass(getTView());
+    let tBindings = isClassBinding ? tNode.classBindings : tNode.styleBindings;
+    let tmplHead = getTStylingRangePrev(tBindings);
+    let tmplTail = getTStylingRangeNext(tBindings);
+    tData[index] = tStylingKeyWithStatic;
+    let isKeyDuplicateOfStatic = false;
+    let tStylingKey;
+    if (Array.isArray(tStylingKeyWithStatic)) {
+        // We are case when the `TStylingKey` contains static fields as well.
+        const staticKeyValueArray = tStylingKeyWithStatic;
+        tStylingKey = staticKeyValueArray[1]; // unwrap.
+        // We need to check if our key is present in the static so that we can mark it as duplicate.
+        if (tStylingKey === null ||
+            keyValueArrayIndexOf(staticKeyValueArray, tStylingKey) > 0) {
+            // tStylingKey is present in the statics, need to mark it as duplicate.
+            isKeyDuplicateOfStatic = true;
+        }
+    }
+    else {
+        tStylingKey = tStylingKeyWithStatic;
+    }
+    if (isHostBinding) {
+        // We are inserting host bindings
+        // If we don't have template bindings then `tail` is 0.
+        const hasTemplateBindings = tmplTail !== 0;
+        // This is important to know because that means that the `head` can't point to the first
+        // template bindings (there are none.) Instead the head points to the tail of the template.
+        if (hasTemplateBindings) {
+            // template head's "prev" will point to last host binding or to 0 if no host bindings yet
+            const previousNode = getTStylingRangePrev(tData[tmplHead + 1]);
+            tData[index + 1] = toTStylingRange(previousNode, tmplHead);
+            // if a host binding has already been registered, we need to update the next of that host
+            // binding to point to this one
+            if (previousNode !== 0) {
+                // We need to update the template-tail value to point to us.
+                tData[previousNode + 1] = setTStylingRangeNext(tData[previousNode + 1], index);
+            }
+            // The "previous" of the template binding head should point to this host binding
+            tData[tmplHead + 1] = setTStylingRangePrev(tData[tmplHead + 1], index);
+        }
+        else {
+            tData[index + 1] = toTStylingRange(tmplHead, 0);
+            // if a host binding has already been registered, we need to update the next of that host
+            // binding to point to this one
+            if (tmplHead !== 0) {
+                // We need to update the template-tail value to point to us.
+                tData[tmplHead + 1] = setTStylingRangeNext(tData[tmplHead + 1], index);
+            }
+            // if we don't have template, the head points to template-tail, and needs to be advanced.
+            tmplHead = index;
+        }
+    }
+    else {
+        // We are inserting in template section.
+        // We need to set this binding's "previous" to the current template tail
+        tData[index + 1] = toTStylingRange(tmplTail, 0);
+        ngDevMode &&
+            assertEqual(tmplHead !== 0 && tmplTail === 0, false, 'Adding template bindings after hostBindings is not allowed.');
+        if (tmplHead === 0) {
+            tmplHead = index;
+        }
+        else {
+            // We need to update the previous value "next" to point to this binding
+            tData[tmplTail + 1] = setTStylingRangeNext(tData[tmplTail + 1], index);
+        }
+        tmplTail = index;
+    }
+    // Now we need to update / compute the duplicates.
+    // Starting with our location search towards head (least priority)
+    if (isKeyDuplicateOfStatic) {
+        tData[index + 1] = setTStylingRangePrevDuplicate(tData[index + 1]);
+    }
+    markDuplicates(tData, tStylingKey, index, true);
+    markDuplicates(tData, tStylingKey, index, false);
+    markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding);
+    tBindings = toTStylingRange(tmplHead, tmplTail);
+    if (isClassBinding) {
+        tNode.classBindings = tBindings;
+    }
+    else {
+        tNode.styleBindings = tBindings;
+    }
 }
 /**
+ * Look into the residual styling to see if the current `tStylingKey` is duplicate of residual.
  *
- * Update an interpolated style property on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate2(0, 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param tNode `TNode` where the residual is stored.
+ * @param tStylingKey `TStylingKey` to store.
+ * @param tData `TData` associated with the current `LView`.
+ * @param index location of where `tStyleValue` should be stored (and linked into list.)
+ * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
+ *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
  */
-function ɵɵstylePropInterpolate2(prop, prefix, v0, i0, v1, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate2;
+function markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding) {
+    const residual = isClassBinding ? tNode.residualClasses : tNode.residualStyles;
+    if (residual != null /* or undefined */ &&
+        typeof tStylingKey == 'string' &&
+        keyValueArrayIndexOf(residual, tStylingKey) >= 0) {
+        // We have duplicate in the residual so mark ourselves as duplicate.
+        tData[index + 1] = setTStylingRangeNextDuplicate(tData[index + 1]);
+    }
 }
 /**
+ * Marks `TStyleValue`s as duplicates if another style binding in the list has the same
+ * `TStyleValue`.
  *
- * Update an interpolated style property on an element with 3 bound values surrounded by text.
+ * NOTE: this function is intended to be called twice once with `isPrevDir` set to `true` and once
+ * with it set to `false` to search both the previous as well as next items in the list.
  *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+ * No duplicate case
+ * ```
+ *   [style.color]
+ *   [style.width.px] <<- index
+ *   [style.height.px]
  * ```
  *
- * Its compiled representation is:
+ * In the above case adding `[style.width.px]` to the existing `[style.color]` produces no
+ * duplicates because `width` is not found in any other part of the linked list.
  *
- * ```ts
- * ɵɵstylePropInterpolate3(0, 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * Duplicate case
  * ```
+ *   [style.color]
+ *   [style.width.em]
+ *   [style.width.px] <<- index
+ * ```
+ * In the above case adding `[style.width.px]` will produce a duplicate with `[style.width.em]`
+ * because `width` is found in the chain.
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * Map case 1
+ * ```
+ *   [style.width.px]
+ *   [style.color]
+ *   [style]  <<- index
+ * ```
+ * In the above case adding `[style]` will produce a duplicate with any other bindings because
+ * `[style]` is a Map and as such is fully dynamic and could produce `color` or `width`.
+ *
+ * Map case 2
+ * ```
+ *   [style]
+ *   [style.width.px]
+ *   [style.color]  <<- index
+ * ```
+ * In the above case adding `[style.color]` will produce a duplicate because there is already a
+ * `[style]` binding which is a Map and as such is fully dynamic and could produce `color` or
+ * `width`.
+ *
+ * NOTE: Once `[style]` (Map) is added into the system all things are mapped as duplicates.
+ * NOTE: We use `style` as example, but same logic is applied to `class`es as well.
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tStylingKey `TStylingKeyPrimitive` which contains the value to compare to other keys in
+ *        the linked list.
+ * @param index Starting location in the linked list to search from
+ * @param isPrevDir Direction.
+ *        - `true` for previous (lower priority);
+ *        - `false` for next (higher priority).
  */
-function ɵɵstylePropInterpolate3(prop, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate3;
+function markDuplicates(tData, tStylingKey, index, isPrevDir) {
+    const tStylingAtIndex = tData[index + 1];
+    const isMap = tStylingKey === null;
+    let cursor = isPrevDir
+        ? getTStylingRangePrev(tStylingAtIndex)
+        : getTStylingRangeNext(tStylingAtIndex);
+    let foundDuplicate = false;
+    // We keep iterating as long as we have a cursor
+    // AND either:
+    // - we found what we are looking for, OR
+    // - we are a map in which case we have to continue searching even after we find what we were
+    //   looking for since we are a wild card and everything needs to be flipped to duplicate.
+    while (cursor !== 0 && (foundDuplicate === false || isMap)) {
+        ngDevMode && assertIndexInRange(tData, cursor);
+        const tStylingValueAtCursor = tData[cursor];
+        const tStyleRangeAtCursor = tData[cursor + 1];
+        if (isStylingMatch(tStylingValueAtCursor, tStylingKey)) {
+            foundDuplicate = true;
+            tData[cursor + 1] = isPrevDir
+                ? setTStylingRangeNextDuplicate(tStyleRangeAtCursor)
+                : setTStylingRangePrevDuplicate(tStyleRangeAtCursor);
+        }
+        cursor = isPrevDir
+            ? getTStylingRangePrev(tStyleRangeAtCursor)
+            : getTStylingRangeNext(tStyleRangeAtCursor);
+    }
+    if (foundDuplicate) {
+        // if we found a duplicate, than mark ourselves.
+        tData[index + 1] = isPrevDir
+            ? setTStylingRangePrevDuplicate(tStylingAtIndex)
+            : setTStylingRangeNextDuplicate(tStylingAtIndex);
+    }
 }
 /**
+ * Determines if two `TStylingKey`s are a match.
  *
- * Update an interpolated style property on an element with 4 bound values surrounded by text.
+ * When computing whether a binding contains a duplicate, we need to compare if the instruction
+ * `TStylingKey` has a match.
  *
- * Used when the value passed to a property has 4 interpolated values in it:
+ * Here are examples of `TStylingKey`s which match given `tStylingKeyCursor` is:
+ * - `color`
+ *    - `color`    // Match another color
+ *    - `null`     // That means that `tStylingKey` is a `classMap`/`styleMap` instruction
+ *    - `['', 'color', 'other', true]` // wrapped `color` so match
+ *    - `['', null, 'other', true]`       // wrapped `null` so match
+ *    - `['', 'width', 'color', 'value']` // wrapped static value contains a match on `'color'`
+ * - `null`       // `tStylingKeyCursor` always match as it is `classMap`/`styleMap` instruction
  *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate4(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param tStylingKeyCursor
+ * @param tStylingKey
  */
-function ɵɵstylePropInterpolate4(prop, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate4;
+function isStylingMatch(tStylingKeyCursor, tStylingKey) {
+    ngDevMode &&
+        assertNotEqual(Array.isArray(tStylingKey), true, "Expected that 'tStylingKey' has been unwrapped");
+    if (tStylingKeyCursor === null || // If the cursor is `null` it means that we have map at that
+        // location so we must assume that we have a match.
+        tStylingKey == null || // If `tStylingKey` is `null` then it is a map therefor assume that it
+        // contains a match.
+        (Array.isArray(tStylingKeyCursor) ? tStylingKeyCursor[1] : tStylingKeyCursor) === tStylingKey // If the keys match explicitly than we are a match.
+    ) {
+        return true;
+    }
+    else if (Array.isArray(tStylingKeyCursor) && typeof tStylingKey === 'string') {
+        // if we did not find a match, but `tStylingKeyCursor` is `KeyValueArray` that means cursor has
+        // statics and we need to check those as well.
+        return keyValueArrayIndexOf(tStylingKeyCursor, tStylingKey) >= 0; // see if we are matching the key
+    }
+    return false;
+}
+
+// Global state of the parser. (This makes parser non-reentrant, but that is not an issue)
+const parserState = {
+    textEnd: 0,
+    key: 0,
+    keyEnd: 0,
+    value: 0,
+    valueEnd: 0,
+};
+/**
+ * Retrieves the last parsed `key` of style.
+ * @param text the text to substring the key from.
+ */
+function getLastParsedKey(text) {
+    return text.substring(parserState.key, parserState.keyEnd);
 }
 /**
- *
- * Update an interpolated style property on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate5(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * Retrieves the last parsed `value` of style.
+ * @param text the text to substring the key from.
  */
-function ɵɵstylePropInterpolate5(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate5;
+function getLastParsedValue(text) {
+    return text.substring(parserState.value, parserState.valueEnd);
 }
 /**
+ * Initializes `className` string for parsing and parses the first token.
  *
- * Update an interpolated style property on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
+ * This function is intended to be used in this format:
  * ```ts
- * ɵɵstylePropInterpolate6(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
+ *   const key = getLastParsedKey();
+ *   ...
+ * }
  * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param text `className` to parse
+ * @returns index where the next invocation of `parseClassNameNext` should resume.
  */
-function ɵɵstylePropInterpolate6(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate6;
+function parseClassName(text) {
+    resetParserState(text);
+    return parseClassNameNext(text, consumeWhitespace(text, 0, parserState.textEnd));
 }
 /**
+ * Parses next `className` token.
  *
- * Update an interpolated style property on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
+ * This function is intended to be used in this format:
  * ```ts
- * ɵɵstylePropInterpolate7(
- *    0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
+ *   const key = getLastParsedKey();
+ *   ...
+ * }
  * ```
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param text `className` to parse
+ * @param index where the parsing should resume.
+ * @returns index where the next invocation of `parseClassNameNext` should resume.
  */
-function ɵɵstylePropInterpolate7(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate7;
+function parseClassNameNext(text, index) {
+    const end = parserState.textEnd;
+    if (end === index) {
+        return -1;
+    }
+    index = parserState.keyEnd = consumeClassToken(text, (parserState.key = index), end);
+    return consumeWhitespace(text, index, end);
 }
 /**
+ * Initializes `cssText` string for parsing and parses the first key/values.
  *
- * Update an interpolated style property on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
+ * This function is intended to be used in this format:
  * ```ts
- * ɵɵstylePropInterpolate8(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6,
- * '-', v7, 'suffix');
+ * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
+ *   const key = getLastParsedKey();
+ *   const value = getLastParsedValue();
+ *   ...
+ * }
  * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param text `cssText` to parse
+ * @returns index where the next invocation of `parseStyleNext` should resume.
  */
-function ɵɵstylePropInterpolate8(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate8;
+function parseStyle(text) {
+    resetParserState(text);
+    return parseStyleNext(text, consumeWhitespace(text, 0, parserState.textEnd));
 }
 /**
- * Update an interpolated style property on an element with 9 or more bound values surrounded by
- * text.
+ * Parses the next `cssText` key/values.
  *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix">
- * </div>
- * ```
- *
- * Its compiled representation is:
- *
+ * This function is intended to be used in this format:
  * ```ts
- * ɵɵstylePropInterpolateV(
- *  0, ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
+ * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
+ *   const key = getLastParsedKey();
+ *   const value = getLastParsedValue();
+ *   ...
+ * }
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`..
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
+ * @param text `cssText` to parse
+ * @param index where the parsing should resume.
+ * @returns index where the next invocation of `parseStyleNext` should resume.
+ */
+function parseStyleNext(text, startIndex) {
+    const end = parserState.textEnd;
+    let index = (parserState.key = consumeWhitespace(text, startIndex, end));
+    if (end === index) {
+        // we reached an end so just quit
+        return -1;
+    }
+    index = parserState.keyEnd = consumeStyleKey(text, index, end);
+    index = consumeSeparator(text, index, end, 58 /* CharCode.COLON */);
+    index = parserState.value = consumeWhitespace(text, index, end);
+    index = parserState.valueEnd = consumeStyleValue(text, index, end);
+    return consumeSeparator(text, index, end, 59 /* CharCode.SEMI_COLON */);
+}
+/**
+ * Reset the global state of the styling parser.
+ * @param text The styling text to parse.
+ */
+function resetParserState(text) {
+    parserState.key = 0;
+    parserState.keyEnd = 0;
+    parserState.value = 0;
+    parserState.valueEnd = 0;
+    parserState.textEnd = text.length;
+}
+/**
+ * Returns index of next non-whitespace character.
+ *
+ * @param text Text to scan
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index of next non-whitespace character (May be the same as `start` if no whitespace at
+ *          that location.)
+ */
+function consumeWhitespace(text, startIndex, endIndex) {
+    while (startIndex < endIndex && text.charCodeAt(startIndex) <= 32 /* CharCode.SPACE */) {
+        startIndex++;
+    }
+    return startIndex;
+}
+/**
+ * Returns index of last char in class token.
+ *
+ * @param text Text to scan
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index after last char in class token.
+ */
+function consumeClassToken(text, startIndex, endIndex) {
+    while (startIndex < endIndex && text.charCodeAt(startIndex) > 32 /* CharCode.SPACE */) {
+        startIndex++;
+    }
+    return startIndex;
+}
+/**
+ * Consumes all of the characters belonging to style key and token.
+ *
+ * @param text Text to scan
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index after last style key character.
+ */
+function consumeStyleKey(text, startIndex, endIndex) {
+    let ch;
+    while (startIndex < endIndex &&
+        ((ch = text.charCodeAt(startIndex)) === 45 /* CharCode.DASH */ ||
+            ch === 95 /* CharCode.UNDERSCORE */ ||
+            ((ch & -33 /* CharCode.UPPER_CASE */) >= 65 /* CharCode.A */ && (ch & -33 /* CharCode.UPPER_CASE */) <= 90 /* CharCode.Z */) ||
+            (ch >= 48 /* CharCode.ZERO */ && ch <= 57 /* CharCode.NINE */))) {
+        startIndex++;
+    }
+    return startIndex;
+}
+/**
+ * Consumes all whitespace and the separator `:` after the style key.
+ *
+ * @param text Text to scan
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index after separator and surrounding whitespace.
+ */
+function consumeSeparator(text, startIndex, endIndex, separator) {
+    startIndex = consumeWhitespace(text, startIndex, endIndex);
+    if (startIndex < endIndex) {
+        if (ngDevMode && text.charCodeAt(startIndex) !== separator) {
+            malformedStyleError(text, String.fromCharCode(separator), startIndex);
+        }
+        startIndex++;
+    }
+    return startIndex;
+}
+/**
+ * Consumes style value honoring `url()` and `""` text.
+ *
+ * @param text Text to scan
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index after last style value character.
+ */
+function consumeStyleValue(text, startIndex, endIndex) {
+    let ch1 = -1; // 1st previous character
+    let ch2 = -1; // 2nd previous character
+    let ch3 = -1; // 3rd previous character
+    let i = startIndex;
+    let lastChIndex = i;
+    while (i < endIndex) {
+        const ch = text.charCodeAt(i++);
+        if (ch === 59 /* CharCode.SEMI_COLON */) {
+            return lastChIndex;
+        }
+        else if (ch === 34 /* CharCode.DOUBLE_QUOTE */ || ch === 39 /* CharCode.SINGLE_QUOTE */) {
+            lastChIndex = i = consumeQuotedText(text, ch, i, endIndex);
+        }
+        else if (startIndex === i - 4 && // We have seen only 4 characters so far "URL(" (Ignore "foo_URL()")
+            ch3 === 85 /* CharCode.U */ &&
+            ch2 === 82 /* CharCode.R */ &&
+            ch1 === 76 /* CharCode.L */ &&
+            ch === 40 /* CharCode.OPEN_PAREN */) {
+            lastChIndex = i = consumeQuotedText(text, 41 /* CharCode.CLOSE_PAREN */, i, endIndex);
+        }
+        else if (ch > 32 /* CharCode.SPACE */) {
+            // if we have a non-whitespace character then capture its location
+            lastChIndex = i;
+        }
+        ch3 = ch2;
+        ch2 = ch1;
+        ch1 = ch & -33 /* CharCode.UPPER_CASE */;
+    }
+    return lastChIndex;
+}
+/**
+ * Consumes all of the quoted characters.
+ *
+ * @param text Text to scan
+ * @param quoteCharCode CharCode of either `"` or `'` quote or `)` for `url(...)`.
+ * @param startIndex Starting index of character where the scan should start.
+ * @param endIndex Ending index of character where the scan should end.
+ * @returns Index after quoted characters.
+ */
+function consumeQuotedText(text, quoteCharCode, startIndex, endIndex) {
+    let ch1 = -1; // 1st previous character
+    let index = startIndex;
+    while (index < endIndex) {
+        const ch = text.charCodeAt(index++);
+        if (ch == quoteCharCode && ch1 !== 92 /* CharCode.BACK_SLASH */) {
+            return index;
+        }
+        if (ch == 92 /* CharCode.BACK_SLASH */ && ch1 === 92 /* CharCode.BACK_SLASH */) {
+            // two back slashes cancel each other out. For example `"\\"` should properly end the
+            // quotation. (It should not assume that the last `"` is escaped.)
+            ch1 = 0;
+        }
+        else {
+            ch1 = ch;
+        }
+    }
+    throw ngDevMode
+        ? malformedStyleError(text, String.fromCharCode(quoteCharCode), endIndex)
+        : new Error();
+}
+function malformedStyleError(text, expecting, index) {
+    ngDevMode && assertEqual(typeof text === 'string', true, 'String expected here');
+    throw throwError(`Malformed style at location ${index} in string '` +
+        text.substring(0, index) +
+        '[>>' +
+        text.substring(index, index + 1) +
+        '<<]' +
+        text.slice(index + 1) +
+        `'. Expecting '${expecting}'.`);
+}
+
+/**
+ * Update a style binding on an element with the provided value.
+ *
+ * If the style value is falsy then it will be removed from the element
+ * (or assigned a different value depending if there are any styles placed
+ * on the element with `styleMap` or any static styles that are
+ * present from when the element was created with `styling`).
+ *
+ * Note that the styling element is updated as part of `stylingApply`.
+ *
+ * @param prop A valid CSS property.
+ * @param value New value to write (`null` or an empty string to remove).
+ * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *
+ * Note that this will apply the provided style value to the host element if this function is called
+ * within a host binding function.
+ *
  * @codeGenApi
  */
-function ɵɵstylePropInterpolateV(prop, values, valueSuffix) {
+function ɵɵstyleProp(prop, value, suffix) {
+    checkStylingProperty(prop, value, suffix, false);
+    return ɵɵstyleProp;
+}
+/**
+ * Update a class binding on an element with the provided value.
+ *
+ * This instruction is meant to handle the `[class.foo]="exp"` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `styling` within the creation block.
+ *
+ * @param prop A valid CSS class (only one).
+ * @param value A true/false value which will turn the class on or off.
+ *
+ * Note that this will apply the provided class value to the host element if this function
+ * is called within a host binding function.
+ *
+ * @codeGenApi
+ */
+function ɵɵclassProp(className, value) {
+    checkStylingProperty(className, value, null, true);
+    return ɵɵclassProp;
+}
+/**
+ * Update style bindings using an object literal on an element.
+ *
+ * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
+ * When styles are applied to the element they will then be updated with respect to
+ * any styles/classes set via `styleProp`. If any styles are set to falsy
+ * then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `stylingApply` is called.
+ *
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * Note that this will apply the provided styleMap value to the host element if this function
+ * is called within a host binding.
+ *
+ * @codeGenApi
+ */
+function ɵɵstyleMap(styles) {
+    checkStylingMap(styleKeyValueArraySet, styleStringParser, styles, false);
+}
+/**
+ * Parse text as style and add values to KeyValueArray.
+ *
+ * This code is pulled out to a separate function so that it can be tree shaken away if it is not
+ * needed. It is only referenced from `ɵɵstyleMap`.
+ *
+ * @param keyValueArray KeyValueArray to add parsed values to.
+ * @param text text to parse.
+ */
+function styleStringParser(keyValueArray, text) {
+    for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i)) {
+        styleKeyValueArraySet(keyValueArray, getLastParsedKey(text), getLastParsedValue(text));
+    }
+}
+/**
+ * Update class bindings using an object literal or class-string on an element.
+ *
+ * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
+ * When classes are applied to the element they will then be updated with
+ * respect to any styles/classes set via `classProp`. If any
+ * classes are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `stylingApply` is called.
+ * Note that this will the provided classMap value to the host element if this function is called
+ * within a host binding.
+ *
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ *
+ * @codeGenApi
+ */
+function ɵɵclassMap(classes) {
+    checkStylingMap(classKeyValueArraySet, classStringParser, classes, true);
+}
+/**
+ * Parse text as class and add values to KeyValueArray.
+ *
+ * This code is pulled out to a separate function so that it can be tree shaken away if it is not
+ * needed. It is only referenced from `ɵɵclassMap`.
+ *
+ * @param keyValueArray KeyValueArray to add parsed values to.
+ * @param text text to parse.
+ */
+function classStringParser(keyValueArray, text) {
+    for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
+        keyValueArraySet(keyValueArray, getLastParsedKey(text), true);
+    }
+}
+/**
+ * Common code between `ɵɵclassProp` and `ɵɵstyleProp`.
+ *
+ * @param prop property name.
+ * @param value binding value.
+ * @param suffix suffix for the property (e.g. `em` or `px`)
+ * @param isClassBased `true` if `class` change (`false` if `style`)
+ */
+function checkStylingProperty(prop, value, suffix, isClassBased) {
     const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolateV;
+    const tView = getTView();
+    // Styling instructions use 2 slots per binding.
+    // 1. one for the value / TStylingKey
+    // 2. one for the intermittent-value / TStylingRange
+    const bindingIndex = incrementBindingIndex(2);
+    if (tView.firstUpdatePass) {
+        stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
+    }
+    if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
+        const tNode = tView.data[getSelectedIndex()];
+        updateStyling(tView, tNode, lView, lView[RENDERER], prop, (lView[bindingIndex + 1] = normalizeSuffix(value, suffix)), isClassBased, bindingIndex);
+    }
+}
+/**
+ * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
+ *
+ * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ *        function so that `style` can be processed. This is done for tree shaking purposes.
+ * @param stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
+ *        have different parsers.)
+ * @param value bound value from application
+ * @param isClassBased `true` if `class` change (`false` if `style`)
+ */
+function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
+    const tView = getTView();
+    const bindingIndex = incrementBindingIndex(2);
+    if (tView.firstUpdatePass) {
+        stylingFirstUpdatePass(tView, null, bindingIndex, isClassBased);
+    }
+    const lView = getLView();
+    if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
+        // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
+        // if so as not to read unnecessarily.
+        const tNode = tView.data[getSelectedIndex()];
+        if (hasStylingInputShadow(tNode, isClassBased) && !isInHostBindings(tView, bindingIndex)) {
+            if (ngDevMode) {
+                // verify that if we are shadowing then `TData` is appropriately marked so that we skip
+                // processing this binding in styling resolution.
+                const tStylingKey = tView.data[bindingIndex];
+                assertEqual(Array.isArray(tStylingKey) ? tStylingKey[1] : tStylingKey, false, "Styling linked list shadow input should be marked as 'false'");
+            }
+            // VE does not concatenate the static portion like we are doing here.
+            // Instead VE just ignores the static completely if dynamic binding is present.
+            // Because of locality we have already set the static portion because we don't know if there
+            // is a dynamic portion until later. If we would ignore the static portion it would look like
+            // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
+            // thing as it would think that the static portion was removed. For this reason we
+            // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
+            let staticPrefix = isClassBased ? tNode.classesWithoutHost : tNode.stylesWithoutHost;
+            ngDevMode &&
+                isClassBased === false &&
+                staticPrefix !== null &&
+                assertEqual(staticPrefix.endsWith(';'), true, "Expecting static portion to end with ';'");
+            if (staticPrefix !== null) {
+                // We want to make sure that falsy values of `value` become empty strings.
+                value = concatStringsWithSpace(staticPrefix, value ? value : '');
+            }
+            // Given `<div [style] my-dir>` such that `my-dir` has `@Input('style')`.
+            // This takes over the `[style]` binding. (Same for `[class]`)
+            setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased);
+        }
+        else {
+            updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], (lView[bindingIndex + 1] = toStylingKeyValueArray(keyValueArraySet, stringParser, value)), isClassBased, bindingIndex);
+        }
+    }
+}
+/**
+ * Determines when the binding is in `hostBindings` section
+ *
+ * @param tView Current `TView`
+ * @param bindingIndex index of binding which we would like if it is in `hostBindings`
+ */
+function isInHostBindings(tView, bindingIndex) {
+    // All host bindings are placed after the expando section.
+    return bindingIndex >= tView.expandoStartIndex;
+}
+/**
+ * Collects the necessary information to insert the binding into a linked list of style bindings
+ * using `insertTStylingBinding`.
+ *
+ * @param tView `TView` where the binding linked list will be stored.
+ * @param tStylingKey Property/key of the binding.
+ * @param bindingIndex Index of binding associated with the `prop`
+ * @param isClassBased `true` if `class` change (`false` if `style`)
+ */
+function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
+    ngDevMode && assertFirstUpdatePass(tView);
+    const tData = tView.data;
+    if (tData[bindingIndex + 1] === null) {
+        // The above check is necessary because we don't clear first update pass until first successful
+        // (no exception) template execution. This prevents the styling instruction from double adding
+        // itself to the list.
+        // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
+        // if so as not to read unnecessarily.
+        const tNode = tData[getSelectedIndex()];
+        ngDevMode && assertDefined(tNode, 'TNode expected');
+        const isHostBindings = isInHostBindings(tView, bindingIndex);
+        if (hasStylingInputShadow(tNode, isClassBased) && tStylingKey === null && !isHostBindings) {
+            // `tStylingKey === null` implies that we are either `[style]` or `[class]` binding.
+            // If there is a directive which uses `@Input('style')` or `@Input('class')` than
+            // we need to neutralize this binding since that directive is shadowing it.
+            // We turn this into a noop by setting the key to `false`
+            tStylingKey = false;
+        }
+        tStylingKey = wrapInStaticStylingKey(tData, tNode, tStylingKey, isClassBased);
+        insertTStylingBinding(tData, tNode, tStylingKey, bindingIndex, isHostBindings, isClassBased);
+    }
+}
+/**
+ * Adds static styling information to the binding if applicable.
+ *
+ * The linked list of styles not only stores the list and keys, but also stores static styling
+ * information on some of the keys. This function determines if the key should contain the styling
+ * information and computes it.
+ *
+ * See `TStylingStatic` for more details.
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param stylingKey `TStylingKeyPrimitive` which may need to be wrapped into `TStylingKey`
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function wrapInStaticStylingKey(tData, tNode, stylingKey, isClassBased) {
+    const hostDirectiveDef = getCurrentDirectiveDef(tData);
+    let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
+    if (hostDirectiveDef === null) {
+        // We are in template node.
+        // If template node already had styling instruction then it has already collected the static
+        // styling and there is no need to collect them again. We know that we are the first styling
+        // instruction because the `TNode.*Bindings` points to 0 (nothing has been inserted yet).
+        const isFirstStylingInstructionInTemplate = (isClassBased ? tNode.classBindings : tNode.styleBindings) === 0;
+        if (isFirstStylingInstructionInTemplate) {
+            // It would be nice to be able to get the statics from `mergeAttrs`, however, at this point
+            // they are already merged and it would not be possible to figure which property belongs where
+            // in the priority.
+            stylingKey = collectStylingFromDirectives(null, tData, tNode, stylingKey, isClassBased);
+            stylingKey = collectStylingFromTAttrs(stylingKey, tNode.attrs, isClassBased);
+            // We know that if we have styling binding in template we can't have residual.
+            residual = null;
+        }
+    }
+    else {
+        // We are in host binding node and there was no binding instruction in template node.
+        // This means that we need to compute the residual.
+        const directiveStylingLast = tNode.directiveStylingLast;
+        const isFirstStylingInstructionInHostBinding = directiveStylingLast === -1 || tData[directiveStylingLast] !== hostDirectiveDef;
+        if (isFirstStylingInstructionInHostBinding) {
+            stylingKey = collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased);
+            if (residual === null) {
+                // - If `null` than either:
+                //    - Template styling instruction already ran and it has consumed the static
+                //      styling into its `TStylingKey` and so there is no need to update residual. Instead
+                //      we need to update the `TStylingKey` associated with the first template node
+                //      instruction. OR
+                //    - Some other styling instruction ran and determined that there are no residuals
+                let templateStylingKey = getTemplateHeadTStylingKey(tData, tNode, isClassBased);
+                if (templateStylingKey !== undefined && Array.isArray(templateStylingKey)) {
+                    // Only recompute if `templateStylingKey` had static values. (If no static value found
+                    // then there is nothing to do since this operation can only produce less static keys, not
+                    // more.)
+                    templateStylingKey = collectStylingFromDirectives(null, tData, tNode, templateStylingKey[1] /* unwrap previous statics */, isClassBased);
+                    templateStylingKey = collectStylingFromTAttrs(templateStylingKey, tNode.attrs, isClassBased);
+                    setTemplateHeadTStylingKey(tData, tNode, isClassBased, templateStylingKey);
+                }
+            }
+            else {
+                // We only need to recompute residual if it is not `null`.
+                // - If existing residual (implies there was no template styling). This means that some of
+                //   the statics may have moved from the residual to the `stylingKey` and so we have to
+                //   recompute.
+                // - If `undefined` this is the first time we are running.
+                residual = collectResidual(tData, tNode, isClassBased);
+            }
+        }
+    }
+    if (residual !== undefined) {
+        isClassBased ? (tNode.residualClasses = residual) : (tNode.residualStyles = residual);
+    }
+    return stylingKey;
+}
+/**
+ * Retrieve the `TStylingKey` for the template styling instruction.
+ *
+ * This is needed since `hostBinding` styling instructions are inserted after the template
+ * instruction. While the template instruction needs to update the residual in `TNode` the
+ * `hostBinding` instructions need to update the `TStylingKey` of the template instruction because
+ * the template instruction is downstream from the `hostBindings` instructions.
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ * @return `TStylingKey` if found or `undefined` if not found.
+ */
+function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
+    const bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
+    if (getTStylingRangeNext(bindings) === 0) {
+        // There does not seem to be a styling instruction in the `template`.
+        return undefined;
+    }
+    return tData[getTStylingRangePrev(bindings)];
+}
+/**
+ * Update the `TStylingKey` of the first template instruction in `TNode`.
+ *
+ * Logically `hostBindings` styling instructions are of lower priority than that of the template.
+ * However, they execute after the template styling instructions. This means that they get inserted
+ * in front of the template styling instructions.
+ *
+ * If we have a template styling instruction and a new `hostBindings` styling instruction is
+ * executed it means that it may need to steal static fields from the template instruction. This
+ * method allows us to update the first template instruction `TStylingKey` with a new value.
+ *
+ * Assume:
+ * ```angular-ts
+ * <div my-dir style="color: red" [style.color]="tmplExp"></div>
+ *
+ * @Directive({
+ *   host: {
+ *     'style': 'width: 100px',
+ *     '[style.color]': 'dirExp',
+ *   }
+ * })
+ * class MyDir {}
+ * ```
+ *
+ * when `[style.color]="tmplExp"` executes it creates this data structure.
+ * ```ts
+ *  ['', 'color', 'color', 'red', 'width', '100px'],
+ * ```
+ *
+ * The reason for this is that the template instruction does not know if there are styling
+ * instructions and must assume that there are none and must collect all of the static styling.
+ * (both
+ * `color' and 'width`)
+ *
+ * When `'[style.color]': 'dirExp',` executes we need to insert a new data into the linked list.
+ * ```ts
+ *  ['', 'color', 'width', '100px'],  // newly inserted
+ *  ['', 'color', 'color', 'red', 'width', '100px'], // this is wrong
+ * ```
+ *
+ * Notice that the template statics is now wrong as it incorrectly contains `width` so we need to
+ * update it like so:
+ * ```ts
+ *  ['', 'color', 'width', '100px'],
+ *  ['', 'color', 'color', 'red'],    // UPDATE
+ * ```
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ * @param tStylingKey New `TStylingKey` which is replacing the old one.
+ */
+function setTemplateHeadTStylingKey(tData, tNode, isClassBased, tStylingKey) {
+    const bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
+    ngDevMode &&
+        assertNotEqual(getTStylingRangeNext(bindings), 0, 'Expecting to have at least one template styling binding.');
+    tData[getTStylingRangePrev(bindings)] = tStylingKey;
+}
+/**
+ * Collect all static values after the current `TNode.directiveStylingLast` index.
+ *
+ * Collect the remaining styling information which has not yet been collected by an existing
+ * styling instruction.
+ *
+ * @param tData `TData` where the `DirectiveDefs` are stored.
+ * @param tNode `TNode` which contains the directive range.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function collectResidual(tData, tNode, isClassBased) {
+    let residual = undefined;
+    const directiveEnd = tNode.directiveEnd;
+    ngDevMode &&
+        assertNotEqual(tNode.directiveStylingLast, -1, 'By the time this function gets called at least one hostBindings-node styling instruction must have executed.');
+    // We add `1 + tNode.directiveStart` because we need to skip the current directive (as we are
+    // collecting things after the last `hostBindings` directive which had a styling instruction.)
+    for (let i = 1 + tNode.directiveStylingLast; i < directiveEnd; i++) {
+        const attrs = tData[i].hostAttrs;
+        residual = collectStylingFromTAttrs(residual, attrs, isClassBased);
+    }
+    return collectStylingFromTAttrs(residual, tNode.attrs, isClassBased);
+}
+/**
+ * Collect the static styling information with lower priority than `hostDirectiveDef`.
+ *
+ * (This is opposite of residual styling.)
+ *
+ * @param hostDirectiveDef `DirectiveDef` for which we want to collect lower priority static
+ *        styling. (Or `null` if template styling)
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param stylingKey Existing `TStylingKey` to update or wrap.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased) {
+    // We need to loop because there can be directives which have `hostAttrs` but don't have
+    // `hostBindings` so this loop catches up to the current directive..
+    let currentDirective = null;
+    const directiveEnd = tNode.directiveEnd;
+    let directiveStylingLast = tNode.directiveStylingLast;
+    if (directiveStylingLast === -1) {
+        directiveStylingLast = tNode.directiveStart;
+    }
+    else {
+        directiveStylingLast++;
+    }
+    while (directiveStylingLast < directiveEnd) {
+        currentDirective = tData[directiveStylingLast];
+        ngDevMode && assertDefined(currentDirective, 'expected to be defined');
+        stylingKey = collectStylingFromTAttrs(stylingKey, currentDirective.hostAttrs, isClassBased);
+        if (currentDirective === hostDirectiveDef)
+            break;
+        directiveStylingLast++;
+    }
+    if (hostDirectiveDef !== null) {
+        // we only advance the styling cursor if we are collecting data from host bindings.
+        // Template executes before host bindings and so if we would update the index,
+        // host bindings would not get their statics.
+        tNode.directiveStylingLast = directiveStylingLast;
+    }
+    return stylingKey;
+}
+/**
+ * Convert `TAttrs` into `TStylingStatic`.
+ *
+ * @param stylingKey existing `TStylingKey` to update or wrap.
+ * @param attrs `TAttributes` to process.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
+    const desiredMarker = isClassBased ? 1 /* AttributeMarker.Classes */ : 2 /* AttributeMarker.Styles */;
+    let currentMarker = -1 /* AttributeMarker.ImplicitAttributes */;
+    if (attrs !== null) {
+        for (let i = 0; i < attrs.length; i++) {
+            const item = attrs[i];
+            if (typeof item === 'number') {
+                currentMarker = item;
+            }
+            else {
+                if (currentMarker === desiredMarker) {
+                    if (!Array.isArray(stylingKey)) {
+                        stylingKey = stylingKey === undefined ? [] : ['', stylingKey];
+                    }
+                    keyValueArraySet(stylingKey, item, isClassBased ? true : attrs[++i]);
+                }
+            }
+        }
+    }
+    return stylingKey === undefined ? null : stylingKey;
+}
+/**
+ * Convert user input to `KeyValueArray`.
+ *
+ * This function takes user input which could be `string`, Object literal, or iterable and converts
+ * it into a consistent representation. The output of this is `KeyValueArray` (which is an array
+ * where
+ * even indexes contain keys and odd indexes contain values for those keys).
+ *
+ * The advantage of converting to `KeyValueArray` is that we can perform diff in an input
+ * independent
+ * way.
+ * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
+ * applied)
+ *
+ * The fact that `KeyValueArray` is sorted is very important because it allows us to compute the
+ * difference in linear fashion without the need to allocate any additional data.
+ *
+ * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
+ * which values need to be deleted, over the new `Map` to determine additions, and we would have to
+ * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
+ *
+ * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ *        function so that `style` can be processed. This is done
+ *        for tree shaking purposes.
+ * @param stringParser The parser is passed in so that it will be tree shakable. See
+ *        `styleStringParser` and `classStringParser`
+ * @param value The value to parse/convert to `KeyValueArray`
+ */
+function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
+    if (value == null /*|| value === undefined */ || value === '')
+        return EMPTY_ARRAY;
+    const styleKeyValueArray = [];
+    const unwrappedValue = unwrapSafeValue(value);
+    if (Array.isArray(unwrappedValue)) {
+        for (let i = 0; i < unwrappedValue.length; i++) {
+            keyValueArraySet(styleKeyValueArray, unwrappedValue[i], true);
+        }
+    }
+    else if (typeof unwrappedValue === 'object') {
+        for (const key in unwrappedValue) {
+            if (unwrappedValue.hasOwnProperty(key)) {
+                keyValueArraySet(styleKeyValueArray, key, unwrappedValue[key]);
+            }
+        }
+    }
+    else if (typeof unwrappedValue === 'string') {
+        stringParser(styleKeyValueArray, unwrappedValue);
+    }
+    else {
+        ngDevMode &&
+            throwError('Unsupported styling type: ' + typeof unwrappedValue + ' (' + unwrappedValue + ')');
+    }
+    return styleKeyValueArray;
+}
+/**
+ * Set a `value` for a `key`.
+ *
+ * See: `keyValueArraySet` for details
+ *
+ * @param keyValueArray KeyValueArray to add to.
+ * @param key Style key to add.
+ * @param value The value to set.
+ */
+function styleKeyValueArraySet(keyValueArray, key, value) {
+    keyValueArraySet(keyValueArray, key, unwrapSafeValue(value));
+}
+/**
+ * Class-binding-specific function for setting the `value` for a `key`.
+ *
+ * See: `keyValueArraySet` for details
+ *
+ * @param keyValueArray KeyValueArray to add to.
+ * @param key Style key to add.
+ * @param value The value to set.
+ */
+function classKeyValueArraySet(keyValueArray, key, value) {
+    // We use `classList.add` to eventually add the CSS classes to the DOM node. Any value passed into
+    // `add` is stringified and added to the `class` attribute, e.g. even null, undefined or numbers
+    // will be added. Stringify the key here so that our internal data structure matches the value in
+    // the DOM. The only exceptions are empty strings and strings that contain spaces for which
+    // the browser throws an error. We ignore such values, because the error is somewhat cryptic.
+    const stringKey = String(key);
+    if (stringKey !== '' && !stringKey.includes(' ')) {
+        keyValueArraySet(keyValueArray, stringKey, value);
+    }
+}
+/**
+ * Update map based styling.
+ *
+ * Map based styling could be anything which contains more than one binding. For example `string`,
+ * or object literal. Dealing with all of these types would complicate the logic so
+ * instead this function expects that the complex input is first converted into normalized
+ * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
+ * very cheap to compute deltas between the previous and current value.
+ *
+ * @param tView Associated `TView.data` contains the linked list of binding priorities.
+ * @param tNode `TNode` where the binding is located.
+ * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
+ * @param renderer Renderer to use if any updates.
+ * @param oldKeyValueArray Previous value represented as `KeyValueArray`
+ * @param newKeyValueArray Current value represented as `KeyValueArray`
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ * @param bindingIndex Binding index of the binding.
+ */
+function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
+    if (oldKeyValueArray === NO_CHANGE) {
+        // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
+        oldKeyValueArray = EMPTY_ARRAY;
+    }
+    let oldIndex = 0;
+    let newIndex = 0;
+    let oldKey = 0 < oldKeyValueArray.length ? oldKeyValueArray[0] : null;
+    let newKey = 0 < newKeyValueArray.length ? newKeyValueArray[0] : null;
+    while (oldKey !== null || newKey !== null) {
+        ngDevMode && assertLessThan(oldIndex, 999, 'Are we stuck in infinite loop?');
+        ngDevMode && assertLessThan(newIndex, 999, 'Are we stuck in infinite loop?');
+        const oldValue = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex + 1] : undefined;
+        const newValue = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex + 1] : undefined;
+        let setKey = null;
+        let setValue = undefined;
+        if (oldKey === newKey) {
+            // UPDATE: Keys are equal => new value is overwriting old value.
+            oldIndex += 2;
+            newIndex += 2;
+            if (oldValue !== newValue) {
+                setKey = newKey;
+                setValue = newValue;
+            }
+        }
+        else if (newKey === null || (oldKey !== null && oldKey < newKey)) {
+            // DELETE: oldKey key is missing or we did not find the oldKey in the newValue
+            // (because the keyValueArray is sorted and `newKey` is found later alphabetically).
+            // `"background" < "color"` so we need to delete `"background"` because it is not found in the
+            // new array.
+            oldIndex += 2;
+            setKey = oldKey;
+        }
+        else {
+            // CREATE: newKey's is earlier alphabetically than oldKey's (or no oldKey) => we have new key.
+            // `"color" > "background"` so we need to add `color` because it is in new array but not in
+            // old array.
+            ngDevMode && assertDefined(newKey, 'Expecting to have a valid key');
+            newIndex += 2;
+            setKey = newKey;
+            setValue = newValue;
+        }
+        if (setKey !== null) {
+            updateStyling(tView, tNode, lView, renderer, setKey, setValue, isClassBased, bindingIndex);
+        }
+        oldKey = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex] : null;
+        newKey = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex] : null;
+    }
+}
+/**
+ * Update a simple (property name) styling.
+ *
+ * This function takes `prop` and updates the DOM to that value. The function takes the binding
+ * value as well as binding priority into consideration to determine which value should be written
+ * to DOM. (For example it may be determined that there is a higher priority overwrite which blocks
+ * the DOM write, or if the value goes to `undefined` a lower priority overwrite may be consulted.)
+ *
+ * @param tView Associated `TView.data` contains the linked list of binding priorities.
+ * @param tNode `TNode` where the binding is located.
+ * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
+ * @param renderer Renderer to use if any updates.
+ * @param prop Either style property name or a class name.
+ * @param value Either style value for `prop` or `true`/`false` if `prop` is class.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ * @param bindingIndex Binding index of the binding.
+ */
+function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased, bindingIndex) {
+    if (!(tNode.type & 3 /* TNodeType.AnyRNode */)) {
+        // It is possible to have styling on non-elements (such as ng-container).
+        // This is rare, but it does happen. In such a case, just ignore the binding.
+        return;
+    }
+    const tData = tView.data;
+    const tRange = tData[bindingIndex + 1];
+    const higherPriorityValue = getTStylingRangeNextDuplicate(tRange)
+        ? findStylingValue(tData, tNode, lView, prop, getTStylingRangeNext(tRange), isClassBased)
+        : undefined;
+    if (!isStylingValuePresent(higherPriorityValue)) {
+        // We don't have a next duplicate, or we did not find a duplicate value.
+        if (!isStylingValuePresent(value)) {
+            // We should delete current value or restore to lower priority value.
+            if (getTStylingRangePrevDuplicate(tRange)) {
+                // We have a possible prev duplicate, let's retrieve it.
+                value = findStylingValue(tData, null, lView, prop, bindingIndex, isClassBased);
+            }
+        }
+        const rNode = getNativeByIndex(getSelectedIndex(), lView);
+        applyStyling(renderer, isClassBased, rNode, prop, value);
+    }
+}
+/**
+ * Search for styling value with higher priority which is overwriting current value, or a
+ * value of lower priority to which we should fall back if the value is `undefined`.
+ *
+ * When value is being applied at a location, related values need to be consulted.
+ * - If there is a higher priority binding, we should be using that one instead.
+ *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp1`
+ *   requires that we check `exp2` to see if it is set to value other than `undefined`.
+ * - If there is a lower priority binding and we are changing to `undefined`
+ *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp2` to
+ *   `undefined` requires that we check `exp1` (and static values) and use that as new value.
+ *
+ * NOTE: The styling stores two values.
+ * 1. The raw value which came from the application is stored at `index + 0` location. (This value
+ *    is used for dirty checking).
+ * 2. The normalized value is stored at `index + 1`.
+ *
+ * @param tData `TData` used for traversing the priority.
+ * @param tNode `TNode` to use for resolving static styling. Also controls search direction.
+ *   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
+ *      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
+ *   - `null` search prev and go all the way to end. Return last value where
+ *     `isStylingValuePresent(value)` is true.
+ * @param lView `LView` used for retrieving the actual values.
+ * @param prop Property which we are interested in.
+ * @param index Starting index in the linked list of styling bindings where the search should start.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
+    // `TNode` to use for resolving static styling. Also controls search direction.
+    //   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
+    //      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
+    //   - `null` search prev and go all the way to end. Return last value where
+    //     `isStylingValuePresent(value)` is true.
+    const isPrevDirection = tNode === null;
+    let value = undefined;
+    while (index > 0) {
+        const rawKey = tData[index];
+        const containsStatics = Array.isArray(rawKey);
+        // Unwrap the key if we contain static values.
+        const key = containsStatics ? rawKey[1] : rawKey;
+        const isStylingMap = key === null;
+        let valueAtLViewIndex = lView[index + 1];
+        if (valueAtLViewIndex === NO_CHANGE) {
+            // In firstUpdatePass the styling instructions create a linked list of styling.
+            // On subsequent passes it is possible for a styling instruction to try to read a binding
+            // which
+            // has not yet executed. In that case we will find `NO_CHANGE` and we should assume that
+            // we have `undefined` (or empty array in case of styling-map instruction) instead. This
+            // allows the resolution to apply the value (which may later be overwritten when the
+            // binding actually executes.)
+            valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
+        }
+        let currentValue = isStylingMap
+            ? keyValueArrayGet(valueAtLViewIndex, prop)
+            : key === prop
+                ? valueAtLViewIndex
+                : undefined;
+        if (containsStatics && !isStylingValuePresent(currentValue)) {
+            currentValue = keyValueArrayGet(rawKey, prop);
+        }
+        if (isStylingValuePresent(currentValue)) {
+            value = currentValue;
+            if (isPrevDirection) {
+                return value;
+            }
+        }
+        const tRange = tData[index + 1];
+        index = isPrevDirection ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
+    }
+    if (tNode !== null) {
+        // in case where we are going in next direction AND we did not find anything, we need to
+        // consult residual styling
+        let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
+        if (residual != null /** OR residual !=== undefined */) {
+            value = keyValueArrayGet(residual, prop);
+        }
+    }
+    return value;
+}
+/**
+ * Determines if the binding value should be used (or if the value is 'undefined' and hence priority
+ * resolution should be used.)
+ *
+ * @param value Binding style value.
+ */
+function isStylingValuePresent(value) {
+    // Currently only `undefined` value is considered non-binding. That is `undefined` says I don't
+    // have an opinion as to what this binding should be and you should consult other bindings by
+    // priority to determine the valid value.
+    // This is extracted into a single function so that we have a single place to control this.
+    return value !== undefined;
+}
+/**
+ * Normalizes and/or adds a suffix to the value.
+ *
+ * If value is `null`/`undefined` no suffix is added
+ * @param value
+ * @param suffix
+ */
+function normalizeSuffix(value, suffix) {
+    if (value == null || value === '') ;
+    else if (typeof suffix === 'string') {
+        value = value + suffix;
+    }
+    else if (typeof value === 'object') {
+        value = stringify(unwrapSafeValue(value));
+    }
+    return value;
+}
+/**
+ * Tests if the `TNode` has input shadow.
+ *
+ * An input shadow is when a directive steals (shadows) the input by using `@Input('style')` or
+ * `@Input('class')` as input.
+ *
+ * @param tNode `TNode` which we would like to see if it has shadow.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+function hasStylingInputShadow(tNode, isClassBased) {
+    return (tNode.flags & (isClassBased ? 8 /* TNodeFlags.hasClassInput */ : 16 /* TNodeFlags.hasStyleInput */)) !== 0;
 }
 
 /**
@@ -27690,6 +26088,189 @@ function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
 }
 function enableLocateOrCreateTextNodeImpl() {
     _locateOrCreateTextNode = locateOrCreateTextNodeImpl;
+}
+
+/**
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and iterate over it.
+ *
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes.
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function interpolationV(lView, values) {
+    ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
+    let isBindingUpdated = false;
+    let bindingIndex = getBindingIndex();
+    for (let i = 1; i < values.length; i += 2) {
+        // Check if bindings (odd indexes) have changed
+        isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
+    }
+    setBindingIndex(bindingIndex);
+    if (!isBindingUpdated) {
+        return NO_CHANGE;
+    }
+    // Build the updated content
+    let content = values[0];
+    for (let i = 1; i < values.length; i += 2) {
+        // The condition is to prevent an out-of-bound read
+        content += renderStringify(values[i]) + (i + 1 !== values.length ? values[i + 1] : '');
+    }
+    return content;
+}
+/**
+ * Creates an interpolation binding with 1 expression.
+ *
+ * @param prefix static value used for concatenation only.
+ * @param v0 value checked for change.
+ * @param suffix static value used for concatenation only.
+ */
+function interpolation1(lView, prefix, v0, suffix = '') {
+    const different = bindingUpdated(lView, nextBindingIndex(), v0);
+    return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 2 expressions.
+ */
+function interpolation2(lView, prefix, v0, i0, v1, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    const different = bindingUpdated2(lView, bindingIndex, v0, v1);
+    incrementBindingIndex(2);
+    return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 3 expressions.
+ */
+function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
+    incrementBindingIndex(3);
+    return different
+        ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix
+        : NO_CHANGE;
+}
+/**
+ * Create an interpolation binding with 4 expressions.
+ */
+function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    incrementBindingIndex(4);
+    return different
+        ? prefix +
+            renderStringify(v0) +
+            i0 +
+            renderStringify(v1) +
+            i1 +
+            renderStringify(v2) +
+            i2 +
+            renderStringify(v3) +
+            suffix
+        : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 5 expressions.
+ */
+function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
+    incrementBindingIndex(5);
+    return different
+        ? prefix +
+            renderStringify(v0) +
+            i0 +
+            renderStringify(v1) +
+            i1 +
+            renderStringify(v2) +
+            i2 +
+            renderStringify(v3) +
+            i3 +
+            renderStringify(v4) +
+            suffix
+        : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 6 expressions.
+ */
+function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
+    incrementBindingIndex(6);
+    return different
+        ? prefix +
+            renderStringify(v0) +
+            i0 +
+            renderStringify(v1) +
+            i1 +
+            renderStringify(v2) +
+            i2 +
+            renderStringify(v3) +
+            i3 +
+            renderStringify(v4) +
+            i4 +
+            renderStringify(v5) +
+            suffix
+        : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 7 expressions.
+ */
+function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
+    incrementBindingIndex(7);
+    return different
+        ? prefix +
+            renderStringify(v0) +
+            i0 +
+            renderStringify(v1) +
+            i1 +
+            renderStringify(v2) +
+            i2 +
+            renderStringify(v3) +
+            i3 +
+            renderStringify(v4) +
+            i4 +
+            renderStringify(v5) +
+            i5 +
+            renderStringify(v6) +
+            suffix
+        : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 8 expressions.
+ */
+function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix = '') {
+    const bindingIndex = getBindingIndex();
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
+    incrementBindingIndex(8);
+    return different
+        ? prefix +
+            renderStringify(v0) +
+            i0 +
+            renderStringify(v1) +
+            i1 +
+            renderStringify(v2) +
+            i2 +
+            renderStringify(v3) +
+            i3 +
+            renderStringify(v4) +
+            i4 +
+            renderStringify(v5) +
+            i5 +
+            renderStringify(v6) +
+            i6 +
+            renderStringify(v7) +
+            suffix
+        : NO_CHANGE;
 }
 
 /**
@@ -28153,7 +26734,9 @@ function ɵɵattachSourceLocations(templatePath, locations) {
  * @codeGenApi
  */
 function ɵɵinterpolate(v0) {
-    return interpolation1(getLView(), '', v0, '');
+    // Avoid calling into the `interpolate` functions since
+    // we know that we don't have a prefix or suffix.
+    return bindingUpdated(getLView(), nextBindingIndex(), v0) ? renderStringify(v0) : NO_CHANGE;
 }
 /**
  * Interpolate a value with a single bound value.
@@ -29624,16 +28207,6 @@ const angularCoreEnv = (() => ({
     'ɵɵprojectionDef': ɵɵprojectionDef,
     'ɵɵdomProperty': ɵɵdomProperty,
     'ɵɵproperty': ɵɵproperty,
-    'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
-    'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
-    'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
-    'ɵɵpropertyInterpolate3': ɵɵpropertyInterpolate3,
-    'ɵɵpropertyInterpolate4': ɵɵpropertyInterpolate4,
-    'ɵɵpropertyInterpolate5': ɵɵpropertyInterpolate5,
-    'ɵɵpropertyInterpolate6': ɵɵpropertyInterpolate6,
-    'ɵɵpropertyInterpolate7': ɵɵpropertyInterpolate7,
-    'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
-    'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
     'ɵɵpipe': ɵɵpipe,
     'ɵɵqueryRefresh': ɵɵqueryRefresh,
     'ɵɵqueryAdvance': ɵɵqueryAdvance,
@@ -29644,35 +28217,8 @@ const angularCoreEnv = (() => ({
     'ɵɵcontentQuerySignal': ɵɵcontentQuerySignal,
     'ɵɵreference': ɵɵreference,
     'ɵɵclassMap': ɵɵclassMap,
-    'ɵɵclassMapInterpolate1': ɵɵclassMapInterpolate1,
-    'ɵɵclassMapInterpolate2': ɵɵclassMapInterpolate2,
-    'ɵɵclassMapInterpolate3': ɵɵclassMapInterpolate3,
-    'ɵɵclassMapInterpolate4': ɵɵclassMapInterpolate4,
-    'ɵɵclassMapInterpolate5': ɵɵclassMapInterpolate5,
-    'ɵɵclassMapInterpolate6': ɵɵclassMapInterpolate6,
-    'ɵɵclassMapInterpolate7': ɵɵclassMapInterpolate7,
-    'ɵɵclassMapInterpolate8': ɵɵclassMapInterpolate8,
-    'ɵɵclassMapInterpolateV': ɵɵclassMapInterpolateV,
     'ɵɵstyleMap': ɵɵstyleMap,
-    'ɵɵstyleMapInterpolate1': ɵɵstyleMapInterpolate1,
-    'ɵɵstyleMapInterpolate2': ɵɵstyleMapInterpolate2,
-    'ɵɵstyleMapInterpolate3': ɵɵstyleMapInterpolate3,
-    'ɵɵstyleMapInterpolate4': ɵɵstyleMapInterpolate4,
-    'ɵɵstyleMapInterpolate5': ɵɵstyleMapInterpolate5,
-    'ɵɵstyleMapInterpolate6': ɵɵstyleMapInterpolate6,
-    'ɵɵstyleMapInterpolate7': ɵɵstyleMapInterpolate7,
-    'ɵɵstyleMapInterpolate8': ɵɵstyleMapInterpolate8,
-    'ɵɵstyleMapInterpolateV': ɵɵstyleMapInterpolateV,
     'ɵɵstyleProp': ɵɵstyleProp,
-    'ɵɵstylePropInterpolate1': ɵɵstylePropInterpolate1,
-    'ɵɵstylePropInterpolate2': ɵɵstylePropInterpolate2,
-    'ɵɵstylePropInterpolate3': ɵɵstylePropInterpolate3,
-    'ɵɵstylePropInterpolate4': ɵɵstylePropInterpolate4,
-    'ɵɵstylePropInterpolate5': ɵɵstylePropInterpolate5,
-    'ɵɵstylePropInterpolate6': ɵɵstylePropInterpolate6,
-    'ɵɵstylePropInterpolate7': ɵɵstylePropInterpolate7,
-    'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
-    'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
     'ɵɵclassProp': ɵɵclassProp,
     'ɵɵadvance': ɵɵadvance,
     'ɵɵtemplate': ɵɵtemplate,
@@ -32154,5 +30700,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomProperty, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
-//# sourceMappingURL=debug_node-BTS7x1jE.mjs.map
+export { AFTER_RENDER_PHASES, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomProperty, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+//# sourceMappingURL=debug_node-CIB_XU0x.mjs.map
