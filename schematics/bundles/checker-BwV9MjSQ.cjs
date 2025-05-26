@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.13+sha-61c731a
+ * @license Angular v19.2.13+sha-9e1cd49
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17596,8 +17596,7 @@ class _Scanner {
     length;
     peek = 0;
     index = -1;
-    literalInterpolationDepth = 0;
-    braceDepth = 0;
+    braceStack = [];
     constructor(input) {
         this.input = input;
         this.length = input.length;
@@ -17704,18 +17703,17 @@ class _Scanner {
         return newOperatorToken(start, this.index, str);
     }
     scanOpenBrace(start, code) {
-        this.braceDepth++;
+        this.braceStack.push('expression');
         this.advance();
         return newCharacterToken(start, this.index, code);
     }
     scanCloseBrace(start, code) {
         this.advance();
-        if (this.braceDepth === 0 && this.literalInterpolationDepth > 0) {
-            this.literalInterpolationDepth--;
+        const currentBrace = this.braceStack.pop();
+        if (currentBrace === 'interpolation') {
             this.tokens.push(newOperatorToken(start, this.index, '}'));
             return this.scanTemplateLiteralPart(this.index);
         }
-        this.braceDepth--;
         return newCharacterToken(start, this.index, code);
     }
     /**
@@ -17858,7 +17856,7 @@ class _Scanner {
                 this.advance();
                 // @ts-expect-error
                 if (this.peek === $LBRACE) {
-                    this.literalInterpolationDepth++;
+                    this.braceStack.push('interpolation');
                     this.tokens.push(new StringToken(start, dollar, buffer + this.input.substring(marker, dollar), StringTokenKind.TemplateLiteralPart));
                     this.advance();
                     return newOperatorToken(dollar, this.index, this.input.substring(dollar, this.index));
@@ -30744,7 +30742,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.13+sha-61c731a');
+new Version('19.2.13+sha-9e1cd49');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32162,7 +32160,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-5pyJrZ9G.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BwV9MjSQ.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
