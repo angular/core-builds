@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0+sha-f7d33ee
+ * @license Angular v20.0.0+sha-1802d36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3122,12 +3122,10 @@ interface ViewEffectNode extends EffectNode {
  *
  * Implements an iterable interface, therefore it can be used in both ES6
  * javascript `for (var i of items)` loops as well as in Angular templates with
- * `*ngFor="let i of myList"`.
+ * `@for(i of myList; track $index)`.
  *
- * Changes can be observed by subscribing to the changes `Observable`.
- *
- * NOTE: In the future this class will implement an `Observable` interface.
- *
+ * Changes can be observed by subscribing to the `changes` `Observable`.
+ * *
  * @usageNotes
  * ### Example
  * ```ts
@@ -6152,7 +6150,6 @@ declare const EventEmitter: {
  *
  * ```ts
  * import {Component, NgZone} from '@angular/core';
- * import {NgIf} from '@angular/common';
  *
  * @Component({
  *   selector: 'ng-zone-demo',
@@ -6160,7 +6157,9 @@ declare const EventEmitter: {
  *     <h2>Demo: NgZone</h2>
  *
  *     <p>Progress: {{progress}}%</p>
- *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
+ *     @if(progress >= 100) {
+ *        <p>Done processing {{label}} of Angular zone!</p>
+ *     }
  *
  *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
  *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>

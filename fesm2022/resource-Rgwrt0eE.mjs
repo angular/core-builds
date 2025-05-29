@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.0+sha-f7d33ee
+ * @license Angular v20.0.0+sha-1802d36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-0BxwqIgm.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DLtDG1oS.mjs';
 import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-ePSl6jXn.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-2ouAFbCz.mjs';
 
@@ -621,4 +621,4 @@ class ResourceWrappedError extends Error {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-BPCh38bN.mjs.map
+//# sourceMappingURL=resource-Rgwrt0eE.mjs.map
