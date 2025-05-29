@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.1.0-next.0+sha-909e543
+ * @license Angular v20.1.0-next.0+sha-8fa75fe
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import '../event_dispatcher.d-BReQpZfC.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d-DvzAxqBc.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from '../discovery.d-DZNIp-Fw.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from '../discovery.d-R8NPWQG9.js';
 import * as i0 from '@angular/core';
 import '../graph.d-BcIOep_B.js';
 import 'rxjs';
