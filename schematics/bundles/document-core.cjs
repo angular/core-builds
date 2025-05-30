@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-5ccc654
+ * @license Angular v20.1.0-next.0+sha-a70f03a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('./compiler-dFpiknpC.cjs');
+require('./compiler-BIZPZpHa.cjs');
 require('typescript');
-var checker = require('./checker-DA9YVZac.cjs');
+var checker = require('./checker-jhrE0CTC.cjs');
 require('os');
-var apply_import_manager = require('./apply_import_manager-Y9XRFbX1.cjs');
-require('./index-DrXHGg2I.cjs');
+var apply_import_manager = require('./apply_import_manager-7dQNWcat.cjs');
+require('./index-Bl7WF_Q4.cjs');
 require('path');
-var project_paths = require('./project_paths-Rz8Wnode.cjs');
+var project_paths = require('./project_paths-XRaoR647.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
