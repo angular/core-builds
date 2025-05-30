@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-2f0ecfc
+ * @license Angular v20.1.0-next.0+sha-77d2a7c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -256,15 +256,19 @@ function getArrayElementRemovalUpdate(node, parent, sourceText) {
     // trailing comma at the end of the line is fine.
     if (parent.elements[parent.elements.length - 1] === node) {
         for (let i = position - 1; i >= 0; i--) {
-            if (sourceText[i] === ',' || sourceText[i] === ' ') {
+            const char = sourceText[i];
+            if (char === ',' || char === ' ') {
                 position--;
             }
             else {
+                if (whitespaceOrLineFeed.test(char)) {
+                    // Replace the node with its leading whitespace to preserve the formatting.
+                    // This only needs to happen if we're breaking on a newline.
+                    toInsert = leading_space.getLeadingLineWhitespaceOfNode(node);
+                }
                 break;
             }
         }
-        // Replace the node with its leading whitespace to preserve the formatting.
-        toInsert = leading_space.getLeadingLineWhitespaceOfNode(node);
     }
     return new project_paths.TextUpdate({ position, end, toInsert });
 }
