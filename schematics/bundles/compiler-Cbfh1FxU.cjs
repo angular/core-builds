@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-0e58e1f
+ * @license Angular v20.1.0-next.0+sha-fd5a049
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19312,8 +19312,13 @@ class _ParseAST {
         if (this.consumeOptionalCharacter($LPAREN)) {
             this.rparensExpected++;
             const result = this.parsePipe();
+            if (!this.consumeOptionalCharacter($RPAREN)) {
+                this.error('Missing closing parentheses');
+                // Calling into `error` above will attempt to recover up until the next closing paren.
+                // If that's the case, consume it so we can partially recover the expression.
+                this.consumeOptionalCharacter($RPAREN);
+            }
             this.rparensExpected--;
-            this.expectCharacter($RPAREN);
             return new ParenthesizedExpression(this.span(start), this.sourceSpan(start), result);
         }
         else if (this.next.isKeywordNull()) {
@@ -32256,7 +32261,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-0e58e1f');
+new Version('20.1.0-next.0+sha-fd5a049');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
