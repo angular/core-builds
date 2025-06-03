@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.0.0+sha-bc72d7a
+ * @license Angular v20.0.0+sha-32230e6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var compiler = require('./compiler-Dl11rH6-.cjs');
+var compiler = require('./compiler-BXqHhIco.cjs');
 var ts = require('typescript');
 require('os');
 var fs$1 = require('fs');
@@ -355,6 +355,30 @@ exports.ErrorCode = void 0;
      * not match any inputs/outputs of the directive.
      */
     ErrorCode[ErrorCode["UNCLAIMED_DIRECTIVE_BINDING"] = 8018] = "UNCLAIMED_DIRECTIVE_BINDING";
+    /**
+     * An `@defer` block with an implicit trigger does not have a placeholder, for example:
+     *
+     * ```
+     * @defer(on viewport) {
+     *   Hello
+     * }
+     * ```
+     */
+    ErrorCode[ErrorCode["DEFER_IMPLICIT_TRIGGER_MISSING_PLACEHOLDER"] = 8019] = "DEFER_IMPLICIT_TRIGGER_MISSING_PLACEHOLDER";
+    /**
+     * The `@placeholder` for an implicit `@defer` trigger is not set up correctly, for example:
+     *
+     * ```
+     * @defer(on viewport) {
+     *   Hello
+     * } @placeholder {
+     *   <!-- Multiple root nodes. -->
+     *   <button></button>
+     *   <div></div>
+     * }
+     * ```
+     */
+    ErrorCode[ErrorCode["DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER"] = 8020] = "DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER";
     /**
      * A two way binding in a template has an incorrect syntax,
      * parentheses outside brackets. For example:
@@ -1000,7 +1024,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BHgMyU8j.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CLEA_0Sd.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -12292,6 +12316,13 @@ class OutOfBandDiagnosticRecorderImpl {
             `Bindings to directives must target existing inputs or outputs.`;
         this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.keySpan || node.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.UNCLAIMED_DIRECTIVE_BINDING), errorMsg));
     }
+    deferImplicitTriggerMissingPlaceholder(id, trigger) {
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_MISSING_PLACEHOLDER), 'Trigger with no parameters can only be placed on an @defer that has a @placeholder block'));
+    }
+    deferImplicitTriggerInvalidPlaceholder(id, trigger) {
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER), 'Trigger with no parameters can only be placed on an @defer that has a ' +
+            '@placeholder block with exactly one root element node'));
+    }
 }
 function makeInlineDiagnostic(id, code, node, messageText, relatedInformation) {
     return {
@@ -15251,16 +15282,45 @@ class Scope {
             this.opQueue.push(new TcbExpressionOp(this.tcb, this, triggers.when.value));
         }
         if (triggers.hover !== undefined) {
-            this.appendReferenceBasedDeferredTrigger(block, triggers.hover);
+            this.validateReferenceBasedDeferredTrigger(block, triggers.hover);
         }
         if (triggers.interaction !== undefined) {
-            this.appendReferenceBasedDeferredTrigger(block, triggers.interaction);
+            this.validateReferenceBasedDeferredTrigger(block, triggers.interaction);
         }
         if (triggers.viewport !== undefined) {
-            this.appendReferenceBasedDeferredTrigger(block, triggers.viewport);
+            this.validateReferenceBasedDeferredTrigger(block, triggers.viewport);
         }
     }
-    appendReferenceBasedDeferredTrigger(block, trigger) {
+    validateReferenceBasedDeferredTrigger(block, trigger) {
+        if (trigger.reference === null) {
+            if (block.placeholder === null) {
+                this.tcb.oobRecorder.deferImplicitTriggerMissingPlaceholder(this.tcb.id, trigger);
+                return;
+            }
+            let rootNode = null;
+            for (const child of block.placeholder.children) {
+                // Skip over empty text nodes if the host doesn't preserve whitespaces.
+                if (!this.tcb.hostPreserveWhitespaces &&
+                    child instanceof compiler.Text$3 &&
+                    child.value.trim().length === 0) {
+                    continue;
+                }
+                // Capture the first root node.
+                if (rootNode === null) {
+                    rootNode = child;
+                }
+                else {
+                    // More than one root node is invalid. Reset it and break
+                    // the loop so the assertion below can flag it.
+                    rootNode = null;
+                    break;
+                }
+            }
+            if (rootNode === null || !(rootNode instanceof compiler.Element)) {
+                this.tcb.oobRecorder.deferImplicitTriggerInvalidPlaceholder(this.tcb.id, trigger);
+            }
+            return;
+        }
         if (this.tcb.boundTarget.getDeferredTriggerTarget(block, trigger) === null) {
             this.tcb.oobRecorder.inaccessibleDeferredTriggerElement(this.tcb.id, trigger);
         }
