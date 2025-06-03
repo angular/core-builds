@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3af65af
+ * @license Angular v20.1.0-next.0+sha-9630d79
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,10 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-BmB-pTGx.cjs');
-var compiler = require('./compiler-Cbfh1FxU.cjs');
-var index = require('./index-CnQqyBNX.cjs');
+var checker = require('./checker-CVLFT03a.cjs');
+var index = require('./index-CKmOXzHc.cjs');
 require('path');
-var project_paths = require('./project_paths-CZhw6lNV.cjs');
+var project_paths = require('./project_paths-30SeLqhg.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -189,7 +188,7 @@ function lookupPropertyAccess(checker, type, path, options = {}) {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateReferenceVisitor extends compiler.RecursiveVisitor {
+class TemplateReferenceVisitor extends checker.RecursiveVisitor {
     result = [];
     /**
      * Whether we are currently descending into HTML AST nodes
@@ -236,21 +235,21 @@ class TemplateReferenceVisitor extends compiler.RecursiveVisitor {
         // of signal calls in templates.
         // TODO: Remove with: https://github.com/angular/angular/pull/55456.
         this.templateAttributeReferencedFields = [];
-        compiler.visitAll(this, template.attributes);
-        compiler.visitAll(this, template.templateAttrs);
+        checker.visitAll(this, template.attributes);
+        checker.visitAll(this, template.templateAttrs);
         // If we are dealing with a microsyntax template, do not check
         // inputs and outputs as those are already passed to the children.
         // Template attributes may contain relevant expressions though.
         if (template.tagName === 'ng-template') {
-            compiler.visitAll(this, template.inputs);
-            compiler.visitAll(this, template.outputs);
+            checker.visitAll(this, template.inputs);
+            checker.visitAll(this, template.outputs);
         }
         const referencedInputs = this.templateAttributeReferencedFields;
         this.templateAttributeReferencedFields = null;
         this.descendAndCheckForNarrowedSimilarReferences(referencedInputs, () => {
-            compiler.visitAll(this, template.children);
-            compiler.visitAll(this, template.references);
-            compiler.visitAll(this, template.variables);
+            checker.visitAll(this, template.children);
+            checker.visitAll(this, template.references);
+            checker.visitAll(this, template.variables);
         });
     }
     visitIfBlockBranch(block) {
@@ -317,7 +316,7 @@ class TemplateReferenceVisitor extends compiler.RecursiveVisitor {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
+class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
     typeChecker;
     templateTypeChecker;
     componentClass;
@@ -383,7 +382,7 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
             !this.fieldNamesToConsiderForReferenceLookup.has(ast.name)) {
             return;
         }
-        const isWrite = !!(ast instanceof compiler.PropertyWrite ||
+        const isWrite = !!(ast instanceof checker.PropertyWrite ||
             (this.activeTmplAstNode && isTwoWayBindingNode(this.activeTmplAstNode)));
         this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) ||
             this._checkAccessViaOwningComponentClassType(ast, isWrite, astPath);
@@ -460,9 +459,9 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
     _isPartOfNarrowingTernary(read) {
         // Note: We do not safe check that the reads are fully matching 1:1. This is acceptable
         // as worst case we just skip an input from being migrated. This is very unlikely too.
-        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof compiler.PropertyRead ||
-            r instanceof compiler.PropertyWrite ||
-            r instanceof compiler.SafePropertyRead) &&
+        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof checker.PropertyRead ||
+            r instanceof checker.PropertyWrite ||
+            r instanceof checker.SafePropertyRead) &&
             r.name === read.name);
     }
 }
@@ -470,18 +469,18 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
  * Emulates an access to a given field using the TypeScript `ts.Type`
  * of the given class. The resolved symbol of the access is returned.
  */
-function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
+function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker$1) {
     const path = [readOrWrite.name];
     let node = readOrWrite;
-    while (node.receiver instanceof compiler.PropertyRead || node.receiver instanceof compiler.PropertyWrite) {
+    while (node.receiver instanceof checker.PropertyRead || node.receiver instanceof checker.PropertyWrite) {
         node = node.receiver;
         path.unshift(node.name);
     }
-    if (!(node.receiver instanceof compiler.ImplicitReceiver || node.receiver instanceof compiler.ThisReceiver)) {
+    if (!(node.receiver instanceof checker.ImplicitReceiver || node.receiver instanceof checker.ThisReceiver)) {
         return null;
     }
-    const classType = checker.getTypeAtLocation(componentClass.name);
-    return (lookupPropertyAccess(checker, classType, path, {
+    const classType = checker$1.getTypeAtLocation(componentClass.name);
+    return (lookupPropertyAccess(checker$1, classType, path, {
         // Necessary to avoid breaking the resolution if there is
         // some narrowing involved. E.g. `myClass ? myClass.input`.
         ignoreNullability: true,
@@ -489,8 +488,8 @@ function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
 }
 /** Whether the given node refers to a two-way binding AST node. */
 function isTwoWayBindingNode(node) {
-    return ((node instanceof compiler.BoundAttribute && node.type === compiler.BindingType.TwoWay) ||
-        (node instanceof compiler.BoundEvent && node.type === compiler.ParsedEventType.TwoWay));
+    return ((node instanceof checker.BoundAttribute && node.type === checker.BindingType.TwoWay) ||
+        (node instanceof checker.BoundEvent && node.type === checker.ParsedEventType.TwoWay));
 }
 
 /** Possible types of references to known fields detected. */
@@ -582,11 +581,11 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
         if (!isPropertyBinding && !isEventBinding) {
             continue;
         }
-        const parser = compiler.makeBindingParser();
-        const sourceSpan = new compiler.ParseSourceSpan(
+        const parser = checker.makeBindingParser();
+        const sourceSpan = new checker.ParseSourceSpan(
         // Fake source span to keep parsing offsets zero-based.
         // We then later combine these with the expression TS node offsets.
-        new compiler.ParseLocation({ content: '', url: '' }, 0, 0, 0), new compiler.ParseLocation({ content: '', url: '' }, 0, 0, 0));
+        new checker.ParseLocation({ content: '', url: '' }, 0, 0, 0), new checker.ParseLocation({ content: '', url: '' }, 0, 0, 0));
         const name = rawName.substring(1, rawName.length - 1);
         let parsed = undefined;
         if (isEventBinding) {
@@ -650,7 +649,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
             return {
                 isInline: true,
                 expression: templateProp,
-                interpolationConfig: compiler.DEFAULT_INTERPOLATION_CONFIG,
+                interpolationConfig: checker.DEFAULT_INTERPOLATION_CONFIG,
                 preserveWhitespaces: false,
                 resolvedTemplateUrl: containingFile,
                 templateUrl: containingFile,
@@ -664,7 +663,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
             if (typeof templateUrl === 'string') {
                 return {
                     isInline: false,
-                    interpolationConfig: compiler.DEFAULT_INTERPOLATION_CONFIG,
+                    interpolationConfig: checker.DEFAULT_INTERPOLATION_CONFIG,
                     preserveWhitespaces: false,
                     templateUrlExpression: templateUrlProp,
                     templateUrl,

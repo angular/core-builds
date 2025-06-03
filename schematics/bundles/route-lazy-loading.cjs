@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3af65af
+ * @license Angular v20.1.0-next.0+sha-9630d79
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,11 @@
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var change_tracker = require('./change_tracker-DqDwZPiA.cjs');
+var compiler_host = require('./compiler_host-CiIr4O0r.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
-var checker = require('./checker-BmB-pTGx.cjs');
+var checker = require('./checker-CVLFT03a.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
-require('./compiler-Cbfh1FxU.cjs');
 require('os');
 require('@angular-devkit/core');
 require('module');
@@ -158,7 +156,7 @@ function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
     const printer = ts.createPrinter();
-    const tracker = new change_tracker.ChangeTracker(printer);
+    const tracker = new compiler_host.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
     if (routeArraysToMigrate.length === 0) {
         return { pendingChanges: [], skippedRoutes: [], migratedRoutes: [] };
@@ -349,7 +347,7 @@ function migrate(options) {
         const basePath = process.cwd();
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
         if (!buildPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the route lazy loading migration.');
         }

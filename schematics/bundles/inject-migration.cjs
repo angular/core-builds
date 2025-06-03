@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-3af65af
+ * @license Angular v20.1.0-next.0+sha-9630d79
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,15 +8,13 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var change_tracker = require('./change_tracker-DqDwZPiA.cjs');
-var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
+var compiler_host = require('./compiler_host-CiIr4O0r.cjs');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./compiler-Cbfh1FxU.cjs');
-require('./checker-BmB-pTGx.cjs');
+require('./checker-CVLFT03a.cjs');
 require('os');
 require('fs');
 require('module');
@@ -681,7 +679,7 @@ function migrateFile(sourceFile, options) {
         return [];
     }
     const printer = ts.createPrinter();
-    const tracker = new change_tracker.ChangeTracker(printer);
+    const tracker = new compiler_host.ChangeTracker(printer);
     analysis.classes.forEach(({ node, constructor, superCall }) => {
         const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
         const prependToClass = [];
@@ -1241,7 +1239,7 @@ function replaceParameterReferencesInInitializer(initializer, constructor, local
 function migrate(options) {
     return async (tree) => {
         const basePath = process.cwd();
-        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
         let allPaths = [];
         if (pathToMigrate.trim() !== '') {
             allPaths.push(pathToMigrate);
