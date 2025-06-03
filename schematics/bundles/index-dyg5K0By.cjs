@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-c663277
+ * @license Angular v20.1.0-next.0+sha-5813dbd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,10 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CVLFT03a.cjs');
-var index = require('./index-CKmOXzHc.cjs');
+var checker = require('./checker-BlxRNGK4.cjs');
+var index = require('./index-DoC0iSMt.cjs');
 require('path');
-var project_paths = require('./project_paths-30SeLqhg.cjs');
+var project_paths = require('./project_paths-CL5R_NCi.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -355,16 +355,20 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
         }
     }
     visitPropertyRead(ast, context) {
-        this._inspectPropertyAccess(ast, context);
+        this._inspectPropertyAccess(ast, false, context);
         super.visitPropertyRead(ast, context);
     }
     visitSafePropertyRead(ast, context) {
-        this._inspectPropertyAccess(ast, context);
+        this._inspectPropertyAccess(ast, false, context);
         super.visitPropertyRead(ast, context);
     }
-    visitPropertyWrite(ast, context) {
-        this._inspectPropertyAccess(ast, context);
-        super.visitPropertyWrite(ast, context);
+    visitBinary(ast, context) {
+        if (ast.operation === '=' && ast.left instanceof checker.PropertyRead) {
+            this._inspectPropertyAccess(ast.left, true, [...context, ast, ast.left]);
+        }
+        else {
+            super.visitBinary(ast, context);
+        }
     }
     visitConditional(ast, context) {
         this.visit(ast.condition, context);
@@ -377,12 +381,12 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
      * Inspects the property access and attempts to resolve whether they access
      * a known field. If so, the result is captured.
      */
-    _inspectPropertyAccess(ast, astPath) {
+    _inspectPropertyAccess(ast, isAssignment, astPath) {
         if (this.fieldNamesToConsiderForReferenceLookup !== null &&
             !this.fieldNamesToConsiderForReferenceLookup.has(ast.name)) {
             return;
         }
-        const isWrite = !!(ast instanceof checker.PropertyWrite ||
+        const isWrite = !!(isAssignment ||
             (this.activeTmplAstNode && isTwoWayBindingNode(this.activeTmplAstNode)));
         this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) ||
             this._checkAccessViaOwningComponentClassType(ast, isWrite, astPath);
@@ -459,10 +463,7 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
     _isPartOfNarrowingTernary(read) {
         // Note: We do not safe check that the reads are fully matching 1:1. This is acceptable
         // as worst case we just skip an input from being migrated. This is very unlikely too.
-        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof checker.PropertyRead ||
-            r instanceof checker.PropertyWrite ||
-            r instanceof checker.SafePropertyRead) &&
-            r.name === read.name);
+        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof checker.PropertyRead || r instanceof checker.SafePropertyRead) && r.name === read.name);
     }
 }
 /**
@@ -472,7 +473,7 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
 function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker$1) {
     const path = [readOrWrite.name];
     let node = readOrWrite;
-    while (node.receiver instanceof checker.PropertyRead || node.receiver instanceof checker.PropertyWrite) {
+    while (node.receiver instanceof checker.PropertyRead) {
         node = node.receiver;
         path.unshift(node.name);
     }

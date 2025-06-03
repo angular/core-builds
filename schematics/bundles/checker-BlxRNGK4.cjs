@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-c663277
+ * @license Angular v20.1.0-next.0+sha-5813dbd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -936,24 +936,25 @@ var BinaryOperator;
 (function (BinaryOperator) {
     BinaryOperator[BinaryOperator["Equals"] = 0] = "Equals";
     BinaryOperator[BinaryOperator["NotEquals"] = 1] = "NotEquals";
-    BinaryOperator[BinaryOperator["Identical"] = 2] = "Identical";
-    BinaryOperator[BinaryOperator["NotIdentical"] = 3] = "NotIdentical";
-    BinaryOperator[BinaryOperator["Minus"] = 4] = "Minus";
-    BinaryOperator[BinaryOperator["Plus"] = 5] = "Plus";
-    BinaryOperator[BinaryOperator["Divide"] = 6] = "Divide";
-    BinaryOperator[BinaryOperator["Multiply"] = 7] = "Multiply";
-    BinaryOperator[BinaryOperator["Modulo"] = 8] = "Modulo";
-    BinaryOperator[BinaryOperator["And"] = 9] = "And";
-    BinaryOperator[BinaryOperator["Or"] = 10] = "Or";
-    BinaryOperator[BinaryOperator["BitwiseOr"] = 11] = "BitwiseOr";
-    BinaryOperator[BinaryOperator["BitwiseAnd"] = 12] = "BitwiseAnd";
-    BinaryOperator[BinaryOperator["Lower"] = 13] = "Lower";
-    BinaryOperator[BinaryOperator["LowerEquals"] = 14] = "LowerEquals";
-    BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
-    BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
-    BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
-    BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
-    BinaryOperator[BinaryOperator["In"] = 19] = "In";
+    BinaryOperator[BinaryOperator["Assign"] = 2] = "Assign";
+    BinaryOperator[BinaryOperator["Identical"] = 3] = "Identical";
+    BinaryOperator[BinaryOperator["NotIdentical"] = 4] = "NotIdentical";
+    BinaryOperator[BinaryOperator["Minus"] = 5] = "Minus";
+    BinaryOperator[BinaryOperator["Plus"] = 6] = "Plus";
+    BinaryOperator[BinaryOperator["Divide"] = 7] = "Divide";
+    BinaryOperator[BinaryOperator["Multiply"] = 8] = "Multiply";
+    BinaryOperator[BinaryOperator["Modulo"] = 9] = "Modulo";
+    BinaryOperator[BinaryOperator["And"] = 10] = "And";
+    BinaryOperator[BinaryOperator["Or"] = 11] = "Or";
+    BinaryOperator[BinaryOperator["BitwiseOr"] = 12] = "BitwiseOr";
+    BinaryOperator[BinaryOperator["BitwiseAnd"] = 13] = "BitwiseAnd";
+    BinaryOperator[BinaryOperator["Lower"] = 14] = "Lower";
+    BinaryOperator[BinaryOperator["LowerEquals"] = 15] = "LowerEquals";
+    BinaryOperator[BinaryOperator["Bigger"] = 16] = "Bigger";
+    BinaryOperator[BinaryOperator["BiggerEquals"] = 17] = "BiggerEquals";
+    BinaryOperator[BinaryOperator["NullishCoalesce"] = 18] = "NullishCoalesce";
+    BinaryOperator[BinaryOperator["Exponentiation"] = 19] = "Exponentiation";
+    BinaryOperator[BinaryOperator["In"] = 20] = "In";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -1083,7 +1084,7 @@ class ReadVarExpr extends Expression {
         return new ReadVarExpr(this.name, this.type, this.sourceSpan);
     }
     set(value) {
-        return new WriteVarExpr(this.name, value, null, this.sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Assign, this, value, null, this.sourceSpan);
     }
 }
 class TypeofExpr extends Expression {
@@ -1141,85 +1142,6 @@ class WrappedNodeExpr extends Expression {
     }
     clone() {
         return new WrappedNodeExpr(this.node, this.type, this.sourceSpan);
-    }
-}
-class WriteVarExpr extends Expression {
-    name;
-    value;
-    constructor(name, value, type, sourceSpan) {
-        super(type || value.type, sourceSpan);
-        this.name = name;
-        this.value = value;
-    }
-    isEquivalent(e) {
-        return e instanceof WriteVarExpr && this.name === e.name && this.value.isEquivalent(e.value);
-    }
-    isConstant() {
-        return false;
-    }
-    visitExpression(visitor, context) {
-        return visitor.visitWriteVarExpr(this, context);
-    }
-    clone() {
-        return new WriteVarExpr(this.name, this.value.clone(), this.type, this.sourceSpan);
-    }
-    toDeclStmt(type, modifiers) {
-        return new DeclareVarStmt(this.name, this.value, type, modifiers, this.sourceSpan);
-    }
-    toConstDecl() {
-        return this.toDeclStmt(INFERRED_TYPE, exports.StmtModifier.Final);
-    }
-}
-class WriteKeyExpr extends Expression {
-    receiver;
-    index;
-    value;
-    constructor(receiver, index, value, type, sourceSpan) {
-        super(type || value.type, sourceSpan);
-        this.receiver = receiver;
-        this.index = index;
-        this.value = value;
-    }
-    isEquivalent(e) {
-        return (e instanceof WriteKeyExpr &&
-            this.receiver.isEquivalent(e.receiver) &&
-            this.index.isEquivalent(e.index) &&
-            this.value.isEquivalent(e.value));
-    }
-    isConstant() {
-        return false;
-    }
-    visitExpression(visitor, context) {
-        return visitor.visitWriteKeyExpr(this, context);
-    }
-    clone() {
-        return new WriteKeyExpr(this.receiver.clone(), this.index.clone(), this.value.clone(), this.type, this.sourceSpan);
-    }
-}
-class WritePropExpr extends Expression {
-    receiver;
-    name;
-    value;
-    constructor(receiver, name, value, type, sourceSpan) {
-        super(type || value.type, sourceSpan);
-        this.receiver = receiver;
-        this.name = name;
-        this.value = value;
-    }
-    isEquivalent(e) {
-        return (e instanceof WritePropExpr &&
-            this.receiver.isEquivalent(e.receiver) &&
-            this.name === e.name &&
-            this.value.isEquivalent(e.value));
-    }
-    isConstant() {
-        return false;
-    }
-    visitExpression(visitor, context) {
-        return visitor.visitWritePropExpr(this, context);
-    }
-    clone() {
-        return new WritePropExpr(this.receiver.clone(), this.name, this.value.clone(), this.type, this.sourceSpan);
     }
 }
 class InvokeFunctionExpr extends Expression {
@@ -1775,7 +1697,7 @@ class ReadPropExpr extends Expression {
         return visitor.visitReadPropExpr(this, context);
     }
     set(value) {
-        return new WritePropExpr(this.receiver, this.name, value, null, this.sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.prop(this.name), value, null, this.sourceSpan);
     }
     clone() {
         return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan);
@@ -1801,7 +1723,7 @@ class ReadKeyExpr extends Expression {
         return visitor.visitReadKeyExpr(this, context);
     }
     set(value) {
-        return new WriteKeyExpr(this.receiver, this.index, value, null, this.sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.key(this.index), value, null, this.sourceSpan);
     }
     clone() {
         return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan);
@@ -2036,21 +1958,6 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
         return ast;
     }
     visitReadVarExpr(ast, context) {
-        return this.visitExpression(ast, context);
-    }
-    visitWriteVarExpr(ast, context) {
-        ast.value.visitExpression(this, context);
-        return this.visitExpression(ast, context);
-    }
-    visitWriteKeyExpr(ast, context) {
-        ast.receiver.visitExpression(this, context);
-        ast.index.visitExpression(this, context);
-        ast.value.visitExpression(this, context);
-        return this.visitExpression(ast, context);
-    }
-    visitWritePropExpr(ast, context) {
-        ast.receiver.visitExpression(this, context);
-        ast.value.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
     visitDynamicImportExpr(ast, context) {
@@ -2382,7 +2289,7 @@ class ConstantPool {
         if ((!newValue && !fixup.shared) || (newValue && forceShared)) {
             // Replace the expression with a variable
             const name = this.freshName();
-            let definition;
+            let value;
             let usage;
             if (this.isClosureCompilerEnabled && isLongStringLiteral(literal)) {
                 // For string literals, Closure will **always** inline the string at
@@ -2398,20 +2305,20 @@ class ConstantPool {
                 // const myStr = function() { return "very very very long string"; };
                 // const usage1 = myStr();
                 // const usage2 = myStr();
-                definition = variable(name).set(new FunctionExpr([], // Params.
+                value = new FunctionExpr([], // Params.
                 [
                     // Statements.
                     new ReturnStatement(literal),
-                ]));
+                ]);
                 usage = variable(name).callFn([]);
             }
             else {
                 // Just declare and use the variable directly, without a function call
                 // indirection. This saves a few bytes and avoids an unnecessary call.
-                definition = variable(name).set(literal);
+                value = literal;
                 usage = variable(name);
             }
-            this.statements.push(definition.toDeclStmt(INFERRED_TYPE, exports.StmtModifier.Final));
+            this.statements.push(new DeclareVarStmt(name, value, INFERRED_TYPE, exports.StmtModifier.Final));
             fixup.fixup(usage);
         }
         return fixup;
@@ -2482,9 +2389,7 @@ class ConstantPool {
                 .map((e) => new FnParam(e.name, DYNAMIC_TYPE));
             const pureFunctionDeclaration = arrowFn(parameters, resultMap(resultExpressions), INFERRED_TYPE);
             const name = this.freshName();
-            this.statements.push(variable(name)
-                .set(pureFunctionDeclaration)
-                .toDeclStmt(INFERRED_TYPE, exports.StmtModifier.Final));
+            this.statements.push(new DeclareVarStmt(name, pureFunctionDeclaration, INFERRED_TYPE, exports.StmtModifier.Final));
             literalFactory = variable(name);
             this.literalFactories.set(key, literalFactory);
         }
@@ -3381,46 +3286,6 @@ class AbstractEmitterVisitor {
         ctx.println(stmt, `}`);
         return null;
     }
-    visitWriteVarExpr(expr, ctx) {
-        const lineWasEmpty = ctx.lineIsEmpty();
-        if (!lineWasEmpty) {
-            ctx.print(expr, '(');
-        }
-        ctx.print(expr, `${expr.name} = `);
-        expr.value.visitExpression(this, ctx);
-        if (!lineWasEmpty) {
-            ctx.print(expr, ')');
-        }
-        return null;
-    }
-    visitWriteKeyExpr(expr, ctx) {
-        const lineWasEmpty = ctx.lineIsEmpty();
-        if (!lineWasEmpty) {
-            ctx.print(expr, '(');
-        }
-        expr.receiver.visitExpression(this, ctx);
-        ctx.print(expr, `[`);
-        expr.index.visitExpression(this, ctx);
-        ctx.print(expr, `] = `);
-        expr.value.visitExpression(this, ctx);
-        if (!lineWasEmpty) {
-            ctx.print(expr, ')');
-        }
-        return null;
-    }
-    visitWritePropExpr(expr, ctx) {
-        const lineWasEmpty = ctx.lineIsEmpty();
-        if (!lineWasEmpty) {
-            ctx.print(expr, '(');
-        }
-        expr.receiver.visitExpression(this, ctx);
-        ctx.print(expr, `.${expr.name} = `);
-        expr.value.visitExpression(this, ctx);
-        if (!lineWasEmpty) {
-            ctx.print(expr, ')');
-        }
-        return null;
-    }
     visitInvokeFunctionExpr(expr, ctx) {
         const shouldParenthesize = expr.fn instanceof ArrowFunctionExpr;
         if (shouldParenthesize) {
@@ -3542,6 +3407,9 @@ class AbstractEmitterVisitor {
     visitBinaryOperatorExpr(ast, ctx) {
         let opStr;
         switch (ast.operator) {
+            case BinaryOperator.Assign:
+                opStr = '=';
+                break;
             case BinaryOperator.Equals:
                 opStr = '==';
                 break;
@@ -3821,7 +3689,7 @@ function compileFactoryFunction(meta) {
     let retExpr = null;
     function makeConditionalFactory(nonCtorExpr) {
         const r = variable('__ngConditionalFactory__');
-        body.push(r.set(NULL_EXPR).toDeclStmt());
+        body.push(new DeclareVarStmt(r.name, NULL_EXPR, INFERRED_TYPE));
         const ctorStmt = ctorExpr !== null
             ? r.set(ctorExpr).toStmt()
             : importExpr(Identifiers.invalidFactory).callFn([]).toStmt();
@@ -4081,20 +3949,6 @@ class PropertyRead extends ASTWithName {
         return visitor.visitPropertyRead(this, context);
     }
 }
-class PropertyWrite extends ASTWithName {
-    receiver;
-    name;
-    value;
-    constructor(span, sourceSpan, nameSpan, receiver, name, value) {
-        super(span, sourceSpan, nameSpan);
-        this.receiver = receiver;
-        this.name = name;
-        this.value = value;
-    }
-    visit(visitor, context = null) {
-        return visitor.visitPropertyWrite(this, context);
-    }
-}
 class SafePropertyRead extends ASTWithName {
     receiver;
     name;
@@ -4129,20 +3983,6 @@ class SafeKeyedRead extends AST {
     }
     visit(visitor, context = null) {
         return visitor.visitSafeKeyedRead(this, context);
-    }
-}
-class KeyedWrite extends AST {
-    receiver;
-    key;
-    value;
-    constructor(span, sourceSpan, receiver, key, value) {
-        super(span, sourceSpan);
-        this.receiver = receiver;
-        this.key = key;
-        this.value = value;
-    }
-    visit(visitor, context = null) {
-        return visitor.visitKeyedWrite(this, context);
     }
 }
 /** Possible types for a pipe. */
@@ -4490,11 +4330,6 @@ class RecursiveAstVisitor {
         this.visit(ast.receiver, context);
         this.visit(ast.key, context);
     }
-    visitKeyedWrite(ast, context) {
-        this.visit(ast.receiver, context);
-        this.visit(ast.key, context);
-        this.visit(ast.value, context);
-    }
     visitLiteralArray(ast, context) {
         this.visitAll(ast.expressions, context);
     }
@@ -4516,10 +4351,6 @@ class RecursiveAstVisitor {
     }
     visitPropertyRead(ast, context) {
         this.visit(ast.receiver, context);
-    }
-    visitPropertyWrite(ast, context) {
-        this.visit(ast.receiver, context);
-        this.visit(ast.value, context);
     }
     visitSafePropertyRead(ast, context) {
         this.visit(ast.receiver, context);
@@ -10352,15 +10183,6 @@ function transformExpressionsInExpression(expr, transform, flags) {
         expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
         expr.index = transformExpressionsInExpression(expr.index, transform, flags);
     }
-    else if (expr instanceof WritePropExpr) {
-        expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
-        expr.value = transformExpressionsInExpression(expr.value, transform, flags);
-    }
-    else if (expr instanceof WriteKeyExpr) {
-        expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
-        expr.index = transformExpressionsInExpression(expr.index, transform, flags);
-        expr.value = transformExpressionsInExpression(expr.value, transform, flags);
-    }
     else if (expr instanceof InvokeFunctionExpr) {
         expr.fn = transformExpressionsInExpression(expr.fn, transform, flags);
         for (let i = 0; i < expr.args.length; i++) {
@@ -10389,9 +10211,6 @@ function transformExpressionsInExpression(expr, transform, flags) {
     }
     else if (expr instanceof VoidExpr) {
         expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
-    }
-    else if (expr instanceof WriteVarExpr) {
-        expr.value = transformExpressionsInExpression(expr.value, transform, flags);
     }
     else if (expr instanceof LocalizedString) {
         for (let i = 0; i < expr.expressions.length; i++) {
@@ -11975,6 +11794,7 @@ const BINARY_OPERATORS$3 = new Map([
     ['|', BinaryOperator.BitwiseOr],
     ['&', BinaryOperator.BitwiseAnd],
     ['/', BinaryOperator.Divide],
+    ['=', BinaryOperator.Assign],
     ['==', BinaryOperator.Equals],
     ['===', BinaryOperator.Identical],
     ['<', BinaryOperator.Lower],
@@ -19470,14 +19290,13 @@ class _ParseAST {
             return id;
         });
         const nameSpan = this.sourceSpan(nameStart);
-        let receiver;
         if (isSafe) {
             if (this.consumeOptionalOperator('=')) {
                 this.error("The '?.' operator cannot be used in the assignment");
-                receiver = new EmptyExpr$1(this.span(start), this.sourceSpan(start));
+                return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
             }
             else {
-                receiver = new SafePropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
+                return new SafePropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
             }
         }
         else {
@@ -19486,14 +19305,14 @@ class _ParseAST {
                     this.error('Bindings cannot contain assignments');
                     return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
                 }
+                const receiver = new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
                 const value = this.parseConditional();
-                receiver = new PropertyWrite(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id, value);
+                return new Binary(this.span(start), this.sourceSpan(start), '=', receiver, value);
             }
             else {
-                receiver = new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
+                return new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
             }
         }
-        return receiver;
     }
     parseCall(receiver, start, isSafe) {
         const argumentStart = this.inputIndex;
@@ -19608,8 +19427,9 @@ class _ParseAST {
                     this.error("The '?.' operator cannot be used in the assignment");
                 }
                 else {
+                    const binaryReceiver = new KeyedRead(this.span(start), this.sourceSpan(start), receiver, key);
                     const value = this.parseConditional();
-                    return new KeyedWrite(this.span(start), this.sourceSpan(start), receiver, key, value);
+                    return new Binary(this.span(start), this.sourceSpan(start), '=', binaryReceiver, value);
                 }
             }
             else {
@@ -19912,9 +19732,6 @@ class SerializeExpressionVisitor {
     visitKeyedRead(ast, context) {
         return `${ast.receiver.visit(this, context)}[${ast.key.visit(this, context)}]`;
     }
-    visitKeyedWrite(ast, context) {
-        return `${ast.receiver.visit(this, context)}[${ast.key.visit(this, context)}] = ${ast.value.visit(this, context)}`;
-    }
     visitLiteralArray(ast, context) {
         return `[${ast.expressions.map((e) => e.visit(this, context)).join(', ')}]`;
     }
@@ -19953,14 +19770,6 @@ class SerializeExpressionVisitor {
         }
         else {
             return `${ast.receiver.visit(this, context)}.${ast.name}`;
-        }
-    }
-    visitPropertyWrite(ast, context) {
-        if (ast.receiver instanceof ImplicitReceiver) {
-            return `${ast.name} = ${ast.value.visit(this, context)}`;
-        }
-        else {
-            return `${ast.receiver.visit(this, context)}.${ast.name} = ${ast.value.visit(this, context)}`;
         }
     }
     visitSafePropertyRead(ast, context) {
@@ -21579,7 +21388,7 @@ function createGoogleGetMsgStatements(variable$1, message, closureVar, placehold
     //  */
     // const MSG_... = goog.getMsg(..);
     // I18N_X = MSG_...;
-    const googGetMsgStmt = closureVar.set(variable(GOOG_GET_MSG).callFn(args)).toConstDecl();
+    const googGetMsgStmt = new DeclareVarStmt(closureVar.name, variable(GOOG_GET_MSG).callFn(args), INFERRED_TYPE, exports.StmtModifier.Final);
     googGetMsgStmt.addLeadingComment(i18nMetaToJSDoc(message));
     const i18nAssignmentStmt = new ExpressionStatement(variable$1.set(closureVar));
     return [googGetMsgStmt, i18nAssignmentStmt];
@@ -26627,17 +26436,6 @@ function convertAst(ast, job, baseSourceSpan) {
             return new ReadPropExpr(convertAst(ast.receiver, job, baseSourceSpan), ast.name, null, convertSourceSpan(ast.span, baseSourceSpan));
         }
     }
-    else if (ast instanceof PropertyWrite) {
-        if (ast.receiver instanceof ImplicitReceiver) {
-            return new WritePropExpr(
-            // TODO: Is it correct to always use the root context in place of the implicit receiver?
-            new ContextExpr(job.root.xref), ast.name, convertAst(ast.value, job, baseSourceSpan), null, convertSourceSpan(ast.span, baseSourceSpan));
-        }
-        return new WritePropExpr(convertAst(ast.receiver, job, baseSourceSpan), ast.name, convertAst(ast.value, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
-    }
-    else if (ast instanceof KeyedWrite) {
-        return new WriteKeyExpr(convertAst(ast.receiver, job, baseSourceSpan), convertAst(ast.key, job, baseSourceSpan), convertAst(ast.value, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
-    }
     else if (ast instanceof Call) {
         if (ast.receiver instanceof ImplicitReceiver) {
             throw new Error(`Unexpected ImplicitReceiver`);
@@ -30907,10 +30705,6 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
         this.maybeMap(ast, ast.name);
         return super.visitSafePropertyRead(ast, context);
     }
-    visitPropertyWrite(ast, context) {
-        this.maybeMap(ast, ast.name);
-        return super.visitPropertyWrite(ast, context);
-    }
     ingestScopedNode(node) {
         const childScope = this.scope.getChildScope(node);
         const binder = new TemplateBinder(this.bindings, this.symbols, this.usedPipes, this.eagerPipes, this.deferBlocks, this.nestingLevel, childScope, node, this.level + 1);
@@ -32288,7 +32082,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-c663277');
+new Version('20.1.0-next.0+sha-5813dbd');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33308,7 +33102,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CVLFT03a.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BlxRNGK4.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38445,24 +38239,6 @@ class ExpressionTranslatorVisitor {
         this.setSourceMapRange(identifier, ast.sourceSpan);
         return identifier;
     }
-    visitWriteVarExpr(expr, context) {
-        const assignment = this.factory.createAssignment(this.setSourceMapRange(this.factory.createIdentifier(expr.name), expr.sourceSpan), expr.value.visitExpression(this, context));
-        return context.isStatement
-            ? assignment
-            : this.factory.createParenthesizedExpression(assignment);
-    }
-    visitWriteKeyExpr(expr, context) {
-        const exprContext = context.withExpressionMode;
-        const target = this.factory.createElementAccess(expr.receiver.visitExpression(this, exprContext), expr.index.visitExpression(this, exprContext));
-        const assignment = this.factory.createAssignment(target, expr.value.visitExpression(this, exprContext));
-        return context.isStatement
-            ? assignment
-            : this.factory.createParenthesizedExpression(assignment);
-    }
-    visitWritePropExpr(expr, context) {
-        const target = this.factory.createPropertyAccess(expr.receiver.visitExpression(this, context), expr.name);
-        return this.factory.createAssignment(target, expr.value.visitExpression(this, context));
-    }
     visitInvokeFunctionExpr(ast, context) {
         return this.setSourceMapRange(this.factory.createCallExpression(ast.fn.visitExpression(this, context), ast.args.map((arg) => arg.visitExpression(this, context)), ast.pure), ast.sourceSpan);
     }
@@ -38583,6 +38359,9 @@ class ExpressionTranslatorVisitor {
             : ast.body.visitExpression(this, context));
     }
     visitBinaryOperatorExpr(ast, context) {
+        if (ast.operator === BinaryOperator.Assign) {
+            return this.factory.createAssignment(ast.lhs.visitExpression(this, context), ast.rhs.visitExpression(this, context));
+        }
         if (!BINARY_OPERATORS$1.has(ast.operator)) {
             throw new Error(`Unknown binary operator: ${BinaryOperator[ast.operator]}`);
         }
@@ -38914,15 +38693,6 @@ class TypeTranslatorVisitor {
             throw new Error(`ReadVarExpr with no variable name in type`);
         }
         return ts.factory.createTypeQueryNode(ts.factory.createIdentifier(ast.name));
-    }
-    visitWriteVarExpr(expr, context) {
-        throw new Error('Method not implemented.');
-    }
-    visitWriteKeyExpr(expr, context) {
-        throw new Error('Method not implemented.');
-    }
-    visitWritePropExpr(expr, context) {
-        throw new Error('Method not implemented.');
     }
     visitInvokeFunctionExpr(ast, context) {
         throw new Error('Method not implemented.');
@@ -41668,7 +41438,7 @@ class CompletionEngine {
         }
         // Completion works inside property reads and method calls.
         let tsExpr = null;
-        if (expr instanceof PropertyRead || expr instanceof PropertyWrite) {
+        if (expr instanceof PropertyRead) {
             // Non-safe navigation operations are trivial: `foo.bar` or `foo.bar()`
             tsExpr = findFirstMatchingNode(this.tcb, {
                 filter: ts.isPropertyAccessExpression,
@@ -44797,6 +44567,7 @@ const BINARY_OPS = new Map([
     ['>', ts.SyntaxKind.GreaterThanToken],
     ['<=', ts.SyntaxKind.LessThanEqualsToken],
     ['>=', ts.SyntaxKind.GreaterThanEqualsToken],
+    ['=', ts.SyntaxKind.EqualsToken],
     ['==', ts.SyntaxKind.EqualsEqualsToken],
     ['===', ts.SyntaxKind.EqualsEqualsEqualsToken],
     ['*', ts.SyntaxKind.AsteriskToken],
@@ -44907,16 +44678,6 @@ class AstTranslator {
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
-    visitKeyedWrite(ast) {
-        const receiver = wrapForDiagnostics(this.translate(ast.receiver));
-        const left = ts.factory.createElementAccessExpression(receiver, this.translate(ast.key));
-        // TODO(joost): annotate `left` with the span of the element access, which is not currently
-        //  available on `ast`.
-        const right = wrapForTypeChecker(this.translate(ast.value));
-        const node = wrapForDiagnostics(ts.factory.createBinaryExpression(left, ts.SyntaxKind.EqualsToken, right));
-        addParseSpanInfo(node, ast.sourceSpan);
-        return node;
-    }
     visitLiteralArray(ast) {
         const elements = ast.expressions.map((expr) => this.translate(expr));
         const literal = ts.factory.createArrayLiteralExpression(elements);
@@ -44993,27 +44754,6 @@ class AstTranslator {
         const name = ts.factory.createPropertyAccessExpression(receiver, ast.name);
         addParseSpanInfo(name, ast.nameSpan);
         const node = wrapForDiagnostics(name);
-        addParseSpanInfo(node, ast.sourceSpan);
-        return node;
-    }
-    visitPropertyWrite(ast) {
-        const receiver = wrapForDiagnostics(this.translate(ast.receiver));
-        const left = ts.factory.createPropertyAccessExpression(receiver, ast.name);
-        addParseSpanInfo(left, ast.nameSpan);
-        // TypeScript reports assignment errors on the entire lvalue expression. Annotate the lvalue of
-        // the assignment with the sourceSpan, which includes receivers, rather than nameSpan for
-        // consistency of the diagnostic location.
-        // a.b.c = 1
-        // ^^^^^^^^^ sourceSpan
-        //     ^     nameSpan
-        const leftWithPath = wrapForDiagnostics(left);
-        addParseSpanInfo(leftWithPath, ast.sourceSpan);
-        // The right needs to be wrapped in parens as well or we cannot accurately match its
-        // span to just the RHS. For example, the span in `e = $event /*0,10*/` is ambiguous.
-        // It could refer to either the whole binary expression or just the RHS.
-        // We should instead generate `e = ($event /*0,10*/)` so we know the span 0,10 matches RHS.
-        const right = wrapForTypeChecker(this.translate(ast.value));
-        const node = wrapForDiagnostics(ts.factory.createBinaryExpression(leftWithPath, ts.SyntaxKind.EqualsToken, right));
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
@@ -45206,9 +44946,6 @@ class VeSafeLhsInferenceBugDetector {
     visitKeyedRead(ast) {
         return false;
     }
-    visitKeyedWrite(ast) {
-        return false;
-    }
     visitLiteralArray(ast) {
         return true;
     }
@@ -45234,9 +44971,6 @@ class VeSafeLhsInferenceBugDetector {
         return ast.expression.visit(this);
     }
     visitPropertyRead(ast) {
-        return false;
-    }
-    visitPropertyWrite(ast) {
         return false;
     }
     visitSafePropertyRead(ast) {
@@ -47722,21 +47456,25 @@ class TcbExpressionTranslator {
             }
             return targetExpression;
         }
-        else if (ast instanceof PropertyWrite && ast.receiver instanceof ImplicitReceiver) {
-            const target = this.tcb.boundTarget.getExpressionTarget(ast);
+        else if (ast instanceof Binary &&
+            ast.operation === '=' &&
+            ast.left instanceof PropertyRead &&
+            ast.left.receiver instanceof ImplicitReceiver) {
+            const read = ast.left;
+            const target = this.tcb.boundTarget.getExpressionTarget(read);
             if (target === null) {
                 return null;
             }
-            const targetExpression = this.getTargetNodeExpression(target, ast);
-            const expr = this.translate(ast.value);
+            const targetExpression = this.getTargetNodeExpression(target, read);
+            const expr = this.translate(ast.right);
             const result = ts.factory.createParenthesizedExpression(ts.factory.createBinaryExpression(targetExpression, ts.SyntaxKind.EqualsToken, expr));
-            addParseSpanInfo(result, ast.sourceSpan);
+            addParseSpanInfo(result, read.sourceSpan);
             // Ignore diagnostics from TS produced for writes to `@let` and re-report them using
             // our own infrastructure. We can't rely on the TS reporting, because it includes
             // the name of the auto-generated TCB variable name.
             if (target instanceof LetDeclaration$1) {
                 markIgnoreDiagnostics(result);
-                this.tcb.oobRecorder.illegalWriteToLetDeclaration(this.tcb.id, ast, target);
+                this.tcb.oobRecorder.illegalWriteToLetDeclaration(this.tcb.id, read, target);
             }
             return result;
         }
@@ -49301,11 +49039,15 @@ class SymbolBuilder {
             return this.getSymbol(expressionTarget);
         }
         let withSpan = expression.sourceSpan;
-        // The `name` part of a `PropertyWrite` and `ASTWithName` do not have their own
+        // The `name` part of a property write and `ASTWithName` do not have their own
         // AST so there is no way to retrieve a `Symbol` for just the `name` via a specific node.
         // Also skipping SafePropertyReads as it breaks nullish coalescing not nullable extended diagnostic
-        if (expression instanceof PropertyWrite ||
-            (expression instanceof ASTWithName && !(expression instanceof SafePropertyRead))) {
+        if (expression instanceof Binary &&
+            expression.operation === '=' &&
+            expression.left instanceof PropertyRead) {
+            withSpan = expression.left.nameSpan;
+        }
+        else if (expression instanceof ASTWithName && !(expression instanceof SafePropertyRead)) {
             withSpan = expression.nameSpan;
         }
         let node = null;
@@ -50382,7 +50124,6 @@ exports.ParseSourceSpan = ParseSourceSpan;
 exports.Parser = Parser$1;
 exports.Placeholder = Placeholder;
 exports.PropertyRead = PropertyRead;
-exports.PropertyWrite = PropertyWrite;
 exports.QUERY_INITIALIZER_FNS = QUERY_INITIALIZER_FNS;
 exports.R3TargetBinder = R3TargetBinder;
 exports.ReadVarExpr = ReadVarExpr;

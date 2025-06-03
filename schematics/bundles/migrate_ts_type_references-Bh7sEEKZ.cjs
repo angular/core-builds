@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-c663277
+ * @license Angular v20.1.0-next.0+sha-5813dbd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-CVLFT03a.cjs');
+var checker = require('./checker-BlxRNGK4.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-C3OQsurH.cjs');
-var project_paths = require('./project_paths-30SeLqhg.cjs');
+var index = require('./index-dyg5K0By.cjs');
+var project_paths = require('./project_paths-CL5R_NCi.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-CKmOXzHc.cjs');
+require('./index-DoC0iSMt.cjs');
 require('path');
 
 /**
@@ -140,24 +140,25 @@ var BinaryOperator;
 (function (BinaryOperator) {
     BinaryOperator[BinaryOperator["Equals"] = 0] = "Equals";
     BinaryOperator[BinaryOperator["NotEquals"] = 1] = "NotEquals";
-    BinaryOperator[BinaryOperator["Identical"] = 2] = "Identical";
-    BinaryOperator[BinaryOperator["NotIdentical"] = 3] = "NotIdentical";
-    BinaryOperator[BinaryOperator["Minus"] = 4] = "Minus";
-    BinaryOperator[BinaryOperator["Plus"] = 5] = "Plus";
-    BinaryOperator[BinaryOperator["Divide"] = 6] = "Divide";
-    BinaryOperator[BinaryOperator["Multiply"] = 7] = "Multiply";
-    BinaryOperator[BinaryOperator["Modulo"] = 8] = "Modulo";
-    BinaryOperator[BinaryOperator["And"] = 9] = "And";
-    BinaryOperator[BinaryOperator["Or"] = 10] = "Or";
-    BinaryOperator[BinaryOperator["BitwiseOr"] = 11] = "BitwiseOr";
-    BinaryOperator[BinaryOperator["BitwiseAnd"] = 12] = "BitwiseAnd";
-    BinaryOperator[BinaryOperator["Lower"] = 13] = "Lower";
-    BinaryOperator[BinaryOperator["LowerEquals"] = 14] = "LowerEquals";
-    BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
-    BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
-    BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
-    BinaryOperator[BinaryOperator["Exponentiation"] = 18] = "Exponentiation";
-    BinaryOperator[BinaryOperator["In"] = 19] = "In";
+    BinaryOperator[BinaryOperator["Assign"] = 2] = "Assign";
+    BinaryOperator[BinaryOperator["Identical"] = 3] = "Identical";
+    BinaryOperator[BinaryOperator["NotIdentical"] = 4] = "NotIdentical";
+    BinaryOperator[BinaryOperator["Minus"] = 5] = "Minus";
+    BinaryOperator[BinaryOperator["Plus"] = 6] = "Plus";
+    BinaryOperator[BinaryOperator["Divide"] = 7] = "Divide";
+    BinaryOperator[BinaryOperator["Multiply"] = 8] = "Multiply";
+    BinaryOperator[BinaryOperator["Modulo"] = 9] = "Modulo";
+    BinaryOperator[BinaryOperator["And"] = 10] = "And";
+    BinaryOperator[BinaryOperator["Or"] = 11] = "Or";
+    BinaryOperator[BinaryOperator["BitwiseOr"] = 12] = "BitwiseOr";
+    BinaryOperator[BinaryOperator["BitwiseAnd"] = 13] = "BitwiseAnd";
+    BinaryOperator[BinaryOperator["Lower"] = 14] = "Lower";
+    BinaryOperator[BinaryOperator["LowerEquals"] = 15] = "LowerEquals";
+    BinaryOperator[BinaryOperator["Bigger"] = 16] = "Bigger";
+    BinaryOperator[BinaryOperator["BiggerEquals"] = 17] = "BiggerEquals";
+    BinaryOperator[BinaryOperator["NullishCoalesce"] = 18] = "NullishCoalesce";
+    BinaryOperator[BinaryOperator["Exponentiation"] = 19] = "Exponentiation";
+    BinaryOperator[BinaryOperator["In"] = 20] = "In";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -266,58 +267,6 @@ class Expression {
     }
     toStmt() {
         return new ExpressionStatement(this, null);
-    }
-}
-class WriteKeyExpr extends Expression {
-    receiver;
-    index;
-    value;
-    constructor(receiver, index, value, type, sourceSpan) {
-        super(type || value.type, sourceSpan);
-        this.receiver = receiver;
-        this.index = index;
-        this.value = value;
-    }
-    isEquivalent(e) {
-        return (e instanceof WriteKeyExpr &&
-            this.receiver.isEquivalent(e.receiver) &&
-            this.index.isEquivalent(e.index) &&
-            this.value.isEquivalent(e.value));
-    }
-    isConstant() {
-        return false;
-    }
-    visitExpression(visitor, context) {
-        return visitor.visitWriteKeyExpr(this, context);
-    }
-    clone() {
-        return new WriteKeyExpr(this.receiver.clone(), this.index.clone(), this.value.clone(), this.type, this.sourceSpan);
-    }
-}
-class WritePropExpr extends Expression {
-    receiver;
-    name;
-    value;
-    constructor(receiver, name, value, type, sourceSpan) {
-        super(type || value.type, sourceSpan);
-        this.receiver = receiver;
-        this.name = name;
-        this.value = value;
-    }
-    isEquivalent(e) {
-        return (e instanceof WritePropExpr &&
-            this.receiver.isEquivalent(e.receiver) &&
-            this.name === e.name &&
-            this.value.isEquivalent(e.value));
-    }
-    isConstant() {
-        return false;
-    }
-    visitExpression(visitor, context) {
-        return visitor.visitWritePropExpr(this, context);
-    }
-    clone() {
-        return new WritePropExpr(this.receiver.clone(), this.name, this.value.clone(), this.type, this.sourceSpan);
     }
 }
 class InvokeFunctionExpr extends Expression {
@@ -466,7 +415,7 @@ class ReadPropExpr extends Expression {
         return visitor.visitReadPropExpr(this, context);
     }
     set(value) {
-        return new WritePropExpr(this.receiver, this.name, value, null, this.sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.prop(this.name), value, null, this.sourceSpan);
     }
     clone() {
         return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan);
@@ -492,7 +441,7 @@ class ReadKeyExpr extends Expression {
         return visitor.visitReadKeyExpr(this, context);
     }
     set(value) {
-        return new WriteKeyExpr(this.receiver, this.index, value, null, this.sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.key(this.index), value, null, this.sourceSpan);
     }
     clone() {
         return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan);

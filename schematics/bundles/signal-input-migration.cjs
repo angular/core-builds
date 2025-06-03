@@ -1,21 +1,21 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-c663277
+ * @license Angular v20.1.0-next.0+sha-5813dbd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-BHtRN0S3.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-Bh7sEEKZ.cjs');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CVLFT03a.cjs');
-var index$1 = require('./index-CKmOXzHc.cjs');
+var checker = require('./checker-BlxRNGK4.cjs');
+var index$1 = require('./index-DoC0iSMt.cjs');
 require('path');
-var project_paths = require('./project_paths-30SeLqhg.cjs');
-var index = require('./index-C3OQsurH.cjs');
+var project_paths = require('./project_paths-CL5R_NCi.cjs');
+var index = require('./index-dyg5K0By.cjs');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-DtX4wQX1.cjs');
+var apply_import_manager = require('./apply_import_manager-CZbgo7s8.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./leading_space-D9nQ8UQC.cjs');
@@ -1144,8 +1144,16 @@ function pass7__migrateTemplateReferences(host, references) {
         if (!host.shouldMigrateReferencesToField(reference.target)) {
             continue;
         }
+        const parent = reference.from.readAstPath.at(-2);
+        let readEndPos;
+        if (reference.from.isWrite && parent) {
+            readEndPos = parent.sourceSpan.end;
+        }
+        else {
+            readEndPos = reference.from.read.sourceSpan.end;
+        }
         // Skip duplicate references. E.g. if a template is shared.
-        const fileReferenceId = `${reference.from.templateFile.id}:${reference.from.read.sourceSpan.end}`;
+        const fileReferenceId = `${reference.from.templateFile.id}:${readEndPos}`;
         if (seenFileReferences.has(fileReferenceId)) {
             continue;
         }
@@ -1155,8 +1163,8 @@ function pass7__migrateTemplateReferences(host, references) {
             ? `: ${reference.from.read.name}()`
             : `()`;
         host.replacements.push(new project_paths.Replacement(reference.from.templateFile, new project_paths.TextUpdate({
-            position: reference.from.read.sourceSpan.end,
-            end: reference.from.read.sourceSpan.end,
+            position: readEndPos,
+            end: readEndPos,
             toInsert: appendText,
         })));
     }
@@ -1179,7 +1187,14 @@ function pass8__migrateHostBindings(host, references, info) {
         }
         const bindingField = reference.from.hostPropertyNode;
         const expressionOffset = bindingField.getStart() + 1; // account for quotes.
-        const readEndPos = expressionOffset + reference.from.read.sourceSpan.end;
+        const parent = reference.from.readAstPath.at(-2);
+        let readEndPos;
+        if (reference.from.isWrite && parent) {
+            readEndPos = expressionOffset + parent.sourceSpan.end;
+        }
+        else {
+            readEndPos = expressionOffset + reference.from.read.sourceSpan.end;
+        }
         // Skip duplicate references. Can happen if the host object is shared.
         if (seenReferences.get(bindingField)?.has(readEndPos)) {
             continue;
