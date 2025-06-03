@@ -1,25 +1,23 @@
 'use strict';
 /**
- * @license Angular v20.0.0+sha-7c4f74a
+ * @license Angular v20.0.0+sha-0ea831c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var index = require('./index-CEGN1XTs.cjs');
+var index = require('./index-CCX_cTPD.cjs');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var change_tracker = require('./change_tracker-O8ccjOWj.cjs');
+var compiler_host = require('./compiler_host-C_4Iw5UD.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
-require('./compiler-BXqHhIco.cjs');
-var checker = require('./checker-CLEA_0Sd.cjs');
+var checker = require('./checker-Bu1Wu4f7.cjs');
 require('os');
 require('@angular-devkit/core');
 require('module');
@@ -236,7 +234,7 @@ function getRelativeImportPath(fromFile, toFile) {
         path = './' + path;
     }
     // Using the Node utilities can yield paths with forward slashes on Windows.
-    return change_tracker.normalizePath(path);
+    return compiler_host.normalizePath(path);
 }
 /** Function used to remap the generated `imports` for a component to known shorter aliases. */
 function knownInternalAliasRemapper(imports) {
@@ -333,7 +331,7 @@ function toStandalone(sourceFiles, program, printer, fileImportRemapper, declara
     const modulesToMigrate = new Set();
     const testObjectsToMigrate = new Set();
     const declarations = new Set();
-    const tracker = new change_tracker.ChangeTracker(printer, fileImportRemapper);
+    const tracker = new compiler_host.ChangeTracker(printer, fileImportRemapper);
     for (const sourceFile of sourceFiles) {
         const modules = findNgModuleClassesToMigrate(sourceFile, typeChecker);
         const testObjects = findTestObjectsToMigrate(sourceFile, typeChecker);
@@ -912,7 +910,7 @@ function isStandaloneDeclaration(node, declarationsInMigration, templateTypeChec
  */
 function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
     const filesToRemove = new Set();
-    const tracker = new change_tracker.ChangeTracker(printer, importRemapper);
+    const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
     const tsProgram = program.getTsProgram();
     const typeChecker = tsProgram.getTypeChecker();
     const templateTypeChecker = program.compiler.getTemplateTypeChecker();
@@ -1396,7 +1394,7 @@ function isInImportsArray(closestAssignment, closestArray) {
  * found in the LICENSE file at https://angular.dev/license
  */
 function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
-    const tracker = new change_tracker.ChangeTracker(printer, importRemapper);
+    const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
     const typeChecker = program.getTsProgram().getTypeChecker();
     const templateTypeChecker = program.compiler.getTemplateTypeChecker();
     const referenceResolver = new ReferenceResolver(program, host, rootFileNames, basePath, referenceLookupExcludedFiles);
@@ -1989,7 +1987,7 @@ function migrate(options) {
         const allPaths = [...buildPaths, ...testPaths];
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
         let migratedFiles = 0;
         if (!allPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the standalone migration.');

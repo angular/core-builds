@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.0+sha-7c4f74a
+ * @license Angular v20.0.0+sha-0ea831c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CLEA_0Sd.cjs');
-var compiler = require('./compiler-BXqHhIco.cjs');
-var index$1 = require('./index-CEGN1XTs.cjs');
+var checker = require('./checker-Bu1Wu4f7.cjs');
+var index$1 = require('./index-CCX_cTPD.cjs');
 require('path');
-var project_paths = require('./project_paths-wiDX6zW-.cjs');
-var apply_import_manager = require('./apply_import_manager-CgsMTrXc.cjs');
-var index = require('./index-hYZAFh8_.cjs');
+var project_paths = require('./project_paths-BjQra9mv.cjs');
+var apply_import_manager = require('./apply_import_manager-DT15wSJs.cjs');
+var index = require('./index-CAM7Xiu7.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -115,7 +114,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof compiler.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof checker.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
