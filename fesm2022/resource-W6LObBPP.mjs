@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0+sha-41b1039
+ * @license Angular v20.0.0+sha-ddd22be
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -365,6 +365,7 @@ class ResourceImpl extends BaseWritableResource {
     pendingController;
     resolvePendingTask = undefined;
     destroyed = false;
+    unregisterOnDestroy;
     constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
         super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
@@ -430,7 +431,7 @@ class ResourceImpl extends BaseWritableResource {
         });
         this.pendingTasks = injector.get(PendingTasks);
         // Cancel any pending request when the resource itself is destroyed.
-        injector.get(DestroyRef).onDestroy(() => this.destroy());
+        this.unregisterOnDestroy = injector.get(DestroyRef).onDestroy(() => this.destroy());
     }
     status = computed(() => projectStatusOfState(this.state()));
     error = computed(() => {
@@ -472,6 +473,7 @@ class ResourceImpl extends BaseWritableResource {
     }
     destroy() {
         this.destroyed = true;
+        this.unregisterOnDestroy();
         this.effectRef.destroy();
         this.abortInProgressLoad();
         // Destroyed resources enter Idle state.
@@ -621,4 +623,4 @@ class ResourceWrappedError extends Error {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-DUFMqIbv.mjs.map
+//# sourceMappingURL=resource-W6LObBPP.mjs.map
