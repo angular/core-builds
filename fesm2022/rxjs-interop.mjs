@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0+sha-eb62a58
+ * @license Angular v20.0.0+sha-5c31e7e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -208,6 +208,7 @@ function toSignal(source, options) {
         next: (value) => state.set({ kind: 1 /* StateKind.Value */, value }),
         error: (error) => {
             state.set({ kind: 2 /* StateKind.Error */, error });
+            destroyUnregisterFn?.();
         },
         complete: () => {
             destroyUnregisterFn?.();
