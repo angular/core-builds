@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-4178e82
+ * @license Angular v20.1.0-next.0+sha-b839d08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -456,7 +456,7 @@ function setThrowInvalidWriteToSignalError(fn) {
  */
 let postSignalSetFn = null;
 /**
- * Create a `Signal` that can be set or updated directly.
+ * Creates a `Signal` getter, setter, and updater function.
  */
 function createSignal(initialValue, equal) {
     const node = Object.create(SIGNAL_NODE);
@@ -471,17 +471,16 @@ function createSignal(initialValue, equal) {
         getter.toString = () => `[Signal${debugName}: ${node.value}]`;
     }
     runPostProducerCreatedFn(node);
-    return getter;
-}
-/**
- * Creates a `Signal` getter, setter, and updater function.
- */
-function createSignalTuple(initialValue, equal) {
-    const getter = createSignal(initialValue, equal);
-    const node = getter[SIGNAL];
     const set = (newValue) => signalSetFn(node, newValue);
     const update = (updateFn) => signalUpdateFn(node, updateFn);
     return [getter, set, update];
+}
+/**
+ * Creates a `Signal` getter, setter, and updater function.
+ * @deprecated use createSignal
+ */
+function createSignalTuple(initialValue, equal) {
+    return createSignal(initialValue, equal);
 }
 function setPostSignalSetFn(fn) {
     const prev = postSignalSetFn;
@@ -529,4 +528,4 @@ function signalValueChanged(node) {
 }
 
 export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
-//# sourceMappingURL=signal-ePSl6jXn.mjs.map
+//# sourceMappingURL=signal-BZ1SD--i.mjs.map

@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.1.0-next.0+sha-4178e82
+ * @license Angular v20.1.0-next.0+sha-b839d08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-Cgau66Rw.mjs';
-import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-ePSl6jXn.mjs';
-import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-2ouAFbCz.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, NodeInjectorDestroyRef, FLAGS, markAncestorsForTraversal, noop, setIsRefreshingViews, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-Ds-Wmkv_.mjs';
+import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, REACTIVE_NODE, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-BZ1SD--i.mjs';
+import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-C72kieeB.mjs';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -365,6 +365,7 @@ class ResourceImpl extends BaseWritableResource {
     pendingController;
     resolvePendingTask = undefined;
     destroyed = false;
+    unregisterOnDestroy;
     constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
         super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
@@ -430,7 +431,7 @@ class ResourceImpl extends BaseWritableResource {
         });
         this.pendingTasks = injector.get(PendingTasks);
         // Cancel any pending request when the resource itself is destroyed.
-        injector.get(DestroyRef).onDestroy(() => this.destroy());
+        this.unregisterOnDestroy = injector.get(DestroyRef).onDestroy(() => this.destroy());
     }
     status = computed(() => projectStatusOfState(this.state()));
     error = computed(() => {
@@ -472,6 +473,7 @@ class ResourceImpl extends BaseWritableResource {
     }
     destroy() {
         this.destroyed = true;
+        this.unregisterOnDestroy();
         this.effectRef.destroy();
         this.abortInProgressLoad();
         // Destroyed resources enter Idle state.
@@ -621,4 +623,4 @@ class ResourceWrappedError extends Error {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-DGZLJFe0.mjs.map
+//# sourceMappingURL=resource-1o9xbJml.mjs.map

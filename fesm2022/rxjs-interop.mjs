@@ -1,18 +1,18 @@
 /**
- * @license Angular v20.1.0-next.0+sha-4178e82
+ * @license Angular v20.1.0-next.0+sha-b839d08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-Cgau66Rw.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-DGZLJFe0.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-Ds-Wmkv_.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-1o9xbJml.mjs';
 import './primitives/di.mjs';
-import './signal-ePSl6jXn.mjs';
+import './signal-BZ1SD--i.mjs';
 import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
-import './untracked-2ouAFbCz.mjs';
+import './untracked-C72kieeB.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -29,8 +29,12 @@ function takeUntilDestroyed(destroyRef) {
         ngDevMode && assertInInjectionContext(takeUntilDestroyed);
         destroyRef = inject(DestroyRef);
     }
-    const destroyed$ = new Observable((observer) => {
-        const unregisterFn = destroyRef.onDestroy(observer.next.bind(observer));
+    const destroyed$ = new Observable((subscriber) => {
+        if (destroyRef.destroyed) {
+            subscriber.next();
+            return;
+        }
+        const unregisterFn = destroyRef.onDestroy(subscriber.next.bind(subscriber));
         return unregisterFn;
     });
     return (source) => {
@@ -208,6 +212,7 @@ function toSignal(source, options) {
         next: (value) => state.set({ kind: 1 /* StateKind.Value */, value }),
         error: (error) => {
             state.set({ kind: 2 /* StateKind.Error */, error });
+            destroyUnregisterFn?.();
         },
         complete: () => {
             destroyUnregisterFn?.();

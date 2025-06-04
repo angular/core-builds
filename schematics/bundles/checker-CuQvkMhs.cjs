@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-4178e82
+ * @license Angular v20.1.0-next.0+sha-b839d08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32082,7 +32082,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-4178e82');
+new Version('20.1.0-next.0+sha-b839d08');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33102,7 +33102,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BlxRNGK4.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CuQvkMhs.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -41354,6 +41354,10 @@ class CompletionEngine {
     tcbIsShim;
     componentContext;
     /**
+     * Get the `TcbLocation` for the global context, which is the location of the `this` variable.
+     */
+    globalTsContext;
+    /**
      * Cache of completions for various levels of the template, including the root template (`null`).
      * Memoizes `getTemplateContextCompletions`.
      */
@@ -41378,10 +41382,19 @@ class CompletionEngine {
                 // for the component context.
                 positionInFile: globalRead.name.getStart(),
             };
+            this.globalTsContext = {
+                tcbPath: this.tcbPath,
+                isShimFile: this.tcbIsShim,
+                positionInFile: globalRead.name.getStart() - 1,
+            };
         }
         else {
             this.componentContext = null;
+            this.globalTsContext = null;
         }
+    }
+    getGlobalTsContext() {
+        return this.globalTsContext;
     }
     /**
      * Get global completions within the given template context and AST node.
@@ -48590,6 +48603,7 @@ class SymbolBuilder {
                     isStructural: meta.isStructural,
                     isInScope: true,
                     isHostDirective: false,
+                    tsCompletionEntryInfo: null,
                 };
                 symbols.push(directiveSymbol);
                 seenDirectives.add(declaration);
@@ -48625,6 +48639,7 @@ class SymbolBuilder {
                     kind: exports.SymbolKind.Directive,
                     isStructural: meta.isStructural,
                     isInScope: true,
+                    tsCompletionEntryInfo: null,
                 };
                 symbols.push(directiveSymbol);
                 seenDirectives.add(node);
@@ -48883,6 +48898,7 @@ class SymbolBuilder {
             ngModule,
             isHostDirective: false,
             isInScope: true, // TODO: this should always be in scope in this context, right?
+            tsCompletionEntryInfo: null,
         };
     }
     getSymbolOfVariable(variable) {
@@ -49659,34 +49675,27 @@ class TemplateTypeCheckerImpl {
         this.symbolBuilderCache.set(component, builder);
         return builder;
     }
-    getPotentialTemplateDirectives(component) {
+    getGlobalTsContext(component) {
+        const engine = this.getOrCreateCompletionEngine(component);
+        if (engine === null) {
+            return null;
+        }
+        return engine.getGlobalTsContext();
+    }
+    getPotentialTemplateDirectives(component, tsLs, options) {
         const scope = this.getComponentScope(component);
         // Don't resolve directives for selectorless components since they're already in the file.
         if (scope?.kind === exports.ComponentScopeKind.Selectorless) {
             return [];
         }
-        const typeChecker = this.programDriver.getProgram().getTypeChecker();
         const resultingDirectives = new Map();
-        if (scope !== null) {
-            const inScopeDirectives = this.getScopeData(component, scope)?.directives ?? [];
-            // First, all in scope directives can be used.
-            for (const d of inScopeDirectives) {
-                resultingDirectives.set(d.ref.node, d);
+        const directivesInScope = this.getTemplateDirectiveInScope(component);
+        const directiveInGlobal = this.getElementsInGlobal(component, tsLs, options);
+        for (const directive of [...directivesInScope, ...directiveInGlobal]) {
+            if (resultingDirectives.has(directive.ref.node)) {
+                continue;
             }
-        }
-        // Any additional directives found from the global registry can be used, but are not in scope.
-        // In the future, we can also walk other registries for .d.ts files, or traverse the
-        // import/export graph.
-        for (const directiveClass of this.localMetaReader.getKnown(exports.MetaKind.Directive)) {
-            const directiveMeta = this.metaReader.getDirectiveMetadata(new Reference(directiveClass));
-            if (directiveMeta === null)
-                continue;
-            if (resultingDirectives.has(directiveClass))
-                continue;
-            const withScope = this.scopeDataOfDirectiveMeta(typeChecker, directiveMeta);
-            if (withScope === null)
-                continue;
-            resultingDirectives.set(directiveClass, { ...withScope, isInScope: false });
+            resultingDirectives.set(directive.ref.node, directive);
         }
         return Array.from(resultingDirectives.values());
     }
@@ -49736,7 +49745,156 @@ class TemplateTypeCheckerImpl {
         }
         return this.metaReader.getPipeMetadata(new Reference(pipe));
     }
-    getPotentialElementTags(component) {
+    getTemplateDirectiveInScope(component) {
+        const resultingDirectives = new Map();
+        const scope = this.getComponentScope(component);
+        // Don't resolve directives for selectorless components since they're already in the file.
+        if (scope?.kind === exports.ComponentScopeKind.Selectorless) {
+            return [];
+        }
+        if (scope !== null) {
+            const inScopeDirectives = this.getScopeData(component, scope)?.directives ?? [];
+            // First, all in scope directives can be used.
+            for (const d of inScopeDirectives) {
+                resultingDirectives.set(d.ref.node, d);
+            }
+        }
+        const typeChecker = this.programDriver.getProgram().getTypeChecker();
+        const currentComponentFileName = component.getSourceFile().fileName;
+        // Any additional directives found from the global registry can be used, only includes the directives includes in the current
+        // component file.
+        //
+        // This means only the inputs in the decorator are needed to be updated, no need to update the import statement.
+        for (const directiveClass of this.localMetaReader.getKnown(exports.MetaKind.Directive)) {
+            if (directiveClass.getSourceFile().fileName !== currentComponentFileName) {
+                continue;
+            }
+            const directiveMeta = this.metaReader.getDirectiveMetadata(new Reference(directiveClass));
+            if (directiveMeta === null)
+                continue;
+            if (resultingDirectives.has(directiveClass))
+                continue;
+            const withScope = this.scopeDataOfDirectiveMeta(typeChecker, directiveMeta);
+            if (withScope === null)
+                continue;
+            resultingDirectives.set(directiveClass, { ...withScope, isInScope: false });
+        }
+        return Array.from(resultingDirectives.values());
+    }
+    getDirectiveScopeData(component, isInScope, tsCompletionEntryInfo) {
+        const typeChecker = this.programDriver.getProgram().getTypeChecker();
+        if (!isNamedClassDeclaration(component)) {
+            return null;
+        }
+        const directiveMeta = this.metaReader.getDirectiveMetadata(new Reference(component));
+        if (directiveMeta === null) {
+            return null;
+        }
+        const withScope = this.scopeDataOfDirectiveMeta(typeChecker, directiveMeta);
+        if (withScope === null) {
+            return null;
+        }
+        return {
+            ...withScope,
+            isInScope,
+            tsCompletionEntryInfo,
+        };
+    }
+    getElementsInFileScope(component) {
+        const tagMap = new Map();
+        const potentialDirectives = this.getTemplateDirectiveInScope(component);
+        for (const directive of potentialDirectives) {
+            if (directive.selector === null) {
+                continue;
+            }
+            for (const selector of CssSelector.parse(directive.selector)) {
+                if (selector.element === null || tagMap.has(selector.element)) {
+                    // Skip this directive if it doesn't match an element tag, or if another directive has
+                    // already been included with the same element name.
+                    continue;
+                }
+                tagMap.set(selector.element, directive);
+            }
+        }
+        return tagMap;
+    }
+    getElementsInGlobal(component, tsLs, options) {
+        // Add the additional directives from the global registry, which are not in scope and in different file with the current
+        // component file.
+        //
+        // This means the inputs and the import statement in the decorator are needed to be updated.
+        const tsContext = this.getGlobalTsContext(component);
+        if (tsContext === null) {
+            return [];
+        }
+        if (!options.includeExternalModule) {
+            return [];
+        }
+        const entries = tsLs.getCompletionsAtPosition(tsContext.tcbPath, tsContext.positionInFile, {
+            includeSymbol: true,
+            includeCompletionsForModuleExports: true,
+        })?.entries;
+        const typeChecker = this.programDriver.getProgram().getTypeChecker();
+        const resultingDirectives = new Map();
+        const currentComponentFileName = component.getSourceFile().fileName;
+        for (const { symbol, data } of entries ?? []) {
+            const symbolFileName = symbol?.declarations?.[0]?.getSourceFile().fileName;
+            if (symbolFileName === undefined) {
+                continue;
+            }
+            if (symbolFileName === currentComponentFileName) {
+                continue;
+            }
+            const decl = getClassDeclFromSymbol(symbol, typeChecker);
+            if (decl === null) {
+                continue;
+            }
+            const directiveDecls = [];
+            const ref = new Reference(decl);
+            const directiveMeta = this.metaReader.getDirectiveMetadata(ref);
+            if (directiveMeta?.isStandalone) {
+                directiveDecls.push({
+                    meta: directiveMeta,
+                    ref,
+                });
+            }
+            else {
+                const ngModuleMeta = this.metaReader.getNgModuleMetadata(ref);
+                if (ngModuleMeta === null) {
+                    continue;
+                }
+                for (const moduleExports of ngModuleMeta.exports) {
+                    const directiveMeta = this.metaReader.getDirectiveMetadata(moduleExports);
+                    if (directiveMeta === null) {
+                        continue;
+                    }
+                    directiveDecls.push({
+                        meta: directiveMeta,
+                        ref: moduleExports,
+                    });
+                }
+            }
+            for (const directiveDecl of directiveDecls) {
+                if (resultingDirectives.has(directiveDecl.ref.node)) {
+                    continue;
+                }
+                const withScope = this.scopeDataOfDirectiveMeta(typeChecker, directiveDecl.meta);
+                if (withScope === null) {
+                    continue;
+                }
+                resultingDirectives.set(directiveDecl.ref.node, {
+                    ...withScope,
+                    isInScope: false,
+                    tsCompletionEntryInfo: {
+                        tsCompletionEntryData: data,
+                        tsCompletionEntrySymbolFileName: symbolFileName,
+                    },
+                });
+            }
+        }
+        return Array.from(resultingDirectives.values());
+    }
+    getPotentialElementTags(component, tsLs, options) {
         if (this.elementTagCache.has(component)) {
             return this.elementTagCache.get(component);
         }
@@ -49744,7 +49902,7 @@ class TemplateTypeCheckerImpl {
         for (const tag of REGISTRY.allKnownElementNames()) {
             tagMap.set(tag, null);
         }
-        const potentialDirectives = this.getPotentialTemplateDirectives(component);
+        const potentialDirectives = this.getPotentialTemplateDirectives(component, tsLs, options);
         for (const directive of potentialDirectives) {
             if (directive.selector === null) {
                 continue;
@@ -49926,6 +50084,7 @@ class TemplateTypeCheckerImpl {
             selector: dep.selector,
             tsSymbol,
             ngModule,
+            tsCompletionEntryInfo: null,
         };
     }
     scopeDataOfPipeMeta(typeChecker, dep) {
@@ -49937,6 +50096,7 @@ class TemplateTypeCheckerImpl {
             ref: dep.ref,
             name: dep.name,
             tsSymbol,
+            tsCompletionEntryInfo: null,
         };
     }
 }
@@ -50050,6 +50210,28 @@ class SingleShimTypeCheckingHost extends SingleFileTypeCheckingHost {
         // Only need to generate a TCB for the class if no shim exists for it currently.
         return !this.fileData.shimData.has(shimPath);
     }
+}
+function getClassDeclFromSymbol(symbol, checker) {
+    const tsDecl = symbol?.getDeclarations();
+    if (tsDecl === undefined) {
+        return null;
+    }
+    let decl = tsDecl.length > 0 ? tsDecl[0] : undefined;
+    if (decl === undefined) {
+        return null;
+    }
+    if (ts.isExportAssignment(decl)) {
+        const symbol = checker.getTypeAtLocation(decl.expression).symbol;
+        return getClassDeclFromSymbol(symbol, checker);
+    }
+    if (ts.isExportSpecifier(decl)) {
+        const symbol = checker.getTypeAtLocation(decl).symbol;
+        return getClassDeclFromSymbol(symbol, checker);
+    }
+    if (isNamedClassDeclaration(decl)) {
+        return decl;
+    }
+    return null;
 }
 
 exports.AST = AST;
