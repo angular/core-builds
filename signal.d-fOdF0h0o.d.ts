@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.0+sha-3710b12
+ * @license Angular v20.0.0+sha-9e850c8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19,11 +19,12 @@ interface SignalGetter<T> extends SignalBaseGetter<T> {
     readonly [SIGNAL]: SignalNode<T>;
 }
 /**
- * Create a `Signal` that can be set or updated directly.
+ * Creates a `Signal` getter, setter, and updater function.
  */
-declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SignalGetter<T>;
+declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): [SignalGetter<T>, SignalSetter<T>, SignalUpdater<T>];
 /**
  * Creates a `Signal` getter, setter, and updater function.
+ * @deprecated use createSignal
  */
 declare function createSignalTuple<T>(initialValue: T, equal?: ValueEqualityFn<T>): [SignalGetter<T>, SignalSetter<T>, SignalUpdater<T>];
 declare function setPostSignalSetFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
