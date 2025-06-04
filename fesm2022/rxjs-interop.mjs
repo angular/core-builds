@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.0.0+sha-3c64468
+ * @license Angular v20.0.0+sha-bdf882c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-EAT5_DvI.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-_OR3gwq6.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-C4AUixQF.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-DUFMqIbv.mjs';
 import './primitives/di.mjs';
 import './signal-BZ1SD--i.mjs';
 import '@angular/core/primitives/di';
@@ -29,8 +29,12 @@ function takeUntilDestroyed(destroyRef) {
         ngDevMode && assertInInjectionContext(takeUntilDestroyed);
         destroyRef = inject(DestroyRef);
     }
-    const destroyed$ = new Observable((observer) => {
-        const unregisterFn = destroyRef.onDestroy(observer.next.bind(observer));
+    const destroyed$ = new Observable((subscriber) => {
+        if (destroyRef.destroyed) {
+            subscriber.next();
+            return;
+        }
+        const unregisterFn = destroyRef.onDestroy(subscriber.next.bind(subscriber));
         return unregisterFn;
     });
     return (source) => {
