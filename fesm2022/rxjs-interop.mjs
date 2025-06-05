@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.1+sha-59eb720
+ * @license Angular v20.0.1+sha-32ce149
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -116,9 +116,12 @@ function outputToObservable(ref) {
         // Complete the observable upon directive/component destroy.
         // Note: May be `undefined` if an `EventEmitter` is declared outside
         // of an injection context.
-        destroyRef?.onDestroy(() => observer.complete());
+        const unregisterOnDestroy = destroyRef?.onDestroy(() => observer.complete());
         const subscription = ref.subscribe((v) => observer.next(v));
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+            unregisterOnDestroy?.();
+        };
     });
 }
 
