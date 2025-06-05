@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.1+sha-49e273a
+ * @license Angular v20.0.1+sha-e98ef80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -81,6 +81,16 @@ function setParsed(text, parsed) {
  */
 const EventType = {
     /**
+     * Mouse middle click, introduced in Chrome 55 and not yet supported on
+     * other browsers.
+     */
+    AUXCLICK: 'auxclick',
+    /**
+     * The change event fired by browsers when the `value` attribute of input,
+     * select, and textarea elements are changed.
+     */
+    CHANGE: 'change',
+    /**
      * The click event. In addEvent() refers to all click events, in the
      * jsaction attribute it refers to the unmodified click and Enter/Space
      * keypress events.  In the latter case, a jsaction click will be triggered,
@@ -94,6 +104,12 @@ const EventType = {
      * click event.
      */
     CLICKMOD: 'clickmod',
+    /**
+     * Specifies the jsaction for a click-only event.  Click-only doesn't take
+     * into account the case where an element with focus receives an Enter/Space
+     * keypress.  This event isn't separately enabled in addEvent().
+     */
+    CLICKONLY: 'clickonly',
     /**
      * The dblclick event.
      */
@@ -144,6 +160,18 @@ const EventType = {
      */
     KEYUP: 'keyup',
     /**
+     * The mouseup event. Can either be used directly or used implicitly to
+     * capture mouseup events. In addEvent(), it represents a regular DOM
+     * mouseup event.
+     */
+    MOUSEUP: 'mouseup',
+    /**
+     * The mousedown event. Can either be used directly or used implicitly to
+     * capture mouseenter events. In addEvent(), it represents a regular DOM
+     * mouseover event.
+     */
+    MOUSEDOWN: 'mousedown',
+    /**
      * The mouseover event. Can either be used directly or used implicitly to
      * capture mouseenter events. In addEvent(), it represents a regular DOM
      * mouseover event.
@@ -165,6 +193,22 @@ const EventType = {
      * element being entered within a DOM tree.
      */
     MOUSELEAVE: 'mouseleave',
+    /**
+     * The mousemove event.
+     */
+    MOUSEMOVE: 'mousemove',
+    /**
+     * The pointerup event. Can either be used directly or used implicitly to
+     * capture pointerup events. In addEvent(), it represents a regular DOM
+     * pointerup event.
+     */
+    POINTERUP: 'pointerup',
+    /**
+     * The pointerdown event. Can either be used directly or used implicitly to
+     * capture pointerenter events. In addEvent(), it represents a regular DOM
+     * mouseover event.
+     */
+    POINTERDOWN: 'pointerdown',
     /**
      * The pointerover event. Can either be used directly or used implicitly to
      * capture pointerenter events. In addEvent(), it represents a regular DOM
@@ -188,6 +232,26 @@ const EventType = {
      */
     POINTERLEAVE: 'pointerleave',
     /**
+     * The pointermove event.
+     */
+    POINTERMOVE: 'pointermove',
+    /**
+     * The pointercancel event.
+     */
+    POINTERCANCEL: 'pointercancel',
+    /**
+     * The gotpointercapture event is fired when
+     * Element.setPointerCapture(pointerId) is called on a mouse input, or
+     * implicitly when a touch input begins.
+     */
+    GOTPOINTERCAPTURE: 'gotpointercapture',
+    /**
+     * The lostpointercapture event is fired when
+     * Element.releasePointerCapture(pointerId) is called, or implicitly after a
+     * touch input ends.
+     */
+    LOSTPOINTERCAPTURE: 'lostpointercapture',
+    /**
      * The error event. The error event doesn't bubble, but you can use it in
      * addEvent() and jsaction anyway. EventContract does the right thing under
      * the hood (except in IE8 which does not use error events).
@@ -199,6 +263,10 @@ const EventType = {
      * under the hood.
      */
     LOAD: 'load',
+    /**
+     * The unload event.
+     */
+    UNLOAD: 'unload',
     /**
      * The touchstart event. Bubbles, will only ever fire in browsers with
      * touch support.
@@ -215,11 +283,29 @@ const EventType = {
      */
     TOUCHMOVE: 'touchmove',
     /**
+     * The input event.
+     */
+    INPUT: 'input',
+    /**
+     * The scroll event.
+     */
+    SCROLL: 'scroll',
+    /**
      * The toggle event. The toggle event doesn't bubble, but you can use it in
      * addEvent() and jsaction anyway. EventContract does the right thing
      * under the hood.
      */
-    TOGGLE: 'toggle'};
+    TOGGLE: 'toggle',
+    /**
+     * A custom event. The actual custom event type is declared as the 'type'
+     * field in the event details. Supported in Firefox 6+, IE 9+, and all Chrome
+     * versions.
+     *
+     * This is an internal name. Users should use jsaction's fireCustomEvent to
+     * fire custom events instead of relying on this type to create them.
+     */
+    CUSTOM: '_custom',
+};
 /** All event types that do not bubble or capture and need a polyfill. */
 const MOUSE_SPECIAL_EVENT_TYPES = [
     EventType.MOUSEENTER,
@@ -563,6 +649,11 @@ class EventContractContainer {
 }
 
 const Char = {
+    /**
+     * The separator between the namespace and the action name in the
+     * jsaction attribute value.
+     */
+    NAMESPACE_ACTION_SEPARATOR: '.',
     /**
      * The separator between the event name and action in the jsaction
      * attribute value.

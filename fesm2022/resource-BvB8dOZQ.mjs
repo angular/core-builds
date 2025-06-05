@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.1+sha-49e273a
+ * @license Angular v20.0.1+sha-e98ef80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, noop, FLAGS, markAncestorsForTraversal, setIsRefreshingViews, NodeInjectorDestroyRef, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-C4AUixQF.mjs';
-import { setActiveConsumer, createComputed, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-BZ1SD--i.mjs';
-import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-RA6XPQ1Z.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, NodeInjectorDestroyRef, FLAGS, markAncestorsForTraversal, noop, setIsRefreshingViews, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-BpVc8KIs.mjs';
+import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, REACTIVE_NODE, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal-BZ1SD--i.mjs';
+import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked-C72kieeB.mjs';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -623,4 +623,4 @@ class ResourceWrappedError extends Error {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-W6LObBPP.mjs.map
+//# sourceMappingURL=resource-BvB8dOZQ.mjs.map

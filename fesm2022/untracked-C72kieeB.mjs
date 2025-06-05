@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.1+sha-49e273a
+ * @license Angular v20.0.1+sha-e98ef80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, producerAccessed, ERRORED, defaultEquals, UNSET, REACTIVE_NODE, COMPUTING, consumerBeforeComputation, consumerAfterComputation, runPostProducerCreatedFn, setActiveConsumer } from './signal-BZ1SD--i.mjs';
+import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer } from './signal-BZ1SD--i.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
     const node = Object.create(LINKED_SIGNAL_NODE);
@@ -114,4 +114,4 @@ function untracked(nonReactiveReadsFn) {
 }
 
 export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked };
-//# sourceMappingURL=untracked-RA6XPQ1Z.mjs.map
+//# sourceMappingURL=untracked-C72kieeB.mjs.map
