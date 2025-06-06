@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.1+sha-0d198f2
+ * @license Angular v20.0.1+sha-6ae07ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22,11 +22,6 @@ interface SignalGetter<T> extends SignalBaseGetter<T> {
  * Creates a `Signal` getter, setter, and updater function.
  */
 declare function createSignal<T>(initialValue: T, equal?: ValueEqualityFn<T>): [SignalGetter<T>, SignalSetter<T>, SignalUpdater<T>];
-/**
- * Creates a `Signal` getter, setter, and updater function.
- * @deprecated use createSignal
- */
-declare function createSignalTuple<T>(initialValue: T, equal?: ValueEqualityFn<T>): [SignalGetter<T>, SignalSetter<T>, SignalUpdater<T>];
 declare function setPostSignalSetFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 declare function signalGetFn<T>(node: SignalNode<T>): T;
 declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
@@ -34,5 +29,5 @@ declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T
 declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
 declare const SIGNAL_NODE: SignalNode<unknown>;
 
-export { SIGNAL_NODE, createSignal, createSignalTuple, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn };
+export { SIGNAL_NODE, createSignal, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn };
 export type { SignalGetter, SignalNode };

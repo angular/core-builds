@@ -1,18 +1,18 @@
 /**
- * @license Angular v20.0.1+sha-0d198f2
+ * @license Angular v20.0.1+sha-6ae07ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-BpVc8KIs.mjs';
-import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-BvB8dOZQ.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, assertNotInReactiveContext, signal, PendingTasks } from './root_effect_scheduler-DCy1y1b8.mjs';
+import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource-BarKSp_3.mjs';
 import './primitives/di.mjs';
-import './signal-BZ1SD--i.mjs';
+import './signal-nCiHhWf6.mjs';
 import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
-import './untracked-C72kieeB.mjs';
+import './untracked-DmD_2MlC.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,

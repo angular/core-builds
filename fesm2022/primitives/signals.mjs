@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.0.1+sha-0d198f2
+ * @license Angular v20.0.1+sha-6ae07ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { consumerMarkDirty, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from '../signal-BZ1SD--i.mjs';
-export { SIGNAL_NODE, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal-BZ1SD--i.mjs';
-export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked-C72kieeB.mjs';
+import { consumerMarkDirty, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from '../signal-nCiHhWf6.mjs';
+export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal-nCiHhWf6.mjs';
+export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked-DmD_2MlC.mjs';
 export { setAlternateWeakRefImpl } from '../weak_ref-BaIq-pgY.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {
