@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.0+sha-8ab0028
+ * @license Angular v20.1.0-next.0+sha-6097184
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -475,13 +475,6 @@ function createSignal(initialValue, equal) {
     const update = (updateFn) => signalUpdateFn(node, updateFn);
     return [getter, set, update];
 }
-/**
- * Creates a `Signal` getter, setter, and updater function.
- * @deprecated use createSignal
- */
-function createSignalTuple(initialValue, equal) {
-    return createSignal(initialValue, equal);
-}
 function setPostSignalSetFn(fn) {
     const prev = postSignalSetFn;
     postSignalSetFn = fn;
@@ -527,5 +520,5 @@ function signalValueChanged(node) {
     postSignalSetFn?.(node);
 }
 
-export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, createSignalTuple, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
-//# sourceMappingURL=signal-BZ1SD--i.mjs.map
+export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
+//# sourceMappingURL=signal-nCiHhWf6.mjs.map
