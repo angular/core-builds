@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.0+sha-21fc93b
+ * @license Angular v20.1.0-next.0+sha-ef10aa4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32082,7 +32082,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.0+sha-21fc93b');
+new Version('20.1.0-next.0+sha-ef10aa4');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33102,7 +33102,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CuQvkMhs.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CY7a8ko8.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -50305,6 +50305,7 @@ exports.ParseSourceFile = ParseSourceFile;
 exports.ParseSourceSpan = ParseSourceSpan;
 exports.Parser = Parser$1;
 exports.Placeholder = Placeholder;
+exports.PrefixNot = PrefixNot;
 exports.PropertyRead = PropertyRead;
 exports.QUERY_INITIALIZER_FNS = QUERY_INITIALIZER_FNS;
 exports.R3TargetBinder = R3TargetBinder;
