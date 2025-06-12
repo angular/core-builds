@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.1+sha-38f8705
+ * @license Angular v20.1.0-next.1+sha-31da435
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -985,7 +985,7 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
     let typeArguments = null;
     // `inject` no longer officially supports string injection so we need
     // to cast to any. We maintain the type by passing it as a generic.
-    if (ts.isStringLiteralLike(firstArg)) {
+    if (ts.isStringLiteralLike(firstArg) || isStringType(firstArg, localTypeChecker)) {
         typeArguments = [type || ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)];
         injectedType += ' as any';
     }
@@ -1234,6 +1234,11 @@ function replaceParameterReferencesInInitializer(initializer, constructor, local
         result.push(initializerText.slice(insertLocations[i], insertLocations[i + 1]));
     }
     return result.join('this.');
+}
+function isStringType(node, checker) {
+    const type = checker.getTypeAtLocation(node);
+    // stringLiteral here is to cover const strings inferred as literal type.
+    return !!(type.flags & ts.TypeFlags.String || type.flags & ts.TypeFlags.StringLiteral);
 }
 
 function migrate(options) {

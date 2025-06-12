@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.1+sha-38f8705
+ * @license Angular v20.1.0-next.1+sha-31da435
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4559,7 +4559,6 @@ declare const LOCALE_ID: InjectionToken<string>;
  * In standalone apps:
  * ```ts
  * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- * import { AppModule } from './app/app.module';
  *
  * const appConfig: ApplicationConfig = {
  *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
@@ -4590,7 +4589,6 @@ declare const DEFAULT_CURRENCY_CODE: InjectionToken<string>;
  * In standalone apps:
  * ```ts
  * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- * import { AppModule } from './app/app.module';
  *
  * const appConfig: ApplicationConfig = {
  *   providers: [{provide: TRANSLATIONS, useValue: translations }]
@@ -4625,7 +4623,6 @@ declare const TRANSLATIONS: InjectionToken<string>;
  * In standalone apps:
  * ```ts
  * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- * import { AppModule } from './app/app.module';
  *
  * const appConfig: ApplicationConfig = {
  *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
