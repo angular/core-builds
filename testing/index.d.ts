@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.1.0-next.1+sha-89efd27
+ * @license Angular v20.1.0-next.1+sha-2e0c98b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import '../event_dispatcher.d-BReQpZfC.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d-Dk_7kdX9.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry } from '../discovery.d-AiW64LSq.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry } from '../discovery.d-AiW64LSq.js';
 import * as i0 from '@angular/core';
 import '../graph.d-BcIOep_B.js';
 import 'rxjs';
@@ -385,6 +385,15 @@ interface TestBedStatic extends TestBed {
     new (...args: any[]): TestBed;
 }
 /**
+ * Options that can be configured for a test component.
+ *
+ * @publicApi
+ */
+interface TestComponentOptions {
+    /** Bindings to apply to the test component. */
+    bindings?: Binding[];
+}
+/**
  * Returns a singleton of the `TestBed` class.
  *
  * @publicApi
@@ -455,7 +464,7 @@ interface TestBed {
         multi?: boolean;
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
-    createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    createComponent<T>(component: Type<T>, options?: TestComponentOptions): ComponentFixture<T>;
     /**
      * Execute any pending effects.
      *
@@ -702,4 +711,4 @@ declare class Log<T = string> {
 }
 
 export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
-export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata };
+export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestComponentOptions, TestEnvironmentOptions, TestModuleMetadata };

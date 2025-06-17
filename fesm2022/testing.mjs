@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.1+sha-89efd27
+ * @license Angular v20.1.0-next.1+sha-2e0c98b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1834,8 +1834,8 @@ class TestBedImpl {
     static runInInjectionContext(fn) {
         return TestBedImpl.INSTANCE.runInInjectionContext(fn);
     }
-    static createComponent(component) {
-        return TestBedImpl.INSTANCE.createComponent(component);
+    static createComponent(component, options) {
+        return TestBedImpl.INSTANCE.createComponent(component, options);
     }
     static resetTestingModule() {
         return TestBedImpl.INSTANCE.resetTestingModule();
@@ -2029,7 +2029,7 @@ class TestBedImpl {
     overrideTemplate(component, template) {
         return this.overrideComponent(component, { set: { template, templateUrl: null } });
     }
-    createComponent(type) {
+    createComponent(type, options) {
         const testComponentRenderer = this.inject(TestComponentRenderer);
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
@@ -2043,7 +2043,7 @@ class TestBedImpl {
         }
         const componentFactory = new ComponentFactory(componentDef);
         const initComponent = () => {
-            const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef);
+            const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef, undefined, options?.bindings);
             return this.runInInjectionContext(() => new ComponentFixture(componentRef));
         };
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
