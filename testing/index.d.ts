@@ -1,12 +1,12 @@
 /**
- * @license Angular v20.1.0-next.2+sha-900cd37
+ * @license Angular v20.1.0-next.2+sha-fa5ae92
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import '../event_dispatcher.d-BReQpZfC.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d-Dk_7kdX9.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry } from '../discovery.d-AiW64LSq.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from '../discovery.d-DXcA6jK9.js';
 import * as i0 from '@angular/core';
 import '../graph.d-BcIOep_B.js';
 import 'rxjs';
@@ -637,6 +637,7 @@ declare class FakeNavigation implements Navigation {
     dispose(): void;
     /** Returns whether this fake is disposed. */
     isDisposed(): boolean;
+    abortOngoingNavigation(eventToAbort: InternalFakeNavigateEvent, reason?: Error): void;
     /**
      * Implementation for all navigations and traversals.
      * @returns true if the event was intercepted, otherwise false
@@ -695,6 +696,72 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     dispatchEvent(event: Event): boolean;
     /** internal */
     dispose(): void;
+}
+/** `NavigationInterceptOptions` with experimental commit option. */
+interface ExperimentalNavigationInterceptOptions extends NavigationInterceptOptions {
+    precommitHandler?: (controller: NavigationPrecommitController) => Promise<void>;
+}
+interface NavigationPrecommitController {
+    redirect: (url: string, options?: NavigationNavigateOptions) => void;
+}
+interface ExperimentalNavigateEvent extends NavigateEvent {
+    intercept(options?: ExperimentalNavigationInterceptOptions): void;
+    precommitHandler?: () => Promise<void>;
+}
+/**
+ * Fake equivalent of `NavigateEvent`.
+ */
+interface FakeNavigateEvent extends ExperimentalNavigateEvent {
+    readonly destination: FakeNavigationDestination;
+}
+interface InternalFakeNavigateEvent extends FakeNavigateEvent {
+    readonly sameDocument: boolean;
+    readonly result: InternalNavigationResult;
+    interceptionState: 'none' | 'intercepted' | 'committed' | 'scrolled' | 'finished';
+    scrollBehavior: 'after-transition' | 'manual' | null;
+    focusResetBehavior: 'after-transition' | 'manual' | null;
+    abortController: AbortController;
+    cancel(reason: Error): void;
+}
+/**
+ * Fake equivalent of `NavigationDestination`.
+ */
+declare class FakeNavigationDestination implements NavigationDestination {
+    url: string;
+    readonly sameDocument: boolean;
+    readonly key: string | null;
+    readonly id: string | null;
+    readonly index: number;
+    state?: unknown;
+    private readonly historyState;
+    constructor({ url, sameDocument, historyState, state, key, id, index, }: {
+        url: string;
+        sameDocument: boolean;
+        historyState: unknown;
+        state?: unknown;
+        key?: string | null;
+        id?: string | null;
+        index?: number;
+    });
+    getState(): unknown;
+    getHistoryState(): unknown;
+}
+/**
+ * Internal utility class for representing the result of a navigation.
+ * Generally equivalent to the "apiMethodTracker" in the spec.
+ */
+declare class InternalNavigationResult {
+    readonly navigation: FakeNavigation;
+    committedTo: FakeNavigationHistoryEntry | null;
+    committedResolve: (entry: FakeNavigationHistoryEntry) => void;
+    committedReject: (reason: Error) => void;
+    finishedResolve: () => void;
+    finishedReject: (reason: Error) => void;
+    readonly committed: Promise<FakeNavigationHistoryEntry>;
+    readonly finished: Promise<FakeNavigationHistoryEntry>;
+    get signal(): AbortSignal;
+    private readonly abortController;
+    constructor(navigation: FakeNavigation);
 }
 
 declare function getCleanupHook(expectedTeardownValue: boolean): VoidFunction;
