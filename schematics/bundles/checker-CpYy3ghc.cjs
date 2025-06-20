@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.4+sha-144c429
+ * @license Angular v20.0.4+sha-dff1417
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32166,7 +32166,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.4+sha-144c429');
+new Version('20.0.4+sha-dff1417');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33182,7 +33182,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Bu1Wu4f7.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CpYy3ghc.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -44249,6 +44249,22 @@ class OutOfBandDiagnosticRecorderImpl {
      * is ever produced per node.
      */
     recordedPipes = new Set();
+    /** Common pipes that can be suggested to users. */
+    pipeSuggestions = new Map([
+        ['async', 'AsyncPipe'],
+        ['uppercase', 'UpperCasePipe'],
+        ['lowercase', 'LowerCasePipe'],
+        ['json', 'JsonPipe'],
+        ['slice', 'SlicePipe'],
+        ['number', 'DecimalPipe'],
+        ['percent', 'PercentPipe'],
+        ['titlecase', 'TitleCasePipe'],
+        ['currency', 'CurrencyPipe'],
+        ['date', 'DatePipe'],
+        ['i18nPlural', 'I18nPluralPipe'],
+        ['i18nSelect', 'I18nSelectPipe'],
+        ['keyvalue', 'KeyValuePipe'],
+    ]);
     constructor(resolver) {
         this.resolver = resolver;
     }
@@ -44261,15 +44277,29 @@ class OutOfBandDiagnosticRecorderImpl {
         const errorMsg = `No directive found with exportAs '${value}'.`;
         this._diagnostics.push(makeTemplateDiagnostic(id, mapping, ref.valueSpan || ref.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REFERENCE_TARGET), errorMsg));
     }
-    missingPipe(id, ast) {
+    missingPipe(id, ast, isStandalone) {
         if (this.recordedPipes.has(ast)) {
             return;
         }
-        const mapping = this.resolver.getTemplateSourceMapping(id);
-        const errorMsg = `No pipe found with name '${ast.name}'.`;
         const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, ast.nameSpan);
         if (sourceSpan === null) {
             throw new Error(`Assertion failure: no SourceLocation found for usage of pipe '${ast.name}'.`);
+        }
+        const mapping = this.resolver.getTemplateSourceMapping(id);
+        let errorMsg = `No pipe found with name '${ast.name}'.`;
+        if (this.pipeSuggestions.has(ast.name)) {
+            const suggestedClassName = this.pipeSuggestions.get(ast.name);
+            const suggestedImport = '@angular/common';
+            if (isStandalone) {
+                errorMsg +=
+                    `\nTo fix this, import the "${suggestedClassName}" class from "${suggestedImport}"` +
+                        ` and add it to the "imports" array of the component.`;
+            }
+            else {
+                errorMsg +=
+                    `\nTo fix this, import the "${suggestedClassName}" class from "${suggestedImport}"` +
+                        ` and add it to the "imports" array of the module declaring the component.`;
+            }
         }
         this._diagnostics.push(makeTemplateDiagnostic(id, mapping, sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_PIPE), errorMsg));
         this.recordedPipes.add(ast);
@@ -47591,7 +47621,7 @@ class TcbExpressionTranslator {
             let pipe;
             if (pipeMeta === null) {
                 // No pipe by that name exists in scope. Record this as an error.
-                this.tcb.oobRecorder.missingPipe(this.tcb.id, ast);
+                this.tcb.oobRecorder.missingPipe(this.tcb.id, ast, this.tcb.hostIsStandalone);
                 // Use an 'any' value to at least allow the rest of the expression to be checked.
                 pipe = ANY_EXPRESSION;
             }

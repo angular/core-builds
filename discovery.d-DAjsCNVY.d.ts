@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.4+sha-144c429
+ * @license Angular v20.0.4+sha-dff1417
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7293,6 +7293,7 @@ declare class NavigationTransition {
     readonly navigationType: NavigationTypeString;
     readonly from: NavigationHistoryEntry;
     readonly finished: Promise<void>;
+    readonly committed: Promise<void>;
 }
 interface NavigationHistoryEntryEventMap {
     dispose: Event;
