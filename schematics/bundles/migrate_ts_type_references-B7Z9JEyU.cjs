@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.2+sha-f364d50
+ * @license Angular v20.1.0-next.2+sha-d25a6a0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-ww1VasfL.cjs');
+var checker = require('./checker-CbEh8hpd.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-Bec3mRlE.cjs');
-var project_paths = require('./project_paths-BaUNhj5m.cjs');
+var index = require('./index-B-8b_5qi.cjs');
+var project_paths = require('./project_paths-BdrJOsQ7.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-SQ7sfjmU.cjs');
+require('./index-DY66Z9te.cjs');
 require('path');
 
 /**
@@ -159,6 +159,15 @@ var BinaryOperator;
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 18] = "NullishCoalesce";
     BinaryOperator[BinaryOperator["Exponentiation"] = 19] = "Exponentiation";
     BinaryOperator[BinaryOperator["In"] = 20] = "In";
+    BinaryOperator[BinaryOperator["AdditionAssignment"] = 21] = "AdditionAssignment";
+    BinaryOperator[BinaryOperator["SubtractionAssignment"] = 22] = "SubtractionAssignment";
+    BinaryOperator[BinaryOperator["MultiplicationAssignment"] = 23] = "MultiplicationAssignment";
+    BinaryOperator[BinaryOperator["DivisionAssignment"] = 24] = "DivisionAssignment";
+    BinaryOperator[BinaryOperator["RemainderAssignment"] = 25] = "RemainderAssignment";
+    BinaryOperator[BinaryOperator["ExponentiationAssignment"] = 26] = "ExponentiationAssignment";
+    BinaryOperator[BinaryOperator["AndAssignment"] = 27] = "AndAssignment";
+    BinaryOperator[BinaryOperator["OrAssignment"] = 28] = "OrAssignment";
+    BinaryOperator[BinaryOperator["NullishCoalesceAssignment"] = 29] = "NullishCoalesceAssignment";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
@@ -391,6 +400,19 @@ class BinaryOperatorExpr extends Expression {
     }
     clone() {
         return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan);
+    }
+    isAssignment() {
+        const op = this.operator;
+        return (op === BinaryOperator.Assign ||
+            op === BinaryOperator.AdditionAssignment ||
+            op === BinaryOperator.SubtractionAssignment ||
+            op === BinaryOperator.MultiplicationAssignment ||
+            op === BinaryOperator.DivisionAssignment ||
+            op === BinaryOperator.RemainderAssignment ||
+            op === BinaryOperator.ExponentiationAssignment ||
+            op === BinaryOperator.AndAssignment ||
+            op === BinaryOperator.OrAssignment ||
+            op === BinaryOperator.NullishCoalesceAssignment);
     }
 }
 class ReadPropExpr extends Expression {
