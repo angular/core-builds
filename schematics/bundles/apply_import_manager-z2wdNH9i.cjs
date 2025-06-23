@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.4+sha-e909287
+ * @license Angular v20.0.4+sha-3eb5a79
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-CpYy3ghc.cjs');
-var project_paths = require('./project_paths-WdQ4fTBW.cjs');
+var checker = require('./checker-bovuFVqM.cjs');
+var project_paths = require('./project_paths-CBE0nAL9.cjs');
 
 /**
  * Applies import manager changes, and writes them as replacements the
