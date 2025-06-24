@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.0.4+sha-f9fe897
+ * @license Angular v20.0.4+sha-76dbd72
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { Attribute } from '../attribute-BWp59EjE.mjs';
+import { Attribute } from '../attribute.mjs';
 
 /** All properties that are used by jsaction. */
 const Property = {

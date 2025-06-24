@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.4+sha-f9fe897
+ * @license Angular v20.0.4+sha-76dbd72
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21,4 +21,4 @@ const Attribute = {
 };
 
 export { Attribute };
-//# sourceMappingURL=attribute-BWp59EjE.mjs.map
+//# sourceMappingURL=attribute.mjs.map

@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.0.4+sha-f9fe897
+ * @license Angular v20.0.4+sha-76dbd72
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL } from './graph.d-BcIOep_B.js';
-import { EventContract } from './event_dispatcher.d-BReQpZfC.js';
+import { SIGNAL } from './graph.d.js';
+import { EventContract } from './event_dispatcher.d.js';
 
 /**
  * A reactive value which notifies consumers of any changes.
