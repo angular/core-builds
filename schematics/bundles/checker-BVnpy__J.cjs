@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.2+sha-08276b5
+ * @license Angular v20.1.0-next.2+sha-20c1f99
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32199,7 +32199,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.2+sha-08276b5');
+new Version('20.1.0-next.2+sha-20c1f99');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33219,7 +33219,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CbEh8hpd.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BVnpy__J.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -37463,25 +37463,29 @@ exports.PerfPhase = void 0;
      */
     PerfPhase[PerfPhase["OutliningSpans"] = 24] = "OutliningSpans";
     /**
-     * Tracks the number of `PerfPhase`s, and must appear at the end of the list.
-     */
-    PerfPhase[PerfPhase["LAST"] = 25] = "LAST";
-    /**
      * Time spent by the Angular Language Service calculating code fixes.
      */
-    PerfPhase[PerfPhase["LsCodeFixes"] = 26] = "LsCodeFixes";
+    PerfPhase[PerfPhase["LsCodeFixes"] = 25] = "LsCodeFixes";
     /**
      * Time spent by the Angular Language Service to fix all detected same type errors.
      */
-    PerfPhase[PerfPhase["LsCodeFixesAll"] = 27] = "LsCodeFixesAll";
+    PerfPhase[PerfPhase["LsCodeFixesAll"] = 26] = "LsCodeFixesAll";
     /**
      * Time spent computing possible Angular refactorings.
      */
-    PerfPhase[PerfPhase["LSComputeApplicableRefactorings"] = 28] = "LSComputeApplicableRefactorings";
+    PerfPhase[PerfPhase["LSComputeApplicableRefactorings"] = 27] = "LSComputeApplicableRefactorings";
     /**
      * Time spent computing changes for applying a given refactoring.
      */
-    PerfPhase[PerfPhase["LSApplyRefactoring"] = 29] = "LSApplyRefactoring";
+    PerfPhase[PerfPhase["LSApplyRefactoring"] = 28] = "LSApplyRefactoring";
+    /**
+     * Time spent by the Angular Language Service calculating semantic classifications.
+     */
+    PerfPhase[PerfPhase["LSSemanticClassification"] = 29] = "LSSemanticClassification";
+    /**
+     * Tracks the number of `PerfPhase`s, and must appear at the end of the list.
+     */
+    PerfPhase[PerfPhase["LAST"] = 30] = "LAST";
 })(exports.PerfPhase || (exports.PerfPhase = {}));
 /**
  * Represents some occurrence during compilation, and is tracked with a counter.

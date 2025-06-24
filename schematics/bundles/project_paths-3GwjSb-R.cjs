@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.2+sha-08276b5
+ * @license Angular v20.1.0-next.2+sha-20c1f99
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var index = require('./index-DY66Z9te.cjs');
+var index = require('./index-BkA2Tb_u.cjs');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-CbEh8hpd.cjs');
+var checker = require('./checker-BVnpy__J.cjs');
 require('path');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
