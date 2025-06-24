@@ -1,15 +1,15 @@
 /**
- * @license Angular v20.1.0-next.2+sha-1cff7cf
+ * @license Angular v20.1.0-next.2+sha-07df4e1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, Provider, ProcessProvidersFunction, ModuleWithProviders, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d-Dk_7kdX9.js';
+import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, Provider, ProcessProvidersFunction, ModuleWithProviders, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d.js';
 import { Observable, Subject, Subscription } from 'rxjs';
-import './event_dispatcher.d-BReQpZfC.js';
-import { SignalNode } from './signal.d-BcmOdASA.js';
+import './event_dispatcher.d.js';
+import { SignalNode } from './signal.d.js';
 import { Injector as Injector$1, InjectionToken as InjectionToken$1, NotFound } from '@angular/core/primitives/di';
-import { ReactiveNode } from './graph.d-BcIOep_B.js';
+import { ReactiveNode } from './graph.d.js';
 
 /**
  * Reactive node type for an input signal. An input signal extends a signal.

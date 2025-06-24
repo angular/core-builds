@@ -1,16 +1,16 @@
 /**
- * @license Angular v20.1.0-next.2+sha-1cff7cf
+ * @license Angular v20.1.0-next.2+sha-07df4e1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import '../event_dispatcher.d-BReQpZfC.js';
-import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d-Dk_7kdX9.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from '../discovery.d-DXcA6jK9.js';
+import '../event_dispatcher.d.js';
+import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from '../discovery.d.js';
 import * as i0 from '@angular/core';
-import '../graph.d-BcIOep_B.js';
+import '../graph.d.js';
 import 'rxjs';
-import '../signal.d-BcmOdASA.js';
+import '../signal.d.js';
 import '@angular/core/primitives/di';
 
 /**

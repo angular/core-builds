@@ -1,14 +1,14 @@
 /**
- * @license Angular v20.1.0-next.2+sha-1cff7cf
+ * @license Angular v20.1.0-next.2+sha-07df4e1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { OutputRef, DestroyRef, Injector, Signal } from '../chrome_dev_tools_performance.d-Dk_7kdX9.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d-Dwpmmn5j.js';
-import '../event_dispatcher.d-BReQpZfC.js';
+import { OutputRef, DestroyRef, Injector, Signal } from '../chrome_dev_tools_performance.d.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d.js';
+import '../event_dispatcher.d.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
-import { ValueEqualityFn } from '../graph.d-BcIOep_B.js';
+import { ValueEqualityFn } from '../graph.d.js';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
