@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-7600bec
+ * @license Angular v20.1.0-next.2+sha-75d246e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -762,7 +762,7 @@ declare abstract class DestroyRef {
      */
     abstract onDestroy(callback: () => void): () => void;
     /**
-     * Indicates whether the instance has already been destroyed and whether its `onDestroy` callbacks have executed.
+     * Indicates whether the instance has already been destroyed.
      */
     abstract get destroyed(): boolean;
 }

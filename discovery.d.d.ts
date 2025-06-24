@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-7600bec
+ * @license Angular v20.1.0-next.2+sha-75d246e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2054,6 +2054,10 @@ declare abstract class EnvironmentInjector implements Injector {
      */
     abstract runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     abstract destroy(): void;
+    /**
+     * Indicates whether the instance has already been destroyed.
+     */
+    abstract get destroyed(): boolean;
 }
 declare class R3Injector extends EnvironmentInjector implements Injector$1 {
     readonly parent: Injector;

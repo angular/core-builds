@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-7600bec
+ * @license Angular v20.1.0-next.2+sha-75d246e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3535,8 +3535,15 @@ const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken(typeof ngDevMode =
         const injector = inject(EnvironmentInjector);
         let userErrorHandler;
         return (e) => {
-            userErrorHandler ??= injector.get(ErrorHandler);
-            userErrorHandler.handleError(e);
+            if (injector.destroyed && !userErrorHandler) {
+                setTimeout(() => {
+                    throw e;
+                });
+            }
+            else {
+                userErrorHandler ??= injector.get(ErrorHandler);
+                userErrorHandler.handleError(e);
+            }
         };
     },
 });
