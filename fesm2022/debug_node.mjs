@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.4+sha-9b01773
+ * @license Angular v20.0.4+sha-65c59dd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13396,7 +13396,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.0.4+sha-9b01773']
+        ? ['ng-version', '20.0.4+sha-65c59dd']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -16798,7 +16798,9 @@ function afterEveryRender(callbackOrSpec, options) {
     return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ false);
 }
 function afterNextRender(callbackOrSpec, options) {
-    !options?.injector && assertInInjectionContext(afterNextRender);
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(afterNextRender);
+    }
     const injector = options?.injector ?? inject(Injector);
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         return NOOP_AFTER_RENDER_REF;
