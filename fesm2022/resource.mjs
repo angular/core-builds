@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-1bf1fb2
+ * @license Angular v20.1.0-next.2+sha-36a1931
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -445,10 +445,14 @@ class ResourceImpl extends BaseWritableResource {
         if (this.destroyed) {
             return;
         }
-        const current = untracked(this.value);
+        const error = untracked(this.error);
         const state = untracked(this.state);
-        if (state.status === 'local' && (this.equal ? this.equal(current, value) : current === value)) {
-            return;
+        if (!error) {
+            const current = untracked(this.value);
+            if (state.status === 'local' &&
+                (this.equal ? this.equal(current, value) : current === value)) {
+                return;
+            }
         }
         // Enter Local state with the user-defined value.
         this.state.set({
