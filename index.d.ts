@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.5+sha-c6f0f54
+ * @license Angular v20.0.5+sha-a7a6a5b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2303,7 +2303,7 @@ interface AfterRenderOptions {
  * }
  * ```
  *
- * @developerPreview
+ * @publicApi 20.0
  */
 declare function afterEveryRender<E = never, W = never, M = never>(spec: {
     earlyRead?: () => E;
@@ -2361,7 +2361,7 @@ declare function afterEveryRender<E = never, W = never, M = never>(spec: {
  * }
  * ```
  *
- * @publicApi
+ * @publicApi 20.0
  */
 declare function afterEveryRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
 /**
@@ -2441,7 +2441,7 @@ declare function afterEveryRender(callback: VoidFunction, options?: AfterRenderO
  * }
  * ```
  *
- * @developerPreview
+ * @publicApi 20.0
  */
 declare function afterNextRender<E = never, W = never, M = never>(spec: {
     earlyRead?: () => E;
