@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.2+sha-ba75583
+ * @license Angular v20.1.0-next.3+sha-85fe323
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18524,10 +18524,14 @@ class Parser {
             return null;
         const expressionNodes = [];
         for (let i = 0; i < expressions.length; ++i) {
+            // If we have a token for the specific expression, it's preferrable to use it because it
+            // allows us to produce more accurate error messages. The expressions are always at the odd
+            // indexes inside the tokens.
+            const expressionSpan = interpolatedTokens?.[i * 2 + 1]?.sourceSpan;
             const expressionText = expressions[i].text;
             const sourceToLex = this._stripComments(expressionText);
             const tokens = this._lexer.tokenize(sourceToLex);
-            const ast = new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, offsets[i], this._supportsDirectPipeReferences).parseChain();
+            const ast = new _ParseAST(expressionSpan ? expressionText : input, expressionSpan || parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, offsets[i], this._supportsDirectPipeReferences).parseChain();
             expressionNodes.push(ast);
         }
         return this.createInterpolationAst(strings.map((s) => s.text), expressionNodes, input, getLocation(parseSourceSpan), absoluteOffset, errors);
@@ -32199,7 +32203,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.2+sha-ba75583');
+new Version('20.1.0-next.3+sha-85fe323');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33219,7 +33223,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BVnpy__J.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-jpNoHPfa.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
