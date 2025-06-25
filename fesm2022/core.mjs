@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-36a1931
+ * @license Angular v20.1.0-next.2+sha-ba75583
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ export { ANIMATION_MODULE_TYPE, APP_INITIALIZER, Attribute, CSP_NONCE, CUSTOM_EL
 import { OutputEmitterRef } from './resource.mjs';
 export { computed, effect, linkedSignal, resource, untracked, ResourceImpl as ɵResourceImpl, encapsulateResourceError as ɵencapsulateResourceError, getOutputDestroyRef as ɵgetOutputDestroyRef } from './resource.mjs';
 export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './weak_ref.mjs';
-export { setCurrentInjector as ɵsetCurrentInjector } from './primitives/di.mjs';
+export { setCurrentInjector as ɵsetCurrentInjector } from './injector.mjs';
 import { clearAppScopedEarlyEventContract, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, EventPhase, getAppScopedQueuedEventInfos, isEarlyEventType, isCaptureEventType } from './primitives/event-dispatch.mjs';
 import 'rxjs';
 import '@angular/core/primitives/di';
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.1.0-next.2+sha-36a1931');
+const VERSION = new Version('20.1.0-next.2+sha-ba75583');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);

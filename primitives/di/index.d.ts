@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-36a1931
+ * @license Angular v20.1.0-next.2+sha-ba75583
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,6 +74,7 @@ interface ɵɵInjectableDeclaration<T> {
 interface InjectionToken<T> {
     ɵprov: ɵɵInjectableDeclaration<T>;
 }
+declare function registerInjectable<T>(ctor: unknown, declaration: ɵɵInjectableDeclaration<T>): InjectionToken<T>;
 
 /**
  * Value returned if the key-value pair couldn't be found in the context
@@ -102,6 +103,7 @@ interface Injector {
 }
 declare function getCurrentInjector(): Injector | undefined | null;
 declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+declare function inject<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
 
-export { NOT_FOUND, NotFoundError, getCurrentInjector, isNotFound, setCurrentInjector };
+export { NOT_FOUND, NotFoundError, getCurrentInjector, inject, isNotFound, registerInjectable, setCurrentInjector };
 export type { InjectionToken, Injector, NotFound, ɵɵInjectableDeclaration };

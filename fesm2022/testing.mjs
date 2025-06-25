@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.2+sha-36a1931
+ * @license Angular v20.1.0-next.2+sha-ba75583
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,7 +13,7 @@ import './signal.mjs';
 import '@angular/core/primitives/signals';
 import 'rxjs/operators';
 import './attribute.mjs';
-import './primitives/di.mjs';
+import './injector.mjs';
 import '@angular/core/primitives/di';
 
 /**
