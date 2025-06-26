@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.5+sha-8b861e2
+ * @license Angular v20.0.5+sha-a3c246a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.5+sha-8b861e2');
+const VERSION = new Version('20.0.5+sha-a3c246a');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -755,7 +755,15 @@ class ImagePerformanceWarning {
     scanImages() {
         const images = getDocument().querySelectorAll('img');
         let lcpElementFound, lcpElementLoadedCorrectly = false;
-        images.forEach((image) => {
+        // Important: do not refactor this to use `images.forEach` or
+        // `for (const ... of ...)`, because images might be a custom internal
+        // data structure — such as a lazily evaluated query result in Domino.
+        // (This naturally would never be a case in any browser).
+        for (let index = 0; index < images.length; index++) {
+            const image = images[index];
+            if (!image) {
+                continue;
+            }
             if (!this.options?.disableImageSizeWarning) {
                 // Image elements using the NgOptimizedImage directive are excluded,
                 // as that directive has its own version of this check.
@@ -775,7 +783,7 @@ class ImagePerformanceWarning {
                     }
                 }
             }
-        });
+        }
         if (lcpElementFound &&
             !lcpElementLoadedCorrectly &&
             this.lcpImageUrl &&
