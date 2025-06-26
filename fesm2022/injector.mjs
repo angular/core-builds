@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-402eaa1
+ * @license Angular v20.1.0-next.3+sha-ec01599
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -43,7 +43,7 @@ function setCurrentInjector(injector) {
 }
 function inject(token, options) {
     const currentInjector = getCurrentInjector();
-    if (!currentInjector) {
+    if (!currentInjector || !token.ɵprov) {
         return NOT_FOUND;
     }
     return currentInjector.retrieve(token, options);

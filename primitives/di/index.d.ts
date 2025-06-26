@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-402eaa1
+ * @license Angular v20.1.0-next.3+sha-ec01599
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,6 +74,14 @@ interface ɵɵInjectableDeclaration<T> {
 interface InjectionToken<T> {
     ɵprov: ɵɵInjectableDeclaration<T>;
 }
+declare function defineInjectable<T>(opts: {
+    token: unknown;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
+    factory: () => T;
+}): unknown;
+type Constructor<T> = Function & {
+    prototype: T;
+};
 declare function registerInjectable<T>(ctor: unknown, declaration: ɵɵInjectableDeclaration<T>): InjectionToken<T>;
 
 /**
@@ -103,7 +111,7 @@ interface Injector {
 }
 declare function getCurrentInjector(): Injector | undefined | null;
 declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
-declare function inject<T>(token: InjectionToken<T>, options?: unknown): T | NotFound;
+declare function inject<T>(token: InjectionToken<T> | Constructor<T>, options?: unknown): T | NotFound;
 
-export { NOT_FOUND, NotFoundError, getCurrentInjector, inject, isNotFound, registerInjectable, setCurrentInjector };
+export { NOT_FOUND, NotFoundError, defineInjectable, getCurrentInjector, inject, isNotFound, registerInjectable, setCurrentInjector };
 export type { InjectionToken, Injector, NotFound, ɵɵInjectableDeclaration };
