@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-c4cffe2
+ * @license Angular v20.1.0-next.3+sha-f849803
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -78,7 +78,7 @@ declare function defineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
     factory: () => T;
-}): unknown;
+}): ɵɵInjectableDeclaration<T>;
 type Constructor<T> = Function & {
     prototype: T;
 };
