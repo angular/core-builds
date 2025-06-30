@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.3+sha-493f25b
+ * @license Angular v20.1.0-next.3+sha-a4300a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32203,7 +32203,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-next.3+sha-493f25b');
+new Version('20.1.0-next.3+sha-a4300a7');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33223,7 +33223,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-jpNoHPfa.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-8bFrLmGZ.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -41709,97 +41709,88 @@ class CompletionEngine {
     }
 }
 
-const comma = ','.charCodeAt(0);
-const semicolon = ';'.charCodeAt(0);
-const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-const intToChar = new Uint8Array(64); // 64 possible chars.
-const charToInt = new Uint8Array(128); // z is 122 in ASCII
+// src/vlq.ts
+var comma = ",".charCodeAt(0);
+var semicolon = ";".charCodeAt(0);
+var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var intToChar = new Uint8Array(64);
+var charToInt = new Uint8Array(128);
 for (let i = 0; i < chars.length; i++) {
-    const c = chars.charCodeAt(i);
-    intToChar[i] = c;
-    charToInt[c] = i;
+  const c = chars.charCodeAt(i);
+  intToChar[i] = c;
+  charToInt[c] = i;
 }
 function encodeInteger(builder, num, relative) {
-    let delta = num - relative;
-    delta = delta < 0 ? (-delta << 1) | 1 : delta << 1;
-    do {
-        let clamped = delta & 0b011111;
-        delta >>>= 5;
-        if (delta > 0)
-            clamped |= 0b100000;
-        builder.write(intToChar[clamped]);
-    } while (delta > 0);
-    return num;
+  let delta = num - relative;
+  delta = delta < 0 ? -delta << 1 | 1 : delta << 1;
+  do {
+    let clamped = delta & 31;
+    delta >>>= 5;
+    if (delta > 0) clamped |= 32;
+    builder.write(intToChar[clamped]);
+  } while (delta > 0);
+  return num;
 }
 
-const bufLength = 1024 * 16;
-// Provide a fallback for older environments.
-const td = typeof TextDecoder !== 'undefined'
-    ? /* #__PURE__ */ new TextDecoder()
-    : typeof Buffer !== 'undefined'
-        ? {
-            decode(buf) {
-                const out = Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength);
-                return out.toString();
-            },
-        }
-        : {
-            decode(buf) {
-                let out = '';
-                for (let i = 0; i < buf.length; i++) {
-                    out += String.fromCharCode(buf[i]);
-                }
-                return out;
-            },
-        };
-class StringWriter {
-    constructor() {
-        this.pos = 0;
-        this.out = '';
-        this.buffer = new Uint8Array(bufLength);
+// src/strings.ts
+var bufLength = 1024 * 16;
+var td = typeof TextDecoder !== "undefined" ? /* @__PURE__ */ new TextDecoder() : typeof Buffer !== "undefined" ? {
+  decode(buf) {
+    const out = Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength);
+    return out.toString();
+  }
+} : {
+  decode(buf) {
+    let out = "";
+    for (let i = 0; i < buf.length; i++) {
+      out += String.fromCharCode(buf[i]);
     }
-    write(v) {
-        const { buffer } = this;
-        buffer[this.pos++] = v;
-        if (this.pos === bufLength) {
-            this.out += td.decode(buffer);
-            this.pos = 0;
-        }
+    return out;
+  }
+};
+var StringWriter = class {
+  constructor() {
+    this.pos = 0;
+    this.out = "";
+    this.buffer = new Uint8Array(bufLength);
+  }
+  write(v) {
+    const { buffer } = this;
+    buffer[this.pos++] = v;
+    if (this.pos === bufLength) {
+      this.out += td.decode(buffer);
+      this.pos = 0;
     }
-    flush() {
-        const { buffer, out, pos } = this;
-        return pos > 0 ? out + td.decode(buffer.subarray(0, pos)) : out;
-    }
-}
+  }
+  flush() {
+    const { buffer, out, pos } = this;
+    return pos > 0 ? out + td.decode(buffer.subarray(0, pos)) : out;
+  }
+};
 function encode(decoded) {
-    const writer = new StringWriter();
-    let sourcesIndex = 0;
-    let sourceLine = 0;
-    let sourceColumn = 0;
-    let namesIndex = 0;
-    for (let i = 0; i < decoded.length; i++) {
-        const line = decoded[i];
-        if (i > 0)
-            writer.write(semicolon);
-        if (line.length === 0)
-            continue;
-        let genColumn = 0;
-        for (let j = 0; j < line.length; j++) {
-            const segment = line[j];
-            if (j > 0)
-                writer.write(comma);
-            genColumn = encodeInteger(writer, segment[0], genColumn);
-            if (segment.length === 1)
-                continue;
-            sourcesIndex = encodeInteger(writer, segment[1], sourcesIndex);
-            sourceLine = encodeInteger(writer, segment[2], sourceLine);
-            sourceColumn = encodeInteger(writer, segment[3], sourceColumn);
-            if (segment.length === 4)
-                continue;
-            namesIndex = encodeInteger(writer, segment[4], namesIndex);
-        }
+  const writer = new StringWriter();
+  let sourcesIndex = 0;
+  let sourceLine = 0;
+  let sourceColumn = 0;
+  let namesIndex = 0;
+  for (let i = 0; i < decoded.length; i++) {
+    const line = decoded[i];
+    if (i > 0) writer.write(semicolon);
+    if (line.length === 0) continue;
+    let genColumn = 0;
+    for (let j = 0; j < line.length; j++) {
+      const segment = line[j];
+      if (j > 0) writer.write(comma);
+      genColumn = encodeInteger(writer, segment[0], genColumn);
+      if (segment.length === 1) continue;
+      sourcesIndex = encodeInteger(writer, segment[1], sourcesIndex);
+      sourceLine = encodeInteger(writer, segment[2], sourceLine);
+      sourceColumn = encodeInteger(writer, segment[3], sourceColumn);
+      if (segment.length === 4) continue;
+      namesIndex = encodeInteger(writer, segment[4], namesIndex);
     }
-    return writer.flush();
+  }
+  return writer.flush();
 }
 
 class BitSet {
