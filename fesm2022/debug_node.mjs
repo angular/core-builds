@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-e1856da
+ * @license Angular v20.1.0-next.3+sha-664ed95
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13476,7 +13476,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.1.0-next.3+sha-e1856da']
+        ? ['ng-version', '20.1.0-next.3+sha-664ed95']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -13600,7 +13600,7 @@ class ComponentRef extends ComponentRef$1 {
         if (ngDevMode && !hasSetInput) {
             const cmpNameForError = stringifyForError(this.componentType);
             let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
-            message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
+            message += `Make sure that the '${name}' property is declared as an input using the @Input() decorator or the input() function.`;
             reportUnknownPropertyError(message);
         }
     }

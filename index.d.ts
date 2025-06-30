@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-e1856da
+ * @license Angular v20.1.0-next.3+sha-664ed95
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2607,7 +2607,7 @@ declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
 
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs/toSignal toSignal})
+ * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs-interop/toSignal toSignal})
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
