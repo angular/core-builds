@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.1.0-next.3+sha-f0965c7
+ * @license Angular v20.1.0-next.3+sha-35032a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-export { NOT_FOUND, NotFoundError, getCurrentInjector, inject, isNotFound, setCurrentInjector } from '../injector.mjs';
+export { NOT_FOUND, NotFoundError, getCurrentInjector, inject, isNotFound, setCurrentInjector } from '../not_found.mjs';
 
 function defineInjectable(opts) {
     return {

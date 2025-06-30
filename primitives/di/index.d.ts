@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-next.3+sha-f0965c7
+ * @license Angular v20.1.0-next.3+sha-35032a6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -111,7 +111,7 @@ interface Injector {
 }
 declare function getCurrentInjector(): Injector | undefined | null;
 declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
-declare function inject<T>(token: InjectionToken<T> | Constructor<T>, options?: unknown): T | NotFound;
+declare function inject<T>(token: InjectionToken<T> | Constructor<T>): T;
 
 export { NOT_FOUND, NotFoundError, defineInjectable, getCurrentInjector, inject, isNotFound, registerInjectable, setCurrentInjector };
 export type { InjectionToken, Injector, NotFound, ɵɵInjectableDeclaration };
