@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.0.5+sha-7c82f26
+ * @license Angular v20.0.5+sha-bf881cc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.0.5+sha-7c82f26');
+const VERSION = new Version('20.0.5+sha-bf881cc');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
