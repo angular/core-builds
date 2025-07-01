@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.0-next.3+sha-1ea65b1
+ * @license Angular v20.1.0-next.3+sha-d7b94e0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-8bFrLmGZ.cjs');
+var checker = require('./checker-CwuJOWZI.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-1ea65b1'));
+    definitionMap.set('version', checker.literal('20.1.0-next.3+sha-d7b94e0'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -8790,34 +8790,34 @@ class ComponentSymbol extends DirectiveSymbol {
 /**
  * Collect the animation names from the static evaluation result.
  * @param value the static evaluation result of the animations
- * @param animationTriggerNames the animation names collected and whether some names could not be
+ * @param legacyAnimationTriggerNames the animation names collected and whether some names could not be
  *     statically evaluated.
  */
-function collectAnimationNames(value, animationTriggerNames) {
+function collectLegacyAnimationNames(value, legacyAnimationTriggerNames) {
     if (value instanceof Map) {
         const name = value.get('name');
         if (typeof name === 'string') {
-            animationTriggerNames.staticTriggerNames.push(name);
+            legacyAnimationTriggerNames.staticTriggerNames.push(name);
         }
         else {
-            animationTriggerNames.includesDynamicAnimations = true;
+            legacyAnimationTriggerNames.includesDynamicAnimations = true;
         }
     }
     else if (Array.isArray(value)) {
         for (const resolvedValue of value) {
-            collectAnimationNames(resolvedValue, animationTriggerNames);
+            collectLegacyAnimationNames(resolvedValue, legacyAnimationTriggerNames);
         }
     }
     else {
-        animationTriggerNames.includesDynamicAnimations = true;
+        legacyAnimationTriggerNames.includesDynamicAnimations = true;
     }
 }
-function isAngularAnimationsReference(reference, symbolName) {
+function isLegacyAngularAnimationsReference(reference, symbolName) {
     return (reference.ownedByModuleGuess === '@angular/animations' && reference.debugName === symbolName);
 }
-const animationTriggerResolver = (fn, node, resolve, unresolvable) => {
+const legacyAnimationTriggerResolver = (fn, node, resolve, unresolvable) => {
     const animationTriggerMethodName = 'trigger';
-    if (!isAngularAnimationsReference(fn, animationTriggerMethodName)) {
+    if (!isLegacyAngularAnimationsReference(fn, animationTriggerMethodName)) {
         return unresolvable;
     }
     const triggerNameExpression = node.arguments[0];
@@ -9636,13 +9636,13 @@ class ComponentDecoratorHandler {
             changeDetection = new checker.WrappedNodeExpr(component.get('changeDetection'));
         }
         let animations = null;
-        let animationTriggerNames = null;
+        let legacyAnimationTriggerNames = null;
         if (component.has('animations')) {
             const animationExpression = component.get('animations');
             animations = new checker.WrappedNodeExpr(animationExpression);
-            const animationsValue = this.evaluator.evaluate(animationExpression, animationTriggerResolver);
-            animationTriggerNames = { includesDynamicAnimations: false, staticTriggerNames: [] };
-            collectAnimationNames(animationsValue, animationTriggerNames);
+            const animationsValue = this.evaluator.evaluate(animationExpression, legacyAnimationTriggerResolver);
+            legacyAnimationTriggerNames = { includesDynamicAnimations: false, staticTriggerNames: [] };
+            collectLegacyAnimationNames(animationsValue, legacyAnimationTriggerNames);
         }
         // Go through the root directories for this project, and select the one with the smallest
         // relative path representation.
@@ -9966,7 +9966,7 @@ class ComponentDecoratorHandler {
                     hostBindings: hostBindingResources,
                 },
                 isPoisoned,
-                animationTriggerNames,
+                legacyAnimationTriggerNames: legacyAnimationTriggerNames,
                 rawImports,
                 resolvedImports,
                 rawDeferredImports,
@@ -10010,7 +10010,7 @@ class ComponentDecoratorHandler {
             imports: analysis.resolvedImports,
             rawImports: analysis.rawImports,
             deferredImports: analysis.resolvedDeferredImports,
-            animationTriggerNames: analysis.animationTriggerNames,
+            animationTriggerNames: analysis.legacyAnimationTriggerNames,
             schemas: analysis.schemas,
             decorator: analysis.decorator,
             assumedToExportProviders: false,
@@ -11537,7 +11537,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('20.1.0-next.3+sha-1ea65b1');
+new checker.Version('20.1.0-next.3+sha-d7b94e0');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -15586,7 +15586,7 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
                 // or an attribute binding like `[attr.role]="mySignal"`
                 node.type === checker.BindingType.Attribute ||
                 // or an animation binding like `[@myAnimation]="mySignal"`
-                node.type === checker.BindingType.Animation) &&
+                node.type === checker.BindingType.LegacyAnimation) &&
                 nodeAst) {
                 return buildDiagnosticForSignal(ctx, nodeAst, component);
             }
@@ -16042,7 +16042,7 @@ class UninvokedFunctionInEventBindingSpec extends TemplateCheckWithVisitor {
         if (!(node instanceof checker.BoundEvent))
             return [];
         // If the node is not a regular or animation event, skip it.
-        if (node.type !== checker.ParsedEventType.Regular && node.type !== checker.ParsedEventType.Animation)
+        if (node.type !== checker.ParsedEventType.Regular && node.type !== checker.ParsedEventType.LegacyAnimation)
             return [];
         if (!(node.handler instanceof checker.ASTWithSource))
             return [];
@@ -19402,7 +19402,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.1.0-next.3+sha-1ea65b1` usually means that core is at head so it supports
+    // A version of `20.1.0-next.3+sha-d7b94e0` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
