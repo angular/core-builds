@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-rc.0+sha-d5210f0
+ * @license Angular v20.1.0-rc.0+sha-87056c3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,6 +32,7 @@ function _interopNamespaceDefault(e) {
 }
 
 var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
+var url__namespace = /*#__PURE__*/_interopNamespaceDefault(url);
 
 const _SELECTOR_REGEXP = new RegExp('(\\:not\\()|' + // 1: ":not("
     '(([\\.\\#]?)[-\\w]+)|' + // 2: "tag"; 3: "."/"#";
@@ -2166,7 +2167,7 @@ function ifStmt(condition, thenClause, elseClause, sourceSpan, leadingComments) 
 function taggedTemplate(tag, template, type, sourceSpan) {
     return new TaggedTemplateLiteralExpr(tag, template, type, sourceSpan);
 }
-function literal$1(value, type, sourceSpan) {
+function literal(value, type, sourceSpan) {
     return new LiteralExpr(value, type, sourceSpan);
 }
 function localizedString(metaBlock, messageParts, placeholderNames, expressions, sourceSpan) {
@@ -3122,7 +3123,7 @@ class _EmittedLine {
         this.indent = indent;
     }
 }
-const BINARY_OPERATORS$4 = new Map([
+const BINARY_OPERATORS$2 = new Map([
     [BinaryOperator.And, '&&'],
     [BinaryOperator.Bigger, '>'],
     [BinaryOperator.BiggerEquals, '>='],
@@ -3476,7 +3477,7 @@ class AbstractEmitterVisitor {
         return null;
     }
     visitBinaryOperatorExpr(ast, ctx) {
-        const operator = BINARY_OPERATORS$4.get(ast.operator);
+        const operator = BINARY_OPERATORS$2.get(ast.operator);
         if (!operator) {
             throw new Error(`Unknown operator ${ast.operator}`);
         }
@@ -3613,7 +3614,7 @@ function devOnlyGuardedExpression(expr) {
 }
 function guardedExpression(guard, expr) {
     const guardExpr = new ExternalExpr({ name: guard, moduleName: null });
-    const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal$1('undefined'));
+    const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal('undefined'));
     const guardUndefinedOrTrue = new BinaryOperatorExpr(BinaryOperator.Or, guardNotDefined, guardExpr, 
     /* type */ undefined, 
     /* sourceSpan */ undefined);
@@ -3759,7 +3760,7 @@ function injectDependencies(deps, target) {
 function compileInjectDependency(dep, target, index) {
     // Interpret the dependency according to its resolved type.
     if (dep.token === null) {
-        return importExpr(Identifiers.invalidFactoryDep).callFn([literal$1(index)]);
+        return importExpr(Identifiers.invalidFactoryDep).callFn([literal(index)]);
     }
     else if (dep.attributeNameType === null) {
         // Build up the injection flags according to the metadata.
@@ -3772,7 +3773,7 @@ function compileInjectDependency(dep, target, index) {
         // If this dependency is optional or otherwise has non-default flags, then additional
         // parameters describing how to inject the dependency must be passed to the inject function
         // that's being used.
-        let flagsParam = flags !== 0 /* InjectFlags.Default */ || dep.optional ? literal$1(flags) : null;
+        let flagsParam = flags !== 0 /* InjectFlags.Default */ || dep.optional ? literal(flags) : null;
         // Build up the arguments to the injectFn call.
         const injectArgs = [dep.token];
         if (flagsParam) {
@@ -3801,7 +3802,7 @@ function createCtorDepsType(deps) {
             return type;
         }
         else {
-            return literal$1(null);
+            return literal(null);
         }
     });
     if (hasTypes) {
@@ -3817,16 +3818,16 @@ function createCtorDepType(dep) {
         entries.push({ key: 'attribute', value: dep.attributeNameType, quoted: false });
     }
     if (dep.optional) {
-        entries.push({ key: 'optional', value: literal$1(true), quoted: false });
+        entries.push({ key: 'optional', value: literal(true), quoted: false });
     }
     if (dep.host) {
-        entries.push({ key: 'host', value: literal$1(true), quoted: false });
+        entries.push({ key: 'host', value: literal(true), quoted: false });
     }
     if (dep.self) {
-        entries.push({ key: 'self', value: literal$1(true), quoted: false });
+        entries.push({ key: 'self', value: literal(true), quoted: false });
     }
     if (dep.skipSelf) {
-        entries.push({ key: 'skipSelf', value: literal$1(true), quoted: false });
+        entries.push({ key: 'skipSelf', value: literal(true), quoted: false });
     }
     return entries.length > 0 ? literalMap(entries) : null;
 }
@@ -5971,7 +5972,7 @@ function asLiteral(value) {
     if (Array.isArray(value)) {
         return literalArr(value.map(asLiteral));
     }
-    return literal$1(value, INFERRED_TYPE);
+    return literal(value, INFERRED_TYPE);
 }
 /**
  * Serializes inputs and outputs for `defineDirective` and `defineComponent`.
@@ -6015,7 +6016,7 @@ function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
             // decorator input transform functions, or store flag information if there is any.
             if (forInputs &&
                 (differentDeclaringName || hasDecoratorInputTransform || flags !== InputFlags.None)) {
-                const result = [literal$1(flags), asLiteral(publicName)];
+                const result = [literal(flags), asLiteral(publicName)];
                 if (differentDeclaringName || hasDecoratorInputTransform) {
                     result.push(asLiteral(declaredName));
                     if (hasDecoratorInputTransform) {
@@ -6821,7 +6822,7 @@ class JitEvaluator {
         const ctx = EmitterVisitorContext.createRoot();
         // Ensure generated code is in strict mode
         if (statements.length > 0 && !isUseStrictStatement(statements[0])) {
-            statements = [literal$1('use strict').toStmt(), ...statements];
+            statements = [literal('use strict').toStmt(), ...statements];
         }
         converter.visitAllStatements(statements, ctx);
         converter.createReturnStmt(ctx);
@@ -6927,7 +6928,7 @@ class JitEmitterVisitor extends AbstractJsEmitterVisitor {
     }
 }
 function isUseStrictStatement(statement) {
-    return statement.isEquivalent(literal$1('use strict').toStmt());
+    return statement.isEquivalent(literal('use strict').toStmt());
 }
 
 function compileInjector(meta) {
@@ -7172,15 +7173,15 @@ function compilePipeFromMetadata(metadata) {
     // e.g. `name: 'myPipe'`
     definitionMapValues.push({
         key: 'name',
-        value: literal$1(metadata.pipeName ?? metadata.name),
+        value: literal(metadata.pipeName ?? metadata.name),
         quoted: false,
     });
     // e.g. `type: MyPipe`
     definitionMapValues.push({ key: 'type', value: metadata.type.value, quoted: false });
     // e.g. `pure: true`
-    definitionMapValues.push({ key: 'pure', value: literal$1(metadata.pure), quoted: false });
+    definitionMapValues.push({ key: 'pure', value: literal(metadata.pure), quoted: false });
     if (metadata.isStandalone === false) {
-        definitionMapValues.push({ key: 'standalone', value: literal$1(false), quoted: false });
+        definitionMapValues.push({ key: 'standalone', value: literal(false), quoted: false });
     }
     const expression = importExpr(Identifiers.definePipe)
         .callFn([literalMap(definitionMapValues)], undefined, true);
@@ -11781,7 +11782,7 @@ function generateConditionalExpressions(job) {
             }
             else {
                 // By default, a switch evaluates to `-1`, causing no template to be displayed.
-                test = literal$1(-1);
+                test = literal(-1);
             }
             // Switch expressions assign their main test to a temporary, to avoid re-executing it.
             let tmp = op.test == null ? null : new AssignTemporaryExpr(op.test, job.allocateXrefId());
@@ -11812,7 +11813,7 @@ function generateConditionalExpressions(job) {
     }
 }
 
-const BINARY_OPERATORS$3 = new Map([
+const BINARY_OPERATORS$1 = new Map([
     ['&&', BinaryOperator.And],
     ['>', BinaryOperator.Bigger],
     ['>=', BinaryOperator.BiggerEquals],
@@ -11876,7 +11877,7 @@ function literalOrArrayLiteral(value) {
     if (Array.isArray(value)) {
         return literalArr(value.map(literalOrArrayLiteral));
     }
-    return literal$1(value);
+    return literal(value);
 }
 
 /**
@@ -12047,9 +12048,9 @@ class ElementAttributes {
  * Gets an array of literal expressions representing the attribute's namespaced name.
  */
 function getAttributeNameLiterals(namespace, name) {
-    const nameLiteral = literal$1(name);
+    const nameLiteral = literal(name);
     if (namespace) {
-        return [literal$1(0 /* core.AttributeMarker.NamespaceURI */), literal$1(namespace), nameLiteral];
+        return [literal(0 /* core.AttributeMarker.NamespaceURI */), literal(namespace), nameLiteral];
     }
     return [nameLiteral];
 }
@@ -12062,22 +12063,22 @@ function serializeAttributes({ attributes, bindings, classes, i18n, projectAs, s
         // Parse the attribute value into a CssSelectorList. Note that we only take the
         // first selector, because we don't support multiple selectors in ngProjectAs.
         const parsedR3Selector = parseSelectorToR3Selector(projectAs)[0];
-        attrArray.push(literal$1(5 /* core.AttributeMarker.ProjectAs */), literalOrArrayLiteral(parsedR3Selector));
+        attrArray.push(literal(5 /* core.AttributeMarker.ProjectAs */), literalOrArrayLiteral(parsedR3Selector));
     }
     if (classes.length > 0) {
-        attrArray.push(literal$1(1 /* core.AttributeMarker.Classes */), ...classes);
+        attrArray.push(literal(1 /* core.AttributeMarker.Classes */), ...classes);
     }
     if (styles.length > 0) {
-        attrArray.push(literal$1(2 /* core.AttributeMarker.Styles */), ...styles);
+        attrArray.push(literal(2 /* core.AttributeMarker.Styles */), ...styles);
     }
     if (bindings.length > 0) {
-        attrArray.push(literal$1(3 /* core.AttributeMarker.Bindings */), ...bindings);
+        attrArray.push(literal(3 /* core.AttributeMarker.Bindings */), ...bindings);
     }
     if (template.length > 0) {
-        attrArray.push(literal$1(4 /* core.AttributeMarker.Template */), ...template);
+        attrArray.push(literal(4 /* core.AttributeMarker.Template */), ...template);
     }
     if (i18n.length > 0) {
-        attrArray.push(literal$1(6 /* core.AttributeMarker.I18n */), ...i18n);
+        attrArray.push(literal(6 /* core.AttributeMarker.I18n */), ...i18n);
     }
     return literalArr(attrArray);
 }
@@ -12699,7 +12700,7 @@ function extractI18nMessages(job) {
                         throw Error('AssertionError: Unexpected ICU placeholder outside of i18n context');
                     }
                     const msg = i18nMessagesByContext.get(currentIcu.context);
-                    msg.postprocessingParams.set(op.name, literal$1(formatIcuPlaceholder(op)));
+                    msg.postprocessingParams.set(op.name, literal(formatIcuPlaceholder(op)));
                     OpList.remove(op);
                     break;
             }
@@ -12733,7 +12734,7 @@ function formatParams(params) {
     for (const [placeholder, placeholderValues] of params) {
         const serializedValues = formatParamValues(placeholderValues);
         if (serializedValues !== null) {
-            formattedParams.set(placeholder, literal$1(serializedValues));
+            formattedParams.set(placeholder, literal(serializedValues));
         }
     }
     return formattedParams;
@@ -13110,7 +13111,7 @@ function collectConstExpressions(job) {
                 if (!(expr instanceof ConstCollectedExpr)) {
                     return expr;
                 }
-                return literal$1(job.addConst(expr.expr));
+                return literal(job.addConst(expr.expr));
             }, VisitorContextFlag.None);
         }
     }
@@ -21428,7 +21429,7 @@ const GOOG_GET_MSG = 'goog.getMsg';
  */
 function createGoogleGetMsgStatements(variable$1, message, closureVar, placeholderValues) {
     const messageString = serializeI18nMessageForGetMsg(message);
-    const args = [literal$1(messageString)];
+    const args = [literal(messageString)];
     if (Object.keys(placeholderValues).length) {
         // Message template parameters containing the magic strings replaced by the Angular runtime with
         // real data, e.g. `{'interpolation': '\uFFFD0\uFFFD'}`.
@@ -21442,9 +21443,9 @@ function createGoogleGetMsgStatements(variable$1, message, closureVar, placehold
                 quoted: true,
                 value: message.placeholders[param]
                     ? // Get source span for typical placeholder if it exists.
-                        literal$1(message.placeholders[param].sourceSpan.toString())
+                        literal(message.placeholders[param].sourceSpan.toString())
                     : // Otherwise must be an ICU expression, get it's source span.
-                        literal$1(message.placeholderToMessage[param].nodes
+                        literal(message.placeholderToMessage[param].nodes
                             .map((node) => node.sourceSpan.toString())
                             .join('')),
             }))),
@@ -21759,7 +21760,7 @@ function collectI18nConsts(job) {
                     if (i18nExprValue === undefined) {
                         throw new Error("AssertionError: Could not find i18n expression's value");
                     }
-                    return [literal$1(i18nExpr.name), i18nExprValue];
+                    return [literal(i18nExpr.name), i18nExprValue];
                 });
                 i18nAttributes.i18nAttributesConfig = job.addConst(new LiteralArrayExpr(i18nAttributeConfig));
             }
@@ -21837,7 +21838,7 @@ function addSubMessageParams(messageOp, subMessagePlaceholders) {
             messageOp.params.set(placeholder, subMessages[0]);
         }
         else {
-            messageOp.params.set(placeholder, literal$1(`${ESCAPE}${I18N_ICU_MAPPING_PREFIX}${placeholder}${ESCAPE}`));
+            messageOp.params.set(placeholder, literal(`${ESCAPE}${I18N_ICU_MAPPING_PREFIX}${placeholder}${ESCAPE}`));
             messageOp.postprocessingParams.set(placeholder, literalArr(subMessages));
         }
     }
@@ -21890,7 +21891,7 @@ function getTranslationDeclStmts(message, variable, closureVar, params, transfor
  */
 function createClosureModeGuard() {
     return typeofExpr(variable(NG_I18N_CLOSURE_MODE))
-        .notIdentical(literal$1('undefined', STRING_TYPE))
+        .notIdentical(literal('undefined', STRING_TYPE))
         .and(variable(NG_I18N_CLOSURE_MODE));
 }
 /**
@@ -22031,7 +22032,7 @@ function liftLocalRefs(job) {
 function serializeLocalRefs(refs) {
     const constRefs = [];
     for (const ref of refs) {
-        constRefs.push(literal$1(ref.name), literal$1(ref.target));
+        constRefs.push(literal(ref.name), literal(ref.target));
     }
     return literalArr(constRefs);
 }
@@ -22167,7 +22168,7 @@ function parseExtractedStyles(job) {
                 if (op.name === 'style') {
                     const parsedStyles = parse(op.expression.value);
                     for (let i = 0; i < parsedStyles.length - 1; i += 2) {
-                        OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, null, parsedStyles[i], literal$1(parsedStyles[i + 1]), null, null, SecurityContext.STYLE), op);
+                        OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, null, parsedStyles[i], literal(parsedStyles[i + 1]), null, null, SecurityContext.STYLE), op);
                     }
                     OpList.remove(op);
                 }
@@ -22910,30 +22911,30 @@ function elementStart(slot, tag, constIndex, localRefIndex, sourceSpan) {
     return elementOrContainerBase(Identifiers.elementStart, slot, tag, constIndex, localRefIndex, sourceSpan);
 }
 function elementOrContainerBase(instruction, slot, tag, constIndex, localRefIndex, sourceSpan) {
-    const args = [literal$1(slot)];
+    const args = [literal(slot)];
     if (tag !== null) {
-        args.push(literal$1(tag));
+        args.push(literal(tag));
     }
     if (localRefIndex !== null) {
-        args.push(literal$1(constIndex), // might be null, but that's okay.
-        literal$1(localRefIndex));
+        args.push(literal(constIndex), // might be null, but that's okay.
+        literal(localRefIndex));
     }
     else if (constIndex !== null) {
-        args.push(literal$1(constIndex));
+        args.push(literal(constIndex));
     }
     return call(instruction, args, sourceSpan);
 }
 function templateBase(instruction, slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan) {
     const args = [
-        literal$1(slot),
+        literal(slot),
         templateFnRef,
-        literal$1(decls),
-        literal$1(vars),
-        literal$1(tag),
-        literal$1(constIndex),
+        literal(decls),
+        literal(vars),
+        literal(tag),
+        literal(constIndex),
     ];
     if (localRefs !== null) {
-        args.push(literal$1(localRefs));
+        args.push(literal(localRefs));
         args.push(importExpr(Identifiers.templateRefExtractor));
     }
     while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
@@ -22942,7 +22943,7 @@ function templateBase(instruction, slot, templateFnRef, decls, vars, tag, constI
     return call(instruction, args, sourceSpan);
 }
 function propertyBase(instruction, name, expression, sanitizer, sourceSpan) {
-    const args = [literal$1(name)];
+    const args = [literal(name)];
     if (expression instanceof Interpolation) {
         args.push(interpolationToExpression(expression, sourceSpan));
     }
@@ -22978,7 +22979,7 @@ function enableBindings() {
     return call(Identifiers.enableBindings, [], null);
 }
 function listener(name, handlerFn, eventTargetResolver, syntheticHost, sourceSpan) {
-    const args = [literal$1(name), handlerFn];
+    const args = [literal(name), handlerFn];
     if (eventTargetResolver !== null) {
         args.push(importExpr(eventTargetResolver));
     }
@@ -22988,10 +22989,10 @@ function twoWayBindingSet(target, value) {
     return importExpr(Identifiers.twoWayBindingSet).callFn([target, value]);
 }
 function twoWayListener(name, handlerFn, sourceSpan) {
-    return call(Identifiers.twoWayListener, [literal$1(name), handlerFn], sourceSpan);
+    return call(Identifiers.twoWayListener, [literal(name), handlerFn], sourceSpan);
 }
 function pipe(slot, name) {
-    return call(Identifiers.pipe, [literal$1(slot), literal$1(name)], null);
+    return call(Identifiers.pipe, [literal(slot), literal(name)], null);
 }
 function namespaceHTML() {
     return call(Identifiers.namespaceHTML, [], null);
@@ -23003,13 +23004,13 @@ function namespaceMath() {
     return call(Identifiers.namespaceMathML, [], null);
 }
 function advance(delta, sourceSpan) {
-    return call(Identifiers.advance, delta > 1 ? [literal$1(delta)] : [], sourceSpan);
+    return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
 }
 function reference(slot) {
-    return importExpr(Identifiers.reference).callFn([literal$1(slot)]);
+    return importExpr(Identifiers.reference).callFn([literal(slot)]);
 }
 function nextContext(steps) {
-    return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal$1(steps)]);
+    return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal(steps)]);
 }
 function getCurrentView() {
     return importExpr(Identifiers.getCurrentView).callFn([]);
@@ -23021,24 +23022,24 @@ function resetView(returnValue) {
     return importExpr(Identifiers.resetView).callFn([returnValue]);
 }
 function text(slot, initialValue, sourceSpan) {
-    const args = [literal$1(slot, null)];
+    const args = [literal(slot, null)];
     if (initialValue !== '') {
-        args.push(literal$1(initialValue));
+        args.push(literal(initialValue));
     }
     return call(Identifiers.text, args, sourceSpan);
 }
 function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeholderSlot, errorSlot, loadingConfig, placeholderConfig, enableTimerScheduling, sourceSpan, flags) {
     const args = [
-        literal$1(selfSlot),
-        literal$1(primarySlot),
-        dependencyResolverFn ?? literal$1(null),
-        literal$1(loadingSlot),
-        literal$1(placeholderSlot),
-        literal$1(errorSlot),
-        loadingConfig ?? literal$1(null),
-        placeholderConfig ?? literal$1(null),
-        enableTimerScheduling ? importExpr(Identifiers.deferEnableTimerScheduling) : literal$1(null),
-        literal$1(flags),
+        literal(selfSlot),
+        literal(primarySlot),
+        dependencyResolverFn ?? literal(null),
+        literal(loadingSlot),
+        literal(placeholderSlot),
+        literal(errorSlot),
+        loadingConfig ?? literal(null),
+        placeholderConfig ?? literal(null),
+        enableTimerScheduling ? importExpr(Identifiers.deferEnableTimerScheduling) : literal(null),
+        literal(flags),
     ];
     let expr;
     while ((expr = args[args.length - 1]) !== null &&
@@ -23111,45 +23112,45 @@ function deferOn(trigger, args, modifier, sourceSpan) {
     if (instructionToCall === undefined) {
         throw new Error(`Unable to determine instruction for trigger ${trigger}`);
     }
-    return call(instructionToCall, args.map((a) => literal$1(a)), sourceSpan);
+    return call(instructionToCall, args.map((a) => literal(a)), sourceSpan);
 }
 function projectionDef(def) {
     return call(Identifiers.projectionDef, def ? [def] : [], null);
 }
 function projection(slot, projectionSlotIndex, attributes, fallbackFnName, fallbackDecls, fallbackVars, sourceSpan) {
-    const args = [literal$1(slot)];
+    const args = [literal(slot)];
     if (projectionSlotIndex !== 0 || attributes !== null || fallbackFnName !== null) {
-        args.push(literal$1(projectionSlotIndex));
+        args.push(literal(projectionSlotIndex));
         if (attributes !== null) {
             args.push(attributes);
         }
         if (fallbackFnName !== null) {
             if (attributes === null) {
-                args.push(literal$1(null));
+                args.push(literal(null));
             }
-            args.push(variable(fallbackFnName), literal$1(fallbackDecls), literal$1(fallbackVars));
+            args.push(variable(fallbackFnName), literal(fallbackDecls), literal(fallbackVars));
         }
     }
     return call(Identifiers.projection, args, sourceSpan);
 }
 function i18nStart(slot, constIndex, subTemplateIndex, sourceSpan) {
-    const args = [literal$1(slot), literal$1(constIndex)];
+    const args = [literal(slot), literal(constIndex)];
     if (subTemplateIndex !== null) {
-        args.push(literal$1(subTemplateIndex));
+        args.push(literal(subTemplateIndex));
     }
     return call(Identifiers.i18nStart, args, sourceSpan);
 }
 function conditionalCreate(slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan) {
     const args = [
-        literal$1(slot),
+        literal(slot),
         templateFnRef,
-        literal$1(decls),
-        literal$1(vars),
-        literal$1(tag),
-        literal$1(constIndex),
+        literal(decls),
+        literal(vars),
+        literal(tag),
+        literal(constIndex),
     ];
     if (localRefs !== null) {
-        args.push(literal$1(localRefs));
+        args.push(literal(localRefs));
         args.push(importExpr(Identifiers.templateRefExtractor));
     }
     while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
@@ -23159,15 +23160,15 @@ function conditionalCreate(slot, templateFnRef, decls, vars, tag, constIndex, lo
 }
 function conditionalBranchCreate(slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan) {
     const args = [
-        literal$1(slot),
+        literal(slot),
         templateFnRef,
-        literal$1(decls),
-        literal$1(vars),
-        literal$1(tag),
-        literal$1(constIndex),
+        literal(decls),
+        literal(vars),
+        literal(tag),
+        literal(constIndex),
     ];
     if (localRefs !== null) {
-        args.push(literal$1(localRefs));
+        args.push(literal(localRefs));
         args.push(importExpr(Identifiers.templateRefExtractor));
     }
     while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
@@ -23177,23 +23178,23 @@ function conditionalBranchCreate(slot, templateFnRef, decls, vars, tag, constInd
 }
 function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, emptyTag, emptyConstIndex, sourceSpan) {
     const args = [
-        literal$1(slot),
+        literal(slot),
         variable(viewFnName),
-        literal$1(decls),
-        literal$1(vars),
-        literal$1(tag),
-        literal$1(constIndex),
+        literal(decls),
+        literal(vars),
+        literal(tag),
+        literal(constIndex),
         trackByFn,
     ];
     if (trackByUsesComponentInstance || emptyViewFnName !== null) {
-        args.push(literal$1(trackByUsesComponentInstance));
+        args.push(literal(trackByUsesComponentInstance));
         if (emptyViewFnName !== null) {
-            args.push(variable(emptyViewFnName), literal$1(emptyDecls), literal$1(emptyVars));
+            args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
             if (emptyTag !== null || emptyConstIndex !== null) {
-                args.push(literal$1(emptyTag));
+                args.push(literal(emptyTag));
             }
             if (emptyConstIndex !== null) {
-                args.push(literal$1(emptyConstIndex));
+                args.push(literal(emptyConstIndex));
             }
         }
     }
@@ -23212,18 +23213,18 @@ function deferWhen(modifier, expr, sourceSpan) {
     return call(Identifiers.deferWhen, [expr], sourceSpan);
 }
 function declareLet(slot, sourceSpan) {
-    return call(Identifiers.declareLet, [literal$1(slot)], sourceSpan);
+    return call(Identifiers.declareLet, [literal(slot)], sourceSpan);
 }
 function storeLet(value, sourceSpan) {
     return importExpr(Identifiers.storeLet).callFn([value], sourceSpan);
 }
 function readContextLet(slot) {
-    return importExpr(Identifiers.readContextLet).callFn([literal$1(slot)]);
+    return importExpr(Identifiers.readContextLet).callFn([literal(slot)]);
 }
 function i18n(slot, constIndex, subTemplateIndex, sourceSpan) {
-    const args = [literal$1(slot), literal$1(constIndex)];
+    const args = [literal(slot), literal(constIndex)];
     if (subTemplateIndex) {
-        args.push(literal$1(subTemplateIndex));
+        args.push(literal(subTemplateIndex));
     }
     return call(Identifiers.i18n, args, sourceSpan);
 }
@@ -23231,21 +23232,21 @@ function i18nEnd(endSourceSpan) {
     return call(Identifiers.i18nEnd, [], endSourceSpan);
 }
 function i18nAttributes(slot, i18nAttributesConfig) {
-    const args = [literal$1(slot), literal$1(i18nAttributesConfig)];
+    const args = [literal(slot), literal(i18nAttributesConfig)];
     return call(Identifiers.i18nAttributes, args, null);
 }
 function property(name, expression, sanitizer, sourceSpan) {
     return propertyBase(Identifiers.property, name, expression, sanitizer, sourceSpan);
 }
 function twoWayProperty(name, expression, sanitizer, sourceSpan) {
-    const args = [literal$1(name), expression];
+    const args = [literal(name), expression];
     if (sanitizer !== null) {
         args.push(sanitizer);
     }
     return call(Identifiers.twoWayProperty, args, sourceSpan);
 }
 function attribute(name, expression, sanitizer, namespace, sourceSpan) {
-    const args = [literal$1(name)];
+    const args = [literal(name)];
     if (expression instanceof Interpolation) {
         args.push(interpolationToExpression(expression, sourceSpan));
     }
@@ -23253,15 +23254,15 @@ function attribute(name, expression, sanitizer, namespace, sourceSpan) {
         args.push(expression);
     }
     if (sanitizer !== null || namespace !== null) {
-        args.push(sanitizer ?? literal$1(null));
+        args.push(sanitizer ?? literal(null));
     }
     if (namespace !== null) {
-        args.push(literal$1(namespace));
+        args.push(literal(namespace));
     }
     return call(Identifiers.attribute, args, null);
 }
 function styleProp(name, expression, unit, sourceSpan) {
-    const args = [literal$1(name)];
+    const args = [literal(name)];
     if (expression instanceof Interpolation) {
         args.push(interpolationToExpression(expression, sourceSpan));
     }
@@ -23269,12 +23270,12 @@ function styleProp(name, expression, unit, sourceSpan) {
         args.push(expression);
     }
     if (unit !== null) {
-        args.push(literal$1(unit));
+        args.push(literal(unit));
     }
     return call(Identifiers.styleProp, args, sourceSpan);
 }
 function classProp(name, expression, sourceSpan) {
-    return call(Identifiers.classProp, [literal$1(name), expression], sourceSpan);
+    return call(Identifiers.classProp, [literal(name), expression], sourceSpan);
 }
 function styleMap(expression, sourceSpan) {
     const value = expression instanceof Interpolation
@@ -23309,7 +23310,7 @@ function domElementContainerEnd() {
     return call(Identifiers.domElementContainerEnd, [], null);
 }
 function domListener(name, handlerFn, eventTargetResolver, sourceSpan) {
-    const args = [literal$1(name), handlerFn];
+    const args = [literal(name), handlerFn];
     if (eventTargetResolver !== null) {
         args.push(importExpr(eventTargetResolver));
     }
@@ -23329,10 +23330,10 @@ function pipeBind(slot, varOffset, args) {
         throw new Error(`pipeBind() argument count out of bounds`);
     }
     const instruction = PIPE_BINDINGS[args.length - 1];
-    return importExpr(instruction).callFn([literal$1(slot), literal$1(varOffset), ...args]);
+    return importExpr(instruction).callFn([literal(slot), literal(varOffset), ...args]);
 }
 function pipeBindV(slot, varOffset, args) {
-    return importExpr(Identifiers.pipeBindV).callFn([literal$1(slot), literal$1(varOffset), args]);
+    return importExpr(Identifiers.pipeBindV).callFn([literal(slot), literal(varOffset), args]);
 }
 function textInterpolate(strings, expressions, sourceSpan) {
     const interpolationArgs = collateInterpolationArgs(strings, expressions);
@@ -23342,19 +23343,19 @@ function i18nExp(expr, sourceSpan) {
     return call(Identifiers.i18nExp, [expr], sourceSpan);
 }
 function i18nApply(slot, sourceSpan) {
-    return call(Identifiers.i18nApply, [literal$1(slot)], sourceSpan);
+    return call(Identifiers.i18nApply, [literal(slot)], sourceSpan);
 }
 function domProperty(name, expression, sanitizer, sourceSpan) {
     return propertyBase(Identifiers.domProperty, name, expression, sanitizer, sourceSpan);
 }
 function syntheticHostProperty(name, expression, sourceSpan) {
-    return call(Identifiers.syntheticHostProperty, [literal$1(name), expression], sourceSpan);
+    return call(Identifiers.syntheticHostProperty, [literal(name), expression], sourceSpan);
 }
 function pureFunction(varOffset, fn, args) {
-    return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal$1(varOffset), fn], args, [], null);
+    return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal(varOffset), fn], args, [], null);
 }
 function attachSourceLocation(templatePath, locations) {
-    return call(Identifiers.attachSourceLocations, [literal$1(templatePath), locations], null);
+    return call(Identifiers.attachSourceLocations, [literal(templatePath), locations], null);
 }
 /**
  * Collates the string an expression arguments for an interpolation instruction.
@@ -23370,10 +23371,10 @@ function collateInterpolationArgs(strings, expressions) {
     else {
         let idx;
         for (idx = 0; idx < expressions.length; idx++) {
-            interpolationArgs.push(literal$1(strings[idx]), expressions[idx]);
+            interpolationArgs.push(literal(strings[idx]), expressions[idx]);
         }
         // idx points at the last string.
-        interpolationArgs.push(literal$1(strings[idx]));
+        interpolationArgs.push(literal(strings[idx]));
     }
     return interpolationArgs;
 }
@@ -23747,10 +23748,10 @@ function reifyCreateOperations(unit, ops) {
                         throw new Error('No slot was assigned for source location');
                     }
                     return literalArr([
-                        literal$1(targetSlot.slot),
-                        literal$1(offset),
-                        literal$1(line),
-                        literal$1(column),
+                        literal(targetSlot.slot),
+                        literal(offset),
+                        literal(line),
+                        literal(column),
                     ]);
                 }));
                 OpList.replace(op, attachSourceLocation(op.templatePath, locationsLiteral));
@@ -23892,7 +23893,7 @@ function reifyIrExpression(expr) {
         case ExpressionKind.PipeBindingVariadic:
             return pipeBindV(expr.targetSlot.slot, expr.varOffset, expr.args);
         case ExpressionKind.SlotLiteralExpr:
-            return literal$1(expr.slot.slot);
+            return literal(expr.slot.slot);
         case ExpressionKind.ContextLetReference:
             return readContextLet(expr.targetSlot.slot);
         case ExpressionKind.StoreLet:
@@ -24026,7 +24027,7 @@ function removeIllegalLetReferences(job) {
             const name = op.variable.identifier;
             let current = op;
             while (current && current.kind !== OpKind.ListEnd) {
-                transformExpressionsInOp(current, (expr) => expr instanceof LexicalReadExpr && expr.name === name ? literal$1(undefined) : expr, VisitorContextFlag.None);
+                transformExpressionsInOp(current, (expr) => expr instanceof LexicalReadExpr && expr.name === name ? literal(undefined) : expr, VisitorContextFlag.None);
                 current = current.prev;
             }
         }
@@ -25964,7 +25965,7 @@ function maybeGenerateRfBlock(flag, statements) {
         return [];
     }
     return [
-        ifStmt(new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, variable('rf'), literal$1(flag)), statements),
+        ifStmt(new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, variable('rf'), literal(flag)), statements),
     ];
 }
 function emitHostBindingFunction(job) {
@@ -26212,7 +26213,7 @@ function ingestContent(unit, content) {
     const op = createProjectionOp(id, content.selector, content.i18n, fallbackView?.xref ?? null, content.sourceSpan);
     for (const attr of content.attributes) {
         const securityContext = domSchema.securityContext(content.name, attr.name, true);
-        unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal$1(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
+        unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
     }
     unit.create.push(op);
 }
@@ -26538,13 +26539,13 @@ function getComputedForLoopVariableExpression(variable, indexName, countName) {
         case '$count':
             return new LexicalReadExpr(countName);
         case '$first':
-            return new LexicalReadExpr(indexName).identical(literal$1(0));
+            return new LexicalReadExpr(indexName).identical(literal(0));
         case '$last':
-            return new LexicalReadExpr(indexName).identical(new LexicalReadExpr(countName).minus(literal$1(1)));
+            return new LexicalReadExpr(indexName).identical(new LexicalReadExpr(countName).minus(literal(1)));
         case '$even':
-            return new LexicalReadExpr(indexName).modulo(literal$1(2)).identical(literal$1(0));
+            return new LexicalReadExpr(indexName).modulo(literal(2)).identical(literal(0));
         case '$odd':
-            return new LexicalReadExpr(indexName).modulo(literal$1(2)).notIdentical(literal$1(0));
+            return new LexicalReadExpr(indexName).modulo(literal(2)).notIdentical(literal(0));
         default:
             throw new Error(`AssertionError: unknown @for loop variable ${variable.value}`);
     }
@@ -26580,7 +26581,7 @@ function convertAst(ast, job, baseSourceSpan) {
         }
     }
     else if (ast instanceof LiteralPrimitive) {
-        return literal$1(ast.value, undefined, convertSourceSpan(ast.span, baseSourceSpan));
+        return literal(ast.value, undefined, convertSourceSpan(ast.span, baseSourceSpan));
     }
     else if (ast instanceof Unary) {
         switch (ast.operator) {
@@ -26593,7 +26594,7 @@ function convertAst(ast, job, baseSourceSpan) {
         }
     }
     else if (ast instanceof Binary) {
-        const operator = BINARY_OPERATORS$3.get(ast.operation);
+        const operator = BINARY_OPERATORS$1.get(ast.operation);
         if (operator === undefined) {
             throw new Error(`AssertionError: unknown binary operator ${ast.operation}`);
         }
@@ -26686,7 +26687,7 @@ function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
         expression = convertAst(value, job, null);
     }
     else {
-        expression = literal$1(value);
+        expression = literal(value);
     }
     return expression;
 }
@@ -27029,7 +27030,7 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
         // Collect the static attributes for content projection purposes.
         for (const attr of root.attributes) {
             const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
-            unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal$1(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
+            unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
         }
         // Also collect the inputs since they participate in content projection as well.
         // Note that TDB used to collect the outputs as well, but it wasn't passing them into
@@ -27069,7 +27070,7 @@ function getTemplateSourceLocationsEnabled() {
 
 //  if (rf & flags) { .. }
 function renderFlagCheckIfStmt(flags, statements) {
-    return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal$1(flags), null), statements);
+    return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal(flags), null), statements);
 }
 /**
  * Translates query flags into `TQueryFlags` type in
@@ -27088,7 +27089,7 @@ function getQueryPredicate(query, constantPool) {
             // Each item in predicates array may contain strings with comma-separated refs
             // (for ex. 'ref, ref1, ..., refN'), thus we extract individual refs and store them
             // as separate array entities
-            const selectors = selector.split(',').map((token) => literal$1(token.trim()));
+            const selectors = selector.split(',').map((token) => literal(token.trim()));
             predicate.push(...selectors);
         });
         return constantPool.getConstLiteral(literalArr(predicate), true);
@@ -27112,7 +27113,7 @@ function createQueryCreateCall(query, constantPool, queryTypeFns, prependParams)
     if (query.isSignal) {
         parameters.push(new ReadPropExpr(variable(CONTEXT_NAME), query.propertyName));
     }
-    parameters.push(getQueryPredicate(query, constantPool), literal$1(toQueryFlags(query)));
+    parameters.push(getQueryPredicate(query, constantPool), literal(toQueryFlags(query)));
     if (query.read) {
         parameters.push(query.read);
     }
@@ -27149,7 +27150,7 @@ function collapseAdvanceStatements(statements) {
     const flushAdvanceCount = () => {
         if (advanceCollapseCount > 0) {
             result.unshift(importExpr(Identifiers.queryAdvance)
-                .callFn(advanceCollapseCount === 1 ? [] : [literal$1(advanceCollapseCount)])
+                .callFn(advanceCollapseCount === 1 ? [] : [literal(advanceCollapseCount)])
                 .toStmt());
             advanceCollapseCount = 0;
         }
@@ -29570,13 +29571,13 @@ function baseDirectiveFields(meta, constantPool, bindingParser) {
     // e.g 'outputs: {a: 'a'}`
     definitionMap.set('outputs', conditionallyCreateDirectiveBindingLiteral(meta.outputs));
     if (meta.exportAs !== null) {
-        definitionMap.set('exportAs', literalArr(meta.exportAs.map((e) => literal$1(e))));
+        definitionMap.set('exportAs', literalArr(meta.exportAs.map((e) => literal(e))));
     }
     if (meta.isStandalone === false) {
-        definitionMap.set('standalone', literal$1(false));
+        definitionMap.set('standalone', literal(false));
     }
     if (meta.isSignal) {
-        definitionMap.set('signals', literal$1(true));
+        definitionMap.set('signals', literal(true));
     }
     return definitionMap;
 }
@@ -29611,7 +29612,7 @@ function addFeatures(definitionMap, meta) {
         features.push(importExpr(Identifiers.NgOnChangesFeature));
     }
     if ('externalStyles' in meta && meta.externalStyles?.length) {
-        const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal$1(externalStyle));
+        const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal(externalStyle));
         features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
     }
     if (features.length) {
@@ -29642,7 +29643,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (firstSelector) {
         const selectorAttributes = firstSelector.getAttrs();
         if (selectorAttributes.length) {
-            definitionMap.set('attrs', constantPool.getConstLiteral(literalArr(selectorAttributes.map((value) => value != null ? literal$1(value) : literal$1(undefined))), 
+            definitionMap.set('attrs', constantPool.getConstLiteral(literalArr(selectorAttributes.map((value) => value != null ? literal(value) : literal(undefined))), 
             /* forceShared */ true));
         }
     }
@@ -29667,8 +29668,8 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (tpl.contentSelectors !== null) {
         definitionMap.set('ngContentSelectors', tpl.contentSelectors);
     }
-    definitionMap.set('decls', literal$1(tpl.root.decls));
-    definitionMap.set('vars', literal$1(tpl.root.vars));
+    definitionMap.set('decls', literal(tpl.root.decls));
+    definitionMap.set('vars', literal(tpl.root.vars));
     if (tpl.consts.length > 0) {
         if (tpl.constsInitializers.length > 0) {
             definitionMap.set('consts', arrowFn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))]));
@@ -29700,7 +29701,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
             : meta.styles;
         const styleNodes = styleValues.reduce((result, style) => {
             if (style.trim().length > 0) {
-                result.push(constantPool.getConstLiteral(literal$1(style)));
+                result.push(constantPool.getConstLiteral(literal(style)));
             }
             return result;
         }, []);
@@ -29715,7 +29716,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     }
     // Only set view encapsulation if it's not the default value
     if (meta.encapsulation !== exports.ViewEncapsulation.Emulated) {
-        definitionMap.set('encapsulation', literal$1(meta.encapsulation));
+        definitionMap.set('encapsulation', literal(meta.encapsulation));
     }
     // e.g. `animation: [trigger('123', [])]`
     if (meta.animations !== null) {
@@ -29726,7 +29727,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
         if (typeof meta.changeDetection === 'number' &&
             meta.changeDetection !== exports.ChangeDetectionStrategy.Default) {
             // changeDetection is resolved during analysis. Only set it if not the default.
-            definitionMap.set('changeDetection', literal$1(meta.changeDetection));
+            definitionMap.set('changeDetection', literal(meta.changeDetection));
         }
         else if (typeof meta.changeDetection === 'object') {
             // changeDetection is not resolved during analysis (e.g., we are in local compilation mode).
@@ -29746,13 +29747,13 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
 function createComponentType(meta) {
     const typeParams = createBaseDirectiveTypeParams(meta);
     typeParams.push(stringArrayAsType(meta.template.ngContentSelectors));
-    typeParams.push(expressionType(literal$1(meta.isStandalone)));
+    typeParams.push(expressionType(literal(meta.isStandalone)));
     typeParams.push(createHostDirectivesType(meta));
     // TODO(signals): Always include this metadata starting with v17. Right
     // now Angular v16.0.x does not support this field and library distributions
     // would then be incompatible with v16.0.x framework users.
     if (meta.isSignal) {
-        typeParams.push(expressionType(literal$1(meta.isSignal)));
+        typeParams.push(expressionType(literal(meta.isSignal)));
     }
     return expressionType(importExpr(Identifiers.ComponentDeclaration, typeParams));
 }
@@ -29777,14 +29778,14 @@ function compileDeclarationList(list, mode) {
     }
 }
 function stringAsType(str) {
-    return expressionType(literal$1(str));
+    return expressionType(literal(str));
 }
 function stringMapAsLiteralExpression(map) {
     const mapValues = Object.keys(map).map((key) => {
         const value = Array.isArray(map[key]) ? map[key][0] : map[key];
         return {
             key,
-            value: literal$1(value),
+            value: literal(value),
             quoted: true,
         };
     });
@@ -29792,7 +29793,7 @@ function stringMapAsLiteralExpression(map) {
 }
 function stringArrayAsType(arr) {
     return arr.length > 0
-        ? expressionType(literalArr(arr.map((value) => literal$1(value))))
+        ? expressionType(literalArr(arr.map((value) => literal(value))))
         : NONE_TYPE;
 }
 function createBaseDirectiveTypeParams(meta) {
@@ -29812,13 +29813,13 @@ function getInputsTypeExpression(meta) {
     return literalMap(Object.keys(meta.inputs).map((key) => {
         const value = meta.inputs[key];
         const values = [
-            { key: 'alias', value: literal$1(value.bindingPropertyName), quoted: true },
-            { key: 'required', value: literal$1(value.required), quoted: true },
+            { key: 'alias', value: literal(value.bindingPropertyName), quoted: true },
+            { key: 'required', value: literal(value.required), quoted: true },
         ];
         // TODO(legacy-partial-output-inputs): Consider always emitting this information,
         // or leaving it as is.
         if (value.isSignal) {
-            values.push({ key: 'isSignal', value: literal$1(value.isSignal), quoted: true });
+            values.push({ key: 'isSignal', value: literal(value.isSignal), quoted: true });
         }
         return { key, value: literalMap(values), quoted: true };
     }));
@@ -29832,13 +29833,13 @@ function createDirectiveType(meta) {
     // Directives have no NgContentSelectors slot, but instead express a `never` type
     // so that future fields align.
     typeParams.push(NONE_TYPE);
-    typeParams.push(expressionType(literal$1(meta.isStandalone)));
+    typeParams.push(expressionType(literal(meta.isStandalone)));
     typeParams.push(createHostDirectivesType(meta));
     // TODO(signals): Always include this metadata starting with v17. Right
     // now Angular v16.0.x does not support this field and library distributions
     // would then be incompatible with v16.0.x framework users.
     if (meta.isSignal) {
-        typeParams.push(expressionType(literal$1(meta.isSignal)));
+        typeParams.push(expressionType(literal(meta.isSignal)));
     }
     return expressionType(importExpr(Identifiers.DirectiveDeclaration, typeParams));
 }
@@ -29852,10 +29853,10 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
     // actually already handle these special attributes internally. Therefore, we just drop them
     // into the attributes map.
     if (hostBindingsMetadata.specialAttributes.styleAttr) {
-        hostBindingsMetadata.attributes['style'] = literal$1(hostBindingsMetadata.specialAttributes.styleAttr);
+        hostBindingsMetadata.attributes['style'] = literal(hostBindingsMetadata.specialAttributes.styleAttr);
     }
     if (hostBindingsMetadata.specialAttributes.classAttr) {
-        hostBindingsMetadata.attributes['class'] = literal$1(hostBindingsMetadata.specialAttributes.classAttr);
+        hostBindingsMetadata.attributes['class'] = literal(hostBindingsMetadata.specialAttributes.classAttr);
     }
     const hostJob = ingestHostBinding({
         componentName: name,
@@ -29868,7 +29869,7 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
     definitionMap.set('hostAttrs', hostJob.root.attributes);
     const varCount = hostJob.root.vars;
     if (varCount !== null && varCount > 0) {
-        definitionMap.set('hostVars', literal$1(varCount));
+        definitionMap.set('hostVars', literal(varCount));
     }
     return emitHostBindingFunction(hostJob);
 }
@@ -29899,7 +29900,7 @@ function parseHostBindings(host) {
                     break;
                 default:
                     if (typeof value === 'string') {
-                        attributes[key] = literal$1(value);
+                        attributes[key] = literal(value);
                     }
                     else {
                         attributes[key] = value;
@@ -30013,7 +30014,7 @@ function createHostDirectivesMappingArray(mapping) {
     const elements = [];
     for (const publicName in mapping) {
         if (mapping.hasOwnProperty(publicName)) {
-            elements.push(literal$1(publicName), literal$1(mapping[publicName]));
+            elements.push(literal(publicName), literal(mapping[publicName]));
         }
     }
     return elements.length > 0 ? literalArr(elements) : null;
@@ -31566,7 +31567,7 @@ function createR3DependencyMetadata(token, isAttributeDep, host, optional, self,
     // If the dep is an `@Attribute()` the `attributeNameType` ought to be the `unknown` type.
     // But types are not available at runtime so we just use a literal `"<unknown>"` string as a dummy
     // marker.
-    const attributeNameType = isAttributeDep ? literal$1('unknown') : null;
+    const attributeNameType = isAttributeDep ? literal('unknown') : null;
     return { token, attributeNameType, host, optional, self, skipSelf };
 }
 function createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies) {
@@ -32216,7 +32217,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-rc.0+sha-d5210f0');
+new Version('20.1.0-rc.0+sha-87056c3');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33236,8 +33237,11 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B80_1LIK.cjs', document.baseURI).href));
-const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CcfUr8Z5.cjs', document.baseURI).href));
+// Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
+const currentFileName = isCommonJS
+    ? __filename
+    : (url__namespace.fileURLToPath?.(currentFileUrl) ?? null);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
  */
@@ -33247,7 +33251,10 @@ class NodeJSReadonlyFileSystem extends NodeJSPathManipulation {
         if (this._caseSensitive === undefined) {
             // Note the use of the real file-system is intentional:
             // `this.exists()` relies upon `isCaseSensitive()` so that would cause an infinite recursion.
-            this._caseSensitive = !fs$1.existsSync(this.normalize(toggleCase(currentFileName)));
+            this._caseSensitive =
+                currentFileName !== null
+                    ? !fs$1.existsSync(this.normalize(toggleCase(currentFileName)))
+                    : true;
         }
         return this._caseSensitive;
     }
@@ -36530,790 +36537,6 @@ function getContainerNode(node) {
     return node.getSourceFile();
 }
 
-class ArraySliceBuiltinFn extends KnownFn {
-    lhs;
-    constructor(lhs) {
-        super();
-        this.lhs = lhs;
-    }
-    evaluate(node, args) {
-        if (args.length === 0) {
-            return this.lhs;
-        }
-        else {
-            return DynamicValue.fromUnknown(node);
-        }
-    }
-}
-class ArrayConcatBuiltinFn extends KnownFn {
-    lhs;
-    constructor(lhs) {
-        super();
-        this.lhs = lhs;
-    }
-    evaluate(node, args) {
-        const result = [...this.lhs];
-        for (const arg of args) {
-            if (arg instanceof DynamicValue) {
-                result.push(DynamicValue.fromDynamicInput(node, arg));
-            }
-            else if (Array.isArray(arg)) {
-                result.push(...arg);
-            }
-            else {
-                result.push(arg);
-            }
-        }
-        return result;
-    }
-}
-class StringConcatBuiltinFn extends KnownFn {
-    lhs;
-    constructor(lhs) {
-        super();
-        this.lhs = lhs;
-    }
-    evaluate(node, args) {
-        let result = this.lhs;
-        for (const arg of args) {
-            const resolved = arg instanceof EnumValue ? arg.resolved : arg;
-            if (typeof resolved === 'string' ||
-                typeof resolved === 'number' ||
-                typeof resolved === 'boolean' ||
-                resolved == null) {
-                // Cast to `any`, because `concat` will convert
-                // anything to a string, but TS only allows strings.
-                result = result.concat(resolved);
-            }
-            else {
-                return DynamicValue.fromUnknown(node);
-            }
-        }
-        return result;
-    }
-}
-
-/**
- * A value produced which originated in a `ForeignFunctionResolver` and doesn't come from the
- * template itself.
- *
- * Synthetic values cannot be further evaluated, and attempts to do so produce `DynamicValue`s
- * instead.
- */
-class SyntheticValue {
-    value;
-    constructor(value) {
-        this.value = value;
-    }
-}
-
-function literalBinaryOp(op) {
-    return { op, literal: true };
-}
-function referenceBinaryOp(op) {
-    return { op, literal: false };
-}
-const BINARY_OPERATORS$2 = new Map([
-    [ts.SyntaxKind.PlusToken, literalBinaryOp((a, b) => a + b)],
-    [ts.SyntaxKind.MinusToken, literalBinaryOp((a, b) => a - b)],
-    [ts.SyntaxKind.AsteriskToken, literalBinaryOp((a, b) => a * b)],
-    [ts.SyntaxKind.SlashToken, literalBinaryOp((a, b) => a / b)],
-    [ts.SyntaxKind.PercentToken, literalBinaryOp((a, b) => a % b)],
-    [ts.SyntaxKind.AmpersandToken, literalBinaryOp((a, b) => a & b)],
-    [ts.SyntaxKind.BarToken, literalBinaryOp((a, b) => a | b)],
-    [ts.SyntaxKind.CaretToken, literalBinaryOp((a, b) => a ^ b)],
-    [ts.SyntaxKind.LessThanToken, literalBinaryOp((a, b) => a < b)],
-    [ts.SyntaxKind.LessThanEqualsToken, literalBinaryOp((a, b) => a <= b)],
-    [ts.SyntaxKind.GreaterThanToken, literalBinaryOp((a, b) => a > b)],
-    [ts.SyntaxKind.GreaterThanEqualsToken, literalBinaryOp((a, b) => a >= b)],
-    [ts.SyntaxKind.EqualsEqualsToken, literalBinaryOp((a, b) => a == b)],
-    [ts.SyntaxKind.EqualsEqualsEqualsToken, literalBinaryOp((a, b) => a === b)],
-    [ts.SyntaxKind.ExclamationEqualsToken, literalBinaryOp((a, b) => a != b)],
-    [ts.SyntaxKind.ExclamationEqualsEqualsToken, literalBinaryOp((a, b) => a !== b)],
-    [ts.SyntaxKind.LessThanLessThanToken, literalBinaryOp((a, b) => a << b)],
-    [ts.SyntaxKind.GreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >> b)],
-    [ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken, literalBinaryOp((a, b) => a >>> b)],
-    [ts.SyntaxKind.AsteriskAsteriskToken, literalBinaryOp((a, b) => Math.pow(a, b))],
-    [ts.SyntaxKind.AmpersandAmpersandToken, referenceBinaryOp((a, b) => a && b)],
-    [ts.SyntaxKind.BarBarToken, referenceBinaryOp((a, b) => a || b)],
-]);
-const UNARY_OPERATORS$2 = new Map([
-    [ts.SyntaxKind.TildeToken, (a) => ~a],
-    [ts.SyntaxKind.MinusToken, (a) => -a],
-    [ts.SyntaxKind.PlusToken, (a) => +a],
-    [ts.SyntaxKind.ExclamationToken, (a) => !a],
-]);
-class StaticInterpreter {
-    host;
-    checker;
-    dependencyTracker;
-    constructor(host, checker, dependencyTracker) {
-        this.host = host;
-        this.checker = checker;
-        this.dependencyTracker = dependencyTracker;
-    }
-    visit(node, context) {
-        return this.visitExpression(node, context);
-    }
-    visitExpression(node, context) {
-        let result;
-        if (node.kind === ts.SyntaxKind.TrueKeyword) {
-            return true;
-        }
-        else if (node.kind === ts.SyntaxKind.FalseKeyword) {
-            return false;
-        }
-        else if (node.kind === ts.SyntaxKind.NullKeyword) {
-            return null;
-        }
-        else if (ts.isStringLiteral(node)) {
-            return node.text;
-        }
-        else if (ts.isNoSubstitutionTemplateLiteral(node)) {
-            return node.text;
-        }
-        else if (ts.isTemplateExpression(node)) {
-            result = this.visitTemplateExpression(node, context);
-        }
-        else if (ts.isNumericLiteral(node)) {
-            return parseFloat(node.text);
-        }
-        else if (ts.isObjectLiteralExpression(node)) {
-            result = this.visitObjectLiteralExpression(node, context);
-        }
-        else if (ts.isIdentifier(node)) {
-            result = this.visitIdentifier(node, context);
-        }
-        else if (ts.isPropertyAccessExpression(node)) {
-            result = this.visitPropertyAccessExpression(node, context);
-        }
-        else if (ts.isCallExpression(node)) {
-            result = this.visitCallExpression(node, context);
-        }
-        else if (ts.isConditionalExpression(node)) {
-            result = this.visitConditionalExpression(node, context);
-        }
-        else if (ts.isPrefixUnaryExpression(node)) {
-            result = this.visitPrefixUnaryExpression(node, context);
-        }
-        else if (ts.isBinaryExpression(node)) {
-            result = this.visitBinaryExpression(node, context);
-        }
-        else if (ts.isArrayLiteralExpression(node)) {
-            result = this.visitArrayLiteralExpression(node, context);
-        }
-        else if (ts.isParenthesizedExpression(node)) {
-            result = this.visitParenthesizedExpression(node, context);
-        }
-        else if (ts.isElementAccessExpression(node)) {
-            result = this.visitElementAccessExpression(node, context);
-        }
-        else if (ts.isAsExpression(node)) {
-            result = this.visitExpression(node.expression, context);
-        }
-        else if (ts.isNonNullExpression(node)) {
-            result = this.visitExpression(node.expression, context);
-        }
-        else if (this.host.isClass(node)) {
-            result = this.visitDeclaration(node, context);
-        }
-        else {
-            return DynamicValue.fromUnsupportedSyntax(node);
-        }
-        if (result instanceof DynamicValue && result.node !== node) {
-            return DynamicValue.fromDynamicInput(node, result);
-        }
-        return result;
-    }
-    visitArrayLiteralExpression(node, context) {
-        const array = [];
-        for (let i = 0; i < node.elements.length; i++) {
-            const element = node.elements[i];
-            if (ts.isSpreadElement(element)) {
-                array.push(...this.visitSpreadElement(element, context));
-            }
-            else {
-                array.push(this.visitExpression(element, context));
-            }
-        }
-        return array;
-    }
-    visitObjectLiteralExpression(node, context) {
-        const map = new Map();
-        for (let i = 0; i < node.properties.length; i++) {
-            const property = node.properties[i];
-            if (ts.isPropertyAssignment(property)) {
-                const name = this.stringNameFromPropertyName(property.name, context);
-                // Check whether the name can be determined statically.
-                if (name === undefined) {
-                    return DynamicValue.fromDynamicInput(node, DynamicValue.fromDynamicString(property.name));
-                }
-                map.set(name, this.visitExpression(property.initializer, context));
-            }
-            else if (ts.isShorthandPropertyAssignment(property)) {
-                const symbol = this.checker.getShorthandAssignmentValueSymbol(property);
-                if (symbol === undefined || symbol.valueDeclaration === undefined) {
-                    map.set(property.name.text, DynamicValue.fromUnknown(property));
-                }
-                else {
-                    map.set(property.name.text, this.visitDeclaration(symbol.valueDeclaration, context));
-                }
-            }
-            else if (ts.isSpreadAssignment(property)) {
-                const spread = this.visitExpression(property.expression, context);
-                if (spread instanceof DynamicValue) {
-                    return DynamicValue.fromDynamicInput(node, spread);
-                }
-                else if (spread instanceof Map) {
-                    spread.forEach((value, key) => map.set(key, value));
-                }
-                else if (spread instanceof ResolvedModule) {
-                    spread.getExports().forEach((value, key) => map.set(key, value));
-                }
-                else {
-                    return DynamicValue.fromDynamicInput(node, DynamicValue.fromInvalidExpressionType(property, spread));
-                }
-            }
-            else {
-                return DynamicValue.fromUnknown(node);
-            }
-        }
-        return map;
-    }
-    visitTemplateExpression(node, context) {
-        const pieces = [node.head.text];
-        for (let i = 0; i < node.templateSpans.length; i++) {
-            const span = node.templateSpans[i];
-            const value = literal(this.visit(span.expression, context), () => DynamicValue.fromDynamicString(span.expression));
-            if (value instanceof DynamicValue) {
-                return DynamicValue.fromDynamicInput(node, value);
-            }
-            pieces.push(`${value}`, span.literal.text);
-        }
-        return pieces.join('');
-    }
-    visitIdentifier(node, context) {
-        const decl = this.host.getDeclarationOfIdentifier(node);
-        if (decl === null) {
-            if (ts.identifierToKeywordKind(node) === ts.SyntaxKind.UndefinedKeyword) {
-                return undefined;
-            }
-            else {
-                // Check if the symbol here is imported.
-                if (this.dependencyTracker !== null && this.host.getImportOfIdentifier(node) !== null) {
-                    // It was, but no declaration for the node could be found. This means that the dependency
-                    // graph for the current file cannot be properly updated to account for this (broken)
-                    // import. Instead, the originating file is reported as failing dependency analysis,
-                    // ensuring that future compilations will always attempt to re-resolve the previously
-                    // broken identifier.
-                    this.dependencyTracker.recordDependencyAnalysisFailure(context.originatingFile);
-                }
-                return DynamicValue.fromUnknownIdentifier(node);
-            }
-        }
-        const declContext = { ...context, ...joinModuleContext(context, node, decl) };
-        const result = this.visitDeclaration(decl.node, declContext);
-        if (result instanceof Reference) {
-            // Only record identifiers to non-synthetic references. Synthetic references may not have the
-            // same value at runtime as they do at compile time, so it's not legal to refer to them by the
-            // identifier here.
-            if (!result.synthetic) {
-                result.addIdentifier(node);
-            }
-        }
-        else if (result instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, result);
-        }
-        return result;
-    }
-    visitDeclaration(node, context) {
-        if (this.dependencyTracker !== null) {
-            this.dependencyTracker.addDependency(context.originatingFile, node.getSourceFile());
-        }
-        if (this.host.isClass(node)) {
-            return this.getReference(node, context);
-        }
-        else if (ts.isVariableDeclaration(node)) {
-            return this.visitVariableDeclaration(node, context);
-        }
-        else if (ts.isParameter(node) && context.scope.has(node)) {
-            return context.scope.get(node);
-        }
-        else if (ts.isExportAssignment(node)) {
-            return this.visitExpression(node.expression, context);
-        }
-        else if (ts.isEnumDeclaration(node)) {
-            return this.visitEnumDeclaration(node, context);
-        }
-        else if (ts.isSourceFile(node)) {
-            return this.visitSourceFile(node, context);
-        }
-        else if (ts.isBindingElement(node)) {
-            return this.visitBindingElement(node, context);
-        }
-        else {
-            return this.getReference(node, context);
-        }
-    }
-    visitVariableDeclaration(node, context) {
-        const value = this.host.getVariableValue(node);
-        if (value !== null) {
-            return this.visitExpression(value, context);
-        }
-        else if (isVariableDeclarationDeclared(node)) {
-            // If the declaration has a literal type that can be statically reduced to a value, resolve to
-            // that value. If not, the historical behavior for variable declarations is to return a
-            // `Reference` to the variable, as the consumer could use it in a context where knowing its
-            // static value is not necessary.
-            //
-            // Arguably, since the value cannot be statically determined, we should return a
-            // `DynamicValue`. This returns a `Reference` because it's the same behavior as before
-            // `visitType` was introduced.
-            //
-            // TODO(zarend): investigate switching to a `DynamicValue` and verify this won't break any
-            // use cases, especially in ngcc
-            if (node.type !== undefined) {
-                const evaluatedType = this.visitType(node.type, context);
-                if (!(evaluatedType instanceof DynamicValue)) {
-                    return evaluatedType;
-                }
-            }
-            return this.getReference(node, context);
-        }
-        else {
-            return undefined;
-        }
-    }
-    visitEnumDeclaration(node, context) {
-        const enumRef = this.getReference(node, context);
-        const map = new Map();
-        node.members.forEach((member, index) => {
-            const name = this.stringNameFromPropertyName(member.name, context);
-            if (name !== undefined) {
-                const resolved = member.initializer ? this.visit(member.initializer, context) : index;
-                map.set(name, new EnumValue(enumRef, name, resolved));
-            }
-        });
-        return map;
-    }
-    visitElementAccessExpression(node, context) {
-        const lhs = this.visitExpression(node.expression, context);
-        if (lhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, lhs);
-        }
-        const rhs = this.visitExpression(node.argumentExpression, context);
-        if (rhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, rhs);
-        }
-        if (typeof rhs !== 'string' && typeof rhs !== 'number') {
-            return DynamicValue.fromInvalidExpressionType(node, rhs);
-        }
-        return this.accessHelper(node, lhs, rhs, context);
-    }
-    visitPropertyAccessExpression(node, context) {
-        const lhs = this.visitExpression(node.expression, context);
-        const rhs = node.name.text;
-        // TODO: handle reference to class declaration.
-        if (lhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, lhs);
-        }
-        return this.accessHelper(node, lhs, rhs, context);
-    }
-    visitSourceFile(node, context) {
-        const declarations = this.host.getExportsOfModule(node);
-        if (declarations === null) {
-            return DynamicValue.fromUnknown(node);
-        }
-        return new ResolvedModule(declarations, (decl) => {
-            const declContext = {
-                ...context,
-                ...joinModuleContext(context, node, decl),
-            };
-            // Visit both concrete and inline declarations.
-            return this.visitDeclaration(decl.node, declContext);
-        });
-    }
-    accessHelper(node, lhs, rhs, context) {
-        const strIndex = `${rhs}`;
-        if (lhs instanceof Map) {
-            if (lhs.has(strIndex)) {
-                return lhs.get(strIndex);
-            }
-            else {
-                return undefined;
-            }
-        }
-        else if (lhs instanceof ResolvedModule) {
-            return lhs.getExport(strIndex);
-        }
-        else if (Array.isArray(lhs)) {
-            if (rhs === 'length') {
-                return lhs.length;
-            }
-            else if (rhs === 'slice') {
-                return new ArraySliceBuiltinFn(lhs);
-            }
-            else if (rhs === 'concat') {
-                return new ArrayConcatBuiltinFn(lhs);
-            }
-            if (typeof rhs !== 'number' || !Number.isInteger(rhs)) {
-                return DynamicValue.fromInvalidExpressionType(node, rhs);
-            }
-            return lhs[rhs];
-        }
-        else if (typeof lhs === 'string' && rhs === 'concat') {
-            return new StringConcatBuiltinFn(lhs);
-        }
-        else if (lhs instanceof Reference) {
-            const ref = lhs.node;
-            if (this.host.isClass(ref)) {
-                const module = owningModule(context, lhs.bestGuessOwningModule);
-                let value = undefined;
-                const member = this.host
-                    .getMembersOfClass(ref)
-                    .find((member) => member.isStatic && member.name === strIndex);
-                if (member !== undefined) {
-                    if (member.value !== null) {
-                        value = this.visitExpression(member.value, context);
-                    }
-                    else if (member.implementation !== null) {
-                        value = new Reference(member.implementation, module);
-                    }
-                    else if (member.node) {
-                        value = new Reference(member.node, module);
-                    }
-                }
-                return value;
-            }
-            else if (isDeclaration(ref)) {
-                return DynamicValue.fromDynamicInput(node, DynamicValue.fromExternalReference(ref, lhs));
-            }
-        }
-        else if (lhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, lhs);
-        }
-        else if (lhs instanceof SyntheticValue) {
-            return DynamicValue.fromSyntheticInput(node, lhs);
-        }
-        return DynamicValue.fromUnknown(node);
-    }
-    visitCallExpression(node, context) {
-        const lhs = this.visitExpression(node.expression, context);
-        if (lhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, lhs);
-        }
-        // If the call refers to a builtin function, attempt to evaluate the function.
-        if (lhs instanceof KnownFn) {
-            return lhs.evaluate(node, this.evaluateFunctionArguments(node, context));
-        }
-        if (!(lhs instanceof Reference)) {
-            return DynamicValue.fromInvalidExpressionType(node.expression, lhs);
-        }
-        const fn = this.host.getDefinitionOfFunction(lhs.node);
-        if (fn === null) {
-            return DynamicValue.fromInvalidExpressionType(node.expression, lhs);
-        }
-        if (!isFunctionOrMethodReference(lhs)) {
-            return DynamicValue.fromInvalidExpressionType(node.expression, lhs);
-        }
-        const resolveFfrExpr = (expr) => {
-            let contextExtension = {};
-            // TODO(alxhub): the condition `fn.body === null` here is vestigial - we probably _do_ want to
-            // change the context like this even for non-null function bodies. But, this is being
-            // redesigned as a refactoring with no behavior changes so that should be done as a follow-up.
-            if (fn.body === null &&
-                expr.getSourceFile() !== node.expression.getSourceFile() &&
-                lhs.bestGuessOwningModule !== null) {
-                contextExtension = {
-                    absoluteModuleName: lhs.bestGuessOwningModule.specifier,
-                    resolutionContext: lhs.bestGuessOwningModule.resolutionContext,
-                };
-            }
-            return this.visitFfrExpression(expr, { ...context, ...contextExtension });
-        };
-        // If the function is foreign (declared through a d.ts file), attempt to resolve it with the
-        // foreignFunctionResolver, if one is specified.
-        if (fn.body === null && context.foreignFunctionResolver !== undefined) {
-            const unresolvable = DynamicValue.fromDynamicInput(node, DynamicValue.fromExternalReference(node.expression, lhs));
-            return context.foreignFunctionResolver(lhs, node, resolveFfrExpr, unresolvable);
-        }
-        const res = this.visitFunctionBody(node, fn, context);
-        // If the result of attempting to resolve the function body was a DynamicValue, attempt to use
-        // the foreignFunctionResolver if one is present. This could still potentially yield a usable
-        // value.
-        if (res instanceof DynamicValue && context.foreignFunctionResolver !== undefined) {
-            const unresolvable = DynamicValue.fromComplexFunctionCall(node, fn);
-            return context.foreignFunctionResolver(lhs, node, resolveFfrExpr, unresolvable);
-        }
-        return res;
-    }
-    /**
-     * Visit an expression which was extracted from a foreign-function resolver.
-     *
-     * This will process the result and ensure it's correct for FFR-resolved values, including marking
-     * `Reference`s as synthetic.
-     */
-    visitFfrExpression(expr, context) {
-        const res = this.visitExpression(expr, context);
-        if (res instanceof Reference) {
-            // This Reference was created synthetically, via a foreign function resolver. The real
-            // runtime value of the function expression may be different than the foreign function
-            // resolved value, so mark the Reference as synthetic to avoid it being misinterpreted.
-            res.synthetic = true;
-        }
-        return res;
-    }
-    visitFunctionBody(node, fn, context) {
-        if (fn.body === null) {
-            return DynamicValue.fromUnknown(node);
-        }
-        else if (fn.body.length !== 1 || !ts.isReturnStatement(fn.body[0])) {
-            return DynamicValue.fromComplexFunctionCall(node, fn);
-        }
-        const ret = fn.body[0];
-        const args = this.evaluateFunctionArguments(node, context);
-        const newScope = new Map();
-        const calleeContext = { ...context, scope: newScope };
-        fn.parameters.forEach((param, index) => {
-            let arg = args[index];
-            if (param.node.dotDotDotToken !== undefined) {
-                arg = args.slice(index);
-            }
-            if (arg === undefined && param.initializer !== null) {
-                arg = this.visitExpression(param.initializer, calleeContext);
-            }
-            newScope.set(param.node, arg);
-        });
-        return ret.expression !== undefined
-            ? this.visitExpression(ret.expression, calleeContext)
-            : undefined;
-    }
-    visitConditionalExpression(node, context) {
-        const condition = this.visitExpression(node.condition, context);
-        if (condition instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, condition);
-        }
-        if (condition) {
-            return this.visitExpression(node.whenTrue, context);
-        }
-        else {
-            return this.visitExpression(node.whenFalse, context);
-        }
-    }
-    visitPrefixUnaryExpression(node, context) {
-        const operatorKind = node.operator;
-        if (!UNARY_OPERATORS$2.has(operatorKind)) {
-            return DynamicValue.fromUnsupportedSyntax(node);
-        }
-        const op = UNARY_OPERATORS$2.get(operatorKind);
-        const value = this.visitExpression(node.operand, context);
-        if (value instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, value);
-        }
-        else {
-            return op(value);
-        }
-    }
-    visitBinaryExpression(node, context) {
-        const tokenKind = node.operatorToken.kind;
-        if (!BINARY_OPERATORS$2.has(tokenKind)) {
-            return DynamicValue.fromUnsupportedSyntax(node);
-        }
-        const opRecord = BINARY_OPERATORS$2.get(tokenKind);
-        let lhs, rhs;
-        if (opRecord.literal) {
-            lhs = literal(this.visitExpression(node.left, context), (value) => DynamicValue.fromInvalidExpressionType(node.left, value));
-            rhs = literal(this.visitExpression(node.right, context), (value) => DynamicValue.fromInvalidExpressionType(node.right, value));
-        }
-        else {
-            lhs = this.visitExpression(node.left, context);
-            rhs = this.visitExpression(node.right, context);
-        }
-        if (lhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, lhs);
-        }
-        else if (rhs instanceof DynamicValue) {
-            return DynamicValue.fromDynamicInput(node, rhs);
-        }
-        else {
-            return opRecord.op(lhs, rhs);
-        }
-    }
-    visitParenthesizedExpression(node, context) {
-        return this.visitExpression(node.expression, context);
-    }
-    evaluateFunctionArguments(node, context) {
-        const args = [];
-        for (const arg of node.arguments) {
-            if (ts.isSpreadElement(arg)) {
-                args.push(...this.visitSpreadElement(arg, context));
-            }
-            else {
-                args.push(this.visitExpression(arg, context));
-            }
-        }
-        return args;
-    }
-    visitSpreadElement(node, context) {
-        const spread = this.visitExpression(node.expression, context);
-        if (spread instanceof DynamicValue) {
-            return [DynamicValue.fromDynamicInput(node, spread)];
-        }
-        else if (!Array.isArray(spread)) {
-            return [DynamicValue.fromInvalidExpressionType(node, spread)];
-        }
-        else {
-            return spread;
-        }
-    }
-    visitBindingElement(node, context) {
-        const path = [];
-        let closestDeclaration = node;
-        while (ts.isBindingElement(closestDeclaration) ||
-            ts.isArrayBindingPattern(closestDeclaration) ||
-            ts.isObjectBindingPattern(closestDeclaration)) {
-            if (ts.isBindingElement(closestDeclaration)) {
-                path.unshift(closestDeclaration);
-            }
-            closestDeclaration = closestDeclaration.parent;
-        }
-        if (!ts.isVariableDeclaration(closestDeclaration) ||
-            closestDeclaration.initializer === undefined) {
-            return DynamicValue.fromUnknown(node);
-        }
-        let value = this.visit(closestDeclaration.initializer, context);
-        for (const element of path) {
-            let key;
-            if (ts.isArrayBindingPattern(element.parent)) {
-                key = element.parent.elements.indexOf(element);
-            }
-            else {
-                const name = element.propertyName || element.name;
-                if (ts.isIdentifier(name)) {
-                    key = name.text;
-                }
-                else {
-                    return DynamicValue.fromUnknown(element);
-                }
-            }
-            value = this.accessHelper(element, value, key, context);
-            if (value instanceof DynamicValue) {
-                return value;
-            }
-        }
-        return value;
-    }
-    stringNameFromPropertyName(node, context) {
-        if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-            return node.text;
-        }
-        else if (ts.isComputedPropertyName(node)) {
-            const literal = this.visitExpression(node.expression, context);
-            return typeof literal === 'string' ? literal : undefined;
-        }
-        else {
-            return undefined;
-        }
-    }
-    getReference(node, context) {
-        return new Reference(node, owningModule(context));
-    }
-    visitType(node, context) {
-        if (ts.isLiteralTypeNode(node)) {
-            return this.visitExpression(node.literal, context);
-        }
-        else if (ts.isTupleTypeNode(node)) {
-            return this.visitTupleType(node, context);
-        }
-        else if (ts.isNamedTupleMember(node)) {
-            return this.visitType(node.type, context);
-        }
-        else if (ts.isTypeOperatorNode(node) && node.operator === ts.SyntaxKind.ReadonlyKeyword) {
-            return this.visitType(node.type, context);
-        }
-        else if (ts.isTypeQueryNode(node)) {
-            return this.visitTypeQuery(node, context);
-        }
-        return DynamicValue.fromDynamicType(node);
-    }
-    visitTupleType(node, context) {
-        const res = [];
-        for (const elem of node.elements) {
-            res.push(this.visitType(elem, context));
-        }
-        return res;
-    }
-    visitTypeQuery(node, context) {
-        if (!ts.isIdentifier(node.exprName)) {
-            return DynamicValue.fromUnknown(node);
-        }
-        const decl = this.host.getDeclarationOfIdentifier(node.exprName);
-        if (decl === null) {
-            return DynamicValue.fromUnknownIdentifier(node.exprName);
-        }
-        const declContext = { ...context, ...joinModuleContext(context, node, decl) };
-        return this.visitDeclaration(decl.node, declContext);
-    }
-}
-function isFunctionOrMethodReference(ref) {
-    return (ts.isFunctionDeclaration(ref.node) ||
-        ts.isMethodDeclaration(ref.node) ||
-        ts.isFunctionExpression(ref.node));
-}
-function literal(value, reject) {
-    if (value instanceof EnumValue) {
-        value = value.resolved;
-    }
-    if (value instanceof DynamicValue ||
-        value === null ||
-        value === undefined ||
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'boolean') {
-        return value;
-    }
-    return reject(value);
-}
-function isVariableDeclarationDeclared(node) {
-    if (node.parent === undefined || !ts.isVariableDeclarationList(node.parent)) {
-        return false;
-    }
-    const declList = node.parent;
-    if (declList.parent === undefined || !ts.isVariableStatement(declList.parent)) {
-        return false;
-    }
-    const varStmt = declList.parent;
-    const modifiers = ts.getModifiers(varStmt);
-    return (modifiers !== undefined && modifiers.some((mod) => mod.kind === ts.SyntaxKind.DeclareKeyword));
-}
-const EMPTY = {};
-function joinModuleContext(existing, node, decl) {
-    if (typeof decl.viaModule === 'string' && decl.viaModule !== existing.absoluteModuleName) {
-        return {
-            absoluteModuleName: decl.viaModule,
-            resolutionContext: node.getSourceFile().fileName,
-        };
-    }
-    else {
-        return EMPTY;
-    }
-}
-function owningModule(context, override = null) {
-    let specifier = context.absoluteModuleName;
-    if (override !== null) {
-        specifier = override.specifier;
-    }
-    if (specifier !== null) {
-        return {
-            specifier,
-            resolutionContext: context.resolutionContext,
-        };
-    }
-    else {
-        return null;
-    }
-}
-
 /**
  * Specifies the compilation mode that is used for the compilation.
  */
@@ -38309,11 +37532,11 @@ function createImportReference(asTypeReference, ref) {
     }
 }
 
-const UNARY_OPERATORS$1 = /* @__PURE__ */ new Map([
+const UNARY_OPERATORS = /* @__PURE__ */ new Map([
     [UnaryOperator.Minus, '-'],
     [UnaryOperator.Plus, '+'],
 ]);
-const BINARY_OPERATORS$1 = /* @__PURE__ */ new Map([
+const BINARY_OPERATORS = /* @__PURE__ */ new Map([
     [BinaryOperator.And, '&&'],
     [BinaryOperator.Bigger, '>'],
     [BinaryOperator.BiggerEquals, '>='],
@@ -38507,10 +37730,10 @@ class ExpressionTranslatorVisitor {
             : ast.body.visitExpression(this, context));
     }
     visitBinaryOperatorExpr(ast, context) {
-        if (!BINARY_OPERATORS$1.has(ast.operator)) {
+        if (!BINARY_OPERATORS.has(ast.operator)) {
             throw new Error(`Unknown binary operator: ${BinaryOperator[ast.operator]}`);
         }
-        const operator = BINARY_OPERATORS$1.get(ast.operator);
+        const operator = BINARY_OPERATORS.get(ast.operator);
         if (ast.isAssignment()) {
             return this.factory.createAssignment(ast.lhs.visitExpression(this, context), operator, ast.rhs.visitExpression(this, context));
         }
@@ -38552,10 +37775,10 @@ class ExpressionTranslatorVisitor {
         return this.factory.createVoidExpression(ast.expr.visitExpression(this, context));
     }
     visitUnaryOperatorExpr(ast, context) {
-        if (!UNARY_OPERATORS$1.has(ast.operator)) {
+        if (!UNARY_OPERATORS.has(ast.operator)) {
             throw new Error(`Unknown unary operator: ${UnaryOperator[ast.operator]}`);
         }
-        return this.factory.createUnaryExpression(UNARY_OPERATORS$1.get(ast.operator), ast.expr.visitExpression(this, context));
+        return this.factory.createUnaryExpression(UNARY_OPERATORS.get(ast.operator), ast.expr.visitExpression(this, context));
     }
     visitParenthesizedExpr(ast, context) {
         const result = ast.expr.visitExpression(this, context);
@@ -39020,64 +38243,67 @@ var PureAnnotation;
     PureAnnotation["CLOSURE"] = "* @pureOrBreakMyCode ";
     PureAnnotation["TERSER"] = "@__PURE__";
 })(PureAnnotation || (PureAnnotation = {}));
-const UNARY_OPERATORS = /* @__PURE__ */ (() => ({
-    '+': ts.SyntaxKind.PlusToken,
-    '-': ts.SyntaxKind.MinusToken,
-    '!': ts.SyntaxKind.ExclamationToken,
-}))();
-const BINARY_OPERATORS = /* @__PURE__ */ (() => ({
-    '&&': ts.SyntaxKind.AmpersandAmpersandToken,
-    '>': ts.SyntaxKind.GreaterThanToken,
-    '>=': ts.SyntaxKind.GreaterThanEqualsToken,
-    '&': ts.SyntaxKind.AmpersandToken,
-    '|': ts.SyntaxKind.BarToken,
-    '/': ts.SyntaxKind.SlashToken,
-    '==': ts.SyntaxKind.EqualsEqualsToken,
-    '===': ts.SyntaxKind.EqualsEqualsEqualsToken,
-    '<': ts.SyntaxKind.LessThanToken,
-    '<=': ts.SyntaxKind.LessThanEqualsToken,
-    '-': ts.SyntaxKind.MinusToken,
-    '%': ts.SyntaxKind.PercentToken,
-    '*': ts.SyntaxKind.AsteriskToken,
-    '**': ts.SyntaxKind.AsteriskAsteriskToken,
-    '!=': ts.SyntaxKind.ExclamationEqualsToken,
-    '!==': ts.SyntaxKind.ExclamationEqualsEqualsToken,
-    '||': ts.SyntaxKind.BarBarToken,
-    '+': ts.SyntaxKind.PlusToken,
-    '??': ts.SyntaxKind.QuestionQuestionToken,
-    'in': ts.SyntaxKind.InKeyword,
-    '=': ts.SyntaxKind.EqualsToken,
-    '+=': ts.SyntaxKind.PlusEqualsToken,
-    '-=': ts.SyntaxKind.MinusEqualsToken,
-    '*=': ts.SyntaxKind.AsteriskEqualsToken,
-    '/=': ts.SyntaxKind.SlashEqualsToken,
-    '%=': ts.SyntaxKind.PercentEqualsToken,
-    '**=': ts.SyntaxKind.AsteriskAsteriskEqualsToken,
-    '&&=': ts.SyntaxKind.AmpersandAmpersandEqualsToken,
-    '||=': ts.SyntaxKind.BarBarEqualsToken,
-    '??=': ts.SyntaxKind.QuestionQuestionEqualsToken,
-}))();
-const VAR_TYPES = /* @__PURE__ */ (() => ({
-    'const': ts.NodeFlags.Const,
-    'let': ts.NodeFlags.Let,
-    'var': ts.NodeFlags.None,
-}))();
 /**
  * A TypeScript flavoured implementation of the AstFactory.
  */
 class TypeScriptAstFactory {
     annotateForClosureCompiler;
     externalSourceFiles = new Map();
+    UNARY_OPERATORS = 
+    /* @__PURE__ */ (() => ({
+        '+': ts.SyntaxKind.PlusToken,
+        '-': ts.SyntaxKind.MinusToken,
+        '!': ts.SyntaxKind.ExclamationToken,
+    }))();
+    BINARY_OPERATORS = 
+    /* @__PURE__ */ (() => ({
+        '&&': ts.SyntaxKind.AmpersandAmpersandToken,
+        '>': ts.SyntaxKind.GreaterThanToken,
+        '>=': ts.SyntaxKind.GreaterThanEqualsToken,
+        '&': ts.SyntaxKind.AmpersandToken,
+        '|': ts.SyntaxKind.BarToken,
+        '/': ts.SyntaxKind.SlashToken,
+        '==': ts.SyntaxKind.EqualsEqualsToken,
+        '===': ts.SyntaxKind.EqualsEqualsEqualsToken,
+        '<': ts.SyntaxKind.LessThanToken,
+        '<=': ts.SyntaxKind.LessThanEqualsToken,
+        '-': ts.SyntaxKind.MinusToken,
+        '%': ts.SyntaxKind.PercentToken,
+        '*': ts.SyntaxKind.AsteriskToken,
+        '**': ts.SyntaxKind.AsteriskAsteriskToken,
+        '!=': ts.SyntaxKind.ExclamationEqualsToken,
+        '!==': ts.SyntaxKind.ExclamationEqualsEqualsToken,
+        '||': ts.SyntaxKind.BarBarToken,
+        '+': ts.SyntaxKind.PlusToken,
+        '??': ts.SyntaxKind.QuestionQuestionToken,
+        'in': ts.SyntaxKind.InKeyword,
+        '=': ts.SyntaxKind.EqualsToken,
+        '+=': ts.SyntaxKind.PlusEqualsToken,
+        '-=': ts.SyntaxKind.MinusEqualsToken,
+        '*=': ts.SyntaxKind.AsteriskEqualsToken,
+        '/=': ts.SyntaxKind.SlashEqualsToken,
+        '%=': ts.SyntaxKind.PercentEqualsToken,
+        '**=': ts.SyntaxKind.AsteriskAsteriskEqualsToken,
+        '&&=': ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+        '||=': ts.SyntaxKind.BarBarEqualsToken,
+        '??=': ts.SyntaxKind.QuestionQuestionEqualsToken,
+    }))();
+    VAR_TYPES = 
+    /* @__PURE__ */ (() => ({
+        'const': ts.NodeFlags.Const,
+        'let': ts.NodeFlags.Let,
+        'var': ts.NodeFlags.None,
+    }))();
     constructor(annotateForClosureCompiler) {
         this.annotateForClosureCompiler = annotateForClosureCompiler;
     }
     attachComments = attachComments;
     createArrayLiteral = ts.factory.createArrayLiteralExpression;
     createAssignment(target, operator, value) {
-        return ts.factory.createBinaryExpression(target, BINARY_OPERATORS[operator], value);
+        return ts.factory.createBinaryExpression(target, this.BINARY_OPERATORS[operator], value);
     }
     createBinaryExpression(leftOperand, operator, rightOperand) {
-        return ts.factory.createBinaryExpression(leftOperand, BINARY_OPERATORS[operator], rightOperand);
+        return ts.factory.createBinaryExpression(leftOperand, this.BINARY_OPERATORS[operator], rightOperand);
     }
     createBlock(body) {
         return ts.factory.createBlock(body);
@@ -39192,12 +38418,12 @@ class TypeScriptAstFactory {
     createTypeOfExpression = ts.factory.createTypeOfExpression;
     createVoidExpression = ts.factory.createVoidExpression;
     createUnaryExpression(operator, operand) {
-        return ts.factory.createPrefixUnaryExpression(UNARY_OPERATORS[operator], operand);
+        return ts.factory.createPrefixUnaryExpression(this.UNARY_OPERATORS[operator], operand);
     }
     createVariableDeclaration(variableName, initializer, type) {
         return ts.factory.createVariableStatement(undefined, ts.factory.createVariableDeclarationList([
             ts.factory.createVariableDeclaration(variableName, undefined, undefined, initializer ?? undefined),
-        ], VAR_TYPES[type]));
+        ], this.VAR_TYPES[type]));
     }
     setSourceMapRange(node, sourceMapRange) {
         if (sourceMapRange === null) {
@@ -43230,26 +42456,29 @@ class ReferenceEmitEnvironment {
  * `ts.BinaryExpression`s need to be wrapped in parentheses before casting.
  */
 //
-const SAFE_TO_CAST_WITHOUT_PARENS = new Set([
-    // Expressions which are already parenthesized can be cast without further wrapping.
-    ts.SyntaxKind.ParenthesizedExpression,
-    // Expressions which form a single lexical unit leave no room for precedence issues with the cast.
-    ts.SyntaxKind.Identifier,
-    ts.SyntaxKind.CallExpression,
-    ts.SyntaxKind.NonNullExpression,
-    ts.SyntaxKind.ElementAccessExpression,
-    ts.SyntaxKind.PropertyAccessExpression,
-    ts.SyntaxKind.ArrayLiteralExpression,
-    ts.SyntaxKind.ObjectLiteralExpression,
-    // The same goes for various literals.
-    ts.SyntaxKind.StringLiteral,
-    ts.SyntaxKind.NumericLiteral,
-    ts.SyntaxKind.TrueKeyword,
-    ts.SyntaxKind.FalseKeyword,
-    ts.SyntaxKind.NullKeyword,
-    ts.SyntaxKind.UndefinedKeyword,
-]);
+let SAFE_TO_CAST_WITHOUT_PARENS = null;
 function tsCastToAny(expr) {
+    if (SAFE_TO_CAST_WITHOUT_PARENS === null) {
+        SAFE_TO_CAST_WITHOUT_PARENS = new Set([
+            // Expressions which are already parenthesized can be cast without further wrapping.
+            ts.SyntaxKind.ParenthesizedExpression,
+            // Expressions which form a single lexical unit leave no room for precedence issues with the cast.
+            ts.SyntaxKind.Identifier,
+            ts.SyntaxKind.CallExpression,
+            ts.SyntaxKind.NonNullExpression,
+            ts.SyntaxKind.ElementAccessExpression,
+            ts.SyntaxKind.PropertyAccessExpression,
+            ts.SyntaxKind.ArrayLiteralExpression,
+            ts.SyntaxKind.ObjectLiteralExpression,
+            // The same goes for various literals.
+            ts.SyntaxKind.StringLiteral,
+            ts.SyntaxKind.NumericLiteral,
+            ts.SyntaxKind.TrueKeyword,
+            ts.SyntaxKind.FalseKeyword,
+            ts.SyntaxKind.NullKeyword,
+            ts.SyntaxKind.UndefinedKeyword,
+        ]);
+    }
     // Wrap `expr` in parentheses if needed (see `SAFE_TO_CAST_WITHOUT_PARENS` above).
     if (!SAFE_TO_CAST_WITHOUT_PARENS.has(expr.kind)) {
         expr = ts.factory.createParenthesizedExpression(expr);
@@ -44740,7 +43969,7 @@ function translateDiagnostic(diagnostic, resolver) {
 }
 
 /**
- * Expression that is cast to any. Currently represented as `0 as any`.
+ * Gets an expression that is cast to any. Currently represented as `0 as any`.
  *
  * Historically this expression was using `null as any`, but a newly-added check in TypeScript 5.6
  * (https://devblogs.microsoft.com/typescript/announcing-typescript-5-6-beta/#disallowed-nullish-and-truthy-checks)
@@ -44750,45 +43979,9 @@ function translateDiagnostic(diagnostic, resolver) {
  * - Some flavor of function call, like `isNan(0) as any` - requires even more characters than the
  *   NaN option and has the same issue with `noLib`.
  */
-const ANY_EXPRESSION = ts.factory.createAsExpression(ts.factory.createNumericLiteral('0'), ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
-const UNDEFINED = ts.factory.createIdentifier('undefined');
-const UNARY_OPS = new Map([
-    ['+', ts.SyntaxKind.PlusToken],
-    ['-', ts.SyntaxKind.MinusToken],
-]);
-const BINARY_OPS = new Map([
-    ['+', ts.SyntaxKind.PlusToken],
-    ['-', ts.SyntaxKind.MinusToken],
-    ['<', ts.SyntaxKind.LessThanToken],
-    ['>', ts.SyntaxKind.GreaterThanToken],
-    ['<=', ts.SyntaxKind.LessThanEqualsToken],
-    ['>=', ts.SyntaxKind.GreaterThanEqualsToken],
-    ['=', ts.SyntaxKind.EqualsToken],
-    ['==', ts.SyntaxKind.EqualsEqualsToken],
-    ['===', ts.SyntaxKind.EqualsEqualsEqualsToken],
-    ['*', ts.SyntaxKind.AsteriskToken],
-    ['**', ts.SyntaxKind.AsteriskAsteriskToken],
-    ['/', ts.SyntaxKind.SlashToken],
-    ['%', ts.SyntaxKind.PercentToken],
-    ['!=', ts.SyntaxKind.ExclamationEqualsToken],
-    ['!==', ts.SyntaxKind.ExclamationEqualsEqualsToken],
-    ['||', ts.SyntaxKind.BarBarToken],
-    ['&&', ts.SyntaxKind.AmpersandAmpersandToken],
-    ['&', ts.SyntaxKind.AmpersandToken],
-    ['|', ts.SyntaxKind.BarToken],
-    ['??', ts.SyntaxKind.QuestionQuestionToken],
-    ['in', ts.SyntaxKind.InKeyword],
-    ['=', ts.SyntaxKind.EqualsToken],
-    ['+=', ts.SyntaxKind.PlusEqualsToken],
-    ['-=', ts.SyntaxKind.MinusEqualsToken],
-    ['*=', ts.SyntaxKind.AsteriskEqualsToken],
-    ['/=', ts.SyntaxKind.SlashEqualsToken],
-    ['%=', ts.SyntaxKind.PercentEqualsToken],
-    ['**=', ts.SyntaxKind.AsteriskAsteriskEqualsToken],
-    ['&&=', ts.SyntaxKind.AmpersandAmpersandEqualsToken],
-    ['||=', ts.SyntaxKind.BarBarEqualsToken],
-    ['??=', ts.SyntaxKind.QuestionQuestionEqualsToken],
-]);
+function getAnyExpression() {
+    return ts.factory.createAsExpression(ts.factory.createNumericLiteral('0'), ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
+}
 /**
  * Convert an `AST` to TypeScript code directly, without going through an intermediate `Expression`
  * AST.
@@ -44800,6 +43993,44 @@ function astToTypescript(ast, maybeResolve, config) {
 class AstTranslator {
     maybeResolve;
     config;
+    UNDEFINED = ts.factory.createIdentifier('undefined');
+    UNARY_OPS = new Map([
+        ['+', ts.SyntaxKind.PlusToken],
+        ['-', ts.SyntaxKind.MinusToken],
+    ]);
+    BINARY_OPS = new Map([
+        ['+', ts.SyntaxKind.PlusToken],
+        ['-', ts.SyntaxKind.MinusToken],
+        ['<', ts.SyntaxKind.LessThanToken],
+        ['>', ts.SyntaxKind.GreaterThanToken],
+        ['<=', ts.SyntaxKind.LessThanEqualsToken],
+        ['>=', ts.SyntaxKind.GreaterThanEqualsToken],
+        ['=', ts.SyntaxKind.EqualsToken],
+        ['==', ts.SyntaxKind.EqualsEqualsToken],
+        ['===', ts.SyntaxKind.EqualsEqualsEqualsToken],
+        ['*', ts.SyntaxKind.AsteriskToken],
+        ['**', ts.SyntaxKind.AsteriskAsteriskToken],
+        ['/', ts.SyntaxKind.SlashToken],
+        ['%', ts.SyntaxKind.PercentToken],
+        ['!=', ts.SyntaxKind.ExclamationEqualsToken],
+        ['!==', ts.SyntaxKind.ExclamationEqualsEqualsToken],
+        ['||', ts.SyntaxKind.BarBarToken],
+        ['&&', ts.SyntaxKind.AmpersandAmpersandToken],
+        ['&', ts.SyntaxKind.AmpersandToken],
+        ['|', ts.SyntaxKind.BarToken],
+        ['??', ts.SyntaxKind.QuestionQuestionToken],
+        ['in', ts.SyntaxKind.InKeyword],
+        ['=', ts.SyntaxKind.EqualsToken],
+        ['+=', ts.SyntaxKind.PlusEqualsToken],
+        ['-=', ts.SyntaxKind.MinusEqualsToken],
+        ['*=', ts.SyntaxKind.AsteriskEqualsToken],
+        ['/=', ts.SyntaxKind.SlashEqualsToken],
+        ['%=', ts.SyntaxKind.PercentEqualsToken],
+        ['**=', ts.SyntaxKind.AsteriskAsteriskEqualsToken],
+        ['&&=', ts.SyntaxKind.AmpersandAmpersandEqualsToken],
+        ['||=', ts.SyntaxKind.BarBarEqualsToken],
+        ['??=', ts.SyntaxKind.QuestionQuestionEqualsToken],
+    ]);
     constructor(maybeResolve, config) {
         this.maybeResolve = maybeResolve;
         this.config = config;
@@ -44825,7 +44056,7 @@ class AstTranslator {
     }
     visitUnary(ast) {
         const expr = this.translate(ast.expr);
-        const op = UNARY_OPS.get(ast.operator);
+        const op = this.UNARY_OPS.get(ast.operator);
         if (op === undefined) {
             throw new Error(`Unsupported Unary.operator: ${ast.operator}`);
         }
@@ -44836,7 +44067,7 @@ class AstTranslator {
     visitBinary(ast) {
         const lhs = wrapForDiagnostics(this.translate(ast.left));
         const rhs = wrapForDiagnostics(this.translate(ast.right));
-        const op = BINARY_OPS.get(ast.operation);
+        const op = this.BINARY_OPS.get(ast.operation);
         if (op === undefined) {
             throw new Error(`Unsupported Binary.operation: ${ast.operation}`);
         }
@@ -44974,7 +44205,7 @@ class AstTranslator {
             // The type of this expression is (typeof a!.b) | undefined, which is exactly as desired.
             const expr = ts.factory.createPropertyAccessExpression(ts.factory.createNonNullExpression(receiver), ast.name);
             addParseSpanInfo(expr, ast.nameSpan);
-            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
+            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(getAnyExpression(), undefined, expr, undefined, this.UNDEFINED));
         }
         else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // Emulate a View Engine bug where 'any' is inferred for the left-hand side of the safe
@@ -45004,7 +44235,7 @@ class AstTranslator {
             // "a?.[...]" becomes (0 as any ? a![...] : undefined)
             const expr = ts.factory.createElementAccessExpression(ts.factory.createNonNullExpression(receiver), key);
             addParseSpanInfo(expr, ast.sourceSpan);
-            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, expr, undefined, UNDEFINED));
+            node = ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(getAnyExpression(), undefined, expr, undefined, this.UNDEFINED));
         }
         else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // "a?.[...]" becomes (a as any)[...]
@@ -45093,7 +44324,7 @@ class AstTranslator {
         if (this.config.strictSafeNavigationTypes) {
             // "a?.method(...)" becomes (0 as any ? a!.method(...) : undefined)
             const call = ts.factory.createCallExpression(ts.factory.createNonNullExpression(expr), undefined, args);
-            return ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(ANY_EXPRESSION, undefined, call, undefined, UNDEFINED));
+            return ts.factory.createParenthesizedExpression(ts.factory.createConditionalExpression(getAnyExpression(), undefined, call, undefined, this.UNDEFINED));
         }
         if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
             // "a?.method(...)" becomes (a as any).method(...)
@@ -45336,7 +44567,13 @@ class TcbOp {
      * circular references.
      */
     circularFallback() {
-        return INFER_TYPE_FOR_CIRCULAR_OP_EXPR;
+        // Value used to break a circular reference between `TcbOp`s.
+        //
+        // This value is returned whenever `TcbOp`s have a circular dependency. The
+        // expression is a non-null assertion of the null value (in TypeScript, the
+        // expression `null!`). This construction will infer the least narrow type
+        // for whatever it's assigned to.
+        return ts.factory.createNonNullExpression(ts.factory.createNull());
     }
 }
 /**
@@ -45789,7 +45026,7 @@ class TcbInvalidReferenceOp extends TcbOp {
     optional = true;
     execute() {
         const id = this.tcb.allocateId();
-        this.scope.addStatement(tsCreateVariable(id, ANY_EXPRESSION));
+        this.scope.addStatement(tsCreateVariable(id, getAnyExpression()));
         return id;
     }
 }
@@ -46772,14 +46009,6 @@ class TcbForOfOp extends TcbOp {
     }
 }
 /**
- * Value used to break a circular reference between `TcbOp`s.
- *
- * This value is returned whenever `TcbOp`s have a circular dependency. The expression is a non-null
- * assertion of the null value (in TypeScript, the expression `null!`). This construction will infer
- * the least narrow type for whatever it's assigned to.
- */
-const INFER_TYPE_FOR_CIRCULAR_OP_EXPR = ts.factory.createNonNullExpression(ts.factory.createNull());
-/**
  * Overall generation context for the type check block.
  *
  * `Context` handles operations during code generation which are global with respect to the whole
@@ -46900,16 +46129,18 @@ class Scope {
      */
     statements = [];
     /**
-     * Names of the for loop context variables and their types.
+     * Gets names of the for loop context variables and their types.
      */
-    static forLoopContextVariableTypes = new Map([
-        ['$first', ts.SyntaxKind.BooleanKeyword],
-        ['$last', ts.SyntaxKind.BooleanKeyword],
-        ['$even', ts.SyntaxKind.BooleanKeyword],
-        ['$odd', ts.SyntaxKind.BooleanKeyword],
-        ['$index', ts.SyntaxKind.NumberKeyword],
-        ['$count', ts.SyntaxKind.NumberKeyword],
-    ]);
+    static getForLoopContextVariableTypes() {
+        return new Map([
+            ['$first', ts.SyntaxKind.BooleanKeyword],
+            ['$last', ts.SyntaxKind.BooleanKeyword],
+            ['$even', ts.SyntaxKind.BooleanKeyword],
+            ['$odd', ts.SyntaxKind.BooleanKeyword],
+            ['$index', ts.SyntaxKind.NumberKeyword],
+            ['$count', ts.SyntaxKind.NumberKeyword],
+        ]);
+    }
     constructor(tcb, parent = null, guard = null) {
         this.tcb = tcb;
         this.parent = parent;
@@ -46961,11 +46192,12 @@ class Scope {
             const loopInitializer = tcb.allocateId();
             addParseSpanInfo(loopInitializer, scopedNode.item.sourceSpan);
             scope.varMap.set(scopedNode.item, loopInitializer);
+            const forLoopContextVariableTypes = Scope.getForLoopContextVariableTypes();
             for (const variable of scopedNode.contextVariables) {
-                if (!this.forLoopContextVariableTypes.has(variable.value)) {
+                if (!forLoopContextVariableTypes.has(variable.value)) {
                     throw new Error(`Unrecognized for loop context variable ${variable.name}`);
                 }
-                const type = ts.factory.createKeywordTypeNode(this.forLoopContextVariableTypes.get(variable.value));
+                const type = ts.factory.createKeywordTypeNode(forLoopContextVariableTypes.get(variable.value));
                 this.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
             }
         }
@@ -47707,7 +46939,7 @@ class TcbExpressionTranslator {
                 // No pipe by that name exists in scope. Record this as an error.
                 this.tcb.oobRecorder.missingPipe(this.tcb.id, ast, this.tcb.hostIsStandalone);
                 // Use an 'any' value to at least allow the rest of the expression to be checked.
-                pipe = ANY_EXPRESSION;
+                pipe = getAnyExpression();
             }
             else if (pipeMeta.isExplicitlyDeferred &&
                 this.tcb.boundTarget.getEagerlyUsedPipes().includes(ast.name)) {
@@ -47715,7 +46947,7 @@ class TcbExpressionTranslator {
                 // but was used outside of a `@defer` block, which is the error.
                 this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast);
                 // Use an 'any' value to at least allow the rest of the expression to be checked.
-                pipe = ANY_EXPRESSION;
+                pipe = getAnyExpression();
             }
             else {
                 // Use a variable declared as the pipe's type.
@@ -47806,7 +47038,7 @@ function tcbCallTypeCtor(dir, tcb, inputs) {
         else {
             // A type constructor is required to be called with all input properties, so any unset
             // inputs are simply assigned a value of type `any` to ignore them.
-            return ts.factory.createPropertyAssignment(propertyName, ANY_EXPRESSION);
+            return ts.factory.createPropertyAssignment(propertyName, getAnyExpression());
         }
     });
     // Call the `ngTypeCtor` method on the directive class, with an object literal argument created
@@ -50533,6 +49765,7 @@ exports.ImportManager = ImportManager;
 exports.Interpolation = Interpolation$1;
 exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
+exports.KnownFn = KnownFn;
 exports.LetDeclaration = LetDeclaration$1;
 exports.LiteralArrayExpr = LiteralArrayExpr;
 exports.LiteralExpr = LiteralExpr;
@@ -50565,6 +49798,7 @@ exports.Reference = Reference;
 exports.Reference$1 = Reference$1;
 exports.ReferenceEmitter = ReferenceEmitter;
 exports.RelativePathStrategy = RelativePathStrategy;
+exports.ResolvedModule = ResolvedModule;
 exports.ReturnStatement = ReturnStatement;
 exports.SafeCall = SafeCall;
 exports.SafeKeyedRead = SafeKeyedRead;
@@ -50572,8 +49806,6 @@ exports.SafePropertyRead = SafePropertyRead;
 exports.SelectorMatcher = SelectorMatcher;
 exports.SelectorlessMatcher = SelectorlessMatcher;
 exports.Serializer = Serializer;
-exports.StaticInterpreter = StaticInterpreter;
-exports.SyntheticValue = SyntheticValue;
 exports.Tag = Tag;
 exports.TagPlaceholder = TagPlaceholder;
 exports.Template = Template;
@@ -50662,6 +49894,7 @@ exports.isAliasImportDeclaration = isAliasImportDeclaration;
 exports.isAngularCore = isAngularCore;
 exports.isAngularCoreReferenceWithPotentialAliasing = isAngularCoreReferenceWithPotentialAliasing;
 exports.isAngularDecorator = isAngularDecorator;
+exports.isDeclaration = isDeclaration;
 exports.isDtsPath = isDtsPath;
 exports.isExpressionForwardReference = isExpressionForwardReference;
 exports.isFatalDiagnosticError = isFatalDiagnosticError;
@@ -50672,7 +49905,7 @@ exports.isNamedClassDeclaration = isNamedClassDeclaration;
 exports.isNonDeclarationTsPath = isNonDeclarationTsPath;
 exports.isShim = isShim;
 exports.join = join;
-exports.literal = literal$1;
+exports.literal = literal;
 exports.literalArr = literalArr;
 exports.literalMap = literalMap;
 exports.loadIsReferencedAliasDeclarationPatch = loadIsReferencedAliasDeclarationPatch;
