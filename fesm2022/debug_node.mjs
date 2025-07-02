@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.0+sha-728ad2e
+ * @license Angular v20.2.0-next.0+sha-8fbe558
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8017,8 +8017,7 @@ function enableApplyRootElementTransformImpl() {
  * object lookup) for performance reasons - the series of `if` checks seems to be the fastest way of
  * mapping property names. Do NOT change without benchmarking.
  *
- * Note: this mapping has to be kept in sync with the equally named mapping in the template
- * type-checking machinery of ngtsc.
+ * Note: this mapping has to be kept in sync with the equivalent mappings in the compiler.
  */
 function mapPropName(name) {
     if (name === 'class')
@@ -8044,6 +8043,10 @@ function setPropertyAndInputs(tNode, lView, propName, value, renderer, sanitizer
         ngDevMode && setNgReflectProperties(lView, tView, tNode, propName, value);
         return; // Stop propcessing if we've matched at least one input.
     }
+    // If the property is going to a DOM node, we have to remap it.
+    if (tNode.type & 3 /* TNodeType.AnyRNode */) {
+        propName = mapPropName(propName);
+    }
     setDomProperty(tNode, lView, propName, value, renderer, sanitizer);
 }
 /**
@@ -8058,7 +8061,6 @@ function setPropertyAndInputs(tNode, lView, propName, value, renderer, sanitizer
 function setDomProperty(tNode, lView, propName, value, renderer, sanitizer) {
     if (tNode.type & 3 /* TNodeType.AnyRNode */) {
         const element = getNativeByTNode(tNode, lView);
-        propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
             if (!isPropertyValid(element, propName, tNode.value, lView[TVIEW].schemas)) {
@@ -13476,7 +13478,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.0+sha-728ad2e']
+        ? ['ng-version', '20.2.0-next.0+sha-8fbe558']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
