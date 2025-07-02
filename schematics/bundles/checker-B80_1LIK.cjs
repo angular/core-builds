@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-rc.0+sha-126204b
+ * @license Angular v20.1.0-rc.0+sha-56769de
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23489,6 +23489,18 @@ const GLOBAL_TARGET_RESOLVERS = new Map([
     ['body', Identifiers.resolveBody],
 ]);
 /**
+ * DOM properties that need to be remapped on the compiler side.
+ * Note: this mapping has to be kept in sync with the equally named mapping in the runtime.
+ */
+const DOM_PROPERTY_REMAPPING = new Map([
+    ['class', 'className'],
+    ['for', 'htmlFor'],
+    ['formaction', 'formAction'],
+    ['innerHtml', 'innerHTML'],
+    ['readonly', 'readOnly'],
+    ['tabindex', 'tabIndex'],
+]);
+/**
  * Compiles semantic operations across all views and generates output `o.Statement`s with actual
  * runtime calls in their place.
  *
@@ -23760,7 +23772,7 @@ function reifyUpdateOperations(unit, ops) {
                 break;
             case OpKind.Property:
                 OpList.replace(op, unit.job.mode === TemplateCompilationMode.DomOnly && !op.isLegacyAnimationTrigger
-                    ? domProperty(op.name, op.expression, op.sanitizer, op.sourceSpan)
+                    ? domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan)
                     : property(op.name, op.expression, op.sanitizer, op.sourceSpan));
                 break;
             case OpKind.TwoWayProperty:
@@ -23799,7 +23811,7 @@ function reifyUpdateOperations(unit, ops) {
                         OpList.replace(op, syntheticHostProperty(op.name, op.expression, op.sourceSpan));
                     }
                     else {
-                        OpList.replace(op, domProperty(op.name, op.expression, op.sanitizer, op.sourceSpan));
+                        OpList.replace(op, domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan));
                     }
                 }
                 break;
@@ -32204,7 +32216,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0-rc.0+sha-126204b');
+new Version('20.1.0-rc.0+sha-56769de');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33224,7 +33236,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CwuJOWZI.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B80_1LIK.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
