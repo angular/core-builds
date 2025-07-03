@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0-rc.0+sha-f5f80d8
+ * @license Angular v20.1.0-rc.0+sha-fca058a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,6 +14,7 @@ var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-CcfUr8Z5.cjs');
 require('path');
+var path = require('node:path');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function _interopNamespaceDefault(e) {
@@ -35,6 +36,7 @@ function _interopNamespaceDefault(e) {
 
 var posixPath__namespace = /*#__PURE__*/_interopNamespaceDefault(posixPath);
 var os__namespace = /*#__PURE__*/_interopNamespaceDefault(os);
+var path__namespace = /*#__PURE__*/_interopNamespaceDefault(path);
 
 /// <reference types="node" />
 class NgtscCompilerHost {
@@ -441,6 +443,10 @@ async function synchronouslyCombineUnitData(migration, unitDatas) {
     return combined;
 }
 
+/** Whether we are executing inside Google */
+function isGoogle3() {
+    return process.env['GOOGLE3_TSURGE'] === '1';
+}
 /**
  * By default, Tsurge will always create an Angular compiler program
  * for projects analyzed and migrated. This works perfectly fine in
@@ -522,6 +528,29 @@ function parseTsconfigOrDie(absoluteTsconfigPath, fs) {
     return tsconfig;
 }
 
+// Note: Try to keep mostly in sync with
+// //depot/google3/javascript/angular2/tools/ngc_wrapped/tsc_plugin.ts
+// TODO: Consider moving this logic into the 1P launcher.
+const EXT = /(\.ts|\.d\.ts|\.js|\.jsx|\.tsx)$/;
+function fileNameToModuleNameFactory(rootDirs, workspaceName) {
+    return (importedFilePath) => {
+        let relativePath = '';
+        for (const rootDir of rootDirs) {
+            const rel = path__namespace.posix.relative(rootDir, importedFilePath);
+            if (!rel.startsWith('.')) {
+                relativePath = rel;
+                break;
+            }
+        }
+        if (relativePath) {
+            return `${workspaceName}/${relativePath.replace(EXT, '')}`;
+        }
+        else {
+            return importedFilePath.replace(EXT, '');
+        }
+    };
+}
+
 /** Creates the base program info for the given tsconfig path. */
 function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
     // Make sure the FS becomes globally available. Some code paths
@@ -535,6 +564,13 @@ function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
     if (google3UsePlainTsProgramIfNoKnownAngularOption() &&
         tsconfig.options['_useHostForImportGeneration'] === undefined) {
         return createPlainTsProgram(tsHost, tsconfig, optionOverrides);
+    }
+    // The Angular program may try to emit references during analysis or migration.
+    // To replicate the Google3 import emission here, ensure the unified module resolution
+    // can be enabled by the compiler.
+    if (isGoogle3() && tsconfig.options.rootDirs) {
+        tsHost.fileNameToModuleName = fileNameToModuleNameFactory(tsconfig.options.rootDirs, 
+        /* workspaceName*/ 'google3');
     }
     return createNgtscProgram(tsHost, tsconfig, optionOverrides);
 }
