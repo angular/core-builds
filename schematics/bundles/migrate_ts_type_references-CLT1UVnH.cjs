@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-aad1e74
+ * @license Angular v20.2.0-next.0+sha-902121e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,11 +10,12 @@ var checker = require('./checker-CcfUr8Z5.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-CTxZ_Pwk.cjs');
-var project_paths = require('./project_paths-CxPcwvuL.cjs');
+var index = require('./index-DS9uJdkv.cjs');
+var project_paths = require('./project_paths-CEWUahIp.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
 require('./index-BVYLKwQE.cjs');
 require('path');
+require('node:path');
 
 /**
  * Reasons why a field cannot be migrated.
