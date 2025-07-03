@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-902121e
+ * @license Angular v20.2.0-next.0+sha-5c54cb8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-902121e'));
+    definitionMap.set('version', checker.literal('20.2.0-next.0+sha-5c54cb8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12321,7 +12321,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('20.2.0-next.0+sha-902121e');
+new checker.Version('20.2.0-next.0+sha-5c54cb8');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -14228,10 +14228,17 @@ function extractLiteralPropertiesAsEnumMembers(declaration) {
 
 /** Extracts an API documentation entry for an Angular decorator. */
 function extractorDecorator(declaration, typeChecker) {
-    const documentedNode = getDecoratorJsDocNode(declaration);
+    const documentedNode = getDecoratorJsDocNode(declaration, typeChecker);
     const decoratorType = getDecoratorType(declaration);
     if (!decoratorType) {
         throw new Error(`"${declaration.name.getText()} is not a decorator."`);
+    }
+    const members = getDecoratorProperties(declaration, typeChecker);
+    let signatures = [];
+    if (!members) {
+        const decoratorInterface = getDecoratorDeclaration(declaration, typeChecker);
+        const callSignatures = decoratorInterface.members.filter(ts.isCallSignatureDeclaration);
+        signatures = getDecoratorSignatures(callSignatures, typeChecker);
     }
     return {
         name: declaration.name.getText(),
@@ -14240,7 +14247,8 @@ function extractorDecorator(declaration, typeChecker) {
         rawComment: extractRawJsDoc(documentedNode),
         description: extractJsDocDescription(documentedNode),
         jsdocTags: extractJsDocTags(documentedNode),
-        members: getDecoratorOptions(declaration, typeChecker),
+        members,
+        signatures,
     };
 }
 /** Gets whether the given variable declaration is an Angular decorator declaration. */
@@ -14267,35 +14275,77 @@ function getDecoratorType(declaration) {
         return DecoratorType.Parameter;
     return undefined;
 }
-/** Gets the doc entry for the options object for an Angular decorator */
-function getDecoratorOptions(declaration, typeChecker) {
-    const name = declaration.name.getText();
-    // Every decorator has an interface with its options in the same SourceFile.
-    // Queries, however, are defined as a type alias pointing to an interface.
-    const optionsDeclaration = declaration.getSourceFile().statements.find((node) => {
-        return ((ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) &&
-            node.name.getText() === name);
-    });
-    if (!optionsDeclaration) {
-        throw new Error(`Decorator "${name}" has no corresponding options interface.`);
+function getDecoratorDeclaration(declaration, typeChecker) {
+    const decoratorName = declaration.name.getText();
+    const decoratorDeclaration = declaration;
+    const decoratorType = typeChecker.getTypeAtLocation(decoratorDeclaration);
+    const aliasDeclaration = decoratorType.getSymbol().getDeclarations()[0];
+    const decoratorInterface = aliasDeclaration;
+    if (!decoratorInterface || !ts.isInterfaceDeclaration(decoratorInterface)) {
+        throw new Error(`No decorator interface found for "${decoratorName}".`);
     }
-    let optionsInterface;
-    if (ts.isTypeAliasDeclaration(optionsDeclaration)) {
-        // We hard-code the assumption that if the decorator's option type is a type alias,
-        // it resolves to a single interface (this is true for all query decorators at time of
-        // this writing).
-        const aliasedType = typeChecker.getTypeAtLocation(optionsDeclaration.type);
-        optionsInterface = (aliasedType.getSymbol()?.getDeclarations() ?? []).find((d) => ts.isInterfaceDeclaration(d));
+    return decoratorInterface;
+}
+/**
+ * @returns Interface properties for decorators that are akin to interfaces eg. @Component
+ * else return null for decorators that are akin to functions eg. @Inject
+ */
+function getDecoratorProperties(declaration, typeChecker) {
+    // Some decorators like Component, Directive are basically interchangeable with a interface declaration.
+    // We want to acount for that and treat them a such.
+    // To determine which type of decorator we have, we check the type of the first parameter of its call signature
+    const decoratorCallSig = getDecoratorJsDocNode(declaration, typeChecker);
+    const decoratorFirstParam = decoratorCallSig.parameters[0];
+    const firstParamType = typeChecker.getTypeAtLocation(decoratorFirstParam);
+    let firstParamTypeDecl;
+    if (firstParamType.isUnion()) {
+        // If the first param is a union, we need to get the first type
+        // This happens for example when the decorator param is optional (eg @Directive())
+        const firstParamTypeUnion = firstParamType.types.find((t) => (t.flags & ts.TypeFlags.Undefined) === 0);
+        firstParamTypeDecl = firstParamTypeUnion?.getSymbol()?.getDeclarations()[0];
     }
     else {
-        optionsInterface = optionsDeclaration;
+        firstParamTypeDecl = firstParamType.getSymbol()?.getDeclarations()[0];
     }
-    if (!optionsInterface || !ts.isInterfaceDeclaration(optionsInterface)) {
-        throw new Error(`Options for decorator "${name}" is not an interface.`);
+    if (!firstParamTypeDecl || !ts.isInterfaceDeclaration(firstParamTypeDecl)) {
+        // At this point we either have on first param, eg for decorators without parameters
+        // or we have a decorator that isn't akin to an interface
+        // We will threat them as functions (in another function) and return null here
+        return null;
     }
-    // Take advantage of the interface extractor to pull the appropriate member info.
-    // Hard code the knowledge that decorator options only have properties, never methods.
-    return extractInterface(optionsInterface, typeChecker).members;
+    const interfaceDeclaration = firstParamTypeDecl;
+    return extractInterface(interfaceDeclaration, typeChecker).members;
+}
+function getDecoratorSignatures(callSignatures, typeChecker) {
+    return callSignatures.map((signatureDecl) => {
+        return {
+            parameters: extractParams(signatureDecl.parameters, typeChecker),
+            jsdocTags: extractJsDocTags(signatureDecl),
+        };
+    });
+}
+function extractParams(params, typeChecker) {
+    return params.map((param) => ({
+        name: param.name.getText(),
+        description: extractJsDocDescription(param),
+        type: getParamTypeString(param, typeChecker),
+        isOptional: !!(param.questionToken || param.initializer),
+        isRestParam: !!param.dotDotDotToken,
+    }));
+}
+/**
+ * Find the the interface usually suffixed with "Decorator" that describes the decorator.
+ */
+function getDecoratorInterface(declaration, typeChecker) {
+    const name = declaration.name.getText();
+    const symbol = typeChecker.getSymbolAtLocation(declaration.name);
+    const decoratorType = typeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+    // This is the interface xxxxDecorator
+    const decoratorInterface = decoratorType.getSymbol()?.getDeclarations()[0];
+    if (!decoratorInterface || !ts.isInterfaceDeclaration(decoratorInterface)) {
+        throw new Error(`No decorator interface found for "${name}".`);
+    }
+    return decoratorInterface;
 }
 /**
  * Gets the call signature node that has the decorator's public JsDoc block.
@@ -14307,25 +14357,67 @@ function getDecoratorOptions(declaration, typeChecker) {
  *
  * For the description and JsDoc tags, we need the interface suffixed with "Decorator".
  */
-function getDecoratorJsDocNode(declaration) {
+function getDecoratorJsDocNode(declaration, typeChecker) {
     const name = declaration.name.getText();
-    // Assume the existence of an interface in the same file with the same name
-    // suffixed with "Decorator".
-    const decoratorInterface = declaration.getSourceFile().statements.find((s) => {
-        return ts.isInterfaceDeclaration(s) && s.name.getText() === `${name}Decorator`;
-    });
-    if (!decoratorInterface || !ts.isInterfaceDeclaration(decoratorInterface)) {
-        throw new Error(`No interface "${name}Decorator" found.`);
-    }
+    const decoratorInterface = getDecoratorInterface(declaration, typeChecker);
     // The public-facing JsDoc for each decorator is on one of its interface's call signatures.
-    const callSignature = decoratorInterface.members.find((node) => {
+    const callSignature = decoratorInterface.members
+        .filter((node) => {
         // The description block lives on one of the call signatures for this interface.
         return ts.isCallSignatureDeclaration(node) && extractRawJsDoc(node);
-    });
+    })
+        .at(-1); // Get the last one, as it is the most complete
     if (!callSignature || !ts.isCallSignatureDeclaration(callSignature)) {
         throw new Error(`No call signature with JsDoc on "${name}Decorator"`);
     }
     return callSignature;
+}
+/**
+ * Advanced function to generate the type string (as single line) for a parameter.
+ * Interfaces in unions are expanded.
+ */
+function getParamTypeString(paramNode, typeChecker) {
+    const type = typeChecker.getTypeAtLocation(paramNode);
+    const printer = ts.createPrinter({ removeComments: true });
+    const sourceFile = paramNode.getSourceFile();
+    const replace = [];
+    if (type.isUnion()) {
+        // The parameter can be a union, this includes optional parameters whiceh are a union of the type and undefined.
+        for (const subType of type.types) {
+            const decl = subType.getSymbol()?.getDeclarations()?.[0];
+            // We only care to expand interfaces
+            if (decl && ts.isInterfaceDeclaration(decl) && decl.name.text !== 'Function') {
+                // the Function type is actually an interface but we don't want to expand it
+                replace.push({
+                    initial: subType.symbol.name,
+                    replacedWith: expandType(decl, sourceFile, printer),
+                });
+            }
+        }
+    }
+    // Using a print here instead of typeToString as it doesn't return optional props as a union of undefined
+    let result = printer
+        .printNode(ts.EmitHint.Unspecified, paramNode, sourceFile)
+        // Removing the parameter name, the conditional question mark and the colon (e.g. opts?: {foo: string})
+        .replace(new RegExp(`${paramNode.name.getText()}\\??\: `), '')
+        // Remove extra spaces/line breaks
+        .replaceAll(/\s+/g, ' ');
+    // Replace the types we expanded
+    for (const { initial, replacedWith } of replace) {
+        result = result.replace(initial, replacedWith);
+    }
+    return result;
+}
+/**
+ * @return a given interface declaration as single line string
+ */
+function expandType(decl, sourceFile, printer) {
+    const props = decl.members
+        // printer will return each member with a semicolon at the end
+        .map((member) => printer.printNode(ts.EmitHint.Unspecified, member, sourceFile))
+        .join(' ')
+        .replaceAll(/\s+/g, ' '); // Remove extra spaces/line breaks
+    return `{${props}}`;
 }
 
 /** Extracts documentation entry for an enum. */
@@ -20186,7 +20278,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.2.0-next.0+sha-902121e` usually means that core is at head so it supports
+    // A version of `20.2.0-next.0+sha-5c54cb8` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
