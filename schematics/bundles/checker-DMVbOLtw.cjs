@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-bd6d043
+ * @license Angular v20.2.0-next.0+sha-c6a720b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32217,7 +32217,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.0+sha-bd6d043');
+new Version('20.2.0-next.0+sha-c6a720b');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33237,7 +33237,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DvrG0jhZ.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DMVbOLtw.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -40525,6 +40525,19 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
                 relatedInformation,
             };
         }
+        let typeForMessage;
+        if (category === ts.DiagnosticCategory.Warning) {
+            typeForMessage = 'Warning';
+        }
+        else if (category === ts.DiagnosticCategory.Suggestion) {
+            typeForMessage = 'Suggestion';
+        }
+        else if (category === ts.DiagnosticCategory.Message) {
+            typeForMessage = 'Message';
+        }
+        else {
+            typeForMessage = 'Error';
+        }
         relatedInformation.push({
             category: ts.DiagnosticCategory.Message,
             code: 0,
@@ -40533,7 +40546,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
             // and getEnd() are used because they don't include surrounding whitespace.
             start: mapping.node.getStart(),
             length: mapping.node.getEnd() - mapping.node.getStart(),
-            messageText: `Error occurs in the template of component ${componentName}.`,
+            messageText: `${typeForMessage} occurs in the template of component ${componentName}.`,
         });
         return {
             source: 'ngtsc',
