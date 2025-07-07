@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0-rc.0+sha-98ecf80
+ * @license Angular v20.1.0-rc.0+sha-fec1206
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.1.0-rc.0+sha-98ecf80');
+const VERSION = new Version('20.1.0-rc.0+sha-fec1206');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -3908,7 +3908,7 @@ function startMeasuring(label) {
 }
 /**
  * Function that will stop measuring against the performance API
- * Should be used in pair with stopMeasuring
+ * Should be used in pair with startMeasuring
  */
 function stopMeasuring(label) {
     if (!enablePerfLogging) {
