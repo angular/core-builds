@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-f85c727
+ * @license Angular v20.2.0-next.0+sha-bd6d043
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10445,7 +10445,7 @@ class OpList {
         oldOp.next = null;
         let prev = oldPrev;
         for (const newOp of newOps) {
-            this.assertIsUnowned(newOp);
+            OpList.assertIsUnowned(newOp);
             newOp.debugListId = listId;
             prev.next = newOp;
             newOp.prev = prev;
@@ -10486,7 +10486,7 @@ class OpList {
     static insertBefore(op, target) {
         if (Array.isArray(op)) {
             for (const o of op) {
-                this.insertBefore(o, target);
+                OpList.insertBefore(o, target);
             }
             return;
         }
@@ -32217,7 +32217,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.0+sha-f85c727');
+new Version('20.2.0-next.0+sha-bd6d043');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33237,7 +33237,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CcfUr8Z5.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DvrG0jhZ.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -46177,13 +46177,13 @@ class Scope {
                     const firstDecl = varMap.get(v.name);
                     tcb.oobRecorder.duplicateTemplateVar(tcb.id, v, firstDecl);
                 }
-                this.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, scopedNode, v));
+                Scope.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, scopedNode, v));
             }
         }
         else if (scopedNode instanceof IfBlockBranch) {
             const { expression, expressionAlias } = scopedNode;
             if (expression !== null && expressionAlias !== null) {
-                this.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
+                Scope.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
             }
         }
         else if (scopedNode instanceof ForLoopBlock) {
@@ -46198,7 +46198,7 @@ class Scope {
                     throw new Error(`Unrecognized for loop context variable ${variable.name}`);
                 }
                 const type = ts.factory.createKeywordTypeNode(forLoopContextVariableTypes.get(variable.value));
-                this.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
+                Scope.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
             }
         }
         else if (scopedNode instanceof HostElement) {
