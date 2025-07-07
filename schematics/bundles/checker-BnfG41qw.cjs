@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.6+sha-434508f
+ * @license Angular v20.0.6+sha-5fca07c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10590,7 +10590,7 @@ class OpList {
         oldOp.next = null;
         let prev = oldPrev;
         for (const newOp of newOps) {
-            this.assertIsUnowned(newOp);
+            OpList.assertIsUnowned(newOp);
             newOp.debugListId = listId;
             prev.next = newOp;
             newOp.prev = prev;
@@ -10631,7 +10631,7 @@ class OpList {
     static insertBefore(op, target) {
         if (Array.isArray(op)) {
             for (const o of op) {
-                this.insertBefore(o, target);
+                OpList.insertBefore(o, target);
             }
             return;
         }
@@ -32166,7 +32166,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.6+sha-434508f');
+new Version('20.0.6+sha-5fca07c');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33182,7 +33182,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-a0VNmSrQ.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BnfG41qw.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -46860,13 +46860,13 @@ class Scope {
                     const firstDecl = varMap.get(v.name);
                     tcb.oobRecorder.duplicateTemplateVar(tcb.id, v, firstDecl);
                 }
-                this.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, scopedNode, v));
+                Scope.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, scopedNode, v));
             }
         }
         else if (scopedNode instanceof IfBlockBranch) {
             const { expression, expressionAlias } = scopedNode;
             if (expression !== null && expressionAlias !== null) {
-                this.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
+                Scope.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
             }
         }
         else if (scopedNode instanceof ForLoopBlock) {
@@ -46880,7 +46880,7 @@ class Scope {
                     throw new Error(`Unrecognized for loop context variable ${variable.name}`);
                 }
                 const type = ts.factory.createKeywordTypeNode(this.forLoopContextVariableTypes.get(variable.value));
-                this.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
+                Scope.registerVariable(scope, variable, new TcbBlockImplicitVariableOp(tcb, scope, type, variable));
             }
         }
         else if (scopedNode instanceof HostElement) {
