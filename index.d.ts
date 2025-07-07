@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.0+sha-633d01b
+ * @license Angular v20.2.0-next.0+sha-65b9adf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5562,7 +5562,7 @@ declare const PERFORMANCE_MARK_PREFIX = "\uD83C\uDD70\uFE0F";
 declare function startMeasuring<T>(label: string): void;
 /**
  * Function that will stop measuring against the performance API
- * Should be used in pair with stopMeasuring
+ * Should be used in pair with startMeasuring
  */
 declare function stopMeasuring(label: string): void;
 /**
