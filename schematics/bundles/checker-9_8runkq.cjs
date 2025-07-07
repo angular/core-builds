@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-c6a720b
+ * @license Angular v20.2.0-next.0+sha-633d01b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6499,7 +6499,7 @@ var ParseErrorLevel;
     ParseErrorLevel[ParseErrorLevel["WARNING"] = 0] = "WARNING";
     ParseErrorLevel[ParseErrorLevel["ERROR"] = 1] = "ERROR";
 })(ParseErrorLevel || (ParseErrorLevel = {}));
-class ParseError {
+class ParseError extends Error {
     span;
     msg;
     level;
@@ -6516,10 +6516,15 @@ class ParseError {
      * couldn't be parsed. Not guaranteed to be defined, but can be used to provide more context.
      */
     relatedError) {
+        super(msg);
         this.span = span;
         this.msg = msg;
         this.level = level;
         this.relatedError = relatedError;
+        // Extending `Error` ends up breaking some internal tests. This appears to be a known issue
+        // when extending errors in TS and the workaround is to explicitly set the prototype.
+        // https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+        Object.setPrototypeOf(this, new.target.prototype);
     }
     contextualMessage() {
         const ctx = this.span.start.getContext(100, 3);
@@ -16985,12 +16990,16 @@ class EscapedCharacterCursor extends PlainCharacterCursor {
         }
     }
 }
-class CursorError {
+class CursorError extends Error {
     msg;
     cursor;
     constructor(msg, cursor) {
+        super(msg);
         this.msg = msg;
         this.cursor = cursor;
+        // Extending `Error` does not always work when code is transpiled. See:
+        // https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -17977,9 +17986,11 @@ class Token {
         return this.type === TokenType.Number ? this.numValue : -1;
     }
     isTemplateLiteralPart() {
+        // Note: Explicit type is needed for Closure.
         return this.isString() && this.kind === StringTokenKind.TemplateLiteralPart;
     }
     isTemplateLiteralEnd() {
+        // Note: Explicit type is needed for Closure.
         return this.isString() && this.kind === StringTokenKind.TemplateLiteralEnd;
     }
     isTemplateLiteralInterpolationStart() {
@@ -32217,7 +32228,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.0+sha-c6a720b');
+new Version('20.2.0-next.0+sha-633d01b');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33237,7 +33248,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DMVbOLtw.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-9_8runkq.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
