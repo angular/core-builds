@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.0.6+sha-403ba91
+ * @license Angular v20.0.6+sha-ce958e0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32177,7 +32177,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.0.6+sha-403ba91');
+new Version('20.0.6+sha-ce958e0');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33193,7 +33193,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DSKwmoIQ.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-BmKImR-Z.cjs', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -37723,10 +37723,14 @@ function createGenerateUniqueIdentifierHelper() {
     const markIdentifierAsGenerated = (sf, identifierName) => generatedIdentifiers.add(`${sf.fileName}@@${identifierName}`);
     return (sourceFile, symbolName) => {
         const sf = sourceFile;
-        if (sf.identifiers === undefined) {
+        // NOTE: Typically accesses to TS fields are not renamed because the 1P externs
+        // produced from TypeScript are ensuring public fields are considered "external".
+        // See: https://developers.google.com/closure/compiler/docs/externs-and-exports.
+        // This property is internal, so not part of the externs— so we need be cautious
+        if (sf['identifiers'] === undefined) {
             throw new Error('Source file unexpectedly lacks map of parsed `identifiers`.');
         }
-        const isUniqueIdentifier = (name) => !sf.identifiers.has(name) && !isGeneratedIdentifier(sf, name);
+        const isUniqueIdentifier = (name) => !sf['identifiers'].has(name) && !isGeneratedIdentifier(sf, name);
         if (isUniqueIdentifier(symbolName)) {
             markIdentifierAsGenerated(sf, symbolName);
             return null;
