@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.2.0-next.0+sha-efc2a41
+ * @license Angular v20.2.0-next.0+sha-96014b5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, throwCyclicDependencyError, stringifyForError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -989,6 +989,7 @@ const NO_PARENT_INJECTOR = -1;
  */
 class NodeInjectorFactory {
     factory;
+    name;
     /**
      * The inject implementation to be activated when using the factory.
      */
@@ -1071,8 +1072,11 @@ class NodeInjectorFactory {
     /**
      * Set to `true` if the token is declared in `viewProviders` (or if it is component).
      */
-    isViewProvider, injectImplementation) {
+    isViewProvider, injectImplementation, 
+    // Expect `null` in devmode
+    name) {
         this.factory = factory;
+        this.name = name;
         ngDevMode && assertDefined(factory, 'Factory not specified');
         ngDevMode && assertEqual(typeof factory, 'function', 'Expected factory function.');
         this.canSeeViewProviders = isViewProvider;
@@ -1937,6 +1941,10 @@ function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, 
     return null;
 }
 /**
+ * Used in ngDevMode to keep the injection path in case of cycles in DI.
+ */
+let injectionPath = [];
+/**
  * Retrieve or instantiate the injectable from the `LView` at particular `index`.
  *
  * This function checks to see if the value has already been instantiated and if so returns the
@@ -1948,8 +1956,15 @@ function getNodeInjectable(lView, tView, index, tNode, flags) {
     const tData = tView.data;
     if (value instanceof NodeInjectorFactory) {
         const factory = value;
+        ngDevMode && injectionPath.push(factory.name ?? 'unknown');
         if (factory.resolving) {
-            throwCyclicDependencyError(stringifyForError(tData[index]));
+            const token = stringifyForError(tData[index]);
+            if (ngDevMode) {
+                throw cyclicDependencyErrorWithDetails(token, injectionPath);
+            }
+            else {
+                throw cyclicDependencyError(token);
+            }
         }
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
@@ -1991,6 +2006,7 @@ function getNodeInjectable(lView, tView, index, tNode, flags) {
             setIncludeViewProviders(previousIncludeViewProviders);
             factory.resolving = false;
             leaveDI();
+            ngDevMode && (injectionPath = []);
         }
     }
     return value;
@@ -12640,7 +12656,7 @@ function configureViewWithDirective(tView, tNode, lView, directiveIndex, def) {
     // Even though `directiveFactory` will already be using `ɵɵdirectiveInject` in its generated code,
     // we also want to support `inject()` directly from the directive constructor context so we set
     // `ɵɵdirectiveInject` as the inject implementation here too.
-    const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), ɵɵdirectiveInject);
+    const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), ɵɵdirectiveInject, ngDevMode ? def.type.name : null);
     tView.blueprint[directiveIndex] = nodeInjectorFactory;
     lView[directiveIndex] = nodeInjectorFactory;
     registerHostBindingOpCodes(tView, tNode, directiveIndex, allocExpando(tView, lView, def.hostVars, NO_CHANGE), def);
@@ -13478,7 +13494,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.0+sha-efc2a41']
+        ? ['ng-version', '20.2.0-next.0+sha-96014b5']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -27232,8 +27248,7 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
         const endIndex = tNode.directiveStart;
         const cptViewProvidersCount = tNode.providerIndexes >> 20 /* TNodeProviderIndexes.CptViewProvidersCountShift */;
         if (isTypeProvider(provider) || !provider.multi) {
-            // Single provider case: the factory is created and pushed immediately
-            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
+            const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject, ngDevMode ? providerName(provider) : null);
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
             if (existingFactoryIndex === -1) {
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
@@ -27282,7 +27297,7 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
                 (!isViewProvider && !doesProvidersFactoryExist)) {
                 // Cases 1.a and 2.a
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
-                const factory = multiFactory(isViewProvider ? multiViewProvidersFactoryResolver : multiProvidersFactoryResolver, lInjectablesBlueprint.length, isViewProvider, isComponent, providerFactory);
+                const factory = multiFactory(isViewProvider ? multiViewProvidersFactoryResolver : multiProvidersFactoryResolver, lInjectablesBlueprint.length, isViewProvider, isComponent, providerFactory, provider);
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
                     lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
                 }
@@ -27410,13 +27425,36 @@ function multiResolve(factories, result) {
 /**
  * Creates a multi factory.
  */
-function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
-    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, ɵɵdirectiveInject);
+function multiFactory(factoryFn, index, isViewProvider, isComponent, f, provider) {
+    const factory = new NodeInjectorFactory(factoryFn, isViewProvider, ɵɵdirectiveInject, ngDevMode ? providerName(provider) : null);
     factory.multi = [];
     factory.index = index;
     factory.componentProviders = 0;
     multiFactoryAdd(factory, f, isComponent && !isViewProvider);
     return factory;
+}
+function providerName(provider) {
+    if (Array.isArray(provider)) {
+        return null;
+    }
+    if (isTypeProvider(provider)) {
+        return provider.name;
+    }
+    else if (isClassProvider(provider)) {
+        if (provider.provide instanceof InjectionToken) {
+            return `('${provider.provide.toString()}':${provider.useClass.name})`;
+        }
+        return provider.useClass.name;
+    }
+    else if (provider.provide instanceof InjectionToken) {
+        return provider.provide.toString();
+    }
+    else if (typeof provider.provide === 'string') {
+        return provider.provide;
+    }
+    else {
+        return null;
+    }
 }
 
 /**
