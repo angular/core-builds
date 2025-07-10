@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0+sha-66a85ab
+ * @license Angular v20.1.0+sha-6549418
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, a
 import { getOutputDestroyRef, effect, untracked, computed, resource, encapsulateResourceError } from './resource.mjs';
 import './not_found.mjs';
 import './signal.mjs';
-import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
+import '@angular/core/primitives/di';
 import './untracked.mjs';
 
 /**

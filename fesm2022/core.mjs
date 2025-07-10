@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0+sha-66a85ab
+ * @license Angular v20.1.0+sha-6549418
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,8 +15,8 @@ export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './weak_ref
 export { setCurrentInjector as ɵsetCurrentInjector } from './not_found.mjs';
 import { clearAppScopedEarlyEventContract, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, EventPhase, getAppScopedQueuedEventInfos, isEarlyEventType, isCaptureEventType } from './primitives/event-dispatch.mjs';
 import 'rxjs';
-import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
+import '@angular/core/primitives/di';
 import 'rxjs/operators';
 import './attribute.mjs';
 import './untracked.mjs';
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.1.0+sha-66a85ab');
+const VERSION = new Version('20.1.0+sha-6549418');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.0+sha-66a85ab
+ * @license Angular v20.1.0+sha-6549418
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,8 +7,8 @@
 import { isNotFound, getCurrentInjector, setCurrentInjector } from './not_found.mjs';
 import { getActiveConsumer, SIGNAL, createSignal } from './signal.mjs';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { NotFoundError, isNotFound as isNotFound$1 } from '@angular/core/primitives/di';
 import { setActiveConsumer } from '@angular/core/primitives/signals';
+import { isNotFound as isNotFound$1 } from '@angular/core/primitives/di';
 
 /**
  * Base URL for the error details page.
@@ -807,11 +807,17 @@ function stringifyTypeFromDebugInfo(debugInfo) {
     }
 }
 
-/** Called when directives inject each other (creating a circular dependency) */
-function throwCyclicDependencyError(token, path) {
-    throw new RuntimeError(-200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, ngDevMode
-        ? `Circular dependency in DI detected for ${token}${path ? `. Dependency path: ${path.join(' > ')} > ${token}` : ''}`
-        : token);
+const NG_RUNTIME_ERROR_CODE = getClosureSafeProperty({ 'ngErrorCode': getClosureSafeProperty });
+const NG_RUNTIME_ERROR_MESSAGE = getClosureSafeProperty({ 'ngErrorMessage': getClosureSafeProperty });
+const NG_TOKEN_PATH = getClosureSafeProperty({ 'ngTokenPath': getClosureSafeProperty });
+/** Creates a circular dependency runtime error. */
+function cyclicDependencyError(token, path) {
+    const message = ngDevMode ? `Circular dependency detected for \`${token}\`.` : '';
+    return createRuntimeError(message, -200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, path);
+}
+/** Creates a circular dependency runtime error including a dependency path in the error message. */
+function cyclicDependencyErrorWithDetails(token, path) {
+    return augmentRuntimeError(cyclicDependencyError(token, path), null);
 }
 function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
@@ -838,6 +844,78 @@ function throwProviderNotFoundError(token, injectorName) {
     const errorMessage = ngDevMode &&
         `No provider for ${stringifyForError(token)} found${injectorName ? ` in ${injectorName}` : ''}`;
     throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, errorMessage);
+}
+/**
+ * Given an Error instance and the current token - update the monkey-patched
+ * dependency path info to include that token.
+ *
+ * @param error Current instance of the Error class.
+ * @param token Extra token that should be appended.
+ */
+function prependTokenToDependencyPath(error, token) {
+    error[NG_TOKEN_PATH] ??= [];
+    // Append current token to the current token path. Since the error
+    // is bubbling up, add the token in front of other tokens.
+    const currentPath = error[NG_TOKEN_PATH];
+    // Do not append the same token multiple times.
+    let pathStr;
+    if (typeof token === 'object' && 'multi' in token && token?.multi === true) {
+        assertDefined(token.provide, 'Token with multi: true should have a provide property');
+        pathStr = stringifyForError(token.provide);
+    }
+    else {
+        pathStr = stringifyForError(token);
+    }
+    if (currentPath[0] !== pathStr) {
+        error[NG_TOKEN_PATH].unshift(pathStr);
+    }
+}
+/**
+ * Modifies an Error instance with an updated error message
+ * based on the accumulated dependency path.
+ *
+ * @param error Current instance of the Error class.
+ * @param source Extra info about the injector which started
+ *    the resolution process, which eventually failed.
+ */
+function augmentRuntimeError(error, source) {
+    const tokenPath = error[NG_TOKEN_PATH];
+    const errorCode = error[NG_RUNTIME_ERROR_CODE];
+    const message = error[NG_RUNTIME_ERROR_MESSAGE] || error.message;
+    error.message = formatErrorMessage(message, errorCode, tokenPath, source);
+    return error;
+}
+/**
+ * Creates an initial RuntimeError instance when a problem is detected.
+ * Monkey-patches extra info in the RuntimeError instance, so that it can
+ * be reused later, before throwing the final error.
+ */
+function createRuntimeError(message, code, path) {
+    // Cast to `any`, so that extra info can be monkey-patched onto this instance.
+    const error = new RuntimeError(code, message);
+    // Monkey-patch a runtime error code and a path onto an Error instance.
+    error[NG_RUNTIME_ERROR_CODE] = code;
+    error[NG_RUNTIME_ERROR_MESSAGE] = message;
+    if (path) {
+        error[NG_TOKEN_PATH] = path;
+    }
+    return error;
+}
+/**
+ * Reads monkey-patched error code from the given Error instance.
+ */
+function getRuntimeErrorCode(error) {
+    return error[NG_RUNTIME_ERROR_CODE];
+}
+function formatErrorMessage(text, code, path = [], source = null) {
+    let pathDetails = '';
+    // If the path is empty or contains only one element (self) -
+    // do not append additional info the error message.
+    if (path && path.length > 1) {
+        pathDetails = ` Path: ${path.join(' -> ')}.`;
+    }
+    const sourceDetails = source ? ` Source: ${source}.` : '';
+    return formatRuntimeError(code, `${text}${sourceDetails}${pathDetails}`);
 }
 
 /**
@@ -926,11 +1004,6 @@ class RetrievingInjector {
         }
     }
 }
-const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
-const NG_TOKEN_PATH = 'ngTokenPath';
-const NEW_LINE = /\n/gm;
-const NO_NEW_LINE = 'ɵ';
-const SOURCE = '__source';
 function injectInjectorOnly(token, flags = 0 /* InternalInjectFlags.Default */) {
     const currentInjector = getCurrentInjector();
     if (currentInjector === undefined) {
@@ -942,6 +1015,8 @@ function injectInjectorOnly(token, flags = 0 /* InternalInjectFlags.Default */) 
     }
     else {
         const options = convertToInjectOptions(flags);
+        // TODO: improve the typings here.
+        // `token` can be a multi: true provider definition, which is considered as a Token but not represented in the typings
         const value = currentInjector.retrieve(token, options);
         ngDevMode && emitInjectEvent(token, value, flags);
         if (isNotFound(value)) {
@@ -1121,34 +1196,6 @@ function attachInjectFlag(decorator, flag) {
  */
 function getInjectFlag(token) {
     return token[DI_DECORATOR_FLAG];
-}
-function catchInjectorError(e, token, injectorErrorName, source) {
-    const tokenPath = e[NG_TEMP_TOKEN_PATH];
-    if (token[SOURCE]) {
-        tokenPath.unshift(token[SOURCE]);
-    }
-    e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
-    e[NG_TOKEN_PATH] = tokenPath;
-    e[NG_TEMP_TOKEN_PATH] = null;
-    throw e;
-}
-function formatError(text, obj, injectorErrorName, source = null) {
-    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.slice(2) : text;
-    let context = stringify(obj);
-    if (Array.isArray(obj)) {
-        context = obj.map(stringify).join(' -> ');
-    }
-    else if (typeof obj === 'object') {
-        let parts = [];
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                let value = obj[key];
-                parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
-            }
-        }
-        context = `{${parts.join(', ')}}`;
-    }
-    return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }
 
 function getFactoryDef(type, throwNotFound) {
@@ -1412,7 +1459,10 @@ const INJECTOR_DEF_TYPES = new InjectionToken(ngDevMode ? 'INJECTOR_DEF_TYPES' :
 class NullInjector {
     get(token, notFoundValue = THROW_IF_NOT_FOUND) {
         if (notFoundValue === THROW_IF_NOT_FOUND) {
-            const error = new NotFoundError(`NullInjectorError: No provider for ${stringify(token)}!`);
+            const message = ngDevMode ? `No provider found for \`${stringify(token)}\`.` : '';
+            const error = createRuntimeError(message, -201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */);
+            // Note: This is the name used by the primitives to identify a not found error.
+            error.name = 'ɵNotFound';
             throw error;
         }
         return notFoundValue;
@@ -1642,8 +1692,8 @@ function walkProviderTree(container, visitor, parents, dedup) {
     // Check for circular dependencies.
     if (ngDevMode && parents.indexOf(defType) !== -1) {
         const defName = stringify(defType);
-        const path = parents.map(stringify);
-        throwCyclicDependencyError(defName, path);
+        const path = parents.map(stringify).concat(defName);
+        throw cyclicDependencyErrorWithDetails(defName, path);
     }
     // Check for multiple imports of the same module
     const isDuplicate = dedup.has(defType);
@@ -1968,22 +2018,31 @@ class R3Injector extends EnvironmentInjector {
                     : notFoundValue;
             return nextInjector.get(token, notFoundValue);
         }
-        catch (e) {
-            if (isNotFound$1(e)) {
-                // @ts-ignore
-                const path = (e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || []);
-                path.unshift(stringify(token));
+        catch (error) {
+            // If there was a cyclic dependency error or a token was not found,
+            // an error is thrown at the level where the problem was detected.
+            // The error propagates up the call stack and the code below appends
+            // the current token into the path. As a result, the full path is assembled
+            // at the very top of the call stack, so the final error message can be
+            // formatted to include that path.
+            const errorCode = getRuntimeErrorCode(error);
+            if (errorCode === -200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */ ||
+                errorCode === -201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */) {
+                if (!ngDevMode) {
+                    throw new RuntimeError(errorCode, null);
+                }
+                prependTokenToDependencyPath(error, token);
                 if (previousInjector) {
                     // We still have a parent injector, keep throwing
-                    throw e;
+                    throw error;
                 }
                 else {
                     // Format & throw the final error message when we don't have any previous injector
-                    return catchInjectorError(e, token, 'R3InjectorError', this.source);
+                    throw augmentRuntimeError(error, this.source);
                 }
             }
             else {
-                throw e;
+                throw error;
             }
         }
         finally {
@@ -2085,7 +2144,7 @@ class R3Injector extends EnvironmentInjector {
         const prevConsumer = setActiveConsumer(null);
         try {
             if (record.value === CIRCULAR) {
-                throwCyclicDependencyError(stringify(token));
+                throw cyclicDependencyError(stringify(token));
             }
             else if (record.value === NOT_YET) {
                 record.value = CIRCULAR;
@@ -3930,5 +3989,5 @@ class ZoneAwareEffectScheduler {
     }
 }
 
-export { AFTER_RENDER_SEQUENCES_TO_ADD, CHILD_HEAD, CHILD_TAIL, CLEANUP, CONTAINER_HEADER_OFFSET, CONTEXT, ChangeDetectionScheduler, CheckNoChangesMode, DECLARATION_COMPONENT_VIEW, DECLARATION_LCONTAINER, DECLARATION_VIEW, DEHYDRATED_VIEWS, DOCUMENT, DestroyRef, EFFECTS, EFFECTS_TO_SCHEDULE, EMBEDDED_VIEW_INJECTOR, EMPTY_ARRAY, EMPTY_OBJ, ENVIRONMENT, ENVIRONMENT_INITIALIZER, EffectScheduler, EnvironmentInjector, ErrorHandler, FLAGS, HEADER_OFFSET, HOST, HYDRATION, ID, INJECTOR$1 as INJECTOR, INJECTOR as INJECTOR$1, INJECTOR_DEF_TYPES, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, InjectionToken, Injector, MATH_ML_NAMESPACE, MOVED_VIEWS, NATIVE, NEXT, NG_COMP_DEF, NG_DIR_DEF, NG_ELEMENT_ID, NG_FACTORY_DEF, NG_INJ_DEF, NG_MOD_DEF, NG_PIPE_DEF, NG_PROV_DEF, NodeInjectorDestroyRef, NullInjector, ON_DESTROY_HOOKS, PARENT, PREORDER_HOOK_FLAGS, PROVIDED_ZONELESS, PendingTasks, PendingTasksInternal, QUERIES, R3Injector, REACTIVE_TEMPLATE_CONSUMER, RENDERER, RuntimeError, SCHEDULE_IN_ROOT_ZONE, SVG_NAMESPACE, TVIEW, T_HOST, VIEW_REFS, ViewContext, XSS_SECURITY_URL, ZONELESS_ENABLED, ZONELESS_SCHEDULER_DISABLED, _global, addToArray, arrayEquals, arrayInsert2, arraySplice, assertComponentType, assertDefined, assertDirectiveDef, assertDomNode, assertElement, assertEqual, assertFirstCreatePass, assertFirstUpdatePass, assertFunction, assertGreaterThan, assertGreaterThanOrEqual, assertHasParent, assertInInjectionContext, assertIndexInDeclRange, assertIndexInExpandoRange, assertIndexInRange, assertInjectImplementationNotEqual, assertLContainer, assertLView, assertLessThan, assertNgModuleType, assertNodeInjector, assertNotDefined, assertNotEqual, assertNotInReactiveContext, assertNotReactive, assertNotSame, assertNumber, assertNumberInRange, assertOneOf, assertParentView, assertProjectionSlots, assertSame, assertString, assertTIcu, assertTNode, assertTNodeCreationIndex, assertTNodeForLView, assertTNodeForTView, attachInjectFlag, concatStringsWithSpace, convertToBitFlags, createInjector, createInjectorWithoutInjectorInstances, debugStringifyTypeForError, decreaseElementDepthCount, deepForEach, defineInjectable, emitEffectCreatedEvent, emitInjectEvent, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, emitProviderConfiguredEvent, enterDI, enterSkipHydrationBlock, enterView, errorHandlerEnvironmentInitializer, fillProperties, flatten, formatRuntimeError, forwardRef, getBindingIndex, getBindingRoot, getBindingsEnabled, getClosureSafeProperty, getComponentDef, getComponentLViewByIndex, getConstant, getContextLView, getCurrentDirectiveDef, getCurrentDirectiveIndex, getCurrentParentTNode, getCurrentQueryIndex, getCurrentTNode, getCurrentTNodePlaceholderOk, getDirectiveDef, getDirectiveDefOrThrow, getElementDepthCount, getFactoryDef, getInjectableDef, getInjectorDef, getLView, getLViewParent, getNamespace, getNativeByIndex, getNativeByTNode, getNativeByTNodeOrNull, getNgModuleDef, getNgModuleDefOrThrow, getNullInjector, getOrCreateLViewCleanup, getOrCreateTViewCleanup, getPipeDef, getSelectedIndex, getSelectedTNode, getTNode, getTView, hasI18n, importProvidersFrom, increaseElementDepthCount, incrementBindingIndex, initNgDevMode, inject, injectRootLimpMode, internalImportProvidersFrom, isClassProvider, isComponentDef, isComponentHost, isContentQueryHost, isCreationMode, isCurrentTNodeParent, isDestroyed, isDirectiveHost, isEnvironmentProviders, isExhaustiveCheckNoChanges, isForwardRef, isInCheckNoChangesMode, isInI18nBlock, isInInjectionContext, isInSkipHydrationBlock, isInjectable, isLContainer, isLView, isProjectionTNode, isRefreshingViews, isRootView, isSignal, isSkipHydrationRootTNode, isStandalone, isTypeProvider, isWritableSignal, keyValueArrayGet, keyValueArrayIndexOf, keyValueArraySet, lastNodeWasCreated, leaveDI, leaveSkipHydrationBlock, leaveView, load, makeEnvironmentProviders, markAncestorsForTraversal, markViewForRefresh, newArray, nextBindingIndex, nextContextImpl, noop, provideBrowserGlobalErrorListeners, provideEnvironmentInitializer, providerToFactory, removeFromArray, removeLViewOnDestroy, renderStringify, requiresRefreshOrTraversal, resetPreOrderHookFlags, resolveForwardRef, runInInjectionContext, runInInjectorProfilerContext, setBindingIndex, setBindingRootForHostBindings, setCurrentDirectiveIndex, setCurrentQueryIndex, setCurrentTNode, setCurrentTNodeAsNotParent, setInI18nBlock, setInjectImplementation, setInjectorProfiler, setInjectorProfilerContext, setIsInCheckNoChangesMode, setIsRefreshingViews, setSelectedIndex, signal, signalAsReadonlyFn, store, storeCleanupWithContext, storeLViewOnDestroy, stringify, stringifyForError, throwCyclicDependencyError, throwError, throwProviderNotFoundError, truncateMiddle, unwrapLView, unwrapRNode, updateAncestorTraversalFlagsOnAttach, viewAttachedToChangeDetector, viewAttachedToContainer, walkProviderTree, walkUpViews, wasLastNodeCreated, ɵunwrapWritableSignal, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinject, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView };
+export { AFTER_RENDER_SEQUENCES_TO_ADD, CHILD_HEAD, CHILD_TAIL, CLEANUP, CONTAINER_HEADER_OFFSET, CONTEXT, ChangeDetectionScheduler, CheckNoChangesMode, DECLARATION_COMPONENT_VIEW, DECLARATION_LCONTAINER, DECLARATION_VIEW, DEHYDRATED_VIEWS, DOCUMENT, DestroyRef, EFFECTS, EFFECTS_TO_SCHEDULE, EMBEDDED_VIEW_INJECTOR, EMPTY_ARRAY, EMPTY_OBJ, ENVIRONMENT, ENVIRONMENT_INITIALIZER, EffectScheduler, EnvironmentInjector, ErrorHandler, FLAGS, HEADER_OFFSET, HOST, HYDRATION, ID, INJECTOR$1 as INJECTOR, INJECTOR as INJECTOR$1, INJECTOR_DEF_TYPES, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, InjectionToken, Injector, MATH_ML_NAMESPACE, MOVED_VIEWS, NATIVE, NEXT, NG_COMP_DEF, NG_DIR_DEF, NG_ELEMENT_ID, NG_FACTORY_DEF, NG_INJ_DEF, NG_MOD_DEF, NG_PIPE_DEF, NG_PROV_DEF, NodeInjectorDestroyRef, NullInjector, ON_DESTROY_HOOKS, PARENT, PREORDER_HOOK_FLAGS, PROVIDED_ZONELESS, PendingTasks, PendingTasksInternal, QUERIES, R3Injector, REACTIVE_TEMPLATE_CONSUMER, RENDERER, RuntimeError, SCHEDULE_IN_ROOT_ZONE, SVG_NAMESPACE, TVIEW, T_HOST, VIEW_REFS, ViewContext, XSS_SECURITY_URL, ZONELESS_ENABLED, ZONELESS_SCHEDULER_DISABLED, _global, addToArray, arrayEquals, arrayInsert2, arraySplice, assertComponentType, assertDefined, assertDirectiveDef, assertDomNode, assertElement, assertEqual, assertFirstCreatePass, assertFirstUpdatePass, assertFunction, assertGreaterThan, assertGreaterThanOrEqual, assertHasParent, assertInInjectionContext, assertIndexInDeclRange, assertIndexInExpandoRange, assertIndexInRange, assertInjectImplementationNotEqual, assertLContainer, assertLView, assertLessThan, assertNgModuleType, assertNodeInjector, assertNotDefined, assertNotEqual, assertNotInReactiveContext, assertNotReactive, assertNotSame, assertNumber, assertNumberInRange, assertOneOf, assertParentView, assertProjectionSlots, assertSame, assertString, assertTIcu, assertTNode, assertTNodeCreationIndex, assertTNodeForLView, assertTNodeForTView, attachInjectFlag, concatStringsWithSpace, convertToBitFlags, createInjector, createInjectorWithoutInjectorInstances, cyclicDependencyError, cyclicDependencyErrorWithDetails, debugStringifyTypeForError, decreaseElementDepthCount, deepForEach, defineInjectable, emitEffectCreatedEvent, emitInjectEvent, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, emitProviderConfiguredEvent, enterDI, enterSkipHydrationBlock, enterView, errorHandlerEnvironmentInitializer, fillProperties, flatten, formatRuntimeError, forwardRef, getBindingIndex, getBindingRoot, getBindingsEnabled, getClosureSafeProperty, getComponentDef, getComponentLViewByIndex, getConstant, getContextLView, getCurrentDirectiveDef, getCurrentDirectiveIndex, getCurrentParentTNode, getCurrentQueryIndex, getCurrentTNode, getCurrentTNodePlaceholderOk, getDirectiveDef, getDirectiveDefOrThrow, getElementDepthCount, getFactoryDef, getInjectableDef, getInjectorDef, getLView, getLViewParent, getNamespace, getNativeByIndex, getNativeByTNode, getNativeByTNodeOrNull, getNgModuleDef, getNgModuleDefOrThrow, getNullInjector, getOrCreateLViewCleanup, getOrCreateTViewCleanup, getPipeDef, getSelectedIndex, getSelectedTNode, getTNode, getTView, hasI18n, importProvidersFrom, increaseElementDepthCount, incrementBindingIndex, initNgDevMode, inject, injectRootLimpMode, internalImportProvidersFrom, isClassProvider, isComponentDef, isComponentHost, isContentQueryHost, isCreationMode, isCurrentTNodeParent, isDestroyed, isDirectiveHost, isEnvironmentProviders, isExhaustiveCheckNoChanges, isForwardRef, isInCheckNoChangesMode, isInI18nBlock, isInInjectionContext, isInSkipHydrationBlock, isInjectable, isLContainer, isLView, isProjectionTNode, isRefreshingViews, isRootView, isSignal, isSkipHydrationRootTNode, isStandalone, isTypeProvider, isWritableSignal, keyValueArrayGet, keyValueArrayIndexOf, keyValueArraySet, lastNodeWasCreated, leaveDI, leaveSkipHydrationBlock, leaveView, load, makeEnvironmentProviders, markAncestorsForTraversal, markViewForRefresh, newArray, nextBindingIndex, nextContextImpl, noop, provideBrowserGlobalErrorListeners, provideEnvironmentInitializer, providerToFactory, removeFromArray, removeLViewOnDestroy, renderStringify, requiresRefreshOrTraversal, resetPreOrderHookFlags, resolveForwardRef, runInInjectionContext, runInInjectorProfilerContext, setBindingIndex, setBindingRootForHostBindings, setCurrentDirectiveIndex, setCurrentQueryIndex, setCurrentTNode, setCurrentTNodeAsNotParent, setInI18nBlock, setInjectImplementation, setInjectorProfiler, setInjectorProfilerContext, setIsInCheckNoChangesMode, setIsRefreshingViews, setSelectedIndex, signal, signalAsReadonlyFn, store, storeCleanupWithContext, storeLViewOnDestroy, stringify, stringifyForError, throwError, throwProviderNotFoundError, truncateMiddle, unwrapLView, unwrapRNode, updateAncestorTraversalFlagsOnAttach, viewAttachedToChangeDetector, viewAttachedToContainer, walkProviderTree, walkUpViews, wasLastNodeCreated, ɵunwrapWritableSignal, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinject, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView };
 //# sourceMappingURL=root_effect_scheduler.mjs.map
