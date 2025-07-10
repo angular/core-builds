@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.0+sha-6274ea7
+ * @license Angular v20.1.0+sha-b4ae55a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-CmZ0155c.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-C0ldYI7f.cjs');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-DLInMAS3.cjs');
@@ -428,7 +428,7 @@ function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
         {
             emit: () => ({
                 kind: checker.ReferenceEmitKind.Success,
-                expression: migrate_ts_type_references.NULL_EXPR,
+                expression: checker.NULL_EXPR,
                 importedFile: null,
             }),
         },
