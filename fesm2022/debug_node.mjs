@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.0+sha-eca2334
+ * @license Angular v20.2.0-next.0+sha-e8c5603
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13188,6 +13188,8 @@ function inputBindingUpdate(targetDirectiveIdx, publicName, value) {
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = lView[TVIEW];
         const tNode = getSelectedTNode();
+        const componentLView = getComponentLViewByIndex(tNode.index, lView);
+        markViewDirty(componentLView, 1 /* NotificationSource.SetInput */);
         // TODO(pk): don't check on each and every binding, just assert in dev mode
         const targetDef = tView.directiveRegistry[targetDirectiveIdx];
         if (ngDevMode && !targetDef) {
@@ -13494,7 +13496,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.0+sha-eca2334']
+        ? ['ng-version', '20.2.0-next.0+sha-e8c5603']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-eca2334
+ * @license Angular v20.2.0-next.0+sha-e8c5603
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32228,7 +32228,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.0+sha-eca2334');
+new Version('20.2.0-next.0+sha-e8c5603');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33248,7 +33248,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DLInMAS3.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CBFvHh1j.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -36669,74 +36669,82 @@ exports.PerfPhase = void 0;
      */
     PerfPhase[PerfPhase["TtcDiagnostics"] = 14] = "TtcDiagnostics";
     /**
+     * Time spent computing template type-checking suggestion diagnostics.
+     */
+    PerfPhase[PerfPhase["TtcSuggestionDiagnostics"] = 15] = "TtcSuggestionDiagnostics";
+    /**
      * Time spent getting a `Symbol` from the `TemplateTypeChecker`.
      */
-    PerfPhase[PerfPhase["TtcSymbol"] = 15] = "TtcSymbol";
+    PerfPhase[PerfPhase["TtcSymbol"] = 16] = "TtcSymbol";
     /**
      * Time spent by the Angular Language Service calculating a "get references" or a renaming
      * operation.
      */
-    PerfPhase[PerfPhase["LsReferencesAndRenames"] = 16] = "LsReferencesAndRenames";
+    PerfPhase[PerfPhase["LsReferencesAndRenames"] = 17] = "LsReferencesAndRenames";
     /**
      * Time spent by the Angular Language Service calculating a "quick info" operation.
      */
-    PerfPhase[PerfPhase["LsQuickInfo"] = 17] = "LsQuickInfo";
+    PerfPhase[PerfPhase["LsQuickInfo"] = 18] = "LsQuickInfo";
     /**
      * Time spent by the Angular Language Service calculating a "get type definition" or "get
      * definition" operation.
      */
-    PerfPhase[PerfPhase["LsDefinition"] = 18] = "LsDefinition";
+    PerfPhase[PerfPhase["LsDefinition"] = 19] = "LsDefinition";
     /**
      * Time spent by the Angular Language Service calculating a "get completions" (AKA autocomplete)
      * operation.
      */
-    PerfPhase[PerfPhase["LsCompletions"] = 19] = "LsCompletions";
+    PerfPhase[PerfPhase["LsCompletions"] = 20] = "LsCompletions";
     /**
      * Time spent by the Angular Language Service calculating a "view template typecheck block"
      * operation.
      */
-    PerfPhase[PerfPhase["LsTcb"] = 20] = "LsTcb";
+    PerfPhase[PerfPhase["LsTcb"] = 21] = "LsTcb";
     /**
      * Time spent by the Angular Language Service calculating diagnostics.
      */
-    PerfPhase[PerfPhase["LsDiagnostics"] = 21] = "LsDiagnostics";
+    PerfPhase[PerfPhase["LsDiagnostics"] = 22] = "LsDiagnostics";
+    /**
+     * Time spent by the Angular Language Service calculating suggestion diagnostics.
+     */
+    PerfPhase[PerfPhase["LsSuggestionDiagnostics"] = 23] = "LsSuggestionDiagnostics";
     /**
      * Time spent by the Angular Language Service calculating a "get component locations for template"
      * operation.
      */
-    PerfPhase[PerfPhase["LsComponentLocations"] = 22] = "LsComponentLocations";
+    PerfPhase[PerfPhase["LsComponentLocations"] = 24] = "LsComponentLocations";
     /**
      * Time spent by the Angular Language Service calculating signature help.
      */
-    PerfPhase[PerfPhase["LsSignatureHelp"] = 23] = "LsSignatureHelp";
+    PerfPhase[PerfPhase["LsSignatureHelp"] = 25] = "LsSignatureHelp";
     /**
      * Time spent by the Angular Language Service calculating outlining spans.
      */
-    PerfPhase[PerfPhase["OutliningSpans"] = 24] = "OutliningSpans";
+    PerfPhase[PerfPhase["OutliningSpans"] = 26] = "OutliningSpans";
     /**
      * Time spent by the Angular Language Service calculating code fixes.
      */
-    PerfPhase[PerfPhase["LsCodeFixes"] = 25] = "LsCodeFixes";
+    PerfPhase[PerfPhase["LsCodeFixes"] = 27] = "LsCodeFixes";
     /**
      * Time spent by the Angular Language Service to fix all detected same type errors.
      */
-    PerfPhase[PerfPhase["LsCodeFixesAll"] = 26] = "LsCodeFixesAll";
+    PerfPhase[PerfPhase["LsCodeFixesAll"] = 28] = "LsCodeFixesAll";
     /**
      * Time spent computing possible Angular refactorings.
      */
-    PerfPhase[PerfPhase["LSComputeApplicableRefactorings"] = 27] = "LSComputeApplicableRefactorings";
+    PerfPhase[PerfPhase["LSComputeApplicableRefactorings"] = 29] = "LSComputeApplicableRefactorings";
     /**
      * Time spent computing changes for applying a given refactoring.
      */
-    PerfPhase[PerfPhase["LSApplyRefactoring"] = 28] = "LSApplyRefactoring";
+    PerfPhase[PerfPhase["LSApplyRefactoring"] = 30] = "LSApplyRefactoring";
     /**
      * Time spent by the Angular Language Service calculating semantic classifications.
      */
-    PerfPhase[PerfPhase["LSSemanticClassification"] = 29] = "LSSemanticClassification";
+    PerfPhase[PerfPhase["LSSemanticClassification"] = 31] = "LSSemanticClassification";
     /**
      * Tracks the number of `PerfPhase`s, and must appear at the end of the list.
      */
-    PerfPhase[PerfPhase["LAST"] = 30] = "LAST";
+    PerfPhase[PerfPhase["LAST"] = 32] = "LAST";
 })(exports.PerfPhase || (exports.PerfPhase = {}));
 /**
  * Represents some occurrence during compilation, and is tracked with a counter.
@@ -40275,6 +40283,314 @@ function extractHostBindingResources(nodes) {
     return result;
 }
 
+const parseSpanComment = /^(\d+),(\d+)$/;
+/**
+ * Reads the trailing comments and finds the first match which is a span comment (i.e. 4,10) on a
+ * node and returns it as an `AbsoluteSourceSpan`.
+ *
+ * Will return `null` if no trailing comments on the node match the expected form of a source span.
+ */
+function readSpanComment(node, sourceFile = node.getSourceFile()) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
+            return null;
+        }
+        const commentText = sourceFile.text.substring(pos + 2, end - 2);
+        const match = commentText.match(parseSpanComment);
+        if (match === null) {
+            return null;
+        }
+        return new AbsoluteSourceSpan(+match[1], +match[2]);
+    }) || null);
+}
+/** Used to identify what type the comment is. */
+var CommentTriviaType;
+(function (CommentTriviaType) {
+    CommentTriviaType["DIAGNOSTIC"] = "D";
+    CommentTriviaType["EXPRESSION_TYPE_IDENTIFIER"] = "T";
+})(CommentTriviaType || (CommentTriviaType = {}));
+/** Identifies what the TCB expression is for (for example, a directive declaration). */
+var ExpressionIdentifier;
+(function (ExpressionIdentifier) {
+    ExpressionIdentifier["DIRECTIVE"] = "DIR";
+    ExpressionIdentifier["COMPONENT_COMPLETION"] = "COMPCOMP";
+    ExpressionIdentifier["EVENT_PARAMETER"] = "EP";
+    ExpressionIdentifier["VARIABLE_AS_EXPRESSION"] = "VAE";
+})(ExpressionIdentifier || (ExpressionIdentifier = {}));
+/** Tags the node with the given expression identifier. */
+function addExpressionIdentifier(node, identifier) {
+    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`, 
+    /* hasTrailingNewLine */ false);
+}
+const IGNORE_FOR_DIAGNOSTICS_MARKER = `${CommentTriviaType.DIAGNOSTIC}:ignore`;
+/**
+ * Tag the `ts.Node` with an indication that any errors arising from the evaluation of the node
+ * should be ignored.
+ */
+function markIgnoreDiagnostics(node) {
+    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, IGNORE_FOR_DIAGNOSTICS_MARKER, 
+    /* hasTrailingNewLine */ false);
+}
+/** Returns true if the node has a marker that indicates diagnostics errors should be ignored.  */
+function hasIgnoreForDiagnosticsMarker(node, sourceFile) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
+            return null;
+        }
+        const commentText = sourceFile.text.substring(pos + 2, end - 2);
+        return commentText === IGNORE_FOR_DIAGNOSTICS_MARKER;
+    }) === true);
+}
+function makeRecursiveVisitor(visitor) {
+    function recursiveVisitor(node) {
+        const res = visitor(node);
+        return res !== null ? res : node.forEachChild(recursiveVisitor);
+    }
+    return recursiveVisitor;
+}
+function getSpanFromOptions(opts) {
+    let withSpan = null;
+    if (opts.withSpan !== undefined) {
+        if (opts.withSpan instanceof AbsoluteSourceSpan) {
+            withSpan = opts.withSpan;
+        }
+        else {
+            withSpan = { start: opts.withSpan.start.offset, end: opts.withSpan.end.offset };
+        }
+    }
+    return withSpan;
+}
+/**
+ * Given a `ts.Node` with finds the first node whose matching the criteria specified
+ * by the `FindOptions`.
+ *
+ * Returns `null` when no `ts.Node` matches the given conditions.
+ */
+function findFirstMatchingNode(tcb, opts) {
+    const withSpan = getSpanFromOptions(opts);
+    const withExpressionIdentifier = opts.withExpressionIdentifier;
+    const sf = tcb.getSourceFile();
+    const visitor = makeRecursiveVisitor((node) => {
+        if (!opts.filter(node)) {
+            return null;
+        }
+        if (withSpan !== null) {
+            const comment = readSpanComment(node, sf);
+            if (comment === null || withSpan.start !== comment.start || withSpan.end !== comment.end) {
+                return null;
+            }
+        }
+        if (withExpressionIdentifier !== undefined &&
+            !hasExpressionIdentifier(sf, node, withExpressionIdentifier)) {
+            return null;
+        }
+        return node;
+    });
+    return tcb.forEachChild(visitor) ?? null;
+}
+/**
+ * Given a `ts.Node` with source span comments, finds the first node whose source span comment
+ * matches the given `sourceSpan`. Additionally, the `filter` function allows matching only
+ * `ts.Nodes` of a given type, which provides the ability to select only matches of a given type
+ * when there may be more than one.
+ *
+ * Returns `null` when no `ts.Node` matches the given conditions.
+ */
+function findAllMatchingNodes(tcb, opts) {
+    const withSpan = getSpanFromOptions(opts);
+    const withExpressionIdentifier = opts.withExpressionIdentifier;
+    const results = [];
+    const stack = [tcb];
+    const sf = tcb.getSourceFile();
+    while (stack.length > 0) {
+        const node = stack.pop();
+        if (!opts.filter(node)) {
+            stack.push(...node.getChildren());
+            continue;
+        }
+        if (withSpan !== null) {
+            const comment = readSpanComment(node, sf);
+            if (comment === null || withSpan.start !== comment.start || withSpan.end !== comment.end) {
+                stack.push(...node.getChildren());
+                continue;
+            }
+        }
+        if (withExpressionIdentifier !== undefined &&
+            !hasExpressionIdentifier(sf, node, withExpressionIdentifier)) {
+            continue;
+        }
+        results.push(node);
+    }
+    return results;
+}
+function hasExpressionIdentifier(sourceFile, node, identifier) {
+    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
+            return false;
+        }
+        const commentText = sourceFile.text.substring(pos + 2, end - 2);
+        return commentText === `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`;
+    }) || false);
+}
+
+/**
+ * A `Set` of `ts.SyntaxKind`s of `ts.Expression` which are safe to wrap in a `ts.AsExpression`
+ * without needing to be wrapped in parentheses.
+ *
+ * For example, `foo.bar()` is a `ts.CallExpression`, and can be safely cast to `any` with
+ * `foo.bar() as any`. however, `foo !== bar` is a `ts.BinaryExpression`, and attempting to cast
+ * without the parentheses yields the expression `foo !== bar as any`. This is semantically
+ * equivalent to `foo !== (bar as any)`, which is not what was intended. Thus,
+ * `ts.BinaryExpression`s need to be wrapped in parentheses before casting.
+ */
+//
+let SAFE_TO_CAST_WITHOUT_PARENS = null;
+function tsCastToAny(expr) {
+    if (SAFE_TO_CAST_WITHOUT_PARENS === null) {
+        SAFE_TO_CAST_WITHOUT_PARENS = new Set([
+            // Expressions which are already parenthesized can be cast without further wrapping.
+            ts.SyntaxKind.ParenthesizedExpression,
+            // Expressions which form a single lexical unit leave no room for precedence issues with the cast.
+            ts.SyntaxKind.Identifier,
+            ts.SyntaxKind.CallExpression,
+            ts.SyntaxKind.NonNullExpression,
+            ts.SyntaxKind.ElementAccessExpression,
+            ts.SyntaxKind.PropertyAccessExpression,
+            ts.SyntaxKind.ArrayLiteralExpression,
+            ts.SyntaxKind.ObjectLiteralExpression,
+            // The same goes for various literals.
+            ts.SyntaxKind.StringLiteral,
+            ts.SyntaxKind.NumericLiteral,
+            ts.SyntaxKind.TrueKeyword,
+            ts.SyntaxKind.FalseKeyword,
+            ts.SyntaxKind.NullKeyword,
+            ts.SyntaxKind.UndefinedKeyword,
+        ]);
+    }
+    // Wrap `expr` in parentheses if needed (see `SAFE_TO_CAST_WITHOUT_PARENS` above).
+    if (!SAFE_TO_CAST_WITHOUT_PARENS.has(expr.kind)) {
+        expr = ts.factory.createParenthesizedExpression(expr);
+    }
+    // The outer expression is always wrapped in parentheses.
+    return ts.factory.createParenthesizedExpression(ts.factory.createAsExpression(expr, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)));
+}
+/**
+ * Create an expression which instantiates an element by its HTML tagName.
+ *
+ * Thanks to narrowing of `document.createElement()`, this expression will have its type inferred
+ * based on the tag name, including for custom elements that have appropriate .d.ts definitions.
+ */
+function tsCreateElement(...tagNames) {
+    const createElement = ts.factory.createPropertyAccessExpression(
+    /* expression */ ts.factory.createIdentifier('document'), 'createElement');
+    let arg;
+    if (tagNames.length === 1) {
+        // If there's only one tag name, we can pass it in directly.
+        arg = ts.factory.createStringLiteral(tagNames[0]);
+    }
+    else {
+        // If there's more than one name, we have to generate a union of all the tag names. To do so,
+        // create an expression in the form of `null! as 'tag-1' | 'tag-2' | 'tag-3'`. This allows
+        // TypeScript to infer the type as a union of the differnet tags.
+        const assertedNullExpression = ts.factory.createNonNullExpression(ts.factory.createNull());
+        const type = ts.factory.createUnionTypeNode(tagNames.map((tag) => ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(tag))));
+        arg = ts.factory.createAsExpression(assertedNullExpression, type);
+    }
+    return ts.factory.createCallExpression(
+    /* expression */ createElement, 
+    /* typeArguments */ undefined, 
+    /* argumentsArray */ [arg]);
+}
+/**
+ * Create a `ts.VariableStatement` which declares a variable without explicit initialization.
+ *
+ * The initializer `null!` is used to bypass strict variable initialization checks.
+ *
+ * Unlike with `tsCreateVariable`, the type of the variable is explicitly specified.
+ */
+function tsDeclareVariable(id, type) {
+    // When we create a variable like `var _t1: boolean = null!`, TypeScript actually infers `_t1`
+    // to be `never`, instead of a `boolean`. To work around it, we cast the value
+    // in the initializer, e.g. `var _t1 = null! as boolean;`.
+    addExpressionIdentifier(type, ExpressionIdentifier.VARIABLE_AS_EXPRESSION);
+    const initializer = ts.factory.createAsExpression(ts.factory.createNonNullExpression(ts.factory.createNull()), type);
+    const decl = ts.factory.createVariableDeclaration(
+    /* name */ id, 
+    /* exclamationToken */ undefined, 
+    /* type */ undefined, 
+    /* initializer */ initializer);
+    return ts.factory.createVariableStatement(
+    /* modifiers */ undefined, 
+    /* declarationList */ [decl]);
+}
+/**
+ * Creates a `ts.TypeQueryNode` for a coerced input.
+ *
+ * For example: `typeof MatInput.ngAcceptInputType_value`, where MatInput is `typeName` and `value`
+ * is the `coercedInputName`.
+ *
+ * @param typeName The `EntityName` of the Directive where the static coerced input is defined.
+ * @param coercedInputName The field name of the coerced input.
+ */
+function tsCreateTypeQueryForCoercedInput(typeName, coercedInputName) {
+    return ts.factory.createTypeQueryNode(ts.factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
+}
+/**
+ * Create a `ts.VariableStatement` that initializes a variable with a given expression.
+ *
+ * Unlike with `tsDeclareVariable`, the type of the variable is inferred from the initializer
+ * expression.
+ */
+function tsCreateVariable(id, initializer, flags = null) {
+    const decl = ts.factory.createVariableDeclaration(
+    /* name */ id, 
+    /* exclamationToken */ undefined, 
+    /* type */ undefined, 
+    /* initializer */ initializer);
+    return ts.factory.createVariableStatement(
+    /* modifiers */ undefined, 
+    /* declarationList */ flags === null
+        ? [decl]
+        : ts.factory.createVariableDeclarationList([decl], flags));
+}
+/**
+ * Construct a `ts.CallExpression` that calls a method on a receiver.
+ */
+function tsCallMethod(receiver, methodName, args = []) {
+    const methodAccess = ts.factory.createPropertyAccessExpression(receiver, methodName);
+    return ts.factory.createCallExpression(
+    /* expression */ methodAccess, 
+    /* typeArguments */ undefined, 
+    /* argumentsArray */ args);
+}
+function isAccessExpression(node) {
+    return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
+}
+/**
+ * Creates a TypeScript node representing a numeric value.
+ */
+function tsNumericExpression(value) {
+    // As of TypeScript 5.3 negative numbers are represented as `prefixUnaryOperator` and passing a
+    // negative number (even as a string) into `createNumericLiteral` will result in an error.
+    if (value < 0) {
+        const operand = ts.factory.createNumericLiteral(Math.abs(value));
+        return ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, operand);
+    }
+    return ts.factory.createNumericLiteral(value);
+}
+/**
+ * Check if a node represents a directive declaration in a TypeCheck Block.
+ * Directive declarations can be either:
+ * - var _t1: TestDir /*T:D*\/ = null! as TestDir;
+ * - var _t1 /*T:D*\/ = _ctor1({});
+ */
+function isDirectiveDeclaration(node) {
+    const sourceFile = node.getSourceFile();
+    return ((ts.isTypeNode(node) || ts.isIdentifier(node)) &&
+        ts.isVariableDeclaration(node.parent) &&
+        hasExpressionIdentifier(sourceFile, node, ExpressionIdentifier.DIRECTIVE));
+}
+
 const NgOriginalFile = Symbol('NgOriginalFile');
 exports.UpdateMode = void 0;
 (function (UpdateMode) {
@@ -40463,12 +40779,13 @@ exports.SymbolKind = void 0;
 
 /**
  * Constructs a `ts.Diagnostic` for a given `ParseSourceSpan` within a template.
+ *
+ * @param deprecatedDiagInfo Optional information about deprecation and related messages.
  */
-function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, relatedMessages) {
+function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, relatedMessages, deprecatedDiagInfo) {
     if (mapping.type === 'direct') {
-        let relatedInformation = undefined;
+        let relatedInformation = [];
         if (relatedMessages !== undefined) {
-            relatedInformation = [];
             for (const relatedMessage of relatedMessages) {
                 relatedInformation.push({
                     category: ts.DiagnosticCategory.Message,
@@ -40479,6 +40796,9 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
                     messageText: relatedMessage.text,
                 });
             }
+        }
+        if (deprecatedDiagInfo !== undefined) {
+            relatedInformation.push(...(deprecatedDiagInfo.relatedMessages ?? []));
         }
         // For direct mappings, the error is shown inline as ngtsc was able to pinpoint a string
         // constant within the `@Component` decorator for the template. This allows us to map the error
@@ -40494,6 +40814,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
             start: span.start.offset,
             length: span.end.offset - span.start.offset,
             relatedInformation,
+            reportsDeprecated: deprecatedDiagInfo?.reportsDeprecated,
         };
     }
     else if (mapping.type === 'indirect' || mapping.type === 'external') {
@@ -40538,6 +40859,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
                 start: mapping.node.getStart(),
                 length: mapping.node.getEnd() - mapping.node.getStart(),
                 relatedInformation,
+                reportsDeprecated: deprecatedDiagInfo?.reportsDeprecated,
             };
         }
         let typeForMessage;
@@ -40552,6 +40874,9 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
         }
         else {
             typeForMessage = 'Error';
+        }
+        if (deprecatedDiagInfo !== undefined) {
+            relatedInformation.push(...(deprecatedDiagInfo.relatedMessages ?? []));
         }
         relatedInformation.push({
             category: ts.DiagnosticCategory.Message,
@@ -40575,6 +40900,7 @@ function makeTemplateDiagnostic(id, mapping, span, category, code, messageText, 
             length: span.end.offset - span.start.offset,
             // Show a secondary message indicating the component whose template contains the error.
             relatedInformation,
+            reportsDeprecated: deprecatedDiagInfo?.reportsDeprecated,
         };
     }
     else {
@@ -40605,156 +40931,6 @@ function getTypeCheckId$1(clazz) {
         sf[TYPE_CHECK_ID_MAP].set(clazz, `tcb${sf[TYPE_CHECK_ID_MAP].size + 1}`);
     }
     return sf[TYPE_CHECK_ID_MAP].get(clazz);
-}
-
-const parseSpanComment = /^(\d+),(\d+)$/;
-/**
- * Reads the trailing comments and finds the first match which is a span comment (i.e. 4,10) on a
- * node and returns it as an `AbsoluteSourceSpan`.
- *
- * Will return `null` if no trailing comments on the node match the expected form of a source span.
- */
-function readSpanComment(node, sourceFile = node.getSourceFile()) {
-    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
-            return null;
-        }
-        const commentText = sourceFile.text.substring(pos + 2, end - 2);
-        const match = commentText.match(parseSpanComment);
-        if (match === null) {
-            return null;
-        }
-        return new AbsoluteSourceSpan(+match[1], +match[2]);
-    }) || null);
-}
-/** Used to identify what type the comment is. */
-var CommentTriviaType;
-(function (CommentTriviaType) {
-    CommentTriviaType["DIAGNOSTIC"] = "D";
-    CommentTriviaType["EXPRESSION_TYPE_IDENTIFIER"] = "T";
-})(CommentTriviaType || (CommentTriviaType = {}));
-/** Identifies what the TCB expression is for (for example, a directive declaration). */
-var ExpressionIdentifier;
-(function (ExpressionIdentifier) {
-    ExpressionIdentifier["DIRECTIVE"] = "DIR";
-    ExpressionIdentifier["COMPONENT_COMPLETION"] = "COMPCOMP";
-    ExpressionIdentifier["EVENT_PARAMETER"] = "EP";
-    ExpressionIdentifier["VARIABLE_AS_EXPRESSION"] = "VAE";
-})(ExpressionIdentifier || (ExpressionIdentifier = {}));
-/** Tags the node with the given expression identifier. */
-function addExpressionIdentifier(node, identifier) {
-    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`, 
-    /* hasTrailingNewLine */ false);
-}
-const IGNORE_FOR_DIAGNOSTICS_MARKER = `${CommentTriviaType.DIAGNOSTIC}:ignore`;
-/**
- * Tag the `ts.Node` with an indication that any errors arising from the evaluation of the node
- * should be ignored.
- */
-function markIgnoreDiagnostics(node) {
-    ts.addSyntheticTrailingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, IGNORE_FOR_DIAGNOSTICS_MARKER, 
-    /* hasTrailingNewLine */ false);
-}
-/** Returns true if the node has a marker that indicates diagnostics errors should be ignored.  */
-function hasIgnoreForDiagnosticsMarker(node, sourceFile) {
-    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
-            return null;
-        }
-        const commentText = sourceFile.text.substring(pos + 2, end - 2);
-        return commentText === IGNORE_FOR_DIAGNOSTICS_MARKER;
-    }) === true);
-}
-function makeRecursiveVisitor(visitor) {
-    function recursiveVisitor(node) {
-        const res = visitor(node);
-        return res !== null ? res : node.forEachChild(recursiveVisitor);
-    }
-    return recursiveVisitor;
-}
-function getSpanFromOptions(opts) {
-    let withSpan = null;
-    if (opts.withSpan !== undefined) {
-        if (opts.withSpan instanceof AbsoluteSourceSpan) {
-            withSpan = opts.withSpan;
-        }
-        else {
-            withSpan = { start: opts.withSpan.start.offset, end: opts.withSpan.end.offset };
-        }
-    }
-    return withSpan;
-}
-/**
- * Given a `ts.Node` with finds the first node whose matching the criteria specified
- * by the `FindOptions`.
- *
- * Returns `null` when no `ts.Node` matches the given conditions.
- */
-function findFirstMatchingNode(tcb, opts) {
-    const withSpan = getSpanFromOptions(opts);
-    const withExpressionIdentifier = opts.withExpressionIdentifier;
-    const sf = tcb.getSourceFile();
-    const visitor = makeRecursiveVisitor((node) => {
-        if (!opts.filter(node)) {
-            return null;
-        }
-        if (withSpan !== null) {
-            const comment = readSpanComment(node, sf);
-            if (comment === null || withSpan.start !== comment.start || withSpan.end !== comment.end) {
-                return null;
-            }
-        }
-        if (withExpressionIdentifier !== undefined &&
-            !hasExpressionIdentifier(sf, node, withExpressionIdentifier)) {
-            return null;
-        }
-        return node;
-    });
-    return tcb.forEachChild(visitor) ?? null;
-}
-/**
- * Given a `ts.Node` with source span comments, finds the first node whose source span comment
- * matches the given `sourceSpan`. Additionally, the `filter` function allows matching only
- * `ts.Nodes` of a given type, which provides the ability to select only matches of a given type
- * when there may be more than one.
- *
- * Returns `null` when no `ts.Node` matches the given conditions.
- */
-function findAllMatchingNodes(tcb, opts) {
-    const withSpan = getSpanFromOptions(opts);
-    const withExpressionIdentifier = opts.withExpressionIdentifier;
-    const results = [];
-    const stack = [tcb];
-    const sf = tcb.getSourceFile();
-    while (stack.length > 0) {
-        const node = stack.pop();
-        if (!opts.filter(node)) {
-            stack.push(...node.getChildren());
-            continue;
-        }
-        if (withSpan !== null) {
-            const comment = readSpanComment(node, sf);
-            if (comment === null || withSpan.start !== comment.start || withSpan.end !== comment.end) {
-                stack.push(...node.getChildren());
-                continue;
-            }
-        }
-        if (withExpressionIdentifier !== undefined &&
-            !hasExpressionIdentifier(sf, node, withExpressionIdentifier)) {
-            continue;
-        }
-        results.push(node);
-    }
-    return results;
-}
-function hasExpressionIdentifier(sourceFile, node, identifier) {
-    return (ts.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia) {
-            return false;
-        }
-        const commentText = sourceFile.text.substring(pos + 2, end - 2);
-        return commentText === `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`;
-    }) || false);
 }
 
 /**
@@ -42474,152 +42650,6 @@ class ReferenceEmitEnvironment {
 }
 
 /**
- * A `Set` of `ts.SyntaxKind`s of `ts.Expression` which are safe to wrap in a `ts.AsExpression`
- * without needing to be wrapped in parentheses.
- *
- * For example, `foo.bar()` is a `ts.CallExpression`, and can be safely cast to `any` with
- * `foo.bar() as any`. however, `foo !== bar` is a `ts.BinaryExpression`, and attempting to cast
- * without the parentheses yields the expression `foo !== bar as any`. This is semantically
- * equivalent to `foo !== (bar as any)`, which is not what was intended. Thus,
- * `ts.BinaryExpression`s need to be wrapped in parentheses before casting.
- */
-//
-let SAFE_TO_CAST_WITHOUT_PARENS = null;
-function tsCastToAny(expr) {
-    if (SAFE_TO_CAST_WITHOUT_PARENS === null) {
-        SAFE_TO_CAST_WITHOUT_PARENS = new Set([
-            // Expressions which are already parenthesized can be cast without further wrapping.
-            ts.SyntaxKind.ParenthesizedExpression,
-            // Expressions which form a single lexical unit leave no room for precedence issues with the cast.
-            ts.SyntaxKind.Identifier,
-            ts.SyntaxKind.CallExpression,
-            ts.SyntaxKind.NonNullExpression,
-            ts.SyntaxKind.ElementAccessExpression,
-            ts.SyntaxKind.PropertyAccessExpression,
-            ts.SyntaxKind.ArrayLiteralExpression,
-            ts.SyntaxKind.ObjectLiteralExpression,
-            // The same goes for various literals.
-            ts.SyntaxKind.StringLiteral,
-            ts.SyntaxKind.NumericLiteral,
-            ts.SyntaxKind.TrueKeyword,
-            ts.SyntaxKind.FalseKeyword,
-            ts.SyntaxKind.NullKeyword,
-            ts.SyntaxKind.UndefinedKeyword,
-        ]);
-    }
-    // Wrap `expr` in parentheses if needed (see `SAFE_TO_CAST_WITHOUT_PARENS` above).
-    if (!SAFE_TO_CAST_WITHOUT_PARENS.has(expr.kind)) {
-        expr = ts.factory.createParenthesizedExpression(expr);
-    }
-    // The outer expression is always wrapped in parentheses.
-    return ts.factory.createParenthesizedExpression(ts.factory.createAsExpression(expr, ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)));
-}
-/**
- * Create an expression which instantiates an element by its HTML tagName.
- *
- * Thanks to narrowing of `document.createElement()`, this expression will have its type inferred
- * based on the tag name, including for custom elements that have appropriate .d.ts definitions.
- */
-function tsCreateElement(...tagNames) {
-    const createElement = ts.factory.createPropertyAccessExpression(
-    /* expression */ ts.factory.createIdentifier('document'), 'createElement');
-    let arg;
-    if (tagNames.length === 1) {
-        // If there's only one tag name, we can pass it in directly.
-        arg = ts.factory.createStringLiteral(tagNames[0]);
-    }
-    else {
-        // If there's more than one name, we have to generate a union of all the tag names. To do so,
-        // create an expression in the form of `null! as 'tag-1' | 'tag-2' | 'tag-3'`. This allows
-        // TypeScript to infer the type as a union of the differnet tags.
-        const assertedNullExpression = ts.factory.createNonNullExpression(ts.factory.createNull());
-        const type = ts.factory.createUnionTypeNode(tagNames.map((tag) => ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(tag))));
-        arg = ts.factory.createAsExpression(assertedNullExpression, type);
-    }
-    return ts.factory.createCallExpression(
-    /* expression */ createElement, 
-    /* typeArguments */ undefined, 
-    /* argumentsArray */ [arg]);
-}
-/**
- * Create a `ts.VariableStatement` which declares a variable without explicit initialization.
- *
- * The initializer `null!` is used to bypass strict variable initialization checks.
- *
- * Unlike with `tsCreateVariable`, the type of the variable is explicitly specified.
- */
-function tsDeclareVariable(id, type) {
-    // When we create a variable like `var _t1: boolean = null!`, TypeScript actually infers `_t1`
-    // to be `never`, instead of a `boolean`. To work around it, we cast the value
-    // in the initializer, e.g. `var _t1 = null! as boolean;`.
-    addExpressionIdentifier(type, ExpressionIdentifier.VARIABLE_AS_EXPRESSION);
-    const initializer = ts.factory.createAsExpression(ts.factory.createNonNullExpression(ts.factory.createNull()), type);
-    const decl = ts.factory.createVariableDeclaration(
-    /* name */ id, 
-    /* exclamationToken */ undefined, 
-    /* type */ undefined, 
-    /* initializer */ initializer);
-    return ts.factory.createVariableStatement(
-    /* modifiers */ undefined, 
-    /* declarationList */ [decl]);
-}
-/**
- * Creates a `ts.TypeQueryNode` for a coerced input.
- *
- * For example: `typeof MatInput.ngAcceptInputType_value`, where MatInput is `typeName` and `value`
- * is the `coercedInputName`.
- *
- * @param typeName The `EntityName` of the Directive where the static coerced input is defined.
- * @param coercedInputName The field name of the coerced input.
- */
-function tsCreateTypeQueryForCoercedInput(typeName, coercedInputName) {
-    return ts.factory.createTypeQueryNode(ts.factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
-}
-/**
- * Create a `ts.VariableStatement` that initializes a variable with a given expression.
- *
- * Unlike with `tsDeclareVariable`, the type of the variable is inferred from the initializer
- * expression.
- */
-function tsCreateVariable(id, initializer, flags = null) {
-    const decl = ts.factory.createVariableDeclaration(
-    /* name */ id, 
-    /* exclamationToken */ undefined, 
-    /* type */ undefined, 
-    /* initializer */ initializer);
-    return ts.factory.createVariableStatement(
-    /* modifiers */ undefined, 
-    /* declarationList */ flags === null
-        ? [decl]
-        : ts.factory.createVariableDeclarationList([decl], flags));
-}
-/**
- * Construct a `ts.CallExpression` that calls a method on a receiver.
- */
-function tsCallMethod(receiver, methodName, args = []) {
-    const methodAccess = ts.factory.createPropertyAccessExpression(receiver, methodName);
-    return ts.factory.createCallExpression(
-    /* expression */ methodAccess, 
-    /* typeArguments */ undefined, 
-    /* argumentsArray */ args);
-}
-function isAccessExpression(node) {
-    return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
-}
-/**
- * Creates a TypeScript node representing a numeric value.
- */
-function tsNumericExpression(value) {
-    // As of TypeScript 5.3 negative numbers are represented as `prefixUnaryOperator` and passing a
-    // negative number (even as a string) into `createNumericLiteral` will result in an error.
-    if (value < 0) {
-        const operand = ts.factory.createNumericLiteral(Math.abs(value));
-        return ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, operand);
-    }
-    return ts.factory.createNumericLiteral(value);
-}
-
-/**
  * See `TypeEmitter` for more information on the emitting process.
  */
 class TypeParameterEmitter {
@@ -43993,7 +44023,12 @@ function translateDiagnostic(diagnostic, resolver) {
         return null;
     }
     const { sourceLocation, sourceMapping: templateSourceMapping, span } = fullMapping;
-    return makeTemplateDiagnostic(sourceLocation.id, templateSourceMapping, span, diagnostic.category, diagnostic.code, diagnostic.messageText);
+    return makeTemplateDiagnostic(sourceLocation.id, templateSourceMapping, span, diagnostic.category, diagnostic.code, diagnostic.messageText, undefined, diagnostic.reportsDeprecated !== undefined
+        ? {
+            reportsDeprecated: diagnostic.reportsDeprecated,
+            relatedMessages: diagnostic.relatedInformation,
+        }
+        : undefined);
 }
 
 /**
@@ -48016,13 +48051,6 @@ class SymbolBuilder {
     }
     getDirectivesOfNode(templateNode) {
         const elementSourceSpan = templateNode.startSourceSpan ?? templateNode.sourceSpan;
-        const tcbSourceFile = this.typeCheckBlock.getSourceFile();
-        // directives could be either:
-        // - var _t1: TestDir /*T:D*/ = null! as TestDir;
-        // - var _t1 /*T:D*/ = _ctor1({});
-        const isDirectiveDeclaration = (node) => (ts.isTypeNode(node) || ts.isIdentifier(node)) &&
-            ts.isVariableDeclaration(node.parent) &&
-            hasExpressionIdentifier(tcbSourceFile, node, ExpressionIdentifier.DIRECTIVE);
         const nodes = findAllMatchingNodes(this.typeCheckBlock, {
             withSpan: elementSourceSpan,
             filter: isDirectiveDeclaration,
@@ -48886,6 +48914,29 @@ class TemplateTypeCheckerImpl {
             return diagnostics.filter((diag) => diag !== null);
         });
     }
+    getSuggestionDiagnosticsForFile(sf, tsLs, optimizeFor) {
+        switch (optimizeFor) {
+            case exports.OptimizeFor.WholeProgram:
+                this.ensureAllShimsForAllFiles();
+                break;
+            case exports.OptimizeFor.SingleFile:
+                this.ensureAllShimsForOneFile(sf);
+                break;
+        }
+        return this.perf.inPhase(exports.PerfPhase.TtcSuggestionDiagnostics, () => {
+            const sfPath = absoluteFromSourceFile(sf);
+            const fileRecord = this.state.get(sfPath);
+            const diagnostics = [];
+            const program = this.programDriver.getProgram();
+            if (fileRecord.hasInlines) {
+                diagnostics.push(...getDeprecatedSuggestionDiagnostics(tsLs, program, sfPath, fileRecord, this));
+            }
+            for (const [shimPath] of fileRecord.shimData) {
+                diagnostics.push(...getDeprecatedSuggestionDiagnostics(tsLs, program, shimPath, fileRecord, this));
+            }
+            return diagnostics.filter((diag) => diag !== null);
+        });
+    }
     getDiagnosticsForComponent(component) {
         this.ensureShimForComponent(component);
         return this.perf.inPhase(exports.PerfPhase.TtcDiagnostics, () => {
@@ -48915,6 +48966,27 @@ class TemplateTypeCheckerImpl {
                 diagnostics.push(...templateData.templateParsingDiagnostics);
             }
             return diagnostics.filter((diag) => diag !== null && diag.typeCheckId === id);
+        });
+    }
+    getSuggestionDiagnosticsForComponent(component, tsLs) {
+        this.ensureShimForComponent(component);
+        return this.perf.inPhase(exports.PerfPhase.TtcSuggestionDiagnostics, () => {
+            const sf = component.getSourceFile();
+            const sfPath = absoluteFromSourceFile(sf);
+            const shimPath = TypeCheckShimGenerator.shimFor(sfPath);
+            const fileRecord = this.getFileData(sfPath);
+            if (!fileRecord.shimData.has(shimPath)) {
+                return [];
+            }
+            const templateId = fileRecord.sourceManager.getTypeCheckId(component);
+            const shimRecord = fileRecord.shimData.get(shimPath);
+            const diagnostics = [];
+            const program = this.programDriver.getProgram();
+            if (shimRecord.hasInlines) {
+                diagnostics.push(...getDeprecatedSuggestionDiagnostics(tsLs, program, sfPath, fileRecord, this));
+            }
+            diagnostics.push(...getDeprecatedSuggestionDiagnostics(tsLs, program, shimPath, fileRecord, this));
+            return diagnostics.filter((diag) => diag !== null && diag.typeCheckId === templateId);
         });
     }
     getTypeCheckBlock(component) {
@@ -49739,6 +49811,124 @@ function getClassDeclFromSymbol(symbol, checker) {
         return decl;
     }
     return null;
+}
+/**
+ * Returns the diagnostics that report deprecated symbols in the given TypeScript language service.
+ *
+ * There are two logins here:
+ *
+ * 1. For input properties, function calls, and so on, the diagnostics reported in the TypeScript
+ *    Language Service can be directly transformed into template diagnostics.
+ * 2. For the element tag deprecation, we need to manually connect the TCB node to the template node
+ *    and generate the template diagnostics.
+ */
+function getDeprecatedSuggestionDiagnostics(tsLs, program, path, fileRecord, templateTypeChecker) {
+    const sourceFile = program.getSourceFile(path);
+    if (sourceFile === undefined) {
+        return [];
+    }
+    const tsDiags = tsLs.getSuggestionDiagnostics(path).filter(isDeprecatedDiagnostics);
+    const commonTemplateDiags = tsDiags.map((diag) => {
+        return convertDiagnostic(diag, fileRecord.sourceManager);
+    });
+    const elementTagDiags = getTheElementTagDeprecatedSuggestionDiagnostics(path, program, fileRecord, tsDiags, templateTypeChecker);
+    return [...commonTemplateDiags, ...elementTagDiags];
+}
+/**
+ * Connect the TCB node to the template node and generate the template diagnostics.
+ *
+ * How to generate the template diagnostics:
+ *
+ * 1. For each diagnostic, find the TCB node that is reported.
+ * 2. Build a map called `nodeToDiag` that the key is the type node and value is the diagnostic.
+ *    For example:
+ *    ```
+ *    var _t1 = null! as TestDir;
+ *                       ^^^^^^^------ This is diagnostic node that is reported by the ts.
+ *    ```
+ *    The key is the class component of TestDir.
+ * 3. Find the all directive nodes in the TCB.
+ *    For example:
+ *    In the above example, the directive node is `_t1`, get the type of `_t1` which is the
+ *    class component of `TestDir`. Check if there is a diagnostic in the `nodeToDiag` map
+ *    that matches the class component of `TestDir`.
+ *    If there is a match, it means that the diagnostic is reported for the directive node
+ * 4. Generate the template diagnostic and return the template diagnostics.
+ */
+function getTheElementTagDeprecatedSuggestionDiagnostics(shimPath, program, fileRecord, diags, templateTypeChecker) {
+    const sourceFile = program.getSourceFile(shimPath);
+    if (sourceFile === undefined) {
+        return [];
+    }
+    const typeChecker = program.getTypeChecker();
+    const nodeToDiag = new Map();
+    for (const tsDiag of diags) {
+        const diagNode = getTokenAtPosition(sourceFile, tsDiag.start);
+        const nodeType = typeChecker.getTypeAtLocation(diagNode);
+        const nodeSymbolDeclarations = nodeType.symbol.declarations;
+        const decl = nodeSymbolDeclarations !== undefined && nodeSymbolDeclarations.length > 0
+            ? nodeSymbolDeclarations[0]
+            : undefined;
+        if (decl === undefined || !ts.isClassDeclaration(decl)) {
+            continue;
+        }
+        const directiveForDiagnostic = templateTypeChecker.getDirectiveMetadata(decl);
+        // For now, we only report deprecations for components. This is because
+        // directive spans apply to the entire element, so it would cause the deprecation to
+        // appear as a deprecation for the element rather than whatever the selector (likely an attribute)
+        // is for the directive. Technically components have this issue as well but nearly
+        // all component selectors are element selectors.
+        if (directiveForDiagnostic === null || !directiveForDiagnostic.isComponent) {
+            continue;
+        }
+        nodeToDiag.set(decl, tsDiag);
+    }
+    const directiveNodesInTcb = findAllMatchingNodes(sourceFile, {
+        filter: isDirectiveDeclaration,
+    });
+    const templateDiagnostics = [];
+    for (const directive of directiveNodesInTcb) {
+        const directiveType = typeChecker.getTypeAtLocation(directive);
+        const directiveSymbolDeclarations = directiveType.symbol.declarations;
+        const decl = directiveSymbolDeclarations !== undefined && directiveSymbolDeclarations.length > 0
+            ? directiveSymbolDeclarations[0]
+            : undefined;
+        if (decl === undefined) {
+            continue;
+        }
+        if (!ts.isClassDeclaration(decl)) {
+            continue;
+        }
+        const diagnostic = nodeToDiag.get(decl);
+        if (diagnostic === undefined) {
+            continue;
+        }
+        const fullMapping = getSourceMapping(diagnostic.file, directive.getStart(), fileRecord.sourceManager, 
+        /**
+         * Don't set to true, the deprecated diagnostics will be ignored if this is a diagnostics request.
+         * Only the deprecated diagnostics will be reported here.
+         */
+        // For example:
+        // var _t2 /*T:DIR*/ /*87,104*/ = _ctor1({ "name": ("") /*96,103*/ }) /*D:ignore*/;
+        // At the end of the statement, there is a comment `/*D:ignore*/` which means that this diagnostic
+        // should be ignored in diagnostics request.
+        /*isDiagnosticsRequest*/ false);
+        if (fullMapping === null) {
+            continue;
+        }
+        const { sourceLocation, sourceMapping: templateSourceMapping, span } = fullMapping;
+        const templateDiagnostic = makeTemplateDiagnostic(sourceLocation.id, templateSourceMapping, span, diagnostic.category, diagnostic.code, diagnostic.messageText, undefined, diagnostic.reportsDeprecated !== undefined
+            ? {
+                reportsDeprecated: diagnostic.reportsDeprecated,
+                relatedMessages: diagnostic.relatedInformation,
+            }
+            : undefined);
+        templateDiagnostics.push(templateDiagnostic);
+    }
+    return templateDiagnostics;
+}
+function isDeprecatedDiagnostics(diag) {
+    return diag.reportsDeprecated !== undefined;
 }
 
 exports.AST = AST;
