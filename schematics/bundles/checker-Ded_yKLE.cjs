@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.0+sha-acf8b74
+ * @license Angular v20.1.0+sha-70c8780
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15667,6 +15667,19 @@ var CharacterReferenceType;
     CharacterReferenceType["HEX"] = "hexadecimal";
     CharacterReferenceType["DEC"] = "decimal";
 })(CharacterReferenceType || (CharacterReferenceType = {}));
+const SUPPORTED_BLOCKS = [
+    '@if',
+    '@else', // Covers `@else if` as well
+    '@for',
+    '@switch',
+    '@case',
+    '@default',
+    '@empty',
+    '@defer',
+    '@placeholder',
+    '@loading',
+    '@error',
+];
 // See https://www.w3.org/TR/html51/syntax.html#writing-html-documents
 class _Tokenizer {
     _getTagDefinition;
@@ -15757,10 +15770,10 @@ class _Tokenizer {
                     // don't want to advance in case it's not `@let`.
                     this._cursor.peek() === $AT &&
                     !this._inInterpolation &&
-                    this._attemptStr('@let')) {
+                    this._isLetStart()) {
                     this._consumeLetDeclaration(start);
                 }
-                else if (this._tokenizeBlocks && this._attemptCharCode($AT)) {
+                else if (this._tokenizeBlocks && this._isBlockStart()) {
                     this._consumeBlockStart(start);
                 }
                 else if (this._tokenizeBlocks &&
@@ -15800,6 +15813,7 @@ class _Tokenizer {
         return this._cursor.getChars(nameCursor).trim();
     }
     _consumeBlockStart(start) {
+        this._requireCharCode($AT);
         this._beginToken(24 /* TokenType.BLOCK_OPEN_START */, start);
         const startToken = this._endToken([this._getBlockName()]);
         if (this._cursor.peek() === $LPAREN) {
@@ -15872,6 +15886,7 @@ class _Tokenizer {
         }
     }
     _consumeLetDeclaration(start) {
+        this._requireStr('@let');
         this._beginToken(29 /* TokenType.LET_START */, start);
         // Require at least one white space after the `@let`.
         if (isWhitespace(this._cursor.peek())) {
@@ -16084,6 +16099,27 @@ class _Tokenizer {
         const char = String.fromCodePoint(this._cursor.peek());
         this._cursor.advance();
         return char;
+    }
+    _peekStr(chars) {
+        const len = chars.length;
+        if (this._cursor.charsLeft() < len) {
+            return false;
+        }
+        const cursor = this._cursor.clone();
+        for (let i = 0; i < len; i++) {
+            if (cursor.peek() !== chars.charCodeAt(i)) {
+                return false;
+            }
+            cursor.advance();
+        }
+        return true;
+    }
+    _isBlockStart() {
+        return (this._cursor.peek() === $AT &&
+            SUPPORTED_BLOCKS.some((blockName) => this._peekStr(blockName)));
+    }
+    _isLetStart() {
+        return this._cursor.peek() === $AT && this._peekStr('@let');
     }
     _consumeEntity(textTokenType) {
         this._beginToken(9 /* TokenType.ENCODED_ENTITY */);
@@ -16631,7 +16667,7 @@ class _Tokenizer {
         if (this._tokenizeBlocks &&
             !this._inInterpolation &&
             !this._isInExpansion() &&
-            (this._cursor.peek() === $AT || this._cursor.peek() === $RBRACE)) {
+            (this._isBlockStart() || this._isLetStart() || this._cursor.peek() === $RBRACE)) {
             return true;
         }
         return false;
@@ -32230,7 +32266,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.0+sha-acf8b74');
+new Version('20.1.0+sha-70c8780');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33250,7 +33286,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DZh1DIQ6.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Ded_yKLE.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
