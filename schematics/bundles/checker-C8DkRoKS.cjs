@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.0+sha-e8c5603
+ * @license Angular v20.2.0-next.0+sha-80da073
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19381,12 +19381,13 @@ class _ParseAST {
         else {
             if (this.isAssignmentOperator(this.next)) {
                 const operation = this.next.strValue;
-                this.advance();
                 if (!(this.parseFlags & 1 /* ParseFlags.Action */)) {
+                    this.advance();
                     this.error('Bindings cannot contain assignments');
                     return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
                 }
                 const receiver = new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
+                this.advance();
                 const value = this.parseConditional();
                 return new Binary(this.span(start), this.sourceSpan(start), operation, receiver, value);
             }
@@ -19505,12 +19506,13 @@ class _ParseAST {
             this.expectCharacter($RBRACKET);
             if (this.isAssignmentOperator(this.next)) {
                 const operation = this.next.strValue;
-                this.advance();
                 if (isSafe) {
+                    this.advance();
                     this.error("The '?.' operator cannot be used in the assignment");
                 }
                 else {
                     const binaryReceiver = new KeyedRead(this.span(start), this.sourceSpan(start), receiver, key);
+                    this.advance();
                     const value = this.parseConditional();
                     return new Binary(this.span(start), this.sourceSpan(start), operation, binaryReceiver, value);
                 }
@@ -32228,7 +32230,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.0+sha-e8c5603');
+new Version('20.2.0-next.0+sha-80da073');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33248,7 +33250,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CBFvHh1j.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-C8DkRoKS.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
