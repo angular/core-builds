@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.1+sha-f5f8f76
+ * @license Angular v20.2.0-next.1+sha-fc8247d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-BVY3FNBy.cjs');
+var checker = require('./checker-CCchFf_F.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-f5f8f76'));
+    definitionMap.set('version', checker.literal('20.2.0-next.1+sha-fc8247d'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12321,7 +12321,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('20.2.0-next.1+sha-f5f8f76');
+new checker.Version('20.2.0-next.1+sha-fc8247d');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16461,6 +16461,8 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
                 node.type === checker.BindingType.Style ||
                 // or an attribute binding like `[attr.role]="mySignal"`
                 node.type === checker.BindingType.Attribute ||
+                // or an animation binding like `[animate.enter]="mySignal"`
+                node.type === checker.BindingType.Animation ||
                 // or an animation binding like `[@myAnimation]="mySignal"`
                 node.type === checker.BindingType.LegacyAnimation) &&
                 nodeAst) {
@@ -16514,7 +16516,7 @@ function buildDiagnosticForSignal(ctx, node, component) {
     }
     return [];
 }
-const factory$d = {
+const factory$e = {
     code: checker.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED,
     name: checker.ExtendedTemplateDiagnosticName.INTERPOLATED_SIGNAL_NOT_INVOKED,
     create: () => new InterpolatedSignalCheck(),
@@ -16540,7 +16542,7 @@ class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$c = {
+const factory$d = {
     code: checker.ErrorCode.INVALID_BANANA_IN_BOX,
     name: checker.ExtendedTemplateDiagnosticName.INVALID_BANANA_IN_BOX,
     create: () => new InvalidBananaInBoxCheck(),
@@ -16601,7 +16603,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$b = {
+const factory$c = {
     code: checker.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_CONTROL_FLOW_DIRECTIVE,
     create: (options) => {
@@ -16634,7 +16636,7 @@ class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$a = {
+const factory$b = {
     code: checker.ErrorCode.MISSING_NGFOROF_LET,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_NGFOROF_LET,
     create: () => new MissingNgForOfLetCheck(),
@@ -16689,7 +16691,7 @@ class MissingStructuralDirectiveCheck extends TemplateCheckWithVisitor {
         return [ctx.makeTemplateDiagnostic(sourceSpan, errorMessage)];
     }
 }
-const factory$9 = {
+const factory$a = {
     code: checker.ErrorCode.MISSING_STRUCTURAL_DIRECTIVE,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_STRUCTURAL_DIRECTIVE,
     create: () => new MissingStructuralDirectiveCheck(),
@@ -16734,7 +16736,7 @@ class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$8 = {
+const factory$9 = {
     code: checker.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE,
     name: checker.ExtendedTemplateDiagnosticName.NULLISH_COALESCING_NOT_NULLABLE,
     create: (options) => {
@@ -16791,7 +16793,7 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$7 = {
+const factory$8 = {
     code: checker.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE,
     name: checker.ExtendedTemplateDiagnosticName.OPTIONAL_CHAIN_NOT_NULLABLE,
     create: (options) => {
@@ -16831,7 +16833,7 @@ class NgSkipHydrationSpec extends TemplateCheckWithVisitor {
         return [];
     }
 }
-const factory$6 = {
+const factory$7 = {
     code: checker.ErrorCode.SKIP_HYDRATION_NOT_STATIC,
     name: checker.ExtendedTemplateDiagnosticName.SKIP_HYDRATION_NOT_STATIC,
     create: () => new NgSkipHydrationSpec(),
@@ -16855,7 +16857,7 @@ class SuffixNotSupportedCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$5 = {
+const factory$6 = {
     code: checker.ErrorCode.SUFFIX_NOT_SUPPORTED,
     name: checker.ExtendedTemplateDiagnosticName.SUFFIX_NOT_SUPPORTED,
     create: () => new SuffixNotSupportedCheck(),
@@ -16900,7 +16902,7 @@ class TextAttributeNotBindingSpec extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$4 = {
+const factory$5 = {
     code: checker.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING,
     name: checker.ExtendedTemplateDiagnosticName.TEXT_ATTRIBUTE_NOT_BINDING,
     create: () => new TextAttributeNotBindingSpec(),
@@ -16925,22 +16927,22 @@ class UninvokedFunctionInEventBindingSpec extends TemplateCheckWithVisitor {
         const sourceExpressionText = node.handler.source || '';
         if (node.handler.ast instanceof checker.Chain) {
             // (click)="increment; decrement"
-            return node.handler.ast.expressions.flatMap((expression) => assertExpressionInvoked(expression, component, node, sourceExpressionText, ctx));
+            return node.handler.ast.expressions.flatMap((expression) => assertExpressionInvoked$1(expression, component, node, sourceExpressionText, ctx));
         }
         if (node.handler.ast instanceof checker.Conditional) {
             // (click)="true ? increment : decrement"
             const { trueExp, falseExp } = node.handler.ast;
-            return [trueExp, falseExp].flatMap((expression) => assertExpressionInvoked(expression, component, node, sourceExpressionText, ctx));
+            return [trueExp, falseExp].flatMap((expression) => assertExpressionInvoked$1(expression, component, node, sourceExpressionText, ctx));
         }
         // (click)="increment"
-        return assertExpressionInvoked(node.handler.ast, component, node, sourceExpressionText, ctx);
+        return assertExpressionInvoked$1(node.handler.ast, component, node, sourceExpressionText, ctx);
     }
 }
 /**
  * Asserts that the expression is invoked.
  * If the expression is a property read, and it has a call signature, a diagnostic is generated.
  */
-function assertExpressionInvoked(expression, component, node, expressionText, ctx) {
+function assertExpressionInvoked$1(expression, component, node, expressionText, ctx) {
     if (expression instanceof checker.Call || expression instanceof checker.SafeCall) {
         return []; // If the method is called, skip it.
     }
@@ -16950,17 +16952,17 @@ function assertExpressionInvoked(expression, component, node, expressionText, ct
     const symbol = ctx.templateTypeChecker.getSymbolOfNode(expression, component);
     if (symbol !== null && symbol.kind === checker.SymbolKind.Expression) {
         if (symbol.tsType.getCallSignatures()?.length > 0) {
-            const fullExpressionText = generateStringFromExpression$1(expression, expressionText);
+            const fullExpressionText = generateStringFromExpression$2(expression, expressionText);
             const errorString = `Function in event binding should be invoked: ${fullExpressionText}()`;
             return [ctx.makeTemplateDiagnostic(node.sourceSpan, errorString)];
         }
     }
     return [];
 }
-function generateStringFromExpression$1(expression, source) {
+function generateStringFromExpression$2(expression, source) {
     return source.substring(expression.span.start, expression.span.end);
 }
-const factory$3 = {
+const factory$4 = {
     code: checker.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     name: checker.ExtendedTemplateDiagnosticName.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     create: () => new UninvokedFunctionInEventBindingSpec(),
@@ -16993,7 +16995,7 @@ class UnparenthesizedNullishCoalescing extends TemplateCheckWithVisitor {
         return [];
     }
 }
-const factory$2 = {
+const factory$3 = {
     code: checker.ErrorCode.UNPARENTHESIZED_NULLISH_COALESCING,
     name: checker.ExtendedTemplateDiagnosticName.UNPARENTHESIZED_NULLISH_COALESCING,
     create: () => new UnparenthesizedNullishCoalescing(),
@@ -17037,7 +17039,7 @@ class UnusedLetDeclarationCheck extends TemplateCheckWithVisitor {
         return this.analysis.get(node);
     }
 }
-const factory$1 = {
+const factory$2 = {
     code: checker.ErrorCode.UNUSED_LET_DECLARATION,
     name: checker.ExtendedTemplateDiagnosticName.UNUSED_LET_DECLARATION,
     create: () => new UnusedLetDeclarationCheck(),
@@ -17065,20 +17067,54 @@ class UninvokedTrackFunctionCheck extends TemplateCheckWithVisitor {
         if (symbol !== null &&
             symbol.kind === checker.SymbolKind.Expression &&
             symbol.tsType.getCallSignatures()?.length > 0) {
-            const fullExpressionText = generateStringFromExpression(node.trackBy.ast, node.trackBy.source || '');
+            const fullExpressionText = generateStringFromExpression$1(node.trackBy.ast, node.trackBy.source || '');
             const errorString = `The track function in the @for block should be invoked: ${fullExpressionText}(/* arguments */)`;
             return [ctx.makeTemplateDiagnostic(node.sourceSpan, errorString)];
         }
         return [];
     }
 }
+function generateStringFromExpression$1(expression, source) {
+    return source.substring(expression.span.start, expression.span.end);
+}
+const factory$1 = {
+    code: checker.ErrorCode.UNINVOKED_TRACK_FUNCTION,
+    name: checker.ExtendedTemplateDiagnosticName.UNINVOKED_TRACK_FUNCTION,
+    create: () => new UninvokedTrackFunctionCheck(),
+};
+
+class UninvokedFunctionInTextInterpolation extends TemplateCheckWithVisitor {
+    code = checker.ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION;
+    visitNode(ctx, component, node) {
+        // interpolations like `{{ myFunction }}`
+        if (node instanceof checker.Interpolation) {
+            return node.expressions.flatMap((item) => assertExpressionInvoked(item, component, node.sourceSpan, ctx));
+        }
+        return [];
+    }
+}
+function assertExpressionInvoked(expression, component, sourceSpan, ctx) {
+    if (!(expression instanceof checker.PropertyRead) && !(expression instanceof checker.SafePropertyRead)) {
+        return []; // If the expression is not a property read, skip it.
+    }
+    const symbol = ctx.templateTypeChecker.getSymbolOfNode(expression, component);
+    if (symbol !== null && symbol.kind === checker.SymbolKind.Expression) {
+        if (symbol.tsType.getCallSignatures()?.length > 0) {
+            const fullExpressionText = generateStringFromExpression(expression, sourceSpan.toString());
+            const errorString = `Function in text interpolation should be invoked: ${fullExpressionText}()`;
+            const templateMapping = ctx.templateTypeChecker.getSourceMappingAtTcbLocation(symbol.tcbLocation);
+            return [ctx.makeTemplateDiagnostic(templateMapping.span, errorString)];
+        }
+    }
+    return [];
+}
 function generateStringFromExpression(expression, source) {
     return source.substring(expression.span.start, expression.span.end);
 }
 const factory = {
-    code: checker.ErrorCode.UNINVOKED_TRACK_FUNCTION,
-    name: checker.ExtendedTemplateDiagnosticName.UNINVOKED_TRACK_FUNCTION,
-    create: () => new UninvokedTrackFunctionCheck(),
+    code: checker.ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION,
+    name: checker.ExtendedTemplateDiagnosticName.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION,
+    create: () => new UninvokedFunctionInTextInterpolation(),
 };
 
 /**
@@ -17168,19 +17204,20 @@ function assertNever(value) {
 }
 
 const ALL_DIAGNOSTIC_FACTORIES = [
-    factory$c,
-    factory$8,
-    factory$7,
-    factory$b,
-    factory$4,
-    factory$a,
-    factory$9,
-    factory$5,
     factory$d,
+    factory$9,
+    factory$8,
+    factory$c,
+    factory$5,
+    factory$b,
+    factory$a,
+    factory$6,
+    factory$e,
+    factory$4,
+    factory$2,
+    factory$7,
     factory$3,
     factory$1,
-    factory$6,
-    factory$2,
     factory,
 ];
 const SUPPORTED_DIAGNOSTIC_NAMES = new Set([
@@ -20278,7 +20315,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.2.0-next.1+sha-f5f8f76` usually means that core is at head so it supports
+    // A version of `20.2.0-next.1+sha-fc8247d` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.1+sha-f5f8f76
+ * @license Angular v20.2.0-next.1+sha-fc8247d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var checker = require('./checker-BVY3FNBy.cjs');
+var checker = require('./checker-CCchFf_F.cjs');
 require('os');
 var p = require('path');
 
