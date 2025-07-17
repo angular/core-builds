@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.1+sha-dcab8c9
+ * @license Angular v20.1.1+sha-8ad10fd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31494,7 +31494,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
             declarations.push(...decl.directives.map((dir) => convertDirectiveDeclarationToMetadata(dir)));
         decl.pipes && declarations.push(...convertPipeMapToMetadata(decl.pipes));
     }
-    const hasDirectiveDependencies = declarations.every(({ kind }) => kind === exports.R3TemplateDependencyKind.Directive || kind === exports.R3TemplateDependencyKind.NgModule);
+    const hasDirectiveDependencies = declarations.some(({ kind }) => kind === exports.R3TemplateDependencyKind.Directive || kind === exports.R3TemplateDependencyKind.NgModule);
     return {
         ...convertDeclareDirectiveFacadeToMetadata(decl, typeSourceSpan),
         template,
@@ -32271,7 +32271,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.1+sha-dcab8c9');
+new Version('20.1.1+sha-8ad10fd');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33291,7 +33291,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CwUJ2eKt.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B0RMVBjs.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
