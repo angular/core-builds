@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.1+sha-d3b770d
+ * @license Angular v20.2.0-next.1+sha-448a7f7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -626,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.2.0-next.1+sha-d3b770d');
+const VERSION = new Version('20.2.0-next.1+sha-448a7f7');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -947,39 +947,36 @@ function bootstrap(config) {
             const taskId = pendingTasks.add();
             const initStatus = envInjector.get(ApplicationInitStatus);
             initStatus.runInitializers();
-            return initStatus.donePromise.then(() => {
-                try {
-                    // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
-                    const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    const enableRootComponentBoostrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
-                    if (!enableRootComponentBoostrap) {
-                        if (isApplicationBootstrapConfig(config)) {
-                            return envInjector.get(ApplicationRef);
-                        }
-                        config.allPlatformModules.push(config.moduleRef);
-                        return config.moduleRef;
-                    }
-                    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                        const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
-                        imagePerformanceService.start();
-                    }
+            return initStatus.donePromise
+                .then(() => {
+                // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+                setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                const enableRootComponentBoostrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
+                if (!enableRootComponentBoostrap) {
                     if (isApplicationBootstrapConfig(config)) {
-                        const appRef = envInjector.get(ApplicationRef);
-                        if (config.rootComponent !== undefined) {
-                            appRef.bootstrap(config.rootComponent);
-                        }
-                        return appRef;
+                        return envInjector.get(ApplicationRef);
                     }
-                    else {
-                        moduleBootstrapImpl?.(config.moduleRef, config.allPlatformModules);
-                        return config.moduleRef;
+                    config.allPlatformModules.push(config.moduleRef);
+                    return config.moduleRef;
+                }
+                if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                    const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
+                    imagePerformanceService.start();
+                }
+                if (isApplicationBootstrapConfig(config)) {
+                    const appRef = envInjector.get(ApplicationRef);
+                    if (config.rootComponent !== undefined) {
+                        appRef.bootstrap(config.rootComponent);
                     }
+                    return appRef;
                 }
-                finally {
-                    pendingTasks.remove(taskId);
+                else {
+                    moduleBootstrapImpl?.(config.moduleRef, config.allPlatformModules);
+                    return config.moduleRef;
                 }
-            });
+            })
+                .finally(() => void pendingTasks.remove(taskId));
         });
     });
 }
