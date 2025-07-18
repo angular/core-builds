@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.1+sha-891444d
+ * @license Angular v20.2.0-next.1+sha-7eb9fcd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5614,6 +5614,7 @@ declare abstract class BaseWritableResource<T> implements WritableResource<T> {
     private readonly isError;
     update(updateFn: (value: T) => T): void;
     readonly isLoading: Signal<boolean>;
+    private readonly isValueDefined;
     hasValue(): this is ResourceRef<Exclude<T, undefined>>;
     asReadonly(): Resource<T>;
 }
