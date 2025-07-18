@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.2+sha-ba8a5d8
+ * @license Angular v20.1.2+sha-409287a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -332,14 +332,17 @@ class BaseWritableResource {
         this.set(updateFn(untracked(this.value)));
     }
     isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading');
-    hasValue() {
-        // Note: we specifically read `isError()` instead of `status()` here to avoid triggering
-        // reactive consumers which read `hasValue()`. This way, if `hasValue()` is used inside of an
-        // effect, it doesn't cause the effect to rerun on every status change.
+    // Use a computed here to avoid triggering reactive consumers if the value changes while staying
+    // either defined or undefined.
+    isValueDefined = computed(() => {
+        // Check if it's in an error state first to prevent the error from bubbling up.
         if (this.isError()) {
             return false;
         }
         return this.value() !== undefined;
+    });
+    hasValue() {
+        return this.isValueDefined();
     }
     asReadonly() {
         return this;
