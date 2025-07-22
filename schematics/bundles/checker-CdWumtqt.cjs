@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.1+sha-db3c928
+ * @license Angular v20.2.0-next.1+sha-4138aca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2693,6 +2693,7 @@ class Identifiers {
     static pipeBind4 = { name: 'ɵɵpipeBind4', moduleName: CORE };
     static pipeBindV = { name: 'ɵɵpipeBindV', moduleName: CORE };
     static domProperty = { name: 'ɵɵdomProperty', moduleName: CORE };
+    static ariaProperty = { name: 'ɵɵariaProperty', moduleName: CORE };
     static property = { name: 'ɵɵproperty', moduleName: CORE };
     static animationEnterListener = {
         name: 'ɵɵanimateEnterListener',
@@ -11769,6 +11770,7 @@ function specializeBindings(job) {
 }
 
 const CHAIN_COMPATIBILITY = new Map([
+    [Identifiers.ariaProperty, Identifiers.ariaProperty],
     [Identifiers.attribute, Identifiers.attribute],
     [Identifiers.classProp, Identifiers.classProp],
     [Identifiers.element, Identifiers.element],
@@ -20496,6 +20498,44 @@ const _ATTR_TO_PROP = new Map(Object.entries({
     'innerHtml': 'innerHTML',
     'readonly': 'readOnly',
     'tabindex': 'tabIndex',
+    // https://www.w3.org/TR/wai-aria-1.2/#accessibilityroleandproperties-correspondence
+    'aria-atomic': 'ariaAtomic',
+    'aria-autocomplete': 'ariaAutoComplete',
+    'aria-busy': 'ariaBusy',
+    'aria-checked': 'ariaChecked',
+    'aria-colcount': 'ariaColCount',
+    'aria-colindex': 'ariaColIndex',
+    'aria-colspan': 'ariaColSpan',
+    'aria-current': 'ariaCurrent',
+    'aria-disabled': 'ariaDisabled',
+    'aria-expanded': 'ariaExpanded',
+    'aria-haspopup': 'ariaHasPopup',
+    'aria-hidden': 'ariaHidden',
+    'aria-invalid': 'ariaInvalid',
+    'aria-keyshortcuts': 'ariaKeyShortcuts',
+    'aria-label': 'ariaLabel',
+    'aria-level': 'ariaLevel',
+    'aria-live': 'ariaLive',
+    'aria-modal': 'ariaModal',
+    'aria-multiline': 'ariaMultiLine',
+    'aria-multiselectable': 'ariaMultiSelectable',
+    'aria-orientation': 'ariaOrientation',
+    'aria-placeholder': 'ariaPlaceholder',
+    'aria-posinset': 'ariaPosInSet',
+    'aria-pressed': 'ariaPressed',
+    'aria-readonly': 'ariaReadOnly',
+    'aria-required': 'ariaRequired',
+    'aria-roledescription': 'ariaRoleDescription',
+    'aria-rowcount': 'ariaRowCount',
+    'aria-rowindex': 'ariaRowIndex',
+    'aria-rowspan': 'ariaRowSpan',
+    'aria-selected': 'ariaSelected',
+    'aria-setsize': 'ariaSetSize',
+    'aria-sort': 'ariaSort',
+    'aria-valuemax': 'ariaValueMax',
+    'aria-valuemin': 'ariaValueMin',
+    'aria-valuenow': 'ariaValueNow',
+    'aria-valuetext': 'ariaValueText',
 }));
 // Invert _ATTR_TO_PROP.
 const _PROP_TO_ATTR = Array.from(_ATTR_TO_PROP).reduce((inverted, [propertyName, attributeName]) => {
@@ -23499,6 +23539,9 @@ function i18nAttributes(slot, i18nAttributesConfig) {
     const args = [literal(slot), literal(i18nAttributesConfig)];
     return call(Identifiers.i18nAttributes, args, null);
 }
+function ariaProperty(name, expression, sourceSpan) {
+    return propertyBase(Identifiers.ariaProperty, name, expression, null, sourceSpan);
+}
 function property(name, expression, sanitizer, sourceSpan) {
     return propertyBase(Identifiers.property, name, expression, sanitizer, sourceSpan);
 }
@@ -23775,6 +23818,7 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
     return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs, extraArgs, sourceSpan).toStmt());
 }
 
+const ARIA_PREFIX = 'aria';
 /**
  * Map of target resolvers for event listeners.
  */
@@ -24081,8 +24125,8 @@ function reifyUpdateOperations(unit, ops) {
                 OpList.replace(op, unit.job.mode === TemplateCompilationMode.DomOnly &&
                     op.bindingKind !== BindingKind.LegacyAnimation &&
                     op.bindingKind !== BindingKind.Animation
-                    ? domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan)
-                    : property(op.name, op.expression, op.sanitizer, op.sourceSpan));
+                    ? reifyDomProperty(op)
+                    : reifyProperty(op));
                 break;
             case OpKind.TwoWayProperty:
                 OpList.replace(op, twoWayProperty(op.name, op.expression, op.sanitizer, op.sourceSpan));
@@ -24121,7 +24165,7 @@ function reifyUpdateOperations(unit, ops) {
                         OpList.replace(op, syntheticHostProperty(op.name, op.expression, op.sourceSpan));
                     }
                     else {
-                        OpList.replace(op, domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan));
+                        OpList.replace(op, reifyDomProperty(op));
                     }
                 }
                 break;
@@ -24152,6 +24196,61 @@ function reifyUpdateOperations(unit, ops) {
                 throw new Error(`AssertionError: Unsupported reification of update op ${OpKind[op.kind]}`);
         }
     }
+}
+/**
+ * Converts an ARIA property name to its corresponding attribute name, if necessary.
+ *
+ * For example, converts `ariaLabel` to `aria-label`.
+ *
+ * https://www.w3.org/TR/wai-aria-1.2/#accessibilityroleandproperties-correspondence
+ *
+ * This must be kept in sync with the the function of the same name in
+ * packages/core/src/render3/instructions/aria_property.ts.
+ *
+ * @param name A property name that starts with `aria`.
+ * @returns The corresponding attribute name.
+ */
+function ariaAttrName(name) {
+    return name.charAt(ARIA_PREFIX.length) !== '-'
+        ? ARIA_PREFIX + '-' + name.slice(ARIA_PREFIX.length).toLowerCase()
+        : name; // Property already has attribute name.
+}
+/**
+ * Returns whether `name` is an ARIA property (or attribute) name.
+ *
+ * This is a heuristic based on whether name begins with and is longer than `aria`. For example,
+ * this returns true for both `ariaLabel` and `aria-label`.
+ */
+function isAriaProperty(name) {
+    return name.startsWith(ARIA_PREFIX) && name.length > ARIA_PREFIX.length;
+}
+/**
+ * Reifies a DOM property binding operation.
+ *
+ * This is an optimized version of {@link reifyProperty} that avoids unnecessarily trying to bind
+ * to directive inputs at runtime for views that don't import any directives.
+ *
+ * @param op A property binding operation.
+ * @returns A statement to update the property at runtime.
+ */
+function reifyDomProperty(op) {
+    return isAriaProperty(op.name)
+        ? attribute(ariaAttrName(op.name), op.expression, null, null, op.sourceSpan)
+        : domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan);
+}
+/**
+ * Reifies a property binding operation.
+ *
+ * The returned statement attempts to bind to directive inputs before falling back to a DOM
+ * property.
+ *
+ * @param op A property binding operation.
+ * @returns A statement to update the property at runtime.
+ */
+function reifyProperty(op) {
+    return isAriaProperty(op.name)
+        ? ariaProperty(op.name, op.expression, op.sourceSpan)
+        : property(op.name, op.expression, op.sanitizer, op.sourceSpan);
 }
 function reifyIrExpression(expr) {
     if (!isIrExpression(expr)) {
@@ -32582,7 +32681,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.1+sha-db3c928');
+new Version('20.2.0-next.1+sha-4138aca');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33617,7 +33716,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CdkrLsGX.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-CdWumtqt.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -45760,7 +45859,7 @@ class TcbDomSchemaCheckerOp extends TcbOp {
             }
             if (isPropertyBinding && binding.name !== 'style' && binding.name !== 'class') {
                 // A direct binding to a property.
-                const propertyName = ATTR_TO_PROP.get(binding.name) ?? binding.name;
+                const propertyName = REGISTRY$1.getMappedPropName(binding.name);
                 if (isTemplateElement) {
                     this.tcb.domSchemaChecker.checkTemplateElementProperty(this.tcb.id, this.getTagName(element), propertyName, binding.sourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
                 }
@@ -45933,18 +46032,6 @@ class TcbComponentNodeOp extends TcbOp {
     }
 }
 /**
- * Mapping between attributes names that don't correspond to their element property names.
- * Note: this mapping has to be kept in sync with the equally named mapping in the runtime.
- */
-const ATTR_TO_PROP = new Map(Object.entries({
-    'class': 'className',
-    'for': 'htmlFor',
-    'formaction': 'formAction',
-    'innerHtml': 'innerHTML',
-    'readonly': 'readOnly',
-    'tabindex': 'tabIndex',
-}));
-/**
  * A `TcbOp` which generates code to check "unclaimed inputs" - bindings on an element which were
  * not attributed to any directive or component, and are instead processed against the HTML element
  * itself.
@@ -45989,7 +46076,7 @@ class TcbUnclaimedInputsOp extends TcbOp {
                         elId = this.scope.resolve(this.target);
                     }
                     // A direct binding to a property.
-                    const propertyName = ATTR_TO_PROP.get(binding.name) ?? binding.name;
+                    const propertyName = REGISTRY$1.getMappedPropName(binding.name);
                     const prop = ts.factory.createElementAccessExpression(elId, ts.factory.createStringLiteral(propertyName));
                     const stmt = ts.factory.createBinaryExpression(prop, ts.SyntaxKind.EqualsToken, wrapForDiagnostics(expr));
                     addParseSpanInfo(stmt, binding.sourceSpan);
