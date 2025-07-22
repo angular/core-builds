@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.1+sha-4138aca
+ * @license Angular v20.2.0-next.1+sha-a2f366f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8753,6 +8753,17 @@ interface DebugSignalGraph {
 declare function getSignalGraph(injector: Injector): DebugSignalGraph;
 
 /**
+ * Retrieves transfer state data from the DOM using the provided injector to get APP_ID.
+ * This approach works by getting the APP_ID from the injector and then finding the
+ * corresponding transfer state script tag. Internal framework keys used for hydration
+ * are stripped from the result.
+ *
+ * @param injector - The injector to use for getting APP_ID
+ * @returns The transfer state data as an object, or empty object if not available
+ */
+declare function getTransferState(injector: Injector): Record<string, unknown>;
+
+/**
  * This file introduces series of globally accessible debug tools
  * to allow for the Angular debugging story to function.
  *
@@ -8783,6 +8794,7 @@ declare const globalUtilsFunctions: {
     ɵsetProfiler: typeof setProfiler;
     ɵgetSignalGraph: typeof getSignalGraph;
     ɵgetDeferBlocks: typeof getDeferBlocks;
+    ɵgetTransferState: typeof getTransferState;
     getDirectiveMetadata: typeof getDirectiveMetadata;
     getComponent: typeof getComponent;
     getContext: typeof getContext;
@@ -8819,17 +8831,6 @@ type FrameworkAgnosticGlobalUtils = Omit<typeof globalUtilsFunctions, 'getDirect
  * So that it can be used from the browser console when an application is not in production.
  */
 declare function publishExternalGlobalUtil<K extends ExternalGlobalUtilsFunctions>(name: K, fn: NgGlobalPublishUtils[K]): void;
-
-/**
- * Retrieves transfer state data from the DOM using the provided injector to get APP_ID.
- * This approach works by getting the APP_ID from the injector and then finding the
- * corresponding transfer state script tag. Internal framework keys used for hydration
- * are stripped from the result.
- *
- * @param injector - The injector to use for getting APP_ID
- * @returns The transfer state data as an object, or empty object if not available
- */
-declare function getTransferState(injector: Injector): Record<string, unknown>;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
