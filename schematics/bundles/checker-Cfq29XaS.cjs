@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.1+sha-882522c
+ * @license Angular v20.2.0-next.1+sha-7767aa6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16579,6 +16579,23 @@ class _Tokenizer {
                 return isNameEnd(code);
             };
         }
+        else if (attrNameStart === $LBRACKET) {
+            let openBrackets = 0;
+            // Be more permissive for which characters are allowed inside square-bracketed attributes,
+            // because they usually end up being bound as attribute values. Some third-party packages
+            // like Tailwind take advantage of this.
+            nameEndPredicate = (code) => {
+                if (code === $LBRACKET) {
+                    openBrackets++;
+                }
+                else if (code === $RBRACKET) {
+                    openBrackets--;
+                }
+                // Only check for name-ending characters if the brackets are balanced or mismatched.
+                // Also interrupt the matching on new lines.
+                return openBrackets <= 0 ? isNameEnd(code) : isNewLine(code);
+            };
+        }
         else {
             nameEndPredicate = isNameEnd;
         }
@@ -32745,7 +32762,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.1+sha-882522c');
+new Version('20.2.0-next.1+sha-7767aa6');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33780,7 +33797,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Cd58JSQL.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Cfq29XaS.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
