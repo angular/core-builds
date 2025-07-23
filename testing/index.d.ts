@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.1+sha-0a9f55d
+ * @license Angular v20.2.0-next.1+sha-cec91c0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -289,7 +289,7 @@ type MetadataOverride<T> = {
  * @publicApi
  */
 declare class TestComponentRenderer {
-    insertRootElement(rootElementId: string): void;
+    insertRootElement(rootElementId: string, tagName?: string): void;
     removeAllRootElements?(): void;
 }
 /**
@@ -341,6 +341,11 @@ interface TestModuleMetadata {
      * Defaults to `manual`.
      */
     deferBlockBehavior?: DeferBlockBehavior;
+    /**
+     * Whether to infer the tag name of test components from their selectors.
+     * Otherwise `div` will be used as the tag name for test components.
+     */
+    inferTagName?: boolean;
 }
 /**
  * @publicApi
@@ -392,6 +397,11 @@ interface TestBedStatic extends TestBed {
 interface TestComponentOptions {
     /** Bindings to apply to the test component. */
     bindings?: Binding[];
+    /**
+     * Whether to infer the tag name of the test component from its selector.
+     * Otherwise `div` will be used as its tag name.
+     */
+    inferTagName?: boolean;
 }
 /**
  * Returns a singleton of the `TestBed` class.

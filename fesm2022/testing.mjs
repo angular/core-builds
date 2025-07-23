@@ -1,13 +1,13 @@
 /**
- * @license Angular v20.2.0-next.1+sha-0a9f55d
+ * @license Angular v20.2.0-next.1+sha-cec91c0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Directive, Component, Pipe, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, COMPILER_OPTIONS, generateStandaloneInDeclarationsError, transitiveScopesFor, Compiler, DEFER_BLOCK_CONFIG, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node.mjs';
+import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Directive, Component, Pipe, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, COMPILER_OPTIONS, generateStandaloneInDeclarationsError, transitiveScopesFor, Compiler, DEFER_BLOCK_CONFIG, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node.mjs';
 import { Subscription } from 'rxjs';
-import { inject as inject$1, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, Injector, isEnvironmentProviders, INTERNAL_APPLICATION_ERROR_HANDLER, runInInjectionContext } from './root_effect_scheduler.mjs';
+import { inject as inject$1, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, Injector, isEnvironmentProviders, INTERNAL_APPLICATION_ERROR_HANDLER, runInInjectionContext, getComponentDef as getComponentDef$1 } from './root_effect_scheduler.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './signal.mjs';
 import '@angular/core/primitives/signals';
@@ -180,7 +180,7 @@ const DEFER_BLOCK_DEFAULT_BEHAVIOR = DeferBlockBehavior.Playthrough;
  * @publicApi
  */
 class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
+    insertRootElement(rootElementId, tagName) { }
     removeAllRootElements() { }
 }
 /**
@@ -1753,6 +1753,10 @@ class TestBedImpl {
      */
     _previousErrorOnUnknownPropertiesOption;
     /**
+     * Stores the value for `inferTagName` from the testing module.
+     */
+    _instanceInferTagName;
+    /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
      *
@@ -1937,6 +1941,7 @@ class TestBedImpl {
                 this._instanceTeardownOptions = undefined;
                 this._instanceErrorOnUnknownElementsOption = undefined;
                 this._instanceErrorOnUnknownPropertiesOption = undefined;
+                this._instanceInferTagName = undefined;
                 this._instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
             }
         }
@@ -1963,6 +1968,7 @@ class TestBedImpl {
         this._instanceTeardownOptions = moduleDef.teardown;
         this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
         this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
+        this._instanceInferTagName = moduleDef.inferTagName;
         this._instanceDeferBlockBehavior = moduleDef.deferBlockBehavior ?? DEFER_BLOCK_DEFAULT_BEHAVIOR;
         // Store the current value of the strict mode option,
         // so we can restore it later
@@ -2030,17 +2036,19 @@ class TestBedImpl {
         return this.overrideComponent(component, { set: { template, templateUrl: null } });
     }
     createComponent(type, options) {
-        const testComponentRenderer = this.inject(TestComponentRenderer);
-        const rootElId = `root${_nextRootElementId++}`;
-        testComponentRenderer.insertRootElement(rootElId);
         if (getAsyncClassMetadataFn(type)) {
             throw new Error(`Component '${type.name}' has unresolved metadata. ` +
                 `Please call \`await TestBed.compileComponents()\` before running this test.`);
         }
-        const componentDef = type.ɵcmp;
+        // Note: injecting the renderer before accessing the definition appears to be load-bearing.
+        const testComponentRenderer = this.inject(TestComponentRenderer);
+        const shouldInferTagName = options?.inferTagName ?? this._instanceInferTagName ?? false;
+        const componentDef = getComponentDef$1(type);
+        const rootElId = `root${_nextRootElementId++}`;
         if (!componentDef) {
             throw new Error(`It looks like '${stringify(type)}' has not been compiled.`);
         }
+        testComponentRenderer.insertRootElement(rootElId, shouldInferTagName ? inferTagNameFromDefinition(componentDef) : undefined);
         const componentFactory = new ComponentFactory(componentDef);
         const initComponent = () => {
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef, undefined, options?.bindings);
