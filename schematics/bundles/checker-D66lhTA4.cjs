@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.2+sha-da2700c
+ * @license Angular v20.2.0-next.2+sha-9d8c48d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18707,7 +18707,7 @@ class Parser {
     parseAction(input, parseSourceSpan, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
         const errors = [];
         this._checkNoInterpolation(errors, input, parseSourceSpan, interpolationConfig);
-        const sourceToLex = this._stripComments(input);
+        const { stripped: sourceToLex } = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
         const ast = new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 1 /* ParseFlags.Action */, errors, 0, this._supportsDirectPipeReferences).parseChain();
         return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
@@ -18734,7 +18734,7 @@ class Parser {
     }
     _parseBindingAst(input, parseSourceSpan, absoluteOffset, interpolationConfig, errors) {
         this._checkNoInterpolation(errors, input, parseSourceSpan, interpolationConfig);
-        const sourceToLex = this._stripComments(input);
+        const { stripped: sourceToLex } = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
         return new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, 0, this._supportsDirectPipeReferences).parseChain();
     }
@@ -18785,8 +18785,13 @@ class Parser {
             // indexes inside the tokens.
             const expressionSpan = interpolatedTokens?.[i * 2 + 1]?.sourceSpan;
             const expressionText = expressions[i].text;
-            const sourceToLex = this._stripComments(expressionText);
+            const { stripped: sourceToLex, hasComments } = this._stripComments(expressionText);
             const tokens = this._lexer.tokenize(sourceToLex);
+            if (hasComments && sourceToLex.trim().length === 0 && tokens.length === 0) {
+                // Empty expressions error are handled futher down, here we only take care of the comment case
+                errors.push(getParseError('Interpolation expression cannot only contain a comment', input, `at column ${expressions[i].start} in`, parseSourceSpan));
+                continue;
+            }
             const ast = new _ParseAST(expressionSpan ? expressionText : input, expressionSpan || parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, offsets[i], this._supportsDirectPipeReferences).parseChain();
             expressionNodes.push(ast);
         }
@@ -18798,7 +18803,7 @@ class Parser {
      * This is used for parsing the switch expression in ICUs.
      */
     parseInterpolationExpression(expression, parseSourceSpan, absoluteOffset) {
-        const sourceToLex = this._stripComments(expression);
+        const { stripped: sourceToLex } = this._stripComments(expression);
         const tokens = this._lexer.tokenize(sourceToLex);
         const errors = [];
         const ast = new _ParseAST(expression, parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, 0, this._supportsDirectPipeReferences).parseChain();
@@ -18886,7 +18891,9 @@ class Parser {
     }
     _stripComments(input) {
         const i = this._commentStart(input);
-        return i != null ? input.substring(0, i) : input;
+        return i != null
+            ? { stripped: input.substring(0, i), hasComments: true }
+            : { stripped: input, hasComments: false };
     }
     _commentStart(input) {
         let outerQuote = null;
@@ -32762,7 +32769,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.2+sha-da2700c');
+new Version('20.2.0-next.2+sha-9d8c48d');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33797,7 +33804,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Cfq29XaS.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-D66lhTA4.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
