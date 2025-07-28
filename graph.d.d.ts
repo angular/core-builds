@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.2+sha-3b759db
+ * @license Angular v20.2.0-next.2+sha-92c2d2a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31,6 +31,14 @@ interface Reactive {
 }
 declare function isReactive(value: unknown): value is Reactive;
 declare const REACTIVE_NODE: ReactiveNode;
+interface ReactiveLink {
+    producer: ReactiveNode;
+    consumer: ReactiveNode;
+    lastReadVersion: number;
+    prevConsumer: ReactiveLink | undefined;
+    nextConsumer: ReactiveLink | undefined;
+    nextProducer: ReactiveLink | undefined;
+}
 /**
  * A producer and/or consumer which participates in the reactive graph.
  *
@@ -66,47 +74,26 @@ interface ReactiveNode {
      */
     dirty: boolean;
     /**
+     * Whether this node is currently rebuilding its producer list.
+     */
+    recomputing: boolean;
+    /**
      * Producers which are dependencies of this consumer.
-     *
-     * Uses the same indices as the `producerLastReadVersion` and `producerIndexOfThis` arrays.
      */
-    producerNode: ReactiveNode[] | undefined;
+    producers: ReactiveLink | undefined;
     /**
-     * `Version` of the value last read by a given producer.
+     * Points to the last linked list node in the `producers` linked list.
      *
-     * Uses the same indices as the `producerNode` and `producerIndexOfThis` arrays.
+     * When this node is recomputing, this is used to track the producers that we have accessed so far.
      */
-    producerLastReadVersion: Version[] | undefined;
+    producersTail: ReactiveLink | undefined;
     /**
-     * Index of `this` (consumer) in each producer's `liveConsumers` array.
+     * Linked list of consumers of this producer that are "live" (they require push notifications).
      *
-     * This value is only meaningful if this node is live (`liveConsumers.length > 0`). Otherwise
-     * these indices are stale.
-     *
-     * Uses the same indices as the `producerNode` and `producerLastReadVersion` arrays.
+     * The length of this list is effectively our reference count for this node.
      */
-    producerIndexOfThis: number[] | undefined;
-    /**
-     * Index into the producer arrays that the next dependency of this node as a consumer will use.
-     *
-     * This index is zeroed before this node as a consumer begins executing. When a producer is read,
-     * it gets inserted into the producers arrays at this index. There may be an existing dependency
-     * in this location which may or may not match the incoming producer, depending on whether the
-     * same producers were read in the same order as the last computation.
-     */
-    nextProducerIndex: number;
-    /**
-     * Array of consumers of this producer that are "live" (they require push notifications).
-     *
-     * `liveConsumerNode.length` is effectively our reference count for this node.
-     */
-    liveConsumerNode: ReactiveNode[] | undefined;
-    /**
-     * Index of `this` (producer) in each consumer's `producerNode` array.
-     *
-     * Uses the same indices as the `liveConsumerNode` array.
-     */
-    liveConsumerIndexOfThis: number[] | undefined;
+    consumers: ReactiveLink | undefined;
+    consumersTail: ReactiveLink | undefined;
     /**
      * Whether writes to signals are allowed when this consumer is the `activeConsumer`.
      *

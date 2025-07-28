@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.2+sha-3b759db
+ * @license Angular v20.2.0-next.2+sha-92c2d2a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -50,12 +50,11 @@ const REACTIVE_NODE = {
     version: 0,
     lastCleanEpoch: 0,
     dirty: false,
-    producerNode: undefined,
-    producerLastReadVersion: undefined,
-    producerIndexOfThis: undefined,
-    nextProducerIndex: 0,
-    liveConsumerNode: undefined,
-    liveConsumerIndexOfThis: undefined,
+    producers: undefined,
+    producersTail: undefined,
+    consumers: undefined,
+    consumersTail: undefined,
+    recomputing: false,
     consumerAllowSignalWrites: false,
     consumerIsAlwaysLive: false,
     kind: 'unknown',
@@ -78,34 +77,61 @@ function producerAccessed(node) {
         return;
     }
     activeConsumer.consumerOnSignalRead(node);
-    // This producer is the `idx`th dependency of `activeConsumer`.
-    const idx = activeConsumer.nextProducerIndex++;
-    assertConsumerNode(activeConsumer);
-    if (idx < activeConsumer.producerNode.length && activeConsumer.producerNode[idx] !== node) {
-        // There's been a change in producers since the last execution of `activeConsumer`.
-        // `activeConsumer.producerNode[idx]` holds a stale dependency which will be be removed and
-        // replaced with `this`.
-        //
-        // If `activeConsumer` isn't live, then this is a no-op, since we can replace the producer in
-        // `activeConsumer.producerNode` directly. However, if `activeConsumer` is live, then we need
-        // to remove it from the stale producer's `liveConsumer`s.
-        if (consumerIsLive(activeConsumer)) {
-            const staleProducer = activeConsumer.producerNode[idx];
-            producerRemoveLiveConsumerAtIndex(staleProducer, activeConsumer.producerIndexOfThis[idx]);
-            // At this point, the only record of `staleProducer` is the reference at
-            // `activeConsumer.producerNode[idx]` which will be overwritten below.
+    const prevProducerLink = activeConsumer.producersTail;
+    // If the last producer we accessed is the same as the current one, we can skip adding a new
+    // link
+    if (prevProducerLink !== undefined && prevProducerLink.producer === node) {
+        return;
+    }
+    let nextProducerLink = undefined;
+    const isRecomputing = activeConsumer.recomputing;
+    if (isRecomputing) {
+        // If we're incrementally rebuilding the producers list, we want to check if the next producer
+        // in the list is the same as the one we're trying to add.
+        // If the previous producer is defined, then the next producer is just the one that follows it.
+        // Otherwise, we should check the head of the producers list (the first node that we accessed the last time this consumer was run).
+        nextProducerLink =
+            prevProducerLink !== undefined ? prevProducerLink.nextProducer : activeConsumer.producers;
+        if (nextProducerLink !== undefined && nextProducerLink.producer === node) {
+            // If the next producer is the same as the one we're trying to add, we can just update the
+            // last read version, update the tail of the producers list of this rerun, and return.
+            activeConsumer.producersTail = nextProducerLink;
+            nextProducerLink.lastReadVersion = node.version;
+            return;
         }
     }
-    if (activeConsumer.producerNode[idx] !== node) {
-        // We're a new dependency of the consumer (at `idx`).
-        activeConsumer.producerNode[idx] = node;
-        // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
-        // placeholder value.
-        activeConsumer.producerIndexOfThis[idx] = consumerIsLive(activeConsumer)
-            ? producerAddLiveConsumer(node, activeConsumer, idx)
-            : 0;
+    const prevConsumerLink = node.consumersTail;
+    // If the producer we're accessing already has a link to this consumer, we can skip adding a new
+    // link. This can short circuit the creation of a new link in the case where the consumer reads alternating ReeactiveNodes
+    if (prevConsumerLink !== undefined &&
+        prevConsumerLink.consumer === activeConsumer &&
+        // However, we have to make sure that the link we've discovered isn't from a node that is incrementally rebuilding its producer list
+        (!isRecomputing || isValidLink(prevConsumerLink, activeConsumer))) {
+        // If we found an existing link to the consumer we can just return.
+        return;
     }
-    activeConsumer.producerLastReadVersion[idx] = node.version;
+    // If we got here, it means that we need to create a new link between the producer and the consumer.
+    const isLive = consumerIsLive(activeConsumer);
+    const newLink = {
+        producer: node,
+        consumer: activeConsumer,
+        // instead of eagerly destroying the previous link, we delay until we've finished recomputing
+        // the producers list, so that we can destroy all of the old links at once.
+        nextProducer: nextProducerLink,
+        prevConsumer: prevConsumerLink,
+        lastReadVersion: node.version,
+        nextConsumer: undefined,
+    };
+    activeConsumer.producersTail = newLink;
+    if (prevProducerLink !== undefined) {
+        prevProducerLink.nextProducer = newLink;
+    }
+    else {
+        activeConsumer.producers = newLink;
+    }
+    if (isLive) {
+        producerAddLiveConsumer(node, newLink);
+    }
 }
 /**
  * Increment the global epoch counter.
@@ -144,14 +170,15 @@ function producerUpdateValueVersion(node) {
  * Propagate a dirty notification to live consumers of this producer.
  */
 function producerNotifyConsumers(node) {
-    if (node.liveConsumerNode === undefined) {
+    if (node.consumers === undefined) {
         return;
     }
     // Prevent signal reads when we're updating the graph
     const prev = inNotificationPhase;
     inNotificationPhase = true;
     try {
-        for (const consumer of node.liveConsumerNode) {
+        for (let link = node.consumers; link !== undefined; link = link.nextConsumer) {
+            const consumer = link.consumer;
             if (!consumer.dirty) {
                 consumerMarkDirty(consumer);
             }
@@ -184,7 +211,10 @@ function producerMarkClean(node) {
  * begin.
  */
 function consumerBeforeComputation(node) {
-    node && (node.nextProducerIndex = 0);
+    if (node) {
+        node.producersTail = undefined;
+        node.recomputing = true;
+    }
     return setActiveConsumer(node);
 }
 /**
@@ -195,26 +225,28 @@ function consumerBeforeComputation(node) {
  */
 function consumerAfterComputation(node, prevConsumer) {
     setActiveConsumer(prevConsumer);
-    if (!node ||
-        node.producerNode === undefined ||
-        node.producerIndexOfThis === undefined ||
-        node.producerLastReadVersion === undefined) {
+    if (!node) {
         return;
     }
-    if (consumerIsLive(node)) {
-        // For live consumers, we need to remove the producer -> consumer edge for any stale producers
-        // which weren't dependencies after the recomputation.
-        for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+    node.recomputing = false;
+    // We've finished incrementally rebuilding the producers list, now if there are any producers
+    // that are after producersTail, they are stale and should be removed.
+    const producersTail = node.producersTail;
+    let toRemove = producersTail !== undefined ? producersTail.nextProducer : node.producers;
+    if (toRemove !== undefined) {
+        if (consumerIsLive(node)) {
+            // For each stale link, we first unlink it from the producers list of consumers
+            do {
+                toRemove = producerRemoveLiveConsumerLink(toRemove);
+            } while (toRemove !== undefined);
         }
-    }
-    // Truncate the producer tracking arrays.
-    // Perf note: this is essentially truncating the length to `node.nextProducerIndex`, but
-    // benchmarking has shown that individual pop operations are faster.
-    while (node.producerNode.length > node.nextProducerIndex) {
-        node.producerNode.pop();
-        node.producerLastReadVersion.pop();
-        node.producerIndexOfThis.pop();
+        // Now, we can truncate the producers list to remove all stale links.
+        if (producersTail !== undefined) {
+            producersTail.nextProducer = undefined;
+        }
+        else {
+            node.producers = undefined;
+        }
     }
 }
 /**
@@ -222,11 +254,10 @@ function consumerAfterComputation(node, prevConsumer) {
  * they were read.
  */
 function consumerPollProducersForChange(node) {
-    assertConsumerNode(node);
     // Poll producers for change.
-    for (let i = 0; i < node.producerNode.length; i++) {
-        const producer = node.producerNode[i];
-        const seenVersion = node.producerLastReadVersion[i];
+    for (let link = node.producers; link !== undefined; link = link.nextProducer) {
+        const producer = link.producer;
+        const seenVersion = link.lastReadVersion;
         // First check the versions. A mismatch means that the producer's value is known to have
         // changed since the last time we read it.
         if (seenVersion !== producer.version) {
@@ -247,21 +278,18 @@ function consumerPollProducersForChange(node) {
  * Disconnect this consumer from the graph.
  */
 function consumerDestroy(node) {
-    assertConsumerNode(node);
     if (consumerIsLive(node)) {
         // Drop all connections from the graph to this node.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+        let link = node.producers;
+        while (link !== undefined) {
+            link = producerRemoveLiveConsumerLink(link);
         }
     }
-    // Truncate all the arrays to drop all connection from this node to the graph.
-    node.producerNode.length =
-        node.producerLastReadVersion.length =
-            node.producerIndexOfThis.length =
-                0;
-    if (node.liveConsumerNode) {
-        node.liveConsumerNode.length = node.liveConsumerIndexOfThis.length = 0;
-    }
+    // Truncate all the linked lists to drop all connection from this node to the graph.
+    node.producers = undefined;
+    node.producersTail = undefined;
+    node.consumers = undefined;
+    node.consumersTail = undefined;
 }
 /**
  * Add `consumer` as a live consumer of this node.
@@ -269,64 +297,54 @@ function consumerDestroy(node) {
  * Note that this operation is potentially transitive. If this node becomes live, then it becomes
  * a live consumer of all of its current producers.
  */
-function producerAddLiveConsumer(node, consumer, indexOfThis) {
-    assertProducerNode(node);
-    if (node.liveConsumerNode.length === 0 && isConsumerNode(node)) {
-        // When going from 0 to 1 live consumers, we become a live consumer to our producers.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
+function producerAddLiveConsumer(node, link) {
+    const consumersTail = node.consumersTail;
+    const wasLive = consumerIsLive(node);
+    if (consumersTail !== undefined) {
+        link.nextConsumer = consumersTail.nextConsumer;
+        consumersTail.nextConsumer = link;
+    }
+    else {
+        link.nextConsumer = undefined;
+        node.consumers = link;
+    }
+    link.prevConsumer = consumersTail;
+    node.consumersTail = link;
+    if (!wasLive) {
+        for (let link = node.producers; link !== undefined; link = link.nextProducer) {
+            producerAddLiveConsumer(link.producer, link);
         }
     }
-    node.liveConsumerIndexOfThis.push(indexOfThis);
-    return node.liveConsumerNode.push(consumer) - 1;
 }
-/**
- * Remove the live consumer at `idx`.
- */
-function producerRemoveLiveConsumerAtIndex(node, idx) {
-    assertProducerNode(node);
-    if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
-        throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
+function producerRemoveLiveConsumerLink(link) {
+    const producer = link.producer;
+    const nextProducer = link.nextProducer;
+    const nextConsumer = link.nextConsumer;
+    const prevConsumer = link.prevConsumer;
+    link.nextConsumer = undefined;
+    link.prevConsumer = undefined;
+    if (nextConsumer !== undefined) {
+        nextConsumer.prevConsumer = prevConsumer;
     }
-    if (node.liveConsumerNode.length === 1 && isConsumerNode(node)) {
-        // When removing the last live consumer, we will no longer be live. We need to remove
-        // ourselves from our producers' tracking (which may cause consumer-producers to lose
-        // liveness as well).
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+    else {
+        producer.consumersTail = prevConsumer;
+    }
+    if (prevConsumer !== undefined) {
+        prevConsumer.nextConsumer = nextConsumer;
+    }
+    else {
+        producer.consumers = nextConsumer;
+        if (!consumerIsLive(producer)) {
+            let producerLink = producer.producers;
+            while (producerLink !== undefined) {
+                producerLink = producerRemoveLiveConsumerLink(producerLink);
+            }
         }
     }
-    // Move the last value of `liveConsumers` into `idx`. Note that if there's only a single
-    // live consumer, this is a no-op.
-    const lastIdx = node.liveConsumerNode.length - 1;
-    node.liveConsumerNode[idx] = node.liveConsumerNode[lastIdx];
-    node.liveConsumerIndexOfThis[idx] = node.liveConsumerIndexOfThis[lastIdx];
-    // Truncate the array.
-    node.liveConsumerNode.length--;
-    node.liveConsumerIndexOfThis.length--;
-    // If the index is still valid, then we need to fix the index pointer from the producer to this
-    // consumer, and update it from `lastIdx` to `idx` (accounting for the move above).
-    if (idx < node.liveConsumerNode.length) {
-        const idxProducer = node.liveConsumerIndexOfThis[idx];
-        const consumer = node.liveConsumerNode[idx];
-        assertConsumerNode(consumer);
-        consumer.producerIndexOfThis[idxProducer] = idx;
-    }
+    return nextProducer;
 }
 function consumerIsLive(node) {
-    return node.consumerIsAlwaysLive || (node?.liveConsumerNode?.length ?? 0) > 0;
-}
-function assertConsumerNode(node) {
-    node.producerNode ??= [];
-    node.producerIndexOfThis ??= [];
-    node.producerLastReadVersion ??= [];
-}
-function assertProducerNode(node) {
-    node.liveConsumerNode ??= [];
-    node.liveConsumerIndexOfThis ??= [];
-}
-function isConsumerNode(node) {
-    return node.producerNode !== undefined;
+    return node.consumerIsAlwaysLive || node.consumers !== undefined;
 }
 function runPostProducerCreatedFn(node) {
     postProducerCreatedFn?.(node);
@@ -335,6 +353,24 @@ function setPostProducerCreatedFn(fn) {
     const prev = postProducerCreatedFn;
     postProducerCreatedFn = fn;
     return prev;
+}
+// While a ReactiveNode is recomputing, it may not have destroyed previous links
+// This allows us to check if a given link will be destroyed by a reactivenode if it were to finish running immediately without accesing any more producers
+function isValidLink(checkLink, consumer) {
+    const producersTail = consumer.producersTail;
+    if (producersTail !== undefined) {
+        let link = consumer.producers;
+        do {
+            if (link === checkLink) {
+                return true;
+            }
+            if (link === producersTail) {
+                break;
+            }
+            link = link.nextProducer;
+        } while (link !== undefined);
+    }
+    return false;
 }
 
 /**
