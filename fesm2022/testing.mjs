@@ -1,11 +1,11 @@
 /**
- * @license Angular v20.2.0-next.2+sha-d55a706
+ * @license Angular v20.2.0-next.2+sha-dc49c2c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Directive, Component, Pipe, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, COMPILER_OPTIONS, generateStandaloneInDeclarationsError, transitiveScopesFor, Compiler, DEFER_BLOCK_CONFIG, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node.mjs';
+import { NgZone, Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, NoopNgZone, ApplicationRef, getDebugNode, RendererFactory2, Directive, Component, Pipe, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, COMPILER_OPTIONS, generateStandaloneInDeclarationsError, transitiveScopesFor, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './debug_node.mjs';
 import { Subscription } from 'rxjs';
 import { inject as inject$1, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, Injector, isEnvironmentProviders, INTERNAL_APPLICATION_ERROR_HANDLER, runInInjectionContext, getComponentDef as getComponentDef$1 } from './root_effect_scheduler.mjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -174,6 +174,8 @@ const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
 const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
 /** Whether defer blocks should use manual triggering or play through normally. */
 const DEFER_BLOCK_DEFAULT_BEHAVIOR = DeferBlockBehavior.Playthrough;
+/** Whether animations are enabled or disabled. */
+const ANIMATIONS_ENABLED_DEFAULT = false;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -827,6 +829,7 @@ class TestBedCompiler {
     scopesWithOverriddenProviders = new Set();
     testModuleType;
     testModuleRef = null;
+    animationsEnabled = ANIMATIONS_ENABLED_DEFAULT;
     deferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
     rethrowApplicationTickErrors = RETHROW_APPLICATION_ERRORS_DEFAULT;
     constructor(platform, additionalModuleTypes) {
@@ -860,6 +863,7 @@ class TestBedCompiler {
             this.schemas.push(...moduleDef.schemas);
         }
         this.deferBlockBehavior = moduleDef.deferBlockBehavior ?? DEFER_BLOCK_DEFAULT_BEHAVIOR;
+        this.animationsEnabled = moduleDef.animationsEnabled ?? ANIMATIONS_ENABLED_DEFAULT;
         this.rethrowApplicationTickErrors =
             moduleDef.rethrowApplicationErrors ?? RETHROW_APPLICATION_ERRORS_DEFAULT;
     }
@@ -1478,6 +1482,10 @@ class TestBedCompiler {
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
             { provide: DEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
             {
+                provide: ANIMATIONS_DISABLED,
+                useValue: !this.animationsEnabled,
+            },
+            {
                 provide: INTERNAL_APPLICATION_ERROR_HANDLER,
                 useFactory: () => {
                     if (this.rethrowApplicationTickErrors) {
@@ -1733,6 +1741,10 @@ class TestBedImpl {
      */
     _instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
     /**
+     * Animations behavior option that specifies whether animations are enabled or disabled.
+     */
+    _instanceAnimationsEnabled = ANIMATIONS_ENABLED_DEFAULT;
+    /**
      * "Error on unknown elements" option that has been configured at the `TestBed` instance level.
      * This option takes precedence over the environment-level one.
      */
@@ -1943,6 +1955,7 @@ class TestBedImpl {
                 this._instanceErrorOnUnknownPropertiesOption = undefined;
                 this._instanceInferTagName = undefined;
                 this._instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
+                this._instanceAnimationsEnabled = ANIMATIONS_ENABLED_DEFAULT;
             }
         }
         return this;
@@ -1970,6 +1983,7 @@ class TestBedImpl {
         this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
         this._instanceInferTagName = moduleDef.inferTagName;
         this._instanceDeferBlockBehavior = moduleDef.deferBlockBehavior ?? DEFER_BLOCK_DEFAULT_BEHAVIOR;
+        this._instanceAnimationsEnabled = moduleDef.animationsEnabled ?? ANIMATIONS_ENABLED_DEFAULT;
         // Store the current value of the strict mode option,
         // so we can restore it later
         this._previousErrorOnUnknownElementsOption = _getUnknownElementStrictMode();
@@ -2157,6 +2171,9 @@ class TestBedImpl {
     }
     getDeferBlockBehavior() {
         return this._instanceDeferBlockBehavior;
+    }
+    getAnimationsEnabled() {
+        return this._instanceAnimationsEnabled;
     }
     tearDownTestingModule() {
         // If the module ref has already been destroyed, we won't be able to get a test renderer.

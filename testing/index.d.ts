@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.2+sha-d55a706
+ * @license Angular v20.2.0-next.2+sha-dc49c2c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -346,6 +346,11 @@ interface TestModuleMetadata {
      * Otherwise `div` will be used as the tag name for test components.
      */
     inferTagName?: boolean;
+    /**
+     * Whether animate.enter / animate.leave should trigger as normal or be disabled.
+     * Defaults to `true`.
+     */
+    animationsEnabled?: boolean;
 }
 /**
  * @publicApi
