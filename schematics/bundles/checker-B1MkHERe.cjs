@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.3+sha-c9fb4e3
+ * @license Angular v20.1.3+sha-3f0e823
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27714,10 +27714,24 @@ class BindingParser {
             return this._isAllowedAssignmentEvent(ast.args[0]);
         }
         if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
-            return true;
+            if (!hasRecursiveSafeReceiver(ast)) {
+                return true;
+            }
         }
         return false;
     }
+}
+function hasRecursiveSafeReceiver(ast) {
+    if (ast instanceof SafePropertyRead || ast instanceof SafeKeyedRead) {
+        return true;
+    }
+    if (ast instanceof ParenthesizedExpression) {
+        return hasRecursiveSafeReceiver(ast.expression);
+    }
+    if (ast instanceof PropertyRead || ast instanceof KeyedRead || ast instanceof Call) {
+        return hasRecursiveSafeReceiver(ast.receiver);
+    }
+    return false;
 }
 function isLegacyAnimationLabel(name) {
     return name[0] == '@';
@@ -32278,7 +32292,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.3+sha-c9fb4e3');
+new Version('20.1.3+sha-3f0e823');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33298,7 +33312,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-Bj8lK7HB.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-B1MkHERe.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
