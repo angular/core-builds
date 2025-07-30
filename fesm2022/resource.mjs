@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.3+sha-af53c93
+ * @license Angular v20.1.3+sha-25c6b15
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -307,7 +307,7 @@ function upgradeLinkedSignalGetter(getter) {
  *
  * This internal flag is being used to gradually roll out this behavior.
  */
-const RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
+let RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
 function resource(options) {
     if (ngDevMode && !options?.injector) {
         assertInInjectionContext(resource);
@@ -315,6 +315,15 @@ function resource(options) {
     const oldNameForParams = options.request;
     const params = (options.params ?? oldNameForParams ?? (() => null));
     return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
+}
+/**
+ * Private helper function to set the default behavior of `Resource.value()` when the resource is
+ * in the error state.
+ *
+ * This function is intented to be temporary to help migrate G3 code to the new throwing behavior.
+ */
+function setResourceValueThrowsErrors(value) {
+    RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = value;
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -629,5 +638,5 @@ class ResourceWrappedError extends Error {
     }
 }
 
-export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, setResourceValueThrowsErrors, untracked };
 //# sourceMappingURL=resource.mjs.map
