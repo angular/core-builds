@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-6652f9f
+ * @license Angular v20.1.4+sha-7a5851e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-B1MkHERe.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-C4RI5-xz.cjs');
-var project_paths = require('./project_paths-KZ5syi8v.cjs');
+var index = require('./index-CqEBch7S.cjs');
+var project_paths = require('./project_paths-CSLrpSOB.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-C7alPIzS.cjs');
+require('./index-Cw1lW1Cx.cjs');
 require('path');
 require('node:path');
 
@@ -122,24 +122,24 @@ class SpyOnFieldPattern {
  * In addition, spying onto an input may be problematic- so we skip migrating
  * such.
  */
-function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisitor, fields, getAllClassesWithKnownFields) {
+function checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, fields, getAllClassesWithKnownFields) {
     const inputClassSymbolsToClass = new Map();
     for (const knownFieldClass of getAllClassesWithKnownFields()) {
-        const classSymbol = checker$1.getTypeAtLocation(knownFieldClass).symbol;
+        const classSymbol = checker.getTypeAtLocation(knownFieldClass).symbol;
         assert(classSymbol != null, 'Expected a symbol to exist for the container of known field class.');
         assert(classSymbol.valueDeclaration !== undefined, 'Expected declaration to exist for known field class.');
         assert(ts.isClassDeclaration(classSymbol.valueDeclaration), 'Expected declaration to be a class.');
         // track class symbol for derived class checks.
         inputClassSymbolsToClass.set(classSymbol, classSymbol.valueDeclaration);
     }
-    const spyOnPattern = new SpyOnFieldPattern(checker$1, fields);
+    const spyOnPattern = new SpyOnFieldPattern(checker, fields);
     const visitor = (node) => {
         // Check for manual class instantiations.
-        if (ts.isNewExpression(node) && ts.isIdentifier(checker.unwrapExpression(node.expression))) {
-            let newTarget = checker$1.getSymbolAtLocation(checker.unwrapExpression(node.expression));
+        if (ts.isNewExpression(node) && ts.isIdentifier(project_tsconfig_paths.unwrapExpression(node.expression))) {
+            let newTarget = checker.getSymbolAtLocation(project_tsconfig_paths.unwrapExpression(node.expression));
             // Plain identifier references can point to alias symbols (e.g. imports).
             if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
-                newTarget = checker$1.getAliasedSymbol(newTarget);
+                newTarget = checker.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
                 fields.markClassIncompatible(inputClassSymbolsToClass.get(newTarget), exports.ClassIncompatibilityReason.ClassManuallyInstantiated);
@@ -155,10 +155,10 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
         problematicReferencesCheck: if (insidePropertyDeclaration !== null &&
             ts.isIdentifier(node) &&
             insidePropertyDeclaration.parent.heritageClauses !== undefined) {
-            let newTarget = checker$1.getSymbolAtLocation(checker.unwrapExpression(node));
+            let newTarget = checker.getSymbolAtLocation(project_tsconfig_paths.unwrapExpression(node));
             // Plain identifier references can point to alias symbols (e.g. imports).
             if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
-                newTarget = checker$1.getAliasedSymbol(newTarget);
+                newTarget = checker.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
                 const memberName = index.getMemberName(insidePropertyDeclaration);
@@ -384,7 +384,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         if (metaRegistry !== null) {
             for (const derivedClasses of inheritanceGraph.traceDerivedClasses(inputClass)) {
                 const derivedMeta = ts.isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
-                    ? metaRegistry.getDirectiveMetadata(new checker.Reference(derivedClasses))
+                    ? metaRegistry.getDirectiveMetadata(new project_tsconfig_paths.Reference(derivedClasses))
                     : null;
                 if (derivedMeta !== null && derivedMeta.inputFieldNamesFromMetadataArray !== null) {
                     derivedMeta.inputFieldNamesFromMetadataArray.forEach((b) => inputFieldNamesFromMetadataArray.add(b));

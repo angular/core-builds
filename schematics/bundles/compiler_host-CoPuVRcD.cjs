@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-6652f9f
+ * @license Angular v20.1.4+sha-7a5851e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var checker = require('./checker-B1MkHERe.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
 require('os');
 var p = require('path');
 
@@ -40,7 +40,7 @@ class ChangeTracker {
     constructor(_printer, _importRemapper) {
         this._printer = _printer;
         this._importRemapper = _importRemapper;
-        this._importManager = new checker.ImportManager({
+        this._importManager = new project_tsconfig_paths.ImportManager({
             shouldUseSingleQuotes: (file) => this._getQuoteKind(file) === 0 /* QuoteKind.SINGLE */,
         });
     }

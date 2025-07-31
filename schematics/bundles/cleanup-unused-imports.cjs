@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-6652f9f
+ * @license Angular v20.1.4+sha-7a5851e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,16 +8,15 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-KZ5syi8v.cjs');
+var project_paths = require('./project_paths-CSLrpSOB.cjs');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-B1MkHERe.cjs');
-var index = require('./index-C7alPIzS.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
+var index = require('./index-Cw1lW1Cx.cjs');
 require('path');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-BwG_XNz3.cjs');
+var apply_import_manager = require('./apply_import_manager-Bjhxgps9.cjs');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('fs');
 require('module');
 require('url');
@@ -44,7 +43,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             if (diag.file !== undefined &&
                 diag.start !== undefined &&
                 diag.length !== undefined &&
-                diag.code === checker.ngErrorCode(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS)) {
+                diag.code === project_tsconfig_paths.ngErrorCode(project_tsconfig_paths.ErrorCode.UNUSED_STANDALONE_IMPORTS)) {
                 // Skip files that aren't owned by this compilation unit.
                 if (!info.sourceFiles.includes(diag.file)) {
                     return;
@@ -194,7 +193,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     generateReplacements(sourceFile, removalLocations, usages, info, replacements) {
         const { fullRemovals, partialRemovals, allRemovedIdentifiers } = removalLocations;
         const { importedSymbols, identifierCounts } = usages;
-        const importManager = new checker.ImportManager();
+        const importManager = new project_tsconfig_paths.ImportManager();
         const sourceText = sourceFile.getFullText();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {

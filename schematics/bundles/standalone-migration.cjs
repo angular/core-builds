@@ -1,27 +1,26 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-6652f9f
+ * @license Angular v20.1.4+sha-7a5851e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var index = require('./index-C7alPIzS.cjs');
+var index = require('./index-Cw1lW1Cx.cjs');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-BouiutKy.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+var compiler_host = require('./compiler_host-CoPuVRcD.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
-var checker = require('./checker-B1MkHERe.cjs');
 require('os');
-require('@angular-devkit/core');
 require('module');
 require('url');
+require('@angular-devkit/core');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new index.NgtscProgram(rootNames, options, host, oldProgram);
@@ -401,8 +400,8 @@ function getComponentImportExpressions(decl, allDeclarations, tracker, typeCheck
     const resolvedDependencies = [];
     for (const dep of templateDependencies) {
         const importLocation = findImportLocation(dep, decl, usedDependenciesInMigration.has(dep)
-            ? checker.PotentialImportMode.ForceDirect
-            : checker.PotentialImportMode.Normal, typeChecker);
+            ? project_tsconfig_paths.PotentialImportMode.ForceDirect
+            : project_tsconfig_paths.PotentialImportMode.Normal, typeChecker);
         if (importLocation && !seenImports.has(importLocation.symbolName)) {
             seenImports.add(importLocation.symbolName);
             resolvedDependencies.push(importLocation);
@@ -622,13 +621,13 @@ function findImportLocation(target, inContext, importMode, typeChecker) {
     for (const location of importLocations) {
         // Prefer a standalone import, if we can find one.
         // Otherwise fall back to the first module-based import.
-        if (location.kind === checker.PotentialImportKind.Standalone) {
+        if (location.kind === project_tsconfig_paths.PotentialImportKind.Standalone) {
             return location;
         }
         if (!location.moduleSpecifier && !firstSameFileImport) {
             firstSameFileImport = location;
         }
-        if (location.kind === checker.PotentialImportKind.NgModule &&
+        if (location.kind === project_tsconfig_paths.PotentialImportKind.NgModule &&
             !firstModuleImport &&
             // ɵ is used for some internal Angular modules that we want to skip over.
             !location.symbolName.startsWith('ɵ')) {
@@ -1149,7 +1148,7 @@ function replaceModulesInImportsArray(array, replacements, tracker, templateType
         }
         const potentialImports = [];
         for (const ref of replacementRefs) {
-            const importLocation = findImportLocation(ref, array, checker.PotentialImportMode.Normal, templateTypeChecker);
+            const importLocation = findImportLocation(ref, array, project_tsconfig_paths.PotentialImportMode.Normal, templateTypeChecker);
             if (importLocation) {
                 potentialImports.push(importLocation);
             }

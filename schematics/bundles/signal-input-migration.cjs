@@ -1,22 +1,22 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-6652f9f
+ * @license Angular v20.1.4+sha-7a5851e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-BXdun0jT.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BYuMi0JW.cjs');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-B1MkHERe.cjs');
-var index$1 = require('./index-C7alPIzS.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
+var index$1 = require('./index-Cw1lW1Cx.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-KZ5syi8v.cjs');
-var index = require('./index-C4RI5-xz.cjs');
+var project_paths = require('./project_paths-CSLrpSOB.cjs');
+var index = require('./index-CqEBch7S.cjs');
 var assert = require('assert');
-var apply_import_manager = require('./apply_import_manager-BwG_XNz3.cjs');
+var apply_import_manager = require('./apply_import_manager-Bjhxgps9.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('./leading_space-D9nQ8UQC.cjs');
@@ -24,7 +24,6 @@ require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /**
  * Class that holds information about a given directive and its input fields.
@@ -275,7 +274,7 @@ function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
         state.templateTypeChecker.generateAllTypeCheckBlocks();
     }
     const typeChecker = userProgram.getTypeChecker();
-    const reflector = new checker.TypeScriptReflectionHost(typeChecker);
+    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
     const evaluator = new index$1.PartialEvaluator(reflector, typeChecker, null);
     const dtsMetadataReader = new index$1.DtsMetadataReader(typeChecker, reflector);
     return {
@@ -338,7 +337,7 @@ function extractDtsInput(node, metadataReader) {
     // in the `.d.ts` aren't resolvable. This seems to be unexpected and shouldn't
     // result in the entire migration to be failing.
     try {
-        directiveMetadata = metadataReader.getDirectiveMetadata(new checker.Reference(node.parent));
+        directiveMetadata = metadataReader.getDirectiveMetadata(new project_tsconfig_paths.Reference(node.parent));
     }
     catch (e) {
         console.error('Unexpected error. Gracefully ignoring.');
@@ -374,7 +373,7 @@ function extractSourceCodeInput(node, host, reflector, evaluator) {
     if (decorators === null) {
         return null;
     }
-    const ngDecorators = checker.getAngularDecorators(decorators, ['Input'], host.isMigratingCore);
+    const ngDecorators = project_tsconfig_paths.getAngularDecorators(decorators, ['Input'], host.isMigratingCore);
     if (ngDecorators.length === 0) {
         return null;
     }
@@ -418,27 +417,27 @@ function extractSourceCodeInput(node, host, reflector, evaluator) {
  */
 function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
     const transformValue = evaluatedInputOpts.get('transform');
-    if (!(transformValue instanceof checker.DynamicValue) && !(transformValue instanceof checker.Reference)) {
+    if (!(transformValue instanceof project_tsconfig_paths.DynamicValue) && !(transformValue instanceof project_tsconfig_paths.Reference)) {
         return null;
     }
     // For parsing the transform, we don't need a real reference emitter, as
     // the emitter is only used for verifying that the transform type could be
     // copied into e.g. an `ngInputAccept` class member.
-    const noopRefEmitter = new checker.ReferenceEmitter([
+    const noopRefEmitter = new project_tsconfig_paths.ReferenceEmitter([
         {
             emit: () => ({
-                kind: checker.ReferenceEmitKind.Success,
-                expression: checker.NULL_EXPR,
+                kind: project_tsconfig_paths.ReferenceEmitKind.Success,
+                expression: project_tsconfig_paths.NULL_EXPR,
                 importedFile: null,
             }),
         },
     ]);
     try {
-        return checker.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, noopRefEmitter, checker.CompilationMode.FULL, 
+        return project_tsconfig_paths.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, noopRefEmitter, project_tsconfig_paths.CompilationMode.FULL, 
         /* emitDeclarationOnly */ false);
     }
     catch (e) {
-        if (!(e instanceof checker.FatalDiagnosticError)) {
+        if (!(e instanceof project_tsconfig_paths.FatalDiagnosticError)) {
             throw e;
         }
         // TODO: implement error handling.
@@ -646,10 +645,10 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
  * In addition, spying onto an input may be problematic- so we skip migrating
  * such.
  */
-function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, groupedTsAstVisitor, knownInputs) {
-    migrate_ts_type_references.checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisitor, knownInputs, () => knownInputs.getAllInputContainingClasses());
+function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker, groupedTsAstVisitor, knownInputs) {
+    migrate_ts_type_references.checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, knownInputs, () => knownInputs.getAllInputContainingClasses());
     for (const input of knownInputs.knownInputIds.values()) {
-        const hostBindingDecorators = checker.getAngularDecorators(input.metadata.fieldDecorators, ['HostBinding'], host.isMigratingCore);
+        const hostBindingDecorators = project_tsconfig_paths.getAngularDecorators(input.metadata.fieldDecorators, ['HostBinding'], host.isMigratingCore);
         if (hostBindingDecorators.length > 0) {
             knownInputs.markFieldIncompatible(input.descriptor, {
                 context: hostBindingDecorators[0].node,
@@ -687,7 +686,7 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
     fullProgramSourceFiles.forEach((sf) => 
     // Shim shim files. Those are unnecessary and might cause unexpected slowness.
     // e.g. `ngtypecheck` files.
-    !checker.isShim(sf) &&
+    !project_tsconfig_paths.isShim(sf) &&
         pass1__IdentifySourceFileAndDeclarationInputs(sf, host, typeChecker, reflector, dtsMetadataReader, evaluator, knownInputs, result));
     const fieldNamesToConsiderForReferenceLookup = new Set();
     for (const input of knownInputs.knownInputIds.values()) {
@@ -1235,7 +1234,7 @@ function pass9__migrateTypeScriptTypeReferences(host, references, importManager,
  */
 function executeMigrationPhase(host, knownInputs, result, info) {
     const { typeChecker, sourceFiles } = info;
-    const importManager = new checker.ImportManager({
+    const importManager = new project_tsconfig_paths.ImportManager({
         // For the purpose of this migration, we always use `input` and don't alias
         // it to e.g. `input_1`.
         generateUniqueIdentifier: () => null,
