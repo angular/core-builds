@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,20 +8,19 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DBomdQHo.cjs');
-var index$1 = require('./index-DWQ8GMRM.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+var index$1 = require('./index-DsZzy7HS.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
-var apply_import_manager = require('./apply_import_manager-C9H5B66Q.cjs');
-var index = require('./index-DvIl8s8s.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
+var apply_import_manager = require('./apply_import_manager-CJiucwZ7.cjs');
+var index = require('./index-CMUSsza3.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
@@ -68,7 +67,7 @@ function isOutputDeclaration(node, reflector, dtsReader) {
             node.parent.name === undefined) {
             return false;
         }
-        const ref = new checker.Reference(node.parent);
+        const ref = new project_tsconfig_paths.Reference(node.parent);
         const directiveMeta = dtsReader.getDirectiveMetadata(ref);
         return !!directiveMeta?.outputs.getByClassPropertyName(node.name.text);
     }
@@ -85,7 +84,7 @@ function getTargetPropertyDeclaration(targetSymbol) {
 /** Returns Angular `@Output` decorator or null when a given property declaration is not an @Output */
 function getOutputDecorator(node, reflector) {
     const decorators = reflector.getDecoratorsOfDeclaration(node);
-    const ngDecorators = decorators !== null ? checker.getAngularDecorators(decorators, ['Output'], /* isCore */ false) : [];
+    const ngDecorators = decorators !== null ? project_tsconfig_paths.getAngularDecorators(decorators, ['Output'], /* isCore */ false) : [];
     return ngDecorators.length > 0 ? ngDecorators[0] : null;
 }
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
@@ -115,7 +114,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof checker.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof project_tsconfig_paths.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
@@ -171,7 +170,7 @@ function calculateDeclarationReplacement(info, node, aliasParam) {
 function calculateImportReplacements(info, sourceFiles) {
     const importReplacements = {};
     for (const sf of sourceFiles) {
-        const importManager = new checker.ImportManager();
+        const importManager = new project_tsconfig_paths.ImportManager();
         const addOnly = [];
         const addRemove = [];
         const file = project_paths.projectFile(sf, info);
@@ -206,7 +205,7 @@ function calculateCompleteCallReplacement(info, node) {
 function calculatePipeCallReplacement(info, node) {
     if (ts.isPropertyAccessExpression(node.expression)) {
         const sf = node.getSourceFile();
-        const importManager = new checker.ImportManager();
+        const importManager = new project_tsconfig_paths.ImportManager();
         const outputToObservableIdent = importManager.addImport({
             requestedFile: sf,
             exportModuleSpecifier: '@angular/core/rxjs-interop',
@@ -256,10 +255,10 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         const problematicUsages = {};
         let problematicDeclarationCount = 0;
         const filesWithOutputDeclarations = new Set();
-        const checker$1 = program.getTypeChecker();
-        const reflector = new checker.TypeScriptReflectionHost(checker$1);
-        const dtsReader = new index$1.DtsMetadataReader(checker$1, reflector);
-        const evaluator = new index$1.PartialEvaluator(reflector, checker$1, null);
+        const checker = program.getTypeChecker();
+        const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
+        const dtsReader = new index$1.DtsMetadataReader(checker, reflector);
+        const evaluator = new index$1.PartialEvaluator(reflector, checker, null);
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         // Pre-analyze the program and get access to the template type checker.
         // If we are processing a non-Angular target, there is no template info.
@@ -320,7 +319,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
             }
             // detect .next usages that should be migrated to .emit
             if (isPotentialNextCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
-                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
+                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     const outputFile = project_paths.projectFile(node.getSourceFile(), info);
@@ -329,7 +328,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
             }
             // detect .complete usages that should be removed
             if (isPotentialCompleteCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
-                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
+                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     const outputFile = project_paths.projectFile(node.getSourceFile(), info);
@@ -341,14 +340,14 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
                     }
                 }
             }
-            addCommentForEmptyEmit(node, info, checker$1, reflector, dtsReader, outputFieldReplacements);
+            addCommentForEmptyEmit(node, info, checker, reflector, dtsReader, outputFieldReplacements);
             // detect imports of test runners
             if (isTestRunnerImport(node)) {
                 isTestFile = true;
             }
             // detect unsafe access of the output property
             if (isPotentialPipeCallUsage(node) && ts.isPropertyAccessExpression(node.expression)) {
-                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker$1, reflector, dtsReader);
+                const propertyDeclaration = isTargetOutputDeclaration(node.expression.expression, checker, reflector, dtsReader);
                 if (propertyDeclaration !== null) {
                     const id = getUniqueIdForProperty(info, propertyDeclaration);
                     if (isTestFile) {
@@ -369,7 +368,7 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         }
         // take care of the references in templates and host bindings
         const referenceResult = { references: [] };
-        const { visitor: templateHostRefVisitor } = index.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, resourceLoader, evaluator, templateTypeChecker, knownFields, null, // TODO: capture known output names as an optimization
+        const { visitor: templateHostRefVisitor } = index.createFindAllSourceFileReferencesVisitor(info, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownFields, null, // TODO: capture known output names as an optimization
         referenceResult);
         // calculate template / host binding replacements
         for (const sf of sourceFiles) {

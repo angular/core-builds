@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,6 +12,7 @@ var fs$1 = require('fs');
 var module$1 = require('module');
 var p = require('path');
 var url = require('url');
+var core = require('@angular-devkit/core');
 
 var _documentCurrentScript = typeof document !== 'undefined' ? document.currentScript : null;
 function _interopNamespaceDefault(e) {
@@ -32783,7 +32784,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.3+sha-78a6b68');
+new Version('20.2.0-next.3+sha-8255e0c');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33818,7 +33819,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('checker-DBomdQHo.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Cn4EEHpG.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -50526,6 +50527,85 @@ function isDeprecatedDiagnostics(diag) {
     return diag.reportsDeprecated !== undefined;
 }
 
+/**
+ * Gets all tsconfig paths from a CLI project by reading the workspace configuration
+ * and looking for common tsconfig locations.
+ */
+async function getProjectTsConfigPaths(tree) {
+    // Start with some tsconfig paths that are generally used within CLI projects. Note
+    // that we are not interested in IDE-specific tsconfig files (e.g. /tsconfig.json)
+    const buildPaths = new Set();
+    const testPaths = new Set();
+    const workspace = await getWorkspace(tree);
+    for (const [, project] of workspace.projects) {
+        for (const [name, target] of project.targets) {
+            if (name !== 'build' && name !== 'test') {
+                continue;
+            }
+            for (const [, options] of allTargetOptions(target)) {
+                const tsConfig = options['tsConfig'];
+                // Filter out tsconfig files that don't exist in the CLI project.
+                if (typeof tsConfig !== 'string' || !tree.exists(tsConfig)) {
+                    continue;
+                }
+                if (name === 'build') {
+                    buildPaths.add(core.normalize(tsConfig));
+                }
+                else {
+                    testPaths.add(core.normalize(tsConfig));
+                }
+            }
+        }
+    }
+    return {
+        buildPaths: [...buildPaths],
+        testPaths: [...testPaths],
+    };
+}
+/** Get options for all configurations for the passed builder target. */
+function* allTargetOptions(target) {
+    if (target.options) {
+        yield [undefined, target.options];
+    }
+    if (!target.configurations) {
+        return;
+    }
+    for (const [name, options] of Object.entries(target.configurations)) {
+        if (options) {
+            yield [name, options];
+        }
+    }
+}
+function createHost(tree) {
+    return {
+        async readFile(path) {
+            const data = tree.read(path);
+            if (!data) {
+                throw new Error('File not found.');
+            }
+            return core.virtualFs.fileBufferToString(data);
+        },
+        async writeFile(path, data) {
+            return tree.overwrite(path, data);
+        },
+        async isDirectory(path) {
+            // Approximate a directory check.
+            // We don't need to consider empty directories and hence this is a good enough approach.
+            // This is also per documentation, see:
+            // https://angular.dev/tools/cli/schematics-for-libraries#get-the-project-configuration
+            return !tree.exists(path) && tree.getDir(path).subfiles.length > 0;
+        },
+        async isFile(path) {
+            return tree.exists(path);
+        },
+    };
+}
+async function getWorkspace(tree) {
+    const host = createHost(tree);
+    const { workspace } = await core.workspaces.readWorkspace('/', host);
+    return workspace;
+}
+
 exports.AST = AST;
 exports.ASTWithSource = ASTWithSource;
 exports.AbsoluteModuleStrategy = AbsoluteModuleStrategy;
@@ -50692,6 +50772,7 @@ exports.getDefaultImportDeclaration = getDefaultImportDeclaration;
 exports.getDirectiveDiagnostics = getDirectiveDiagnostics;
 exports.getFileSystem = getFileSystem;
 exports.getOriginNodeForDiagnostics = getOriginNodeForDiagnostics;
+exports.getProjectTsConfigPaths = getProjectTsConfigPaths;
 exports.getProviderDiagnostics = getProviderDiagnostics;
 exports.getRootDirs = getRootDirs;
 exports.getSourceFile = getSourceFile;

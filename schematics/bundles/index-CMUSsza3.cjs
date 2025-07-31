@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DBomdQHo.cjs');
-var index = require('./index-DWQ8GMRM.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+var index = require('./index-DsZzy7HS.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -189,7 +189,7 @@ function lookupPropertyAccess(checker, type, path, options = {}) {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateReferenceVisitor extends checker.RecursiveVisitor {
+class TemplateReferenceVisitor extends project_tsconfig_paths.RecursiveVisitor {
     result = [];
     /**
      * Whether we are currently descending into HTML AST nodes
@@ -236,21 +236,21 @@ class TemplateReferenceVisitor extends checker.RecursiveVisitor {
         // of signal calls in templates.
         // TODO: Remove with: https://github.com/angular/angular/pull/55456.
         this.templateAttributeReferencedFields = [];
-        checker.visitAll(this, template.attributes);
-        checker.visitAll(this, template.templateAttrs);
+        project_tsconfig_paths.visitAll(this, template.attributes);
+        project_tsconfig_paths.visitAll(this, template.templateAttrs);
         // If we are dealing with a microsyntax template, do not check
         // inputs and outputs as those are already passed to the children.
         // Template attributes may contain relevant expressions though.
         if (template.tagName === 'ng-template') {
-            checker.visitAll(this, template.inputs);
-            checker.visitAll(this, template.outputs);
+            project_tsconfig_paths.visitAll(this, template.inputs);
+            project_tsconfig_paths.visitAll(this, template.outputs);
         }
         const referencedInputs = this.templateAttributeReferencedFields;
         this.templateAttributeReferencedFields = null;
         this.descendAndCheckForNarrowedSimilarReferences(referencedInputs, () => {
-            checker.visitAll(this, template.children);
-            checker.visitAll(this, template.references);
-            checker.visitAll(this, template.variables);
+            project_tsconfig_paths.visitAll(this, template.children);
+            project_tsconfig_paths.visitAll(this, template.references);
+            project_tsconfig_paths.visitAll(this, template.variables);
         });
     }
     visitIfBlockBranch(block) {
@@ -317,7 +317,7 @@ class TemplateReferenceVisitor extends checker.RecursiveVisitor {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
+class TemplateExpressionReferenceVisitor extends project_tsconfig_paths.RecursiveAstVisitor {
     typeChecker;
     templateTypeChecker;
     componentClass;
@@ -364,7 +364,7 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
         super.visitPropertyRead(ast, context);
     }
     visitBinary(ast, context) {
-        if (ast.operation === '=' && ast.left instanceof checker.PropertyRead) {
+        if (ast.operation === '=' && ast.left instanceof project_tsconfig_paths.PropertyRead) {
             this._inspectPropertyAccess(ast.left, true, [...context, ast, ast.left]);
         }
         else {
@@ -402,7 +402,7 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
             return false;
         }
         const symbol = this.templateTypeChecker.getSymbolOfNode(ast, this.componentClass);
-        if (symbol?.kind !== checker.SymbolKind.Expression || symbol.tsSymbol === null) {
+        if (symbol?.kind !== project_tsconfig_paths.SymbolKind.Expression || symbol.tsSymbol === null) {
             return false;
         }
         // Dangerous: Type checking symbol retrieval is a totally different `ts.Program`,
@@ -464,25 +464,25 @@ class TemplateExpressionReferenceVisitor extends checker.RecursiveAstVisitor {
     _isPartOfNarrowingTernary(read) {
         // Note: We do not safe check that the reads are fully matching 1:1. This is acceptable
         // as worst case we just skip an input from being migrated. This is very unlikely too.
-        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof checker.PropertyRead || r instanceof checker.SafePropertyRead) && r.name === read.name);
+        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof project_tsconfig_paths.PropertyRead || r instanceof project_tsconfig_paths.SafePropertyRead) && r.name === read.name);
     }
 }
 /**
  * Emulates an access to a given field using the TypeScript `ts.Type`
  * of the given class. The resolved symbol of the access is returned.
  */
-function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker$1) {
+function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
     const path = [readOrWrite.name];
     let node = readOrWrite;
-    while (node.receiver instanceof checker.PropertyRead) {
+    while (node.receiver instanceof project_tsconfig_paths.PropertyRead) {
         node = node.receiver;
         path.unshift(node.name);
     }
-    if (!(node.receiver instanceof checker.ImplicitReceiver || node.receiver instanceof checker.ThisReceiver)) {
+    if (!(node.receiver instanceof project_tsconfig_paths.ImplicitReceiver || node.receiver instanceof project_tsconfig_paths.ThisReceiver)) {
         return null;
     }
-    const classType = checker$1.getTypeAtLocation(componentClass.name);
-    return (lookupPropertyAccess(checker$1, classType, path, {
+    const classType = checker.getTypeAtLocation(componentClass.name);
+    return (lookupPropertyAccess(checker, classType, path, {
         // Necessary to avoid breaking the resolution if there is
         // some narrowing involved. E.g. `myClass ? myClass.input`.
         ignoreNullability: true,
@@ -490,8 +490,8 @@ function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker$1)
 }
 /** Whether the given node refers to a two-way binding AST node. */
 function isTwoWayBindingNode(node) {
-    return ((node instanceof checker.BoundAttribute && node.type === checker.BindingType.TwoWay) ||
-        (node instanceof checker.BoundEvent && node.type === checker.ParsedEventType.TwoWay));
+    return ((node instanceof project_tsconfig_paths.BoundAttribute && node.type === project_tsconfig_paths.BindingType.TwoWay) ||
+        (node instanceof project_tsconfig_paths.BoundEvent && node.type === project_tsconfig_paths.ParsedEventType.TwoWay));
 }
 
 /** Possible types of references to known fields detected. */
@@ -526,7 +526,7 @@ function isTsClassTypeReference(ref) {
  * Checks host bindings of the given class and tracks all
  * references to inputs within bindings.
  */
-function identifyHostBindingReferences(node, programInfo, checker$1, reflector, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
+function identifyHostBindingReferences(node, programInfo, checker, reflector, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
     if (node.name === undefined) {
         return;
     }
@@ -534,7 +534,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
     if (decorators === null) {
         return;
     }
-    const angularDecorators = checker.getAngularDecorators(decorators, ['Directive', 'Component'], 
+    const angularDecorators = project_tsconfig_paths.getAngularDecorators(decorators, ['Directive', 'Component'], 
     /* isAngularCore */ false);
     if (angularDecorators.length === 0) {
         return;
@@ -544,22 +544,22 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
     if (ngDecorator.args?.length !== 1) {
         return;
     }
-    const metadataNode = checker.unwrapExpression(ngDecorator.args[0]);
+    const metadataNode = project_tsconfig_paths.unwrapExpression(ngDecorator.args[0]);
     if (!ts.isObjectLiteralExpression(metadataNode)) {
         return;
     }
-    const metadata = checker.reflectObjectLiteral(metadataNode);
+    const metadata = project_tsconfig_paths.reflectObjectLiteral(metadataNode);
     if (!metadata.has('host')) {
         return;
     }
-    let hostField = checker.unwrapExpression(metadata.get('host'));
+    let hostField = project_tsconfig_paths.unwrapExpression(metadata.get('host'));
     // Special-case in case host bindings are shared via a variable.
     // e.g. Material button shares host bindings as a constant in the same target.
     if (ts.isIdentifier(hostField)) {
-        let symbol = checker$1.getSymbolAtLocation(hostField);
+        let symbol = checker.getSymbolAtLocation(hostField);
         // Plain identifier references can point to alias symbols (e.g. imports).
         if (symbol !== undefined && symbol.flags & ts.SymbolFlags.Alias) {
-            symbol = checker$1.getAliasedSymbol(symbol);
+            symbol = checker.getAliasedSymbol(symbol);
         }
         if (symbol !== undefined &&
             symbol.valueDeclaration !== undefined &&
@@ -570,9 +570,9 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
     if (hostField === undefined || !ts.isObjectLiteralExpression(hostField)) {
         return;
     }
-    const hostMap = checker.reflectObjectLiteral(hostField);
+    const hostMap = project_tsconfig_paths.reflectObjectLiteral(hostField);
     const expressionResult = [];
-    const expressionVisitor = new TemplateExpressionReferenceVisitor(checker$1, null, node, knownFields, fieldNamesToConsiderForReferenceLookup);
+    const expressionVisitor = new TemplateExpressionReferenceVisitor(checker, null, node, knownFields, fieldNamesToConsiderForReferenceLookup);
     for (const [rawName, expression] of hostMap.entries()) {
         if (!ts.isStringLiteralLike(expression)) {
             continue;
@@ -583,11 +583,11 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
         if (!isPropertyBinding && !isEventBinding) {
             continue;
         }
-        const parser = checker.makeBindingParser();
-        const sourceSpan = new checker.ParseSourceSpan(
+        const parser = project_tsconfig_paths.makeBindingParser();
+        const sourceSpan = new project_tsconfig_paths.ParseSourceSpan(
         // Fake source span to keep parsing offsets zero-based.
         // We then later combine these with the expression TS node offsets.
-        new checker.ParseLocation({ content: '', url: '' }, 0, 0, 0), new checker.ParseLocation({ content: '', url: '' }, 0, 0, 0));
+        new project_tsconfig_paths.ParseLocation({ content: '', url: '' }, 0, 0, 0), new project_tsconfig_paths.ParseLocation({ content: '', url: '' }, 0, 0, 0));
         const name = rawName.substring(1, rawName.length - 1);
         let parsed = undefined;
         if (isEventBinding) {
@@ -628,11 +628,11 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
  * The definition can then be used with the Angular compiler to
  * load/parse the given template.
  */
-function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLoader) {
+function attemptExtractTemplateDefinition(node, checker, reflector, resourceLoader) {
     const classDecorators = reflector.getDecoratorsOfDeclaration(node);
-    const evaluator = new index.PartialEvaluator(reflector, checker$1, null);
+    const evaluator = new index.PartialEvaluator(reflector, checker, null);
     const ngDecorators = classDecorators !== null
-        ? checker.getAngularDecorators(classDecorators, ['Component'], /* isAngularCore */ false)
+        ? project_tsconfig_paths.getAngularDecorators(classDecorators, ['Component'], /* isAngularCore */ false)
         : [];
     if (ngDecorators.length === 0 ||
         ngDecorators[0].args === null ||
@@ -640,7 +640,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
         !ts.isObjectLiteralExpression(ngDecorators[0].args[0])) {
         return null;
     }
-    const properties = checker.reflectObjectLiteral(ngDecorators[0].args[0]);
+    const properties = project_tsconfig_paths.reflectObjectLiteral(ngDecorators[0].args[0]);
     const templateProp = properties.get('template');
     const templateUrlProp = properties.get('templateUrl');
     const containingFile = node.getSourceFile().fileName;
@@ -651,7 +651,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
             return {
                 isInline: true,
                 expression: templateProp,
-                interpolationConfig: checker.DEFAULT_INTERPOLATION_CONFIG,
+                interpolationConfig: project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG,
                 preserveWhitespaces: false,
                 resolvedTemplateUrl: containingFile,
                 templateUrl: containingFile,
@@ -665,7 +665,7 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
             if (typeof templateUrl === 'string') {
                 return {
                     isInline: false,
-                    interpolationConfig: checker.DEFAULT_INTERPOLATION_CONFIG,
+                    interpolationConfig: project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG,
                     preserveWhitespaces: false,
                     templateUrlExpression: templateUrlProp,
                     templateUrl,
@@ -684,14 +684,14 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
  * Checks whether the given class has an Angular template, and resolves
  * all of the references to inputs.
  */
-function identifyTemplateReferences(programInfo, node, reflector, checker$1, evaluator, templateTypeChecker, resourceLoader, options, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
-    const template = templateTypeChecker.getTemplate(node, checker.OptimizeFor.WholeProgram) ??
+function identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, options, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
+    const template = templateTypeChecker.getTemplate(node, project_tsconfig_paths.OptimizeFor.WholeProgram) ??
         // If there is no template registered in the TCB or compiler, the template may
         // be skipped due to an explicit `jit: true` setting. We try to detect this case
         // and parse the template manually.
-        extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, resourceLoader, evaluator, options);
+        extractTemplateWithoutCompilerAnalysis(node, checker, reflector, resourceLoader, evaluator, options);
     if (template !== null) {
-        const visitor = new TemplateReferenceVisitor(checker$1, templateTypeChecker, node, knownFields, fieldNamesToConsiderForReferenceLookup);
+        const visitor = new TemplateReferenceVisitor(checker, templateTypeChecker, node, knownFields, fieldNamesToConsiderForReferenceLookup);
         template.forEach((node) => node.visit(visitor));
         for (const res of visitor.result) {
             const templateFilePath = res.context.sourceSpan.start.file.url;
@@ -714,7 +714,7 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
                     node: res.context,
                     isObjectShorthandExpression: res.isObjectShorthandExpression,
                     originatingTsFile: project_paths.projectFile(node.getSourceFile(), programInfo),
-                    templateFile: project_paths.projectFile(checker.absoluteFrom(templateFilePath), programInfo),
+                    templateFile: project_paths.projectFile(project_tsconfig_paths.absoluteFrom(templateFilePath), programInfo),
                     isLikelyPartOfNarrowing: res.isLikelyNarrowed,
                     isWrite: res.isWrite,
                 },
@@ -732,11 +732,11 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
  * contain references to inputs that we can resolve via the fallback
  * reference resolutions (that does not use the type check block).
  */
-function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, resourceLoader, evaluator, options) {
+function extractTemplateWithoutCompilerAnalysis(node, checker, reflector, resourceLoader, evaluator, options) {
     if (node.name === undefined) {
         return null;
     }
-    const tmplDef = attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLoader);
+    const tmplDef = attemptExtractTemplateDefinition(node, checker, reflector, resourceLoader);
     if (tmplDef === null) {
         return null;
     }
@@ -747,7 +747,7 @@ function extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, reso
         enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat !== false,
         i18nNormalizeLineEndingsInICUs: options.i18nNormalizeLineEndingsInICUs === true,
         enableSelectorless: false,
-    }, checker.CompilationMode.FULL).nodes;
+    }, project_tsconfig_paths.CompilationMode.FULL).nodes;
 }
 
 /** Gets the pattern and property name for a given binding element. */

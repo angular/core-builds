@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-require('./checker-DBomdQHo.cjs');
-require('./index-DWQ8GMRM.cjs');
+require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+require('./index-DsZzy7HS.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 require('@angular-devkit/core');
@@ -21,7 +21,6 @@ require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Name of the method being replaced. */
 const METHOD_NAME = 'get';

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,17 +8,18 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-DTywrGR6.cjs');
+var compiler_host = require('./compiler_host-Lm-0mCtQ.cjs');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./checker-DBomdQHo.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
 require('os');
 require('fs');
 require('module');
 require('url');
+require('@angular-devkit/core');
 
 /*!
  * @license
@@ -1243,12 +1244,10 @@ function isStringType(node, checker) {
 
 function migrate(options) {
     return async (tree) => {
+        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
         const basePath = process.cwd();
+        const allPaths = [...buildPaths, ...testPaths];
         const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
-        let allPaths = [];
-        if (pathToMigrate.trim() !== '') {
-            allPaths.push(pathToMigrate);
-        }
         if (!allPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the inject migration.');
         }

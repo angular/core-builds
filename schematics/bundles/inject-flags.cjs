@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,12 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DBomdQHo.cjs');
-require('./index-DWQ8GMRM.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+require('./index-DsZzy7HS.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
-var apply_import_manager = require('./apply_import_manager-C9H5B66Q.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
+var apply_import_manager = require('./apply_import_manager-CJiucwZ7.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -21,7 +21,6 @@ require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Mapping between `InjectFlag` enum members to their object literal equvalients. */
 const FLAGS_TO_FIELDS = {
@@ -42,7 +41,7 @@ class InjectFlagsMigration extends project_paths.TsurgeFunnelMigration {
                 continue;
             }
             const file = project_paths.projectFile(sourceFile, info);
-            const importManager = new checker.ImportManager();
+            const importManager = new project_tsconfig_paths.ImportManager();
             const importReplacements = [];
             // Always remove the `InjectFlags` since it has been removed from Angular.
             // Note that it be better to do this inside of `migrate`, but we don't have AST access there.

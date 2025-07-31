@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,15 +9,14 @@
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var compiler_host = require('./compiler_host-DTywrGR6.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+var compiler_host = require('./compiler_host-Lm-0mCtQ.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
 var ts = require('typescript');
-var checker = require('./checker-DBomdQHo.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('os');
-require('@angular-devkit/core');
 require('module');
 require('url');
+require('@angular-devkit/core');
 
 /**
  * Finds the class declaration that is being referred to by a node.
@@ -48,7 +47,7 @@ function isStandaloneComponent(node, reflector) {
     if (decorators === null) {
         return false;
     }
-    const decorator = checker.findAngularDecorator(decorators, 'Component', false);
+    const decorator = project_tsconfig_paths.findAngularDecorator(decorators, 'Component', false);
     if (decorator === undefined || decorator.args === null || decorator.args.length !== 1) {
         return false;
     }
@@ -154,7 +153,7 @@ function isProvideRoutesCallExpression(node, typeChecker) {
  */
 function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
-    const reflector = new checker.TypeScriptReflectionHost(typeChecker);
+    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
     const printer = ts.createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);

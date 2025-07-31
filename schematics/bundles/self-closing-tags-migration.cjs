@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DBomdQHo.cjs');
-require('./index-DWQ8GMRM.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+require('./index-DsZzy7HS.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('@angular-devkit/core');
@@ -21,7 +21,6 @@ require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('./imports-CIX-JgAN.cjs');
 
 /**
@@ -128,7 +127,7 @@ function findClosestLineStartPosition(linesMap, position, low = 0, high = linesM
 class NgComponentTemplateVisitor {
     typeChecker;
     resolvedTemplates = [];
-    fs = checker.getFileSystem();
+    fs = project_tsconfig_paths.getFileSystem();
     constructor(typeChecker) {
         this.typeChecker = typeChecker;
     }
@@ -203,7 +202,7 @@ function parseTemplate(template) {
         // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
         // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
         // easily get the text-only ranges without having to reconstruct the original text.
-        parsed = new checker.HtmlParser().parse(template, '', {
+        parsed = new project_tsconfig_paths.HtmlParser().parse(template, '', {
             // Allows for ICUs to be parsed.
             tokenizeExpansionForms: true,
             // Explicitly disable blocks so that their characters are treated as plain text.
@@ -228,7 +227,7 @@ function migrateTemplateToSelfClosingTags(template) {
         return { migrated: template, changed: false, replacementCount: 0 };
     }
     const visitor = new AngularElementCollector();
-    checker.visitAll$1(visitor, parsed.tree.rootNodes);
+    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -256,8 +255,8 @@ function replaceWithSelfClosingTag(html, tagName) {
 function replaceTemplate(template, replaceValue, start, end, offset) {
     return template.slice(0, start + offset) + replaceValue + template.slice(end + offset);
 }
-const ALL_HTML_TAGS = new checker.DomElementSchemaRegistry().allKnownElementNames();
-class AngularElementCollector extends checker.RecursiveVisitor$1 {
+const ALL_HTML_TAGS = new project_tsconfig_paths.DomElementSchemaRegistry().allKnownElementNames();
+class AngularElementCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
     elements = [];
     constructor() {
         super();
@@ -280,7 +279,7 @@ class AngularElementCollector extends checker.RecursiveVisitor$1 {
         }
         if (element.children.length === 1) {
             const child = element.children[0];
-            return child instanceof checker.Text && /^\s*$/.test(child.value);
+            return child instanceof project_tsconfig_paths.Text && /^\s*$/.test(child.value);
         }
         return false;
     }

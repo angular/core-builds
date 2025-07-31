@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-DBomdQHo.cjs');
-var project_paths = require('./project_paths-Cuim0I7i.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
+var project_paths = require('./project_paths-ASu7fs-L.cjs');
 
 /**
  * Applies import manager changes, and writes them as replacements the
@@ -23,7 +23,7 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
     newImports.forEach((newImports, fileName) => {
         newImports.forEach((newImport) => {
             const printedImport = printer.printNode(ts.EmitHint.Unspecified, newImport, pathToFile.get(fileName));
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(checker.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(project_tsconfig_paths.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
         });
     });
     // Capture updated imports

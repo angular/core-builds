@@ -1,21 +1,20 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-78a6b68
+ * @license Angular v20.2.0-next.3+sha-8255e0c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var index = require('./index-DWQ8GMRM.cjs');
+var index = require('./index-DsZzy7HS.cjs');
 var schematics = require('@angular-devkit/schematics');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-DBomdQHo.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cn4EEHpG.cjs');
 require('path');
 var path = require('node:path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
@@ -59,7 +58,7 @@ class NgtscCompilerHost {
         return this.fs.getDefaultLibLocation();
     }
     writeFile(fileName, data, writeByteOrderMark, onError, sourceFiles) {
-        const path = checker.absoluteFrom(fileName);
+        const path = project_tsconfig_paths.absoluteFrom(fileName);
         this.fs.ensureDir(this.fs.dirname(path));
         this.fs.writeFile(path, data);
     }
@@ -143,7 +142,7 @@ function createFileSystemTsReadDirectoryFn(fs) {
     };
 }
 
-function calcProjectFileAndBasePath(project, host = checker.getFileSystem()) {
+function calcProjectFileAndBasePath(project, host = project_tsconfig_paths.getFileSystem()) {
     const absProject = host.resolve(project);
     const projectIsDir = host.lstat(absProject).isDirectory();
     const projectFile = projectIsDir ? host.join(absProject, 'tsconfig.json') : absProject;
@@ -151,9 +150,9 @@ function calcProjectFileAndBasePath(project, host = checker.getFileSystem()) {
     const basePath = host.resolve(projectDir);
     return { projectFile, basePath };
 }
-function readConfiguration(project, existingOptions, host = checker.getFileSystem()) {
+function readConfiguration(project, existingOptions, host = project_tsconfig_paths.getFileSystem()) {
     try {
-        const fs = checker.getFileSystem();
+        const fs = project_tsconfig_paths.getFileSystem();
         const readConfigFile = (configFile) => ts.readConfigFile(configFile, (file) => host.readFile(host.resolve(file)));
         const readAngularCompilerOptions = (configFile, parentOptions = {}) => {
             const { config, error } = readConfigFile(configFile);
@@ -226,7 +225,7 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
         return { project: '', errors, rootNames: [], options: {}, emitFlags: index.EmitFlags.Default };
     }
 }
-function createParseConfigHost(host, fs = checker.getFileSystem()) {
+function createParseConfigHost(host, fs = project_tsconfig_paths.getFileSystem()) {
     return {
         fileExists: host.exists.bind(host),
         readDirectory: createFileSystemTsReadDirectoryFn(fs),
@@ -256,7 +255,7 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
         // Path isn't a rooted or relative path, resolve like a module.
         const { resolvedModule } = ts.nodeModuleNameResolver(extendsValue, configFile, { moduleResolution: ts.ModuleResolutionKind.Node10, resolveJsonModule: true }, parseConfigHost);
         if (resolvedModule) {
-            return checker.absoluteFrom(resolvedModule.resolvedFileName);
+            return project_tsconfig_paths.absoluteFrom(resolvedModule.resolvedFileName);
         }
     }
     return null;
@@ -556,7 +555,7 @@ function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
     // Make sure the FS becomes globally available. Some code paths
     // of the Angular compiler, or tsconfig parsing aren't leveraging
     // the specified file system.
-    checker.setFileSystem(fs);
+    project_tsconfig_paths.setFileSystem(fs);
     const tsconfig = parseTsconfigOrDie(absoluteTsconfigPath, fs);
     const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
     // When enabled, use a plain TS program if we are sure it's not
@@ -585,14 +584,14 @@ function getProgramInfoFromBaseInfo(baseInfo) {
     const fullProgramSourceFiles = [...baseInfo.program.getSourceFiles()];
     const sourceFiles = fullProgramSourceFiles.filter((f) => !f.isDeclarationFile &&
         // Note `isShim` will work for the initial program, but for TCB programs, the shims are no longer annotated.
-        !checker.isShim(f) &&
+        !project_tsconfig_paths.isShim(f) &&
         !f.fileName.endsWith('.ngtypecheck.ts'));
     // Sort it by length in reverse order (longest first). This speeds up lookups,
     // since there's no need to keep going through the array once a match is found.
-    const sortedRootDirs = checker.getRootDirs(baseInfo.host, baseInfo.userOptions).sort((a, b) => b.length - a.length);
+    const sortedRootDirs = project_tsconfig_paths.getRootDirs(baseInfo.host, baseInfo.userOptions).sort((a, b) => b.length - a.length);
     // TODO: Consider also following TS's logic here, finding the common source root.
     // See: Program#getCommonSourceDirectory.
-    const primaryRoot = checker.absoluteFrom(baseInfo.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? baseInfo.program.getCurrentDirectory());
+    const primaryRoot = project_tsconfig_paths.absoluteFrom(baseInfo.userOptions.rootDir ?? sortedRootDirs.at(-1) ?? baseInfo.program.getCurrentDirectory());
     return {
         ...baseInfo,
         sourceFiles,
@@ -671,7 +670,7 @@ async function runMigrationInDevkit(config) {
     }
     const tsconfigPaths = [...buildPaths, ...testPaths];
     const fs = new DevkitMigrationFilesystem(config.tree);
-    checker.setFileSystem(fs);
+    project_tsconfig_paths.setFileSystem(fs);
     const migration = config.getMigration(fs);
     const unitResults = [];
     const isFunnelMigration = migration instanceof TsurgeFunnelMigration;
@@ -781,7 +780,7 @@ function confirmAsSerializable(data) {
  * See {@link ProjectFile}.
  */
 function projectFile(file, { sortedRootDirs, projectRoot }) {
-    const fs = checker.getFileSystem();
+    const fs = project_tsconfig_paths.getFileSystem();
     const filePath = fs.resolve(typeof file === 'string' ? file : file.fileName);
     // Sorted root directories are sorted longest to shortest. First match
     // is the appropriate root directory for ID computation.
@@ -808,7 +807,7 @@ function projectFile(file, { sortedRootDirs, projectRoot }) {
  * E.g. `a/b/c` is within `a/b` but not within `a/x`.
  */
 function isWithinBasePath(fs, base, path) {
-    return checker.isLocalRelativePath(fs.relative(base, path));
+    return project_tsconfig_paths.isLocalRelativePath(fs.relative(base, path));
 }
 
 exports.Replacement = Replacement;
