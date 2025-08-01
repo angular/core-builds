@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-d05138a
+ * @license Angular v20.2.0-next.3+sha-e5d6fb5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13511,7 +13511,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.3+sha-d05138a']
+        ? ['ng-version', '20.2.0-next.3+sha-e5d6fb5']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21842,7 +21842,6 @@ function ɵɵanimateEnter(value) {
     // Retrieve the actual class list from the value. This will resolve any resolver functions from
     // bindings.
     const activeClasses = getClassListFromValue(value);
-    let longestAnimation;
     const cleanupFns = [];
     // In the case where multiple animations are happening on the element, we need
     // to get the longest animation to ensure we don't complete animations early.
@@ -21850,7 +21849,6 @@ function ɵɵanimateEnter(value) {
     // gets removed early.
     const handleAnimationStart = (event) => {
         setupAnimationCancel(event, activeClasses, renderer);
-        longestAnimation = getLongestAnimation(event);
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
             cleanupFns.push(renderer.listen(nativeElement, eventName, handleInAnimationEnd));
@@ -21858,7 +21856,7 @@ function ɵɵanimateEnter(value) {
     };
     // When the longest animation ends, we can remove all the classes
     const handleInAnimationEnd = (event) => {
-        animationEnd(event, nativeElement, longestAnimation, activeClasses, renderer, cleanupFns);
+        animationEnd(event, nativeElement, activeClasses, renderer, cleanupFns);
     };
     // We only need to add these event listeners if there are actual classes to apply
     if (activeClasses && activeClasses.length > 0) {
@@ -22109,7 +22107,8 @@ function isLongestAnimation(event, nativeElement, longestAnimation) {
             (longestAnimation.propertyName !== undefined &&
                 event.propertyName === longestAnimation.propertyName)));
 }
-function animationEnd(event, nativeElement, longestAnimation, classList, renderer, cleanupFns) {
+function animationEnd(event, nativeElement, classList, renderer, cleanupFns) {
+    const longestAnimation = getLongestAnimation(event);
     if (isLongestAnimation(event, nativeElement, longestAnimation)) {
         // Now that we've found the longest animation, there's no need
         // to keep bubbling up this event as it's not going to apply to
