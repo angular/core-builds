@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-cbd300d
+ * @license Angular v20.2.0-next.3+sha-6597ac0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13511,7 +13511,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.3+sha-cbd300d']
+        ? ['ng-version', '20.2.0-next.3+sha-6597ac0']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21740,7 +21740,9 @@ class ElementRegistry {
     }
     /** Used when animate.leave is only applying classes */
     trackClasses(details, classes) {
-        const classList = typeof classes === 'string' ? [classes] : classes;
+        const classList = getClassListFromValue(classes);
+        if (!classList)
+            return;
         for (let klass of classList) {
             details.classes?.add(klass);
         }
@@ -21814,9 +21816,19 @@ class ElementRegistry {
         details.animateFn(remove);
     }
 }
+function getClassListFromValue(value) {
+    const classes = typeof value === 'function' ? value() : value;
+    let classList = Array.isArray(classes) ? classes : null;
+    if (typeof classes === 'string') {
+        classList = classes
+            .trim()
+            .split(/\s+/)
+            .filter((k) => k);
+    }
+    return classList;
+}
 
 const DEFAULT_ANIMATIONS_DISABLED = false;
-const WS_REGEXP = /\s+/;
 const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) &&
     typeof document !== 'undefined' &&
     // tslint:disable-next-line:no-toplevel-property-access
@@ -22073,17 +22085,6 @@ function getLongestAnimation(event) {
         }
     }
     return currentLongest;
-}
-function getClassListFromValue(value) {
-    const classes = typeof value === 'function' ? value() : value;
-    let classList = classes instanceof Array ? classes : null;
-    if (typeof classes === 'string') {
-        classList = classes
-            .trim()
-            .split(WS_REGEXP)
-            .filter((k) => k);
-    }
-    return classList;
 }
 function setupAnimationCancel(event, classList, renderer) {
     if (!(event.target instanceof Element))
