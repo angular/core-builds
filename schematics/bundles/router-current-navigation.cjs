@@ -23,22 +23,21 @@ require('url');
 require('@angular-devkit/schematics');
 
 /** Name of the method being replaced. */
-const METHOD_NAME = 'get';
-/** Migration that replaces `TestBed.get` usages with `TestBed.inject`. */
-class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
+const METHOD_NAME = 'getCurrentNavigation';
+/** Migration that replaces `Router.getCurrentNavigation` usages with `Router.currentNavigation()`. */
+class RouterCurrentNavigationMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const locations = [];
         for (const sourceFile of info.sourceFiles) {
-            const specifier = imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed');
-            if (specifier === null) {
+            const routerSpecifier = imports.getImportSpecifier(sourceFile, '@angular/router', 'Router');
+            if (routerSpecifier === null) {
                 continue;
             }
             const typeChecker = info.program.getTypeChecker();
             sourceFile.forEachChild(function walk(node) {
                 if (ts.isPropertyAccessExpression(node) &&
                     node.name.text === METHOD_NAME &&
-                    ts.isIdentifier(node.expression) &&
-                    symbol.isReferenceToImport(typeChecker, node.expression, specifier)) {
+                    isRouterType(typeChecker, node.expression, routerSpecifier)) {
                     locations.push({ file: project_paths.projectFile(sourceFile, info), position: node.name.getStart() });
                 }
                 else {
@@ -53,7 +52,7 @@ class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
             return new project_paths.Replacement(file, new project_paths.TextUpdate({
                 position: position,
                 end: position + METHOD_NAME.length,
-                toInsert: 'inject',
+                toInsert: 'currentNavigation',
             }));
         });
         return project_paths.confirmAsSerializable({ replacements });
@@ -78,6 +77,23 @@ class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
         return project_paths.confirmAsSerializable({});
     }
 }
+/**
+ * Checks if the given symbol represents a Router type.
+ */
+function isRouterType(typeChecker, expression, routerSpecifier) {
+    const expressionType = typeChecker.getTypeAtLocation(expression);
+    const expressionSymbol = expressionType.getSymbol();
+    if (!expressionSymbol) {
+        return false;
+    }
+    const declarations = expressionSymbol.getDeclarations() ?? [];
+    for (const declaration of declarations) {
+        if (symbol.isReferenceToImport(typeChecker, declaration, routerSpecifier)) {
+            return true;
+        }
+    }
+    return declarations.some((decl) => decl === routerSpecifier);
+}
 
 /*!
  * @license
@@ -90,7 +106,7 @@ function migrate() {
     return async (tree) => {
         await project_paths.runMigrationInDevkit({
             tree,
-            getMigration: () => new TestBedGetMigration(),
+            getMigration: () => new RouterCurrentNavigationMigration(),
         });
     };
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-6597ac0
+ * @license Angular v20.2.0-next.3+sha-5802f80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3937,11 +3937,8 @@ declare class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {
  * ]});
  * ```
  *
- * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
- * in patch versions. There are known feature gaps and API ergonomic considerations. We will iterate
- * on the exact API based on the feedback and our understanding of the problem and solution space.
+ * @publicApi 20.2
  *
- * @developerPreview 20.0
  * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  */
 declare function provideZonelessChangeDetection(): EnvironmentProviders;
@@ -4918,6 +4915,7 @@ declare const enum RuntimeErrorCode {
     MISSING_NG_MODULE_DEFINITION = 915,
     MISSING_DIRECTIVE_DEFINITION = 916,
     NO_COMPONENT_FACTORY_FOUND = 917,
+    EXTERNAL_RESOURCE_LOADING_FAILED = 918,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
@@ -5248,6 +5246,7 @@ declare const DEFAULT_LOCALE_ID = "en-US";
  */
 declare function resolveComponentResources(resourceResolver: (url: string) => Promise<string | {
     text(): Promise<string>;
+    status?: number;
 }>): Promise<void>;
 declare function isComponentDefPendingResolution(type: Type$1<any>): boolean;
 declare function clearResolutionOfComponentResourcesQueue(): Map<Type$1<any>, Component>;

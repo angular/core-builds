@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-6597ac0
+ * @license Angular v20.2.0-next.3+sha-5802f80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13511,7 +13511,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-next.3+sha-6597ac0']
+        ? ['ng-version', '20.2.0-next.3+sha-5802f80']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -14654,7 +14654,7 @@ function resolveComponentResources(resourceResolver) {
         let promise = urlMap.get(url);
         if (!promise) {
             const resp = resourceResolver(url);
-            urlMap.set(url, (promise = resp.then(unwrapResponse)));
+            urlMap.set(url, (promise = resp.then((res) => unwrapResponse(url, res))));
         }
         return promise;
     }
@@ -14727,8 +14727,14 @@ function restoreComponentResolutionQueue(queue) {
 function isComponentResourceResolutionQueueEmpty() {
     return componentResourceResolutionQueue.size === 0;
 }
-function unwrapResponse(response) {
-    return typeof response == 'string' ? response : response.text();
+function unwrapResponse(url, response) {
+    if (typeof response === 'string') {
+        return response;
+    }
+    if (response.status !== undefined && response.status !== 200) {
+        return Promise.reject(new RuntimeError(918 /* RuntimeErrorCode.EXTERNAL_RESOURCE_LOADING_FAILED */, ngDevMode && `Could not load resource: ${url}. Response status: ${response.status}`));
+    }
+    return response.text();
 }
 function componentDefResolved(type) {
     componentDefPendingResolution.delete(type);
@@ -21834,6 +21840,9 @@ const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerM
     // tslint:disable-next-line:no-toplevel-property-access
     typeof document?.documentElement?.getAnimations === 'function';
 const noOpAnimationComplete = () => { };
+// Tracks the list of classes added to a DOM node from `animate.enter` calls to ensure
+// we remove all of the classes in the case of animation composition via host bindings.
+const enterClassMap = new WeakMap();
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
  *
@@ -21867,7 +21876,6 @@ function ɵɵanimateEnter(value) {
     // This also allows us to setup cancellation of animations in progress if the
     // gets removed early.
     const handleAnimationStart = (event) => {
-        setupAnimationCancel(event, activeClasses, renderer);
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
             cleanupFns.push(renderer.listen(nativeElement, eventName, handleInAnimationEnd));
@@ -21875,7 +21883,7 @@ function ɵɵanimateEnter(value) {
     };
     // When the longest animation ends, we can remove all the classes
     const handleInAnimationEnd = (event) => {
-        animationEnd(event, nativeElement, activeClasses, renderer, cleanupFns);
+        animationEnd(event, nativeElement, renderer, cleanupFns);
     };
     // We only need to add these event listeners if there are actual classes to apply
     if (activeClasses && activeClasses.length > 0) {
@@ -21883,11 +21891,29 @@ function ɵɵanimateEnter(value) {
             cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleAnimationStart));
             cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleAnimationStart));
         });
+        trackEnterClasses(nativeElement, activeClasses);
         for (const klass of activeClasses) {
             renderer.addClass(nativeElement, klass);
         }
     }
     return ɵɵanimateEnter; // For chaining
+}
+/**
+ * trackEnterClasses is necessary in the case of composition where animate.enter
+ * is used on the same element in multiple places, like on the element and in a
+ * host binding. When removing classes, we need the entire list of animation classes
+ * added to properly remove them when the longest animation fires.
+ */
+function trackEnterClasses(el, classes) {
+    const classlist = enterClassMap.get(el);
+    if (classlist) {
+        for (const klass of classes) {
+            classlist.push(klass);
+        }
+    }
+    else {
+        enterClassMap.set(el, classes);
+    }
 }
 /**
  * Instruction to handle the `(animate.enter)` behavior for event bindings, aka when
@@ -22115,7 +22141,11 @@ function isLongestAnimation(event, nativeElement, longestAnimation) {
             (longestAnimation.propertyName !== undefined &&
                 event.propertyName === longestAnimation.propertyName)));
 }
-function animationEnd(event, nativeElement, classList, renderer, cleanupFns) {
+function animationEnd(event, nativeElement, renderer, cleanupFns) {
+    const classList = enterClassMap.get(nativeElement);
+    if (!classList)
+        return;
+    setupAnimationCancel(event, classList, renderer);
     const longestAnimation = getLongestAnimation(event);
     if (isLongestAnimation(event, nativeElement, longestAnimation)) {
         // Now that we've found the longest animation, there's no need
@@ -22123,11 +22153,10 @@ function animationEnd(event, nativeElement, classList, renderer, cleanupFns) {
         // other elements further up. We don't want it to inadvertently
         // affect any other animations on the page.
         event.stopImmediatePropagation();
-        if (classList !== null) {
-            for (const klass of classList) {
-                renderer.removeClass(nativeElement, klass);
-            }
+        for (const klass of classList) {
+            renderer.removeClass(nativeElement, klass);
         }
+        enterClassMap.delete(nativeElement);
         for (const fn of cleanupFns) {
             fn();
         }
@@ -30820,11 +30849,8 @@ class ChangeDetectionSchedulerImpl {
  * ]});
  * ```
  *
- * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
- * in patch versions. There are known feature gaps and API ergonomic considerations. We will iterate
- * on the exact API based on the feedback and our understanding of the problem and solution space.
+ * @publicApi 20.2
  *
- * @developerPreview 20.0
  * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
  */
 function provideZonelessChangeDetection() {

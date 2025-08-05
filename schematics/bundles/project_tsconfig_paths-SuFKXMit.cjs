@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-6597ac0
+ * @license Angular v20.2.0-next.3+sha-5802f80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30797,7 +30797,8 @@ class R3TargetBinder {
         // Bind the host element in a separate scope. Note that it only uses the
         // `TemplateBinder` since directives don't apply inside a host context.
         if (target.host) {
-            TemplateBinder.applyWithScope(target.host, Scope$1.apply(target.host), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
+            directives.set(target.host.node, target.host.directives);
+            TemplateBinder.applyWithScope(target.host.node, Scope$1.apply(target.host.node), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
         }
         return new R3BoundTarget(target, directives, eagerDirectives, missingDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
     }
@@ -31590,7 +31591,8 @@ class R3BoundTarget {
         }
         if (target instanceof Template ||
             target.node instanceof Component$1 ||
-            target.node instanceof Directive$1) {
+            target.node instanceof Directive$1 ||
+            target.node instanceof HostElement) {
             return null;
         }
         return this.referenceTargetToElement(target.node);
@@ -32784,7 +32786,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.3+sha-6597ac0');
+new Version('20.2.0-next.3+sha-5802f80');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33819,7 +33821,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Cn4EEHpG.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-SuFKXMit.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -45156,7 +45158,7 @@ function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecor
     }
     // Add the host bindings type checking code.
     if (tcb.boundTarget.target.host !== undefined) {
-        const hostScope = Scope.forNodes(tcb, null, tcb.boundTarget.target.host, null, null);
+        const hostScope = Scope.forNodes(tcb, null, tcb.boundTarget.target.host.node, null, null);
         statements.push(renderBlockStatements(env, hostScope, createHostBindingsBlockGuard()));
     }
     const body = ts.factory.createBlock(statements);
@@ -45527,6 +45529,7 @@ class TcbDirectiveTypeOpBase extends TcbOp {
         const dirRef = this.dir.ref;
         const rawType = this.tcb.env.referenceType(this.dir.ref);
         let type;
+        let span;
         if (this.dir.isGeneric === false || dirRef.node.typeParameters === undefined) {
             type = rawType;
         }
@@ -45537,9 +45540,15 @@ class TcbDirectiveTypeOpBase extends TcbOp {
             const typeArguments = dirRef.node.typeParameters.map(() => ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword));
             type = ts.factory.createTypeReferenceNode(rawType.typeName, typeArguments);
         }
+        if (this.node instanceof HostElement) {
+            span = this.node.sourceSpan;
+        }
+        else {
+            span = this.node.startSourceSpan || this.node.sourceSpan;
+        }
         const id = this.tcb.allocateId();
         addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
-        addParseSpanInfo(id, this.node.startSourceSpan || this.node.sourceSpan);
+        addParseSpanInfo(id, span);
         this.scope.addStatement(tsDeclareVariable(id, type));
         return id;
     }
@@ -46209,12 +46218,16 @@ class TcbDirectiveOutputsOp extends TcbOp {
     tcb;
     scope;
     node;
+    inputs;
+    outputs;
     dir;
-    constructor(tcb, scope, node, dir) {
+    constructor(tcb, scope, node, inputs, outputs, dir) {
         super();
         this.tcb = tcb;
         this.scope = scope;
         this.node = node;
+        this.inputs = inputs;
+        this.outputs = outputs;
         this.dir = dir;
     }
     get optional() {
@@ -46223,14 +46236,16 @@ class TcbDirectiveOutputsOp extends TcbOp {
     execute() {
         let dirId = null;
         const outputs = this.dir.outputs;
-        for (const output of this.node.outputs) {
+        for (const output of this.outputs) {
             if (output.type === exports.ParsedEventType.LegacyAnimation ||
                 !outputs.hasBindingPropertyName(output.name)) {
                 continue;
             }
-            if (this.tcb.env.config.checkTypeOfOutputEvents && output.name.endsWith('Change')) {
+            if (this.tcb.env.config.checkTypeOfOutputEvents &&
+                this.inputs !== null &&
+                output.name.endsWith('Change')) {
                 const inputName = output.name.slice(0, -6);
-                checkSplitTwoWayBinding(inputName, output, this.node.inputs, this.tcb);
+                checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb);
             }
             // TODO(alxhub): consider supporting multiple fields with the same property name for outputs.
             const field = outputs.getByBindingPropertyName(output.name)[0].classPropertyName;
@@ -47010,7 +47025,8 @@ class Scope {
         else if ((ref instanceof Element$1 ||
             ref instanceof Template ||
             ref instanceof Component$1 ||
-            ref instanceof Directive$1) &&
+            ref instanceof Directive$1 ||
+            ref instanceof HostElement) &&
             directive !== undefined &&
             this.directiveOpMap.has(ref)) {
             // Resolving a directive on an element or sub-template.
@@ -47073,7 +47089,7 @@ class Scope {
                 this.appendContentProjectionCheckOp(node);
             }
             this.appendDirectivesAndInputsOfElementLikeNode(node);
-            this.appendOutputsOfElementLikeNode(node);
+            this.appendOutputsOfElementLikeNode(node, node.inputs, node.outputs);
             this.appendSelectorlessDirectives(node);
             this.appendChildren(node);
             this.checkAndAppendReferencesOfNode(node);
@@ -47081,7 +47097,7 @@ class Scope {
         else if (node instanceof Template) {
             // Template children are rendered in a child scope.
             this.appendDirectivesAndInputsOfElementLikeNode(node);
-            this.appendOutputsOfElementLikeNode(node);
+            this.appendOutputsOfElementLikeNode(node, node.inputs, node.outputs);
             this.appendSelectorlessDirectives(node);
             const ctxIndex = this.opQueue.push(new TcbTemplateContextOp(this.tcb, this)) - 1;
             this.templateCtxOpMap.set(node, ctxIndex);
@@ -47128,9 +47144,7 @@ class Scope {
             }
         }
         else if (node instanceof HostElement) {
-            const opIndex = this.opQueue.push(new TcbHostElementOp(this.tcb, this, node)) - 1;
-            this.hostElementOpMap.set(node, opIndex);
-            this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.bindings, node, null), new TcbUnclaimedOutputsOp(this.tcb, this, node, node.listeners, null, null), new TcbDomSchemaCheckerOp(this.tcb, node, false, null));
+            this.appendHostElement(node);
         }
     }
     appendChildren(node) {
@@ -47204,7 +47218,7 @@ class Scope {
             this.opQueue.push(new TcbDomSchemaCheckerOp(this.tcb, node, checkElement, claimedInputs));
         }
     }
-    appendOutputsOfElementLikeNode(node) {
+    appendOutputsOfElementLikeNode(node, bindings, events) {
         // Collect all the outputs on the element.
         const claimedOutputs = new Set();
         // Don't resolve directives when selectorless is enabled and treat all the outputs on the
@@ -47215,24 +47229,24 @@ class Scope {
             // If there are no directives, then all outputs are unclaimed outputs, so queue an operation
             // to add them if needed.
             if (node instanceof Element$1) {
-                this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, node.outputs, node.inputs, claimedOutputs));
+                this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, events, bindings, claimedOutputs));
             }
             return;
         }
         // Queue operations for all directives to check the relevant outputs for a directive.
         for (const dir of directives) {
-            this.opQueue.push(new TcbDirectiveOutputsOp(this.tcb, this, node, dir));
+            this.opQueue.push(new TcbDirectiveOutputsOp(this.tcb, this, node, bindings, events, dir));
         }
         // After expanding the directives, we might need to queue an operation to check any unclaimed
         // outputs.
-        if (node instanceof Element$1) {
+        if (node instanceof Element$1 || node instanceof HostElement) {
             // Go through the directives and register any outputs that it claims in `claimedOutputs`.
             for (const dir of directives) {
                 for (const outputProperty of dir.outputs.propertyNames) {
                     claimedOutputs.add(outputProperty);
                 }
             }
-            this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, node.outputs, node.inputs, claimedOutputs));
+            this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, events, bindings, claimedOutputs));
         }
     }
     appendInputsOfSelectorlessNode(node) {
@@ -47273,7 +47287,7 @@ class Scope {
         const claimedOutputs = new Set();
         if (directives !== null && directives.length > 0) {
             for (const dir of directives) {
-                this.opQueue.push(new TcbDirectiveOutputsOp(this.tcb, this, node, dir));
+                this.opQueue.push(new TcbDirectiveOutputsOp(this.tcb, this, node, node.inputs, node.outputs, dir));
                 for (const outputProperty of dir.outputs.propertyNames) {
                     claimedOutputs.add(outputProperty);
                 }
@@ -47446,6 +47460,21 @@ class Scope {
         if (triggers.viewport !== undefined) {
             this.validateReferenceBasedDeferredTrigger(block, triggers.viewport);
         }
+    }
+    appendHostElement(node) {
+        const opIndex = this.opQueue.push(new TcbHostElementOp(this.tcb, this, node)) - 1;
+        const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
+        if (directives !== null && directives.length > 0) {
+            const directiveOpMap = new Map();
+            for (const directive of directives) {
+                const directiveOp = new TcbNonGenericDirectiveTypeOp(this.tcb, this, node, directive);
+                directiveOpMap.set(directive, this.opQueue.push(directiveOp) - 1);
+            }
+            this.directiveOpMap.set(node, directiveOpMap);
+        }
+        this.hostElementOpMap.set(node, opIndex);
+        this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.bindings, node, null), new TcbDomSchemaCheckerOp(this.tcb, node, false, null));
+        this.appendOutputsOfElementLikeNode(node, null, node.listeners);
     }
     validateReferenceBasedDeferredTrigger(block, trigger) {
         if (trigger.reference === null) {
@@ -48073,7 +48102,12 @@ class TypeCheckContextImpl {
         }
         const boundTarget = binder.bind({
             template: templateContext?.nodes,
-            host: hostBindingContext?.node,
+            host: hostBindingContext === null
+                ? undefined
+                : {
+                    node: hostBindingContext.node,
+                    directives: hostBindingContext.directives,
+                },
         });
         if (this.inlining === InliningMode.InlineOps) {
             // Get all of the directives used in the template and record inline type constructors when
@@ -50640,8 +50674,8 @@ exports.Directive = Directive$1;
 exports.DomElementSchemaRegistry = DomElementSchemaRegistry;
 exports.DynamicImportExpr = DynamicImportExpr;
 exports.DynamicValue = DynamicValue;
-exports.Element = Element$1;
-exports.Element$1 = Element;
+exports.Element = Element;
+exports.Element$1 = Element$1;
 exports.EnumValue = EnumValue;
 exports.ExternalExpr = ExternalExpr;
 exports.FatalDiagnosticError = FatalDiagnosticError;
