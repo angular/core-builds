@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-5802f80
+ * @license Angular v20.2.0-next.3+sha-ddf779e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-dhsdsdCp.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-SuFKXMit.cjs');
+var compiler_host = require('./compiler_host-Dtf8fsIr.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BGhHq5-d.cjs');
 var ts = require('typescript');
 require('os');
 require('fs');
@@ -1739,7 +1739,7 @@ function assertValidSwitchStructure(children) {
             throw new Error(`Text node: "${child.value}" would result in invalid migrated @switch block structure. ` +
                 `@switch can only have @case or @default as children.`);
         }
-        else if (child instanceof project_tsconfig_paths.Element) {
+        else if (child instanceof project_tsconfig_paths.Element$1) {
             let hasCase = false;
             for (const attr of child.attrs) {
                 if (cases.includes(attr.name)) {

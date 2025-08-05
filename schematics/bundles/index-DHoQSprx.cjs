@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-5802f80
+ * @license Angular v20.2.0-next.3+sha-ddf779e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-SuFKXMit.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BGhHq5-d.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-5802f80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.2.0-next.3+sha-ddf779e'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12329,7 +12329,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('20.2.0-next.3+sha-5802f80');
+new project_tsconfig_paths.Version('20.2.0-next.3+sha-ddf779e');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -15620,7 +15620,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
             name = node.tagName ?? 'ng-template';
             kind = IdentifierKind.Template;
         }
-        else if (node instanceof project_tsconfig_paths.Element$1) {
+        else if (node instanceof project_tsconfig_paths.Element) {
             name = node.name;
             kind = IdentifierKind.Element;
         }
@@ -15635,7 +15635,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
         // Namespaced elements have a particular format for `node.name` that needs to be handled.
         // For example, an `<svg>` element has a `node.name` of `':svg:svg'`.
         // TODO(alxhub): properly handle namespaced elements
-        if ((node instanceof project_tsconfig_paths.Template || node instanceof project_tsconfig_paths.Element$1) &&
+        if ((node instanceof project_tsconfig_paths.Template || node instanceof project_tsconfig_paths.Element) &&
             name.startsWith(':')) {
             name = name.split(':').pop();
         }
@@ -15696,7 +15696,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
             if (refTarget) {
                 let node = null;
                 let directive = null;
-                if (refTarget instanceof project_tsconfig_paths.Element$1 ||
+                if (refTarget instanceof project_tsconfig_paths.Element ||
                     refTarget instanceof project_tsconfig_paths.Template ||
                     refTarget instanceof project_tsconfig_paths.Component ||
                     refTarget instanceof project_tsconfig_paths.Directive) {
@@ -20319,7 +20319,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.2.0-next.3+sha-5802f80` usually means that core is at head so it supports
+    // A version of `20.2.0-next.3+sha-ddf779e` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

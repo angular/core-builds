@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-5802f80
+ * @license Angular v20.2.0-next.3+sha-ddf779e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32786,7 +32786,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.3+sha-5802f80');
+new Version('20.2.0-next.3+sha-ddf779e');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33821,7 +33821,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-SuFKXMit.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BGhHq5-d.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -50674,8 +50674,8 @@ exports.Directive = Directive$1;
 exports.DomElementSchemaRegistry = DomElementSchemaRegistry;
 exports.DynamicImportExpr = DynamicImportExpr;
 exports.DynamicValue = DynamicValue;
-exports.Element = Element;
-exports.Element$1 = Element$1;
+exports.Element = Element$1;
+exports.Element$1 = Element;
 exports.EnumValue = EnumValue;
 exports.ExternalExpr = ExternalExpr;
 exports.FatalDiagnosticError = FatalDiagnosticError;
