@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.1.4+sha-e0d436a
+ * @license Angular v20.1.4+sha-16a4d80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-B1xzlbRF.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DA1eve-D.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-e0d436a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.1.4+sha-16a4d80'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -7130,10 +7130,12 @@ class TypeCheckScopeRegistry {
      * contains an error, then 'error' is returned. If the component is not declared in any NgModule,
      * an empty type-check scope is returned.
      */
-    getTypeCheckScope(node) {
+    getTypeCheckScope(ref) {
         const directives = [];
         const pipes = new Map();
-        const scope = this.scopeReader.getScopeForComponent(node);
+        const scope = this.scopeReader.getScopeForComponent(ref.node);
+        const hostMeta = this.getTypeCheckDirectiveMetadata(ref);
+        const directivesOnHost = hostMeta === null ? null : this.combineWithHostDirectives(hostMeta);
         if (scope === null) {
             return {
                 matcher: null,
@@ -7141,6 +7143,7 @@ class TypeCheckScopeRegistry {
                 pipes,
                 schemas: [],
                 isPoisoned: false,
+                directivesOnHost,
             };
         }
         const isNgModuleScope = scope.kind === project_tsconfig_paths.ComponentScopeKind.NgModule;
@@ -7185,6 +7188,7 @@ class TypeCheckScopeRegistry {
             directives,
             pipes,
             schemas: scope.schemas,
+            directivesOnHost,
             isPoisoned: scope.kind === project_tsconfig_paths.ComponentScopeKind.NgModule
                 ? scope.compilation.isPoisoned || scope.exported.isPoisoned
                 : scope.isPoisoned,
@@ -7217,10 +7221,7 @@ class TypeCheckScopeRegistry {
                 }
                 // Carry over the `isExplicitlyDeferred` flag from the dependency info.
                 const directiveMeta = this.applyExplicitlyDeferredFlag(extMeta, meta.isExplicitlyDeferred);
-                matcher.addSelectables(project_tsconfig_paths.CssSelector.parse(meta.selector), [
-                    ...this.hostDirectivesResolver.resolve(directiveMeta),
-                    directiveMeta,
-                ]);
+                matcher.addSelectables(project_tsconfig_paths.CssSelector.parse(meta.selector), this.combineWithHostDirectives(directiveMeta));
             }
         }
         return matcher;
@@ -7230,10 +7231,13 @@ class TypeCheckScopeRegistry {
         for (const [name, dep] of scope.dependencies) {
             const extMeta = dep.kind === project_tsconfig_paths.MetaKind.Directive ? this.getTypeCheckDirectiveMetadata(dep.ref) : null;
             if (extMeta !== null) {
-                registry.set(name, [extMeta, ...this.hostDirectivesResolver.resolve(extMeta)]);
+                registry.set(name, this.combineWithHostDirectives(extMeta));
             }
         }
         return new project_tsconfig_paths.SelectorlessMatcher(registry);
+    }
+    combineWithHostDirectives(meta) {
+        return [...this.hostDirectivesResolver.resolve(meta), meta];
     }
 }
 
@@ -8008,19 +8012,21 @@ class DirectiveDecoratorHandler {
         if (!ts.isClassDeclaration(node) || (meta.isPoisoned && !this.usePoisonedData)) {
             return;
         }
-        const scope = this.typeCheckScopeRegistry.getTypeCheckScope(node);
+        const ref = new project_tsconfig_paths.Reference(node);
+        const scope = this.typeCheckScopeRegistry.getTypeCheckScope(ref);
         if (scope.isPoisoned && !this.usePoisonedData) {
             // Don't type-check components that had errors in their scopes, unless requested.
             return;
         }
         const hostElement = project_tsconfig_paths.createHostElement('directive', meta.meta.selector, node, meta.hostBindingNodes.literal, meta.hostBindingNodes.bindingDecorators, meta.hostBindingNodes.listenerDecorators);
-        if (hostElement !== null) {
+        if (hostElement !== null && scope.directivesOnHost !== null) {
             const binder = new project_tsconfig_paths.R3TargetBinder(scope.matcher);
             const hostBindingsContext = {
                 node: hostElement,
+                directives: scope.directivesOnHost,
                 sourceMapping: { type: 'direct', node },
             };
-            ctx.addDirective(new project_tsconfig_paths.Reference(node), binder, scope.schemas, null, hostBindingsContext, meta.meta.isStandalone);
+            ctx.addDirective(ref, binder, scope.schemas, null, hostBindingsContext, meta.meta.isStandalone);
         }
     }
     resolve(node, analysis, symbol) {
@@ -10845,7 +10851,8 @@ class ComponentDecoratorHandler {
         if (!ts.isClassDeclaration(node) || (meta.isPoisoned && !this.usePoisonedData)) {
             return;
         }
-        const scope = this.typeCheckScopeRegistry.getTypeCheckScope(node);
+        const ref = new project_tsconfig_paths.Reference(node);
+        const scope = this.typeCheckScopeRegistry.getTypeCheckScope(ref);
         if (scope.isPoisoned && !this.usePoisonedData) {
             // Don't type-check components that had errors in their scopes, unless requested.
             return;
@@ -10862,13 +10869,14 @@ class ComponentDecoratorHandler {
         const hostElement = this.typeCheckHostBindings
             ? project_tsconfig_paths.createHostElement('component', meta.meta.selector, node, meta.hostBindingNodes.literal, meta.hostBindingNodes.bindingDecorators, meta.hostBindingNodes.listenerDecorators)
             : null;
-        const hostBindingsContext = hostElement === null
+        const hostBindingsContext = hostElement === null || scope.directivesOnHost === null
             ? null
             : {
                 node: hostElement,
+                directives: scope.directivesOnHost,
                 sourceMapping: { type: 'direct', node },
             };
-        ctx.addDirective(new project_tsconfig_paths.Reference(node), binder, scope.schemas, templateContext, hostBindingsContext, meta.meta.isStandalone);
+        ctx.addDirective(ref, binder, scope.schemas, templateContext, hostBindingsContext, meta.meta.isStandalone);
     }
     extendedTemplateCheck(component, extendedTemplateChecker) {
         return extendedTemplateChecker.getDiagnosticsForComponent(component);
@@ -12321,7 +12329,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('20.1.4+sha-e0d436a');
+new project_tsconfig_paths.Version('20.1.4+sha-16a4d80');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -20278,7 +20286,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.1.4+sha-e0d436a` usually means that core is at head so it supports
+    // A version of `20.1.4+sha-16a4d80` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.4+sha-e0d436a
+ * @license Angular v20.1.4+sha-16a4d80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13502,7 +13502,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.1.4+sha-e0d436a']
+        ? ['ng-version', '20.1.4+sha-16a4d80']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -14645,7 +14645,7 @@ function resolveComponentResources(resourceResolver) {
         let promise = urlMap.get(url);
         if (!promise) {
             const resp = resourceResolver(url);
-            urlMap.set(url, (promise = resp.then(unwrapResponse)));
+            urlMap.set(url, (promise = resp.then((res) => unwrapResponse(url, res))));
         }
         return promise;
     }
@@ -14718,8 +14718,14 @@ function restoreComponentResolutionQueue(queue) {
 function isComponentResourceResolutionQueueEmpty() {
     return componentResourceResolutionQueue.size === 0;
 }
-function unwrapResponse(response) {
-    return typeof response == 'string' ? response : response.text();
+function unwrapResponse(url, response) {
+    if (typeof response === 'string') {
+        return response;
+    }
+    if (response.status !== undefined && response.status !== 200) {
+        return Promise.reject(new RuntimeError(918 /* RuntimeErrorCode.EXTERNAL_RESOURCE_LOADING_FAILED */, ngDevMode && `Could not load resource: ${url}. Response status: ${response.status}`));
+    }
+    return response.text();
 }
 function componentDefResolved(type) {
     componentDefPendingResolution.delete(type);
