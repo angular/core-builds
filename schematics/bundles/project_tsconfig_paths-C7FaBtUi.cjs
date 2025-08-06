@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.3+sha-52b8e07
+ * @license Angular v20.2.0-next.4+sha-d24d574
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -452,6 +452,7 @@ exports.ViewEncapsulation = void 0;
     // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+    ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
 })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
 exports.ChangeDetectionStrategy = void 0;
 (function (ChangeDetectionStrategy) {
@@ -545,6 +546,7 @@ var ViewEncapsulation;
     // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+    ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
@@ -32786,7 +32788,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.3+sha-52b8e07');
+new Version('20.2.0-next.4+sha-d24d574');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33821,7 +33823,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BGhHq5-d.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-C7FaBtUi.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -50430,11 +50432,11 @@ function getClassDeclFromSymbol(symbol, checker) {
         return null;
     }
     if (ts.isExportAssignment(decl)) {
-        const symbol = checker.getTypeAtLocation(decl.expression).symbol;
+        const symbol = checker.getTypeAtLocation(decl.expression).getSymbol();
         return getClassDeclFromSymbol(symbol, checker);
     }
     if (ts.isExportSpecifier(decl)) {
-        const symbol = checker.getTypeAtLocation(decl).symbol;
+        const symbol = checker.getTypeAtLocation(decl).getSymbol();
         return getClassDeclFromSymbol(symbol, checker);
     }
     if (isNamedClassDeclaration(decl)) {
@@ -50495,7 +50497,7 @@ function getTheElementTagDeprecatedSuggestionDiagnostics(shimPath, program, file
     for (const tsDiag of diags) {
         const diagNode = getTokenAtPosition(sourceFile, tsDiag.start);
         const nodeType = typeChecker.getTypeAtLocation(diagNode);
-        const nodeSymbolDeclarations = nodeType.symbol.declarations;
+        const nodeSymbolDeclarations = nodeType.getSymbol()?.declarations;
         const decl = nodeSymbolDeclarations !== undefined && nodeSymbolDeclarations.length > 0
             ? nodeSymbolDeclarations[0]
             : undefined;
@@ -50519,7 +50521,7 @@ function getTheElementTagDeprecatedSuggestionDiagnostics(shimPath, program, file
     const templateDiagnostics = [];
     for (const directive of directiveNodesInTcb) {
         const directiveType = typeChecker.getTypeAtLocation(directive);
-        const directiveSymbolDeclarations = directiveType.symbol.declarations;
+        const directiveSymbolDeclarations = directiveType.getSymbol()?.declarations;
         const decl = directiveSymbolDeclarations !== undefined && directiveSymbolDeclarations.length > 0
             ? directiveSymbolDeclarations[0]
             : undefined;

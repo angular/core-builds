@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-52b8e07
+ * @license Angular v20.2.0-next.4+sha-d24d574
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5814,6 +5814,7 @@ interface AnimationDetails {
     classFns?: Function[];
     animateFn: AnimationRemoveFunction;
 }
+
 interface AnimationRemovalRegistry {
     elements: ElementRegistry | undefined;
 }
@@ -8436,7 +8437,8 @@ interface R3DeclareInjectableFacade {
 declare enum ViewEncapsulation {
     Emulated = 0,
     None = 2,
-    ShadowDom = 3
+    ShadowDom = 3,
+    IsolatedShadowDom = 4
 }
 type ChangeDetectionStrategy = number;
 interface R3DeclareQueryMetadataFacade {

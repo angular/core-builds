@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-next.3+sha-52b8e07
+ * @license Angular v20.2.0-next.4+sha-d24d574
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2169,7 +2169,13 @@ declare enum ViewEncapsulation {
      * a ShadowRoot for the component's host element which is then used to encapsulate
      * all the Component's styling.
      */
-    ShadowDom = 3
+    ShadowDom = 3,
+    /**
+     * Similar to `ShadowDom`, but prevents any external styles from leaking into the
+     * component's ShadowRoot. This is useful when you want to ensure that the component's
+     * styles are completely isolated from the rest of the application, including global styles.
+     */
+    IsolatedShadowDom = 4
 }
 
 /**
@@ -6417,6 +6423,7 @@ declare class NgProbeToken {
  * Provides additional options to the bootstrapping process.
  *
  * @publicApi
+ * @deprecated 20.2 Configure `NgZone` in the `providers` array of the application module instead.
  */
 interface BootstrapOptions {
     /**
@@ -6425,6 +6432,8 @@ interface BootstrapOptions {
      * - Provide your own `NgZone` instance.
      * - `zone.js` - Use default `NgZone` which requires `Zone.js`.
      * - `noop` - Use `NoopNgZone` which does nothing.
+     *
+     * @deprecated BootstrapOptions is deprecated. Provide `NgZone` in the `providers` array of the module instead.
      */
     ngZone?: NgZone | 'zone.js' | 'noop';
     /**
@@ -6447,6 +6456,8 @@ interface BootstrapOptions {
      * And if this option be set to true, the change detection will be
      * triggered async by scheduling a animation frame. So in the case above,
      * the change detection will only be triggered once.
+     *
+     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
      */
     ngZoneEventCoalescing?: boolean;
     /**
@@ -6466,6 +6477,7 @@ interface BootstrapOptions {
      * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
      * In addition, the change detection executes in requestAnimation.
      *
+     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
      */
     ngZoneRunCoalescing?: boolean;
     /**
