@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.4+sha-c966746
+ * @license Angular v20.1.5+sha-6a3d2a0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13502,7 +13502,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.1.4+sha-c966746']
+        ? ['ng-version', '20.1.5+sha-6a3d2a0']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -19062,6 +19062,9 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
                 label: consumer.debugName ?? consumer.lView?.[HOST]?.tagName?.toLowerCase?.(),
                 kind: consumer.kind,
                 epoch: consumer.version,
+                // The `lView[CONTEXT]` is a reference to an instance of the component's class.
+                // We get the constructor so that `inspect(.constructor)` shows the component class.
+                debuggableFn: consumer.lView?.[CONTEXT]?.constructor,
                 id,
             });
         }
