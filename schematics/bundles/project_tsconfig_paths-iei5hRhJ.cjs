@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-next.5+sha-0d12eac
+ * @license Angular v20.2.0-next.6+sha-124dcc0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32788,7 +32788,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-next.5+sha-0d12eac');
+new Version('20.2.0-next.6+sha-124dcc0');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33823,7 +33823,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-ClCuNoA6.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-iei5hRhJ.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -45466,6 +45466,7 @@ class TcbTemplateBodyOp extends TcbOp {
                 if (this.tcb.env.config.applyTemplateContextGuards) {
                     const ctx = this.scope.resolve(hostNode);
                     const guardInvoke = tsCallMethod(dirId, 'ngTemplateContextGuard', [dirInstId, ctx]);
+                    markIgnoreDiagnostics(guardInvoke);
                     addParseSpanInfo(guardInvoke, hostNode.sourceSpan);
                     guards.push(guardInvoke);
                 }
@@ -46375,7 +46376,8 @@ class TcbUnclaimedOutputsOp extends TcbOp {
                 // ```
                 if (this.target instanceof Element$1 &&
                     this.target.isVoid &&
-                    ts.isIdentifier(target)) {
+                    ts.isIdentifier(target) &&
+                    this.tcb.env.config.allowDomEventAssertion) {
                     domEventAssertion = ts.factory.createCallExpression(this.tcb.env.referenceExternalSymbol('@angular/core', 'ɵassertType'), [ts.factory.createTypeQueryNode(target)], [
                         ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier(EVENT_PARAMETER), 'target'),
                     ]);
