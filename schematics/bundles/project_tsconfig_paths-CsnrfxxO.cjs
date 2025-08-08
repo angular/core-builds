@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.6+sha-bba7c6f
+ * @license Angular v20.1.6+sha-322042c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32295,7 +32295,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.6+sha-bba7c6f');
+new Version('20.1.6+sha-322042c');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33315,7 +33315,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DA1eve-D.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CsnrfxxO.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -45162,11 +45162,21 @@ class TcbDirectiveCtorOp extends TcbOp {
         return true;
     }
     execute() {
-        const id = this.tcb.allocateId();
-        addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
-        addParseSpanInfo(id, this.node.startSourceSpan || this.node.sourceSpan);
         const genericInputs = new Map();
-        const boundAttrs = getBoundAttributes(this.dir, this.node);
+        const id = this.tcb.allocateId();
+        let boundAttrs;
+        let span;
+        if (this.node instanceof HostElement) {
+            // Host elements can't bind to their own inputs so we don't resolve any.
+            boundAttrs = [];
+            span = this.node.sourceSpan;
+        }
+        else {
+            boundAttrs = getBoundAttributes(this.dir, this.node);
+            span = this.node.startSourceSpan || this.node.sourceSpan;
+        }
+        addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
+        addParseSpanInfo(id, span);
         for (const attr of boundAttrs) {
             // Skip text attributes if configured to do so.
             if (!this.tcb.env.config.checkTypeOfAttributes &&
@@ -46767,29 +46777,28 @@ class Scope {
         }
     }
     appendDirectiveInputs(dir, node, dirMap) {
-        let directiveOp;
-        const host = this.tcb.env.reflector;
+        const directiveOp = this.getDirectiveOp(dir, node);
+        const dirIndex = this.opQueue.push(directiveOp) - 1;
+        dirMap.set(dir, dirIndex);
+        this.opQueue.push(new TcbDirectiveInputsOp(this.tcb, this, node, dir));
+    }
+    getDirectiveOp(dir, node) {
         const dirRef = dir.ref;
         if (!dir.isGeneric) {
             // The most common case is that when a directive is not generic, we use the normal
             // `TcbNonDirectiveTypeOp`.
-            directiveOp = new TcbNonGenericDirectiveTypeOp(this.tcb, this, node, dir);
+            return new TcbNonGenericDirectiveTypeOp(this.tcb, this, node, dir);
         }
-        else if (!requiresInlineTypeCtor(dirRef.node, host, this.tcb.env) ||
+        else if (!requiresInlineTypeCtor(dirRef.node, this.tcb.env.reflector, this.tcb.env) ||
             this.tcb.env.config.useInlineTypeConstructors) {
             // For generic directives, we use a type constructor to infer types. If a directive requires
             // an inline type constructor, then inlining must be available to use the
             // `TcbDirectiveCtorOp`. If not we, we fallback to using `any` – see below.
-            directiveOp = new TcbDirectiveCtorOp(this.tcb, this, node, dir);
+            return new TcbDirectiveCtorOp(this.tcb, this, node, dir);
         }
-        else {
-            // If inlining is not available, then we give up on inferring the generic params, and use
-            // `any` type for the directive's generic parameters.
-            directiveOp = new TcbGenericDirectiveTypeWithAnyParamsOp(this.tcb, this, node, dir);
-        }
-        const dirIndex = this.opQueue.push(directiveOp) - 1;
-        dirMap.set(dir, dirIndex);
-        this.opQueue.push(new TcbDirectiveInputsOp(this.tcb, this, node, dir));
+        // If inlining is not available, then we give up on inferring the generic params, and use
+        // `any` type for the directive's generic parameters.
+        return new TcbGenericDirectiveTypeWithAnyParamsOp(this.tcb, this, node, dir);
     }
     appendSelectorlessDirectives(node) {
         for (const directive of node.directives) {
@@ -46928,7 +46937,7 @@ class Scope {
         if (directives !== null && directives.length > 0) {
             const directiveOpMap = new Map();
             for (const directive of directives) {
-                const directiveOp = new TcbNonGenericDirectiveTypeOp(this.tcb, this, node, directive);
+                const directiveOp = this.getDirectiveOp(directive, node);
                 directiveOpMap.set(directive, this.opQueue.push(directiveOp) - 1);
             }
             this.directiveOpMap.set(node, directiveOpMap);
