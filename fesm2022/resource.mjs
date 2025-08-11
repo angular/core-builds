@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.0+sha-499fa8f
+ * @license Angular v20.2.0-rc.0+sha-af247ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -317,15 +317,6 @@ function resource(options) {
     return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
 }
 /**
- * Private helper function to set the default behavior of `Resource.value()` when the resource is
- * in the error state.
- *
- * This function is intented to be temporary to help migrate G3 code to the new throwing behavior.
- */
-function setResourceValueThrowsErrors(value) {
-    RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = value;
-}
-/**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
  */
 class BaseWritableResource {
@@ -638,5 +629,5 @@ class ResourceWrappedError extends Error {
     }
 }
 
-export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, setResourceValueThrowsErrors, untracked };
+export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
 //# sourceMappingURL=resource.mjs.map
