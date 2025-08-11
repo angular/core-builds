@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.6+sha-53297c0
+ * @license Angular v20.1.6+sha-d9e3790
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29198,8 +29198,8 @@ class HtmlAstToIvyAst {
         const value = attribute.value;
         const srcSpan = attribute.sourceSpan;
         const absoluteOffset = attribute.valueSpan
-            ? attribute.valueSpan.start.offset
-            : srcSpan.start.offset;
+            ? attribute.valueSpan.fullStart.offset
+            : srcSpan.fullStart.offset;
         function createKeySpan(srcSpan, prefix, identifier) {
             // We need to adjust the start location for the keySpan to account for the removed 'data-'
             // prefix from `normalizeAttributeName`.
@@ -32295,7 +32295,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.1.6+sha-53297c0');
+new Version('20.1.6+sha-d9e3790');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33315,7 +33315,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CsnrfxxO.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CyFT0Qtu.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.6+sha-53297c0
+ * @license Angular v20.1.6+sha-d9e3790
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,12 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CsnrfxxO.cjs');
-require('./index-BgPzkt_a.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CyFT0Qtu.cjs');
+require('./index-J6TbSFnW.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-DvK4rgjD.cjs');
-var apply_import_manager = require('./apply_import_manager-CJGO2FJc.cjs');
+var project_paths = require('./project_paths-Dw58UiZi.cjs');
+var apply_import_manager = require('./apply_import_manager-CrQaSA-f.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
