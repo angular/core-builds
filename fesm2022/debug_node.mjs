@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.0+sha-767a280
+ * @license Angular v20.2.0-rc.0+sha-d9f0e6b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4896,12 +4896,6 @@ var ViewEncapsulation;
      * all the Component's styling.
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-    /**
-     * Similar to `ShadowDom`, but prevents any external styles from leaking into the
-     * component's ShadowRoot. This is useful when you want to ensure that the component's
-     * styles are completely isolated from the rest of the application, including global styles.
-     */
-    ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
@@ -7996,9 +7990,7 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
     const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
     // When using native Shadow DOM, do not clear host element to allow native slot
     // projection.
-    const preserveContent = preserveHostContent ||
-        encapsulation === ViewEncapsulation.ShadowDom ||
-        encapsulation === ViewEncapsulation.IsolatedShadowDom;
+    const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom;
     const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
     applyRootElementTransform(rootElement);
     return rootElement;
@@ -13523,7 +13515,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-rc.0+sha-767a280']
+        ? ['ng-version', '20.2.0-rc.0+sha-d9f0e6b']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -29077,8 +29069,7 @@ function recreateLView(importMeta, id, newDef, oldDef, lView) {
         // shadow root. The browser will throw if we attempt to attach another one and there's no way
         // to detach it. Our only option is to make a clone only of the root node, replace the node
         // with the clone and use it for the newly-created LView.
-        if (oldDef.encapsulation === ViewEncapsulation.ShadowDom ||
-            oldDef.encapsulation === ViewEncapsulation.IsolatedShadowDom) {
+        if (oldDef.encapsulation === ViewEncapsulation.ShadowDom) {
             const newHost = host.cloneNode(false);
             host.replaceWith(newHost);
             host = newHost;

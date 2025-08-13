@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.2.0-rc.0+sha-767a280
+ * @license Angular v20.2.0-rc.0+sha-d9f0e6b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, ɵɵdefineInjectable as __defineInjectable, formatRuntimeError, INTERNAL_APPLICATION_ERROR_HANDLER, PROVIDED_ZONELESS, PendingTasksInternal, stringify, ChangeDetectionScheduler, errorHandlerEnvironmentInitializer, ɵɵinject as __inject, INJECTOR_SCOPE, makeEnvironmentProviders, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, ENVIRONMENT_INITIALIZER, unwrapRNode, CLEANUP, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, getComponentDef, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitEffectCreatedEvent, getNullInjector } from './root_effect_scheduler.mjs';
+import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, ɵɵdefineInjectable as __defineInjectable, formatRuntimeError, INTERNAL_APPLICATION_ERROR_HANDLER, PROVIDED_ZONELESS, PendingTasksInternal, stringify, ChangeDetectionScheduler, errorHandlerEnvironmentInitializer, ɵɵinject as __inject, INJECTOR_SCOPE, makeEnvironmentProviders, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, ENVIRONMENT_INITIALIZER, unwrapRNode, CLEANUP, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, getComponentDef, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitEffectCreatedEvent, getNullInjector } from './root_effect_scheduler.mjs';
 export { DOCUMENT, EnvironmentInjector, INJECTOR, PendingTasks, defineInjectable, forwardRef, importProvidersFrom, isSignal, isStandalone, provideBrowserGlobalErrorListeners, resolveForwardRef, signal, EffectScheduler as ɵEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, R3Injector as ɵR3Injector, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, getAnimationElementRemovalRegistry as ɵgetAnimationElementRemovalRegistry, getInjectableDef as ɵgetInjectableDef, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, store as ɵstore, truncateMiddle as ɵtruncateMiddle, ɵunwrapWritableSignal, ɵɵdisableBindings, ɵɵenableBindings, ɵɵinvalidFactoryDep, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵresetView, ɵɵrestoreView } from './root_effect_scheduler.mjs';
 import { SIGNAL_NODE, signalSetFn, SIGNAL, producerAccessed, consumerDestroy, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal.mjs';
 import { ɵɵinjectAttribute as __injectAttribute, createMultiResultQuerySignalFn, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, makePropDecorator, NgModuleFactory, COMPILER_OPTIONS, setJitOptions, isComponentResourceResolutionQueueEmpty, getCompilerFacade, resolveComponentResources, IMAGE_CONFIG, getDocument, setClassMetadata, Injectable, NgZone, PROVIDED_NG_ZONE, remove, isPromise, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ApplicationRef, internalProvideZoneChangeDetection, ChangeDetectionSchedulerImpl, createNgModuleRefWithProviders, optionsReducer, getNgZone, getNgZoneOptions, publishDefaultGlobalUtils, PLATFORM_INITIALIZER, publishSignalConfiguration, checkNoChangesInternal, UseExhaustiveCheckNoChanges, getRegisteredNgModuleType, ViewRef as ViewRef$1, isListLikeIterable, iterateListLike, isJsObject, SkipSelf, Optional, ɵɵdefineNgModule as __defineNgModule, NgModule, profiler, assertStandaloneComponentType, EnvironmentNgModuleRefAdapter, JSACTION_BLOCK_ELEMENT_MAP, APP_ID, setStashFn, APP_BOOTSTRAP_LISTENER, JSACTION_EVENT_CONTRACT, removeListeners, isIncrementalHydrationEnabled, DEFER_BLOCK_SSR_ID_ATTRIBUTE, invokeListeners, triggerHydrationFromBlockName, IS_EVENT_REPLAY_ENABLED, EVENT_REPLAY_ENABLED_DEFAULT, performanceMarkFeature, sharedStashFunction, sharedMapFunction, enableStashEventListenerImpl, isI18nHydrationEnabled, TransferState, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, SKIP_HYDRATION_ATTR_NAME, NGH_ATTR_NAME, getLNodeForHydration, isI18nHydrationSupportEnabled, getOrComputeI18nChildren, trySerializeI18nBlock, I18N_DATA, isTNodeShape, isDetachedByI18n, TEMPLATES, isDisconnectedNode, isInSkipHydrationBlock, unsupportedProjectionOfDomNodes, CONTAINERS, isLetDeclaration, ELEMENT_CONTAINERS, processTextNodeBeforeSerialization, setJSActionAttributes, ViewEncapsulation as ViewEncapsulation$1, collectNativeNodes, TEMPLATE_ID, NUM_ROOT_NODES, isDeferBlock, getLDeferBlockDetails, getTDeferBlockDetails, collectNativeNodesInLContainer, validateNodeExists, validateMatchingNode, DEFER_BLOCK_ID, DEFER_BLOCK_STATE, DEFER_BLOCK_STATE$1, MULTIPLIER, NODES, calcPathForNode, DISCONNECTED_NODES, convertHydrateTriggersToJsAction, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, IS_I18N_HYDRATION_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, DEHYDRATED_BLOCK_REGISTRY, DehydratedBlockRegistry, processBlockData, gatherDeferBlocksCommentNodes, processAndInitTriggers, appendDeferBlocksToJSActionMap, verifySsrContentsIntegrity, Console, PRESERVE_HOST_CONTENT, cleanupDehydratedViews, countBlocksSkippedByHydration, enableRetrieveHydrationInfoImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateTextNodeImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableFindMatchingDehydratedViewImpl, enableApplyRootElementTransformImpl, enableLocateOrCreateI18nNodeImpl, enablePrepareI18nBlockForHydrationImpl, setIsI18nHydrationSupportEnabled, enableClaimDehydratedIcuCaseImpl, enableRetrieveDeferBlockDataImpl, readPatchedLView, angularCoreEnv, setClassMetadataAsync, NOOP_AFTER_RENDER_REF, AfterRenderManager, TracingService, AfterRenderImpl, AfterRenderSequence, AFTER_RENDER_PHASES, assertComponentDef, ComponentFactory } from './debug_node.mjs';
@@ -90,7 +90,6 @@ var ViewEncapsulation;
     // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-    ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /*!
@@ -627,7 +626,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('20.2.0-rc.0+sha-767a280');
+const VERSION = new Version('20.2.0-rc.0+sha-d9f0e6b');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -3462,11 +3461,9 @@ function conditionallyAnnotateNodePath(ngh, tNode, lView, excludedParentNodes) {
  */
 function componentUsesShadowDomEncapsulation(lView) {
     const instance = lView[CONTEXT];
-    if (!instance?.constructor)
-        return false;
-    const def = getComponentDef(instance.constructor);
-    return (def?.encapsulation === ViewEncapsulation$1.ShadowDom ||
-        def?.encapsulation === ViewEncapsulation$1.IsolatedShadowDom);
+    return instance?.constructor
+        ? getComponentDef(instance.constructor)?.encapsulation === ViewEncapsulation$1.ShadowDom
+        : false;
 }
 /**
  * Annotates component host element for hydration:

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.0+sha-767a280
+ * @license Angular v20.2.0-rc.0+sha-d9f0e6b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2169,13 +2169,7 @@ declare enum ViewEncapsulation {
      * a ShadowRoot for the component's host element which is then used to encapsulate
      * all the Component's styling.
      */
-    ShadowDom = 3,
-    /**
-     * Similar to `ShadowDom`, but prevents any external styles from leaking into the
-     * component's ShadowRoot. This is useful when you want to ensure that the component's
-     * styles are completely isolated from the rest of the application, including global styles.
-     */
-    IsolatedShadowDom = 4
+    ShadowDom = 3
 }
 
 /**

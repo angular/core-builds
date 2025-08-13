@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.0+sha-767a280
+ * @license Angular v20.2.0-rc.0+sha-d9f0e6b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8430,8 +8430,7 @@ interface R3DeclareInjectableFacade {
 declare enum ViewEncapsulation {
     Emulated = 0,
     None = 2,
-    ShadowDom = 3,
-    IsolatedShadowDom = 4
+    ShadowDom = 3
 }
 type ChangeDetectionStrategy = number;
 interface R3DeclareQueryMetadataFacade {
