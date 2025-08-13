@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.0-rc.0+sha-ada3c37
+ * @license Angular v20.2.0-rc.0+sha-0211668
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32791,7 +32791,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('20.2.0-rc.0+sha-ada3c37');
+new Version('20.2.0-rc.0+sha-0211668');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
