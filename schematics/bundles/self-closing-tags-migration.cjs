@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-e7cc89e
+ * @license Angular v21.0.0-next.0+sha-4bed062
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-BEYhFeds.cjs');
-require('./index-BqI6i-V_.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BYM9Uq7C.cjs');
+require('./index-DTrtd-vR.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-CHhdM33G.cjs');
+var project_paths = require('./project_paths-BrhSItIa.cjs');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('@angular-devkit/core');
