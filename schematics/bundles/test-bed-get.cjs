@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.1.7+sha-b16de05
+ * @license Angular v20.1.7+sha-7ee4965
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,10 +9,10 @@
 var ts = require('typescript');
 require('os');
 require('./project_tsconfig_paths-CyFT0Qtu.cjs');
-require('./index-CJL_rwo1.cjs');
+require('./index-mPWa2O2y.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-BRD3Cpsf.cjs');
+var project_paths = require('./project_paths-Bj6GLlSC.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 require('@angular-devkit/core');
