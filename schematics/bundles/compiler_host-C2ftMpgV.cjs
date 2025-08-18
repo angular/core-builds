@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-5115050
+ * @license Angular v21.0.0-next.0+sha-cab3adf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-DtmVce5c.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CVNv_T5P.cjs');
 require('os');
 var p = require('path');
 
