@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-ab067a3
+ * @license Angular v21.0.0-next.0+sha-6c8d000
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6556,7 +6556,7 @@ declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
  *
- * @param value The value bound to `animate.enter`, which is a string or a string array.
+ * @param value The value bound to `animate.enter`, which is a string or a function.
  * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
@@ -6577,7 +6577,7 @@ declare function ɵɵanimateEnterListener(value: AnimationFunction): typeof ɵɵ
  * It registers an animation with the ElementRegistry to be run when the element
  * is scheduled for removal from the DOM.
  *
- * @param value The value bound to `animate.leave`, which can be a string or string array.
+ * @param value The value bound to `animate.leave`, which can be a string or a function.
  * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
