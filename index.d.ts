@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.1.7+sha-9e26158
+ * @license Angular v20.1.7+sha-683ae03
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -177,7 +177,7 @@ interface InputFunction {
  * To use signal-based inputs, import `input` from `@angular/core`.
  *
  * ```ts
- * import {input} from '@angular/core`;
+ * import {input} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize
@@ -285,7 +285,7 @@ interface ModelFunction {
  * To use `model()`, import the function from `@angular/core`.
  *
  * ```ts
- * import {model} from '@angular/core`;
+ * import {model} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize
