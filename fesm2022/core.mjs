@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-9425179
+ * @license Angular v21.0.0-next.0+sha-72ae106
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -266,7 +266,7 @@ function inputRequiredFunction(opts) {
  * To use signal-based inputs, import `input` from `@angular/core`.
  *
  * ```ts
- * import {input} from '@angular/core`;
+ * import {input} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize
@@ -490,7 +490,7 @@ function modelRequiredFunction(opts) {
  * To use `model()`, import the function from `@angular/core`.
  *
  * ```ts
- * import {model} from '@angular/core`;
+ * import {model} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize
@@ -627,7 +627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('21.0.0-next.0+sha-9425179');
+const VERSION = new Version('21.0.0-next.0+sha-72ae106');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
