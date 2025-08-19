@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-101f072
+ * @license Angular v21.0.0-next.0+sha-6712456
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13523,7 +13523,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.0+sha-101f072']
+        ? ['ng-version', '21.0.0-next.0+sha-6712456']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -13647,7 +13647,7 @@ class ComponentRef extends ComponentRef$1 {
         if (ngDevMode && !hasSetInput) {
             const cmpNameForError = stringifyForError(this.componentType);
             let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
-            message += `Make sure that the '${name}' property is declared as an input using the @Input() decorator or the input() function.`;
+            message += `Make sure that the '${name}' property is declared as an input using the input() or model() function or the @Input() decorator.`;
             reportUnknownPropertyError(message);
         }
     }
