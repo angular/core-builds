@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.1+sha-aff4829
+ * @license Angular v20.2.0-rc.1+sha-5ceb116
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -348,7 +348,7 @@ interface TestModuleMetadata {
     inferTagName?: boolean;
     /**
      * Whether animate.enter / animate.leave should trigger as normal or be disabled.
-     * Defaults to `true`.
+     * Defaults to `false`.
      */
     animationsEnabled?: boolean;
 }
