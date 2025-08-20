@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.0-rc.1+sha-5ceb116
+ * @license Angular v20.2.0-rc.1+sha-f9d73cc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13515,7 +13515,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.0-rc.1+sha-5ceb116']
+        ? ['ng-version', '20.2.0-rc.1+sha-f9d73cc']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21882,6 +21882,13 @@ function getLongestComputedAnimation(computedStyle) {
     }
     return longest;
 }
+function isShorterThanExistingAnimation(existing, longest) {
+    return existing !== undefined && existing.duration > longest.duration;
+}
+function longestExists(longest) {
+    return ((longest.animationName != undefined || longest.propertyName != undefined) &&
+        longest.duration > 0);
+}
 /**
  * Determines the longest animation, but with `getComputedStyles` instead of `getAnimations`. This
  * is ultimately safer than getAnimations because it can be used when recalculations are in
@@ -21892,10 +21899,11 @@ function determineLongestAnimationFromComputedStyles(el, animationsMap) {
     const longestAnimation = getLongestComputedAnimation(computedStyle);
     const longestTransition = getLongestComputedTransition(computedStyle);
     const longest = longestAnimation.duration > longestTransition.duration ? longestAnimation : longestTransition;
-    if (animationsMap.has(el) && animationsMap.get(el).duration > longest.duration) {
+    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
         return;
+    if (longestExists(longest)) {
+        animationsMap.set(el, longest);
     }
-    animationsMap.set(el, longest);
 }
 /**
  * Multiple animations can be set on an element. This grabs an element and
@@ -21904,8 +21912,8 @@ function determineLongestAnimationFromComputedStyles(el, animationsMap) {
  * This ensures we get the longest running animation and only remove when
  * that animation completes.
  */
-function determineLongestAnimation(event, el, animationsMap, areAnimationSupported) {
-    if (!areAnimationSupported || !(event.target instanceof Element) || event.target !== el)
+function determineLongestAnimation(el, animationsMap, areAnimationSupported) {
+    if (!areAnimationSupported)
         return;
     const animations = el.getAnimations();
     return animations.length === 0
@@ -21915,7 +21923,7 @@ function determineLongestAnimation(event, el, animationsMap, areAnimationSupport
         : determineLongestAnimationFromElementAnimations(el, animationsMap, animations);
 }
 function determineLongestAnimationFromElementAnimations(el, animationsMap, animations) {
-    let currentLongest = {
+    let longest = {
         animationName: undefined,
         propertyName: undefined,
         duration: 0,
@@ -21934,14 +21942,15 @@ function determineLongestAnimationFromElementAnimations(el, animationsMap, anima
             // Check for CSSTransition specific property
             propertyName = animation.transitionProperty;
         }
-        if (duration >= currentLongest.duration) {
-            currentLongest = { animationName, propertyName, duration };
+        if (duration >= longest.duration) {
+            longest = { animationName, propertyName, duration };
         }
     }
-    if (animationsMap.has(el) && animationsMap.get(el).duration > currentLongest.duration) {
+    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
         return;
+    if (longestExists(longest)) {
+        animationsMap.set(el, longest);
     }
-    animationsMap.set(el, currentLongest);
 }
 
 const DEFAULT_ANIMATIONS_DISABLED = false;
@@ -22035,7 +22044,6 @@ function ɵɵanimateEnter(value) {
     // This also allows us to setup cancellation of animations in progress if the
     // gets removed early.
     const handleAnimationStart = (event) => {
-        determineLongestAnimation(event, nativeElement, longestAnimations, areAnimationSupported);
         setupAnimationCancel(event, renderer);
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
@@ -22064,6 +22072,20 @@ function ɵɵanimateEnter(value) {
         for (const klass of activeClasses) {
             renderer.addClass(nativeElement, klass);
         }
+        // In the case that the classes added have no animations, we need to remove
+        // the classes right away. This could happen because someone is intentionally
+        // preventing an animation via selector specificity.
+        ngZone.runOutsideAngular(() => {
+            requestAnimationFrame(() => {
+                determineLongestAnimation(nativeElement, longestAnimations, areAnimationSupported);
+                if (!longestAnimations.has(nativeElement)) {
+                    for (const klass of activeClasses) {
+                        renderer.removeClass(nativeElement, klass);
+                    }
+                    cleanupEnterClassData(nativeElement);
+                }
+            });
+        });
     }
     return ɵɵanimateEnter; // For chaining
 }
@@ -22323,11 +22345,9 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
     if (animationsDisabled) {
         longestAnimations.delete(el);
         finalRemoveFn();
+        return;
     }
     cancelAnimationsIfRunning(el, renderer);
-    const handleAnimationStart = (event) => {
-        determineLongestAnimation(event, el, longestAnimations, areAnimationSupported);
-    };
     const handleOutAnimationEnd = (event) => {
         if (event instanceof CustomEvent || isLongestAnimation(event, el)) {
             // Now that we've found the longest animation, there's no need
@@ -22340,18 +22360,26 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
             finalRemoveFn();
         }
     };
-    if (!animationsDisabled) {
-        ngZone.runOutsideAngular(() => {
-            renderer.listen(el, 'animationstart', handleAnimationStart, { once: true });
-            renderer.listen(el, 'transitionstart', handleAnimationStart, { once: true });
-            renderer.listen(el, 'animationend', handleOutAnimationEnd);
-            renderer.listen(el, 'transitionend', handleOutAnimationEnd);
-        });
-        trackLeavingNodes(tNode, el);
-        for (const item of classList) {
-            renderer.addClass(el, item);
-        }
+    ngZone.runOutsideAngular(() => {
+        renderer.listen(el, 'animationend', handleOutAnimationEnd);
+        renderer.listen(el, 'transitionend', handleOutAnimationEnd);
+    });
+    trackLeavingNodes(tNode, el);
+    for (const item of classList) {
+        renderer.addClass(el, item);
     }
+    // In the case that the classes added have no animations, we need to remove
+    // the element right away. This could happen because someone is intentionally
+    // preventing an animation via selector specificity.
+    ngZone.runOutsideAngular(() => {
+        requestAnimationFrame(() => {
+            determineLongestAnimation(el, longestAnimations, areAnimationSupported);
+            if (!longestAnimations.has(el)) {
+                clearLeavingNodes(tNode);
+                finalRemoveFn();
+            }
+        });
+    });
 }
 
 /*!
