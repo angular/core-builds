@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-6a6cb01
+ * @license Angular v21.0.0-next.0+sha-eeeaadc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32817,7 +32817,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.0+sha-6a6cb01');
+new Version('21.0.0-next.0+sha-eeeaadc');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33853,7 +33853,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CVNv_T5P.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CS-eSeHC.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -41194,6 +41194,46 @@ function isDirectiveDeclaration(node) {
     return ((ts.isTypeNode(node) || ts.isIdentifier(node)) &&
         ts.isVariableDeclaration(node.parent) &&
         hasExpressionIdentifier(sourceFile, node, ExpressionIdentifier.DIRECTIVE));
+}
+/**
+ * Check if the lastSymbol is an alias of the firstSymbol. For example:
+ *
+ * The NewBarComponent is an alias of BarComponent.
+ *
+ * But the NotAliasBarComponent is not an alias of BarComponent, because
+ * the NotAliasBarComponent is a new variable.
+ *
+ * This should work for most cases.
+ *
+ * https://github.com/microsoft/TypeScript/blob/9e20e032effad965567d4a1e1c30d5433b0a3332/src/compiler/checker.ts#L3638-L3652
+ *
+ * ```
+ * // a.ts
+ * export class BarComponent {};
+ * // b.ts
+ * export {BarComponent as NewBarComponent} from "./a";
+ * // c.ts
+ * import {BarComponent} from "./a"
+ * const NotAliasBarComponent = BarComponent;
+ * export {NotAliasBarComponent};
+ * ```
+ */
+function isSymbolAliasOf(firstSymbol, lastSymbol, typeChecker) {
+    let currentSymbol = lastSymbol;
+    const seenSymbol = new Set();
+    while (firstSymbol !== currentSymbol &&
+        currentSymbol !== undefined &&
+        currentSymbol.flags & ts.SymbolFlags.Alias) {
+        if (seenSymbol.has(currentSymbol)) {
+            break;
+        }
+        seenSymbol.add(currentSymbol);
+        currentSymbol = typeChecker.getImmediateAliasedSymbol(currentSymbol);
+        if (currentSymbol === firstSymbol) {
+            return true;
+        }
+    }
+    return false;
 }
 
 const NgOriginalFile = Symbol('NgOriginalFile');
@@ -50067,11 +50107,11 @@ class TemplateTypeCheckerImpl {
             }
             for (const directiveDecl of directiveDecls) {
                 const cachedCompletionEntryInfos = resultingDirectives.get(directiveDecl.ref.node)?.tsCompletionEntryInfos ?? [];
-                cachedCompletionEntryInfos.push({
+                appendOrReplaceTsEntryInfo(cachedCompletionEntryInfos, {
                     tsCompletionEntryData: data,
                     tsCompletionEntrySymbolFileName: symbolFileName,
                     tsCompletionEntrySymbolName: symbolName,
-                });
+                }, this.programDriver.getProgram());
                 if (resultingDirectives.has(directiveDecl.ref.node)) {
                     const directiveInfo = resultingDirectives.get(directiveDecl.ref.node);
                     resultingDirectives.set(directiveDecl.ref.node, {
@@ -50245,29 +50285,30 @@ class TemplateTypeCheckerImpl {
          * When providing the code action for the directive. All the imports will show for the developer to choose.
          */
         let highestImportPriority = -1;
-        const collectImports = (emit, moduleSpecifier) => {
+        const collectImports = (emit, moduleSpecifierDetail) => {
             if (emit === null) {
                 return;
             }
             imports.push({
                 ...emit,
-                moduleSpecifier: moduleSpecifier ?? emit.moduleSpecifier,
+                moduleSpecifier: moduleSpecifierDetail?.moduleSpecifier ?? emit.moduleSpecifier,
+                symbolName: moduleSpecifierDetail?.exportName ?? emit.symbolName,
             });
-            if (moduleSpecifier !== undefined && highestImportPriority === -1) {
+            if (moduleSpecifierDetail !== null && highestImportPriority === -1) {
                 highestImportPriority = imports.length - 1;
             }
         };
         if (meta.isStandalone || importMode === exports.PotentialImportMode.ForceDirect) {
             const emitted = this.emit(exports.PotentialImportKind.Standalone, toImport, inContext);
-            const moduleSpecifier = potentialDirectiveModuleSpecifierResolver?.resolve(toImport, inContext);
-            collectImports(emitted, moduleSpecifier);
+            const moduleSpecifierDetail = potentialDirectiveModuleSpecifierResolver?.resolve(toImport, inContext) ?? null;
+            collectImports(emitted, moduleSpecifierDetail);
         }
         const exportingNgModules = this.ngModuleIndex.getNgModulesExporting(meta.ref.node);
         if (exportingNgModules !== null) {
             for (const exporter of exportingNgModules) {
                 const emittedRef = this.emit(exports.PotentialImportKind.NgModule, exporter, inContext);
-                const moduleSpecifier = potentialDirectiveModuleSpecifierResolver?.resolve(exporter, inContext);
-                collectImports(emittedRef, moduleSpecifier);
+                const moduleSpecifierDetail = potentialDirectiveModuleSpecifierResolver?.resolve(exporter, inContext) ?? null;
+                collectImports(emittedRef, moduleSpecifierDetail);
             }
         }
         // move the import with module specifier from the tsLs to top in the imports array
@@ -50602,6 +50643,87 @@ function getTheElementTagDeprecatedSuggestionDiagnostics(shimPath, program, file
 }
 function isDeprecatedDiagnostics(diag) {
     return diag.reportsDeprecated !== undefined;
+}
+/**
+ * Append the ts completion entry into the array only when the new entry's directive
+ * doesn't exist in the array.
+ *
+ * If the new entry's directive already exists, and the entry's symbol is the alias of
+ * the existing entry, the new entry will replace the existing entry.
+ *
+ */
+function appendOrReplaceTsEntryInfo(tsEntryInfos, newTsEntryInfo, program) {
+    const typeChecker = program.getTypeChecker();
+    const newTsEntryInfoSymbol = getSymbolFromTsEntryInfo(newTsEntryInfo, program);
+    if (newTsEntryInfoSymbol === null) {
+        return;
+    }
+    // Find the index of the first entry that has a matching type.
+    const matchedEntryIndex = tsEntryInfos.findIndex((currentTsEntryInfo) => {
+        const currentTsEntrySymbol = getSymbolFromTsEntryInfo(currentTsEntryInfo, program);
+        if (currentTsEntrySymbol === null) {
+            return false;
+        }
+        return isSymbolTypeMatch(currentTsEntrySymbol, newTsEntryInfoSymbol, typeChecker);
+    });
+    if (matchedEntryIndex === -1) {
+        // No entry with a matching type was found, so append the new entry.
+        tsEntryInfos.push(newTsEntryInfo);
+        return;
+    }
+    // An entry with a matching type was found at matchedEntryIndex.
+    const matchedEntry = tsEntryInfos[matchedEntryIndex];
+    const matchedEntrySymbol = getSymbolFromTsEntryInfo(matchedEntry, program);
+    if (matchedEntrySymbol === null) {
+        // Should not happen based on the findIndex condition, but check defensively.
+        return;
+    }
+    // Check if the `matchedEntrySymbol` is an alias of the `newTsEntryInfoSymbol`.
+    if (isSymbolAliasOf(matchedEntrySymbol, newTsEntryInfoSymbol, typeChecker)) {
+        // The first type-matching entry is an alias, so replace it.
+        tsEntryInfos[matchedEntryIndex] = newTsEntryInfo;
+        return;
+    }
+    // The new entry's symbol is an alias of the existing entry's symbol.
+    // In this case, we prefer to keep the existing entry that was found first
+    // and do not replace it.
+    return;
+}
+function getSymbolFromTsEntryInfo(tsInfo, program) {
+    const typeChecker = program.getTypeChecker();
+    const sf = program.getSourceFile(tsInfo.tsCompletionEntrySymbolFileName);
+    if (sf === undefined) {
+        return null;
+    }
+    const sfSymbol = typeChecker.getSymbolAtLocation(sf);
+    if (sfSymbol === undefined) {
+        return null;
+    }
+    return (typeChecker.tryGetMemberInModuleExports(tsInfo.tsCompletionEntrySymbolName, sfSymbol) ?? null);
+}
+function getFirstTypeDeclarationOfSymbol(symbol, typeChecker) {
+    const type = typeChecker.getTypeOfSymbol(symbol);
+    return type.getSymbol()?.declarations?.[0];
+}
+/**
+ * Check if the two symbols come from the same type node. For example:
+ *
+ * The `NewBarComponent`'s type node is the `BarComponent`.
+ *
+ * ```
+ * // a.ts
+ * export class BarComponent
+ *
+ * // b.ts
+ * import {BarComponent} from "./a"
+ * const NewBarComponent = BarComponent;
+ * export {NewBarComponent}
+ * ```
+ */
+function isSymbolTypeMatch(first, last, typeChecker) {
+    const firstTypeNode = getFirstTypeDeclarationOfSymbol(first, typeChecker);
+    const lastTypeNode = getFirstTypeDeclarationOfSymbol(last, typeChecker);
+    return firstTypeNode === lastTypeNode && firstTypeNode !== undefined;
 }
 
 /**
