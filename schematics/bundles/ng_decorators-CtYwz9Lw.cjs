@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-7d6ae95
+ * @license Angular v21.0.0-next.0+sha-69df2c0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var imports = require('./imports-CIX-JgAN.cjs');
+var imports = require('./imports-26VeX8i-.cjs');
 
 function getCallDecoratorImport(typeChecker, decorator) {
     // Note that this does not cover the edge case where decorators are called from

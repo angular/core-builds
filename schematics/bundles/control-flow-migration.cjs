@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-7d6ae95
+ * @license Angular v21.0.0-next.0+sha-69df2c0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,6 +11,7 @@ var p = require('path');
 var compiler_host = require('./compiler_host-B1ivKV85.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-8k2lixiS.cjs');
 var ts = require('typescript');
+var parse_html = require('./parse_html-BmdBt08t.cjs');
 require('os');
 require('fs');
 require('module');
@@ -579,37 +580,8 @@ function getNestedCount(etm, aggregator) {
         return getNestedCount(etm, aggregator);
     }
 }
-/**
- * parses the template string into the Html AST
- */
-function parseTemplate(template) {
-    let parsed;
-    try {
-        // Note: we use the HtmlParser here, instead of the `parseTemplate` function, because the
-        // latter returns an Ivy AST, not an HTML AST. The HTML AST has the advantage of preserving
-        // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
-        // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
-        // easily get the text-only ranges without having to reconstruct the original text.
-        parsed = new project_tsconfig_paths.HtmlParser().parse(template, '', {
-            // Allows for ICUs to be parsed.
-            tokenizeExpansionForms: true,
-            // Explicitly disable blocks so that their characters are treated as plain text.
-            tokenizeBlocks: true,
-            preserveLineEndings: true,
-        });
-        // Don't migrate invalid templates.
-        if (parsed.errors && parsed.errors.length > 0) {
-            const errors = parsed.errors.map((e) => ({ type: 'parse', error: e }));
-            return { tree: undefined, errors };
-        }
-    }
-    catch (e) {
-        return { tree: undefined, errors: [{ type: 'parse', error: e }] };
-    }
-    return { tree: parsed, errors: [] };
-}
 function validateMigratedTemplate(migrated, fileName) {
-    const parsed = parseTemplate(migrated);
+    const parsed = parse_html.parseTemplate(migrated);
     let errors = [];
     if (parsed.errors.length > 0) {
         errors.push({
@@ -705,7 +677,7 @@ function reduceNestingOffset(el, nestLevel, offset, postOffsets) {
  * Returns null if the migration failed (e.g. there was a syntax error).
  */
 function getTemplates(template) {
-    const parsed = parseTemplate(template);
+    const parsed = parse_html.parseTemplate(template);
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
         project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
@@ -845,7 +817,7 @@ function getViewChildOrViewChildrenNames(sourceFile) {
     return names;
 }
 function getTemplateReferences(template) {
-    const parsed = parseTemplate(template);
+    const parsed = parse_html.parseTemplate(template);
     if (parsed.tree === undefined) {
         return [];
     }
@@ -880,7 +852,7 @@ function replaceRemainingPlaceholders(template) {
  * determines if the CommonModule can be safely removed from imports
  */
 function canRemoveCommonModule(template) {
-    const parsed = parseTemplate(template);
+    const parsed = parse_html.parseTemplate(template);
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
@@ -1004,7 +976,7 @@ function getMainBlock(etm, tmpl, offset) {
     return { start, middle, end };
 }
 function generateI18nMarkers(tmpl) {
-    let parsed = parseTemplate(tmpl);
+    let parsed = parse_html.parseTemplate(tmpl);
     if (parsed.tree !== undefined) {
         const visitor = new i18nCollector();
         project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
@@ -1203,7 +1175,7 @@ const cases = [boundcase, switchcase, nakedcase, switchdefault, nakeddefault];
  */
 function migrateCase(template) {
     let errors = [];
-    let parsed = parseTemplate(template);
+    let parsed = parse_html.parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1300,7 +1272,7 @@ const stringPairs = new Map([
  */
 function migrateFor(template) {
     let errors = [];
-    let parsed = parseTemplate(template);
+    let parsed = parse_html.parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1505,7 +1477,7 @@ const ifs = [ngif, nakedngif, boundngif];
  */
 function migrateIf(template) {
     let errors = [];
-    let parsed = parseTemplate(template);
+    let parsed = parse_html.parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1698,7 +1670,7 @@ const switches = [ngswitch];
  */
 function migrateSwitch(template) {
     let errors = [];
-    let parsed = parseTemplate(template);
+    let parsed = parse_html.parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
