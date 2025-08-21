@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-62c00ab
+ * @license Angular v21.0.0-next.0+sha-827c3c1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -25369,8 +25369,13 @@ function hasPipe(root) {
  *
  * 1. Unary operators in the base of an exponentiation expression. For example, `-2 ** 3` is not
  *    valid JavaScript, but `(-2) ** 3` is.
+ *
  * 2. When mixing nullish coalescing (`??`) and logical and/or operators (`&&`, `||`), we need
  *    parentheses. For example, `a ?? b && c` is not valid JavaScript, but `a ?? (b && c)` is.
+ *    Note: Because of the outcome of https://github.com/microsoft/TypeScript/issues/62307
+ *    We need (for now) to keep parentheses around the `??` operator when it is used with and/or operators.
+ *    For example, `a ?? b && c` is not valid JavaScript, but `(a ?? b) && c` is.
+ *
  * 3. Ternary expression used as an operand for nullish coalescing. Typescript generates incorrect
  *    code if the parentheses are missing. For example when `(a ? b : c) ?? d` is translated to
  *    typescript AST, the parentheses node is removed, and then the remaining AST is printed, it
@@ -25393,6 +25398,11 @@ function stripNonrequiredParentheses(job) {
                         case BinaryOperator.NullishCoalesce:
                             checkNullishCoalescingParens(expr, requiredParens);
                             break;
+                        // these 2 cases can be dropped if the regression introduced in 5.9.2 is fixed
+                        // see https://github.com/microsoft/TypeScript/issues/62307
+                        case BinaryOperator.And:
+                        case BinaryOperator.Or:
+                            checkAndOrParens(expr, requiredParens);
                     }
                 }
             });
@@ -25423,6 +25433,13 @@ function checkNullishCoalescingParens(expr, requiredParens) {
     if (expr.rhs instanceof ParenthesizedExpr &&
         (isLogicalAndOr(expr.rhs.expr) || expr.rhs.expr instanceof ConditionalExpr)) {
         requiredParens.add(expr.rhs);
+    }
+}
+function checkAndOrParens(expr, requiredParens) {
+    if (expr.lhs instanceof ParenthesizedExpr &&
+        expr.lhs.expr instanceof BinaryOperatorExpr &&
+        expr.lhs.expr.operator === BinaryOperator.NullishCoalesce) {
+        requiredParens.add(expr.lhs);
     }
 }
 function isLogicalAndOr(expr) {
@@ -32817,7 +32834,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.0+sha-62c00ab');
+new Version('21.0.0-next.0+sha-827c3c1');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33853,7 +33870,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CS-eSeHC.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-8k2lixiS.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
