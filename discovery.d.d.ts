@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-6f541b8
+ * @license Angular v21.0.0-next.0+sha-56a8408
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -447,6 +447,10 @@ interface RNode {
      * Gets the Node immediately following this one in the parent's childNodes
      */
     nextSibling: RNode | null;
+    /**
+     * Gets the Node immediately preceding this one in the parent's childNodes
+     */
+    previousSibling: RNode | null;
     /**
      * Insert a child node.
      *

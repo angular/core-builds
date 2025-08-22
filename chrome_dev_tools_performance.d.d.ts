@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-6f541b8
+ * @license Angular v21.0.0-next.0+sha-56a8408
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -569,21 +569,6 @@ interface ModuleWithProviders<T> {
     ngModule: Type<T>;
     providers?: Array<Provider | EnvironmentProviders>;
 }
-/**
- * Providers that were imported from NgModules via the `importProvidersFrom` function.
- *
- * These providers are meant for use in an application injector (or other environment injectors) and
- * should not be used in component injectors.
- *
- * This type cannot be directly implemented. It's returned from the `importProvidersFrom` function
- * and serves to prevent the extracted NgModule providers from being used in the wrong contexts.
- *
- * @see {@link importProvidersFrom}
- *
- * @publicApi
- * @deprecated replaced by `EnvironmentProviders`
- */
-type ImportedNgModuleProviders = EnvironmentProviders;
 
 /**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
@@ -834,4 +819,4 @@ declare global {
 declare function enableProfiling(): () => void;
 
 export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
-export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, EventCallback, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, ImportedNgModuleProviders, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
+export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, EventCallback, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
