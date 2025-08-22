@@ -1,16 +1,17 @@
 'use strict';
 /**
- * @license Angular v20.2.1+sha-e1481d8
+ * @license Angular v20.2.1+sha-10b0927
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var p = require('path');
+var path = require('node:path');
 var compiler_host = require('./compiler_host-DbXQvYKt.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-COqholMT.cjs');
 var ts = require('typescript');
+var p = require('path');
 require('os');
 require('fs');
 require('module');
@@ -1843,7 +1844,7 @@ function migrate(options) {
         const basePath = process.cwd();
         let pathToMigrate;
         if (options.path) {
-            pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+            pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
             if (pathToMigrate.trim() !== '') {
                 allPaths.push(pathToMigrate);
             }
@@ -1888,10 +1889,10 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     // sort files with .html files first
     // this ensures class files know if it's safe to remove CommonModule
     const paths = sortFilePaths([...analysis.keys()]);
-    for (const path of paths) {
-        const file = analysis.get(path);
+    for (const path$1 of paths) {
+        const file = analysis.get(path$1);
         const ranges = file.getSortedRanges();
-        const relativePath = p.relative(basePath, path);
+        const relativePath = path.relative(basePath, path$1);
         const content = tree.readText(relativePath);
         const update = tree.beginUpdate(relativePath);
         for (const { start, end, node, type } of ranges) {
@@ -1903,7 +1904,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
                 update.insertLeft(start, migrated);
             }
             if (errors.length > 0) {
-                migrateErrors.set(path, errors);
+                migrateErrors.set(path$1, errors);
             }
         }
         tree.commitUpdate(update);

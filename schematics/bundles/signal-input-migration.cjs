@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.2.1+sha-e1481d8
+ * @license Angular v20.2.1+sha-10b0927
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-xcaijJqF.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-EQ7gRu3S.cjs');
 var ts = require('typescript');
 require('os');
 var project_tsconfig_paths = require('./project_tsconfig_paths-COqholMT.cjs');
@@ -15,7 +15,8 @@ require('path');
 require('node:path');
 var project_paths = require('./project_paths-BaK5P5a5.cjs');
 var index = require('./index-Bphk20D_.cjs');
-var assert = require('assert');
+var assert$1 = require('assert');
+var assert = require('node:assert');
 var apply_import_manager = require('./apply_import_manager-BvwNQhfG.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -598,7 +599,7 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
     const visitor = (node) => {
         const decoratorInput = extractDecoratorInput(node, host, reflector, dtsMetadataReader, evaluator);
         if (decoratorInput !== null) {
-            assert(index.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
+            assert$1(index.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
             const inputDescr = getInputDescriptor(host, node);
             // track all inputs, even from declarations for reference resolution.
             knownDecoratorInputs.register({ descriptor: inputDescr, metadata: decoratorInput, node });
@@ -761,7 +762,7 @@ function pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownIn
         isClassWithKnownFields: (clazz) => knownInputs.isInputContainingClass(clazz),
         getFieldsForClass: (clazz) => {
             const directiveInfo = knownInputs.getDirectiveInfoForClass(clazz);
-            assert(directiveInfo !== undefined, 'Expected directive info to exist for input.');
+            assert$1(directiveInfo !== undefined, 'Expected directive info to exist for input.');
             return Array.from(directiveInfo.inputFields.values()).map((i) => i.descriptor);
         },
     });
@@ -1098,8 +1099,8 @@ function pass6__migrateInputDeclarations(host, checker, result, knownInputs, imp
             filesWithIncompatibleInputs.add(sf);
             continue;
         }
-        assert(metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
-        assert(!ts.isAccessor(input.node), 'Accessor inputs are incompatible.');
+        assert$1(metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
+        assert$1(!ts.isAccessor(input.node), 'Accessor inputs are incompatible.');
         filesWithMigratedInputs.add(sf);
         result.replacements.push(...convertToSignalInput(input.node, metadata, info, checker, importManager, result));
     }

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.1+sha-e1481d8
+ * @license Angular v20.2.1+sha-10b0927
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23,10 +23,11 @@ require('node:path');
 require('./project_paths-BaK5P5a5.cjs');
 require('node:path/posix');
 require('./apply_import_manager-BvwNQhfG.cjs');
-require('./migrate_ts_type_references-xcaijJqF.cjs');
+require('./migrate_ts_type_references-EQ7gRu3S.cjs');
 require('assert');
 require('./index-Bphk20D_.cjs');
 require('./leading_space-D9nQ8UQC.cjs');
+require('node:assert');
 
 function migrate(options) {
     // The migrations are independent so we can run them in any order, but we sort them here

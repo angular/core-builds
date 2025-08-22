@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.2.1+sha-e1481d8
+ * @license Angular v20.2.1+sha-10b0927
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16,6 +16,7 @@ var leading_space = require('./leading_space-D9nQ8UQC.cjs');
 require('./index-Bcv0dPD8.cjs');
 require('path');
 require('node:path');
+var assert$1 = require('node:assert');
 
 /**
  * Reasons why a field cannot be migrated.
@@ -1127,7 +1128,7 @@ function analyzeControlFlow(entries, checker) {
     for (const entry of entries) {
         const { flowContainer, resultIndex } = referenceToMetadata.get(entry);
         const flowPathInterestingNodes = traverseFlowForInterestingNodes(getFlowNode(entry));
-        assert(flowContainer !== null && flowPathInterestingNodes !== null, 'Expected a flow container to exist.');
+        assert$1(flowContainer !== null && flowPathInterestingNodes !== null, 'Expected a flow container to exist.');
         const narrowPartners = getAllMatchingReferencesInFlowPath(flowPathInterestingNodes, entry, referenceToMetadata, flowContainer, checker);
         if (narrowPartners.length !== 0) {
             connectSharedReferences(result, narrowPartners, resultIndex);
@@ -1153,8 +1154,8 @@ function connectSharedReferences(result, flowPartners, refId) {
             earliestPartnerId = partnerId;
         }
     }
-    assert(earliestPartner !== null, 'Expected an earliest partner to be found.');
-    assert(earliestPartnerId !== null, 'Expected an earliest partner to be found.');
+    assert$1(earliestPartner !== null, 'Expected an earliest partner to be found.');
+    assert$1(earliestPartnerId !== null, 'Expected an earliest partner to be found.');
     // Earliest partner ID could be higher than `refId` in cyclic
     // situations like `loop` flow nodes. We need to find the minimum
     // and maximum to iterate through partners in between.
@@ -1195,7 +1196,7 @@ function connectSharedReferences(result, flowPartners, refId) {
     if (!highestBlock) {
         console.error(earliestPartnerId, refId, refFlowContainer.getText(), seenBlocks);
     }
-    assert(highestBlock, 'Expected a block anchor to be found');
+    assert$1(highestBlock, 'Expected a block anchor to be found');
     result[earliestPartnerId].recommendedNode = highestBlock;
 }
 function isPotentialInsertionAncestor(node) {
