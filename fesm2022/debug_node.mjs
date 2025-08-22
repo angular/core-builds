@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.1+sha-040cba0
+ * @license Angular v20.2.1+sha-b020423
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13515,7 +13515,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.2.1+sha-040cba0']
+        ? ['ng-version', '20.2.1+sha-b020423']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21997,9 +21997,37 @@ const longestAnimations = new WeakMap();
 // used to prevent duplicate nodes from showing up when nodes have been toggled quickly
 // from an `@if` or `@for`.
 const leavingNodes = new WeakMap();
-function clearLeavingNodes(tNode) {
-    if (leavingNodes.get(tNode)?.length === 0) {
+function clearLeavingNodes(tNode, el) {
+    const nodes = leavingNodes.get(tNode);
+    if (nodes && nodes.length > 0) {
+        const ix = nodes.findIndex((node) => node === el);
+        if (ix > -1)
+            nodes.splice(ix, 1);
+    }
+    if (nodes?.length === 0) {
         leavingNodes.delete(tNode);
+    }
+}
+/**
+ * In the case that we have an existing node that's animating away, like when
+ * an `@if` toggles quickly, we need to end the animation for the former node
+ * and remove it right away to prevent duplicate nodes showing up.
+ */
+function cancelLeavingNodes(tNode, lView) {
+    const leavingEl = leavingNodes.get(tNode)?.shift();
+    const lContainer = lView[DECLARATION_LCONTAINER];
+    if (lContainer) {
+        // this is the insertion point for the new TNode element.
+        // it will be inserted before the declaring containers anchor.
+        const beforeNode = getBeforeNodeForView(tNode.index, lContainer);
+        // here we need to check the previous sibling of that anchor
+        const previousNode = beforeNode?.previousSibling;
+        // We really only want to cancel animations if the leaving node is the
+        // same as the node before where the new node will be inserted. This is
+        // the control flow scenario where an if was toggled.
+        if (leavingEl && previousNode && leavingEl === previousNode) {
+            leavingEl.dispatchEvent(new CustomEvent('animationend', { detail: { cancel: true } }));
+        }
     }
 }
 function trackLeavingNodes(tNode, el) {
@@ -22060,14 +22088,7 @@ function ɵɵanimateEnter(value) {
             cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleAnimationStart));
             cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleAnimationStart));
         });
-        // In the case that we have an existing node that's animating away, like when
-        // an `@if` toggles quickly or `@for` adds and removes elements quickly, we
-        // need to end the animation for the former node and remove it right away to
-        // prevent duplicate nodes showing up.
-        leavingNodes
-            .get(tNode)
-            ?.pop()
-            ?.dispatchEvent(new CustomEvent('animationend', { detail: { cancel: true } }));
+        cancelLeavingNodes(tNode, lView);
         trackEnterClasses(nativeElement, activeClasses, cleanupFns);
         for (const klass of activeClasses) {
             renderer.addClass(nativeElement, klass);
@@ -22130,14 +22151,7 @@ function ɵɵanimateEnterListener(value) {
     }
     const tNode = getCurrentTNode();
     const nativeElement = getNativeByTNode(tNode, lView);
-    // In the case that we have an existing node that's animating away, like when
-    // an `@if` toggles quickly or `@for` adds and removes elements quickly, we
-    // need to end the animation for the former node and remove it right away to
-    // prevent duplicate nodes showing up.
-    leavingNodes
-        .get(tNode)
-        ?.pop()
-        ?.dispatchEvent(new CustomEvent('animationend', { detail: { cancel: true } }));
+    cancelLeavingNodes(tNode, lView);
     value.call(lView[CONTEXT], { target: nativeElement, animationComplete: noOpAnimationComplete });
     return ɵɵanimateEnterListener;
 }
@@ -22227,7 +22241,7 @@ function ɵɵanimateLeaveListener(value) {
                 const event = {
                     target: nativeElement,
                     animationComplete: () => {
-                        clearLeavingNodes(tNode);
+                        clearLeavingNodes(tNode, _el);
                         removeFn();
                     },
                 };
@@ -22356,7 +22370,7 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
             // affect any other animations on the page.
             event.stopImmediatePropagation();
             longestAnimations.delete(el);
-            clearLeavingNodes(tNode);
+            clearLeavingNodes(tNode, el);
             finalRemoveFn();
         }
     };
@@ -22375,7 +22389,7 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
         requestAnimationFrame(() => {
             determineLongestAnimation(el, longestAnimations, areAnimationSupported);
             if (!longestAnimations.has(el)) {
-                clearLeavingNodes(tNode);
+                clearLeavingNodes(tNode, el);
                 finalRemoveFn();
             }
         });
