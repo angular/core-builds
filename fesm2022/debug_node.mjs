@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-aff8bb2
+ * @license Angular v21.0.0-next.0+sha-a038840
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13516,7 +13516,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.0+sha-aff8bb2']
+        ? ['ng-version', '21.0.0-next.0+sha-a038840']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22048,6 +22048,7 @@ function ɵɵanimateEnter(value) {
     }
     const tNode = getCurrentTNode();
     const nativeElement = getNativeByTNode(tNode, lView);
+    ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
     const renderer = lView[RENDERER];
     const ngZone = lView[INJECTOR].get(NgZone);
     // Retrieve the actual class list from the value. This will resolve any resolver functions from
@@ -22138,6 +22139,7 @@ function ɵɵanimateEnterListener(value) {
     }
     const tNode = getCurrentTNode();
     const nativeElement = getNativeByTNode(tNode, lView);
+    ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
     cancelLeavingNodes(tNode, lView);
     value.call(lView[CONTEXT], { target: nativeElement, animationComplete: noOpAnimationComplete });
     return ɵɵanimateEnterListener;
@@ -22166,6 +22168,7 @@ function ɵɵanimateLeave(value) {
     const tView = getTView();
     const tNode = getCurrentTNode();
     const nativeElement = getNativeByTNode(tNode, lView);
+    ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
     // This instruction is called in the update pass.
     const renderer = lView[RENDERER];
     const elementRegistry = getAnimationElementRemovalRegistry();
@@ -22210,9 +22213,7 @@ function ɵɵanimateLeaveListener(value) {
     const tNode = getCurrentTNode();
     const tView = getTView();
     const nativeElement = getNativeByTNode(tNode, lView);
-    if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
-        return ɵɵanimateLeaveListener;
-    }
+    ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
     const elementRegistry = getAnimationElementRemovalRegistry();
     ngDevMode &&
         assertDefined(elementRegistry.elements, 'Expected `ElementRegistry` to be present in animations subsystem');
@@ -22333,6 +22334,11 @@ function animationEnd(event, nativeElement, renderer) {
 function assertAnimationTypes(value, instruction) {
     if (value == null || (typeof value !== 'string' && typeof value !== 'function')) {
         throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' value must be a string of CSS classes or an animation function, got ${stringify(value)}`);
+    }
+}
+function assertElementNodes(nativeElement, instruction) {
+    if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
+        throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' can only be used on an element node, got ${stringify(nativeElement.nodeType)}`);
     }
 }
 /**

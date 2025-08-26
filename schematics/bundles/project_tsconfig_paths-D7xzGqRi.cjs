@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.0+sha-aff8bb2
+ * @license Angular v21.0.0-next.0+sha-a038840
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29810,6 +29810,12 @@ class HtmlAstToIvyAst {
         }
         return directives;
     }
+    filterAnimationAttributes(attributes) {
+        return attributes.filter((a) => !a.name.startsWith('animate.'));
+    }
+    filterAnimationInputs(attributes) {
+        return attributes.filter((a) => a.type !== exports.BindingType.Animation);
+    }
     wrapInTemplate(node, templateProperties, templateVariables, i18nAttrsMeta, isTemplateElement, isI18nRootElement) {
         // We need to hoist the attributes of the node to the template for content projection purposes.
         const attrs = this.categorizePropertyAttributes('ng-template', templateProperties, i18nAttrsMeta);
@@ -29822,8 +29828,8 @@ class HtmlAstToIvyAst {
             outputs: [],
         };
         if (node instanceof Element$1 || node instanceof Component$1) {
-            hoistedAttrs.attributes.push(...node.attributes);
-            hoistedAttrs.inputs.push(...node.inputs);
+            hoistedAttrs.attributes.push(...this.filterAnimationAttributes(node.attributes));
+            hoistedAttrs.inputs.push(...this.filterAnimationInputs(node.inputs));
             hoistedAttrs.outputs.push(...node.outputs);
         }
         // For <ng-template>s with structural directives on them, avoid passing i18n information to
@@ -32834,7 +32840,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.0+sha-aff8bb2');
+new Version('21.0.0-next.0+sha-a038840');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33870,7 +33876,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-8k2lixiS.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D7xzGqRi.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
