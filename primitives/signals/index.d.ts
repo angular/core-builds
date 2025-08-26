@@ -1,13 +1,13 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { ReactiveNode, ValueEqualityFn, SIGNAL } from '../../graph.d.js';
 export { REACTIVE_NODE, Reactive, ReactiveHookFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from '../../graph.d.js';
-import { SignalNode } from '../../signal.d.js';
-export { SIGNAL_NODE, SignalGetter, createSignal, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from '../../signal.d.js';
+import { SignalNode } from '../../effect.d.js';
+export { BASE_EFFECT_NODE, BaseEffectNode, SIGNAL_NODE, SignalGetter, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from '../../effect.d.js';
 export { setAlternateWeakRefImpl } from '../../weak_ref.d.js';
 
 /**

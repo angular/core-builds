@@ -1,12 +1,12 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, NodeInjectorDestroyRef, FLAGS, markAncestorsForTraversal, noop, setIsRefreshingViews, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler.mjs';
-import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, REACTIVE_NODE, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './signal.mjs';
-import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './untracked.mjs';
+import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, isInNotificationPhase } from './signal.mjs';
+import { untracked as untracked$1, BASE_EFFECT_NODE, runEffect, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './effect.mjs';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -175,41 +175,27 @@ function effect(effectFn, options) {
     }
     return effectRef;
 }
-const BASE_EFFECT_NODE = 
+const EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
-    ...REACTIVE_NODE,
-    consumerIsAlwaysLive: true,
-    consumerAllowSignalWrites: true,
-    dirty: true,
-    hasRun: false,
+    ...BASE_EFFECT_NODE,
     cleanupFns: undefined,
     zone: null,
-    kind: 'effect',
     onDestroyFn: noop,
     run() {
-        this.dirty = false;
         if (ngDevMode && isInNotificationPhase()) {
             throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
         }
-        if (this.hasRun && !consumerPollProducersForChange(this)) {
-            return;
-        }
-        this.hasRun = true;
-        const registerCleanupFn = (cleanupFn) => (this.cleanupFns ??= []).push(cleanupFn);
-        const prevNode = consumerBeforeComputation(this);
         // We clear `setIsRefreshingViews` so that `markForCheck()` within the body of an effect will
         // cause CD to reach the component in question.
         const prevRefreshingViews = setIsRefreshingViews(false);
         try {
-            this.maybeCleanup();
-            this.fn(registerCleanupFn);
+            runEffect(this);
         }
         finally {
             setIsRefreshingViews(prevRefreshingViews);
-            consumerAfterComputation(this, prevNode);
         }
     },
-    maybeCleanup() {
+    cleanup() {
         if (!this.cleanupFns?.length) {
             return;
         }
@@ -230,7 +216,7 @@ const BASE_EFFECT_NODE =
 }))();
 const ROOT_EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
-    ...BASE_EFFECT_NODE,
+    ...EFFECT_NODE,
     consumerMarkedDirty() {
         this.scheduler.schedule(this);
         this.notifier.notify(12 /* NotificationSource.RootEffect */);
@@ -238,13 +224,13 @@ const ROOT_EFFECT_NODE =
     destroy() {
         consumerDestroy(this);
         this.onDestroyFn();
-        this.maybeCleanup();
+        this.cleanup();
         this.scheduler.remove(this);
     },
 }))();
 const VIEW_EFFECT_NODE = 
 /* @__PURE__ */ (() => ({
-    ...BASE_EFFECT_NODE,
+    ...EFFECT_NODE,
     consumerMarkedDirty() {
         this.view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
         markAncestorsForTraversal(this.view);
@@ -253,7 +239,7 @@ const VIEW_EFFECT_NODE =
     destroy() {
         consumerDestroy(this);
         this.onDestroyFn();
-        this.maybeCleanup();
+        this.cleanup();
         this.view[EFFECTS]?.delete(this);
     },
 }))();
@@ -262,7 +248,7 @@ function createViewEffect(view, notifier, fn) {
     node.view = view;
     node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
     node.notifier = notifier;
-    node.fn = fn;
+    node.fn = createEffectFn(node, fn);
     view[EFFECTS] ??= new Set();
     view[EFFECTS].add(node);
     node.consumerMarkedDirty(node);
@@ -270,13 +256,18 @@ function createViewEffect(view, notifier, fn) {
 }
 function createRootEffect(fn, scheduler, notifier) {
     const node = Object.create(ROOT_EFFECT_NODE);
-    node.fn = fn;
+    node.fn = createEffectFn(node, fn);
     node.scheduler = scheduler;
     node.notifier = notifier;
     node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
     node.scheduler.add(node);
     node.notifier.notify(12 /* NotificationSource.RootEffect */);
     return node;
+}
+function createEffectFn(node, fn) {
+    return () => {
+        fn((cleanupFn) => (node.cleanupFns ??= []).push(cleanupFn));
+    };
 }
 
 const identityFn = (v) => v;

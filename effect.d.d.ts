@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29,5 +29,15 @@ declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T
 declare function runPostSignalSetFn<T>(node: SignalNode<T>): void;
 declare const SIGNAL_NODE: SignalNode<unknown>;
 
-export { SIGNAL_NODE, createSignal, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn };
-export type { SignalGetter, SignalNode };
+interface BaseEffectNode extends ReactiveNode {
+    hasRun: boolean;
+    fn: () => void;
+    destroy(): void;
+    cleanup(): void;
+    run(): void;
+}
+declare const BASE_EFFECT_NODE: Omit<BaseEffectNode, 'fn' | 'destroy' | 'cleanup' | 'run'>;
+declare function runEffect(node: BaseEffectNode): void;
+
+export { BASE_EFFECT_NODE, SIGNAL_NODE, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn };
+export type { BaseEffectNode, SignalGetter, SignalNode };

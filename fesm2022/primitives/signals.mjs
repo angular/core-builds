@@ -1,12 +1,12 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { consumerMarkDirty, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from '../signal.mjs';
 export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal.mjs';
-export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from '../untracked.mjs';
+export { BASE_EFFECT_NODE, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, runEffect, untracked } from '../effect.mjs';
 export { setAlternateWeakRefImpl } from '../weak_ref.mjs';
 
 function createWatch(fn, schedule, allowSignalWrites) {

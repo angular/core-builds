@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19,7 +19,7 @@ import '@angular/core/primitives/signals';
 import '@angular/core/primitives/di';
 import 'rxjs/operators';
 import './attribute.mjs';
-import './untracked.mjs';
+import './effect.mjs';
 
 const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
@@ -627,7 +627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('21.0.0-next.0+sha-dfa2044');
+const VERSION = new Version('21.0.0-next.0+sha-a43057c');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);

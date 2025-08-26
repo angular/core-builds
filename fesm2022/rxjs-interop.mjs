@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.0+sha-dfa2044
+ * @license Angular v21.0.0-next.0+sha-a43057c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ import './not_found.mjs';
 import './signal.mjs';
 import '@angular/core/primitives/signals';
 import '@angular/core/primitives/di';
-import './untracked.mjs';
+import './effect.mjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
