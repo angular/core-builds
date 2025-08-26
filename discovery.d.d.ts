@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.1+sha-e220a61
+ * @license Angular v20.2.1+sha-23d1ace
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, Provider, ProcessProvidersFunction, ModuleWithProviders, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './chrome_dev_tools_performance.d.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import './event_dispatcher.d.js';
-import { SignalNode } from './signal.d.js';
+import { SignalNode, BaseEffectNode } from './effect.d.js';
 import { Injector as Injector$1, InjectionToken as InjectionToken$1, NotFound } from '@angular/core/primitives/di';
 import { ReactiveNode } from './graph.d.js';
 
@@ -3106,16 +3106,11 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * @publicApi 20.0
  */
 declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
-interface EffectNode extends ReactiveNode, SchedulableEffect {
-    hasRun: boolean;
+interface EffectNode extends BaseEffectNode, SchedulableEffect {
     cleanupFns: EffectCleanupFn[] | undefined;
     injector: Injector;
     notifier: ChangeDetectionScheduler;
     onDestroyFn: () => void;
-    fn: (cleanupFn: EffectCleanupRegisterFn) => void;
-    run(): void;
-    destroy(): void;
-    maybeCleanup(): void;
 }
 interface ViewEffectNode extends EffectNode {
     view: LView;

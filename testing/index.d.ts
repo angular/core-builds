@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.1+sha-e220a61
+ * @license Angular v20.2.1+sha-23d1ace
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, Element
 import * as i0 from '@angular/core';
 import '../graph.d.js';
 import 'rxjs';
-import '../signal.d.js';
+import '../effect.d.js';
 import '@angular/core/primitives/di';
 
 /**

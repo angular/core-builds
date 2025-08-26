@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.2.1+sha-e220a61
+ * @license Angular v20.2.1+sha-23d1ace
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer } from './signal.mjs';
+import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer, consumerPollProducersForChange } from './signal.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
     const node = Object.create(LINKED_SIGNAL_NODE);
@@ -113,5 +113,30 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked };
-//# sourceMappingURL=untracked.mjs.map
+const BASE_EFFECT_NODE = 
+/* @__PURE__ */ (() => ({
+    ...REACTIVE_NODE,
+    consumerIsAlwaysLive: true,
+    consumerAllowSignalWrites: true,
+    dirty: true,
+    hasRun: false,
+    kind: 'effect',
+}))();
+function runEffect(node) {
+    node.dirty = false;
+    if (node.hasRun && !consumerPollProducersForChange(node)) {
+        return;
+    }
+    node.hasRun = true;
+    const prevNode = consumerBeforeComputation(node);
+    try {
+        node.cleanup();
+        node.fn();
+    }
+    finally {
+        consumerAfterComputation(node, prevNode);
+    }
+}
+
+export { BASE_EFFECT_NODE, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, runEffect, untracked };
+//# sourceMappingURL=effect.mjs.map
