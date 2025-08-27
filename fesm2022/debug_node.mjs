@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-3a3bd36
+ * @license Angular v21.0.0-next.1+sha-1bb30c7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8399,7 +8399,13 @@ function handleUncaughtError(lView, error) {
     if (!injector) {
         return;
     }
-    const errorHandler = injector.get(INTERNAL_APPLICATION_ERROR_HANDLER, null);
+    let errorHandler;
+    try {
+        errorHandler = injector.get(INTERNAL_APPLICATION_ERROR_HANDLER, null);
+    }
+    catch {
+        errorHandler = null;
+    }
     errorHandler?.(error);
 }
 /**
@@ -13516,7 +13522,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.1+sha-3a3bd36']
+        ? ['ng-version', '21.0.0-next.1+sha-1bb30c7']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
