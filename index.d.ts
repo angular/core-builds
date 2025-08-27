@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-f868465
+ * @license Angular v21.0.0-next.1+sha-3a3bd36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5799,6 +5799,7 @@ interface AnimationDetails {
     classes: Set<string> | null;
     classFns?: Function[];
     animateFn: AnimationRemoveFunction;
+    isEventBinding: boolean;
 }
 
 interface AnimationRemovalRegistry {

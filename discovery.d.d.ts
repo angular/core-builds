@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-f868465
+ * @license Angular v21.0.0-next.1+sha-3a3bd36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4611,34 +4611,25 @@ interface DirectiveDecorator {
      *
      * ### Declaring directives
      *
-     * In order to make a directive available to other components in your application, you should do
-     * one of the following:
-     *  - either mark the directive as [standalone](guide/components/importing),
-     *  - or declare it in an NgModule by adding it to the `declarations` and `exports` fields.
-     *
-     * ** Marking a directive as standalone **
-     *
-     * You can add the `standalone: true` flag to the Directive decorator metadata to declare it as
-     * [standalone](guide/components/importing):
+     * By default, directives are marked as [standalone](guide/components/importing), which makes
+     * them available to other components in your application.
      *
      * ```ts
      * @Directive({
-     *   standalone: true,
      *   selector: 'my-directive',
      * })
-     * class MyDirective {}
      * ```
      *
-     * When marking a directive as standalone, please make sure that the directive is not already
-     * declared in an NgModule.
-     *
+     * Please make sure that directives marked as standalone are not already declared in an NgModule.
      *
      * ** Declaring a directive in an NgModule **
-     *
-     * Another approach is to declare a directive in an NgModule:
+     * If you want to declare a directive in an ngModule, add the `standalone: false` flag to the
+     * Directive decorator metadata and add the directive to the `declarations` and `exports`
+     * fields of your ngModule.
      *
      * ```ts
      * @Directive({
+     *   standalone: false,
      *   selector: 'my-directive',
      * })
      * class MyDirective {}

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-f868465
+ * @license Angular v21.0.0-next.1+sha-3a3bd36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3030,12 +3030,12 @@ function dispatchNavigateEvent({ cancelable, canIntercept, userInitiated, hashCh
             }
             navigation.navigateEvent = null;
             finishNavigationEvent(event, true);
+            result.finishedResolve();
             const navigatesuccessEvent = new Event('navigatesuccess', {
                 bubbles: false,
                 cancelable: false,
             });
             navigation.eventTarget.dispatchEvent(navigatesuccessEvent);
-            result.finishedResolve();
             navigation.transition?.finishedResolve();
             navigation.transition = null;
         })
@@ -3063,16 +3063,14 @@ function dispatchNavigateEvent({ cancelable, canIntercept, userInitiated, hashCh
         else if (this.interceptionState === 'intercepted') {
             this.interceptionState = 'finished';
         }
+        result.committedReject(reason);
+        result.finishedReject(reason);
         const navigateerrorEvent = new Event('navigateerror', {
             bubbles: false,
             cancelable,
         });
         navigateerrorEvent.error = reason;
         navigation.eventTarget.dispatchEvent(navigateerrorEvent);
-        if (result.committedTo === null && !result.signal.aborted) {
-            result.committedReject(reason);
-        }
-        result.finishedReject(reason);
         const transition = navigation.transition;
         transition?.committedReject(reason);
         transition?.finishedReject(reason);

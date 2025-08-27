@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-f868465
+ * @license Angular v21.0.0-next.1+sha-3a3bd36
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13516,7 +13516,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.1+sha-f868465']
+        ? ['ng-version', '21.0.0-next.1+sha-3a3bd36']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21768,6 +21768,7 @@ class ElementRegistry {
         const details = this.outElements.get(el) ?? {
             classes: null,
             animateFn: () => { },
+            isEventBinding: true,
         };
         details.animateFn = animateWrapperFn(el, value);
         this.outElements.set(el, details);
@@ -21777,6 +21778,7 @@ class ElementRegistry {
         const details = this.outElements.get(el) ?? {
             classes: new Set(),
             animateFn: () => { },
+            isEventBinding: false,
         };
         if (typeof value === 'function') {
             this.trackResolver(details, value);
@@ -21812,8 +21814,11 @@ class ElementRegistry {
         };
         // this timeout is used to ensure elements actually get removed in the case
         // that the user forgot to call the remove callback. The timeout is cleared
-        // in the DOM renderer during the remove child process.
-        timeoutId = setTimeout(remove, maxAnimationTimeout);
+        // in the DOM renderer during the remove child process. It only applies
+        // to the event binding use case.
+        if (details.isEventBinding) {
+            timeoutId = setTimeout(remove, maxAnimationTimeout);
+        }
         details.animateFn(remove);
     }
 }
