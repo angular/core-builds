@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.2.2+sha-114906d
+ * @license Angular v20.2.2+sha-05a9322
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -310,7 +310,7 @@ function rxResource(opts) {
             let sub;
             // Track the abort listener so it can be removed if the Observable completes (as a memory
             // optimization).
-            const onAbort = () => sub.unsubscribe();
+            const onAbort = () => sub?.unsubscribe();
             params.abortSignal.addEventListener('abort', onAbort);
             // Start off stream as undefined.
             const stream = signal({ value: undefined });
