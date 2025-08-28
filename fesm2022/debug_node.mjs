@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-99cf028
+ * @license Angular v21.0.0-next.1+sha-ed3d1f2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13522,7 +13522,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.1+sha-99cf028']
+        ? ['ng-version', '21.0.0-next.1+sha-ed3d1f2']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22071,7 +22071,6 @@ function ɵɵanimateEnter(value) {
     // This also allows us to setup cancellation of animations in progress if the
     // gets removed early.
     const handleAnimationStart = (event) => {
-        setupAnimationCancel(event, renderer);
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
             cleanupFns.push(renderer.listen(nativeElement, eventName, handleInAnimationEnd));
@@ -22280,42 +22279,22 @@ function cancelAnimationsIfRunning(element, renderer) {
     if (!areAnimationSupported)
         return;
     const elementData = enterClassMap.get(element);
-    if (element.getAnimations().length > 0) {
-        for (const animation of element.getAnimations()) {
-            if (animation.playState === 'running') {
-                animation.cancel();
-            }
-        }
-    }
-    else {
-        if (elementData) {
-            for (const klass of elementData.classList) {
-                renderer.removeClass(element, klass);
-            }
+    if (elementData &&
+        elementData.classList.length > 0 &&
+        elementHasClassList(element, elementData.classList)) {
+        for (const klass of elementData.classList) {
+            renderer.removeClass(element, klass);
         }
     }
     // We need to prevent any enter animation listeners from firing if they exist.
     cleanupEnterClassData(element);
 }
-function setupAnimationCancel(event, renderer) {
-    if (!(event.target instanceof Element))
-        return;
-    const nativeElement = event.target;
-    if (areAnimationSupported) {
-        const elementData = enterClassMap.get(nativeElement);
-        const animations = nativeElement.getAnimations();
-        if (animations.length === 0)
-            return;
-        for (let animation of animations) {
-            animation.addEventListener('cancel', (event) => {
-                if (nativeElement === event.target && elementData?.classList) {
-                    for (const klass of elementData.classList) {
-                        renderer.removeClass(nativeElement, klass);
-                    }
-                }
-            });
-        }
+function elementHasClassList(element, classList) {
+    for (const className of classList) {
+        if (element.classList.contains(className))
+            return true;
     }
+    return false;
 }
 function isLongestAnimation(event, nativeElement) {
     const longestAnimation = longestAnimations.get(nativeElement);
