@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.1+sha-1a26fd3
+ * @license Angular v21.0.0-next.1+sha-0a82138
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27970,7 +27970,7 @@ class BindingParser {
         if (isLegacyAnimationProp) {
             this._parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
         }
-        else if (name.startsWith(ANIMATE_PREFIX)) {
+        else if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
             this._parseAnimation(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
         }
         else {
@@ -28133,7 +28133,7 @@ class BindingParser {
         if (isAssignmentEvent) {
             eventType = exports.ParsedEventType.TwoWay;
         }
-        if (name.startsWith(ANIMATE_PREFIX)) {
+        if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
             eventType = exports.ParsedEventType.Animation;
         }
         targetEvents.push(new ParsedEvent(eventName, target, eventType, ast, sourceSpan, handlerSpan, keySpan));
@@ -32840,7 +32840,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.1+sha-1a26fd3');
+new Version('21.0.0-next.1+sha-0a82138');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33876,7 +33876,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D7xzGqRi.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-ZWeneXAD.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
