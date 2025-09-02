@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-16fa983
+ * @license Angular v21.0.0-next.1+sha-1541606
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3944,27 +3944,6 @@ declare class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {
 declare function provideZonelessChangeDetection(): EnvironmentProviders;
 
 /**
- * Internal implementation of the pending tasks service.
- */
-declare class PendingTasksInternal implements OnDestroy {
-    private taskId;
-    private pendingTasks;
-    private destroyed;
-    private pendingTask;
-    get hasPendingTasks(): boolean;
-    /**
-     * In case the service is about to be destroyed, return a self-completing observable.
-     * Otherwise, return the observable that emits the current state of pending tasks.
-     */
-    get hasPendingTasksObservable(): Observable<boolean>;
-    add(): number;
-    has(taskId: number): boolean;
-    remove(taskId: number): void;
-    ngOnDestroy(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-/**
  * Service that keeps track of pending tasks contributing to the stableness of Angular
  * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
  * tasks influencing stability, this API gives control over stability to library and application
@@ -5248,6 +5227,28 @@ declare function resolveComponentResources(resourceResolver: (url: string) => Pr
 declare function isComponentDefPendingResolution(type: Type$1<any>): boolean;
 declare function clearResolutionOfComponentResourcesQueue(): Map<Type$1<any>, Component>;
 declare function restoreComponentResolutionQueue(queue: Map<Type$1<any>, Component>): void;
+
+/**
+ * Internal implementation of the pending tasks service.
+ */
+declare class PendingTasksInternal implements OnDestroy {
+    private taskId;
+    private pendingTasks;
+    private destroyed;
+    private pendingTask;
+    get hasPendingTasks(): boolean;
+    /**
+     * In case the service is about to be destroyed, return a self-completing observable.
+     * Otherwise, return the observable that emits the current state of pending tasks.
+     */
+    get hasPendingTasksObservable(): Observable<boolean>;
+    add(): number;
+    has(taskId: number): boolean;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
 
 /**
  * InjectionToken to control root component bootstrap behavior.
