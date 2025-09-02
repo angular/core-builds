@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.1+sha-1e6d311
+ * @license Angular v21.0.0-next.1+sha-92e09ad
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -627,7 +627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.0.0-next.1+sha-1e6d311');
+const VERSION = /* @__PURE__ */ new Version('21.0.0-next.1+sha-92e09ad');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -1060,11 +1060,9 @@ class PlatformRef {
             }),
             scheduleInRootZone,
         });
-        const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
         const allAppProviders = [
             internalProvideZoneChangeDetection({
                 ngZoneFactory,
-                ignoreChangesOutsideZone,
             }),
             { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
             errorHandlerEnvironmentInitializer,
