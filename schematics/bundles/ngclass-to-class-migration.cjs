@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.1+sha-49d5de4
+ * @license Angular v21.0.0-next.1+sha-8738b81
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -511,7 +511,7 @@ function migrate(options) {
                 }
             },
             beforeUnitAnalysis: (tsconfigPath) => {
-                context.logger.info(`Scanning for component tags: ${tsconfigPath}...`);
+                context.logger.info(`Scanning for ngClass bindings: ${tsconfigPath}...`);
             },
             afterAllAnalyzed: () => {
                 context.logger.info(``);
