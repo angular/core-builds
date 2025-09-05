@@ -1,20 +1,20 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.2+sha-8401f89
+ * @license Angular v20.3.0-next.0+sha-11a54d1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-DZ17BWwk.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cj3oe5Ih.cjs');
 require('typescript');
 require('os');
-var apply_import_manager = require('./apply_import_manager-B3czqUhF.cjs');
-require('./index-B6-f9bil.cjs');
+var apply_import_manager = require('./apply_import_manager-C481F-Gt.cjs');
+require('./index-DXYtX_OC.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-D64fJzoa.cjs');
-var imports = require('./imports-26VeX8i-.cjs');
+var project_paths = require('./project_paths-FWT-fVvl.cjs');
+var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -22,14 +22,14 @@ require('module');
 require('url');
 require('@angular-devkit/schematics');
 
-/** Migration that moves the import of `ApplicationConfig` from `platform-browser` to `core`. */
-class ApplicationConfigCoreMigration extends project_paths.TsurgeFunnelMigration {
+/** Migration that moves the import of `DOCUMENT` from `core` to `common`. */
+class DocumentCoreMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const replacements = [];
         let importManager = null;
         for (const sourceFile of info.sourceFiles) {
-            const specifier = imports.getImportSpecifier(sourceFile, '@angular/platform-browser', 'ApplicationConfig');
-            if (!specifier) {
+            const specifier = imports.getImportSpecifier(sourceFile, '@angular/common', 'DOCUMENT');
+            if (specifier === null) {
                 continue;
             }
             importManager ??= new project_tsconfig_paths.ImportManager({
@@ -37,9 +37,9 @@ class ApplicationConfigCoreMigration extends project_paths.TsurgeFunnelMigration
                 generateUniqueIdentifier: () => null,
                 shouldUseSingleQuotes: () => true,
             });
-            importManager.removeImport(sourceFile, 'ApplicationConfig', '@angular/platform-browser');
+            importManager.removeImport(sourceFile, 'DOCUMENT', '@angular/common');
             importManager.addImport({
-                exportSymbolName: 'ApplicationConfig',
+                exportSymbolName: 'DOCUMENT',
                 exportModuleSpecifier: '@angular/core',
                 requestedFile: sourceFile,
                 unsafeAliasOverride: specifier.propertyName ? specifier.name.text : undefined,
@@ -87,7 +87,7 @@ function migrate() {
     return async (tree) => {
         await project_paths.runMigrationInDevkit({
             tree,
-            getMigration: () => new ApplicationConfigCoreMigration(),
+            getMigration: () => new DocumentCoreMigration(),
         });
     };
 }

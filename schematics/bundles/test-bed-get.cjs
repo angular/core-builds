@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.2+sha-8401f89
+ * @license Angular v20.3.0-next.0+sha-11a54d1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,12 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-require('./project_tsconfig_paths-DZ17BWwk.cjs');
-require('./index-B6-f9bil.cjs');
+require('./project_tsconfig_paths-Cj3oe5Ih.cjs');
+require('./index-DXYtX_OC.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-D64fJzoa.cjs');
-var imports = require('./imports-26VeX8i-.cjs');
+var project_paths = require('./project_paths-FWT-fVvl.cjs');
+var imports = require('./imports-CIX-JgAN.cjs');
 var symbol = require('./symbol-VPWguRxr.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -23,21 +23,22 @@ require('url');
 require('@angular-devkit/schematics');
 
 /** Name of the method being replaced. */
-const METHOD_NAME = 'lastSuccessfulNavigation';
-/** Migration that replaces `Router.lastSuccessfulNavigation` usages with `Router.lastSuccessfulNavigation()`. */
-class RouterLastSuccessfulNavigationMigration extends project_paths.TsurgeFunnelMigration {
+const METHOD_NAME = 'get';
+/** Migration that replaces `TestBed.get` usages with `TestBed.inject`. */
+class TestBedGetMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         const locations = [];
         for (const sourceFile of info.sourceFiles) {
-            const routerSpecifier = imports.getImportSpecifier(sourceFile, '@angular/router', 'Router');
-            if (routerSpecifier === null) {
+            const specifier = imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed');
+            if (specifier === null) {
                 continue;
             }
             const typeChecker = info.program.getTypeChecker();
             sourceFile.forEachChild(function walk(node) {
                 if (ts.isPropertyAccessExpression(node) &&
                     node.name.text === METHOD_NAME &&
-                    isRouterType(typeChecker, node.expression, routerSpecifier)) {
+                    ts.isIdentifier(node.expression) &&
+                    symbol.isReferenceToImport(typeChecker, node.expression, specifier)) {
                     locations.push({ file: project_paths.projectFile(sourceFile, info), position: node.name.getStart() });
                 }
                 else {
@@ -52,7 +53,7 @@ class RouterLastSuccessfulNavigationMigration extends project_paths.TsurgeFunnel
             return new project_paths.Replacement(file, new project_paths.TextUpdate({
                 position: position,
                 end: position + METHOD_NAME.length,
-                toInsert: 'lastSuccessfulNavigation()',
+                toInsert: 'inject',
             }));
         });
         return project_paths.confirmAsSerializable({ replacements });
@@ -77,23 +78,6 @@ class RouterLastSuccessfulNavigationMigration extends project_paths.TsurgeFunnel
         return project_paths.confirmAsSerializable({});
     }
 }
-/**
- * Checks if the given symbol represents a Router type.
- */
-function isRouterType(typeChecker, expression, routerSpecifier) {
-    const expressionType = typeChecker.getTypeAtLocation(expression);
-    const expressionSymbol = expressionType.getSymbol();
-    if (!expressionSymbol) {
-        return false;
-    }
-    const declarations = expressionSymbol.getDeclarations() ?? [];
-    for (const declaration of declarations) {
-        if (symbol.isReferenceToImport(typeChecker, declaration, routerSpecifier)) {
-            return true;
-        }
-    }
-    return declarations.some((decl) => decl === routerSpecifier);
-}
 
 /*!
  * @license
@@ -106,7 +90,7 @@ function migrate() {
     return async (tree) => {
         await project_paths.runMigrationInDevkit({
             tree,
-            getMigration: () => new RouterLastSuccessfulNavigationMigration(),
+            getMigration: () => new TestBedGetMigration(),
         });
     };
 }

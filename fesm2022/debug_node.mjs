@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.2+sha-8401f89
+ * @license Angular v20.3.0-next.0+sha-11a54d1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, getAnimationElementRemovalRegistry, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, setAnimationElementRemovalRegistry, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, ZONELESS_SCHEDULER_DISABLED, angularZoneInstanceIdProperty, NoopNgZone, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, getAnimationElementRemovalRegistry, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, setAnimationElementRemovalRegistry, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -3593,6 +3593,13 @@ const PLATFORM_ID = new InjectionToken(ngDevMode ? 'Platform ID' : '', {
     providedIn: 'platform',
     factory: () => 'unknown', // set a default platform name, when none set explicitly
 });
+/**
+ * A DI token that indicates the root directory of
+ * the application
+ * @publicApi
+ * @deprecated
+ */
+const PACKAGE_ROOT_URL = new InjectionToken(ngDevMode ? 'Application Packages Root URL' : '');
 // We keep this token here, rather than the animations package, so that modules that only care
 // about which animations module is loaded (e.g. the CDK) can retrieve it without having to
 // include extra dependencies. See #44970 for more context.
@@ -4889,12 +4896,6 @@ var ViewEncapsulation;
      * all the Component's styling.
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-    /**
-     * Similar to `ShadowDom`, but prevents any external styles from leaking into the
-     * component's ShadowRoot. This is useful when you want to ensure that the component's
-     * styles are completely isolated from the rest of the application, including global styles.
-     */
-    ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
@@ -7989,9 +7990,7 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
     const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
     // When using native Shadow DOM, do not clear host element to allow native slot
     // projection.
-    const preserveContent = preserveHostContent ||
-        encapsulation === ViewEncapsulation.ShadowDom ||
-        encapsulation === ViewEncapsulation.IsolatedShadowDom;
+    const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom;
     const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
     applyRootElementTransform(rootElement);
     return rootElement;
@@ -13522,7 +13521,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.2+sha-8401f89']
+        ? ['ng-version', '20.3.0-next.0+sha-11a54d1']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -16199,6 +16198,610 @@ var TracingAction;
  * Injection token for a `TracingService`, optionally provided.
  */
 const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
+
+const SCHEDULE_IN_ROOT_ZONE_DEFAULT = false;
+
+class EventEmitter_ extends Subject {
+    // tslint:disable-next-line:require-internal-with-underscore
+    __isAsync;
+    destroyRef = undefined;
+    pendingTasks = undefined;
+    constructor(isAsync = false) {
+        super();
+        this.__isAsync = isAsync;
+        // Attempt to retrieve a `DestroyRef` and `PendingTasks` optionally.
+        // For backwards compatibility reasons, this cannot be required.
+        if (isInInjectionContext()) {
+            // `DestroyRef` is optional because it is not available in all contexts.
+            // But it is useful to properly complete the `EventEmitter` if used with `outputToObservable`
+            // when the component/directive is destroyed. (See `outputToObservable` for more details.)
+            this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
+            this.pendingTasks = inject(PendingTasksInternal, { optional: true }) ?? undefined;
+        }
+    }
+    emit(value) {
+        const prevConsumer = setActiveConsumer(null);
+        try {
+            super.next(value);
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    subscribe(observerOrNext, error, complete) {
+        let nextFn = observerOrNext;
+        let errorFn = error || (() => null);
+        let completeFn = complete;
+        if (observerOrNext && typeof observerOrNext === 'object') {
+            const observer = observerOrNext;
+            nextFn = observer.next?.bind(observer);
+            errorFn = observer.error?.bind(observer);
+            completeFn = observer.complete?.bind(observer);
+        }
+        if (this.__isAsync) {
+            errorFn = this.wrapInTimeout(errorFn);
+            if (nextFn) {
+                nextFn = this.wrapInTimeout(nextFn);
+            }
+            if (completeFn) {
+                completeFn = this.wrapInTimeout(completeFn);
+            }
+        }
+        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
+        if (observerOrNext instanceof Subscription) {
+            observerOrNext.add(sink);
+        }
+        return sink;
+    }
+    wrapInTimeout(fn) {
+        return (value) => {
+            const taskId = this.pendingTasks?.add();
+            setTimeout(() => {
+                try {
+                    fn(value);
+                }
+                finally {
+                    if (taskId !== undefined) {
+                        this.pendingTasks?.remove(taskId);
+                    }
+                }
+            });
+        };
+    }
+}
+/**
+ * @publicApi
+ */
+const EventEmitter = EventEmitter_;
+
+/**
+ * Gets a scheduling function that runs the callback after the first of setTimeout and
+ * requestAnimationFrame resolves.
+ *
+ * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
+ * This ensures that the create and update passes of a change detection always happen
+ * in the same frame.
+ * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
+ * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
+ * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
+ * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
+ * prevent it from being used alone. First, it does not run in background tabs, which would
+ * prevent Angular from initializing an application when opened in a new tab (for example).
+ * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
+ * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
+ * are written with several updates and asserts in the form of "update; await stable; assert;".
+ * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
+ * interaction into a single change detection. Importantly, this reduces view tree traversals when
+ * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
+ * then be interleaves between each event.
+ *
+ * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
+ * best of both worlds.
+ *
+ * @returns a function to cancel the scheduled callback
+ */
+function scheduleCallbackWithRafRace(callback) {
+    let timeoutId;
+    let animationFrameId;
+    function cleanup() {
+        callback = noop;
+        try {
+            if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
+                cancelAnimationFrame(animationFrameId);
+            }
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+            }
+        }
+        catch {
+            // Clearing/canceling can fail in tests due to the timing of functions being patched and unpatched
+            // Just ignore the errors - we protect ourselves from this issue by also making the callback a no-op.
+        }
+    }
+    timeoutId = setTimeout(() => {
+        callback();
+        cleanup();
+    });
+    if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(() => {
+            callback();
+            cleanup();
+        });
+    }
+    return () => cleanup();
+}
+function scheduleCallbackWithMicrotask(callback) {
+    queueMicrotask(() => callback());
+    return () => {
+        callback = noop;
+    };
+}
+
+class AsyncStackTaggingZoneSpec {
+    createTask;
+    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
+        this.name = 'asyncStackTagging for ' + namePrefix;
+        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
+    }
+    // ZoneSpec implementation below.
+    name;
+    onScheduleTask(delegate, _current, target, task) {
+        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
+        return delegate.scheduleTask(target, task);
+    }
+    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
+        let ret;
+        if (task.consoleTask) {
+            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
+        }
+        else {
+            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
+        }
+        return ret;
+    }
+}
+
+const isAngularZoneProperty = 'isAngularZone';
+const angularZoneInstanceIdProperty = isAngularZoneProperty + '_ID';
+let ngZoneInstanceId = 0;
+/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```ts
+ * import {Component, NgZone} from '@angular/core';
+ *
+ * @Component({
+ *   selector: 'ng-zone-demo',
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     @if(progress >= 100) {
+ *        <p>Done processing {{label}} of Angular zone!</p>
+ *     }
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+class NgZone {
+    hasPendingMacrotasks = false;
+    hasPendingMicrotasks = false;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    isStable = true;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    onUnstable = new EventEmitter(false);
+    /**
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    onMicrotaskEmpty = new EventEmitter(false);
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    onStable = new EventEmitter(false);
+    /**
+     * Notifies that an error has been delivered.
+     */
+    onError = new EventEmitter(false);
+    constructor(options) {
+        const { enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, scheduleInRootZone = SCHEDULE_IN_ROOT_ZONE_DEFAULT, } = options;
+        if (typeof Zone == 'undefined') {
+            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
+        }
+        Zone.assertZonePatched();
+        const self = this;
+        self._nesting = 0;
+        self._outer = self._inner = Zone.current;
+        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
+        // where the async operation is scheduled. For more details, refer
+        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
+        // And we only import this AsyncStackTaggingZoneSpec in development mode,
+        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
+        if (ngDevMode) {
+            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
+        }
+        if (Zone['TaskTrackingZoneSpec']) {
+            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']());
+        }
+        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
+            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
+        }
+        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
+        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
+        self.shouldCoalesceEventChangeDetection =
+            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
+        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
+        self.callbackScheduled = false;
+        self.scheduleInRootZone = scheduleInRootZone;
+        forkInnerZoneWithAngularBehavior(self);
+    }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
+    static isInAngularZone() {
+        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
+        return typeof Zone !== 'undefined' && Zone.current.get(isAngularZoneProperty) === true;
+    }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
+    static assertInAngularZone() {
+        if (!NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
+        }
+    }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
+    static assertNotInAngularZone() {
+        if (NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
+        }
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    run(fn, applyThis, applyArgs) {
+        return this._inner.run(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask(fn, applyThis, applyArgs, name) {
+        const zone = this._inner;
+        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        try {
+            return zone.runTask(task, applyThis, applyArgs);
+        }
+        finally {
+            zone.cancelTask(task);
+        }
+    }
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded(fn, applyThis, applyArgs) {
+        return this._inner.runGuarded(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular(fn) {
+        return this._outer.run(fn);
+    }
+}
+const EMPTY_PAYLOAD = {};
+function checkStable(zone) {
+    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+    // re-entry. The case is:
+    //
+    // @Component({...})
+    // export class AppComponent {
+    // constructor(private ngZone: NgZone) {
+    //   this.ngZone.onStable.subscribe(() => {
+    //     this.ngZone.run(() => console.log('stable'););
+    //   });
+    // }
+    //
+    // The onStable subscriber run another function inside ngZone
+    // which causes `checkStable()` re-entry.
+    // But this fix causes some issues in g3, so this fix will be
+    // launched in another PR.
+    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        try {
+            zone._nesting++;
+            zone.onMicrotaskEmpty.emit(null);
+        }
+        finally {
+            zone._nesting--;
+            if (!zone.hasPendingMicrotasks) {
+                try {
+                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                }
+                finally {
+                    zone.isStable = true;
+                }
+            }
+        }
+    }
+}
+function delayChangeDetectionForEvents(zone) {
+    /**
+     * We also need to check _nesting here
+     * Consider the following case with shouldCoalesceRunChangeDetection = true
+     *
+     * ngZone.run(() => {});
+     * ngZone.run(() => {});
+     *
+     * We want the two `ngZone.run()` only trigger one change detection
+     * when shouldCoalesceRunChangeDetection is true.
+     * And because in this case, change detection run in async way(requestAnimationFrame),
+     * so we also need to check the _nesting here to prevent multiple
+     * change detections.
+     */
+    if (zone.isCheckStableRunning || zone.callbackScheduled) {
+        return;
+    }
+    zone.callbackScheduled = true;
+    function scheduleCheckStable() {
+        scheduleCallbackWithRafRace(() => {
+            zone.callbackScheduled = false;
+            updateMicroTaskStatus(zone);
+            zone.isCheckStableRunning = true;
+            checkStable(zone);
+            zone.isCheckStableRunning = false;
+        });
+    }
+    if (zone.scheduleInRootZone) {
+        Zone.root.run(() => {
+            scheduleCheckStable();
+        });
+    }
+    else {
+        zone._outer.run(() => {
+            scheduleCheckStable();
+        });
+    }
+    updateMicroTaskStatus(zone);
+}
+function forkInnerZoneWithAngularBehavior(zone) {
+    const delayChangeDetectionForEventsDelegate = () => {
+        delayChangeDetectionForEvents(zone);
+    };
+    const instanceId = ngZoneInstanceId++;
+    zone._inner = zone._inner.fork({
+        name: 'angular',
+        properties: {
+            [isAngularZoneProperty]: true,
+            [angularZoneInstanceIdProperty]: instanceId,
+            [angularZoneInstanceIdProperty + instanceId]: true,
+        },
+        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+            // Prevent triggering change detection when the flag is detected.
+            if (shouldBeIgnoredByZone(applyArgs)) {
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            try {
+                onEnter(zone);
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            finally {
+                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
+                    zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+            try {
+                onEnter(zone);
+                return delegate.invoke(target, callback, applyThis, applyArgs, source);
+            }
+            finally {
+                if (zone.shouldCoalesceRunChangeDetection &&
+                    // Do not delay change detection when the task is the scheduler's tick.
+                    // We need to synchronously trigger the stability logic so that the
+                    // zone-based scheduler can prevent a duplicate ApplicationRef.tick
+                    // by first checking if the scheduler tick is running. This does seem a bit roundabout,
+                    // but we _do_ still want to trigger all the correct events when we exit the zone.run
+                    // (`onMicrotaskEmpty` and `onStable` _should_ emit; developers can have code which
+                    // relies on these events happening after change detection runs).
+                    // Note: `zone.callbackScheduled` is already in delayChangeDetectionForEventsDelegate
+                    // but is added here as well to prevent reads of applyArgs when not necessary
+                    !zone.callbackScheduled &&
+                    !isSchedulerTick(applyArgs)) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onHasTask: (delegate, current, target, hasTaskState) => {
+            delegate.hasTask(target, hasTaskState);
+            if (current === target) {
+                // We are only interested in hasTask events which originate from our zone
+                // (A child hasTask event is not interesting to us)
+                if (hasTaskState.change == 'microTask') {
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
+                    checkStable(zone);
+                }
+                else if (hasTaskState.change == 'macroTask') {
+                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
+                }
+            }
+        },
+        onHandleError: (delegate, current, target, error) => {
+            delegate.handleError(target, error);
+            zone.runOutsideAngular(() => zone.onError.emit(error));
+            return false;
+        },
+    });
+}
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
+            zone.callbackScheduled === true)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
+}
+function onEnter(zone) {
+    zone._nesting++;
+    if (zone.isStable) {
+        zone.isStable = false;
+        zone.onUnstable.emit(null);
+    }
+}
+function onLeave(zone) {
+    zone._nesting--;
+    checkStable(zone);
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+class NoopNgZone {
+    hasPendingMicrotasks = false;
+    hasPendingMacrotasks = false;
+    isStable = true;
+    onUnstable = new EventEmitter();
+    onMicrotaskEmpty = new EventEmitter();
+    onStable = new EventEmitter();
+    onError = new EventEmitter();
+    run(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runGuarded(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runOutsideAngular(fn) {
+        return fn();
+    }
+    runTask(fn, applyThis, applyArgs, name) {
+        return fn.apply(applyThis, applyArgs);
+    }
+}
+function shouldBeIgnoredByZone(applyArgs) {
+    return hasApplyArgsData(applyArgs, '__ignore_ng_zone__');
+}
+function isSchedulerTick(applyArgs) {
+    return hasApplyArgsData(applyArgs, '__scheduler_tick__');
+}
+function hasApplyArgsData(applyArgs, key) {
+    if (!Array.isArray(applyArgs)) {
+        return false;
+    }
+    // We should only ever get 1 arg passed through to invokeTask.
+    // Short circuit here incase that behavior changes.
+    if (applyArgs.length !== 1) {
+        return false;
+    }
+    return applyArgs[0]?.data?.[key] === true;
+}
+function getNgZone(ngZoneToUse = 'zone.js', options) {
+    if (ngZoneToUse === 'noop') {
+        return new NoopNgZone();
+    }
+    if (ngZoneToUse === 'zone.js') {
+        return new NgZone(options);
+    }
+    return ngZoneToUse;
+}
 
 class AfterRenderManager {
     impl = null;
@@ -19354,6 +19957,20 @@ function publishSignalConfiguration() {
 }
 function isBoundToModule(cf) {
     return cf.isBoundToModule;
+}
+/**
+ * A token for third-party components that can register themselves with NgProbe.
+ *
+ * @deprecated
+ * @publicApi
+ */
+class NgProbeToken {
+    name;
+    token;
+    constructor(name, token) {
+        this.name = name;
+        this.token = token;
+    }
 }
 /** Maximum number of times ApplicationRef will refresh all attached views in a single tick. */
 const MAXIMUM_REFRESH_RERUNS = 10;
@@ -28519,8 +29136,7 @@ function recreateLView(importMeta, id, newDef, oldDef, lView) {
         // shadow root. The browser will throw if we attempt to attach another one and there's no way
         // to detach it. Our only option is to make a clone only of the root node, replace the node
         // with the clone and use it for the newly-created LView.
-        if (oldDef.encapsulation === ViewEncapsulation.ShadowDom ||
-            oldDef.encapsulation === ViewEncapsulation.IsolatedShadowDom) {
+        if (oldDef.encapsulation === ViewEncapsulation.ShadowDom) {
             const newHost = host.cloneNode(false);
             host.replaceWith(newHost);
             host = newHost;
@@ -29962,7 +30578,7 @@ class NgZoneChangeDetectionScheduler {
  * with the bootstrapModule API.
  */
 const PROVIDED_NG_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'provideZoneChangeDetection token' : '', { factory: () => false });
-function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone, }) {
+function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, scheduleInRootZone, }) {
     ngZoneFactory ??= () => new NgZone({ ...getNgZoneOptions(), scheduleInRootZone });
     return [
         { provide: NgZone, useFactory: ngZoneFactory },
@@ -29991,9 +30607,33 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone,
                 };
             },
         },
+        // Always disable scheduler whenever explicitly disabled, even if another place called
+        // `provideZoneChangeDetection` without the 'ignore' option.
+        ignoreChangesOutsideZone === true ? { provide: ZONELESS_SCHEDULER_DISABLED, useValue: true } : [],
         {
             provide: SCHEDULE_IN_ROOT_ZONE,
             useValue: scheduleInRootZone ?? SCHEDULE_IN_ROOT_ZONE_DEFAULT,
+        },
+        {
+            provide: INTERNAL_APPLICATION_ERROR_HANDLER,
+            useFactory: () => {
+                const zone = inject(NgZone);
+                const injector = inject(EnvironmentInjector);
+                let userErrorHandler;
+                return (e) => {
+                    zone.runOutsideAngular(() => {
+                        if (injector.destroyed && !userErrorHandler) {
+                            setTimeout(() => {
+                                throw e;
+                            });
+                        }
+                        else {
+                            userErrorHandler ??= injector.get(ErrorHandler);
+                            userErrorHandler.handleError(e);
+                        }
+                    });
+                };
+            },
         },
     ];
 }
@@ -30018,6 +30658,7 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone,
  * @see {@link NgZoneOptions}
  */
 function provideZoneChangeDetection(options) {
+    const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
     const scheduleInRootZone = options?.scheduleInRootZone;
     const zoneProviders = internalProvideZoneChangeDetection({
         ngZoneFactory: () => {
@@ -30028,6 +30669,7 @@ function provideZoneChangeDetection(options) {
             }
             return new NgZone(ngZoneOptions);
         },
+        ignoreChangesOutsideZone,
         scheduleInRootZone,
     });
     return makeEnvironmentProviders([
@@ -31185,5 +31827,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, ElementRegistry, EnvironmentNgModuleRefAdapter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵAnimationsFeature, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, ElementRegistry, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵAnimationsFeature, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=debug_node.mjs.map

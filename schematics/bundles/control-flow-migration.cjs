@@ -1,17 +1,17 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.2+sha-8401f89
+ * @license Angular v20.3.0-next.0+sha-11a54d1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var p = require('path');
-var compiler_host = require('./compiler_host-B9qvCnmC.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-DZ17BWwk.cjs');
+var path = require('node:path');
+var compiler_host = require('./compiler_host-BBQ2scSi.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-Cj3oe5Ih.cjs');
 var ts = require('typescript');
-var parse_html = require('./parse_html-C8TYlOyu.cjs');
+var p = require('path');
 require('os');
 require('fs');
 require('module');
@@ -580,8 +580,37 @@ function getNestedCount(etm, aggregator) {
         return getNestedCount(etm, aggregator);
     }
 }
+/**
+ * parses the template string into the Html AST
+ */
+function parseTemplate(template) {
+    let parsed;
+    try {
+        // Note: we use the HtmlParser here, instead of the `parseTemplate` function, because the
+        // latter returns an Ivy AST, not an HTML AST. The HTML AST has the advantage of preserving
+        // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
+        // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
+        // easily get the text-only ranges without having to reconstruct the original text.
+        parsed = new project_tsconfig_paths.HtmlParser().parse(template, '', {
+            // Allows for ICUs to be parsed.
+            tokenizeExpansionForms: true,
+            // Explicitly disable blocks so that their characters are treated as plain text.
+            tokenizeBlocks: true,
+            preserveLineEndings: true,
+        });
+        // Don't migrate invalid templates.
+        if (parsed.errors && parsed.errors.length > 0) {
+            const errors = parsed.errors.map((e) => ({ type: 'parse', error: e }));
+            return { tree: undefined, errors };
+        }
+    }
+    catch (e) {
+        return { tree: undefined, errors: [{ type: 'parse', error: e }] };
+    }
+    return { tree: parsed, errors: [] };
+}
 function validateMigratedTemplate(migrated, fileName) {
-    const parsed = parse_html.parseTemplate(migrated);
+    const parsed = parseTemplate(migrated);
     let errors = [];
     if (parsed.errors.length > 0) {
         errors.push({
@@ -677,7 +706,7 @@ function reduceNestingOffset(el, nestLevel, offset, postOffsets) {
  * Returns null if the migration failed (e.g. there was a syntax error).
  */
 function getTemplates(template) {
-    const parsed = parse_html.parseTemplate(template);
+    const parsed = parseTemplate(template);
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
         project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
@@ -817,7 +846,7 @@ function getViewChildOrViewChildrenNames(sourceFile) {
     return names;
 }
 function getTemplateReferences(template) {
-    const parsed = parse_html.parseTemplate(template);
+    const parsed = parseTemplate(template);
     if (parsed.tree === undefined) {
         return [];
     }
@@ -852,7 +881,7 @@ function replaceRemainingPlaceholders(template) {
  * determines if the CommonModule can be safely removed from imports
  */
 function canRemoveCommonModule(template) {
-    const parsed = parse_html.parseTemplate(template);
+    const parsed = parseTemplate(template);
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
@@ -976,7 +1005,7 @@ function getMainBlock(etm, tmpl, offset) {
     return { start, middle, end };
 }
 function generateI18nMarkers(tmpl) {
-    let parsed = parse_html.parseTemplate(tmpl);
+    let parsed = parseTemplate(tmpl);
     if (parsed.tree !== undefined) {
         const visitor = new i18nCollector();
         project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
@@ -1175,7 +1204,7 @@ const cases = [boundcase, switchcase, nakedcase, switchdefault, nakeddefault];
  */
 function migrateCase(template) {
     let errors = [];
-    let parsed = parse_html.parseTemplate(template);
+    let parsed = parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1272,7 +1301,7 @@ const stringPairs = new Map([
  */
 function migrateFor(template) {
     let errors = [];
-    let parsed = parse_html.parseTemplate(template);
+    let parsed = parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1477,7 +1506,7 @@ const ifs = [ngif, nakedngif, boundngif];
  */
 function migrateIf(template) {
     let errors = [];
-    let parsed = parse_html.parseTemplate(template);
+    let parsed = parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1670,7 +1699,7 @@ const switches = [ngswitch];
  */
 function migrateSwitch(template) {
     let errors = [];
-    let parsed = parse_html.parseTemplate(template);
+    let parsed = parseTemplate(template);
     if (parsed.tree === undefined) {
         return { migrated: template, errors, changed: false };
     }
@@ -1815,7 +1844,7 @@ function migrate(options) {
         const basePath = process.cwd();
         let pathToMigrate;
         if (options.path) {
-            pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+            pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
             if (pathToMigrate.trim() !== '') {
                 allPaths.push(pathToMigrate);
             }
@@ -1860,10 +1889,10 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     // sort files with .html files first
     // this ensures class files know if it's safe to remove CommonModule
     const paths = sortFilePaths([...analysis.keys()]);
-    for (const path of paths) {
-        const file = analysis.get(path);
+    for (const path$1 of paths) {
+        const file = analysis.get(path$1);
         const ranges = file.getSortedRanges();
-        const relativePath = p.relative(basePath, path);
+        const relativePath = path.relative(basePath, path$1);
         const content = tree.readText(relativePath);
         const update = tree.beginUpdate(relativePath);
         for (const { start, end, node, type } of ranges) {
@@ -1875,7 +1904,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
                 update.insertLeft(start, migrated);
             }
             if (errors.length > 0) {
-                migrateErrors.set(path, errors);
+                migrateErrors.set(path$1, errors);
             }
         }
         tree.commitUpdate(update);

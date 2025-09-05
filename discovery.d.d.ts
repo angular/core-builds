@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.2+sha-8401f89
+ * @license Angular v20.3.0-next.0+sha-11a54d1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -61,8 +61,6 @@ declare abstract class ChangeDetectionScheduler {
 }
 /** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
 declare const ZONELESS_ENABLED: InjectionToken<boolean>;
-/** Token used to indicate `provideZonelessChangeDetection` was used. */
-declare const PROVIDED_ZONELESS: InjectionToken<boolean>;
 
 /**
  * @fileoverview
@@ -1970,6 +1968,12 @@ declare function ɵɵdefineInjectable<T>(opts: {
     factory: () => T;
 }): unknown;
 /**
+ * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
+ * code should now use ɵɵdefineInjectable instead.
+ * @publicApi
+ */
+declare const defineInjectable: typeof ɵɵdefineInjectable;
+/**
  * Construct an `InjectorDef` which configures an injector.
  *
  * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
@@ -2169,13 +2173,7 @@ declare enum ViewEncapsulation {
      * a ShadowRoot for the component's host element which is then used to encapsulate
      * all the Component's styling.
      */
-    ShadowDom = 3,
-    /**
-     * Similar to `ShadowDom`, but prevents any external styles from leaking into the
-     * component's ShadowRoot. This is useful when you want to ensure that the component's
-     * styles are completely isolated from the rest of the application, including global styles.
-     */
-    IsolatedShadowDom = 4
+    ShadowDom = 3
 }
 
 /**
@@ -6395,6 +6393,17 @@ type CtorDependency = {
 declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
 declare function isBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 /**
+ * A token for third-party components that can register themselves with NgProbe.
+ *
+ * @deprecated
+ * @publicApi
+ */
+declare class NgProbeToken {
+    name: string;
+    token: any;
+    constructor(name: string, token: any);
+}
+/**
  * Provides additional options to the bootstrapping process.
  *
  * @publicApi
@@ -6455,6 +6464,24 @@ interface BootstrapOptions {
      * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
      */
     ngZoneRunCoalescing?: boolean;
+    /**
+     * When false, change detection is scheduled when Angular receives
+     * a clear indication that templates need to be refreshed. This includes:
+     *
+     * - calling `ChangeDetectorRef.markForCheck`
+     * - calling `ComponentRef.setInput`
+     * - updating a signal that is read in a template
+     * - attaching a view that is marked dirty
+     * - removing a view
+     * - registering a render hook (templates are only refreshed if render hooks do one of the above)
+     *
+     * @deprecated This option was introduced out of caution as a way for developers to opt out of the
+     *    new behavior in v18 which schedule change detection for the above events when they occur
+     *    outside the Zone. After monitoring the results post-release, we have determined that this
+     *    feature is working as desired and do not believe it should ever be disabled by setting
+     *    this option to `true`.
+     */
+    ignoreChangesOutsideZone?: boolean;
 }
 /**
  * A reference to an Angular application running on a page.
@@ -7361,5 +7388,5 @@ interface DeferBlockDetails extends DehydratedDeferBlock {
  */
 declare function getDeferBlocks(lView: LView, deferBlocks: DeferBlockDetails[]): void;
 
-export { APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, InputFlags, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryFlags, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
+export { APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, InputFlags, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, NoopNgZone, NotificationSource, Output, Pipe, PlatformRef, QueryFlags, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, defineInjectable, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
