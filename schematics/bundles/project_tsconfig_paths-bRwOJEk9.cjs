@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.2+sha-8ab078a
+ * @license Angular v21.0.0-next.2+sha-8e8a3fe
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32840,7 +32840,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.2+sha-8ab078a');
+new Version('21.0.0-next.2+sha-8e8a3fe');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33876,7 +33876,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DZ17BWwk.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-bRwOJEk9.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -50881,6 +50881,7 @@ exports.INPUT_INITIALIZER_FN = INPUT_INITIALIZER_FN;
 exports.Icu = Icu;
 exports.IcuPlaceholder = IcuPlaceholder;
 exports.Identifiers = Identifiers;
+exports.IfBlock = IfBlock;
 exports.ImplicitReceiver = ImplicitReceiver;
 exports.ImportManager = ImportManager;
 exports.Interpolation = Interpolation$1;
@@ -50927,6 +50928,7 @@ exports.SafePropertyRead = SafePropertyRead;
 exports.SelectorMatcher = SelectorMatcher;
 exports.SelectorlessMatcher = SelectorlessMatcher;
 exports.Serializer = Serializer;
+exports.SwitchBlock = SwitchBlock;
 exports.Tag = Tag;
 exports.TagPlaceholder = TagPlaceholder;
 exports.Template = Template;
