@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v20.2.4+sha-b3d102b
+ * @license Angular v20.2.4+sha-35a1d5d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-Cj3oe5Ih.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-RAvhwg8f.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-Cwnr5FLK.cjs');
-var project_paths = require('./project_paths-FWT-fVvl.cjs');
+var index = require('./index-CKtFJ_6n.cjs');
+var project_paths = require('./project_paths-CGqaSutM.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-DXYtX_OC.cjs');
+require('./index-CLpTl6rd.cjs');
 require('path');
 require('node:path');
 var assert$1 = require('node:assert');
