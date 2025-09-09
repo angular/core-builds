@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.14+sha-6f6db99
+ * @license Angular v19.2.14+sha-70d0639
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,8 +9,9 @@
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var compiler_host = require('./compiler_host-C55Cczah.cjs');
+var change_tracker = require('./change_tracker-BfH3nBIf.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
 var checker = require('./checker-BwV9MjSQ.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
@@ -156,7 +157,7 @@ function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
     const printer = ts.createPrinter();
-    const tracker = new compiler_host.ChangeTracker(printer);
+    const tracker = new change_tracker.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
     if (routeArraysToMigrate.length === 0) {
         return { pendingChanges: [], skippedRoutes: [], migratedRoutes: [] };
@@ -347,7 +348,7 @@ function migrate(options) {
         const basePath = process.cwd();
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
         if (!buildPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the route lazy loading migration.');
         }

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.14+sha-6f6db99
+ * @license Angular v19.2.14+sha-70d0639
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,8 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-C55Cczah.cjs');
+var change_tracker = require('./change_tracker-BfH3nBIf.cjs');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var checker = require('./checker-BwV9MjSQ.cjs');
 var ts = require('typescript');
 require('os');
@@ -1839,7 +1840,7 @@ function migrateTemplate(template, templateType, node, file, format = true, anal
 function migrate(options) {
     return async (tree, context) => {
         const basePath = process.cwd();
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
         let allPaths = [];
         if (pathToMigrate.trim() !== '') {
             allPaths.push(pathToMigrate);

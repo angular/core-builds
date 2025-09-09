@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.14+sha-6f6db99
+ * @license Angular v19.2.14+sha-70d0639
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,8 +9,9 @@
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
 var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-var compiler_host = require('./compiler_host-C55Cczah.cjs');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
+var change_tracker = require('./change_tracker-BfH3nBIf.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
 require('@angular-devkit/core');
 require('./checker-BwV9MjSQ.cjs');
@@ -24,7 +25,7 @@ const DIRECTIVE = 'Directive';
 const COMPONENT = 'Component';
 const PIPE = 'Pipe';
 function migrateFile(sourceFile, rewriteFn) {
-    const changeTracker = new compiler_host.ChangeTracker(ts.createPrinter());
+    const changeTracker = new change_tracker.ChangeTracker(ts.createPrinter());
     // Check if there are any imports of the `AfterRenderPhase` enum.
     const coreImports = imports.getNamedImports(sourceFile, CORE);
     if (!coreImports) {

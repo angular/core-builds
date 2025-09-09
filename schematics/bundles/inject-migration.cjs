@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.14+sha-6f6db99
+ * @license Angular v19.2.14+sha-70d0639
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,8 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-C55Cczah.cjs');
+var change_tracker = require('./change_tracker-BfH3nBIf.cjs');
+var compiler_host = require('./compiler_host-CAfDJO3W.cjs');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-B5HCqr20.cjs');
 var imports = require('./imports-CIX-JgAN.cjs');
@@ -679,7 +680,7 @@ function migrateFile(sourceFile, options) {
         return [];
     }
     const printer = ts.createPrinter();
-    const tracker = new compiler_host.ChangeTracker(printer);
+    const tracker = new change_tracker.ChangeTracker(printer);
     analysis.classes.forEach(({ node, constructor, superCall }) => {
         const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
         const prependToClass = [];
@@ -1236,7 +1237,7 @@ function replaceParameterReferencesInInitializer(initializer, constructor, local
 function migrate(options) {
     return async (tree) => {
         const basePath = process.cwd();
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = change_tracker.normalizePath(p.join(basePath, options.path));
         let allPaths = [];
         if (pathToMigrate.trim() !== '') {
             allPaths.push(pathToMigrate);
