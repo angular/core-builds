@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.2+sha-3dc5056
+ * @license Angular v21.0.0-next.2+sha-28926ba
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -627,7 +627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.0.0-next.2+sha-3dc5056');
+const VERSION = /* @__PURE__ */ new Version('21.0.0-next.2+sha-28926ba');
 
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
@@ -953,8 +953,8 @@ function bootstrap(config) {
                 // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
                 const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
                 setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                const enableRootComponentBoostrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
-                if (!enableRootComponentBoostrap) {
+                const enableRootComponentbootstrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
+                if (!enableRootComponentbootstrap) {
                     if (isApplicationBootstrapConfig(config)) {
                         return envInjector.get(ApplicationRef);
                     }
@@ -982,8 +982,8 @@ function bootstrap(config) {
     });
 }
 /**
- * Having a separate symbol for the module boostrap implementation allows us to
- * tree shake the module based boostrap implementation in standalone apps.
+ * Having a separate symbol for the module bootstrap implementation allows us to
+ * tree shake the module based bootstrap implementation in standalone apps.
  */
 let moduleBootstrapImpl;
 /**
@@ -1142,23 +1142,20 @@ class PlatformRef {
 
 let _platformInjector = null;
 /**
- * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
- * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
- */
-const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken(ngDevMode ? 'AllowMultipleToken' : '');
-/**
  * Creates a platform.
  * Platforms must be created on launch using this function.
  *
  * @publicApi
  */
 function createPlatform(injector) {
-    if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+    if (getPlatform()) {
         throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, ngDevMode && 'There can be only one platform. Destroy the previous one to create a new one.');
     }
     publishDefaultGlobalUtils();
     publishSignalConfiguration();
-    _platformInjector = injector;
+    // During SSR, using this setting and using an injector from the global can cause the
+    // injector to be used for a different requjest due to concurrency.
+    _platformInjector = typeof ngServerMode === 'undefined' || !ngServerMode ? injector : null;
     const platform = injector.get(PlatformRef);
     runPlatformInitializers(injector);
     return platform;
@@ -1179,20 +1176,17 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
     const marker = new InjectionToken(desc);
     return (extraProviders = []) => {
         let platform = getPlatform();
-        if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+        if (!platform) {
             const platformProviders = [
                 ...providers,
                 ...extraProviders,
                 { provide: marker, useValue: true },
             ];
-            if (parentPlatformFactory) {
-                parentPlatformFactory(platformProviders);
-            }
-            else {
-                createPlatform(createPlatformInjector(platformProviders, desc));
-            }
+            platform =
+                parentPlatformFactory?.(platformProviders) ??
+                    createPlatform(createPlatformInjector(platformProviders, desc));
         }
-        return assertPlatform(marker);
+        return typeof ngServerMode !== 'undefined' && ngServerMode ? platform : assertPlatform(marker);
     };
 }
 /**
@@ -1226,16 +1220,22 @@ function assertPlatform(requiredToken) {
     return platform;
 }
 /**
- * Returns the current platform.
+ * Returns the current platform in the browser environment. In the server environment,
+ * returns `null`. If you need access to the platform information, inject `PlatformRef` in your application.
  *
  * @publicApi
  */
 function getPlatform() {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return null;
+    }
     return _platformInjector?.get(PlatformRef) ?? null;
 }
 /**
  * Destroys the current Angular platform and all Angular applications on the page.
  * Destroys all modules and listeners registered with the platform.
+ *
+ * This function should not be used in a server environment, as it will be a no-op.
  *
  * @publicApi
  */
@@ -1255,7 +1255,11 @@ function createOrReusePlatformInjector(providers = []) {
     publishDefaultGlobalUtils();
     // Otherwise, setup a new platform injector and run platform initializers.
     const injector = createPlatformInjector(providers);
-    _platformInjector = injector;
+    // During SSR, using this setting and using an injector from the global can cause the
+    // injector to be used for a different request due to concurrency.
+    if (typeof ngServerMode === 'undefined' || !ngServerMode) {
+        _platformInjector = injector;
+    }
     publishSignalConfiguration();
     runPlatformInitializers(injector);
     return injector;
@@ -2630,13 +2634,18 @@ class ApplicationModule {
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
 function internalCreateApplication(config) {
+    const { rootComponent, appProviders, platformProviders, platformRef } = config;
     profiler(8 /* ProfilerEvent.BootstrapApplicationStart */);
+    if (typeof ngServerMode !== 'undefined' && ngServerMode && !platformRef) {
+        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode &&
+            'Missing Platform: This may be due to using `bootstrapApplication` on the server without passing a `BootstrapContext`. ' +
+                'Please make sure that `bootstrapApplication` is called with a `context` argument.');
+    }
     try {
-        const { rootComponent, appProviders, platformProviders } = config;
+        const platformInjector = platformRef?.injector ?? createOrReusePlatformInjector(platformProviders);
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
             assertStandaloneComponentType(rootComponent);
         }
-        const platformInjector = createOrReusePlatformInjector(platformProviders);
         // Create root application injector based on a set of providers configured at the platform
         // bootstrap level as well as providers passed to the bootstrap call by a user.
         const allAppProviders = [
@@ -4536,5 +4545,5 @@ const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || n
     factory: () => null,
 });
 
-export { APP_BOOTSTRAP_LISTENER, APP_ID, ApplicationInitStatus, ApplicationModule, ApplicationRef, COMPILER_OPTIONS, ChangeDetectorRef, ContentChild, ContentChildren, DefaultIterableDiffer, DestroyRef, ENVIRONMENT_INITIALIZER, EmbeddedViewRef, ErrorHandler, HOST_TAG_NAME, HostAttributeToken, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, NgModule, NgZone, OutputEmitterRef, PLATFORM_INITIALIZER, PlatformRef, Query, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, TransferState, VERSION, Version, ViewChild, ViewChildren, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, contentChild, contentChildren, createComponent, createPlatform, createPlatformFactory, destroyPlatform, enableProdMode, getModuleFactory, getNgModuleById, getPlatform, inject, input, isDevMode, makeEnvironmentProviders, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideCheckNoChangesConfig, provideEnvironmentInitializer, providePlatformInitializer, reflectComponentType, runInInjectionContext, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, IMAGE_CONFIG as ɵIMAGE_CONFIG, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, PendingTasksInternal as ɵPendingTasksInternal, ComponentFactory as ɵRender3ComponentFactory, RuntimeError as ɵRuntimeError, SIGNAL as ɵSIGNAL, TracingService as ɵTracingService, ViewRef$1 as ɵViewRef, annotateForHydration as ɵannotateForHydration, ɵassertType, compileNgModuleFactory as ɵcompileNgModuleFactory, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, formatRuntimeError as ɵformatRuntimeError, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDocument as ɵgetDocument, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isPromise as ɵisPromise, performanceMarkFeature as ɵperformanceMarkFeature, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, stringify as ɵstringify, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, FactoryTarget as ɵɵFactoryTarget, __defineInjectable as ɵɵdefineInjectable, __defineInjector as ɵɵdefineInjector, __defineNgModule as ɵɵdefineNgModule, __inject as ɵɵinject, __injectAttribute as ɵɵinjectAttribute, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe };
+export { APP_BOOTSTRAP_LISTENER, APP_ID, ApplicationInitStatus, ApplicationModule, ApplicationRef, COMPILER_OPTIONS, ChangeDetectorRef, ContentChild, ContentChildren, DefaultIterableDiffer, DestroyRef, ENVIRONMENT_INITIALIZER, EmbeddedViewRef, ErrorHandler, HOST_TAG_NAME, HostAttributeToken, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, NgModule, NgZone, OutputEmitterRef, PLATFORM_INITIALIZER, PlatformRef, Query, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, TransferState, VERSION, Version, ViewChild, ViewChildren, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, contentChild, contentChildren, createComponent, createPlatform, createPlatformFactory, destroyPlatform, enableProdMode, getModuleFactory, getNgModuleById, getPlatform, inject, input, isDevMode, makeEnvironmentProviders, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideCheckNoChangesConfig, provideEnvironmentInitializer, providePlatformInitializer, reflectComponentType, runInInjectionContext, viewChild, viewChildren, AfterRenderManager as ɵAfterRenderManager, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, IMAGE_CONFIG as ɵIMAGE_CONFIG, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, PendingTasksInternal as ɵPendingTasksInternal, ComponentFactory as ɵRender3ComponentFactory, RuntimeError as ɵRuntimeError, SIGNAL as ɵSIGNAL, TracingService as ɵTracingService, ViewRef$1 as ɵViewRef, annotateForHydration as ɵannotateForHydration, ɵassertType, compileNgModuleFactory as ɵcompileNgModuleFactory, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, formatRuntimeError as ɵformatRuntimeError, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDocument as ɵgetDocument, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isPromise as ɵisPromise, performanceMarkFeature as ɵperformanceMarkFeature, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, stringify as ɵstringify, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, FactoryTarget as ɵɵFactoryTarget, __defineInjectable as ɵɵdefineInjectable, __defineInjector as ɵɵdefineInjector, __defineNgModule as ɵɵdefineNgModule, __inject as ɵɵinject, __injectAttribute as ɵɵinjectAttribute, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe };
 //# sourceMappingURL=core.mjs.map
