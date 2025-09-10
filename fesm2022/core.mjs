@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.13+sha-32512de
+ * @license Angular v18.2.13+sha-08f01ac
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16940,7 +16940,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.13+sha-32512de']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.13+sha-08f01ac']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31056,7 +31056,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.13+sha-32512de');
+const VERSION = new Version('18.2.13+sha-08f01ac');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -34225,12 +34225,15 @@ const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken(ngDevMode ? 'AllowMultipleTo
  * @publicApi
  */
 function createPlatform(injector) {
-    if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+    if (getPlatform()) {
         throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, ngDevMode && 'There can be only one platform. Destroy the previous one to create a new one.');
     }
     publishDefaultGlobalUtils();
     publishSignalConfiguration();
-    _platformInjector = injector;
+    const isServer = injector.get(ALLOW_MULTIPLE_PLATFORMS, false);
+    // During SSR, using this setting and using an injector from the global can cause the
+    // injector to be used for a different requjest due to concurrency.
+    _platformInjector = !isServer ? injector : null;
     const platform = injector.get(PlatformRef);
     runPlatformInitializers(injector);
     return platform;
@@ -34257,14 +34260,12 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
                 ...extraProviders,
                 { provide: marker, useValue: true },
             ];
-            if (parentPlatformFactory) {
-                parentPlatformFactory(platformProviders);
-            }
-            else {
-                createPlatform(createPlatformInjector(platformProviders, desc));
-            }
+            platform =
+                parentPlatformFactory?.(platformProviders) ??
+                    createPlatform(createPlatformInjector(platformProviders, desc));
         }
-        return assertPlatform(marker);
+        const isServer = platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false);
+        return isServer ? platform : assertPlatform(marker);
     };
 }
 /**
@@ -34298,16 +34299,23 @@ function assertPlatform(requiredToken) {
     return platform;
 }
 /**
- * Returns the current platform.
+ * Returns the current platform in the browser environment. In the server environment,
+ * returns `null`. If you need access to the platform information, inject `PlatformRef` in your application.
  *
  * @publicApi
  */
 function getPlatform() {
+    const isServer = _platformInjector && _platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false);
+    if (isServer) {
+        return null;
+    }
     return _platformInjector?.get(PlatformRef) ?? null;
 }
 /**
  * Destroys the current Angular platform and all Angular applications on the page.
  * Destroys all modules and listeners registered with the platform.
+ *
+ * This function should not be used in a server environment, as it will be a no-op.
  *
  * @publicApi
  */
@@ -34327,7 +34335,12 @@ function createOrReusePlatformInjector(providers = []) {
     publishDefaultGlobalUtils();
     // Otherwise, setup a new platform injector and run platform initializers.
     const injector = createPlatformInjector(providers);
-    _platformInjector = injector;
+    // During SSR, using this setting and using an injector from the global can cause the
+    // injector to be used for a different request due to concurrency.
+    const isServer = injector.get(ALLOW_MULTIPLE_PLATFORMS, false);
+    if (!isServer) {
+        _platformInjector = injector;
+    }
     publishSignalConfiguration();
     runPlatformInitializers(injector);
     return injector;
@@ -36902,12 +36915,17 @@ function setAlternateWeakRefImpl(impl) {
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
 function internalCreateApplication(config) {
+    const { rootComponent, appProviders, platformProviders, platformRef } = config;
     try {
-        const { rootComponent, appProviders, platformProviders } = config;
+        const platformInjector = platformRef?.injector ?? createOrReusePlatformInjector(platformProviders);
+        if (platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false) === true && !config.platformRef) {
+            throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode &&
+                'Missing Platform: This may be due to using `bootstrapApplication` on the server without passing a `BootstrapContext`. ' +
+                    'Please make sure that `bootstrapApplication` is called with a `BootstrapContext.');
+        }
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
             assertStandaloneComponentType(rootComponent);
         }
-        const platformInjector = createOrReusePlatformInjector(platformProviders);
         // Create root application injector based on a set of providers configured at the platform
         // bootstrap level as well as providers passed to the bootstrap call by a user.
         const allAppProviders = [

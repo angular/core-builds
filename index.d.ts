@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.13+sha-32512de
+ * @license Angular v18.2.13+sha-08f01ac
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3161,6 +3161,8 @@ declare type DestroyHookData = (HookEntry | HookData)[];
  * Destroys the current Angular platform and all Angular applications on the page.
  * Destroys all modules and listeners registered with the platform.
  *
+ * This function should not be used in a server environment, as it will be a no-op.
+ *
  * @publicApi
  */
 export declare function destroyPlatform(): void;
@@ -4562,7 +4564,8 @@ export declare function getNgModuleById<T>(id: string): Type<T>;
 declare function getOwningComponent<T>(elementOrDir: Element | {}): T | null;
 
 /**
- * Returns the current platform.
+ * Returns the current platform in the browser environment. In the server environment,
+ * returns `null`. If you need access to the platform information, inject `PlatformRef` in your application.
  *
  * @publicApi
  */
@@ -13080,6 +13083,7 @@ export declare function ɵinternalCreateApplication(config: {
     rootComponent?: Type<unknown>;
     appProviders?: Array<Provider | EnvironmentProviders>;
     platformProviders?: Provider[];
+    platformRef?: PlatformRef;
 }): Promise<ApplicationRef>;
 
 export declare interface ɵInternalEnvironmentProviders extends EnvironmentProviders {
