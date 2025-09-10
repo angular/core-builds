@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-9096d45
+ * @license Angular v20.3.0+sha-802dbcc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13053,12 +13053,20 @@ function listenToDomEvent(tNode, tView, lView, eventTargetResolver, renderer, ev
         const target = eventTargetResolver ? eventTargetResolver(native) : native;
         stashEventListenerImpl(lView, target, eventName, wrappedListener);
         const cleanupFn = renderer.listen(target, eventName, wrappedListener);
-        const idxOrTargetGetter = eventTargetResolver
-            ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
-            : tNode.index;
-        storeListenerCleanup(idxOrTargetGetter, tView, lView, eventName, wrappedListener, cleanupFn, false);
+        // We skip cleaning up animation event types to ensure leaving animation events can be used.
+        // These events should be automatically garbage collected anyway after the element is
+        // removed from the DOM.
+        if (!isAnimationEventType(eventName)) {
+            const idxOrTargetGetter = eventTargetResolver
+                ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
+                : tNode.index;
+            storeListenerCleanup(idxOrTargetGetter, tView, lView, eventName, wrappedListener, cleanupFn, false);
+        }
     }
     return hasCoalesced;
+}
+function isAnimationEventType(eventName) {
+    return eventName.startsWith('animation') || eventName.startsWith('transition');
 }
 /**
  * A utility function that checks if a given element has already an event handler registered for an
@@ -13521,7 +13529,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.0+sha-9096d45']
+        ? ['ng-version', '20.3.0+sha-802dbcc']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
