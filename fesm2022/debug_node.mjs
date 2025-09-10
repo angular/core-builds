@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.3+sha-94a0880
+ * @license Angular v21.0.0-next.3+sha-7a4b225
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, getAnimationElementRemovalRegistry, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, setAnimationElementRemovalRegistry, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, ZONELESS_SCHEDULER_DISABLED, angularZoneInstanceIdProperty, NoopNgZone, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, ZONELESS_SCHEDULER_DISABLED, angularZoneInstanceIdProperty, NoopNgZone, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -7208,11 +7208,123 @@ function ensureIcuContainerVisitorLoaded(loader) {
     }
 }
 
+/** Parses a CSS time value to milliseconds. */
+function parseCssTimeUnitsToMs(value) {
+    // Some browsers will return it in seconds, whereas others will return milliseconds.
+    const multiplier = value.toLowerCase().indexOf('ms') > -1 ? 1 : 1000;
+    return parseFloat(value) * multiplier;
+}
+/** Parses out multiple values from a computed style into an array. */
+function parseCssPropertyValue(computedStyle, name) {
+    const value = computedStyle.getPropertyValue(name);
+    return value.split(',').map((part) => part.trim());
+}
+/** Gets the transform transition duration, including the delay, of an element in milliseconds. */
+function getLongestComputedTransition(computedStyle) {
+    const transitionedProperties = parseCssPropertyValue(computedStyle, 'transition-property');
+    const rawDurations = parseCssPropertyValue(computedStyle, 'transition-duration');
+    const rawDelays = parseCssPropertyValue(computedStyle, 'transition-delay');
+    const longest = { propertyName: '', duration: 0, animationName: undefined };
+    for (let i = 0; i < transitionedProperties.length; i++) {
+        const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
+        if (duration > longest.duration) {
+            longest.propertyName = transitionedProperties[i];
+            longest.duration = duration;
+        }
+    }
+    return longest;
+}
+function getLongestComputedAnimation(computedStyle) {
+    const rawNames = parseCssPropertyValue(computedStyle, 'animation-name');
+    const rawDelays = parseCssPropertyValue(computedStyle, 'animation-delay');
+    const rawDurations = parseCssPropertyValue(computedStyle, 'animation-duration');
+    const longest = { animationName: '', propertyName: undefined, duration: 0 };
+    for (let i = 0; i < rawNames.length; i++) {
+        const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
+        if (duration > longest.duration) {
+            longest.animationName = rawNames[i];
+            longest.duration = duration;
+        }
+    }
+    return longest;
+}
+function isShorterThanExistingAnimation(existing, longest) {
+    return existing !== undefined && existing.duration > longest.duration;
+}
+function longestExists(longest) {
+    return ((longest.animationName != undefined || longest.propertyName != undefined) &&
+        longest.duration > 0);
+}
+/**
+ * Determines the longest animation, but with `getComputedStyles` instead of `getAnimations`. This
+ * is ultimately safer than getAnimations because it can be used when recalculations are in
+ * progress. `getAnimations()` will be empty in that case.
+ */
+function determineLongestAnimationFromComputedStyles(el, animationsMap) {
+    const computedStyle = getComputedStyle(el);
+    const longestAnimation = getLongestComputedAnimation(computedStyle);
+    const longestTransition = getLongestComputedTransition(computedStyle);
+    const longest = longestAnimation.duration > longestTransition.duration ? longestAnimation : longestTransition;
+    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
+        return;
+    if (longestExists(longest)) {
+        animationsMap.set(el, longest);
+    }
+}
+/**
+ * Multiple animations can be set on an element. This grabs an element and
+ * determines which of those will be the longest duration. If we didn't do
+ * this, elements would be removed whenever the first animation completes.
+ * This ensures we get the longest running animation and only remove when
+ * that animation completes.
+ */
+function determineLongestAnimation(el, animationsMap, areAnimationSupported) {
+    if (!areAnimationSupported)
+        return;
+    const animations = el.getAnimations();
+    return animations.length === 0
+        ? // fallback to computed styles if getAnimations is empty. This would happen if styles are
+            // currently recalculating due to a reflow happening elsewhere.
+            determineLongestAnimationFromComputedStyles(el, animationsMap)
+        : determineLongestAnimationFromElementAnimations(el, animationsMap, animations);
+}
+function determineLongestAnimationFromElementAnimations(el, animationsMap, animations) {
+    let longest = {
+        animationName: undefined,
+        propertyName: undefined,
+        duration: 0,
+    };
+    for (const animation of animations) {
+        const timing = animation.effect?.getTiming();
+        // duration can be a string 'auto' or a number.
+        const animDuration = typeof timing?.duration === 'number' ? timing.duration : 0;
+        let duration = (timing?.delay ?? 0) + animDuration;
+        let propertyName;
+        let animationName;
+        if (animation.animationName) {
+            animationName = animation.animationName;
+        }
+        else {
+            // Check for CSSTransition specific property
+            propertyName = animation.transitionProperty;
+        }
+        if (duration >= longest.duration) {
+            longest = { animationName, propertyName, duration };
+        }
+    }
+    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
+        return;
+    if (longestExists(longest)) {
+        animationsMap.set(el, longest);
+    }
+}
+const allLeavingAnimations = new Set();
+
 /**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
  */
-function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
+function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode, parentLView) {
     // If this slot was allocated for a text node dynamically created by i18n, the text node itself
     // won't be created until i18nApply() in the update block, so this node should be skipped.
     // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
@@ -7244,10 +7356,14 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
         }
         else if (action === 2 /* WalkTNodeTreeAction.Detach */) {
-            nativeRemoveNode(renderer, rNode, isComponent);
+            runLeaveAnimationsWithCallback(parentLView, () => {
+                nativeRemoveNode(renderer, rNode, isComponent);
+            });
         }
         else if (action === 3 /* WalkTNodeTreeAction.Destroy */) {
-            renderer.destroyNode(rNode);
+            runLeaveAnimationsWithCallback(parentLView, () => {
+                renderer.destroyNode(rNode);
+            });
         }
         if (lContainer != null) {
             applyContainer(renderer, action, lContainer, parent, beforeNode);
@@ -7426,6 +7542,30 @@ function cleanUpView(tView, lView) {
     finally {
         setActiveConsumer(prevConsumer);
     }
+}
+function runLeaveAnimationsWithCallback(lView, callback) {
+    if (lView && lView[ANIMATIONS] && lView[ANIMATIONS].leave) {
+        const runningAnimations = [];
+        for (let animateFn of lView[ANIMATIONS].leave) {
+            runningAnimations.push(animateFn());
+        }
+        lView[ANIMATIONS].running = Promise.allSettled(runningAnimations);
+        lView[ANIMATIONS].leave = undefined;
+    }
+    runAfterLeaveAnimations(lView, callback);
+}
+function runAfterLeaveAnimations(lView, callback) {
+    if (lView && lView[ANIMATIONS] && lView[ANIMATIONS].running) {
+        lView[ANIMATIONS].running.then(() => {
+            if (lView[ANIMATIONS] && lView[ANIMATIONS].running) {
+                lView[ANIMATIONS].running = undefined;
+            }
+            allLeavingAnimations.delete(lView);
+            callback();
+        });
+        return;
+    }
+    callback();
 }
 /** Removes listeners and unsubscribes from output subscriptions */
 function processCleanups(tView, lView) {
@@ -7764,22 +7904,22 @@ function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, 
         if (!isDetachedByI18n(tNode)) {
             if (tNodeType & 8 /* TNodeType.ElementContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, parentRElement, beforeNode, false);
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
             }
             else if (tNodeType & 32 /* TNodeType.Icu */) {
                 const nextRNode = icuContainerIterate(tNode, lView);
                 let rNode;
                 while ((rNode = nextRNode())) {
-                    applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode);
+                    applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode, lView);
                 }
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
             }
             else if (tNodeType & 16 /* TNodeType.Projection */) {
                 applyProjectionRecursive(renderer, action, lView, tNode, parentRElement, beforeNode);
             }
             else {
                 ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */);
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
             }
         }
         tNode = isProjection ? tNode.projectionNext : tNode.next;
@@ -7833,7 +7973,7 @@ function applyProjectionRecursive(renderer, action, lView, tProjectionNode, pare
         // This should be refactored and cleaned up.
         for (let i = 0; i < nodeToProjectOrRNodes.length; i++) {
             const rNode = nodeToProjectOrRNodes[i];
-            applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode);
+            applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode, lView);
         }
     }
     else {
@@ -8975,6 +9115,7 @@ function refreshView(tView, lView, templateFn, context) {
         if (templateFn !== null) {
             executeTemplate(tView, lView, templateFn, 2 /* RenderFlags.Update */, context);
         }
+        runEnterAnimations(lView);
         const hooksInitPhaseCompleted = (flags & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
         // execute pre-order hooks (OnInit, OnChanges, DoCheck)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
@@ -9100,6 +9241,15 @@ function refreshView(tView, lView, templateFn, context) {
             }
         }
         leaveView();
+    }
+}
+function runEnterAnimations(lView) {
+    const animationData = lView[ANIMATIONS];
+    if (animationData?.enter) {
+        for (const animateFn of animationData.enter) {
+            animateFn();
+        }
+        animationData.enter = undefined;
     }
 }
 /**
@@ -13530,7 +13680,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.3+sha-94a0880']
+        ? ['ng-version', '21.0.0-next.3+sha-7a4b225']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21136,225 +21286,6 @@ const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined
 });
 const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
 
-/**
- * Registers elements for delayed removal action for animation in the case
- * that `animate.leave` is used. This stores the target element and any
- * classes, class resolvers, and callback functions that may be needed
- * to apply the removal animation, and then stashes the actual element
- * removal function from the dom renderer to be called after the
- * animation is finished.
- */
-class ElementRegistry {
-    outElements = new WeakMap();
-    remove(el) {
-        this.outElements.delete(el);
-    }
-    /** Used when animate.leave is only applying classes */
-    trackClasses(details, classes) {
-        const classList = getClassListFromValue(classes);
-        if (!classList)
-            return;
-        for (let klass of classList) {
-            details.classes?.add(klass);
-        }
-    }
-    /** Used when animate.leave is applying classes via a bound attribute
-     *  which requires resolving the binding function at the right time
-     *  to get the proper class list. There may be multiple resolvers due
-     *  to composition via host bindings.
-     */
-    trackResolver(details, resolver) {
-        if (!details.classFns) {
-            details.classFns = [resolver];
-        }
-        else {
-            details.classFns.push(resolver);
-        }
-    }
-    /** Used when `animate.leave` is using the function signature and will have a
-     *  callback function, rather than a list of classes.
-     */
-    addCallback(el, value, animateWrapperFn) {
-        const details = this.outElements.get(el) ?? {
-            classes: null,
-            animateFn: () => { },
-            isEventBinding: true,
-        };
-        details.animateFn = animateWrapperFn(el, value);
-        this.outElements.set(el, details);
-    }
-    /** Used when `animate.leave` is using classes. */
-    add(el, value, animateWrapperFn) {
-        const details = this.outElements.get(el) ?? {
-            classes: new Set(),
-            animateFn: () => { },
-            isEventBinding: false,
-        };
-        if (typeof value === 'function') {
-            this.trackResolver(details, value);
-        }
-        else {
-            this.trackClasses(details, value);
-        }
-        details.animateFn = animateWrapperFn(el, details.classes, details.classFns);
-        this.outElements.set(el, details);
-    }
-    has(el) {
-        return this.outElements.has(el);
-    }
-    /** This is called by the dom renderer to actually initiate the animation
-     *  using the animateFn stored in the registry. The DOM renderer passes in
-     *  the removal function to be fired off when the animation finishes.
-     */
-    animate(el, removeFn, maxAnimationTimeout) {
-        if (!this.outElements.has(el))
-            return removeFn();
-        const details = this.outElements.get(el);
-        let timeoutId;
-        let called = false;
-        const remove = () => {
-            // This called check is to prevent a rare race condition where the timing of removal
-            // might result in the removal function being called twice.
-            if (called)
-                return;
-            called = true;
-            clearTimeout(timeoutId);
-            this.remove(el);
-            removeFn();
-        };
-        // this timeout is used to ensure elements actually get removed in the case
-        // that the user forgot to call the remove callback. The timeout is cleared
-        // in the DOM renderer during the remove child process. It only applies
-        // to the event binding use case.
-        if (details.isEventBinding) {
-            timeoutId = setTimeout(remove, maxAnimationTimeout);
-        }
-        details.animateFn(remove);
-    }
-}
-function getClassListFromValue(value) {
-    const classes = typeof value === 'function' ? value() : value;
-    let classList = Array.isArray(classes) ? classes : null;
-    if (typeof classes === 'string') {
-        classList = classes
-            .trim()
-            .split(/\s+/)
-            .filter((k) => k);
-    }
-    return classList;
-}
-
-/** Parses a CSS time value to milliseconds. */
-function parseCssTimeUnitsToMs(value) {
-    // Some browsers will return it in seconds, whereas others will return milliseconds.
-    const multiplier = value.toLowerCase().indexOf('ms') > -1 ? 1 : 1000;
-    return parseFloat(value) * multiplier;
-}
-/** Parses out multiple values from a computed style into an array. */
-function parseCssPropertyValue(computedStyle, name) {
-    const value = computedStyle.getPropertyValue(name);
-    return value.split(',').map((part) => part.trim());
-}
-/** Gets the transform transition duration, including the delay, of an element in milliseconds. */
-function getLongestComputedTransition(computedStyle) {
-    const transitionedProperties = parseCssPropertyValue(computedStyle, 'transition-property');
-    const rawDurations = parseCssPropertyValue(computedStyle, 'transition-duration');
-    const rawDelays = parseCssPropertyValue(computedStyle, 'transition-delay');
-    const longest = { propertyName: '', duration: 0, animationName: undefined };
-    for (let i = 0; i < transitionedProperties.length; i++) {
-        const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
-        if (duration > longest.duration) {
-            longest.propertyName = transitionedProperties[i];
-            longest.duration = duration;
-        }
-    }
-    return longest;
-}
-function getLongestComputedAnimation(computedStyle) {
-    const rawNames = parseCssPropertyValue(computedStyle, 'animation-name');
-    const rawDelays = parseCssPropertyValue(computedStyle, 'animation-delay');
-    const rawDurations = parseCssPropertyValue(computedStyle, 'animation-duration');
-    const longest = { animationName: '', propertyName: undefined, duration: 0 };
-    for (let i = 0; i < rawNames.length; i++) {
-        const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
-        if (duration > longest.duration) {
-            longest.animationName = rawNames[i];
-            longest.duration = duration;
-        }
-    }
-    return longest;
-}
-function isShorterThanExistingAnimation(existing, longest) {
-    return existing !== undefined && existing.duration > longest.duration;
-}
-function longestExists(longest) {
-    return ((longest.animationName != undefined || longest.propertyName != undefined) &&
-        longest.duration > 0);
-}
-/**
- * Determines the longest animation, but with `getComputedStyles` instead of `getAnimations`. This
- * is ultimately safer than getAnimations because it can be used when recalculations are in
- * progress. `getAnimations()` will be empty in that case.
- */
-function determineLongestAnimationFromComputedStyles(el, animationsMap) {
-    const computedStyle = getComputedStyle(el);
-    const longestAnimation = getLongestComputedAnimation(computedStyle);
-    const longestTransition = getLongestComputedTransition(computedStyle);
-    const longest = longestAnimation.duration > longestTransition.duration ? longestAnimation : longestTransition;
-    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
-        return;
-    if (longestExists(longest)) {
-        animationsMap.set(el, longest);
-    }
-}
-/**
- * Multiple animations can be set on an element. This grabs an element and
- * determines which of those will be the longest duration. If we didn't do
- * this, elements would be removed whenever the first animation completes.
- * This ensures we get the longest running animation and only remove when
- * that animation completes.
- */
-function determineLongestAnimation(el, animationsMap, areAnimationSupported) {
-    if (!areAnimationSupported)
-        return;
-    const animations = el.getAnimations();
-    return animations.length === 0
-        ? // fallback to computed styles if getAnimations is empty. This would happen if styles are
-            // currently recalculating due to a reflow happening elsewhere.
-            determineLongestAnimationFromComputedStyles(el, animationsMap)
-        : determineLongestAnimationFromElementAnimations(el, animationsMap, animations);
-}
-function determineLongestAnimationFromElementAnimations(el, animationsMap, animations) {
-    let longest = {
-        animationName: undefined,
-        propertyName: undefined,
-        duration: 0,
-    };
-    for (const animation of animations) {
-        const timing = animation.effect?.getTiming();
-        // duration can be a string 'auto' or a number.
-        const animDuration = typeof timing?.duration === 'number' ? timing.duration : 0;
-        let duration = (timing?.delay ?? 0) + animDuration;
-        let propertyName;
-        let animationName;
-        if (animation.animationName) {
-            animationName = animation.animationName;
-        }
-        else {
-            // Check for CSSTransition specific property
-            propertyName = animation.transitionProperty;
-        }
-        if (duration >= longest.duration) {
-            longest = { animationName, propertyName, duration };
-        }
-    }
-    if (isShorterThanExistingAnimation(animationsMap.get(el), longest))
-        return;
-    if (longestExists(longest)) {
-        animationsMap.set(el, longest);
-    }
-}
-
 const DEFAULT_ANIMATIONS_DISABLED = false;
 const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) &&
     typeof document !== 'undefined' &&
@@ -21366,16 +21297,6 @@ const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerM
 function areAnimationsDisabled(lView) {
     const injector = lView[INJECTOR];
     return injector.get(ANIMATIONS_DISABLED, DEFAULT_ANIMATIONS_DISABLED);
-}
-/**
- * Helper function to setup element registry cleanup when LView is destroyed
- */
-function setupElementRegistryCleanup(elementRegistry, lView, tView, nativeElement) {
-    if (lView[FLAGS] & 8 /* LViewFlags.FirstLViewPass */) {
-        storeCleanupWithContext(tView, lView, nativeElement, (elToClean) => {
-            elementRegistry.elements.remove(elToClean);
-        });
-    }
 }
 /**
  * Helper function to cleanup enterClassMap data safely
@@ -21422,7 +21343,9 @@ function cancelLeavingNodes(tNode, lView) {
         // this is the insertion point for the new TNode element.
         // it will be inserted before the declaring containers anchor.
         const beforeNode = getBeforeNodeForView(tNode.index, lContainer);
-        // here we need to check the previous sibling of that anchor
+        // here we need to check the previous sibling of that anchor. The first
+        // previousSibling node will be the new element added. The second
+        // previousSibling will be the one that's being removed.
         const previousNode = beforeNode?.previousSibling;
         // We really only want to cancel animations if the leaving node is the
         // same as the node before where the new node will be inserted. This is
@@ -21443,6 +21366,25 @@ function trackLeavingNodes(tNode, el) {
         leavingNodes.set(tNode, [el]);
     }
 }
+function getLViewEnterAnimations(lView) {
+    const animationData = (lView[ANIMATIONS] ??= {});
+    return (animationData.enter ??= []);
+}
+function getLViewLeaveAnimations(lView) {
+    const animationData = (lView[ANIMATIONS] ??= {});
+    return (animationData.leave ??= []);
+}
+function getClassListFromValue(value) {
+    const classes = typeof value === 'function' ? value() : value;
+    let classList = Array.isArray(classes) ? classes : null;
+    if (typeof classes === 'string') {
+        classList = classes
+            .trim()
+            .split(/\s+/)
+            .filter((k) => k);
+    }
+    return classList;
+}
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
  *
@@ -21462,6 +21404,11 @@ function ɵɵanimateEnter(value) {
         return ɵɵanimateEnter;
     }
     const tNode = getCurrentTNode();
+    cancelLeavingNodes(tNode, lView);
+    getLViewEnterAnimations(lView).push(() => runEnterAnimation(lView, tNode, value));
+    return ɵɵanimateEnter; // For chaining
+}
+function runEnterAnimation(lView, tNode, value) {
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
     const renderer = lView[RENDERER];
@@ -21490,7 +21437,6 @@ function ɵɵanimateEnter(value) {
             cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleAnimationStart));
             cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleAnimationStart));
         });
-        cancelLeavingNodes(tNode, lView);
         trackEnterClasses(nativeElement, activeClasses, cleanupFns);
         for (const klass of activeClasses) {
             renderer.addClass(nativeElement, klass);
@@ -21510,7 +21456,6 @@ function ɵɵanimateEnter(value) {
             });
         });
     }
-    return ɵɵanimateEnter; // For chaining
 }
 /**
  * trackEnterClasses is necessary in the case of composition where animate.enter
@@ -21552,16 +21497,22 @@ function ɵɵanimateEnterListener(value) {
         return ɵɵanimateEnterListener;
     }
     const tNode = getCurrentTNode();
-    const nativeElement = getNativeByTNode(tNode, lView);
-    ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
     cancelLeavingNodes(tNode, lView);
-    value.call(lView[CONTEXT], { target: nativeElement, animationComplete: noOpAnimationComplete });
+    getLViewEnterAnimations(lView).push(() => runEnterAnimationFunction(lView, tNode, value));
     return ɵɵanimateEnterListener;
 }
 /**
+ * runs enter animations when a custom function is provided
+ */
+function runEnterAnimationFunction(lView, tNode, value) {
+    const nativeElement = getNativeByTNode(tNode, lView);
+    ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
+    value.call(lView[CONTEXT], { target: nativeElement, animationComplete: noOpAnimationComplete });
+}
+/**
  * Instruction to handle the `animate.leave` behavior for class animations.
- * It registers an animation with the ElementRegistry to be run when the element
- * is scheduled for removal from the DOM.
+ * It creates a leave animation function that's tracked in the LView to
+ * be run before DOM node removal and cleanup.
  *
  * @param value The value bound to `animate.leave`, which can be a string or a function.
  * @returns This function returns itself so that it may be chained.
@@ -21579,35 +21530,31 @@ function ɵɵanimateLeave(value) {
     if (animationsDisabled) {
         return ɵɵanimateLeave;
     }
-    const tView = getTView();
     const tNode = getCurrentTNode();
+    getLViewLeaveAnimations(lView).push(() => runLeaveAnimations(lView, tNode, value, animationsDisabled));
+    return ɵɵanimateLeave; // For chaining
+}
+function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
+    const { promise, resolve } = Promise.withResolvers();
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
-    // This instruction is called in the update pass.
     const renderer = lView[RENDERER];
-    const elementRegistry = getAnimationElementRemovalRegistry();
-    ngDevMode &&
-        assertDefined(elementRegistry.elements, 'Expected `ElementRegistry` to be present in animations subsystem');
     const ngZone = lView[INJECTOR].get(NgZone);
-    // This function gets stashed in the registry to be used once the element removal process
-    // begins. We pass in the values and resolvers so as to evaluate the resolved classes
-    // at the latest possible time, meaning we evaluate them right before the animation
-    // begins.
-    const animate = (el, value, resolvers) => {
-        return (removalFn) => {
-            animateLeaveClassRunner(el, tNode, getClassList(value, resolvers), removalFn, renderer, animationsDisabled, ngZone);
-        };
-    };
-    // Ensure cleanup if the LView is destroyed before the animation runs.
-    setupElementRegistryCleanup(elementRegistry, lView, tView, nativeElement);
-    elementRegistry.elements.add(nativeElement, value, animate);
-    return ɵɵanimateLeave; // For chaining
+    allLeavingAnimations.add(lView);
+    const activeClasses = getClassListFromValue(value);
+    if (activeClasses && activeClasses.length > 0) {
+        animateLeaveClassRunner(nativeElement, tNode, activeClasses, renderer, animationsDisabled, ngZone, resolve);
+    }
+    else {
+        resolve();
+    }
+    return promise;
 }
 /**
  * Instruction to handle the `(animate.leave)` behavior for event bindings, aka when
  * a user wants to use a custom animation function rather than a class. It registers
- * an animation with the ElementRegistry to be run when the element is scheduled for
- * removal from the DOM.
+ * a leave animation function in the LView to be run at right before removal from the
+ * DOM.
  *
  * @param value The value bound to `(animate.leave)`, an AnimationFunction.
  * @returns This function returns itself so that it may be chained.
@@ -21625,59 +21572,47 @@ function ɵɵanimateLeaveListener(value) {
     // So we don't have an early return here.
     const lView = getLView();
     const tNode = getCurrentTNode();
-    const tView = getTView();
-    const nativeElement = getNativeByTNode(tNode, lView);
-    ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
-    const elementRegistry = getAnimationElementRemovalRegistry();
-    ngDevMode &&
-        assertDefined(elementRegistry.elements, 'Expected `ElementRegistry` to be present in animations subsystem');
-    const renderer = lView[RENDERER];
-    const animationsDisabled = areAnimationsDisabled(lView);
-    const ngZone = lView[INJECTOR].get(NgZone);
-    const animate = (_el, value) => {
-        return (removeFn) => {
-            if (animationsDisabled) {
-                removeFn();
-            }
-            else {
-                const event = {
-                    target: nativeElement,
-                    animationComplete: () => {
-                        clearLeavingNodes(tNode, _el);
-                        removeFn();
-                    },
-                };
-                trackLeavingNodes(tNode, _el);
-                ngZone.runOutsideAngular(() => {
-                    renderer.listen(_el, 'animationend', () => removeFn(), { once: true });
-                });
-                value.call(lView[CONTEXT], event);
-            }
-        };
-    };
-    // Ensure cleanup if the LView is destroyed before the animation runs.
-    setupElementRegistryCleanup(elementRegistry, lView, tView, nativeElement);
-    elementRegistry.elements.addCallback(nativeElement, value, animate);
+    allLeavingAnimations.add(lView);
+    getLViewLeaveAnimations(lView).push(() => runLeaveAnimationFunction(lView, tNode, value));
     return ɵɵanimateLeaveListener; // For chaining
 }
 /**
- * Builds the list of classes to apply to an element based on either the passed in list of strings
- * or the set of resolver functions that are coming from bindings. Those resolver functions should
- * resolve into either a string or a string array. There may be multiple to support composition.
+ * runs leave animations when a custom function is provided
  */
-function getClassList(value, resolvers) {
-    const classList = new Set(value);
-    if (resolvers && resolvers.length) {
-        for (const resolverFn of resolvers) {
-            const resolvedValue = getClassListFromValue(resolverFn);
-            if (resolvedValue) {
-                for (const rv of resolvedValue) {
-                    classList.add(rv);
-                }
-            }
-        }
+function runLeaveAnimationFunction(lView, tNode, value) {
+    const { promise, resolve } = Promise.withResolvers();
+    const nativeElement = getNativeByTNode(tNode, lView);
+    ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
+    const renderer = lView[RENDERER];
+    const animationsDisabled = areAnimationsDisabled(lView);
+    const ngZone = lView[INJECTOR].get(NgZone);
+    const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
+    if (animationsDisabled) {
+        resolve();
     }
-    return classList;
+    else {
+        const timeoutId = setTimeout(() => {
+            clearLeavingNodes(tNode, nativeElement);
+            resolve();
+        }, maxAnimationTimeout);
+        const event = {
+            target: nativeElement,
+            animationComplete: () => {
+                clearLeavingNodes(tNode, nativeElement);
+                clearTimeout(timeoutId);
+                resolve();
+            },
+        };
+        trackLeavingNodes(tNode, nativeElement);
+        ngZone.runOutsideAngular(() => {
+            renderer.listen(nativeElement, 'animationend', () => {
+                resolve();
+            }, { once: true });
+        });
+        value.call(lView[CONTEXT], event);
+    }
+    // Ensure cleanup if the LView is destroyed before the animation runs.
+    return promise;
 }
 function cancelAnimationsIfRunning(element, renderer) {
     if (!areAnimationSupported)
@@ -21739,10 +21674,10 @@ function assertElementNodes(nativeElement, instruction) {
  * This function actually adds the classes that animate element that's leaving the DOM.
  * Once it finishes, it calls the remove function that was provided by the DOM renderer.
  */
-function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, animationsDisabled, ngZone) {
+function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisabled, ngZone, resolver) {
     if (animationsDisabled) {
         longestAnimations.delete(el);
-        finalRemoveFn();
+        resolver();
         return;
     }
     cancelAnimationsIfRunning(el, renderer);
@@ -21755,8 +21690,16 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
             event.stopImmediatePropagation();
             longestAnimations.delete(el);
             clearLeavingNodes(tNode, el);
-            finalRemoveFn();
+            if (Array.isArray(tNode.projection)) {
+                // in the content projection case, the element is not destroyed.
+                // So we need to remove the class at the end so that it isn't left
+                // behind for whenever the item shows up again.
+                for (const item of classList) {
+                    renderer.removeClass(el, item);
+                }
+            }
         }
+        resolver();
     };
     ngZone.runOutsideAngular(() => {
         renderer.listen(el, 'animationend', handleOutAnimationEnd);
@@ -21774,7 +21717,7 @@ function animateLeaveClassRunner(el, tNode, classList, finalRemoveFn, renderer, 
             determineLongestAnimation(el, longestAnimations, areAnimationSupported);
             if (!longestAnimations.has(el)) {
                 clearLeavingNodes(tNode, el);
-                finalRemoveFn();
+                resolver();
             }
         });
     });
@@ -23163,6 +23106,7 @@ const ICU_MARKER = {
  */
 var I18nCreateOpCode;
 (function (I18nCreateOpCode) {
+    /* tslint:disable:no-duplicate-enum-values */
     /**
      * Number of bits to shift index so that it can be combined with the `APPEND_EAGERLY` and
      * `COMMENT`.
@@ -23176,6 +23120,7 @@ var I18nCreateOpCode;
      * If set the node should be comment (rather than a text) node.
      */
     I18nCreateOpCode[I18nCreateOpCode["COMMENT"] = 2] = "COMMENT";
+    /* tslint:enable:no-duplicate-enum-values */
 })(I18nCreateOpCode || (I18nCreateOpCode = {}));
 
 /**
@@ -27702,18 +27647,6 @@ function ɵɵExternalStylesFeature(styleUrls) {
 }
 
 /**
- * This feature adds the element registry for delayed element removal when animate.leave
- * is utilized.
- *
- * @codeGenApi
- */
-function ɵɵAnimationsFeature() {
-    return () => {
-        setAnimationElementRemovalRegistry(new ElementRegistry());
-    };
-}
-
-/**
  * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
  * definition, when generating a direct reference in the component file would otherwise create an
  * import cycle.
@@ -28672,7 +28605,6 @@ const angularCoreEnv = (() => ({
     'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
     'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
     'ɵɵExternalStylesFeature': ɵɵExternalStylesFeature,
-    'ɵɵAnimationsFeature': ɵɵAnimationsFeature,
     'ɵɵnextContext': ɵɵnextContext,
     'ɵɵnamespaceHTML': __namespaceHTML,
     'ɵɵnamespaceMathML': __namespaceMathML,
@@ -31193,5 +31125,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, ElementRegistry, EnvironmentNgModuleRefAdapter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵAnimationsFeature, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=debug_node.mjs.map

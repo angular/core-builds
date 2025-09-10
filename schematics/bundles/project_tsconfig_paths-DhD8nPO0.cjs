@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-94a0880
+ * @license Angular v21.0.0-next.3+sha-7a4b225
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2851,10 +2851,6 @@ class Identifiers {
         name: 'ɵɵExternalStylesFeature',
         moduleName: CORE,
     };
-    static AnimationsFeature = {
-        name: 'ɵɵAnimationsFeature',
-        moduleName: CORE,
-    };
     static listener = { name: 'ɵɵlistener', moduleName: CORE };
     static getInheritedFactory = {
         name: 'ɵɵgetInheritedFactory',
@@ -2988,7 +2984,7 @@ function getJitStandaloneDefaultForVersion(version) {
 }
 
 // https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit
-const VERSION = 3;
+const VERSION$1 = 3;
 const JS_B64_PREFIX = '# sourceMappingURL=data:application/json;base64,';
 class SourceMapGenerator {
     file;
@@ -3082,7 +3078,7 @@ class SourceMapGenerator {
         mappings = mappings.slice(0, -1);
         return {
             'file': this.file || '',
-            'version': VERSION,
+            'version': VERSION$1,
             'sourceRoot': '',
             'sources': sources,
             'sourcesContent': sourcesContent,
@@ -30106,184 +30102,9 @@ function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, s
     return new BindingParser(new Parser(new Lexer(), selectorlessEnabled), interpolationConfig, elementRegistry, []);
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-/**
- * Visitor that traverses all template and expression AST nodes in a template.
- * Useful for cases where every single node needs to be visited.
- */
-class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
-    visit(node) {
-        if (node instanceof ASTWithSource) {
-            this.visit(node.ast);
-        }
-        else {
-            node.visit(this);
-        }
-    }
-    visitElement(element) {
-        this.visitAllTemplateNodes(element.attributes);
-        this.visitAllTemplateNodes(element.inputs);
-        this.visitAllTemplateNodes(element.outputs);
-        this.visitAllTemplateNodes(element.directives);
-        this.visitAllTemplateNodes(element.references);
-        this.visitAllTemplateNodes(element.children);
-    }
-    visitTemplate(template) {
-        this.visitAllTemplateNodes(template.attributes);
-        this.visitAllTemplateNodes(template.inputs);
-        this.visitAllTemplateNodes(template.outputs);
-        this.visitAllTemplateNodes(template.directives);
-        this.visitAllTemplateNodes(template.templateAttrs);
-        this.visitAllTemplateNodes(template.variables);
-        this.visitAllTemplateNodes(template.references);
-        this.visitAllTemplateNodes(template.children);
-    }
-    visitContent(content) {
-        this.visitAllTemplateNodes(content.children);
-    }
-    visitBoundAttribute(attribute) {
-        this.visit(attribute.value);
-    }
-    visitBoundEvent(attribute) {
-        this.visit(attribute.handler);
-    }
-    visitBoundText(text) {
-        this.visit(text.value);
-    }
-    visitIcu(icu) {
-        Object.keys(icu.vars).forEach((key) => this.visit(icu.vars[key]));
-        Object.keys(icu.placeholders).forEach((key) => this.visit(icu.placeholders[key]));
-    }
-    visitDeferredBlock(deferred) {
-        deferred.visitAll(this);
-    }
-    visitDeferredTrigger(trigger) {
-        if (trigger instanceof BoundDeferredTrigger) {
-            this.visit(trigger.value);
-        }
-    }
-    visitDeferredBlockPlaceholder(block) {
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitDeferredBlockError(block) {
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitDeferredBlockLoading(block) {
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitSwitchBlock(block) {
-        this.visit(block.expression);
-        this.visitAllTemplateNodes(block.cases);
-    }
-    visitSwitchBlockCase(block) {
-        block.expression && this.visit(block.expression);
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitForLoopBlock(block) {
-        block.item.visit(this);
-        this.visitAllTemplateNodes(block.contextVariables);
-        this.visit(block.expression);
-        this.visitAllTemplateNodes(block.children);
-        block.empty?.visit(this);
-    }
-    visitForLoopBlockEmpty(block) {
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitIfBlock(block) {
-        this.visitAllTemplateNodes(block.branches);
-    }
-    visitIfBlockBranch(block) {
-        block.expression && this.visit(block.expression);
-        block.expressionAlias?.visit(this);
-        this.visitAllTemplateNodes(block.children);
-    }
-    visitLetDeclaration(decl) {
-        this.visit(decl.value);
-    }
-    visitComponent(component) {
-        this.visitAllTemplateNodes(component.attributes);
-        this.visitAllTemplateNodes(component.inputs);
-        this.visitAllTemplateNodes(component.outputs);
-        this.visitAllTemplateNodes(component.directives);
-        this.visitAllTemplateNodes(component.references);
-        this.visitAllTemplateNodes(component.children);
-    }
-    visitDirective(directive) {
-        this.visitAllTemplateNodes(directive.attributes);
-        this.visitAllTemplateNodes(directive.inputs);
-        this.visitAllTemplateNodes(directive.outputs);
-        this.visitAllTemplateNodes(directive.references);
-    }
-    visitVariable(variable) { }
-    visitReference(reference) { }
-    visitTextAttribute(attribute) { }
-    visitText(text) { }
-    visitUnknownBlock(block) { }
-    visitAllTemplateNodes(nodes) {
-        for (const node of nodes) {
-            this.visit(node);
-        }
-    }
-}
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-const ANIMATE_LEAVE$1 = `animate.leave`;
-/**
- * Analyzes a component's template to determine if it's using animate.enter
- * or animate.leave syntax.
- */
-function analyzeTemplateForAnimations(template) {
-    const analyzer = new AnimationsAnalyzer();
-    visitAll$1(analyzer, template);
-    // The template is considered selectorless only if there
-    // are direct references to directives or pipes.
-    return analyzer.hasAnimations;
-}
-/**
- * Visitor that traverses all the template nodes and
- * expressions to look for selectorless references.
- */
-class AnimationsAnalyzer extends CombinedRecursiveAstVisitor {
-    hasAnimations = false;
-    visitElement(element) {
-        // check for regular strings
-        for (const attr of element.attributes) {
-            if (attr.name === ANIMATE_LEAVE$1) {
-                this.hasAnimations = true;
-            }
-        }
-        // check for attribute bindings
-        for (const input of element.inputs) {
-            if (input.name === ANIMATE_LEAVE$1) {
-                this.hasAnimations = true;
-            }
-        }
-        // check for event bindings
-        for (const output of element.outputs) {
-            if (output.name === ANIMATE_LEAVE$1) {
-                this.hasAnimations = true;
-            }
-        }
-        super.visitElement(element);
-    }
-}
-
 const COMPONENT_VARIABLE = '%COMP%';
 const HOST_ATTR = `_nghost-${COMPONENT_VARIABLE}`;
 const CONTENT_ATTR = `_ngcontent-${COMPONENT_VARIABLE}`;
-const ANIMATE_LEAVE = `animate.leave`;
 function baseDirectiveFields(meta, constantPool, bindingParser) {
     const definitionMap = new DefinitionMap();
     const selectors = parseSelectorToR3Selector(meta.selector);
@@ -30316,11 +30137,6 @@ function baseDirectiveFields(meta, constantPool, bindingParser) {
         definitionMap.set('signals', literal(true));
     }
     return definitionMap;
-}
-function hasAnimationHostBinding(meta) {
-    return (meta.host.attributes[ANIMATE_LEAVE] !== undefined ||
-        meta.host.properties[ANIMATE_LEAVE] !== undefined ||
-        meta.host.listeners[ANIMATE_LEAVE] !== undefined);
 }
 /**
  * Add features to the definition map.
@@ -30355,12 +30171,6 @@ function addFeatures(definitionMap, meta) {
     if ('externalStyles' in meta && meta.externalStyles?.length) {
         const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal(externalStyle));
         features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
-    }
-    const template = meta.template;
-    if (hasAnimationHostBinding(meta) || (template && template.nodes.length > 0)) {
-        if (hasAnimationHostBinding(meta) || analyzeTemplateForAnimations(template.nodes)) {
-            features.push(importExpr(Identifiers.AnimationsFeature).callFn([]));
-        }
     }
     if (features.length) {
         definitionMap.set('features', literalArr(features));
@@ -30800,6 +30610,132 @@ function compileDeferResolverFunction(meta) {
         }
     }
     return arrowFn([], literalArr(depExpressions));
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Visitor that traverses all template and expression AST nodes in a template.
+ * Useful for cases where every single node needs to be visited.
+ */
+class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
+    visit(node) {
+        if (node instanceof ASTWithSource) {
+            this.visit(node.ast);
+        }
+        else {
+            node.visit(this);
+        }
+    }
+    visitElement(element) {
+        this.visitAllTemplateNodes(element.attributes);
+        this.visitAllTemplateNodes(element.inputs);
+        this.visitAllTemplateNodes(element.outputs);
+        this.visitAllTemplateNodes(element.directives);
+        this.visitAllTemplateNodes(element.references);
+        this.visitAllTemplateNodes(element.children);
+    }
+    visitTemplate(template) {
+        this.visitAllTemplateNodes(template.attributes);
+        this.visitAllTemplateNodes(template.inputs);
+        this.visitAllTemplateNodes(template.outputs);
+        this.visitAllTemplateNodes(template.directives);
+        this.visitAllTemplateNodes(template.templateAttrs);
+        this.visitAllTemplateNodes(template.variables);
+        this.visitAllTemplateNodes(template.references);
+        this.visitAllTemplateNodes(template.children);
+    }
+    visitContent(content) {
+        this.visitAllTemplateNodes(content.children);
+    }
+    visitBoundAttribute(attribute) {
+        this.visit(attribute.value);
+    }
+    visitBoundEvent(attribute) {
+        this.visit(attribute.handler);
+    }
+    visitBoundText(text) {
+        this.visit(text.value);
+    }
+    visitIcu(icu) {
+        Object.keys(icu.vars).forEach((key) => this.visit(icu.vars[key]));
+        Object.keys(icu.placeholders).forEach((key) => this.visit(icu.placeholders[key]));
+    }
+    visitDeferredBlock(deferred) {
+        deferred.visitAll(this);
+    }
+    visitDeferredTrigger(trigger) {
+        if (trigger instanceof BoundDeferredTrigger) {
+            this.visit(trigger.value);
+        }
+    }
+    visitDeferredBlockPlaceholder(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitDeferredBlockError(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitDeferredBlockLoading(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitSwitchBlock(block) {
+        this.visit(block.expression);
+        this.visitAllTemplateNodes(block.cases);
+    }
+    visitSwitchBlockCase(block) {
+        block.expression && this.visit(block.expression);
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitForLoopBlock(block) {
+        block.item.visit(this);
+        this.visitAllTemplateNodes(block.contextVariables);
+        this.visit(block.expression);
+        this.visitAllTemplateNodes(block.children);
+        block.empty?.visit(this);
+    }
+    visitForLoopBlockEmpty(block) {
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitIfBlock(block) {
+        this.visitAllTemplateNodes(block.branches);
+    }
+    visitIfBlockBranch(block) {
+        block.expression && this.visit(block.expression);
+        block.expressionAlias?.visit(this);
+        this.visitAllTemplateNodes(block.children);
+    }
+    visitLetDeclaration(decl) {
+        this.visit(decl.value);
+    }
+    visitComponent(component) {
+        this.visitAllTemplateNodes(component.attributes);
+        this.visitAllTemplateNodes(component.inputs);
+        this.visitAllTemplateNodes(component.outputs);
+        this.visitAllTemplateNodes(component.directives);
+        this.visitAllTemplateNodes(component.references);
+        this.visitAllTemplateNodes(component.children);
+    }
+    visitDirective(directive) {
+        this.visitAllTemplateNodes(directive.attributes);
+        this.visitAllTemplateNodes(directive.inputs);
+        this.visitAllTemplateNodes(directive.outputs);
+        this.visitAllTemplateNodes(directive.references);
+    }
+    visitVariable(variable) { }
+    visitReference(reference) { }
+    visitTextAttribute(attribute) { }
+    visitText(text) { }
+    visitUnknownBlock(block) { }
+    visitAllTemplateNodes(nodes) {
+        for (const node of nodes) {
+            this.visit(node);
+        }
+    }
 }
 
 /**
@@ -32840,7 +32776,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('21.0.0-next.3+sha-94a0880');
+const VERSION = new Version('21.0.0-next.3+sha-7a4b225');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33523,6 +33459,18 @@ function isFatalDiagnosticError(err) {
 }
 
 /**
+ * Base URL for the error details page.
+ *
+ * Keep the files below in full sync:
+ *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+ *  - packages/core/src/error_details_base_url.ts
+ */
+const ERROR_DETAILS_PAGE_BASE_URL = (() => {
+    const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
+    return `https://${versionSubDomain}angular.dev/errors`;
+})();
+
+/**
  * Enum holding the name of each extended template diagnostic. The name is used as a user-meaningful
  * value for configuring the diagnostic in the project's options.
  *
@@ -33876,7 +33824,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-bRwOJEk9.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DhD8nPO0.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -50868,6 +50816,7 @@ exports.Directive = Directive$1;
 exports.DomElementSchemaRegistry = DomElementSchemaRegistry;
 exports.DynamicImportExpr = DynamicImportExpr;
 exports.DynamicValue = DynamicValue;
+exports.ERROR_DETAILS_PAGE_BASE_URL = ERROR_DETAILS_PAGE_BASE_URL;
 exports.Element = Element;
 exports.Element$1 = Element$1;
 exports.EnumValue = EnumValue;

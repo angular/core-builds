@@ -1,19 +1,19 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-94a0880
+ * @license Angular v21.0.0-next.3+sha-7a4b225
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-bRwOJEk9.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DhD8nPO0.cjs');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-Clvp4COX.cjs');
-var project_paths = require('./project_paths-BJTqcWvC.cjs');
+var index = require('./index-IrerERjR.cjs');
+var project_paths = require('./project_paths-BI1-KH_O.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-CBaykQBv.cjs');
+require('./index-BVNCudfT.cjs');
 require('path');
 require('node:path');
 
