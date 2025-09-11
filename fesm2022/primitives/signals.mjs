@@ -1,11 +1,11 @@
 /**
- * @license Angular v21.0.0-next.3+sha-a8fae2a
+ * @license Angular v21.0.0-next.3+sha-663f48c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { consumerMarkDirty, SIGNAL, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from '../signal.mjs';
-export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal.mjs';
+export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from '../signal.mjs';
 export { BASE_EFFECT_NODE, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, runEffect, untracked } from '../effect.mjs';
 export { setAlternateWeakRefImpl } from '../weak_ref.mjs';
 

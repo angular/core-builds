@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-a8fae2a
+ * @license Angular v21.0.0-next.3+sha-663f48c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -205,29 +205,50 @@ function producerMarkClean(node) {
     node.lastCleanEpoch = epoch;
 }
 /**
- * Prepare this consumer to run a computation in its reactive context.
+ * Prepare this consumer to run a computation in its reactive context and set
+ * it as the active consumer.
  *
  * Must be called by subclasses which represent reactive computations, before those computations
  * begin.
  */
 function consumerBeforeComputation(node) {
-    if (node) {
-        node.producersTail = undefined;
-        node.recomputing = true;
-    }
+    if (node)
+        resetConsumerBeforeComputation(node);
     return setActiveConsumer(node);
 }
 /**
- * Finalize this consumer's state after a reactive computation has run.
+ * Prepare this consumer to run a computation in its reactive context.
+ *
+ * We expose this mainly for code where we manually batch effects into a single
+ * consumer. In those cases we may wish to "reopen" a consumer multiple times
+ * in initial render before finalizing it. Most code should just call
+ * `consumerBeforeComputation` instead of calling this directly.
+ */
+function resetConsumerBeforeComputation(node) {
+    node.producersTail = undefined;
+    node.recomputing = true;
+}
+/**
+ * Finalize this consumer's state and set previous consumer as the active consumer after a
+ * reactive computation has run.
  *
  * Must be called by subclasses which represent reactive computations, after those computations
  * have finished.
  */
 function consumerAfterComputation(node, prevConsumer) {
     setActiveConsumer(prevConsumer);
-    if (!node) {
-        return;
-    }
+    if (node)
+        finalizeConsumerAfterComputation(node);
+}
+/**
+ * Finalize this consumer's state after a reactive computation has run.
+ *
+ * We expose this mainly for code where we manually batch effects into a single
+ * consumer. In those cases we may wish to "reopen" a consumer multiple times
+ * in initial render before finalizing it. Most code should just call
+ * `consumerAfterComputation` instead of calling this directly.
+ */
+function finalizeConsumerAfterComputation(node) {
     node.recomputing = false;
     // We've finished incrementally rebuilding the producers list, now if there are any producers
     // that are after producersTail, they are stale and should be removed.
@@ -556,5 +577,5 @@ function signalValueChanged(node) {
     postSignalSetFn?.(node);
 }
 
-export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
+export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
 //# sourceMappingURL=signal.mjs.map
