@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-50b3e9f
+ * @license Angular v20.3.0+sha-00b87a7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('20.3.0+sha-50b3e9f');
+const VERSION = /* @__PURE__ */ new Version('20.3.0+sha-00b87a7');
 
 /**
  * Base URL for the error details page.
