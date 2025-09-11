@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-c36cd73
+ * @license Angular v20.3.0+sha-219462f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -153,19 +153,39 @@ declare function producerUpdatesAllowed(): boolean;
 declare function consumerMarkDirty(node: ReactiveNode): void;
 declare function producerMarkClean(node: ReactiveNode): void;
 /**
- * Prepare this consumer to run a computation in its reactive context.
+ * Prepare this consumer to run a computation in its reactive context and set
+ * it as the active consumer.
  *
  * Must be called by subclasses which represent reactive computations, before those computations
  * begin.
  */
 declare function consumerBeforeComputation(node: ReactiveNode | null): ReactiveNode | null;
 /**
- * Finalize this consumer's state after a reactive computation has run.
+ * Prepare this consumer to run a computation in its reactive context.
+ *
+ * We expose this mainly for code where we manually batch effects into a single
+ * consumer. In those cases we may wish to "reopen" a consumer multiple times
+ * in initial render before finalizing it. Most code should just call
+ * `consumerBeforeComputation` instead of calling this directly.
+ */
+declare function resetConsumerBeforeComputation(node: ReactiveNode): void;
+/**
+ * Finalize this consumer's state and set previous consumer as the active consumer after a
+ * reactive computation has run.
  *
  * Must be called by subclasses which represent reactive computations, after those computations
  * have finished.
  */
 declare function consumerAfterComputation(node: ReactiveNode | null, prevConsumer: ReactiveNode | null): void;
+/**
+ * Finalize this consumer's state after a reactive computation has run.
+ *
+ * We expose this mainly for code where we manually batch effects into a single
+ * consumer. In those cases we may wish to "reopen" a consumer multiple times
+ * in initial render before finalizing it. Most code should just call
+ * `consumerAfterComputation` instead of calling this directly.
+ */
+declare function finalizeConsumerAfterComputation(node: ReactiveNode): void;
 /**
  * Determine whether this consumer has any dependencies which have changed since the last time
  * they were read.
@@ -178,5 +198,5 @@ declare function consumerDestroy(node: ReactiveNode): void;
 declare function runPostProducerCreatedFn(node: ReactiveNode): void;
 declare function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 
-export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
+export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
 export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn };
