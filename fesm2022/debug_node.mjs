@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-464bff9
+ * @license Angular v21.0.0-next.3+sha-a4001c4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7545,12 +7545,19 @@ function cleanUpView(tView, lView) {
 }
 function runLeaveAnimationsWithCallback(lView, callback) {
     if (lView && lView[ANIMATIONS] && lView[ANIMATIONS].leave) {
-        const runningAnimations = [];
-        for (let animateFn of lView[ANIMATIONS].leave) {
-            runningAnimations.push(animateFn());
+        if (lView[ANIMATIONS].skipLeaveAnimations) {
+            lView[ANIMATIONS].skipLeaveAnimations = false;
         }
-        lView[ANIMATIONS].running = Promise.allSettled(runningAnimations);
-        lView[ANIMATIONS].leave = undefined;
+        else {
+            const leaveAnimations = lView[ANIMATIONS].leave;
+            const runningAnimations = [];
+            for (let index = 0; index < leaveAnimations.length; index++) {
+                const animateFn = leaveAnimations[index];
+                runningAnimations.push(animateFn());
+            }
+            lView[ANIMATIONS].running = Promise.allSettled(runningAnimations);
+            lView[ANIMATIONS].leave = undefined;
+        }
     }
     runAfterLeaveAnimations(lView, callback);
 }
@@ -13680,7 +13687,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.3+sha-464bff9']
+        ? ['ng-version', '21.0.0-next.3+sha-a4001c4']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21772,7 +21779,11 @@ class LiveCollection {
         }
     }
     move(prevIndex, newIdx) {
-        this.attach(newIdx, this.detach(prevIndex));
+        // For move operations, the detach code path is the same one used for removing
+        // DOM nodes, which would trigger `animate.leave` bindings. We need to skip
+        // those animations in the case of a move operation so the moving elements don't
+        // unexpectedly disappear.
+        this.attach(newIdx, this.detach(prevIndex, true /* skipLeaveAnimations */));
     }
 }
 function valuesMatching(liveIdx, liveValue, newIdx, newValue, trackBy) {
@@ -22344,8 +22355,10 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         this.needsIndexUpdate ||= index !== this.length;
         addLViewToLContainer(this.lContainer, lView, index, shouldAddViewToDom(this.templateTNode, dehydratedView));
     }
-    detach(index) {
+    detach(index, skipLeaveAnimations) {
         this.needsIndexUpdate ||= index !== this.length - 1;
+        if (skipLeaveAnimations)
+            setSkipLeaveAnimations(this.lContainer, index);
         return detachExistingView(this.lContainer, index);
     }
     create(index, value) {
@@ -22450,6 +22463,15 @@ function getLContainer(lView, index) {
     const lContainer = lView[index];
     ngDevMode && assertLContainer(lContainer);
     return lContainer;
+}
+function setSkipLeaveAnimations(lContainer, index) {
+    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
+        return;
+    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+    const viewToDetach = lContainer[indexInContainer];
+    if (viewToDetach && viewToDetach[ANIMATIONS]) {
+        viewToDetach[ANIMATIONS].skipLeaveAnimations = true;
+    }
 }
 function detachExistingView(lContainer, index) {
     const existingLView = detachView(lContainer, index);
