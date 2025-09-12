@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-9def492
+ * @license Angular v20.3.0+sha-2ebdd57
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13686,7 +13686,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.0+sha-9def492']
+        ? ['ng-version', '20.3.0+sha-2ebdd57']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21923,6 +21923,42 @@ function areAnimationsDisabled(lView) {
     return injector.get(ANIMATIONS_DISABLED, DEFAULT_ANIMATIONS_DISABLED);
 }
 /**
+ * Asserts a value passed in is actually an animation type and not something else
+ */
+function assertAnimationTypes(value, instruction) {
+    if (value == null || (typeof value !== 'string' && typeof value !== 'function')) {
+        throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' value must be a string of CSS classes or an animation function, got ${stringify(value)}`);
+    }
+}
+/**
+ * Asserts a given native element is an actual Element node and not something like a comment node.
+ */
+function assertElementNodes(nativeElement, instruction) {
+    if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
+        throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' can only be used on an element node, got ${stringify(nativeElement.nodeType)}`);
+    }
+}
+/**
+ * trackEnterClasses is necessary in the case of composition where animate.enter
+ * is used on the same element in multiple places, like on the element and in a
+ * host binding. When removing classes, we need the entire list of animation classes
+ * added to properly remove them when the longest animation fires.
+ */
+function trackEnterClasses(el, classList, cleanupFns) {
+    const elementData = enterClassMap.get(el);
+    if (elementData) {
+        for (const klass of classList) {
+            elementData.classList.push(klass);
+        }
+        for (const fn of cleanupFns) {
+            elementData.cleanupFns.push(fn);
+        }
+    }
+    else {
+        enterClassMap.set(el, { classList, cleanupFns });
+    }
+}
+/**
  * Helper function to cleanup enterClassMap data safely
  */
 function cleanupEnterClassData(element) {
@@ -21944,6 +21980,9 @@ const longestAnimations = new WeakMap();
 // used to prevent duplicate nodes from showing up when nodes have been toggled quickly
 // from an `@if` or `@for`.
 const leavingNodes = new WeakMap();
+/**
+ * This actually removes the leaving HTML Element in the TNode
+ */
 function clearLeavingNodes(tNode, el) {
     const nodes = leavingNodes.get(tNode);
     if (nodes && nodes.length > 0) {
@@ -21979,6 +22018,11 @@ function cancelLeavingNodes(tNode, lView) {
         }
     }
 }
+/**
+ * Tracks the nodes list of nodes that are leaving the DOM so we can cancel any leave animations
+ * and remove the node before adding a new entering instance of the DOM node. This prevents
+ * duplicates from showing up on screen mid-animation.
+ */
 function trackLeavingNodes(tNode, el) {
     // We need to track this tNode's element just to be sure we don't add
     // a new RNode for this TNode while this one is still animating away.
@@ -21990,14 +22034,23 @@ function trackLeavingNodes(tNode, el) {
         leavingNodes.set(tNode, [el]);
     }
 }
+/**
+ * Retrieves the list of specified enter animations from the lView
+ */
 function getLViewEnterAnimations(lView) {
     const animationData = (lView[ANIMATIONS] ??= {});
     return (animationData.enter ??= []);
 }
+/**
+ * Retrieves the list of specified leave animations from the lView
+ */
 function getLViewLeaveAnimations(lView) {
     const animationData = (lView[ANIMATIONS] ??= {});
     return (animationData.leave ??= []);
 }
+/**
+ * Gets the list of classes from a passed in value
+ */
 function getClassListFromValue(value) {
     const classes = typeof value === 'function' ? value() : value;
     let classList = Array.isArray(classes) ? classes : null;
@@ -22009,6 +22062,52 @@ function getClassListFromValue(value) {
     }
     return classList;
 }
+/**
+ * Cancels any running enter animations on a given element to prevent them from interfering
+ * with leave animations.
+ */
+function cancelAnimationsIfRunning(element, renderer) {
+    if (!areAnimationSupported)
+        return;
+    const elementData = enterClassMap.get(element);
+    if (elementData &&
+        elementData.classList.length > 0 &&
+        elementHasClassList(element, elementData.classList)) {
+        for (const klass of elementData.classList) {
+            renderer.removeClass(element, klass);
+        }
+    }
+    // We need to prevent any enter animation listeners from firing if they exist.
+    cleanupEnterClassData(element);
+}
+/**
+ * Checks if a given element contains the classes is a provided list
+ */
+function elementHasClassList(element, classList) {
+    for (const className of classList) {
+        if (element.classList.contains(className))
+            return true;
+    }
+    return false;
+}
+/**
+ * Determines if the animation or transition event is currently the expected longest animation
+ * based on earlier determined data in `longestAnimations`
+ *
+ * @param event
+ * @param nativeElement
+ * @returns
+ */
+function isLongestAnimation(event, nativeElement) {
+    const longestAnimation = longestAnimations.get(nativeElement);
+    return (nativeElement === event.target &&
+        longestAnimation !== undefined &&
+        ((longestAnimation.animationName !== undefined &&
+            event.animationName === longestAnimation.animationName) ||
+            (longestAnimation.propertyName !== undefined &&
+                event.propertyName === longestAnimation.propertyName)));
+}
+
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
  *
@@ -22045,21 +22144,21 @@ function runEnterAnimation(lView, tNode, value) {
     // to get the longest animation to ensure we don't complete animations early.
     // This also allows us to setup cancellation of animations in progress if the
     // gets removed early.
-    const handleAnimationStart = (event) => {
+    const handleEnterAnimationStart = (event) => {
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
-            cleanupFns.push(renderer.listen(nativeElement, eventName, handleInAnimationEnd));
+            cleanupFns.push(renderer.listen(nativeElement, eventName, handleEnterAnimationEnd));
         });
     };
     // When the longest animation ends, we can remove all the classes
-    const handleInAnimationEnd = (event) => {
-        animationEnd(event, nativeElement, renderer);
+    const handleEnterAnimationEnd = (event) => {
+        enterAnimationEnd(event, nativeElement, renderer);
     };
     // We only need to add these event listeners if there are actual classes to apply
     if (activeClasses && activeClasses.length > 0) {
         ngZone.runOutsideAngular(() => {
-            cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleAnimationStart));
-            cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleAnimationStart));
+            cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleEnterAnimationStart));
+            cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleEnterAnimationStart));
         });
         trackEnterClasses(nativeElement, activeClasses, cleanupFns);
         for (const klass of activeClasses) {
@@ -22081,24 +22180,20 @@ function runEnterAnimation(lView, tNode, value) {
         });
     }
 }
-/**
- * trackEnterClasses is necessary in the case of composition where animate.enter
- * is used on the same element in multiple places, like on the element and in a
- * host binding. When removing classes, we need the entire list of animation classes
- * added to properly remove them when the longest animation fires.
- */
-function trackEnterClasses(el, classList, cleanupFns) {
-    const elementData = enterClassMap.get(el);
-    if (elementData) {
-        for (const klass of classList) {
-            elementData.classList.push(klass);
+function enterAnimationEnd(event, nativeElement, renderer) {
+    const elementData = enterClassMap.get(nativeElement);
+    if (!elementData)
+        return;
+    if (isLongestAnimation(event, nativeElement)) {
+        // Now that we've found the longest animation, there's no need
+        // to keep bubbling up this event as it's not going to apply to
+        // other elements further up. We don't want it to inadvertently
+        // affect any other animations on the page.
+        event.stopImmediatePropagation();
+        for (const klass of elementData.classList) {
+            renderer.removeClass(nativeElement, klass);
         }
-        for (const fn of cleanupFns) {
-            elementData.cleanupFns.push(fn);
-        }
-    }
-    else {
-        enterClassMap.set(el, { classList, cleanupFns });
+        cleanupEnterClassData(nativeElement);
     }
 }
 /**
@@ -22175,6 +22270,58 @@ function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
     return promise;
 }
 /**
+ * This function actually adds the classes that animate element that's leaving the DOM.
+ * Once it finishes, it calls the remove function that was provided by the DOM renderer.
+ */
+function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisabled, ngZone, resolver) {
+    if (animationsDisabled) {
+        longestAnimations.delete(el);
+        resolver();
+        return;
+    }
+    cancelAnimationsIfRunning(el, renderer);
+    const handleOutAnimationEnd = (event) => {
+        if (event instanceof CustomEvent || isLongestAnimation(event, el)) {
+            // Now that we've found the longest animation, there's no need
+            // to keep bubbling up this event as it's not going to apply to
+            // other elements further up. We don't want it to inadvertently
+            // affect any other animations on the page.
+            event.stopImmediatePropagation();
+            longestAnimations.delete(el);
+            clearLeavingNodes(tNode, el);
+            if (Array.isArray(tNode.projection)) {
+                // in the content projection case, the element is not destroyed.
+                // So we need to remove the class at the end so that it isn't left
+                // behind for whenever the item shows up again.
+                for (const item of classList) {
+                    renderer.removeClass(el, item);
+                }
+            }
+        }
+        resolver();
+    };
+    ngZone.runOutsideAngular(() => {
+        renderer.listen(el, 'animationend', handleOutAnimationEnd);
+        renderer.listen(el, 'transitionend', handleOutAnimationEnd);
+    });
+    trackLeavingNodes(tNode, el);
+    for (const item of classList) {
+        renderer.addClass(el, item);
+    }
+    // In the case that the classes added have no animations, we need to remove
+    // the element right away. This could happen because someone is intentionally
+    // preventing an animation via selector specificity.
+    ngZone.runOutsideAngular(() => {
+        requestAnimationFrame(() => {
+            determineLongestAnimation(el, longestAnimations, areAnimationSupported);
+            if (!longestAnimations.has(el)) {
+                clearLeavingNodes(tNode, el);
+                resolver();
+            }
+        });
+    });
+}
+/**
  * Instruction to handle the `(animate.leave)` behavior for event bindings, aka when
  * a user wants to use a custom animation function rather than a class. It registers
  * a leave animation function in the LView to be run at right before removal from the
@@ -22237,114 +22384,6 @@ function runLeaveAnimationFunction(lView, tNode, value) {
     }
     // Ensure cleanup if the LView is destroyed before the animation runs.
     return promise;
-}
-function cancelAnimationsIfRunning(element, renderer) {
-    if (!areAnimationSupported)
-        return;
-    const elementData = enterClassMap.get(element);
-    if (elementData &&
-        elementData.classList.length > 0 &&
-        elementHasClassList(element, elementData.classList)) {
-        for (const klass of elementData.classList) {
-            renderer.removeClass(element, klass);
-        }
-    }
-    // We need to prevent any enter animation listeners from firing if they exist.
-    cleanupEnterClassData(element);
-}
-function elementHasClassList(element, classList) {
-    for (const className of classList) {
-        if (element.classList.contains(className))
-            return true;
-    }
-    return false;
-}
-function isLongestAnimation(event, nativeElement) {
-    const longestAnimation = longestAnimations.get(nativeElement);
-    return (nativeElement === event.target &&
-        longestAnimation !== undefined &&
-        ((longestAnimation.animationName !== undefined &&
-            event.animationName === longestAnimation.animationName) ||
-            (longestAnimation.propertyName !== undefined &&
-                event.propertyName === longestAnimation.propertyName)));
-}
-function animationEnd(event, nativeElement, renderer) {
-    const elementData = enterClassMap.get(nativeElement);
-    if (!elementData)
-        return;
-    if (isLongestAnimation(event, nativeElement)) {
-        // Now that we've found the longest animation, there's no need
-        // to keep bubbling up this event as it's not going to apply to
-        // other elements further up. We don't want it to inadvertently
-        // affect any other animations on the page.
-        event.stopImmediatePropagation();
-        for (const klass of elementData.classList) {
-            renderer.removeClass(nativeElement, klass);
-        }
-        cleanupEnterClassData(nativeElement);
-    }
-}
-function assertAnimationTypes(value, instruction) {
-    if (value == null || (typeof value !== 'string' && typeof value !== 'function')) {
-        throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' value must be a string of CSS classes or an animation function, got ${stringify(value)}`);
-    }
-}
-function assertElementNodes(nativeElement, instruction) {
-    if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
-        throw new RuntimeError(650 /* RuntimeErrorCode.ANIMATE_INVALID_VALUE */, `'${instruction}' can only be used on an element node, got ${stringify(nativeElement.nodeType)}`);
-    }
-}
-/**
- * This function actually adds the classes that animate element that's leaving the DOM.
- * Once it finishes, it calls the remove function that was provided by the DOM renderer.
- */
-function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisabled, ngZone, resolver) {
-    if (animationsDisabled) {
-        longestAnimations.delete(el);
-        resolver();
-        return;
-    }
-    cancelAnimationsIfRunning(el, renderer);
-    const handleOutAnimationEnd = (event) => {
-        if (event instanceof CustomEvent || isLongestAnimation(event, el)) {
-            // Now that we've found the longest animation, there's no need
-            // to keep bubbling up this event as it's not going to apply to
-            // other elements further up. We don't want it to inadvertently
-            // affect any other animations on the page.
-            event.stopImmediatePropagation();
-            longestAnimations.delete(el);
-            clearLeavingNodes(tNode, el);
-            if (Array.isArray(tNode.projection)) {
-                // in the content projection case, the element is not destroyed.
-                // So we need to remove the class at the end so that it isn't left
-                // behind for whenever the item shows up again.
-                for (const item of classList) {
-                    renderer.removeClass(el, item);
-                }
-            }
-        }
-        resolver();
-    };
-    ngZone.runOutsideAngular(() => {
-        renderer.listen(el, 'animationend', handleOutAnimationEnd);
-        renderer.listen(el, 'transitionend', handleOutAnimationEnd);
-    });
-    trackLeavingNodes(tNode, el);
-    for (const item of classList) {
-        renderer.addClass(el, item);
-    }
-    // In the case that the classes added have no animations, we need to remove
-    // the element right away. This could happen because someone is intentionally
-    // preventing an animation via selector specificity.
-    ngZone.runOutsideAngular(() => {
-        requestAnimationFrame(() => {
-            determineLongestAnimation(el, longestAnimations, areAnimationSupported);
-            if (!longestAnimations.has(el)) {
-                clearLeavingNodes(tNode, el);
-                resolver();
-            }
-        });
-    });
 }
 
 /*!
