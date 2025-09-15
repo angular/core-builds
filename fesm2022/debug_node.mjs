@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-19462fc
+ * @license Angular v20.3.0+sha-4a23f6e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9897,15 +9897,20 @@ class ViewRef {
      * introduce other changes.
      */
     checkNoChanges() {
-        if (!ngDevMode)
-            return;
-        try {
-            this.exhaustive ??= this._lView[INJECTOR].get(UseExhaustiveCheckNoChanges, USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT);
+        // Note: we use `if (ngDevMode) { ... }` instead of an early return.
+        // ESBuild is conservative about removing dead code that follows `return;`
+        // inside a function body, so the block may remain in the bundle.
+        // Using a conditional ensures the dev-only logic is reliably tree-shaken
+        // in production builds.
+        if (ngDevMode) {
+            try {
+                this.exhaustive ??= this._lView[INJECTOR].get(UseExhaustiveCheckNoChanges, USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT);
+            }
+            catch {
+                this.exhaustive = USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT;
+            }
+            checkNoChangesInternal(this._lView, this.exhaustive);
         }
-        catch {
-            this.exhaustive = USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT;
-        }
-        checkNoChangesInternal(this._lView, this.exhaustive);
     }
     attachToViewContainerRef() {
         if (this._appRef) {
@@ -13686,7 +13691,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.0+sha-19462fc']
+        ? ['ng-version', '20.3.0+sha-4a23f6e']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
