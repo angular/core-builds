@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-803dc8e
+ * @license Angular v21.0.0-next.3+sha-8b43fce
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5172,12 +5172,6 @@ interface Component extends Directive {
      * the policy is automatically switched to `ViewEncapsulation.None`.
      */
     encapsulation?: ViewEncapsulation;
-    /**
-     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
-     *
-     * @deprecated use Angular's default interpolation delimiters instead.
-     */
-    interpolation?: [string, string];
     /**
      * True to preserve or false to remove potentially superfluous whitespace characters
      * from the compiled template. Whitespace characters are those matching the `\s`

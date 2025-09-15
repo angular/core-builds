@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-803dc8e
+ * @license Angular v21.0.0-next.3+sha-8b43fce
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13687,7 +13687,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.3+sha-803dc8e']
+        ? ['ng-version', '21.0.0-next.3+sha-8b43fce']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -29396,7 +29396,6 @@ function compileComponent(type, metadata) {
                     declarations: [],
                     changeDetection: metadata.changeDetection,
                     encapsulation,
-                    interpolation: metadata.interpolation,
                     viewProviders: metadata.viewProviders || null,
                     // We can't inspect whether any of the dependencies are actually directives, because they
                     // get patched on after compilation. That's why in JIT mode we consider that any
