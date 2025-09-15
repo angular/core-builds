@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.3.0+sha-7fb5a80
+ * @license Angular v20.3.0+sha-636cd0d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-DgQP-WP4.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-hIclAxSD.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -891,7 +891,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +909,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1004,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1420,7 +1420,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1455,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1506,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1539,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1590,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-7fb5a80'));
+    definitionMap.set('version', project_tsconfig_paths.literal('20.3.0+sha-636cd0d'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12321,7 +12321,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('20.3.0+sha-7fb5a80');
+new project_tsconfig_paths.Version('20.3.0+sha-636cd0d');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -17358,7 +17358,7 @@ function unwrapAstWithSource(ast) {
  * found in the LICENSE file at https://angular.dev/license
  */
 /** APIs whose usages should be checked by the rule. */
-const APIS_TO_CHECK = [
+const APIS_TO_CHECK$1 = [
     project_tsconfig_paths.INPUT_INITIALIZER_FN,
     project_tsconfig_paths.MODEL_INITIALIZER_FN,
     ...project_tsconfig_paths.OUTPUT_INITIALIZER_FNS,
@@ -17376,7 +17376,7 @@ class InitializerApiUsageRule {
     }
     shouldCheck(sourceFile) {
         // Skip the traversal if there are no imports of the initializer APIs.
-        return APIS_TO_CHECK.some(({ functionName, owningModule }) => {
+        return APIS_TO_CHECK$1.some(({ functionName, owningModule }) => {
             return (this.importedSymbolsTracker.hasNamedImport(sourceFile, functionName, owningModule) ||
                 this.importedSymbolsTracker.hasNamespaceImport(sourceFile, owningModule));
         });
@@ -17394,7 +17394,7 @@ class InitializerApiUsageRule {
         if (!node.parent || !ts.isCallExpression(node)) {
             return null;
         }
-        const identifiedInitializer = project_tsconfig_paths.tryParseInitializerApi(APIS_TO_CHECK, node, this.reflector, this.importedSymbolsTracker);
+        const identifiedInitializer = project_tsconfig_paths.tryParseInitializerApi(APIS_TO_CHECK$1, node, this.reflector, this.importedSymbolsTracker);
         if (identifiedInitializer === null) {
             return null;
         }
@@ -17563,6 +17563,86 @@ function closestNode(start, predicate) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.dev/license
  */
+/** APIs whose usages should be checked by the rule. */
+const APIS_TO_CHECK = [
+    project_tsconfig_paths.INPUT_INITIALIZER_FN,
+    project_tsconfig_paths.MODEL_INITIALIZER_FN,
+    ...project_tsconfig_paths.QUERY_INITIALIZER_FNS,
+];
+/**
+ * Rule that flags forbidden invocations of required initializers in property initializers and constructors.
+ */
+class ForbiddenRequiredInitializersInvocationRule {
+    reflector;
+    importedSymbolsTracker;
+    constructor(reflector, importedSymbolsTracker) {
+        this.reflector = reflector;
+        this.importedSymbolsTracker = importedSymbolsTracker;
+    }
+    shouldCheck(sourceFile) {
+        // Skip the traversal if there are no imports of the initializer APIs.
+        return APIS_TO_CHECK.some(({ functionName, owningModule }) => {
+            return (this.importedSymbolsTracker.hasNamedImport(sourceFile, functionName, owningModule) ||
+                this.importedSymbolsTracker.hasNamespaceImport(sourceFile, owningModule));
+        });
+    }
+    checkNode(node) {
+        if (!ts.isClassDeclaration(node))
+            return null;
+        const requiredInitializerDeclarations = node.members.filter((m) => ts.isPropertyDeclaration(m) && this.isPropDeclarationARequiredInitializer(m));
+        const diagnostics = [];
+        // Handling of the usages in props initializations
+        for (let decl of node.members) {
+            if (!ts.isPropertyDeclaration(decl))
+                continue;
+            const initiallizerExpr = decl.initializer;
+            if (!initiallizerExpr)
+                continue;
+            checkForbiddenInvocation(initiallizerExpr);
+        }
+        function checkForbiddenInvocation(node) {
+            if (ts.isArrowFunction(node) || ts.isFunctionExpression(node))
+                return;
+            if (ts.isPropertyAccessExpression(node) &&
+                node.expression.kind === ts.SyntaxKind.ThisKeyword &&
+                // With the following we make sure we only flag invoked required initializers
+                ts.isCallExpression(node.parent) &&
+                node.parent.expression === node) {
+                const requiredProp = requiredInitializerDeclarations.find((prop) => prop.name.getText() === node.name.getText());
+                if (requiredProp) {
+                    const initializerFn = requiredProp.initializer.expression.expression.getText();
+                    diagnostics.push(project_tsconfig_paths.makeDiagnostic(project_tsconfig_paths.ErrorCode.FORBIDDEN_REQUIRED_INITIALIZER_INVOCATION, node, `\`${node.name.getText()}\` is a required \`${initializerFn}\` and does not have a value in this context.`));
+                }
+            }
+            return node.forEachChild(checkForbiddenInvocation);
+        }
+        const ctor = getConstructorFromClass(node);
+        if (ctor) {
+            checkForbiddenInvocation(ctor);
+        }
+        return diagnostics;
+    }
+    isPropDeclarationARequiredInitializer(node) {
+        if (!node.initializer)
+            return false;
+        const identifiedInitializer = project_tsconfig_paths.tryParseInitializerApi(APIS_TO_CHECK, node.initializer, this.reflector, this.importedSymbolsTracker);
+        if (identifiedInitializer === null || !identifiedInitializer.isRequired)
+            return false;
+        return true;
+    }
+}
+function getConstructorFromClass(node) {
+    // We also check for a constructor body to avoid picking up parent constructors.
+    return node.members.find((m) => ts.isConstructorDeclaration(m) && m.body !== undefined);
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
 /**
  * Validates that TypeScript files match a specific set of rules set by the Angular compiler.
  */
@@ -17571,6 +17651,7 @@ class SourceFileValidator {
     constructor(reflector, importedSymbolsTracker, templateTypeChecker, typeCheckingConfig) {
         this.rules = [new InitializerApiUsageRule(reflector, importedSymbolsTracker)];
         this.rules.push(new UnusedStandaloneImportsRule(templateTypeChecker, typeCheckingConfig, importedSymbolsTracker));
+        this.rules.push(new ForbiddenRequiredInitializersInvocationRule(reflector, importedSymbolsTracker));
     }
     /**
      * Gets the diagnostics for a specific file, or null if the file is valid.
@@ -20332,7 +20413,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `20.3.0+sha-7fb5a80` usually means that core is at head so it supports
+    // A version of `20.3.0+sha-636cd0d` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
