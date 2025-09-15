@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-8b43fce
+ * @license Angular v21.0.0-next.3+sha-8dc8914
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,7 +14,7 @@ require('path');
 require('node:path');
 var project_paths = require('./project_paths-DmK5vABf.cjs');
 var ng_component_template = require('./ng_component_template-C8lCq-Y7.cjs');
-var parse_html = require('./parse_html-DcP3MoKD.cjs');
+var parse_html = require('./parse_html-Bp1a87ts.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
