@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-d9369d1
+ * @license Angular v21.0.0-next.3+sha-d5e00f9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -396,7 +396,15 @@ function extractSourceCodeInput(node, host, reflector, evaluator) {
                 isRequired = !!evaluatedInputOpts.get('required');
             }
             if (evaluatedInputOpts.has('transform') && evaluatedInputOpts.get('transform') != null) {
-                transformResult = parseTransformOfInput(evaluatedInputOpts, node, reflector);
+                const result = parseTransformOfInput(evaluatedInputOpts, node, reflector);
+                if (result === 'parsingError') {
+                    if (!host.config.bestEffortMode) {
+                        return null;
+                    }
+                }
+                else {
+                    transformResult = result;
+                }
             }
         }
     }
@@ -443,7 +451,7 @@ function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
         // TODO: implement error handling.
         // See failing case: e.g. inherit_definition_feature_spec.ts
         console.error(`${e.node.getSourceFile().fileName}: ${e.toString()}`);
-        return null;
+        return 'parsingError';
     }
 }
 

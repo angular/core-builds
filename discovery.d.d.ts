@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-d9369d1
+ * @license Angular v21.0.0-next.3+sha-d5e00f9
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7047,7 +7047,6 @@ declare class PlatformRef {
     private _modules;
     private _destroyListeners;
     private _destroyed;
-    private _additionalApplicationProviders?;
     /**
      * Creates an instance of an `@NgModule` for the given platform.
      *
