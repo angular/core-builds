@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.0+sha-444fd01
+ * @license Angular v20.3.0+sha-6e54bdf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -208,7 +208,7 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                 }
             }
         }
-        if (ts.isVariableDeclaration(node)) {
+        else if (ts.isVariableDeclaration(node)) {
             if (isAngularRoutesArray(node, typeChecker)) {
                 const initializer = node.initializer;
                 if (initializer &&
@@ -224,6 +224,33 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                         array: initializer,
                         routeFileImports: sourceFile.statements.filter(ts.isImportDeclaration),
                     });
+                }
+            }
+        }
+        else if (ts.isExportAssignment(node)) {
+            // Handles `export default routes`, `export default [...]` and `export default [...] as Routes`
+            let expression = node.expression;
+            if (ts.isAsExpression(expression)) {
+                expression = expression.expression;
+            }
+            if (ts.isArrayLiteralExpression(expression)) {
+                routesArrays.push({
+                    routeFilePath: sourceFile.fileName,
+                    array: expression,
+                    routeFileImports: sourceFile.statements.filter(ts.isImportDeclaration),
+                });
+            }
+            else if (ts.isIdentifier(expression)) {
+                manageRoutesExportedByDefault(routesArrays, typeChecker, expression, sourceFile);
+            }
+        }
+        else if (ts.isExportDeclaration(node)) {
+            // Handles cases like `export { routes as default }`
+            if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+                for (const specifier of node.exportClause.elements) {
+                    if (specifier.name.text === 'default') {
+                        manageRoutesExportedByDefault(routesArrays, typeChecker, specifier.propertyName ?? specifier.name, sourceFile);
+                    }
                 }
             }
         }
@@ -333,6 +360,23 @@ function createLoadComponentPropertyAssignment(componentImportPath, componentDec
         // will generate import('./path).then(m => m.componentName)
         ts.factory.createPropertyAccessExpression(createImportCallExpression(componentImportPath), 'then'), undefined, [createImportThenCallExpression(componentDeclarationName)])));
 }
+const manageRoutesExportedByDefault = (routesArrays, typeChecker, expression, sourceFile) => {
+    const symbol = typeChecker.getSymbolAtLocation(expression);
+    if (!symbol?.declarations) {
+        return;
+    }
+    for (const declaration of symbol.declarations) {
+        if (ts.isVariableDeclaration(declaration) &&
+            declaration.initializer &&
+            ts.isArrayLiteralExpression(declaration.initializer)) {
+            routesArrays.push({
+                routeFilePath: sourceFile.fileName,
+                array: declaration.initializer,
+                routeFileImports: sourceFile.statements.filter(ts.isImportDeclaration),
+            });
+        }
+    }
+};
 // import('./path)
 const createImportCallExpression = (componentImportPath) => ts.factory.createCallExpression(ts.factory.createIdentifier('import'), undefined, [
     ts.factory.createStringLiteral(componentImportPath, true),

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-444fd01
+ * @license Angular v20.3.0+sha-6e54bdf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('20.3.0+sha-444fd01');
+const VERSION = /* @__PURE__ */ new Version('20.3.0+sha-6e54bdf');
 
 /**
  * Base URL for the error details page.
@@ -2054,17 +2054,24 @@ class R3Injector extends EnvironmentInjector {
             const errorCode = getRuntimeErrorCode(error);
             if (errorCode === -200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */ ||
                 errorCode === -201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */) {
-                if (!ngDevMode) {
-                    throw new RuntimeError(errorCode, null);
-                }
-                prependTokenToDependencyPath(error, token);
-                if (previousInjector) {
-                    // We still have a parent injector, keep throwing
-                    throw error;
+                // Note: we use `if (ngDevMode) { ... }` instead of an early return.
+                // ESBuild is conservative about removing dead code that follows `return;`
+                // inside a function body, so the block may remain in the bundle.
+                // Using a conditional ensures the dev-only logic is reliably tree-shaken
+                // in production builds.
+                if (ngDevMode) {
+                    prependTokenToDependencyPath(error, token);
+                    if (previousInjector) {
+                        // We still have a parent injector, keep throwing
+                        throw error;
+                    }
+                    else {
+                        // Format & throw the final error message when we don't have any previous injector
+                        throw augmentRuntimeError(error, this.source);
+                    }
                 }
                 else {
-                    // Format & throw the final error message when we don't have any previous injector
-                    throw augmentRuntimeError(error, this.source);
+                    throw new RuntimeError(errorCode, null);
                 }
             }
             else {
