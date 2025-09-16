@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-1004418
+ * @license Angular v21.0.0-next.3+sha-5ce4d95
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -105,6 +105,7 @@ function outputFromObservable(observable, opts) {
 /**
  * Converts an Angular output declared via `output()` or `outputFromObservable()`
  * to an observable.
+ * It creates an observable that represents the stream of "events firing" in an output.
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
@@ -127,6 +128,7 @@ function outputToObservable(ref) {
 
 /**
  * Exposes the value of an Angular `Signal` as an RxJS `Observable`.
+ * As it reflects a state, the observable will always emit the latest value upon subscription.
  *
  * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
  *
