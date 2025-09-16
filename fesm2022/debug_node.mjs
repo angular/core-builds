@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.3+sha-7e0cf41
+ * @license Angular v21.0.0-next.3+sha-9707ac1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13692,7 +13692,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.3+sha-7e0cf41']
+        ? ['ng-version', '21.0.0-next.3+sha-9707ac1']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -29970,6 +29970,7 @@ const PROVIDED_NG_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || 
 function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone, }) {
     ngZoneFactory ??= () => new NgZone({ ...getNgZoneOptions(), scheduleInRootZone });
     return [
+        { provide: ZONELESS_ENABLED, useValue: false },
         { provide: NgZone, useFactory: ngZoneFactory },
         {
             provide: ENVIRONMENT_INITIALIZER,
@@ -30035,11 +30036,7 @@ function provideZoneChangeDetection(options) {
         },
         scheduleInRootZone,
     });
-    return makeEnvironmentProviders([
-        { provide: PROVIDED_NG_ZONE, useValue: true },
-        { provide: ZONELESS_ENABLED, useValue: false },
-        zoneProviders,
-    ]);
+    return makeEnvironmentProviders([{ provide: PROVIDED_NG_ZONE, useValue: true }, zoneProviders]);
 }
 // Transforms a set of `BootstrapOptions` (supported by the NgModule-based bootstrap APIs) ->
 // `NgZoneOptions` that are recognized by the NgZone constructor. Passing no options will result in
