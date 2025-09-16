@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-1352fbd
+ * @license Angular v21.0.0-next.3+sha-1fec2a2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,7 +13,8 @@ function isReferenceToImport(typeChecker, node, importSpecifier) {
     // If this function is called on an identifier (should be most cases), we can quickly rule out
     // non-matches by comparing the identifier's string and the local name of the import specifier
     // which saves us some calls to the type checker.
-    if (ts.isIdentifier(node) && node.text !== importSpecifier.name.text) {
+    if (importSpecifier === null ||
+        (ts.isIdentifier(node) && node.text !== importSpecifier.name.text)) {
         return false;
     }
     const nodeSymbol = typeChecker.getTypeAtLocation(node).getSymbol();
