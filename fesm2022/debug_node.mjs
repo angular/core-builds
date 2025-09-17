@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.0+sha-423cc17
+ * @license Angular v20.3.0+sha-dcdca98
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13691,7 +13691,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.0+sha-423cc17']
+        ? ['ng-version', '20.3.0+sha-dcdca98']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -20699,6 +20699,22 @@ function remove(list, el) {
 }
 
 /**
+ * Replace with `Promise.withResolvers()` once it's available.
+ * NET September 2026
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/withResolvers.
+ */
+function promiseWithResolvers() {
+    let resolve;
+    let reject;
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
+
+/**
  * Schedules triggering of a defer block for `on idle` and `on timer` conditions.
  */
 function scheduleDelayedTrigger(scheduleFn) {
@@ -21067,7 +21083,7 @@ function cleanupRemainingHydrationQueue(hydrationQueue, dehydratedBlockRegistry)
  */
 function populateHydratingStateForQueue(registry, queue) {
     for (let blockId of queue) {
-        registry.hydrating.set(blockId, Promise.withResolvers());
+        registry.hydrating.set(blockId, promiseWithResolvers());
     }
 }
 // Waits for the next render cycle to complete
@@ -22259,7 +22275,7 @@ function ɵɵanimateLeave(value) {
     return ɵɵanimateLeave; // For chaining
 }
 function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
-    const { promise, resolve } = Promise.withResolvers();
+    const { promise, resolve } = promiseWithResolvers();
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
     const renderer = lView[RENDERER];
@@ -22356,7 +22372,7 @@ function ɵɵanimateLeaveListener(value) {
  * runs leave animations when a custom function is provided
  */
 function runLeaveAnimationFunction(lView, tNode, value) {
-    const { promise, resolve } = Promise.withResolvers();
+    const { promise, resolve } = promiseWithResolvers();
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
     const renderer = lView[RENDERER];
