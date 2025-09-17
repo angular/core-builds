@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.0+sha-dcdca98
+ * @license Angular v20.3.0+sha-8843707
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32774,7 +32774,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.0+sha-dcdca98');
+const VERSION = new Version('20.3.0+sha-8843707');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33836,7 +33836,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-hIclAxSD.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-crm5NKE7.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -47831,10 +47831,16 @@ function getBoundAttributes(directive, node) {
             });
         }
     };
-    node.inputs.forEach(processAttribute);
-    node.attributes.forEach(processAttribute);
     if (node instanceof Template) {
+        if (node.tagName === 'ng-template') {
+            node.inputs.forEach(processAttribute);
+            node.attributes.forEach(processAttribute);
+        }
         node.templateAttrs.forEach(processAttribute);
+    }
+    else {
+        node.inputs.forEach(processAttribute);
+        node.attributes.forEach(processAttribute);
     }
     return boundInputs;
 }
