@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.3+sha-af33647
+ * @license Angular v21.0.0-next.3+sha-32c98e0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1233,6 +1233,27 @@ class InstantiateExpr extends Expression {
         return new InstantiateExpr(this.classExpr.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan);
     }
 }
+let RegularExpressionLiteral$1 = class RegularExpressionLiteral extends Expression {
+    body;
+    flags;
+    constructor(body, flags, sourceSpan) {
+        super(null, sourceSpan);
+        this.body = body;
+        this.flags = flags;
+    }
+    isEquivalent(e) {
+        return e instanceof RegularExpressionLiteral && this.body === e.body && this.flags === e.flags;
+    }
+    isConstant() {
+        return true;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitRegularExpressionLiteral(this, context);
+    }
+    clone() {
+        return new RegularExpressionLiteral(this.body, this.flags, this.sourceSpan);
+    }
+};
 class LiteralExpr extends Expression {
     value;
     constructor(value, type, sourceSpan) {
@@ -2007,6 +2028,9 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
     visitLiteralExpr(ast, context) {
         return this.visitExpression(ast, context);
     }
+    visitRegularExpressionLiteral(ast, context) {
+        return this.visitExpression(ast, context);
+    }
     visitLocalizedString(ast, context) {
         return this.visitExpression(ast, context);
     }
@@ -2446,6 +2470,9 @@ class GenericKeyFn {
         }
         else if (expr instanceof LiteralExpr) {
             return String(expr.value);
+        }
+        else if (expr instanceof RegularExpressionLiteral$1) {
+            return `/${expr.body}/${expr.flags ?? ''}`;
         }
         else if (expr instanceof LiteralArrayExpr) {
             const entries = [];
@@ -3441,6 +3468,10 @@ class AbstractEmitterVisitor {
         }
         return null;
     }
+    visitRegularExpressionLiteral(ast, ctx) {
+        ctx.print(ast, `/${ast.body}/${ast.flags || ''}`);
+        return null;
+    }
     visitLocalizedString(ast, ctx) {
         const head = ast.serializeI18nHead();
         ctx.print(ast, '$localize `' + head.raw);
@@ -4249,6 +4280,18 @@ class ParenthesizedExpression extends AST {
         return visitor.visitParenthesizedExpression(this, context);
     }
 }
+class RegularExpressionLiteral extends AST {
+    body;
+    flags;
+    constructor(span, sourceSpan, body, flags) {
+        super(span, sourceSpan);
+        this.body = body;
+        this.flags = flags;
+    }
+    visit(visitor, context) {
+        return visitor.visitRegularExpressionLiteral(this, context);
+    }
+}
 /**
  * Records the absolute position of a text span in a source file, where `start` and `end` are the
  * starting and ending byte offsets, respectively, of the text span in a source file.
@@ -4409,6 +4452,7 @@ class RecursiveAstVisitor {
     visitParenthesizedExpression(ast, context) {
         this.visit(ast.expression, context);
     }
+    visitRegularExpressionLiteral(ast, context) { }
     // This is not part of the AstVisitor interface, just a helper method
     visitAll(asts, context) {
         for (const ast of asts) {
@@ -10324,7 +10368,8 @@ function transformExpressionsInExpression(expr, transform, flags) {
     }
     else if (expr instanceof ReadVarExpr ||
         expr instanceof ExternalExpr ||
-        expr instanceof LiteralExpr) ;
+        expr instanceof LiteralExpr ||
+        expr instanceof RegularExpressionLiteral$1) ;
     else {
         throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
     }
@@ -18133,7 +18178,9 @@ var TokenType;
     TokenType[TokenType["String"] = 4] = "String";
     TokenType[TokenType["Operator"] = 5] = "Operator";
     TokenType[TokenType["Number"] = 6] = "Number";
-    TokenType[TokenType["Error"] = 7] = "Error";
+    TokenType[TokenType["RegExpBody"] = 7] = "RegExpBody";
+    TokenType[TokenType["RegExpFlags"] = 8] = "RegExpFlags";
+    TokenType[TokenType["Error"] = 9] = "Error";
 })(TokenType || (TokenType = {}));
 var StringTokenKind;
 (function (StringTokenKind) {
@@ -18228,6 +18275,12 @@ class Token {
     isError() {
         return this.type === TokenType.Error;
     }
+    isRegExpBody() {
+        return this.type === TokenType.RegExpBody;
+    }
+    isRegExpFlags() {
+        return this.type === TokenType.RegExpFlags;
+    }
     toNumber() {
         return this.type === TokenType.Number ? this.numValue : -1;
     }
@@ -18254,6 +18307,8 @@ class Token {
             case TokenType.PrivateIdentifier:
             case TokenType.String:
             case TokenType.Error:
+            case TokenType.RegExpBody:
+            case TokenType.RegExpFlags:
                 return this.strValue;
             case TokenType.Number:
                 return this.numValue.toString();
@@ -18289,6 +18344,12 @@ function newNumberToken(index, end, n) {
 }
 function newErrorToken(index, end, message) {
     return new Token(index, end, TokenType.Error, 0, message);
+}
+function newRegExpBodyToken(index, end, text) {
+    return new Token(index, end, TokenType.RegExpBody, 0, text);
+}
+function newRegExpFlagsToken(index, end, text) {
+    return new Token(index, end, TokenType.RegExpFlags, 0, text);
 }
 const EOF = new Token(-1, -1, TokenType.Character, 0, '');
 class _Scanner {
@@ -18373,6 +18434,9 @@ class _Scanner {
             case $MINUS:
                 return this.scanComplexOperator(start, '-', $EQ, '=');
             case $SLASH:
+                if (this.isStartOfRegex()) {
+                    return this.scanRegex(index);
+                }
                 return this.scanComplexOperator(start, '/', $EQ, '=');
             case $PERCENT:
                 return this.scanComplexOperator(start, '%', $EQ, '=');
@@ -18635,6 +18699,67 @@ class _Scanner {
             this.advance();
         }
         return newOperatorToken(start, this.index, operator);
+    }
+    isStartOfRegex() {
+        if (this.tokens.length === 0) {
+            return true;
+        }
+        const lastToken = this.tokens[this.tokens.length - 1];
+        return (!lastToken.isIdentifier() &&
+            !lastToken.isPrivateIdentifier() &&
+            !lastToken.isNumber() &&
+            !lastToken.isString() &&
+            !lastToken.isKeyword() &&
+            !lastToken.isCharacter($RPAREN) &&
+            !lastToken.isCharacter($RBRACKET));
+    }
+    scanRegex(tokenStart) {
+        this.advance();
+        const textStart = this.index;
+        let inEscape = false;
+        let inCharacterClass = false;
+        while (true) {
+            const peek = this.peek;
+            if (peek === $EOF) {
+                return this.error('Unterminated regular expression', 0);
+            }
+            if (inEscape) {
+                inEscape = false;
+            }
+            else if (peek === $BACKSLASH) {
+                inEscape = true;
+            }
+            else if (peek === $LBRACKET) {
+                inCharacterClass = true;
+            }
+            else if (peek === $RBRACKET) {
+                inCharacterClass = false;
+            }
+            else if (peek === $SLASH && !inCharacterClass) {
+                break;
+            }
+            this.advance();
+        }
+        // Note that we want the text without the slashes,
+        // but we still want the slashes to be part of the span.
+        const value = this.input.substring(textStart, this.index);
+        this.advance();
+        const bodyToken = newRegExpBodyToken(tokenStart, this.index, value);
+        const flagsToken = this.scanRegexFlags(this.index);
+        if (flagsToken !== null) {
+            this.tokens.push(bodyToken);
+            return flagsToken;
+        }
+        return bodyToken;
+    }
+    scanRegexFlags(start) {
+        if (!isAsciiLetter(this.peek)) {
+            return null;
+        }
+        while (isAsciiLetter(this.peek)) {
+            this.advance();
+        }
+        return newRegExpFlagsToken(start, this.index, this.input.substring(start, this.index));
     }
 }
 function isIdentifierStart(code) {
@@ -18987,6 +19112,8 @@ var ParseContextFlags;
      */
     ParseContextFlags[ParseContextFlags["Writable"] = 1] = "Writable";
 })(ParseContextFlags || (ParseContextFlags = {}));
+/** Possible flags that can be used in a regex literal. */
+const SUPPORTED_REGEX_FLAGS = new Set(['d', 'g', 'i', 'm', 's', 'u', 'v', 'y']);
 class _ParseAST {
     input;
     parseSourceSpan;
@@ -19556,6 +19683,9 @@ class _ParseAST {
             this._reportErrorForPrivateIdentifier(this.next, null);
             return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
         }
+        else if (this.next.isRegExpBody()) {
+            return this.parseRegularExpressionLiteral();
+        }
         else if (this.index >= this.tokens.length) {
             this.error(`Unexpected end of expression: ${this.input}`);
             return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
@@ -19925,6 +20055,35 @@ class _ParseAST {
         }
         return new TemplateLiteral(this.span(start), this.sourceSpan(start), elements, expressions);
     }
+    parseRegularExpressionLiteral() {
+        const bodyToken = this.next;
+        this.advance();
+        if (!bodyToken.isRegExpBody()) {
+            return new EmptyExpr$1(this.span(this.inputIndex), this.sourceSpan(this.inputIndex));
+        }
+        let flagsToken = null;
+        if (this.next.isRegExpFlags()) {
+            flagsToken = this.next;
+            this.advance();
+            const seenFlags = new Set();
+            for (let i = 0; i < flagsToken.strValue.length; i++) {
+                const char = flagsToken.strValue[i];
+                if (!SUPPORTED_REGEX_FLAGS.has(char)) {
+                    this.error(`Unsupported regular expression flag "${char}". The supported flags are: ` +
+                        Array.from(SUPPORTED_REGEX_FLAGS, (f) => `"${f}"`).join(', '), flagsToken.index + i);
+                }
+                else if (seenFlags.has(char)) {
+                    this.error(`Duplicate regular expression flag "${char}"`, flagsToken.index + i);
+                }
+                else {
+                    seenFlags.add(char);
+                }
+            }
+        }
+        const start = bodyToken.index;
+        const end = flagsToken ? flagsToken.end : bodyToken.end;
+        return new RegularExpressionLiteral(this.span(start, end), this.sourceSpan(start, end), bodyToken.strValue, flagsToken ? flagsToken.strValue : null);
+    }
     /**
      * Consume the optional statement terminator: semicolon or comma.
      */
@@ -20137,6 +20296,9 @@ class SerializeExpressionVisitor {
     }
     visitVoidExpression(ast, context) {
         return `void ${ast.expression.visit(this, context)}`;
+    }
+    visitRegularExpressionLiteral(ast, context) {
+        return `/${ast.body}/${ast.flags || ''}`;
     }
     visitASTWithSource(ast, context) {
         return ast.ast.visit(this, context);
@@ -23240,6 +23402,27 @@ function transformLiteralMap(expr) {
     return new PureFunctionExpr(literalMap(derivedEntries), nonConstantArgs);
 }
 
+/** Optimizes regular expressions used in expressions. */
+function optimizeRegularExpressions(job) {
+    for (const view of job.units) {
+        for (const op of view.ops()) {
+            transformExpressionsInOp(op, (expr) => {
+                if (expr instanceof RegularExpressionLiteral$1 &&
+                    // We can't optimize global regexes, because they're stateful.
+                    (expr.flags === null || !expr.flags.includes('g'))) {
+                    return job.pool.getSharedConstant(new RegularExpressionConstant(), expr);
+                }
+                return expr;
+            }, VisitorContextFlag.None);
+        }
+    }
+}
+class RegularExpressionConstant extends GenericKeyFn {
+    toSharedConstantDeclaration(declName, keyExpr) {
+        return new DeclareVarStmt(declName, keyExpr, undefined, exports.StmtModifier.Final);
+    }
+}
+
 // This file contains helpers for generating calls to Ivy instructions. In particular, each
 // instruction type is represented as a function, which may select a specific instruction variant
 // depending on the exact arguments.
@@ -26331,6 +26514,7 @@ function wrapI18nIcus(job) {
  */
 const phases = [
     { kind: CompilationJobKind.Tmpl, fn: removeContentSelectors },
+    { kind: CompilationJobKind.Both, fn: optimizeRegularExpressions },
     { kind: CompilationJobKind.Host, fn: parseHostStyleProperties },
     { kind: CompilationJobKind.Tmpl, fn: emitNamespaceChanges },
     { kind: CompilationJobKind.Tmpl, fn: propagateI18nBlocks },
@@ -27176,6 +27360,9 @@ function convertAst(ast, job, baseSourceSpan) {
     }
     else if (ast instanceof ParenthesizedExpression) {
         return new ParenthesizedExpr(convertAst(ast.expression, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
+    }
+    else if (ast instanceof RegularExpressionLiteral) {
+        return new RegularExpressionLiteral$1(ast.body, ast.flags, baseSourceSpan);
     }
     else {
         throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan?.start.file.url}"`);
@@ -32776,7 +32963,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.3+sha-af33647');
+const VERSION = new Version('21.0.0-next.3+sha-32c98e0');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33839,7 +34026,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Bkx6zyd-.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CNnG1EBT.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -38239,6 +38426,9 @@ class ExpressionTranslatorVisitor {
     visitLiteralExpr(ast, _context) {
         return this.setSourceMapRange(this.factory.createLiteral(ast.value), ast.sourceSpan);
     }
+    visitRegularExpressionLiteral(ast, context) {
+        return this.setSourceMapRange(this.factory.createRegularExpressionLiteral(ast.body, ast.flags), ast.sourceSpan);
+    }
     visitLocalizedString(ast, context) {
         // A `$localize` message consists of `messageParts` and `expressions`, which get interleaved
         // together. The interleaved pieces look like:
@@ -38736,6 +38926,9 @@ class TypeTranslatorVisitor {
     visitDynamicImportExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
+    visitRegularExpressionLiteral(ast, context) {
+        throw new Error('Method not implemented.');
+    }
     visitNotExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
@@ -39038,6 +39231,9 @@ class TypeScriptAstFactory {
         return ts.factory.createVariableStatement(undefined, ts.factory.createVariableDeclarationList([
             ts.factory.createVariableDeclaration(variableName, undefined, undefined, initializer ?? undefined),
         ], this.VAR_TYPES[type]));
+    }
+    createRegularExpressionLiteral(body, flags) {
+        return ts.factory.createRegularExpressionLiteral(`/${body}/${flags ?? ''}`);
     }
     setSourceMapRange(node, sourceMapRange) {
         if (sourceMapRange === null) {
@@ -44807,6 +45003,9 @@ class AstTranslator {
     visitThisReceiver(ast) {
         throw new Error('Method not implemented.');
     }
+    visitRegularExpressionLiteral(ast, context) {
+        return wrapForTypeChecker(ts.factory.createRegularExpressionLiteral(`/${ast.body}/${ast.flags ?? ''}`));
+    }
     visitInterpolation(ast) {
         // Build up a chain of binary + operations to simulate the string concatenation of the
         // interpolation's expressions. The chain is started using an actual string literal to ensure
@@ -45132,6 +45331,9 @@ class VeSafeLhsInferenceBugDetector {
     }
     visitParenthesizedExpression(ast, context) {
         return ast.expression.visit(this);
+    }
+    visitRegularExpressionLiteral(ast, context) {
+        return false;
     }
 }
 
@@ -47834,10 +48036,16 @@ function getBoundAttributes(directive, node) {
             });
         }
     };
-    node.inputs.forEach(processAttribute);
-    node.attributes.forEach(processAttribute);
     if (node instanceof Template) {
+        if (node.tagName === 'ng-template') {
+            node.inputs.forEach(processAttribute);
+            node.attributes.forEach(processAttribute);
+        }
         node.templateAttrs.forEach(processAttribute);
+    }
+    else {
+        node.inputs.forEach(processAttribute);
+        node.attributes.forEach(processAttribute);
     }
     return boundInputs;
 }
