@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-e1ae765
+ * @license Angular v21.0.0-next.4+sha-e426302
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13692,7 +13692,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.4+sha-e1ae765']
+        ? ['ng-version', '21.0.0-next.4+sha-e426302']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -20788,7 +20788,6 @@ function ɵɵdeferPrefetchWhen(rawValue) {
         try {
             const value = Boolean(rawValue); // handle truthy or falsy values
             const tView = lView[TVIEW];
-            const tNode = getSelectedTNode();
             const tDetails = getTDeferBlockDetails(tView, tNode);
             if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
                 // If loading has not been started yet, trigger it now.
