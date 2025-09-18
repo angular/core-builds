@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-307e4ea
+ * @license Angular v21.0.0-next.4+sha-4c091ab
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-BI0uV7KI.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-D4D2q-U2.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-RdUBwKbj.cjs');
 
 /**
  * Unwraps a given expression TypeScript node. Expressions can be wrapped within multiple
