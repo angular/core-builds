@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-e426302
+ * @license Angular v21.0.0-next.4+sha-307e4ea
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,7 +32,7 @@ const commonModuleImportsStr = 'CommonModule';
 function migrateNgClassBindings(template, config, componentNode, typeChecker) {
     const parsed = parse_html.parseTemplate(template);
     if (!parsed.tree || !parsed.tree.rootNodes.length) {
-        return { migrated: template, changed: false, replacementCount: 0 };
+        return { migrated: template, changed: false, replacementCount: 0, canRemoveCommonModule: false };
     }
     const visitor = new NgClassCollector(template, componentNode, typeChecker);
     project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes, config);
@@ -45,13 +45,19 @@ function migrateNgClassBindings(template, config, componentNode, typeChecker) {
         changedOffset += newTemplate.length - currentLength;
         replacementCount++;
     }
-    return { migrated: newTemplate, changed: newTemplate !== template, replacementCount };
+    const changed = newTemplate !== template;
+    return {
+        migrated: newTemplate,
+        changed,
+        replacementCount,
+        canRemoveCommonModule: changed ? parse_html.canRemoveCommonModule(newTemplate) : false,
+    };
 }
 /**
  * Creates a Replacement to remove `NgClass` from a component's `imports` array.
  * Uses ReflectionHost + PartialEvaluator for robust AST analysis.
  */
-function createNgClassImportsArrayRemoval(classNode, file, typeChecker) {
+function createNgClassImportsArrayRemoval(classNode, file, typeChecker, removeCommonModule) {
     const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
     const evaluator = new index.PartialEvaluator(reflector, typeChecker, null);
     // Use ReflectionHost to get decorators instead of manual AST traversal
@@ -84,74 +90,66 @@ function createNgClassImportsArrayRemoval(classNode, file, typeChecker) {
         return null;
     }
     const importsArray = importsProperty.initializer;
-    const ngClassIndex = importsArray.elements.findIndex((e) => ts.isIdentifier(e) && e.text === ngClassStr);
-    if (ngClassIndex === -1) {
-        return null;
+    const elementsToRemove = new Set([ngClassStr]);
+    if (removeCommonModule) {
+        elementsToRemove.add(commonModuleImportsStr);
     }
-    const elements = importsArray.elements;
-    const ngClassElement = elements[ngClassIndex];
-    const range = getNgClassRemovalRange(importsProperty, importsArray, ngClassElement, classNode.getSourceFile());
-    return new project_paths.Replacement(file, new project_paths.TextUpdate({ position: range.start, end: range.end, toInsert: '' }));
+    const originalElements = importsArray.elements;
+    const filteredElements = originalElements.filter((el) => !ts.isIdentifier(el) || !elementsToRemove.has(el.text));
+    if (filteredElements.length === originalElements.length) {
+        return null; // No changes needed.
+    }
+    // If the array becomes empty, remove the entire `imports` property.
+    if (filteredElements.length === 0) {
+        const removalRange = getPropertyRemovalRange(importsProperty);
+        return new project_paths.Replacement(file, new project_paths.TextUpdate({
+            position: removalRange.start,
+            end: removalRange.end,
+            toInsert: '',
+        }));
+    }
+    const printer = ts.createPrinter();
+    const newArray = ts.factory.updateArrayLiteralExpression(importsArray, filteredElements);
+    const newText = printer.printNode(ts.EmitHint.Unspecified, newArray, classNode.getSourceFile());
+    return new project_paths.Replacement(file, new project_paths.TextUpdate({
+        position: importsArray.getStart(),
+        end: importsArray.getEnd(),
+        toInsert: newText,
+    }));
 }
-function getElementRemovalRange(elementNode, sourceFile) {
-    const parent = elementNode.parent;
-    // Check if in array context (imports: [..]) or object context (@Component({..}))
-    const isArrayLiteralExpression = ts.isArrayLiteralExpression(parent);
-    const isObjectLiteralExpression = ts.isObjectLiteralExpression(parent);
-    let elements;
-    if (isArrayLiteralExpression) {
-        elements = parent.elements;
+function getPropertyRemovalRange(property) {
+    const parent = property.parent;
+    if (!ts.isObjectLiteralExpression(parent)) {
+        return { start: property.getStart(), end: property.getEnd() };
     }
-    else if (isObjectLiteralExpression) {
-        elements = parent.properties;
+    const properties = parent.properties;
+    const propertyIndex = properties.indexOf(property);
+    const end = property.getEnd();
+    if (propertyIndex < properties.length - 1) {
+        const nextProperty = properties[propertyIndex + 1];
+        return { start: property.getStart(), end: nextProperty.getStart() };
     }
-    else {
-        return { start: elementNode.getStart(sourceFile), end: elementNode.getEnd() };
-    }
-    const elementIndex = elements.indexOf(elementNode);
-    const isLastElement = elementIndex === elements.length - 1;
-    if (isLastElement) {
-        // If this is the LAST element, the range is from the END of the previous element
-        // to the END of this element. This captures the comma and space preceding it.
-        // Ex: `[a, b]` -> remove `, b`
-        const start = elementIndex > 0 ? elements[elementIndex - 1].getEnd() : elementNode.getStart(sourceFile); // If it is also the first (only) element, there is no comma before it.
-        return { start: start, end: elementNode.getEnd() };
-    }
-    else {
-        // If it's the FIRST or MIDDLE element, the range goes from the BEGINNING of this element
-        // to the BEGINNING of the next one. This captures the element itself and the comma that FOLLOWS it.
-        // Ex: `[a, b]` -> remove `a,`
-        const nextElement = elements[elementIndex + 1];
-        return {
-            start: elementNode.getStart(sourceFile),
-            end: nextElement.getStart(sourceFile),
-        };
-    }
+    return { start: property.getStart(), end };
 }
-/**
- * If there is more than one import, it affects the NgClass element within the array.
- * Otherwise, `NgClass` is the only import. The removal affects the entire `imports: [...]` property.
- */
-function getNgClassRemovalRange(importsProperty, importsArray, ngClassElement, sourceFile) {
-    if (importsArray.elements.length > 1) {
-        return getElementRemovalRange(ngClassElement, sourceFile);
-    }
-    else {
-        return getElementRemovalRange(importsProperty, sourceFile);
-    }
-}
-function calculateImportReplacements(info, sourceFiles) {
+function calculateImportReplacements(info, sourceFiles, filesToRemoveCommonModule) {
     const importReplacements = {};
     const importManager = new project_tsconfig_paths.ImportManager();
     for (const sf of sourceFiles) {
         const file = project_paths.projectFile(sf, info);
+        // Always remove NgClass if it's imported directly.
         importManager.removeImport(sf, ngClassStr, commonModuleStr);
+        // Conditionally remove CommonModule if it's no longer needed.
+        if (filesToRemoveCommonModule.has(file.id)) {
+            importManager.removeImport(sf, commonModuleImportsStr, commonModuleStr);
+        }
         const addRemove = [];
         apply_import_manager.applyImportManagerChanges(importManager, addRemove, [sf], info);
-        importReplacements[file.id] = {
-            add: [],
-            addAndRemove: addRemove,
-        };
+        if (addRemove.length > 0) {
+            importReplacements[file.id] = {
+                add: [],
+                addAndRemove: addRemove,
+            };
+        }
     }
     return importReplacements;
 }
@@ -390,11 +388,27 @@ class NgClassMigration extends project_paths.TsurgeFunnelMigration {
         super();
         this.config = config;
     }
+    processTemplate(template, node, file, info, typeChecker) {
+        const { migrated, changed, replacementCount, canRemoveCommonModule } = migrateNgClassBindings(template.content, this.config, node, typeChecker);
+        if (!changed) {
+            return null;
+        }
+        const fileToMigrate = template.inline
+            ? file
+            : project_paths.projectFile(template.filePath, info);
+        const end = template.start + template.content.length;
+        return {
+            replacements: [prepareTextReplacement(fileToMigrate, migrated, template.start, end)],
+            replacementCount,
+            canRemoveCommonModule,
+        };
+    }
     async analyze(info) {
         const { sourceFiles, program } = info;
         const typeChecker = program.getTypeChecker();
         const ngClassReplacements = [];
         const filesWithNgClassDeclarations = new Set();
+        const filesToRemoveCommonModule = new Set();
         for (const sf of sourceFiles) {
             ts.forEachChild(sf, (node) => {
                 if (!ts.isClassDeclaration(node)) {
@@ -408,42 +422,40 @@ class NgClassMigration extends project_paths.TsurgeFunnelMigration {
                 templateVisitor.visitNode(node);
                 const replacementsForClass = [];
                 let replacementCountForClass = 0;
-                templateVisitor.resolvedTemplates.forEach((template) => {
-                    const { migrated, changed, replacementCount } = migrateNgClassBindings(template.content, this.config, node, typeChecker);
-                    if (!changed) {
-                        return;
+                let canRemoveCommonModuleForFile = true;
+                for (const template of templateVisitor.resolvedTemplates) {
+                    const result = this.processTemplate(template, node, file, info, typeChecker);
+                    if (result) {
+                        replacementsForClass.push(...result.replacements);
+                        replacementCountForClass += result.replacementCount;
+                        if (!result.canRemoveCommonModule) {
+                            canRemoveCommonModuleForFile = false;
+                        }
                     }
-                    replacementCountForClass += replacementCount;
-                    const fileToMigrate = template.inline
-                        ? file
-                        : project_paths.projectFile(template.filePath, info);
-                    const end = template.start + template.content.length;
-                    replacementsForClass.push(prepareTextReplacement(fileToMigrate, migrated, template.start, end));
-                });
-                if (replacementCountForClass === 0) {
-                    return;
                 }
-                filesWithNgClassDeclarations.add(sf);
-                const importArrayRemoval = createNgClassImportsArrayRemoval(node, file, typeChecker);
-                if (importArrayRemoval) {
-                    replacementsForClass.push(importArrayRemoval);
-                }
-                const existing = ngClassReplacements.find((entry) => entry.file === file);
-                if (existing) {
-                    existing.replacements.push(...replacementsForClass);
-                    existing.replacementCount += replacementCountForClass;
-                }
-                else {
+                if (replacementsForClass.length > 0) {
+                    if (canRemoveCommonModuleForFile) {
+                        filesToRemoveCommonModule.add(file.id);
+                    }
+                    // Handle the `@Component({ imports: [...] })` array.
+                    const importsRemoval = createNgClassImportsArrayRemoval(node, file, typeChecker, canRemoveCommonModuleForFile);
+                    if (importsRemoval) {
+                        replacementsForClass.push(importsRemoval);
+                    }
                     ngClassReplacements.push({
                         file,
-                        replacements: replacementsForClass,
                         replacementCount: replacementCountForClass,
+                        replacements: replacementsForClass,
                     });
+                    filesWithNgClassDeclarations.add(sf);
                 }
             });
         }
-        const importReplacements = calculateImportReplacements(info, filesWithNgClassDeclarations);
-        return project_paths.confirmAsSerializable({ ngClassReplacements, importReplacements });
+        const importReplacements = calculateImportReplacements(info, filesWithNgClassDeclarations, filesToRemoveCommonModule);
+        return project_paths.confirmAsSerializable({
+            ngClassReplacements,
+            importReplacements,
+        });
     }
     async combine(unitA, unitB) {
         const importReplacements = {};
