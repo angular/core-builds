@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-d0c7ea8
+ * @license Angular v20.3.1+sha-150ed2b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4870,7 +4870,7 @@ declare const enum RuntimeErrorCode {
     INVALID_BINDING_TARGET = 316,
     INVALID_SET_INPUT_CALL = 317,
     MULTIPLE_PLATFORMS = 400,
-    PLATFORM_NOT_FOUND = 401,
+    PLATFORM_NOT_FOUND = -401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
     BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
     PLATFORM_ALREADY_DESTROYED = 404,
