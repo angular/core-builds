@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-fec7c28
+ * @license Angular v21.0.0-next.4+sha-0c4feb8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1368,7 +1368,7 @@ function createPlatformInjector(providers = [], name) {
 function assertPlatform(requiredToken) {
     const platform = getPlatform();
     if (!platform) {
-        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode && 'No platform exists!');
+        throw new RuntimeError(-401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode && 'No platform exists!');
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
         !platform.injector.get(requiredToken, null)) {
@@ -2795,7 +2795,7 @@ function internalCreateApplication(config) {
     const { rootComponent, appProviders, platformProviders, platformRef } = config;
     profiler(8 /* ProfilerEvent.BootstrapApplicationStart */);
     if (typeof ngServerMode !== 'undefined' && ngServerMode && !platformRef) {
-        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode &&
+        throw new RuntimeError(-401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode &&
             'Missing Platform: This may be due to using `bootstrapApplication` on the server without passing a `BootstrapContext`. ' +
                 'Please make sure that `bootstrapApplication` is called with a `context` argument.');
     }
