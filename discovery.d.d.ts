@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-b04e6b1
+ * @license Angular v20.3.1+sha-e78451c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3638,9 +3638,10 @@ declare abstract class Renderer2 {
      * @param parent The parent node.
      * @param oldChild The child node to remove.
      * @param isHostElement Optionally signal to the renderer whether this element is a host element
-     * or not
+     * @param requireSynchronousElementRemoval Optionally signal to the renderer whether this element
+     * needs synchronous removal
      */
-    abstract removeChild(parent: any, oldChild: any, isHostElement?: boolean): void;
+    abstract removeChild(parent: any, oldChild: any, isHostElement?: boolean, requireSynchronousElementRemoval?: boolean): void;
     /**
      * Implement this callback to prepare an element to be bootstrapped
      * as a root element, and return the element instance.
@@ -3785,7 +3786,7 @@ interface Renderer {
     destroyNode?: ((node: RNode) => void) | null;
     appendChild(parent: RElement, newChild: RNode): void;
     insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
-    removeChild(parent: RElement | null, oldChild: RNode, isHostElement?: boolean): void;
+    removeChild(parent: RElement | null, oldChild: RNode, isHostElement?: boolean, requireSynchronousElementRemoval?: boolean): void;
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;

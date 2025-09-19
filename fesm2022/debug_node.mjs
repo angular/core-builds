@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-b04e6b1
+ * @license Angular v20.3.1+sha-e78451c
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6804,9 +6804,11 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove)
  * @param renderer A renderer to be used
  * @param rNode The native node that should be removed
  * @param isHostElement A flag indicating if a node to be removed is a host of a component.
+ * @param requireSynchronousElementRemoval A flag indicating if a node requires synchronous
+ * removal from the DOM.
  */
-function nativeRemoveNode(renderer, rNode, isHostElement) {
-    renderer.removeChild(null, rNode, isHostElement);
+function nativeRemoveNode(renderer, rNode, isHostElement, requireSynchronousElementRemoval) {
+    renderer.removeChild(null, rNode, isHostElement, requireSynchronousElementRemoval);
 }
 /**
  * Clears the contents of a given RElement.
@@ -7357,8 +7359,11 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
         }
         else if (action === 2 /* WalkTNodeTreeAction.Detach */) {
-            runLeaveAnimationsWithCallback(parentLView, () => {
-                nativeRemoveNode(renderer, rNode, isComponent);
+            runLeaveAnimationsWithCallback(parentLView, (nodeHasLeaveAnimations) => {
+                // the nodeHasLeaveAnimations indicates to the renderer that the element needs to
+                // be removed synchronously and sets the requireSynchronousElementRemoval flag in
+                // the renderer.
+                nativeRemoveNode(renderer, rNode, isComponent, nodeHasLeaveAnimations);
             });
         }
         else if (action === 3 /* WalkTNodeTreeAction.Destroy */) {
@@ -7569,11 +7574,11 @@ function runAfterLeaveAnimations(lView, callback) {
                 lView[ANIMATIONS].running = undefined;
             }
             allLeavingAnimations.delete(lView);
-            callback();
+            callback(true);
         });
         return;
     }
-    callback();
+    callback(false);
 }
 /** Removes listeners and unsubscribes from output subscriptions */
 function processCleanups(tView, lView) {
@@ -13686,7 +13691,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.1+sha-b04e6b1']
+        ? ['ng-version', '20.3.1+sha-e78451c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
