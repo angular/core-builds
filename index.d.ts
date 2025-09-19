@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-8891ee4
+ * @license Angular v21.0.0-next.4+sha-fec7c28
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4770,6 +4770,7 @@ declare const enum RuntimeErrorCode {
     MISSING_INJECTION_TOKEN = 208,
     INVALID_MULTI_PROVIDER = -209,
     MISSING_DOCUMENT = 210,
+    INVALID_APP_ID = 211,
     MULTIPLE_COMPONENTS_MATCH = -300,
     EXPORT_NOT_FOUND = -301,
     PIPE_NOT_FOUND = -302,
