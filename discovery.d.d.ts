@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-de18875
+ * @license Angular v20.3.1+sha-b04e6b1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -70,7 +70,7 @@ type AnimationFunction = (event: AnimationCallbackEvent) => void;
 interface AnimationLViewData {
     enter?: Function[];
     leave?: (() => Promise<void>)[];
-    running?: Promise<PromiseSettledResult<void>[]>;
+    running?: Promise<unknown>;
     skipLeaveAnimations?: boolean;
 }
 
