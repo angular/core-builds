@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-56cb093
+ * @license Angular v21.0.0-next.4+sha-40ae5af
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -160,7 +160,7 @@ const HOST_TAG_NAME = /* @__PURE__ */ (() => {
     // the bundler can drop the whole block. If we set `__NG_ELEMENT_ID__` at
     // the top level instead, the mutation would look like a side effect,
     // forcing the bundler to keep it even when unused.
-    const HOST_TAG_NAME_TOKEN = new InjectionToken(ngDevMode ? 'HOST_TAG_NAME' : '');
+    const HOST_TAG_NAME_TOKEN = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'HOST_TAG_NAME' : '');
     // HOST_TAG_NAME should be resolved at the current node, similar to e.g. ElementRef,
     // so we manually specify __NG_ELEMENT_ID__ here, instead of using a factory.
     // tslint:disable-next-line:no-toplevel-property-access
@@ -1027,7 +1027,7 @@ function logOversizedImageWarning(src) {
  * `PlatformRef` class (i.e. register the callback via `PlatformRef.onDestroy`), thus making the
  * entire class tree-shakeable.
  */
-const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestroyListeners' : '');
+const PLATFORM_DESTROY_LISTENERS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'PlatformDestroyListeners' : '');
 
 /**
  * InjectionToken to control root component bootstrap behavior.
@@ -1049,7 +1049,7 @@ const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestr
  * This mechanism ensures SSR can efficiently separate route extraction logic
  * from component rendering.
  */
-const ENABLE_ROOT_COMPONENT_BOOTSTRAP = new InjectionToken(ngDevMode ? 'ENABLE_ROOT_COMPONENT_BOOTSTRAP' : '');
+const ENABLE_ROOT_COMPONENT_BOOTSTRAP = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ENABLE_ROOT_COMPONENT_BOOTSTRAP' : '');
 function isApplicationBootstrapConfig(config) {
     return !config.moduleRef;
 }

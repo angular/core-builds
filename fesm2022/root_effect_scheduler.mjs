@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-56cb093
+ * @license Angular v21.0.0-next.4+sha-40ae5af
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.0.0-next.4+sha-56cb093');
+const VERSION = /* @__PURE__ */ new Version('21.0.0-next.4+sha-40ae5af');
 
 /**
  * Base URL for the error details page.
@@ -1459,7 +1459,7 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
  *
  * @publicApi
  */
-const ENVIRONMENT_INITIALIZER = new InjectionToken(ngDevMode ? 'ENVIRONMENT_INITIALIZER' : '');
+const ENVIRONMENT_INITIALIZER = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ENVIRONMENT_INITIALIZER' : '');
 
 /**
  * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
@@ -1469,12 +1469,12 @@ const ENVIRONMENT_INITIALIZER = new InjectionToken(ngDevMode ? 'ENVIRONMENT_INIT
  *
  * @publicApi
  */
-const INJECTOR$1 = new InjectionToken(ngDevMode ? 'INJECTOR' : '', 
+const INJECTOR$1 = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'INJECTOR' : '', 
 // Disable tslint because this is const enum which gets inlined not top level prop access.
 // tslint:disable-next-line: no-toplevel-property-access
 -1 /* InjectorMarkers.Injector */);
 
-const INJECTOR_DEF_TYPES = new InjectionToken(ngDevMode ? 'INJECTOR_DEF_TYPES' : '');
+const INJECTOR_DEF_TYPES = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'INJECTOR_DEF_TYPES' : '');
 
 class NullInjector {
     get(token, notFoundValue = THROW_IF_NOT_FOUND) {
@@ -1841,7 +1841,7 @@ function isClassProvider(value) {
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
-const INJECTOR_SCOPE = new InjectionToken(ngDevMode ? 'Set Injector scope.' : '');
+const INJECTOR_SCOPE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Set Injector scope.' : '');
 
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -3530,7 +3530,7 @@ class Injector {
  *
  * @publicApi
  */
-const DOCUMENT = new InjectionToken(ngDevMode ? 'DocumentToken' : '');
+const DOCUMENT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DocumentToken' : '');
 
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
@@ -4312,7 +4312,7 @@ const errorHandlerEnvironmentInitializer = {
     },
     multi: true,
 };
-const globalErrorListeners = new InjectionToken(ngDevMode ? 'GlobalErrorListeners' : '', {
+const globalErrorListeners = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'GlobalErrorListeners' : '', {
     providedIn: 'root',
     factory: () => {
         if (typeof ngServerMode !== 'undefined' && ngServerMode) {

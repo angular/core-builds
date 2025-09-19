@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-56cb093
+ * @license Angular v21.0.0-next.4+sha-40ae5af
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3569,7 +3569,7 @@ function getDocument() {
  *
  * @publicApi
  */
-const APP_ID = new InjectionToken(ngDevMode ? 'AppId' : '', {
+const APP_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AppId' : '', {
     providedIn: 'root',
     factory: () => DEFAULT_APP_ID,
 });
@@ -3597,12 +3597,12 @@ const validAppIdInitializer = {
  *
  * @publicApi
  */
-const PLATFORM_INITIALIZER = new InjectionToken(ngDevMode ? 'Platform Initializer' : '');
+const PLATFORM_INITIALIZER = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Platform Initializer' : '');
 /**
  * A token that indicates an opaque platform ID.
  * @publicApi
  */
-const PLATFORM_ID = new InjectionToken(ngDevMode ? 'Platform ID' : '', {
+const PLATFORM_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Platform ID' : '', {
     providedIn: 'platform',
     factory: () => 'unknown', // set a default platform name, when none set explicitly
 });
@@ -3614,7 +3614,7 @@ const PLATFORM_ID = new InjectionToken(ngDevMode ? 'Platform ID' : '', {
  * module has been loaded.
  * @publicApi
  */
-const ANIMATION_MODULE_TYPE = new InjectionToken(ngDevMode ? 'AnimationModuleType' : '');
+const ANIMATION_MODULE_TYPE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AnimationModuleType' : '');
 // TODO(crisbeto): link to CSP guide here.
 /**
  * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
@@ -3623,7 +3623,7 @@ const ANIMATION_MODULE_TYPE = new InjectionToken(ngDevMode ? 'AnimationModuleTyp
  *
  * @publicApi
  */
-const CSP_NONCE = new InjectionToken(ngDevMode ? 'CSP nonce' : '', {
+const CSP_NONCE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'CSP nonce' : '', {
     providedIn: 'root',
     factory: () => {
         // Ideally we wouldn't have to use `querySelector` here since we know that the nonce will be on
@@ -3661,7 +3661,7 @@ const IMAGE_CONFIG_DEFAULTS = {
  * @see {@link ImageConfig}
  * @publicApi
  */
-const IMAGE_CONFIG = new InjectionToken(ngDevMode ? 'ImageConfig' : '', {
+const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ImageConfig' : '', {
     providedIn: 'root',
     factory: () => IMAGE_CONFIG_DEFAULTS,
 });
@@ -3848,7 +3848,7 @@ const IS_INCREMENTAL_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode ===
 /**
  * A map of DOM elements with `jsaction` attributes grouped by action names.
  */
-const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
+const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
     providedIn: 'root',
     factory: () => new Map(),
 });
@@ -4066,7 +4066,7 @@ const removeListeners = (el) => {
     el.removeAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE);
     el.__jsaction_fns = undefined;
 };
-const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
+const JSACTION_EVENT_CONTRACT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
     providedIn: 'root',
     factory: () => ({}),
 });
@@ -4134,7 +4134,7 @@ function enableStashEventListenerImpl() {
  * An internal injection token to reference `DehydratedBlockRegistry` implementation
  * in a tree-shakable way.
  */
-const DEHYDRATED_BLOCK_REGISTRY = new InjectionToken(ngDevMode ? 'DEHYDRATED_BLOCK_REGISTRY' : '');
+const DEHYDRATED_BLOCK_REGISTRY = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DEHYDRATED_BLOCK_REGISTRY' : '');
 /**
  * The DehydratedBlockRegistry is used for incremental hydration purposes. It keeps
  * track of the Defer Blocks that need hydration so we can effectively
@@ -6816,9 +6816,11 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove)
  * @param renderer A renderer to be used
  * @param rNode The native node that should be removed
  * @param isHostElement A flag indicating if a node to be removed is a host of a component.
+ * @param requireSynchronousElementRemoval A flag indicating if a node requires synchronous
+ * removal from the DOM.
  */
-function nativeRemoveNode(renderer, rNode, isHostElement) {
-    renderer.removeChild(null, rNode, isHostElement);
+function nativeRemoveNode(renderer, rNode, isHostElement, requireSynchronousElementRemoval) {
+    renderer.removeChild(null, rNode, isHostElement, requireSynchronousElementRemoval);
 }
 /**
  * Clears the contents of a given RElement.
@@ -7369,8 +7371,11 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
         }
         else if (action === 2 /* WalkTNodeTreeAction.Detach */) {
-            runLeaveAnimationsWithCallback(parentLView, () => {
-                nativeRemoveNode(renderer, rNode, isComponent);
+            runLeaveAnimationsWithCallback(parentLView, (nodeHasLeaveAnimations) => {
+                // the nodeHasLeaveAnimations indicates to the renderer that the element needs to
+                // be removed synchronously and sets the requireSynchronousElementRemoval flag in
+                // the renderer.
+                nativeRemoveNode(renderer, rNode, isComponent, nodeHasLeaveAnimations);
             });
         }
         else if (action === 3 /* WalkTNodeTreeAction.Destroy */) {
@@ -7581,11 +7586,11 @@ function runAfterLeaveAnimations(lView, callback) {
                 lView[ANIMATIONS].running = undefined;
             }
             allLeavingAnimations.delete(lView);
-            callback();
+            callback(true);
         });
         return;
     }
-    callback();
+    callback(false);
 }
 /** Removes listeners and unsubscribes from output subscriptions */
 function processCleanups(tView, lView) {
@@ -8808,7 +8813,7 @@ function shouldAddViewToDom(tNode, dehydratedView) {
 }
 
 const USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT = false;
-const UseExhaustiveCheckNoChanges = new InjectionToken(ngDevMode ? 'exhaustive checkNoChanges' : '');
+const UseExhaustiveCheckNoChanges = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'exhaustive checkNoChanges' : '');
 
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     while (tNode !== null) {
@@ -13700,7 +13705,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.4+sha-56cb093']
+        ? ['ng-version', '21.0.0-next.4+sha-40ae5af']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -16376,7 +16381,7 @@ var TracingAction;
 /**
  * Injection token for a `TracingService`, optionally provided.
  */
-const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
+const TracingService = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TracingService' : '');
 
 class AfterRenderManager {
     impl = null;
@@ -17212,7 +17217,7 @@ const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR =
 /**
  * **INTERNAL**, token used for configuring defer block behavior.
  */
-const DEFER_BLOCK_CONFIG = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
+const DEFER_BLOCK_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
 /**
  * Checks whether there is a cached injector associated with a given defer block
  * declaration and returns if it exists. If there is no cached injector present -
@@ -29913,7 +29918,7 @@ class Compiler {
  *
  * @publicApi
  */
-const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
+const COMPILER_OPTIONS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'compilerOptions' : '');
 /**
  * A factory for creating a Compiler
  *
@@ -30291,7 +30296,7 @@ function getGlobalLocale() {
  *
  * @publicApi
  */
-const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
+const LOCALE_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'LocaleId' : '', {
     providedIn: 'root',
     factory: () => inject(LOCALE_ID, { optional: true, skipSelf: true }) || getGlobalLocale(),
 });
@@ -30338,7 +30343,7 @@ const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
  *
  * @publicApi
  */
-const DEFAULT_CURRENCY_CODE = new InjectionToken(ngDevMode ? 'DefaultCurrencyCode' : '', {
+const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DefaultCurrencyCode' : '', {
     providedIn: 'root',
     factory: () => USD_CURRENCY_CODE,
 });
@@ -30375,7 +30380,7 @@ const DEFAULT_CURRENCY_CODE = new InjectionToken(ngDevMode ? 'DefaultCurrencyCod
  *
  * @publicApi
  */
-const TRANSLATIONS = new InjectionToken(ngDevMode ? 'Translations' : '');
+const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Translations' : '');
 /**
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
@@ -30406,7 +30411,7 @@ const TRANSLATIONS = new InjectionToken(ngDevMode ? 'Translations' : '');
  *
  * @publicApi
  */
-const TRANSLATIONS_FORMAT = new InjectionToken(ngDevMode ? 'TranslationsFormat' : '');
+const TRANSLATIONS_FORMAT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TranslationsFormat' : '');
 /**
  * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
  * that the compiler should use in case of missing translations:
