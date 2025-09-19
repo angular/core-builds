@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.1+sha-3c66209
+ * @license Angular v20.3.1+sha-d0c7ea8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -402,9 +402,16 @@ function getComponentImportExpressions(decl, allDeclarations, tracker, typeCheck
         const importLocation = findImportLocation(dep, decl, usedDependenciesInMigration.has(dep)
             ? project_tsconfig_paths.PotentialImportMode.ForceDirect
             : project_tsconfig_paths.PotentialImportMode.Normal, typeChecker);
-        if (importLocation && !seenImports.has(importLocation.symbolName)) {
-            seenImports.add(importLocation.symbolName);
-            resolvedDependencies.push(importLocation);
+        if (importLocation) {
+            // Create a unique key that includes both the symbol name and module specifier
+            // to handle cases where the same symbol name is imported from different modules
+            const importKey = importLocation.moduleSpecifier
+                ? `${importLocation.symbolName}::${importLocation.moduleSpecifier}`
+                : importLocation.symbolName;
+            if (!seenImports.has(importKey)) {
+                seenImports.add(importKey);
+                resolvedDependencies.push(importLocation);
+            }
         }
     }
     return potentialImportsToExpressions(resolvedDependencies, decl.getSourceFile(), tracker, importRemapper);

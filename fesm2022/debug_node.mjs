@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-3c66209
+ * @license Angular v20.3.1+sha-d0c7ea8
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13650,13 +13650,8 @@ class ComponentFactory extends ComponentFactory$1 {
             try {
                 const hostTNode = directiveHostFirstCreatePass(HEADER_OFFSET, rootLView, 2 /* TNodeType.Element */, '#host', () => rootTView.directiveRegistry, true, 0);
                 // ---- element instruction
-                // TODO(crisbeto): in practice `hostElement` should always be defined, but there are some
-                // tests where the renderer is mocked out and `undefined` is returned. We should update the
-                // tests so that this check can be removed.
-                if (hostElement) {
-                    setupStaticAttributes(hostRenderer, hostElement, hostTNode);
-                    attachPatchData(hostElement, rootLView);
-                }
+                setupStaticAttributes(hostRenderer, hostElement, hostTNode);
+                attachPatchData(hostElement, rootLView);
                 // TODO(pk): this logic is similar to the instruction code where a node can have directives
                 createDirectivesInstances(rootTView, rootLView, hostTNode);
                 executeContentQueries(rootTView, hostTNode, rootLView);
@@ -13691,7 +13686,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.1+sha-3c66209']
+        ? ['ng-version', '20.3.1+sha-d0c7ea8']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
