@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-b60d5e4
+ * @license Angular v21.0.0-next.4+sha-2d232b3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2903,16 +2903,6 @@ class Identifiers {
     };
     static validateIframeAttribute = {
         name: 'ɵɵvalidateIframeAttribute',
-        moduleName: CORE,
-    };
-    // Decorators
-    static inputDecorator = { name: 'Input', moduleName: CORE };
-    static outputDecorator = { name: 'Output', moduleName: CORE };
-    static viewChildDecorator = { name: 'ViewChild', moduleName: CORE };
-    static viewChildrenDecorator = { name: 'ViewChildren', moduleName: CORE };
-    static contentChildDecorator = { name: 'ContentChild', moduleName: CORE };
-    static contentChildrenDecorator = {
-        name: 'ContentChildren',
         moduleName: CORE,
     };
     // type-checking
@@ -32974,7 +32964,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.4+sha-b60d5e4');
+const VERSION = new Version('21.0.0-next.4+sha-2d232b3');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -34037,7 +34027,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DfXQ3yIs.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BwEAMq1P.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -40439,120 +40429,6 @@ function parseFieldStringArrayValue(directive, field, evaluator) {
         throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Directive.${field} to a string array`);
     }
     return value;
-}
-/**
- * Returns a function that can be used to extract data for the `setClassMetadata`
- * calls from undecorated directive class members.
- */
-function getDirectiveUndecoratedMetadataExtractor(reflector, importTracker) {
-    return (member) => {
-        const input = tryParseSignalInputMapping(member, reflector, importTracker);
-        if (input !== null) {
-            return getDecoratorMetaArray([
-                [new ExternalExpr(Identifiers.inputDecorator), memberMetadataFromSignalInput(input)],
-            ]);
-        }
-        const output = tryParseInitializerBasedOutput(member, reflector, importTracker);
-        if (output !== null) {
-            return getDecoratorMetaArray([
-                [
-                    new ExternalExpr(Identifiers.outputDecorator),
-                    memberMetadataFromInitializerOutput(output.metadata),
-                ],
-            ]);
-        }
-        const model = tryParseSignalModelMapping(member, reflector, importTracker);
-        if (model !== null) {
-            return getDecoratorMetaArray([
-                [
-                    new ExternalExpr(Identifiers.inputDecorator),
-                    memberMetadataFromSignalInput(model.input),
-                ],
-                [
-                    new ExternalExpr(Identifiers.outputDecorator),
-                    memberMetadataFromInitializerOutput(model.output),
-                ],
-            ]);
-        }
-        const query = tryParseSignalQueryFromInitializer(member, reflector, importTracker);
-        if (query !== null) {
-            let identifier;
-            if (query.name === 'viewChild') {
-                identifier = Identifiers.viewChildDecorator;
-            }
-            else if (query.name === 'viewChildren') {
-                identifier = Identifiers.viewChildrenDecorator;
-            }
-            else if (query.name === 'contentChild') {
-                identifier = Identifiers.contentChildDecorator;
-            }
-            else if (query.name === 'contentChildren') {
-                identifier = Identifiers.contentChildrenDecorator;
-            }
-            else {
-                return null;
-            }
-            return getDecoratorMetaArray([
-                [new ExternalExpr(identifier), memberMetadataFromSignalQuery(query.call)],
-            ]);
-        }
-        return null;
-    };
-}
-function getDecoratorMetaArray(decorators) {
-    return new LiteralArrayExpr(decorators.map(([type, args]) => literalMap([
-        { key: 'type', value: type, quoted: false },
-        { key: 'args', value: args, quoted: false },
-    ])));
-}
-function memberMetadataFromSignalInput(input) {
-    // Note that for signal inputs the transform is captured in the signal
-    // initializer so we don't need to capture it here.
-    return new LiteralArrayExpr([
-        literalMap([
-            {
-                key: 'isSignal',
-                value: literal(true),
-                quoted: false,
-            },
-            {
-                key: 'alias',
-                value: literal(input.bindingPropertyName),
-                quoted: false,
-            },
-            {
-                key: 'required',
-                value: literal(input.required),
-                quoted: false,
-            },
-        ]),
-    ]);
-}
-function memberMetadataFromInitializerOutput(output) {
-    return new LiteralArrayExpr([literal(output.bindingPropertyName)]);
-}
-function memberMetadataFromSignalQuery(call) {
-    const firstArg = call.arguments[0];
-    const firstArgMeta = ts.isStringLiteralLike(firstArg) || ts.isCallExpression(firstArg)
-        ? new WrappedNodeExpr(firstArg)
-        : // If the first argument is a class reference, we need to wrap it in a `forwardRef`
-            // because the reference might occur after the current class. This wouldn't be flagged
-            // on the query initializer, because it executes after the class is initialized, whereas
-            // `setClassMetadata` runs immediately.
-            new ExternalExpr(Identifiers.forwardRef).callFn([
-                new ArrowFunctionExpr([], new WrappedNodeExpr(firstArg)),
-            ]);
-    const entries = [
-        // We use wrapped nodes here, because the output AST doesn't support spread assignments.
-        firstArgMeta,
-        new WrappedNodeExpr(ts.factory.createObjectLiteralExpression([
-            ...(call.arguments.length > 1
-                ? [ts.factory.createSpreadAssignment(call.arguments[1])]
-                : []),
-            ts.factory.createPropertyAssignment('isSignal', ts.factory.createTrue()),
-        ])),
-    ];
-    return new LiteralArrayExpr(entries);
 }
 function isStringArrayOrDie(value, name, node) {
     if (!Array.isArray(value)) {
@@ -51297,7 +51173,6 @@ exports.getConstructorDependencies = getConstructorDependencies;
 exports.getContainingImportDeclaration = getContainingImportDeclaration;
 exports.getDefaultImportDeclaration = getDefaultImportDeclaration;
 exports.getDirectiveDiagnostics = getDirectiveDiagnostics;
-exports.getDirectiveUndecoratedMetadataExtractor = getDirectiveUndecoratedMetadataExtractor;
 exports.getFileSystem = getFileSystem;
 exports.getOriginNodeForDiagnostics = getOriginNodeForDiagnostics;
 exports.getProjectTsConfigPaths = getProjectTsConfigPaths;
