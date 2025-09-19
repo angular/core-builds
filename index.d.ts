@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-4328ea8
+ * @license Angular v21.0.0-next.4+sha-8891ee4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6383,12 +6383,12 @@ declare function ɵɵdeferHydrateOnViewport(): void;
 declare function ɵɵadvance(delta?: number): void;
 
 /**
- * Update an ARIA attribute by either its attribute or property name on a selected element.
+ * Update an ARIA attribute on a selected element.
  *
- * If the property name also exists as an input property on any of the element's directives, those
- * inputs will be set instead of the element property.
+ * If the attribute name also exists as an input property on any of the element's directives, those
+ * inputs will be set instead of the element attribute.
  *
- * @param name Name of the ARIA attribute or property (beginning with `aria`).
+ * @param name Name of the ARIA attribute (beginning with `aria-`).
  * @param value New value to write.
  * @returns This function returns itself so that it may be chained.
  *

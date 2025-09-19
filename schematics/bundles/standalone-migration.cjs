@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-4328ea8
+ * @license Angular v21.0.0-next.4+sha-8891ee4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var index = require('./index-DibrglSz.cjs');
+var index = require('./index-1VdjOnkg.cjs');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-BRrb_JUt.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-RdUBwKbj.cjs');
+var compiler_host = require('./compiler_host-D_QW5lia.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DfXQ3yIs.cjs');
 var ng_decorators = require('./ng_decorators-BI0uV7KI.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var symbol = require('./symbol-BObKoqes.cjs');
@@ -402,9 +402,16 @@ function getComponentImportExpressions(decl, allDeclarations, tracker, typeCheck
         const importLocation = findImportLocation(dep, decl, usedDependenciesInMigration.has(dep)
             ? project_tsconfig_paths.PotentialImportMode.ForceDirect
             : project_tsconfig_paths.PotentialImportMode.Normal, typeChecker);
-        if (importLocation && !seenImports.has(importLocation.symbolName)) {
-            seenImports.add(importLocation.symbolName);
-            resolvedDependencies.push(importLocation);
+        if (importLocation) {
+            // Create a unique key that includes both the symbol name and module specifier
+            // to handle cases where the same symbol name is imported from different modules
+            const importKey = importLocation.moduleSpecifier
+                ? `${importLocation.symbolName}::${importLocation.moduleSpecifier}`
+                : importLocation.symbolName;
+            if (!seenImports.has(importKey)) {
+                seenImports.add(importKey);
+                resolvedDependencies.push(importLocation);
+            }
         }
     }
     return potentialImportsToExpressions(resolvedDependencies, decl.getSourceFile(), tracker, importRemapper);
