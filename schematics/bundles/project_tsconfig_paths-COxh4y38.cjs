@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.1+sha-ca104b3
+ * @license Angular v20.3.1+sha-2d21524
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32774,7 +32774,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.1+sha-ca104b3');
+const VERSION = new Version('20.3.1+sha-2d21524');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33836,7 +33836,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-crm5NKE7.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-COxh4y38.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -42435,6 +42435,10 @@ class MagicString {
 			if (chunk.outro.length) mappings.advance(chunk.outro);
 		});
 
+		if (this.outro) {
+			mappings.advance(this.outro);
+		}
+
 		return {
 			file: options.file ? options.file.split(/[/\\]/).pop() : undefined,
 			sources: [
@@ -43100,7 +43104,12 @@ class MagicString {
 		const index = original.indexOf(string);
 
 		if (index !== -1) {
-			this.overwrite(index, index + string.length, replacement);
+			if (typeof replacement === 'function') {
+				replacement = replacement(string, index, original);
+			}
+			if (string !== replacement) {
+				this.overwrite(index, index + string.length, replacement);
+			}
 		}
 
 		return this;
@@ -43123,7 +43132,11 @@ class MagicString {
 			index = original.indexOf(string, index + stringLength)
 		) {
 			const previous = original.slice(index, index + stringLength);
-			if (previous !== replacement) this.overwrite(index, index + stringLength, replacement);
+			let _replacement = replacement;
+			if (typeof replacement === 'function') {
+				_replacement = replacement(previous, index, original);
+			}
+			if (previous !== _replacement) this.overwrite(index, index + stringLength, _replacement);
 		}
 
 		return this;
