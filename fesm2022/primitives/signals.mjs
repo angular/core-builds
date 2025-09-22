@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-1d4f81c
+ * @license Angular v20.3.1+sha-a67d822
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -43,10 +43,10 @@ function createWatch(fn, schedule, allowSignalWrites) {
                 : '');
         }
         node.dirty = false;
-        if (node.hasRun && !consumerPollProducersForChange(node)) {
+        if (node.version > 0 && !consumerPollProducersForChange(node)) {
             return;
         }
-        node.hasRun = true;
+        node.version++;
         const prevConsumer = consumerBeforeComputation(node);
         try {
             node.cleanupFn();
@@ -80,7 +80,6 @@ const WATCH_NODE = /* @__PURE__ */ (() => {
                 node.schedule(node.ref);
             }
         },
-        hasRun: false,
         cleanupFn: NOOP_CLEANUP_FN,
     };
 })();

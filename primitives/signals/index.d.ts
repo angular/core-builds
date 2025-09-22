@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-1d4f81c
+ * @license Angular v20.3.1+sha-a67d822
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -106,7 +106,6 @@ interface Watch {
     [SIGNAL]: WatchNode;
 }
 interface WatchNode extends ReactiveNode {
-    hasRun: boolean;
     fn: ((onCleanup: WatchCleanupRegisterFn) => void) | null;
     schedule: ((watch: Watch) => void) | null;
     cleanupFn: WatchCleanupFn;
