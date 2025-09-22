@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-3bd91de
+ * @license Angular v21.0.0-next.4+sha-5406e1a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -119,15 +119,14 @@ const BASE_EFFECT_NODE =
     consumerIsAlwaysLive: true,
     consumerAllowSignalWrites: true,
     dirty: true,
-    hasRun: false,
     kind: 'effect',
 }))();
 function runEffect(node) {
     node.dirty = false;
-    if (node.hasRun && !consumerPollProducersForChange(node)) {
+    if (node.version > 0 && !consumerPollProducersForChange(node)) {
         return;
     }
-    node.hasRun = true;
+    node.version++;
     const prevNode = consumerBeforeComputation(node);
     try {
         node.cleanup();
