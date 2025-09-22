@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-a7e4851
+ * @license Angular v21.0.0-next.4+sha-3bd91de
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 var ts = require('typescript');
 require('os');
 var project_tsconfig_paths = require('./project_tsconfig_paths-Cfrq3FPR.cjs');
-var project_paths = require('./project_paths-P8Y7opU3.cjs');
+var project_paths = require('./project_paths-IHwbk0Jd.cjs');
 
 /**
  * Applies import manager changes, and writes them as replacements the
