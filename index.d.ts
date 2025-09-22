@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-6782f71
+ * @license Angular v21.0.0-next.4+sha-a2d98cc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3525,7 +3525,6 @@ declare class TemplateRef<C> {
  *
  * ```angular-ts
  * @Component({
- *   standalone: true,
  *   selector: 'dynamic',
  *   template: `<span>This is a content of a dynamic component.</span>`,
  * })
@@ -3534,7 +3533,6 @@ declare class TemplateRef<C> {
  * }
  *
  * @Component({
- *   standalone: true,
  *   selector: 'app',
  *   template: `<main>Hi! This is the main content.</main>`,
  * })
@@ -9100,7 +9098,6 @@ declare const depsTracker: DepsTracker;
  *
  * ```angular-ts
  * @Component({
- *   standalone: true,
  *   template: `Hello {{ name }}!`
  * })
  * class HelloComponent {
@@ -9108,7 +9105,6 @@ declare const depsTracker: DepsTracker;
  * }
  *
  * @Component({
- *   standalone: true,
  *   template: `<div id="hello-component-host"></div>`
  * })
  * class RootComponent {}
@@ -9145,7 +9141,7 @@ declare const depsTracker: DepsTracker;
  * `[[element1, element2], [element3]]`: projects `element1` and `element2` into one `<ng-content>`,
  * and `element3` into a separate `<ng-content>`.
  *  * `directives` (optional): Directives that should be applied to the component.
- *  * `binding` (optional): Bindings to apply to the root component.
+ *  * `bindings` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
  * @publicApi
@@ -9209,7 +9205,6 @@ interface ComponentMirror<C> {
  *
  * ```angular-ts
  * @Component({
- *   standalone: true,
  *   selector: 'foo-component',
  *   template: `
  *     <ng-content></ng-content>

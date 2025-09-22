@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.4+sha-6782f71
+ * @license Angular v21.0.0-next.4+sha-a2d98cc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6236,8 +6236,8 @@ function assertStandaloneComponentType(type) {
     if (!componentDef.standalone) {
         throw new RuntimeError(907 /* RuntimeErrorCode.TYPE_IS_NOT_STANDALONE */, `The ${stringifyForError(type)} component is not marked as standalone, ` +
             `but Angular expects to have a standalone component here. ` +
-            `Please make sure the ${stringifyForError(type)} component has ` +
-            `the \`standalone: true\` flag in the decorator.`);
+            `Please make sure the ${stringifyForError(type)} component does not have ` +
+            `the \`standalone: false\` flag in the decorator.`);
     }
 }
 /** Verifies whether a given type is a component */
@@ -12179,7 +12179,8 @@ function verifyStandaloneImport(depType, importingType) {
         if (def != null) {
             // if a component, directive or pipe is imported make sure that it is standalone
             if (!def.standalone) {
-                throw new Error(`The "${stringifyForError(depType)}" ${getDependencyTypeForError(depType)}, imported from "${stringifyForError(importingType)}", is not standalone. Did you forget to add the standalone: true flag?`);
+                const type = getDependencyTypeForError(depType);
+                throw new Error(`The "${stringifyForError(depType)}" ${type}, imported from "${stringifyForError(importingType)}", is not standalone. Does the ${type} have the standalone: false flag?`);
             }
         }
         else {
@@ -13705,7 +13706,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.4+sha-6782f71']
+        ? ['ng-version', '21.0.0-next.4+sha-a2d98cc']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -13878,7 +13879,6 @@ function projectNodes(tNode, ngContentSelectors, projectableNodes) {
  *
  * ```angular-ts
  * @Component({
- *   standalone: true,
  *   selector: 'dynamic',
  *   template: `<span>This is a content of a dynamic component.</span>`,
  * })
@@ -13887,7 +13887,6 @@ function projectNodes(tNode, ngContentSelectors, projectableNodes) {
  * }
  *
  * @Component({
- *   standalone: true,
  *   selector: 'app',
  *   template: `<main>Hi! This is the main content.</main>`,
  * })
