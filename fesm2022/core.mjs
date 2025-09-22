@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-12b9577
+ * @license Angular v20.3.1+sha-ca104b3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4367,7 +4367,7 @@ function phaseDebugName(phase) {
  * `[[element1, element2], [element3]]`: projects `element1` and `element2` into one `<ng-content>`,
  * and `element3` into a separate `<ng-content>`.
  *  * `directives` (optional): Directives that should be applied to the component.
- *  * `binding` (optional): Bindings to apply to the root component.
+ *  * `bindings` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
  * @publicApi
