@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-0ebf1af
+ * @license Angular v20.3.1+sha-8d1891a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -274,16 +274,17 @@ const identityFn = (v) => v;
 function linkedSignal(optionsOrComputation, options) {
     if (typeof optionsOrComputation === 'function') {
         const getter = createLinkedSignal(optionsOrComputation, (identityFn), options?.equal);
-        return upgradeLinkedSignalGetter(getter);
+        return upgradeLinkedSignalGetter(getter, options?.debugName);
     }
     else {
         const getter = createLinkedSignal(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
-        return upgradeLinkedSignalGetter(getter);
+        return upgradeLinkedSignalGetter(getter, optionsOrComputation.debugName);
     }
 }
-function upgradeLinkedSignalGetter(getter) {
+function upgradeLinkedSignalGetter(getter, debugName) {
     if (ngDevMode) {
         getter.toString = () => `[LinkedSignal: ${getter()}]`;
+        getter[SIGNAL].debugName = debugName;
     }
     const node = getter[SIGNAL];
     const upgradedGetter = getter;
