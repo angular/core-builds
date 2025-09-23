@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.1+sha-2d07610
+ * @license Angular v20.3.1+sha-9515a70
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -139,7 +139,8 @@ interface Resource<T> {
      *
      * This function is reactive.
      */
-    hasValue(): this is Resource<Exclude<T, undefined>>;
+    hasValue(this: T extends undefined ? this : never): this is Resource<Exclude<T, undefined>>;
+    hasValue(): boolean;
 }
 /**
  * A `Resource` with a mutable value.
@@ -150,7 +151,8 @@ interface Resource<T> {
  */
 interface WritableResource<T> extends Resource<T> {
     readonly value: WritableSignal<T>;
-    hasValue(): this is WritableResource<Exclude<T, undefined>>;
+    hasValue(this: T extends undefined ? this : never): this is WritableResource<Exclude<T, undefined>>;
+    hasValue(): boolean;
     /**
      * Convenience wrapper for `value.set`.
      */
@@ -176,7 +178,8 @@ interface WritableResource<T> extends Resource<T> {
  * @experimental
  */
 interface ResourceRef<T> extends WritableResource<T> {
-    hasValue(): this is ResourceRef<Exclude<T, undefined>>;
+    hasValue(this: T extends undefined ? this : never): this is ResourceRef<Exclude<T, undefined>>;
+    hasValue(): boolean;
     /**
      * Manually destroy the resource, which cancels pending requests and returns it to `idle` state.
      */
