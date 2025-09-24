@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-7e8e310
+ * @license Angular v21.0.0-next.4+sha-fffc7cf
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27,34 +27,6 @@ require('url');
 const CORE_PACKAGE = '@angular/core';
 const PROVIDE_ZONE_CHANGE_DETECTION = 'provideZoneChangeDetection';
 const ZONE_CD_PROVIDER = `${PROVIDE_ZONE_CHANGE_DETECTION}()`;
-const NoopNgZone = `
-// TODO ADD WARNING MESSAGE
-export class NoopNgZone implements NgZone {
-  readonly hasPendingMicrotasks = false;
-  readonly hasPendingMacrotasks = false;
-  readonly isStable = true;
-  readonly onUnstable = new EventEmitter<any>();
-  readonly onMicrotaskEmpty = new EventEmitter<any>();
-  readonly onStable = new EventEmitter<any>();
-  readonly onError = new EventEmitter<any>();
-
-  run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any): T {
-    return fn.apply(applyThis, applyArgs);
-  }
-
-  runGuarded<T>(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): T {
-    return fn.apply(applyThis, applyArgs);
-  }
-
-  runOutsideAngular<T>(fn: (...args: any[]) => T): T {
-    return fn();
-  }
-
-  runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T {
-    return fn.apply(applyThis, applyArgs);
-  }
-}
-`;
 class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         let replacements = [];
@@ -65,11 +37,12 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
             // * `platformBrowser().bootstrapModule(AppModule)`
             // * `platformBrowserDynamic().bootstrapModule(AppModule)`
             // * `TestBed.initTestEnvironment([AppModule], platformBrowserTesting())`
+            // * `getTestBed.initTestEnvironment([AppModule], platformBrowserTesting())`
             const specifiers = getSpecifiers(sourceFile);
             // If none of the imports related to bootstraping are present, we can skip the file.
             if (specifiers === null)
                 continue;
-            const { bootstrapAppSpecifier, platformBrowserDynamicSpecifier, platformBrowserSpecifier, testBedSpecifier, createApplicationSpecifier, } = specifiers;
+            const { bootstrapAppSpecifier, platformBrowserDynamicSpecifier, platformBrowserSpecifier, testBedSpecifier, createApplicationSpecifier, getTestBedSpecifier, } = specifiers;
             const typeChecker = info.program.getTypeChecker();
             const isCreateApplicationNode = (node) => {
                 return (ts.isCallExpression(node) &&
@@ -93,23 +66,8 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 return (ts.isCallExpression(node) &&
                     ts.isPropertyAccessExpression(node.expression) &&
                     node.expression.name.text === 'initTestEnvironment' &&
-                    symbol.isReferenceToImport(typeChecker, node.expression.expression, testBedSpecifier));
-            };
-            const NgModuleWithBootstrapPropMetadataLiteral = (node) => {
-                const moduleClass = node;
-                const ngModule = findNgModule(moduleClass, reflector);
-                if (!ngModule)
-                    return;
-                const ngModuleMetadata = evaluator.evaluate(ngModule);
-                if (!(ngModuleMetadata instanceof Map)) {
-                    return;
-                }
-                if (ngModuleMetadata.has('bootstrap') &&
-                    Array.isArray(ngModuleMetadata.get('bootstrap')) &&
-                    ngModuleMetadata.get('bootstrap').length > 0) {
-                    return ngModule;
-                }
-                return;
+                    (symbol.isReferenceToImport(typeChecker, node.expression.expression, testBedSpecifier) ||
+                        symbol.isReferenceToImport(typeChecker, node.expression.expression, getTestBedSpecifier)));
             };
             const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
             const evaluator = new index.PartialEvaluator(reflector, typeChecker, null);
@@ -125,13 +83,6 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 }
                 else if (isTestBedInitEnvironmentNode(node)) {
                     this.analyzeTestBedInitEnvironment(node, sourceFile, info, typeChecker, importManager, replacements);
-                }
-                else if (ts.isClassDeclaration(node)) {
-                    // This case is specific for handling G3 where the NgModule metadata might not be inspectable when it's in a different build target.
-                    const ngModuleLiteral = NgModuleWithBootstrapPropMetadataLiteral(node);
-                    if (ngModuleLiteral) {
-                        this.analyzeModuleWithBootstrapProp(ngModuleLiteral, sourceFile, info, typeChecker, importManager, replacements);
-                    }
                 }
                 node.forEachChild(walk);
             };
@@ -309,23 +260,6 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 }
             }
             else if (typeof ngZoneOption === 'string' && ngZoneOption === 'noop') {
-                importManager.addImport({
-                    exportModuleSpecifier: CORE_PACKAGE,
-                    exportSymbolName: 'NgZone',
-                    requestedFile: moduleSourceFile,
-                });
-                // The migration specifically relies on this being longer than ZoneChangeDetectionModule
-                // As we take the "longest" change in case of duplicate replacements.
-                const moduleName = 'ZonelessChangeDetectionModule';
-                replacements.push(new project_paths.Replacement(moduleProjectFile, new project_paths.TextUpdate({
-                    position: moduleClass.getStart() - 1,
-                    end: moduleClass.getStart() - 1,
-                    toInsert: `${NoopNgZone}\n@NgModule({providers: [{provide: NgZone, useClass: NoopNgZone}]})\nexport class ${moduleName} {}\n\n`,
-                })));
-                const importsNode = property_name.findLiteralProperty(ngModule, 'imports');
-                if (importsNode && ts.isPropertyAssignment(importsNode)) {
-                    insertZoneCDModule(importsNode.initializer, moduleProjectFile, replacements, moduleName);
-                }
                 return;
             }
             else if (ngZoneOption && typeof ngZoneOption !== 'string') {
@@ -393,21 +327,6 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
         });
         addZoneCDModule(ZONE_CD_PROVIDER, moduleProjectFile, insertPosition, replacements);
         insertZoneCDModule(ngModules, moduleProjectFile, replacements, 'ZoneChangeDetectionModule');
-    }
-    analyzeModuleWithBootstrapProp(ngModuleProps, sourceFile, info, typeChecker, importManager, replacements) {
-        if (sourceFile.getText().includes('ZoneChangeDetectionModule')) {
-            // If the file already contains the ZoneChangeDetectionModule, we can skip it.
-            return;
-        }
-        const hasExistingChangeDetectionProvider = hasChangeDetectionProvider(ngModuleProps, typeChecker);
-        if (hasExistingChangeDetectionProvider)
-            return;
-        importManager.addImport({
-            exportModuleSpecifier: CORE_PACKAGE,
-            exportSymbolName: PROVIDE_ZONE_CHANGE_DETECTION,
-            requestedFile: sourceFile,
-        });
-        addProvidersToNgModule(project_paths.projectFile(sourceFile, info), sourceFile, ngModuleProps, ZONE_CD_PROVIDER, replacements);
     }
 }
 function addProvidersToNgModule(projectFile, moduleSourceFile, ngModule, providersText, replacements) {
@@ -629,13 +548,15 @@ function getSpecifiers(sourceFile) {
     const platformBrowserDynamicSpecifier = imports.getImportSpecifier(sourceFile, '@angular/platform-browser-dynamic', 'platformBrowserDynamic');
     const platformBrowserSpecifier = imports.getImportSpecifier(sourceFile, '@angular/platform-browser', 'platformBrowser');
     const testBedSpecifier = imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed');
+    const getTestBedSpecifier = imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'getTestBed');
     const ngModuleSpecifier = imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule');
     if (!createApplicationSpecifier &&
         !bootstrapAppSpecifier &&
         !platformBrowserDynamicSpecifier &&
         !platformBrowserSpecifier &&
         !testBedSpecifier &&
-        !ngModuleSpecifier) {
+        !ngModuleSpecifier &&
+        !getTestBedSpecifier) {
         return null;
     }
     return {
@@ -645,6 +566,7 @@ function getSpecifiers(sourceFile) {
         platformBrowserSpecifier,
         testBedSpecifier,
         ngModuleSpecifier,
+        getTestBedSpecifier,
     };
 }
 /**
