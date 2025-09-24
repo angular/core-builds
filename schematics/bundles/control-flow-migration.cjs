@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.1+sha-3c14d05
+ * @license Angular v20.3.1+sha-3ebaecc
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -410,6 +410,7 @@ const endMarkerRegex = new RegExp(endMarker, 'gm');
 const startI18nMarkerRegex = new RegExp(startI18nMarker, 'gm');
 const endI18nMarkerRegex = new RegExp(endI18nMarker, 'gm');
 const replaceMarkerRegex = new RegExp(`${startMarker}|${endMarker}`, 'gm');
+const PRIORITY_WEIGHT_TEMPLATE_REFERENCE_BY_OUTLET = 2;
 /**
  * Analyzes a source file to find file that need to be migrated and the text ranges within them.
  * @param sourceFile File to be analyzed.
@@ -718,34 +719,6 @@ function getTemplates(template) {
     }
     return new Map();
 }
-function countTemplateUsage(nodes, templateName) {
-    let count = 0;
-    let isReferencedInTemplateOutlet = false;
-    for (const node of nodes) {
-        if (node.attrs) {
-            for (const attr of node.attrs) {
-                if (attr.name === '*ngTemplateOutlet' && attr.value === templateName.slice(1)) {
-                    isReferencedInTemplateOutlet = true;
-                    break;
-                }
-                if (attr.name.trim() === templateName) {
-                    count++;
-                }
-            }
-        }
-        if (node.children) {
-            if (node.name === 'for') {
-                for (const child of node.children) {
-                    if (child.value?.includes(templateName.slice(1))) {
-                        count++;
-                    }
-                }
-            }
-            count += countTemplateUsage(node.children, templateName);
-        }
-    }
-    return isReferencedInTemplateOutlet ? count + 2 : count;
-}
 function updateTemplates(template, templates) {
     const updatedTemplates = getTemplates(template);
     for (let [key, tmpl] of updatedTemplates) {
@@ -769,9 +742,10 @@ function processNgTemplates(template, sourceFile) {
     try {
         const templates = getTemplates(template);
         // swap placeholders and remove
-        for (const [name, t] of templates) {
-            const replaceRegex = new RegExp(getPlaceholder(name.slice(1)), 'g');
-            const forRegex = new RegExp(getPlaceholder(name.slice(1), PlaceholderKind.Alternate), 'g');
+        for (const [nameWithHash, t] of templates) {
+            const name = nameWithHash.slice(1);
+            const replaceRegex = new RegExp(getPlaceholder(name), 'g');
+            const forRegex = new RegExp(getPlaceholder(nameWithHash.slice(1), PlaceholderKind.Alternate), 'g');
             const forMatches = [...template.matchAll(forRegex)];
             const matches = [...forMatches, ...template.matchAll(replaceRegex)];
             let safeToRemove = true;
@@ -796,7 +770,12 @@ function processNgTemplates(template, sourceFile) {
                     template = template.replace(replaceRegex, t.children);
                 }
                 const dist = matches.filter((obj, index, self) => index === self.findIndex((t) => t.input === obj.input));
-                if ((t.count === dist.length || t.count - matches.length === 1) && safeToRemove) {
+                // Check if template is used by ngTemplateOutlet in addition to control flow
+                const hasTemplateOutletUsage = checkForTemplateOutletUsage(template, nameWithHash.slice(1));
+                // Only remove template if it's safe to do so AND not used by ngTemplateOutlet
+                if ((t.count === dist.length || t.count - matches.length === 1) &&
+                    safeToRemove &&
+                    !hasTemplateOutletUsage) {
                     const refsInComponentFile = getViewChildOrViewChildrenNames(sourceFile);
                     if (refsInComponentFile?.length > 0) {
                         const templateRefs = getTemplateReferences(template);
@@ -826,6 +805,59 @@ function processNgTemplates(template, sourceFile) {
         return { migrated: template, err: err };
     }
 }
+function analyzeTemplateUsage(nodes, templateName) {
+    let count = 0;
+    let isReferencedInTemplateOutlet = false;
+    const templateNameWithHash = `#${templateName}`;
+    function traverseNodes(nodeList) {
+        for (const node of nodeList) {
+            if (node.attrs) {
+                for (const attr of node.attrs) {
+                    if ((attr.name === '*ngTemplateOutlet' || attr.name === '[ngTemplateOutlet]') &&
+                        attr.value === templateName) {
+                        isReferencedInTemplateOutlet = true;
+                    }
+                    if (attr.name.trim() === templateNameWithHash) {
+                        count++;
+                    }
+                }
+            }
+            if (node.children) {
+                if (node.name === 'for') {
+                    for (const child of node.children) {
+                        if (child.value?.includes(templateName)) {
+                            count++;
+                        }
+                    }
+                }
+                traverseNodes(node.children);
+            }
+        }
+    }
+    traverseNodes(nodes);
+    return {
+        isReferencedInTemplateOutlet,
+        totalCount: isReferencedInTemplateOutlet
+            ? count + PRIORITY_WEIGHT_TEMPLATE_REFERENCE_BY_OUTLET
+            : count,
+    };
+}
+/**
+ * Checks if a template is used by ngTemplateOutlet directive
+ */
+function checkForTemplateOutletUsage(template, templateName) {
+    const parsed = parseTemplate(template);
+    if (parsed.tree === undefined) {
+        return false;
+    }
+    const result = analyzeTemplateUsage(parsed.tree.rootNodes, templateName);
+    return result.isReferencedInTemplateOutlet;
+}
+function countTemplateUsage(nodes, templateNameWithHash) {
+    const templateName = templateNameWithHash.slice(1);
+    const result = analyzeTemplateUsage(nodes, templateName);
+    return result.totalCount;
+}
 function getViewChildOrViewChildrenNames(sourceFile) {
     const names = [];
     function visit(node) {
@@ -850,11 +882,11 @@ function getTemplateReferences(template) {
     if (parsed.tree === undefined) {
         return [];
     }
-    const references = [];
+    const templateNameRefWithoutHash = [];
     function visitNodes(nodes) {
         for (const node of nodes) {
             if (node?.name === 'ng-template') {
-                references.push(...node.attrs?.map((ref) => ref?.name?.slice(1)));
+                templateNameRefWithoutHash.push(...node.attrs?.map((ref) => ref?.name?.slice(1)));
             }
             if (node.children) {
                 visitNodes(node.children);
@@ -862,7 +894,7 @@ function getTemplateReferences(template) {
         }
     }
     visitNodes(parsed.tree.rootNodes);
-    return references;
+    return templateNameRefWithoutHash;
 }
 function replaceRemainingPlaceholders(template) {
     const pattern = '.*';
