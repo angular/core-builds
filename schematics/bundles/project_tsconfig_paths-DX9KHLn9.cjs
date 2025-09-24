@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.4+sha-a9145f3
+ * @license Angular v21.0.0-next.4+sha-7e8e310
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32964,7 +32964,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.4+sha-a9145f3');
+const VERSION = new Version('21.0.0-next.4+sha-7e8e310');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -34027,7 +34027,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Cfrq3FPR.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DX9KHLn9.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -51073,6 +51073,7 @@ exports.ImportManager = ImportManager;
 exports.Interpolation = Interpolation$1;
 exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
+exports.KeyedRead = KeyedRead;
 exports.KnownFn = KnownFn;
 exports.LetDeclaration = LetDeclaration$1;
 exports.LiteralArrayExpr = LiteralArrayExpr;
