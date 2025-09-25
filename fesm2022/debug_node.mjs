@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.2+sha-36c4b3f
+ * @license Angular v20.3.2+sha-7d720d5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13691,7 +13691,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.2+sha-36c4b3f']
+        ? ['ng-version', '20.3.2+sha-7d720d5']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22145,6 +22145,9 @@ function runEnterAnimation(lView, tNode, value) {
     // This also allows us to setup cancellation of animations in progress if the
     // gets removed early.
     const handleEnterAnimationStart = (event) => {
+        // this early exit case is to prevent issues with bubbling events that are from child element animations
+        if (event.target !== nativeElement)
+            return;
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
             cleanupFns.push(renderer.listen(nativeElement, eventName, handleEnterAnimationEnd));
@@ -22152,6 +22155,9 @@ function runEnterAnimation(lView, tNode, value) {
     };
     // When the longest animation ends, we can remove all the classes
     const handleEnterAnimationEnd = (event) => {
+        // this early exit case is to prevent issues with bubbling events that are from child element animations
+        if (event.target !== nativeElement)
+            return;
         enterAnimationEnd(event, nativeElement, renderer);
     };
     // We only need to add these event listeners if there are actual classes to apply
@@ -22182,7 +22188,8 @@ function runEnterAnimation(lView, tNode, value) {
 }
 function enterAnimationEnd(event, nativeElement, renderer) {
     const elementData = enterClassMap.get(nativeElement);
-    if (!elementData)
+    // this event.target check is to prevent issues with bubbling events that are from child element animations
+    if (event.target !== nativeElement || !elementData)
         return;
     if (isLongestAnimation(event, nativeElement)) {
         // Now that we've found the longest animation, there's no need
@@ -22281,6 +22288,9 @@ function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisab
     }
     cancelAnimationsIfRunning(el, renderer);
     const handleOutAnimationEnd = (event) => {
+        // this early exit case is to prevent issues with bubbling events that are from child element animations
+        if (event.target !== el)
+            return;
         if (event instanceof CustomEvent || isLongestAnimation(event, el)) {
             // Now that we've found the longest animation, there's no need
             // to keep bubbling up this event as it's not going to apply to
