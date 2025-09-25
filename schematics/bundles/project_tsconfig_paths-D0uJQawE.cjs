@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.2+sha-a74d74b
+ * @license Angular v20.3.2+sha-542cd00
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11700,6 +11700,16 @@ function extractAttributeOp(unit, op, elements) {
     }
 }
 
+const ARIA_PREFIX = 'aria-';
+/**
+ * Returns whether `name` is an ARIA attribute name.
+ *
+ * This is a heuristic based on whether name begins with and is longer than `aria-`.
+ */
+function isAriaAttribute(name) {
+    return name.startsWith(ARIA_PREFIX) && name.length > ARIA_PREFIX.length;
+}
+
 /**
  * Looks up an element in the given map by xref ID.
  */
@@ -11745,7 +11755,15 @@ function specializeBindings(job) {
                     break;
                 case BindingKind.Property:
                 case BindingKind.LegacyAnimation:
-                    if (job.kind === CompilationJobKind.Host) {
+                    // Convert a property binding targeting an ARIA attribute (e.g. [aria-label]) into an
+                    // attribute binding when we know it can't also target an input. Note that a `Host` job is
+                    // always `DomOnly`, so this condition must be checked first.
+                    if (job.mode === TemplateCompilationMode.DomOnly && isAriaAttribute(op.name)) {
+                        OpList.replace(op, createAttributeOp(op.target, 
+                        /* namespace= */ null, op.name, op.expression, op.securityContext, 
+                        /* isTextAttribute= */ false, op.isStructuralTemplateAttribute, op.templateKind, op.i18nMessage, op.sourceSpan));
+                    }
+                    else if (job.kind === CompilationJobKind.Host) {
                         OpList.replace(op, createDomPropertyOp(op.name, op.expression, op.bindingKind, op.i18nContext, op.securityContext, op.sourceSpan));
                     }
                     else {
@@ -23851,7 +23869,6 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
     return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs, extraArgs, sourceSpan).toStmt());
 }
 
-const ARIA_PREFIX = 'aria';
 /**
  * Map of target resolvers for event listeners.
  */
@@ -24231,33 +24248,6 @@ function reifyUpdateOperations(unit, ops) {
     }
 }
 /**
- * Converts an ARIA property name to its corresponding attribute name, if necessary.
- *
- * For example, converts `ariaLabel` to `aria-label`.
- *
- * https://www.w3.org/TR/wai-aria-1.2/#accessibilityroleandproperties-correspondence
- *
- * This must be kept in sync with the the function of the same name in
- * packages/core/src/render3/instructions/aria_property.ts.
- *
- * @param name A property name that starts with `aria`.
- * @returns The corresponding attribute name.
- */
-function ariaAttrName(name) {
-    return name.charAt(ARIA_PREFIX.length) !== '-'
-        ? ARIA_PREFIX + '-' + name.slice(ARIA_PREFIX.length).toLowerCase()
-        : name; // Property already has attribute name.
-}
-/**
- * Returns whether `name` is an ARIA property (or attribute) name.
- *
- * This is a heuristic based on whether name begins with and is longer than `aria`. For example,
- * this returns true for both `ariaLabel` and `aria-label`.
- */
-function isAriaProperty(name) {
-    return name.startsWith(ARIA_PREFIX) && name.length > ARIA_PREFIX.length;
-}
-/**
  * Reifies a DOM property binding operation.
  *
  * This is an optimized version of {@link reifyProperty} that avoids unnecessarily trying to bind
@@ -24267,9 +24257,7 @@ function isAriaProperty(name) {
  * @returns A statement to update the property at runtime.
  */
 function reifyDomProperty(op) {
-    return isAriaProperty(op.name)
-        ? attribute(ariaAttrName(op.name), op.expression, null, null, op.sourceSpan)
-        : domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan);
+    return domProperty(DOM_PROPERTY_REMAPPING.get(op.name) ?? op.name, op.expression, op.sanitizer, op.sourceSpan);
 }
 /**
  * Reifies a property binding operation.
@@ -24281,7 +24269,7 @@ function reifyDomProperty(op) {
  * @returns A statement to update the property at runtime.
  */
 function reifyProperty(op) {
-    return isAriaProperty(op.name)
+    return isAriaAttribute(op.name)
         ? ariaProperty(op.name, op.expression, op.sourceSpan)
         : property(op.name, op.expression, op.sanitizer, op.sourceSpan);
 }
@@ -32774,7 +32762,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.2+sha-a74d74b');
+const VERSION = new Version('20.3.2+sha-542cd00');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33836,7 +33824,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-C11WBTJF.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D0uJQawE.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
