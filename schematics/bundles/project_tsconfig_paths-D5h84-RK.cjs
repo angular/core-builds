@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-8a1e36b
+ * @license Angular v21.0.0-next.5+sha-768a09d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6303,48 +6303,6 @@ function createFactoryFunction(type) {
     const t = new FnParam('__ngFactoryType__', DYNAMIC_TYPE);
     return arrowFn([t], type.prop('ɵfac').callFn([variable(t.name)]));
 }
-
-const UNUSABLE_INTERPOLATION_REGEXPS = [
-    /@/, // control flow reserved symbol
-    /^\s*$/, // empty
-    /[<>]/, // html tag
-    /^[{}]$/, // i18n expansion
-    /&(#|[a-z])/i, // character reference,
-    /^\/\//, // comment
-];
-function assertInterpolationSymbols(identifier, value) {
-    if (value != null && !(Array.isArray(value) && value.length == 2)) {
-        throw new Error(`Expected '${identifier}' to be an array, [start, end].`);
-    }
-    else if (value != null) {
-        const start = value[0];
-        const end = value[1];
-        // Check for unusable interpolation symbols
-        UNUSABLE_INTERPOLATION_REGEXPS.forEach((regexp) => {
-            if (regexp.test(start) || regexp.test(end)) {
-                throw new Error(`['${start}', '${end}'] contains unusable interpolation symbol.`);
-            }
-        });
-    }
-}
-
-class InterpolationConfig {
-    start;
-    end;
-    static fromArray(markers) {
-        if (!markers) {
-            return DEFAULT_INTERPOLATION_CONFIG;
-        }
-        assertInterpolationSymbols('interpolation', markers);
-        return new InterpolationConfig(markers[0], markers[1]);
-    }
-    constructor(start, end) {
-        this.start = start;
-        this.end = end;
-    }
-}
-const DEFAULT_INTERPOLATION_CONFIG = new InterpolationConfig('{{', '}}');
-const DEFAULT_CONTAINER_BLOCKS = new Set(['switch']);
 
 const $EOF = 0;
 const $BSPACE = 8;
@@ -15936,12 +15894,15 @@ const SUPPORTED_BLOCKS = [
     '@loading',
     '@error',
 ];
+const INTERPOLATION = {
+    start: '{{',
+    end: '}}',
+};
 // See https://www.w3.org/TR/html51/syntax.html#writing-html-documents
 class _Tokenizer {
     _getTagDefinition;
     _cursor;
     _tokenizeIcu;
-    _interpolationConfig;
     _leadingTriviaCodePoints;
     _currentTokenStart = null;
     _currentTokenType = null;
@@ -15964,7 +15925,6 @@ class _Tokenizer {
     constructor(_file, _getTagDefinition, options) {
         this._getTagDefinition = _getTagDefinition;
         this._tokenizeIcu = options.tokenizeExpansionForms || false;
-        this._interpolationConfig = options.interpolationConfig || DEFAULT_INTERPOLATION_CONFIG;
         this._leadingTriviaCodePoints =
             options.leadingTriviaChars && options.leadingTriviaChars.map((c) => c.codePointAt(0) || 0);
         const range = options.range || {
@@ -16795,7 +16755,7 @@ class _Tokenizer {
         const parts = [];
         while (!endPredicate()) {
             const current = this._cursor.clone();
-            if (this._interpolationConfig && this._attemptStr(this._interpolationConfig.start)) {
+            if (this._attemptStr(INTERPOLATION.start)) {
                 this._endToken([this._processCarriageReturns(parts.join(''))], current);
                 parts.length = 0;
                 this._consumeInterpolation(interpolationTokenType, current, endInterpolation);
@@ -16827,7 +16787,7 @@ class _Tokenizer {
     _consumeInterpolation(interpolationTokenType, interpolationStart, prematureEndPredicate) {
         const parts = [];
         this._beginToken(interpolationTokenType, interpolationStart);
-        parts.push(this._interpolationConfig.start);
+        parts.push(INTERPOLATION.start);
         // Find the end of the interpolation, ignoring content inside quotes.
         const expressionStart = this._cursor.clone();
         let inQuote = null;
@@ -16845,10 +16805,10 @@ class _Tokenizer {
                 return;
             }
             if (inQuote === null) {
-                if (this._attemptStr(this._interpolationConfig.end)) {
+                if (this._attemptStr(INTERPOLATION.end)) {
                     // We are not in a string, and we hit the end interpolation marker
                     parts.push(this._getProcessedChars(expressionStart, current));
-                    parts.push(this._interpolationConfig.end);
+                    parts.push(INTERPOLATION.end);
                     this._endToken(parts);
                     return;
                 }
@@ -16987,13 +16947,10 @@ class _Tokenizer {
         if (this._cursor.peek() !== $LBRACE) {
             return false;
         }
-        if (this._interpolationConfig) {
-            const start = this._cursor.clone();
-            const isInterpolation = this._attemptStr(this._interpolationConfig.start);
-            this._cursor = start;
-            return !isInterpolation;
-        }
-        return true;
+        const start = this._cursor.clone();
+        const isInterpolation = this._attemptStr(INTERPOLATION.start);
+        this._cursor = start;
+        return !isInterpolation;
     }
 }
 function isNotWhitespace(code) {
@@ -18862,17 +18819,17 @@ class Parser {
         this._lexer = _lexer;
         this._supportsDirectPipeReferences = _supportsDirectPipeReferences;
     }
-    parseAction(input, parseSourceSpan, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    parseAction(input, parseSourceSpan, absoluteOffset) {
         const errors = [];
-        this._checkNoInterpolation(errors, input, parseSourceSpan, interpolationConfig);
+        this._checkNoInterpolation(errors, input, parseSourceSpan);
         const { stripped: sourceToLex } = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
         const ast = new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 1 /* ParseFlags.Action */, errors, 0, this._supportsDirectPipeReferences).parseChain();
         return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
     }
-    parseBinding(input, parseSourceSpan, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    parseBinding(input, parseSourceSpan, absoluteOffset) {
         const errors = [];
-        const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, interpolationConfig, errors);
+        const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, errors);
         return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
     }
     checkSimpleExpression(ast) {
@@ -18881,17 +18838,17 @@ class Parser {
         return checker.errors;
     }
     // Host bindings parsed here
-    parseSimpleBinding(input, parseSourceSpan, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    parseSimpleBinding(input, parseSourceSpan, absoluteOffset) {
         const errors = [];
-        const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, interpolationConfig, errors);
+        const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, errors);
         const simplExpressionErrors = this.checkSimpleExpression(ast);
         if (simplExpressionErrors.length > 0) {
             errors.push(getParseError(`Host binding expression cannot contain ${simplExpressionErrors.join(' ')}`, input, '', parseSourceSpan));
         }
         return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
     }
-    _parseBindingAst(input, parseSourceSpan, absoluteOffset, interpolationConfig, errors) {
-        this._checkNoInterpolation(errors, input, parseSourceSpan, interpolationConfig);
+    _parseBindingAst(input, parseSourceSpan, absoluteOffset, errors) {
+        this._checkNoInterpolation(errors, input, parseSourceSpan);
         const { stripped: sourceToLex } = this._stripComments(input);
         const tokens = this._lexer.tokenize(sourceToLex);
         return new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 0 /* ParseFlags.None */, errors, 0, this._supportsDirectPipeReferences).parseChain();
@@ -18931,9 +18888,9 @@ class Parser {
             span: new AbsoluteSourceSpan(absoluteKeyOffset, absoluteKeyOffset + templateKey.length),
         });
     }
-    parseInterpolation(input, parseSourceSpan, absoluteOffset, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    parseInterpolation(input, parseSourceSpan, absoluteOffset, interpolatedTokens) {
         const errors = [];
-        const { strings, expressions, offsets } = this.splitInterpolation(input, parseSourceSpan, errors, interpolatedTokens, interpolationConfig);
+        const { strings, expressions, offsets } = this.splitInterpolation(input, parseSourceSpan, errors, interpolatedTokens);
         if (expressions.length === 0)
             return null;
         const expressionNodes = [];
@@ -18980,7 +18937,7 @@ class Parser {
      * `SplitInterpolation` with splits that look like
      *   <raw text> <expression> <raw text> ... <raw text> <expression> <raw text>
      */
-    splitInterpolation(input, parseSourceSpan, errors, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    splitInterpolation(input, parseSourceSpan, errors, interpolatedTokens) {
         const strings = [];
         const expressions = [];
         const offsets = [];
@@ -18990,7 +18947,8 @@ class Parser {
         let i = 0;
         let atInterpolation = false;
         let extendLastString = false;
-        let { start: interpStart, end: interpEnd } = interpolationConfig;
+        const interpStart = '{{';
+        const interpEnd = '}}';
         while (i < input.length) {
             if (!atInterpolation) {
                 // parse until starting {{
@@ -19069,24 +19027,24 @@ class Parser {
         }
         return null;
     }
-    _checkNoInterpolation(errors, input, parseSourceSpan, { start, end }) {
+    _checkNoInterpolation(errors, input, parseSourceSpan) {
         let startIndex = -1;
         let endIndex = -1;
         for (const charIndex of this._forEachUnquotedChar(input, 0)) {
             if (startIndex === -1) {
-                if (input.startsWith(start)) {
+                if (input.startsWith('{{')) {
                     startIndex = charIndex;
                 }
             }
             else {
-                endIndex = this._getInterpolationEndIndex(input, end, charIndex);
+                endIndex = this._getInterpolationEndIndex(input, '}}', charIndex);
                 if (endIndex > -1) {
                     break;
                 }
             }
         }
         if (startIndex > -1 && endIndex > -1) {
-            errors.push(getParseError(`Got interpolation (${start}${end}) where expression was expected`, input, `at column ${startIndex} in`, parseSourceSpan));
+            errors.push(getParseError(`Got interpolation ({{}}) where expression was expected`, input, `at column ${startIndex} in`, parseSourceSpan));
         }
     }
     /**
@@ -21252,10 +21210,10 @@ class PlaceholderRegistry {
 
 const _expParser = new Parser(new Lexer());
 /**
- * Returns a function converting html nodes to an i18n Message given an interpolationConfig
+ * Returns a function converting html nodes to an i18n Message
  */
-function createI18nMessageFactory(interpolationConfig, containerBlocks, retainEmptyTokens, preserveExpressionWhitespace) {
-    const visitor = new _I18nVisitor(_expParser, interpolationConfig, containerBlocks, retainEmptyTokens, preserveExpressionWhitespace);
+function createI18nMessageFactory(containerBlocks, retainEmptyTokens, preserveExpressionWhitespace) {
+    const visitor = new _I18nVisitor(_expParser, containerBlocks, retainEmptyTokens, preserveExpressionWhitespace);
     return (nodes, meaning, description, customId, visitNodeFn) => visitor.toI18nMessage(nodes, meaning, description, customId, visitNodeFn);
 }
 function noopVisitNodeFn(_html, i18n) {
@@ -21263,13 +21221,11 @@ function noopVisitNodeFn(_html, i18n) {
 }
 class _I18nVisitor {
     _expressionParser;
-    _interpolationConfig;
     _containerBlocks;
     _retainEmptyTokens;
     _preserveExpressionWhitespace;
-    constructor(_expressionParser, _interpolationConfig, _containerBlocks, _retainEmptyTokens, _preserveExpressionWhitespace) {
+    constructor(_expressionParser, _containerBlocks, _retainEmptyTokens, _preserveExpressionWhitespace) {
         this._expressionParser = _expressionParser;
-        this._interpolationConfig = _interpolationConfig;
         this._containerBlocks = _containerBlocks;
         this._retainEmptyTokens = _retainEmptyTokens;
         this._preserveExpressionWhitespace = _preserveExpressionWhitespace;
@@ -21491,7 +21447,7 @@ class _I18nVisitor {
         const expression = token.parts[1];
         const expr = this._expressionParser.parseBinding(expression, 
         /* location */ token.sourceSpan, 
-        /* absoluteOffset */ token.sourceSpan.start.offset, this._interpolationConfig);
+        /* absoluteOffset */ token.sourceSpan.start.offset);
         return serialize(expr);
     }
 }
@@ -21556,6 +21512,8 @@ function extractPlaceholderName(input) {
     return input.split(_CUSTOM_PH_EXP)[2];
 }
 
+const DEFAULT_CONTAINER_BLOCKS = new Set(['switch']);
+
 /**
  * Set of tagName|propertyName corresponding to Trusted Types sinks. Properties applying to all
  * tags use '*'.
@@ -21617,7 +21575,6 @@ const setI18nRefs = (originalNodeMap) => {
  * stored with other element's and attribute's information.
  */
 class I18nMetaVisitor {
-    interpolationConfig;
     keepI18nAttrs;
     enableI18nLegacyMessageIdFormat;
     containerBlocks;
@@ -21626,7 +21583,7 @@ class I18nMetaVisitor {
     // whether visited nodes contain i18n information
     hasI18nMeta = false;
     _errors = [];
-    constructor(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, keepI18nAttrs = false, enableI18nLegacyMessageIdFormat = false, containerBlocks = DEFAULT_CONTAINER_BLOCKS, preserveSignificantWhitespace = true, 
+    constructor(keepI18nAttrs = false, enableI18nLegacyMessageIdFormat = false, containerBlocks = DEFAULT_CONTAINER_BLOCKS, preserveSignificantWhitespace = true, 
     // When dropping significant whitespace we need to retain empty tokens or
     // else we won't be able to reuse source spans because empty tokens would be
     // removed and cause a mismatch. Unfortunately this still needs to be
@@ -21634,7 +21591,6 @@ class I18nMetaVisitor {
     // sure the number of nodes don't change between parses, even when
     // `preserveSignificantWhitespace` changes.
     retainEmptyTokens = !preserveSignificantWhitespace) {
-        this.interpolationConfig = interpolationConfig;
         this.keepI18nAttrs = keepI18nAttrs;
         this.enableI18nLegacyMessageIdFormat = enableI18nLegacyMessageIdFormat;
         this.containerBlocks = containerBlocks;
@@ -21643,7 +21599,7 @@ class I18nMetaVisitor {
     }
     _generateI18nMessage(nodes, meta = '', visitNodeFn) {
         const { meaning, description, customId } = this._parseMetadata(meta);
-        const createI18nMessage = createI18nMessageFactory(this.interpolationConfig, this.containerBlocks, this.retainEmptyTokens, 
+        const createI18nMessage = createI18nMessageFactory(this.containerBlocks, this.retainEmptyTokens, 
         /* preserveExpressionWhitespace */ this.preserveSignificantWhitespace);
         const message = createI18nMessage(nodes, meaning, description, customId, visitNodeFn);
         this._setMessageId(message, meta);
@@ -27964,17 +27920,12 @@ const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
  */
 class BindingParser {
     _exprParser;
-    _interpolationConfig;
     _schemaRegistry;
     errors;
-    constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
+    constructor(_exprParser, _schemaRegistry, errors) {
         this._exprParser = _exprParser;
-        this._interpolationConfig = _interpolationConfig;
         this._schemaRegistry = _schemaRegistry;
         this.errors = errors;
-    }
-    get interpolationConfig() {
-        return this._interpolationConfig;
     }
     createBoundHostProperties(properties, sourceSpan) {
         const boundProps = [];
@@ -28019,7 +27970,7 @@ class BindingParser {
     parseInterpolation(value, sourceSpan, interpolatedTokens) {
         const absoluteOffset = sourceSpan.fullStart.offset;
         try {
-            const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens, this._interpolationConfig);
+            const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens);
             if (ast) {
                 this.errors.push(...ast.errors);
             }
@@ -28191,8 +28142,8 @@ class BindingParser {
     parseBinding(value, isHostBinding, sourceSpan, absoluteOffset) {
         try {
             const ast = isHostBinding
-                ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig)
-                : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig);
+                ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset)
+                : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset);
             if (ast) {
                 this.errors.push(...ast.errors);
             }
@@ -28327,7 +28278,7 @@ class BindingParser {
     _parseAction(value, sourceSpan) {
         const absoluteOffset = sourceSpan && sourceSpan.start ? sourceSpan.start.offset : 0;
         try {
-            const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset, this._interpolationConfig);
+            const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset);
             if (ast) {
                 this.errors.push(...ast.errors);
             }
@@ -30177,9 +30128,9 @@ const LEADING_TRIVIA_CHARS = [' ', '\n', '\r', '\t'];
  * @param options options to modify how the template is parsed
  */
 function parseTemplate(template, templateUrl, options = {}) {
-    const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
+    const { preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
     const selectorlessEnabled = options.enableSelectorless ?? false;
-    const bindingParser = makeBindingParser(interpolationConfig, selectorlessEnabled);
+    const bindingParser = makeBindingParser(selectorlessEnabled);
     const htmlParser = new HtmlParser();
     const parseResult = htmlParser.parse(template, templateUrl, {
         leadingTriviaChars: LEADING_TRIVIA_CHARS,
@@ -30193,7 +30144,6 @@ function parseTemplate(template, templateUrl, options = {}) {
         parseResult.errors &&
         parseResult.errors.length > 0) {
         const parsedTemplate = {
-            interpolationConfig,
             preserveWhitespaces,
             errors: parseResult.errors,
             nodes: [],
@@ -30216,7 +30166,7 @@ function parseTemplate(template, templateUrl, options = {}) {
     // before we run whitespace removal process, because existing i18n
     // extraction process (ng extract-i18n) relies on a raw content to generate
     // message ids
-    const i18nMetaVisitor = new I18nMetaVisitor(interpolationConfig, 
+    const i18nMetaVisitor = new I18nMetaVisitor(
     /* keepI18nAttrs */ !preserveWhitespaces, enableI18nLegacyMessageIdFormat, 
     /* containerBlocks */ undefined, options.preserveSignificantWhitespace, retainEmptyTokens);
     const i18nMetaResult = i18nMetaVisitor.visitAllWithErrors(rootNodes);
@@ -30224,7 +30174,6 @@ function parseTemplate(template, templateUrl, options = {}) {
         i18nMetaResult.errors &&
         i18nMetaResult.errors.length > 0) {
         const parsedTemplate = {
-            interpolationConfig,
             preserveWhitespaces,
             errors: i18nMetaResult.errors,
             nodes: [],
@@ -30259,7 +30208,7 @@ function parseTemplate(template, templateUrl, options = {}) {
         // template. During this pass i18n IDs generated at the first pass will be preserved, so we can
         // mimic existing extraction process (ng extract-i18n)
         if (i18nMetaVisitor.hasI18nMeta) {
-            rootNodes = visitAll(new I18nMetaVisitor(interpolationConfig, 
+            rootNodes = visitAll(new I18nMetaVisitor(
             /* keepI18nAttrs */ false, 
             /* enableI18nLegacyMessageIdFormat */ undefined, 
             /* containerBlocks */ undefined, 
@@ -30269,7 +30218,6 @@ function parseTemplate(template, templateUrl, options = {}) {
     const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, { collectCommentNodes: !!options.collectCommentNodes });
     errors.push(...parseResult.errors, ...i18nMetaResult.errors);
     const parsedTemplate = {
-        interpolationConfig,
         preserveWhitespaces,
         errors: errors.length > 0 ? errors : null,
         nodes,
@@ -30286,8 +30234,8 @@ const elementRegistry = new DomElementSchemaRegistry();
 /**
  * Construct a `BindingParser` with a default configuration.
  */
-function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, selectorlessEnabled = false) {
-    return new BindingParser(new Parser(new Lexer(), selectorlessEnabled), interpolationConfig, elementRegistry, []);
+function makeBindingParser(selectorlessEnabled = false) {
+    return new BindingParser(new Parser(new Lexer(), selectorlessEnabled), elementRegistry, []);
 }
 
 const COMPONENT_VARIABLE = '%COMP%';
@@ -31927,7 +31875,7 @@ class CompilerFacadeImpl {
     }
     compileComponent(angularCoreEnv, sourceMapUrl, facade) {
         // Parse the template and check for errors.
-        const { template, interpolation, defer } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation, undefined);
+        const { template, defer } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, undefined);
         // Compile the component metadata, including template, into an expression.
         const meta = {
             ...facade,
@@ -31939,7 +31887,6 @@ class CompilerFacadeImpl {
             defer,
             styles: [...facade.styles, ...template.styles],
             encapsulation: facade.encapsulation,
-            interpolation,
             changeDetection: facade.changeDetection ?? null,
             animations: facade.animations != null ? new WrappedNodeExpr(facade.animations) : null,
             viewProviders: facade.viewProviders != null ? new WrappedNodeExpr(facade.viewProviders) : null,
@@ -31957,7 +31904,7 @@ class CompilerFacadeImpl {
     }
     compileComponentFromMeta(angularCoreEnv, sourceMapUrl, meta) {
         const constantPool = new ConstantPool();
-        const bindingParser = makeBindingParser(meta.interpolation);
+        const bindingParser = makeBindingParser();
         const res = compileComponentFromMetadata(meta, constantPool, bindingParser);
         return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool.statements);
     }
@@ -32163,7 +32110,7 @@ function convertOpaqueValuesToExpressions(obj) {
     return result;
 }
 function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMapUrl) {
-    const { template, interpolation, defer } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, decl.preserveWhitespaces ?? false, decl.interpolation, decl.deferBlockDependencies);
+    const { template, defer } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, decl.preserveWhitespaces ?? false, decl.deferBlockDependencies);
     const declarations = [];
     if (decl.dependencies) {
         for (const innerDep of decl.dependencies) {
@@ -32198,7 +32145,6 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
         defer,
         changeDetection: decl.changeDetection ?? exports.ChangeDetectionStrategy.Default,
         encapsulation: decl.encapsulation ?? exports.ViewEncapsulation.Emulated,
-        interpolation,
         declarationListEmitMode: 2 /* DeclarationListEmitMode.ClosureResolved */,
         relativeContextFilePath: '',
         i18nUseExternalIds: true,
@@ -32242,15 +32188,9 @@ function convertPipeDeclarationToMetadata(pipe) {
         type: new WrappedNodeExpr(pipe.type),
     };
 }
-function parseJitTemplate(template, typeName, sourceMapUrl, preserveWhitespaces, interpolation, deferBlockDependencies) {
-    const interpolationConfig = interpolation
-        ? InterpolationConfig.fromArray(interpolation)
-        : DEFAULT_INTERPOLATION_CONFIG;
+function parseJitTemplate(template, typeName, sourceMapUrl, preserveWhitespaces, deferBlockDependencies) {
     // Parse the template and check for errors.
-    const parsed = parseTemplate(template, sourceMapUrl, {
-        preserveWhitespaces,
-        interpolationConfig,
-    });
+    const parsed = parseTemplate(template, sourceMapUrl, { preserveWhitespaces });
     if (parsed.errors !== null) {
         const errors = parsed.errors.map((err) => err.toString()).join(', ');
         throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
@@ -32259,7 +32199,6 @@ function parseJitTemplate(template, typeName, sourceMapUrl, preserveWhitespaces,
     const boundTarget = binder.bind({ template: parsed.nodes });
     return {
         template: parsed,
-        interpolation: interpolationConfig,
         defer: createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies),
     };
 }
@@ -32483,9 +32422,9 @@ let i18nCommentsWarned = false;
 /**
  * Extract translatable messages from an html AST
  */
-function extractMessages(nodes, interpolationConfig, implicitTags, implicitAttrs, preserveSignificantWhitespace) {
+function extractMessages(nodes, implicitTags, implicitAttrs, preserveSignificantWhitespace) {
     const visitor = new _Visitor(implicitTags, implicitAttrs, preserveSignificantWhitespace);
-    return visitor.extract(nodes, interpolationConfig);
+    return visitor.extract(nodes);
 }
 class ExtractionResult {
     messages;
@@ -32540,8 +32479,8 @@ class _Visitor {
     /**
      * Extracts the messages from the tree
      */
-    extract(nodes, interpolationConfig) {
-        this._init(_VisitorMode.Extract, interpolationConfig);
+    extract(nodes) {
+        this._init(_VisitorMode.Extract);
         nodes.forEach((node) => node.visit(this, null));
         if (this._inI18nBlock) {
             this._reportError(nodes[nodes.length - 1], 'Unclosed block');
@@ -32551,8 +32490,8 @@ class _Visitor {
     /**
      * Returns a tree where all translatable nodes are translated
      */
-    merge(nodes, translations, interpolationConfig) {
-        this._init(_VisitorMode.Merge, interpolationConfig);
+    merge(nodes, translations) {
+        this._init(_VisitorMode.Merge);
         this._translations = translations;
         // Construct a single fake root element
         const wrapper = new Element('wrapper', [], [], nodes, false, undefined, undefined, undefined, false);
@@ -32657,7 +32596,7 @@ class _Visitor {
     visitDirective(directive, context) {
         throw new Error('unreachable code');
     }
-    _init(mode, interpolationConfig) {
+    _init(mode) {
         this._mode = mode;
         this._inI18nBlock = false;
         this._inI18nNode = false;
@@ -32667,7 +32606,7 @@ class _Visitor {
         this._errors = [];
         this._messages = [];
         this._inImplicitNode = false;
-        this._createI18nMessage = createI18nMessageFactory(interpolationConfig, DEFAULT_CONTAINER_BLOCKS, 
+        this._createI18nMessage = createI18nMessageFactory(DEFAULT_CONTAINER_BLOCKS, 
         // When dropping significant whitespace we need to retain whitespace tokens or
         // else we won't be able to reuse source spans because empty tokens would be
         // removed and cause a mismatch.
@@ -32964,7 +32903,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.5+sha-8a1e36b');
+const VERSION = new Version('21.0.0-next.5+sha-768a09d');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -34027,7 +33966,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DX9KHLn9.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D5h84-RK.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -51042,7 +50981,6 @@ exports.Conditional = Conditional;
 exports.ConstantPool = ConstantPool;
 exports.Container = Container;
 exports.CssSelector = CssSelector;
-exports.DEFAULT_INTERPOLATION_CONFIG = DEFAULT_INTERPOLATION_CONFIG;
 exports.DYNAMIC_TYPE = DYNAMIC_TYPE;
 exports.Declaration = Declaration;
 exports.DeclareFunctionStmt = DeclareFunctionStmt;
@@ -51071,7 +51009,6 @@ exports.IfBlock = IfBlock;
 exports.ImplicitReceiver = ImplicitReceiver;
 exports.ImportManager = ImportManager;
 exports.Interpolation = Interpolation$1;
-exports.InterpolationConfig = InterpolationConfig;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
 exports.KeyedRead = KeyedRead;
 exports.KnownFn = KnownFn;
