@@ -1,14 +1,14 @@
 /**
- * @license Angular v21.0.0-next.5+sha-768a09d
+ * @license Angular v21.0.0-next.5+sha-78cee8e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ReactiveNode, ValueEqualityFn, SIGNAL } from '../../graph.d.js';
-export { REACTIVE_NODE, Reactive, ReactiveHookFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from '../../graph.d.js';
-import { SignalNode } from '../../effect.d.js';
-export { BASE_EFFECT_NODE, BaseEffectNode, SIGNAL_NODE, SignalGetter, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from '../../effect.d.js';
-export { setAlternateWeakRefImpl } from '../../weak_ref.d.js';
+import { ReactiveNode, ValueEqualityFn, SIGNAL } from '../../graph.js';
+export { REACTIVE_NODE, Reactive, ReactiveHookFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from '../../graph.js';
+import { SignalNode } from '../../effect.js';
+export { BASE_EFFECT_NODE, BaseEffectNode, SIGNAL_NODE, SignalGetter, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from '../../effect.js';
+export { setAlternateWeakRefImpl } from '../../weak_ref.js';
 
 /**
  * A computation, which derives a value from a declarative reactive expression.

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-768a09d
+ * @license Angular v21.0.0-next.5+sha-78cee8e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,15 +8,15 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-D5h84-RK.cjs');
-var index = require('./index-CxNh976g.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BC-uRDA1.cjs');
+var index = require('./index-CQBM7vFC.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-H9bWMC3C.cjs');
-var apply_import_manager = require('./apply_import_manager-iVAaYquD.cjs');
+var project_paths = require('./project_paths-ChvWZCIo.cjs');
+var apply_import_manager = require('./apply_import_manager-CqC3GRTh.cjs');
 var imports = require('./imports-DwPXlGFl.cjs');
-var parse_html = require('./parse_html-C5RIbCPZ.cjs');
-var ng_component_template = require('./ng_component_template-5Hw6FW4R.cjs');
+var parse_html = require('./parse_html-NRxfGr86.cjs');
+var ng_component_template = require('./ng_component_template-DDaQXmiE.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');

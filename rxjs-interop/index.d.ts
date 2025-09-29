@@ -1,14 +1,14 @@
 /**
- * @license Angular v21.0.0-next.5+sha-768a09d
+ * @license Angular v21.0.0-next.5+sha-78cee8e
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { OutputRef, DestroyRef, Injector, Signal } from '../chrome_dev_tools_performance.d.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d.js';
-import '../event_dispatcher.d.js';
+import { OutputRef, DestroyRef, Injector, Signal } from '../chrome_dev_tools_performance.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.js';
+import '../event_dispatcher.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
-import { ValueEqualityFn } from '../graph.d.js';
+import { ValueEqualityFn } from '../graph.js';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
