@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "21.0.0-next.5+sha-377d1a0",
+  "version": "21.0.0-next.5+sha-fc643c9",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -18,27 +18,27 @@
       "default": "./package.json"
     },
     ".": {
-      "types": "./index.d.ts",
+      "types": "./types/core.d.ts",
       "default": "./fesm2022/core.mjs"
     },
     "./primitives/di": {
-      "types": "./primitives/di/index.d.ts",
+      "types": "./types/primitives/di.d.ts",
       "default": "./fesm2022/primitives/di.mjs"
     },
     "./primitives/event-dispatch": {
-      "types": "./primitives/event-dispatch/index.d.ts",
+      "types": "./types/primitives/event-dispatch.d.ts",
       "default": "./fesm2022/primitives/event-dispatch.mjs"
     },
     "./primitives/signals": {
-      "types": "./primitives/signals/index.d.ts",
+      "types": "./types/primitives/signals.d.ts",
       "default": "./fesm2022/primitives/signals.mjs"
     },
     "./rxjs-interop": {
-      "types": "./rxjs-interop/index.d.ts",
+      "types": "./types/rxjs-interop.d.ts",
       "default": "./fesm2022/rxjs-interop.mjs"
     },
     "./testing": {
-      "types": "./testing/index.d.ts",
+      "types": "./types/testing.d.ts",
       "default": "./fesm2022/testing.mjs"
     }
   },
@@ -46,7 +46,7 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "21.0.0-next.5+sha-377d1a0",
+    "@angular/compiler": "21.0.0-next.5+sha-fc643c9",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0"
   },
@@ -87,6 +87,6 @@
   "schematics": "./schematics/collection.json",
   "sideEffects": false,
   "module": "./fesm2022/core.mjs",
-  "typings": "./index.d.ts",
+  "typings": "./types/core.d.ts",
   "type": "module"
 }
