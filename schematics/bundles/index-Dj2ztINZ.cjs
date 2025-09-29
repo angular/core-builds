@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-fc643c9
+ * @license Angular v21.0.0-next.5+sha-04462ed
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,11 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-BC-uRDA1.cjs');
-var index = require('./index-CQBM7vFC.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DNUb5KOh.cjs');
+var index = require('./index-B8vHcJB0.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-ChvWZCIo.cjs');
+var project_paths = require('./project_paths-yswLig2L.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -651,7 +651,6 @@ function attemptExtractTemplateDefinition(node, checker, reflector, resourceLoad
             return {
                 isInline: true,
                 expression: templateProp,
-                interpolationConfig: project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG,
                 preserveWhitespaces: false,
                 resolvedTemplateUrl: containingFile,
                 templateUrl: containingFile,
@@ -665,7 +664,6 @@ function attemptExtractTemplateDefinition(node, checker, reflector, resourceLoad
             if (typeof templateUrl === 'string') {
                 return {
                     isInline: false,
-                    interpolationConfig: project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG,
                     preserveWhitespaces: false,
                     templateUrlExpression: templateUrlProp,
                     templateUrl,

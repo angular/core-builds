@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-fc643c9
+ * @license Angular v21.0.0-next.5+sha-04462ed
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,10 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-Dt7cmKjT.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-BC-uRDA1.cjs');
+var compiler_host = require('./compiler_host-DhaOpjjr.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DNUb5KOh.cjs');
 var ts = require('typescript');
-var parse_html = require('./parse_html-NRxfGr86.cjs');
+var parse_html = require('./parse_html-BXQ7zlmI.cjs');
 require('os');
 require('fs');
 require('module');

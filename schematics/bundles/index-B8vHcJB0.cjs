@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-fc643c9
+ * @license Angular v21.0.0-next.5+sha-04462ed
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-BC-uRDA1.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DNUb5KOh.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -727,11 +727,8 @@ class MessageBundle {
         this._locale = _locale;
         this._preserveWhitespace = _preserveWhitespace;
     }
-    updateFromTemplate(source, url, interpolationConfig) {
-        const htmlParserResult = this._htmlParser.parse(source, url, {
-            tokenizeExpansionForms: true,
-            interpolationConfig,
-        });
+    updateFromTemplate(source, url) {
+        const htmlParserResult = this._htmlParser.parse(source, url, { tokenizeExpansionForms: true });
         if (htmlParserResult.errors.length) {
             return htmlParserResult.errors;
         }
@@ -741,7 +738,7 @@ class MessageBundle {
         const rootNodes = this._preserveWhitespace
             ? htmlParserResult.rootNodes
             : project_tsconfig_paths.visitAllWithSiblings(new project_tsconfig_paths.WhitespaceVisitor(/* preserveSignificantWhitespace */ false), htmlParserResult.rootNodes);
-        const i18nParserResult = project_tsconfig_paths.extractMessages(rootNodes, interpolationConfig, this._implicitTags, this._implicitAttrs, 
+        const i18nParserResult = project_tsconfig_paths.extractMessages(rootNodes, this._implicitTags, this._implicitAttrs, 
         /* preserveSignificantWhitespace */ this._preserveWhitespace);
         if (i18nParserResult.errors.length) {
             return i18nParserResult.errors;
@@ -891,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -909,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1004,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1274,9 +1271,6 @@ function createComponentDefinitionMap(meta, template, templateInfo) {
     if (meta.encapsulation !== project_tsconfig_paths.ViewEncapsulation.Emulated) {
         definitionMap.set('encapsulation', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.ViewEncapsulation).prop(project_tsconfig_paths.ViewEncapsulation[meta.encapsulation]));
     }
-    if (meta.interpolation !== project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG) {
-        definitionMap.set('interpolation', project_tsconfig_paths.literalArr([project_tsconfig_paths.literal(meta.interpolation.start), project_tsconfig_paths.literal(meta.interpolation.end)]));
-    }
     if (template.preserveWhitespaces === true) {
         definitionMap.set('preserveWhitespaces', project_tsconfig_paths.literal(true));
     }
@@ -1420,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1455,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1506,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1539,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1590,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-fc643c9'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.5+sha-04462ed'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -9171,7 +9165,6 @@ function createEmptyTemplate(componentClass, component, containingFile) {
         declaration: templateUrl
             ? {
                 isInline: false,
-                interpolationConfig: project_tsconfig_paths.InterpolationConfig.fromArray(null),
                 preserveWhitespaces: false,
                 templateUrlExpression: templateUrl,
                 templateUrl: 'missing.ng.html',
@@ -9179,7 +9172,6 @@ function createEmptyTemplate(componentClass, component, containingFile) {
             }
             : {
                 isInline: true,
-                interpolationConfig: project_tsconfig_paths.InterpolationConfig.fromArray(null),
                 preserveWhitespaces: false,
                 expression: template,
                 templateUrl: containingFile,
@@ -9191,7 +9183,6 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
     // We always normalize line endings if the template has been escaped (i.e. is inline).
     const i18nNormalizeLineEndingsInICUs = escapedString || options.i18nNormalizeLineEndingsInICUs;
     const commonParseOptions = {
-        interpolationConfig: template.interpolationConfig,
         range: sourceParseRange ?? undefined,
         enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
         i18nNormalizeLineEndingsInICUs,
@@ -9243,7 +9234,6 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
         }
         preserveWhitespaces = value;
     }
-    let interpolationConfig = project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG;
     if (component.has('interpolation')) {
         const expr = component.get('interpolation');
         const value = evaluator.evaluate(expr);
@@ -9252,7 +9242,6 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
             !value.every((element) => typeof element === 'string')) {
             throw project_tsconfig_paths.createValueHasWrongTypeError(expr, value, 'interpolation must be an array with 2 elements of string type');
         }
-        interpolationConfig = project_tsconfig_paths.InterpolationConfig.fromArray(value);
     }
     if (component.has('templateUrl')) {
         const templateUrlExpr = component.get('templateUrl');
@@ -9264,7 +9253,6 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
             const resourceUrl = resourceLoader.resolve(templateUrl, containingFile);
             return {
                 isInline: false,
-                interpolationConfig,
                 preserveWhitespaces,
                 templateUrl,
                 templateUrlExpression: templateUrlExpr,
@@ -9283,7 +9271,6 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
     else if (component.has('template')) {
         return {
             isInline: true,
-            interpolationConfig,
             preserveWhitespaces,
             expression: component.get('template'),
             templateUrl: containingFile,
@@ -10721,7 +10708,6 @@ class ComponentDecoratorHandler {
                     template,
                     encapsulation,
                     changeDetection,
-                    interpolation: template.interpolationConfig ?? project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG,
                     styles,
                     externalStyles,
                     // These will be replaced during the compilation step, after all `NgModule`s have been
@@ -10987,7 +10973,7 @@ class ComponentDecoratorHandler {
         return { data };
     }
     xi18n(ctx, node, analysis) {
-        ctx.updateFromTemplate(analysis.template.content, analysis.template.declaration.resolvedTemplateUrl, analysis.template.interpolationConfig ?? project_tsconfig_paths.DEFAULT_INTERPOLATION_CONFIG);
+        ctx.updateFromTemplate(analysis.template.content, analysis.template.declaration.resolvedTemplateUrl);
     }
     updateResources(node, analysis) {
         const containingFile = node.getSourceFile().fileName;
@@ -11736,7 +11722,7 @@ class ComponentDecoratorHandler {
     }
     /** Creates a new binding parser. */
     getNewBindingParser() {
-        return project_tsconfig_paths.makeBindingParser(undefined, this.enableSelectorless);
+        return project_tsconfig_paths.makeBindingParser(this.enableSelectorless);
     }
 }
 function createMatcherFromScope(scope, hostDirectivesResolver) {
@@ -12325,7 +12311,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.5+sha-fc643c9');
+new project_tsconfig_paths.Version('21.0.0-next.5+sha-04462ed');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -20429,7 +20415,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.5+sha-fc643c9` usually means that core is at head so it supports
+    // A version of `21.0.0-next.5+sha-04462ed` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
