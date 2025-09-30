@@ -1,15 +1,8 @@
 /**
- * @license Angular v21.0.0-next.5+sha-899c25f
+ * @license Angular v21.0.0-next.5+sha-2aca6da
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
-
-/**
- * The default equality function used for `signal` and `computed`, which uses referential equality.
- */
-function defaultEquals(a, b) {
-    return Object.is(a, b);
-}
 
 /**
  * The currently active consumer `ReactiveNode`, if running code in a reactive context.
@@ -395,6 +388,13 @@ function isValidLink(checkLink, consumer) {
 }
 
 /**
+ * The default equality function used for `signal` and `computed`, which uses referential equality.
+ */
+function defaultEquals(a, b) {
+    return Object.is(a, b);
+}
+
+/**
  * Create a computed signal which derives a reactive value from an expression.
  */
 function createComputed(computation, equal) {
@@ -578,4 +578,4 @@ function signalValueChanged(node) {
 }
 
 export { COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
-//# sourceMappingURL=signal-ChMCRiH3.mjs.map
+//# sourceMappingURL=signal-DVgTxyMU.mjs.map

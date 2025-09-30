@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.5+sha-899c25f
+ * @license Angular v21.0.0-next.5+sha-2aca6da
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer, consumerPollProducersForChange } from './signal-ChMCRiH3.mjs';
+import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer, consumerPollProducersForChange } from './signal-DVgTxyMU.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
     const node = Object.create(LINKED_SIGNAL_NODE);
@@ -138,4 +138,4 @@ function runEffect(node) {
 }
 
 export { BASE_EFFECT_NODE, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, runEffect, untracked };
-//# sourceMappingURL=effect-BZosf66B.mjs.map
+//# sourceMappingURL=effect-wi7IDaMk.mjs.map

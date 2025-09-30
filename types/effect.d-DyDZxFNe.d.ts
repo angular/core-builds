@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.5+sha-899c25f
+ * @license Angular v21.0.0-next.5+sha-2aca6da
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ReactiveNode, ValueEqualityFn, SIGNAL, ReactiveHookFn } from './graph.d-CYu7eN6j.js';
+import { ReactiveNode, ValueEqualityFn, SIGNAL, ReactiveHookFn } from './formatter.d-VHxLYAbV.js';
 
 interface SignalNode<T> extends ReactiveNode {
     value: T;

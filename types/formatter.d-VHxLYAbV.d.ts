@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.5+sha-899c25f
+ * @license Angular v21.0.0-next.5+sha-2aca6da
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -198,5 +198,17 @@ declare function consumerDestroy(node: ReactiveNode): void;
 declare function runPostProducerCreatedFn(node: ReactiveNode): void;
 declare function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null;
 
-export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
+declare global {
+    var devtoolsFormatters: any[];
+}
+/**
+ * Installs the custom formatter into custom formatting on Signals in the devtools.
+ *
+ * Supported by both Chrome and Firefox.
+ *
+ * @see https://firefox-source-docs.mozilla.org/devtools-user/custom_formatters/index.html
+ */
+declare function installDevToolsSignalFormatter(): void;
+
+export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
 export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn };

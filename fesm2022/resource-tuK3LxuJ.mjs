@@ -1,12 +1,12 @@
 /**
- * @license Angular v21.0.0-next.5+sha-899c25f
+ * @license Angular v21.0.0-next.5+sha-2aca6da
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, NodeInjectorDestroyRef, FLAGS, markAncestorsForTraversal, noop, setIsRefreshingViews, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DikDKCEv.mjs';
-import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, isInNotificationPhase } from './signal-ChMCRiH3.mjs';
-import { untracked as untracked$1, BASE_EFFECT_NODE, runEffect, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './effect-BZosf66B.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, assertNotInReactiveContext, assertInInjectionContext, Injector, ViewContext, ChangeDetectionScheduler, EffectScheduler, setInjectorProfilerContext, emitEffectCreatedEvent, EFFECTS, NodeInjectorDestroyRef, FLAGS, markAncestorsForTraversal, noop, setIsRefreshingViews, signalAsReadonlyFn, PendingTasks, signal } from './root_effect_scheduler-DreawIYf.mjs';
+import { setActiveConsumer, createComputed, SIGNAL, consumerDestroy, isInNotificationPhase } from './signal-DVgTxyMU.mjs';
+import { untracked as untracked$1, BASE_EFFECT_NODE, runEffect, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './effect-wi7IDaMk.mjs';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
@@ -622,4 +622,4 @@ class ResourceWrappedError extends Error {
 }
 
 export { OutputEmitterRef, ResourceImpl, computed, effect, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
-//# sourceMappingURL=resource-jzpyA84w.mjs.map
+//# sourceMappingURL=resource-tuK3LxuJ.mjs.map
