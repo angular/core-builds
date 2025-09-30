@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.5+sha-c3a949a
+ * @license Angular v21.0.0-next.5+sha-31bc9e4
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -969,6 +969,12 @@ function populateKnownInputsFromGlobalData(knownInputs, globalData) {
  * @returns Replacements for converting the input.
  */
 function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, preferShorthandIfPossible, originalInputDecorator, initialValue, leadingTodoText, }, info, checker, importManager, result) {
+    // Check for 'this' references in initializer before doing anything else
+    if (node.initializer &&
+        (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer)) &&
+        containsThisReferences(node.initializer)) {
+        return []; // Skip migration for this input by returning empty replacements
+    }
     let optionsLiteral = null;
     // We need an options array for the input because:
     //   - the input is either aliased,
@@ -1038,7 +1044,23 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (!modifiersWithoutInputDecorator?.some((s) => s.kind === ts.SyntaxKind.ReadonlyKeyword)) {
         modifiersWithoutInputDecorator.push(ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword));
     }
-    const newNode = ts.factory.createPropertyDeclaration(modifiersWithoutInputDecorator, node.name, undefined, undefined, inputInitializer);
+    // Skip migration if the input is a function that references class members via 'this'
+    if (inputInitializer &&
+        (ts.isArrowFunction(inputInitializer) || ts.isFunctionExpression(inputInitializer))) {
+        if (containsThisReferences(inputInitializer)) {
+            return []; // Skip migration for this input by returning empty replacements
+        }
+    }
+    let finalInitializer = inputInitializer;
+    if (inputInitializer === undefined) {
+        if (preferShorthandIfPossible === null) {
+            finalInitializer = ts.factory.createIdentifier('undefined');
+        }
+        else {
+            resolvedType = preferShorthandIfPossible.originalType;
+        }
+    }
+    const newNode = ts.factory.createPropertyDeclaration(modifiersWithoutInputDecorator, node.name, undefined, undefined, finalInitializer);
     const newPropertyText = result.printer.printNode(ts.EmitHint.Unspecified, newNode, node.getSourceFile());
     const replacements = [];
     if (leadingTodoText !== null) {
@@ -1081,6 +1103,43 @@ function extractTransformOfInput(transform, resolvedType, checker) {
         node: ts.factory.createPropertyAssignment('transform', transformFn),
         leadingTodoText,
     };
+}
+/**
+ * Checks if a function node contains any references to 'this'.
+ * This is used to skip migration for functions that reference class members.
+ */
+function containsThisReferences(node) {
+    let hasThis = false;
+    const visit = (node) => {
+        if (hasThis)
+            return;
+        if (node.kind === ts.SyntaxKind.ThisKeyword) {
+            hasThis = true;
+            return;
+        }
+        if (ts.isPropertyAccessExpression(node)) {
+            const expr = node.expression;
+            if (ts.isIdentifier(expr) && expr.text === 'this') {
+                hasThis = true;
+                return;
+            }
+        }
+        ts.forEachChild(node, visit);
+    };
+    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+        if (node.body) {
+            if (node.body.kind === ts.SyntaxKind.Block) {
+                node.body.statements.forEach(visit);
+            }
+            else {
+                visit(node.body);
+            }
+        }
+    }
+    else {
+        ts.forEachChild(node, visit);
+    }
+    return hasThis;
 }
 
 /**
