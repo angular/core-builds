@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.2+sha-8e80083
+ * @license Angular v20.3.2+sha-612ce99
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,14 +18,14 @@ require('module');
 require('path');
 require('url');
 require('@angular-devkit/core');
-require('./index-BGHi5O0G.cjs');
+require('./index-UVCyXFwB.cjs');
 require('node:path');
-require('./project_paths-BOa96rp2.cjs');
+require('./project_paths-DWBSqIZK.cjs');
 require('node:path/posix');
-require('./apply_import_manager-BFFxcKK7.cjs');
-require('./migrate_ts_type_references-0kspsEza.cjs');
+require('./apply_import_manager-DeNgjhpj.cjs');
+require('./migrate_ts_type_references-48ioR-RU.cjs');
 require('assert');
-require('./index-VcURe-7u.cjs');
+require('./index-0ObjNRFK.cjs');
 require('./leading_space-D9nQ8UQC.cjs');
 require('node:assert');
 
