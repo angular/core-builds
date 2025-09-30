@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.3.2+sha-c1a922a
+ * @license Angular v20.3.2+sha-8e80083
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL } from './graph.d.js';
+import { SIGNAL } from './formatter.d.js';
 import { EventContract } from './event_dispatcher.d.js';
 
 /**

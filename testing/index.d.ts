@@ -1,14 +1,14 @@
 /**
- * @license Angular v20.3.2+sha-c1a922a
+ * @license Angular v20.3.2+sha-8e80083
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import '../formatter.d.js';
 import '../event_dispatcher.d.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from '../chrome_dev_tools_performance.d.js';
 import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from '../discovery.d.js';
 import * as i0 from '@angular/core';
-import '../graph.d.js';
 import 'rxjs';
 import '../effect.d.js';
 import '@angular/core/primitives/di';

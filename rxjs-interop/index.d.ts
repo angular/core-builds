@@ -1,14 +1,14 @@
 /**
- * @license Angular v20.3.2+sha-c1a922a
+ * @license Angular v20.3.2+sha-8e80083
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import { ValueEqualityFn } from '../formatter.d.js';
 import { OutputRef, DestroyRef, Injector, Signal } from '../chrome_dev_tools_performance.d.js';
 import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from '../api.d.js';
 import '../event_dispatcher.d.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
-import { ValueEqualityFn } from '../graph.d.js';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source

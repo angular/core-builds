@@ -1,15 +1,8 @@
 /**
- * @license Angular v20.3.2+sha-c1a922a
+ * @license Angular v20.3.2+sha-8e80083
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
-
-/**
- * The default equality function used for `signal` and `computed`, which uses referential equality.
- */
-function defaultEquals(a, b) {
-    return Object.is(a, b);
-}
 
 /**
  * The currently active consumer `ReactiveNode`, if running code in a reactive context.
@@ -392,6 +385,13 @@ function isValidLink(checkLink, consumer) {
         } while (link !== undefined);
     }
     return false;
+}
+
+/**
+ * The default equality function used for `signal` and `computed`, which uses referential equality.
+ */
+function defaultEquals(a, b) {
+    return Object.is(a, b);
 }
 
 /**
