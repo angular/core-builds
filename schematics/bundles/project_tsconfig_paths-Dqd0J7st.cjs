@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.2+sha-77b6305
+ * @license Angular v20.3.2+sha-f51ab32
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18258,9 +18258,6 @@ class Token {
     isTemplateLiteralInterpolationStart() {
         return this.isOperator('${');
     }
-    isTemplateLiteralInterpolationEnd() {
-        return this.isOperator('}');
-    }
     toString() {
         switch (this.type) {
             case TokenType.Character:
@@ -18433,7 +18430,7 @@ class _Scanner {
         this.advance();
         const currentBrace = this.braceStack.pop();
         if (currentBrace === 'interpolation') {
-            this.tokens.push(newOperatorToken(start, this.index, '}'));
+            this.tokens.push(newCharacterToken(start, this.index, $RBRACE));
             return this.scanTemplateLiteralPart(this.index);
         }
         return newCharacterToken(start, this.index, code);
@@ -19927,6 +19924,7 @@ class _ParseAST {
             }
             else if (token.isTemplateLiteralInterpolationStart()) {
                 this.advance();
+                this.rbracesExpected++;
                 const expression = this.parsePipe();
                 if (expression instanceof EmptyExpr$1) {
                     this.error('Template literal interpolation cannot be empty');
@@ -19934,6 +19932,7 @@ class _ParseAST {
                 else {
                     expressions.push(expression);
                 }
+                this.rbracesExpected--;
             }
             else {
                 this.advance();
@@ -32769,7 +32768,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.2+sha-77b6305');
+const VERSION = new Version('20.3.2+sha-f51ab32');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33831,7 +33830,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CKIk-DtF.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Dqd0J7st.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
