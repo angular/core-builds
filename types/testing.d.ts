@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.5+sha-f866132
+ * @license Angular v21.0.0-next.5+sha-1cb16fd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import './formatter.d-VHxLYAbV.js';
 import './event_dispatcher.d-BReQpZfC.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './chrome_dev_tools_performance.d-BoAe9-Vl.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './discovery.d-CJy3iHBK.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './discovery.d-BQf5fXDF.js';
 import * as i0 from '@angular/core';
 import 'rxjs';
 import './effect.d-DyDZxFNe.js';
