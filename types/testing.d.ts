@@ -1,16 +1,16 @@
 /**
- * @license Angular v21.0.0-next.5+sha-51a0b59
+ * @license Angular v21.0.0-next.5+sha-2f6caef
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import './formatter.d-VHxLYAbV.js';
-import './event_dispatcher.d-BReQpZfC.js';
-import { InjectionToken, Type, ProviderToken, InjectOptions } from './chrome_dev_tools_performance.d-BoAe9-Vl.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './discovery.d-BQf5fXDF.js';
+import './_formatter-chunk.js';
+import './_event_dispatcher-chunk.js';
+import { InjectionToken, Type, ProviderToken, InjectOptions } from './_chrome_dev_tools_performance-chunk.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './_discovery-chunk.js';
 import * as i0 from '@angular/core';
 import 'rxjs';
-import './effect.d-DyDZxFNe.js';
+import './_effect-chunk.js';
 import '@angular/core/primitives/di';
 
 /**

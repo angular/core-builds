@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "21.0.0-next.5+sha-51a0b59",
+  "version": "21.0.0-next.5+sha-2f6caef",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -22,16 +22,16 @@
       "default": "./fesm2022/core.mjs"
     },
     "./primitives/di": {
-      "types": "./types/primitives/di.d.ts",
-      "default": "./fesm2022/primitives/di.mjs"
+      "types": "./types/primitives-di.d.ts",
+      "default": "./fesm2022/primitives-di.mjs"
     },
     "./primitives/event-dispatch": {
-      "types": "./types/primitives/event-dispatch.d.ts",
-      "default": "./fesm2022/primitives/event-dispatch.mjs"
+      "types": "./types/primitives-event-dispatch.d.ts",
+      "default": "./fesm2022/primitives-event-dispatch.mjs"
     },
     "./primitives/signals": {
-      "types": "./types/primitives/signals.d.ts",
-      "default": "./fesm2022/primitives/signals.mjs"
+      "types": "./types/primitives-signals.d.ts",
+      "default": "./fesm2022/primitives-signals.mjs"
     },
     "./rxjs-interop": {
       "types": "./types/rxjs-interop.d.ts",
@@ -46,7 +46,7 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "21.0.0-next.5+sha-51a0b59",
+    "@angular/compiler": "21.0.0-next.5+sha-2f6caef",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0"
   },

@@ -1,13 +1,13 @@
 /**
- * @license Angular v21.0.0-next.5+sha-51a0b59
+ * @license Angular v21.0.0-next.5+sha-2f6caef
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ValueEqualityFn } from './formatter.d-VHxLYAbV.js';
-import { OutputRef, DestroyRef, Injector, Signal } from './chrome_dev_tools_performance.d-BoAe9-Vl.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './api.d-DkWjHUhm.js';
-import './event_dispatcher.d-BReQpZfC.js';
+import { ValueEqualityFn } from './_formatter-chunk.js';
+import { OutputRef, DestroyRef, Injector, Signal } from './_chrome_dev_tools_performance-chunk.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './_api-chunk.js';
+import './_event_dispatcher-chunk.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 
 /**
