@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.6+sha-cb56fbf
+ * @license Angular v21.0.0-next.6+sha-9eac43c
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_root_effect_scheduler-chunk.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, formatRuntimeError, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, ANIMATIONS, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_root_effect_scheduler-chunk.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_signal-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -7338,10 +7338,53 @@ function determineLongestAnimationFromElementAnimations(el, animationsMap, anima
 const allLeavingAnimations = new Set();
 
 /**
+ * A [DI token](api/core/InjectionToken) that enables or disables all enter and leave animations.
+ */
+const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
+    providedIn: 'root',
+    factory: () => false,
+});
+/**
+ * A [DI token](api/core/InjectionToken) for the queue of all animations.
+ */
+const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationQueue' : '', {
+    providedIn: 'root',
+    factory: () => {
+        return {
+            queue: new Set(),
+            isScheduled: false,
+        };
+    },
+});
+/**
+ * A [DI token](api/core/InjectionToken) that configures the maximum animation timeout
+ * before element removal. The default value mirrors from Chrome's cross document
+ * navigation view transition timeout. It's intended to prevent people from accidentally
+ * forgetting to call the removal function in their callback. Also serves as a delay
+ * for when stylesheets are pruned.
+ *
+ * @publicApi 20.2
+ */
+const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
+    providedIn: 'root',
+    factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT,
+});
+const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
+
+function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
+    const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
+    if (parent !== null && enterAnimations && enterAnimations.has(tNode.index)) {
+        const animationQueue = injector.get(ANIMATION_QUEUE);
+        for (const animateFn of enterAnimations.get(tNode.index)) {
+            animationQueue.queue.add(animateFn);
+        }
+    }
+}
+/**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
  */
-function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode, parentLView) {
+function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHandle, tNode, beforeNode, parentLView) {
     // If this slot was allocated for a text node dynamically created by i18n, the text node itself
     // won't be created until i18nApply() in the update block, so this node should be skipped.
     // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
@@ -7362,6 +7405,7 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
         }
         const rNode = unwrapRNode(lNodeToHandle);
         if (action === 0 /* WalkTNodeTreeAction.Create */ && parent !== null) {
+            maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
             if (beforeNode == null) {
                 nativeAppendChild(renderer, parent, rNode);
             }
@@ -7370,10 +7414,11 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             }
         }
         else if (action === 1 /* WalkTNodeTreeAction.Insert */ && parent !== null) {
+            maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
             nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
         }
         else if (action === 2 /* WalkTNodeTreeAction.Detach */) {
-            runLeaveAnimationsWithCallback(parentLView, (nodeHasLeaveAnimations) => {
+            runLeaveAnimationsWithCallback(parentLView, tNode, injector, (nodeHasLeaveAnimations) => {
                 // the nodeHasLeaveAnimations indicates to the renderer that the element needs to
                 // be removed synchronously and sets the requireSynchronousElementRemoval flag in
                 // the renderer.
@@ -7381,13 +7426,24 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             });
         }
         else if (action === 3 /* WalkTNodeTreeAction.Destroy */) {
-            runLeaveAnimationsWithCallback(parentLView, () => {
+            runLeaveAnimationsWithCallback(parentLView, tNode, injector, () => {
                 renderer.destroyNode(rNode);
             });
         }
         if (lContainer != null) {
-            applyContainer(renderer, action, lContainer, parent, beforeNode);
+            applyContainer(renderer, action, injector, lContainer, tNode, parent, beforeNode);
         }
+    }
+}
+function addToAnimationQueue(injector, animationFns) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    if (Array.isArray(animationFns)) {
+        for (const animateFn of animationFns) {
+            animationQueue.queue.add(animateFn);
+        }
+    }
+    else {
+        animationQueue.queue.add(animationFns);
     }
 }
 /**
@@ -7563,30 +7619,45 @@ function cleanUpView(tView, lView) {
         setActiveConsumer(prevConsumer);
     }
 }
-function runLeaveAnimationsWithCallback(lView, callback) {
-    if (lView && lView[ANIMATIONS] && lView[ANIMATIONS].leave) {
-        if (lView[ANIMATIONS].skipLeaveAnimations) {
-            lView[ANIMATIONS].skipLeaveAnimations = false;
+function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
+    const animations = lView?.[ANIMATIONS];
+    if (animations == null || (animations.leave && !animations.leave.has(tNode.index)))
+        return callback(false);
+    // this is solely for move operations to prevent leave animations from running
+    // on the moved nodes, which would have deleted the node.
+    if (animations.skipLeaveAnimations) {
+        animations.skipLeaveAnimations = false;
+        return callback(false);
+    }
+    addToAnimationQueue(injector, () => {
+        // it's possible that in the time between when the leave animation was
+        // and the time it was executed, the data structure changed. So we need
+        // to be safe here.
+        if (animations.leave && animations.leave.has(tNode.index)) {
+            const leaveAnimationMap = animations.leave;
+            const leaveAnimations = leaveAnimationMap.get(tNode.index);
+            const runningAnimations = [];
+            if (leaveAnimations) {
+                for (let index = 0; index < leaveAnimations.length; index++) {
+                    const animationFn = leaveAnimations[index];
+                    runningAnimations.push(animationFn());
+                }
+            }
+            animations.running = Promise.allSettled(runningAnimations);
+            runAfterLeaveAnimations(lView, callback);
         }
         else {
-            const leaveAnimations = lView[ANIMATIONS].leave;
-            const runningAnimations = [];
-            for (let index = 0; index < leaveAnimations.length; index++) {
-                const animateFn = leaveAnimations[index];
-                runningAnimations.push(animateFn());
-            }
-            lView[ANIMATIONS].running = Promise.allSettled(runningAnimations);
-            lView[ANIMATIONS].leave = undefined;
+            if (lView)
+                allLeavingAnimations.delete(lView);
+            callback(false);
         }
-    }
-    runAfterLeaveAnimations(lView, callback);
+    });
 }
 function runAfterLeaveAnimations(lView, callback) {
-    if (lView && lView[ANIMATIONS] && lView[ANIMATIONS].running) {
-        lView[ANIMATIONS].running.then(() => {
-            if (lView[ANIMATIONS] && lView[ANIMATIONS].running) {
-                lView[ANIMATIONS].running = undefined;
-            }
+    const runningAnimations = lView[ANIMATIONS]?.running;
+    if (runningAnimations) {
+        runningAnimations.then(() => {
+            lView[ANIMATIONS].running = undefined;
             allLeavingAnimations.delete(lView);
             callback(true);
         });
@@ -7913,6 +7984,7 @@ function getBeforeNodeForView(viewIndexInContainer, lContainer) {
 function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, isProjection) {
     while (tNode != null) {
         ngDevMode && assertTNodeForLView(tNode, lView);
+        const injector = lView[INJECTOR];
         // Let declarations don't have corresponding DOM nodes so we skip over them.
         if (tNode.type === 128 /* TNodeType.LetDeclaration */) {
             tNode = tNode.next;
@@ -7931,22 +8003,22 @@ function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, 
         if (!isDetachedByI18n(tNode)) {
             if (tNodeType & 8 /* TNodeType.ElementContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, parentRElement, beforeNode, false);
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
+                applyToElementOrContainer(action, renderer, injector, parentRElement, rawSlotValue, tNode, beforeNode, lView);
             }
             else if (tNodeType & 32 /* TNodeType.Icu */) {
                 const nextRNode = icuContainerIterate(tNode, lView);
                 let rNode;
                 while ((rNode = nextRNode())) {
-                    applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode, lView);
+                    applyToElementOrContainer(action, renderer, injector, parentRElement, rNode, tNode, beforeNode, lView);
                 }
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
+                applyToElementOrContainer(action, renderer, injector, parentRElement, rawSlotValue, tNode, beforeNode, lView);
             }
             else if (tNodeType & 16 /* TNodeType.Projection */) {
                 applyProjectionRecursive(renderer, action, lView, tNode, parentRElement, beforeNode);
             }
             else {
                 ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */);
-                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode, lView);
+                applyToElementOrContainer(action, renderer, injector, parentRElement, rawSlotValue, tNode, beforeNode, lView);
             }
         }
         tNode = isProjection ? tNode.projectionNext : tNode.next;
@@ -8000,7 +8072,7 @@ function applyProjectionRecursive(renderer, action, lView, tProjectionNode, pare
         // This should be refactored and cleaned up.
         for (let i = 0; i < nodeToProjectOrRNodes.length; i++) {
             const rNode = nodeToProjectOrRNodes[i];
-            applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode, lView);
+            applyToElementOrContainer(action, renderer, lView[INJECTOR], parentRElement, rNode, tProjectionNode, beforeNode, lView);
         }
     }
     else {
@@ -8027,7 +8099,7 @@ function applyProjectionRecursive(renderer, action, lView, tProjectionNode, pare
  * @param parentRElement parent DOM element for insertion/removal.
  * @param beforeNode Before which node the insertions should happen.
  */
-function applyContainer(renderer, action, lContainer, parentRElement, beforeNode) {
+function applyContainer(renderer, action, injector, lContainer, tNode, parentRElement, beforeNode) {
     ngDevMode && assertLContainer(lContainer);
     const anchor = lContainer[NATIVE]; // LContainer has its own before node.
     const native = unwrapRNode(lContainer);
@@ -8042,7 +8114,7 @@ function applyContainer(renderer, action, lContainer, parentRElement, beforeNode
         // don't see a reason why they should be different, but they are.
         //
         // If they are we need to process the second anchor as well.
-        applyToElementOrContainer(action, renderer, parentRElement, anchor, beforeNode);
+        applyToElementOrContainer(action, renderer, injector, parentRElement, anchor, tNode, beforeNode);
     }
     for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         const lView = lContainer[i];
@@ -9142,7 +9214,6 @@ function refreshView(tView, lView, templateFn, context) {
         if (templateFn !== null) {
             executeTemplate(tView, lView, templateFn, 2 /* RenderFlags.Update */, context);
         }
-        runEnterAnimations(lView);
         const hooksInitPhaseCompleted = (flags & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
         // execute pre-order hooks (OnInit, OnChanges, DoCheck)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
@@ -9268,15 +9339,6 @@ function refreshView(tView, lView, templateFn, context) {
             }
         }
         leaveView();
-    }
-}
-function runEnterAnimations(lView) {
-    const animationData = lView[ANIMATIONS];
-    if (animationData?.enter) {
-        for (const animateFn of animationData.enter) {
-            animateFn();
-        }
-        animationData.enter = undefined;
     }
 }
 /**
@@ -13708,7 +13770,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.6+sha-cb56fbf']
+        ? ['ng-version', '21.0.0-next.6+sha-9eac43c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21285,28 +21347,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     return ɵɵattribute;
 }
 
-/**
- * A [DI token](api/core/InjectionToken) that enables or disables all enter and leave animations.
- */
-const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
-    providedIn: 'root',
-    factory: () => false,
-});
-/**
- * A [DI token](api/core/InjectionToken) that configures the maximum animation timeout
- * before element removal. The default value mirrors from Chrome's cross document
- * navigation view transition timeout. It's intended to prevent people from accidentally
- * forgetting to call the removal function in their callback. Also serves as a delay
- * for when stylesheets are pruned.
- *
- * @publicApi 20.2
- */
-const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
-    providedIn: 'root',
-    factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT,
-});
-const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
-
 const DEFAULT_ANIMATIONS_DISABLED = false;
 const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) &&
     typeof document !== 'undefined' &&
@@ -21436,14 +21476,14 @@ function trackLeavingNodes(tNode, el) {
  */
 function getLViewEnterAnimations(lView) {
     const animationData = (lView[ANIMATIONS] ??= {});
-    return (animationData.enter ??= []);
+    return (animationData.enter ??= new Map());
 }
 /**
  * Retrieves the list of specified leave animations from the lView
  */
 function getLViewLeaveAnimations(lView) {
     const animationData = (lView[ANIMATIONS] ??= {});
-    return (animationData.leave ??= []);
+    return (animationData.leave ??= new Map());
 }
 /**
  * Gets the list of classes from a passed in value
@@ -21504,6 +21544,18 @@ function isLongestAnimation(event, nativeElement) {
             (longestAnimation.propertyName !== undefined &&
                 event.propertyName === longestAnimation.propertyName)));
 }
+/**
+ * Stores a given animation function in the LView's animation map for later execution
+ *
+ * @param animations Either the enter or leave animation map from the LView
+ * @param tNode The TNode the animation is associated with
+ * @param fn The animation function to be called later
+ */
+function addAnimationToLView(animations, tNode, fn) {
+    const animationFns = animations.get(tNode.index) ?? [];
+    animationFns.push(fn);
+    animations.set(tNode.index, animationFns);
+}
 
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
@@ -21525,7 +21577,8 @@ function ɵɵanimateEnter(value) {
     }
     const tNode = getCurrentTNode();
     cancelLeavingNodes(tNode, lView);
-    getLViewEnterAnimations(lView).push(() => runEnterAnimation(lView, tNode, value));
+    addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value));
+    queueEnterAnimations(lView);
     return ɵɵanimateEnter; // For chaining
 }
 function runEnterAnimation(lView, tNode, value) {
@@ -21547,7 +21600,7 @@ function runEnterAnimation(lView, tNode, value) {
             return;
         const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
         ngZone.runOutsideAngular(() => {
-            cleanupFns.push(renderer.listen(nativeElement, eventName, handleEnterAnimationEnd));
+            renderer.listen(nativeElement, eventName, handleEnterAnimationEnd);
         });
     };
     // When the longest animation ends, we can remove all the classes
@@ -21621,7 +21674,8 @@ function ɵɵanimateEnterListener(value) {
     }
     const tNode = getCurrentTNode();
     cancelLeavingNodes(tNode, lView);
-    getLViewEnterAnimations(lView).push(() => runEnterAnimationFunction(lView, tNode, value));
+    addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimationFunction(lView, tNode, value));
+    queueEnterAnimations(lView);
     return ɵɵanimateEnterListener;
 }
 /**
@@ -21654,10 +21708,11 @@ function ɵɵanimateLeave(value) {
         return ɵɵanimateLeave;
     }
     const tNode = getCurrentTNode();
-    getLViewLeaveAnimations(lView).push(() => runLeaveAnimations(lView, tNode, value, animationsDisabled));
+    addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value));
+    enableAnimationQueueScheduler(lView[INJECTOR]);
     return ɵɵanimateLeave; // For chaining
 }
-function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
+function runLeaveAnimations(lView, tNode, value) {
     const { promise, resolve } = promiseWithResolvers();
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
@@ -21666,7 +21721,7 @@ function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
     allLeavingAnimations.add(lView);
     const activeClasses = getClassListFromValue(value);
     if (activeClasses && activeClasses.length > 0) {
-        animateLeaveClassRunner(nativeElement, tNode, activeClasses, renderer, animationsDisabled, ngZone, resolve);
+        animateLeaveClassRunner(nativeElement, tNode, activeClasses, renderer, ngZone, resolve);
     }
     else {
         resolve();
@@ -21677,13 +21732,9 @@ function runLeaveAnimations(lView, tNode, value, animationsDisabled) {
  * This function actually adds the classes that animate element that's leaving the DOM.
  * Once it finishes, it calls the remove function that was provided by the DOM renderer.
  */
-function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisabled, ngZone, resolver) {
-    if (animationsDisabled) {
-        longestAnimations.delete(el);
-        resolver();
-        return;
-    }
+function animateLeaveClassRunner(el, tNode, classList, renderer, ngZone, resolver) {
     cancelAnimationsIfRunning(el, renderer);
+    const cleanupFns = [];
     const handleOutAnimationEnd = (event) => {
         // this early exit case is to prevent issues with bubbling events that are from child element animations
         if (event.target !== el)
@@ -21706,10 +21757,13 @@ function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisab
             }
         }
         resolver();
+        for (const fn of cleanupFns) {
+            fn();
+        }
     };
     ngZone.runOutsideAngular(() => {
-        renderer.listen(el, 'animationend', handleOutAnimationEnd);
-        renderer.listen(el, 'transitionend', handleOutAnimationEnd);
+        cleanupFns.push(renderer.listen(el, 'animationend', handleOutAnimationEnd));
+        cleanupFns.push(renderer.listen(el, 'transitionend', handleOutAnimationEnd));
     });
     trackLeavingNodes(tNode, el);
     for (const item of classList) {
@@ -21724,6 +21778,9 @@ function animateLeaveClassRunner(el, tNode, classList, renderer, animationsDisab
             if (!longestAnimations.has(el)) {
                 clearLeavingNodes(tNode, el);
                 resolver();
+                for (const fn of cleanupFns) {
+                    fn();
+                }
             }
         });
     });
@@ -21751,7 +21808,8 @@ function ɵɵanimateLeaveListener(value) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     allLeavingAnimations.add(lView);
-    getLViewLeaveAnimations(lView).push(() => runLeaveAnimationFunction(lView, tNode, value));
+    addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value));
+    enableAnimationQueueScheduler(lView[INJECTOR]);
     return ɵɵanimateLeaveListener; // For chaining
 }
 /**
@@ -21791,6 +21849,35 @@ function runLeaveAnimationFunction(lView, tNode, value) {
     }
     // Ensure cleanup if the LView is destroyed before the animation runs.
     return promise;
+}
+function queueEnterAnimations(lView) {
+    enableAnimationQueueScheduler(lView[INJECTOR]);
+    const enterAnimations = lView[ANIMATIONS]?.enter;
+    if (enterAnimations) {
+        const animationQueue = lView[INJECTOR].get(ANIMATION_QUEUE);
+        for (const [_, animateFns] of enterAnimations) {
+            for (const animateFn of animateFns) {
+                animationQueue.queue.add(animateFn);
+            }
+        }
+    }
+}
+function enableAnimationQueueScheduler(injector) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    // We only need to schedule the animation queue runner once per application.
+    if (!animationQueue.isScheduled) {
+        afterEveryRender(() => {
+            runQueuedAnimations(injector);
+        }, { injector });
+        animationQueue.isScheduled = true;
+    }
+}
+function runQueuedAnimations(injector) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    for (let animateFn of animationQueue.queue) {
+        animateFn();
+    }
+    animationQueue.queue.clear();
 }
 
 /*!
