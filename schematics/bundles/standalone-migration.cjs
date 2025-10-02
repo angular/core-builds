@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.3+sha-e2820d1
+ * @license Angular v20.3.3+sha-6588489
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -971,7 +971,7 @@ function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, pri
         }
         node.forEachChild(walk);
     });
-    replaceInComponentImportsArray(componentImportArrays, classesToRemove, tracker, typeChecker, templateTypeChecker, declarationImportRemapper);
+    replaceInComponentImportsArray(componentImportArrays, classesToRemove, removalLocations, tracker, typeChecker, templateTypeChecker, declarationImportRemapper);
     replaceInTestImportsArray(testArrays, removalLocations, classesToRemove, tracker, typeChecker, templateTypeChecker, declarationImportRemapper);
     // We collect all the places where we need to remove references first before generating the
     // removal instructions since we may have to remove multiple references from one node.
@@ -1077,12 +1077,13 @@ function collectChangeLocations(ngModule, removalLocations, componentImportArray
  * Replaces all the leftover modules in component `imports` arrays with their exports.
  * @param componentImportArrays All the imports arrays and their nodes that represent NgModules.
  * @param classesToRemove Set of classes that were marked for removal.
+ * @param removalLocations Tracks the different places from which imports should be removed.
  * @param tracker
  * @param typeChecker
  * @param templateTypeChecker
  * @param importRemapper
  */
-function replaceInComponentImportsArray(componentImportArrays, classesToRemove, tracker, typeChecker, templateTypeChecker, importRemapper) {
+function replaceInComponentImportsArray(componentImportArrays, classesToRemove, removalLocations, tracker, typeChecker, templateTypeChecker, importRemapper) {
     for (const [array, toReplace] of componentImportArrays.getEntries()) {
         const closestClass = nodes.closestNode(array, ts.isClassDeclaration);
         if (!closestClass) {
@@ -1090,16 +1091,35 @@ function replaceInComponentImportsArray(componentImportArrays, classesToRemove, 
         }
         const replacements = new UniqueItemTracker();
         const usedImports = new Set(findTemplateDependencies(closestClass, templateTypeChecker).map((ref) => ref.node));
+        const nodesToRemove = new Set();
         for (const node of toReplace) {
             const moduleDecl = findClassDeclaration(node, typeChecker);
             if (moduleDecl) {
                 const moduleMeta = templateTypeChecker.getNgModuleMetadata(moduleDecl);
                 if (moduleMeta) {
+                    let hasUsedExports = false;
                     moduleMeta.exports.forEach((exp) => {
                         if (usedImports.has(exp.node)) {
                             replacements.track(node, exp);
+                            hasUsedExports = true;
                         }
                     });
+                    // If none of the module's exports are used, track the node for removal
+                    if (!hasUsedExports) {
+                        nodesToRemove.add(node);
+                    }
+                    else if (ts.isIdentifier(node)) {
+                        // Track the import statement for removal when replacing with exports
+                        const symbol = typeChecker.getSymbolAtLocation(node);
+                        const declarations = symbol?.declarations;
+                        if (declarations) {
+                            for (const declaration of declarations) {
+                                if (ts.isImportSpecifier(declaration)) {
+                                    removalLocations.imports.track(declaration.parent, declaration);
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     // It's unlikely not to have module metadata at this point, but just in
@@ -1108,12 +1128,13 @@ function replaceInComponentImportsArray(componentImportArrays, classesToRemove, 
                 }
             }
         }
-        replaceModulesInImportsArray(array, replacements, tracker, templateTypeChecker, importRemapper);
+        replaceModulesInImportsArray(array, replacements, nodesToRemove, tracker, templateTypeChecker, importRemapper);
     }
 }
 /**
  * Replaces all the leftover modules in testing `imports` arrays with their exports.
  * @param testImportArrays All test `imports` arrays and their nodes that represent modules.
+ * @param removalLocations Tracks the different places from which imports should be removed.
  * @param classesToRemove Classes marked for removal by the migration.
  * @param tracker
  * @param typeChecker
@@ -1123,6 +1144,7 @@ function replaceInComponentImportsArray(componentImportArrays, classesToRemove, 
 function replaceInTestImportsArray(testImportArrays, removalLocations, classesToRemove, tracker, typeChecker, templateTypeChecker, importRemapper) {
     for (const [array, toReplace] of testImportArrays.getEntries()) {
         const replacements = new UniqueItemTracker();
+        const nodesToRemove = new Set();
         for (const node of toReplace) {
             const moduleDecl = findClassDeclaration(node, typeChecker);
             if (moduleDecl) {
@@ -1133,6 +1155,18 @@ function replaceInTestImportsArray(testImportArrays, removalLocations, classesTo
                     const exports = moduleMeta.exports.filter((exp) => !classesToRemove.has(exp.node));
                     if (exports.length > 0) {
                         exports.forEach((exp) => replacements.track(node, exp));
+                        // Track the import statement for removal when replacing with exports
+                        if (ts.isIdentifier(node)) {
+                            const symbol = typeChecker.getSymbolAtLocation(node);
+                            const declarations = symbol?.declarations;
+                            if (declarations) {
+                                for (const declaration of declarations) {
+                                    if (ts.isImportSpecifier(declaration)) {
+                                        removalLocations.imports.track(declaration.parent, declaration);
+                                    }
+                                }
+                            }
+                        }
                     }
                     else {
                         removalLocations.arrays.track(array, node);
@@ -1145,19 +1179,21 @@ function replaceInTestImportsArray(testImportArrays, removalLocations, classesTo
                 }
             }
         }
-        replaceModulesInImportsArray(array, replacements, tracker, templateTypeChecker, importRemapper);
+        replaceModulesInImportsArray(array, replacements, nodesToRemove, tracker, templateTypeChecker, importRemapper);
     }
 }
 /**
  * Replaces any leftover modules in an `imports` arrays with a set of specified exports
  * @param array Imports array which is being migrated.
  * @param replacements Map of NgModule references to their exports.
+ * @param nodesToRemove Set of nodes that should be removed without replacement (unused modules).
  * @param tracker
+ * @param typeChecker
  * @param templateTypeChecker
  * @param importRemapper
  */
-function replaceModulesInImportsArray(array, replacements, tracker, templateTypeChecker, importRemapper) {
-    if (replacements.isEmpty()) {
+function replaceModulesInImportsArray(array, replacements, nodesToRemove, tracker, templateTypeChecker, importRemapper) {
+    if (replacements.isEmpty() && nodesToRemove.size === 0) {
         return;
     }
     const newElements = [];
@@ -1168,6 +1204,10 @@ function replaceModulesInImportsArray(array, replacements, tracker, templateType
         }
     }
     for (const element of array.elements) {
+        // Check if this element should be removed entirely (unused module)
+        if (nodesToRemove.has(element)) {
+            continue;
+        }
         const replacementRefs = replacements.get(element);
         if (!replacementRefs) {
             newElements.push(element);
