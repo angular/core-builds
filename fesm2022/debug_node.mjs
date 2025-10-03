@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.3+sha-28668a5
+ * @license Angular v20.3.3+sha-853ed16
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7609,7 +7609,7 @@ function cleanUpView(tView, lView) {
 }
 function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
     const animations = lView?.[ANIMATIONS];
-    if (animations == null || (animations.leave && !animations.leave.has(tNode.index)))
+    if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index))
         return callback(false);
     // this is solely for move operations to prevent leave animations from running
     // on the moved nodes, which would have deleted the node.
@@ -13755,7 +13755,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.3+sha-28668a5']
+        ? ['ng-version', '20.3.3+sha-853ed16']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
