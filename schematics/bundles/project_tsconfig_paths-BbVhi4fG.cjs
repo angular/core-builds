@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.6+sha-548ea02
+ * @license Angular v21.0.0-next.6+sha-effccff
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2725,6 +2725,8 @@ class Identifiers {
     static domProperty = { name: 'ɵɵdomProperty', moduleName: CORE };
     static ariaProperty = { name: 'ɵɵariaProperty', moduleName: CORE };
     static property = { name: 'ɵɵproperty', moduleName: CORE };
+    static control = { name: 'ɵɵcontrol', moduleName: CORE };
+    static controlCreate = { name: 'ɵɵcontrolCreate', moduleName: CORE };
     static animationEnterListener = {
         name: 'ɵɵanimateEnterListener',
         moduleName: CORE,
@@ -8657,6 +8659,17 @@ var OpKind;
      * An operation to bind animation events to an element.
      */
     OpKind[OpKind["AnimationListener"] = 56] = "AnimationListener";
+    /**
+     * An operation to bind an expression to a `control` property of an element.
+     */
+    OpKind[OpKind["Control"] = 57] = "Control";
+    /**
+     * An operation to set up a corresponding {@link Control} operation.
+     *
+     * This is responsible for setting up event listeners on a native or custom form control when
+     * bound to a specialized control directive.
+     */
+    OpKind[OpKind["ControlCreate"] = 58] = "ControlCreate";
 })(OpKind || (OpKind = {}));
 /**
  * Distinguishes different kinds of IR expressions.
@@ -9322,6 +9335,25 @@ function createStoreLetOp(target, declaredName, value, sourceSpan) {
         declaredName,
         value,
         sourceSpan,
+        ...TRAIT_DEPENDS_ON_SLOT_CONTEXT,
+        ...TRAIT_CONSUMES_VARS,
+        ...NEW_OP,
+    };
+}
+/** Creates a {@link ControlOp}. */
+function createControlOp(op) {
+    return {
+        kind: OpKind.Control,
+        target: op.target,
+        expression: op.expression,
+        bindingKind: op.bindingKind,
+        securityContext: op.securityContext,
+        sanitizer: null,
+        isStructuralTemplateAttribute: op.isStructuralTemplateAttribute,
+        templateKind: op.templateKind,
+        i18nContext: op.i18nContext,
+        i18nMessage: op.i18nMessage,
+        sourceSpan: op.sourceSpan,
         ...TRAIT_DEPENDS_ON_SLOT_CONTEXT,
         ...TRAIT_CONSUMES_VARS,
         ...NEW_OP,
@@ -10109,6 +10141,7 @@ function transformExpressionsInOp(op, transform, flags) {
         case OpKind.Property:
         case OpKind.DomProperty:
         case OpKind.Attribute:
+        case OpKind.Control:
             if (op.expression instanceof Interpolation) {
                 transformExpressionsInInterpolation(op.expression, transform, flags);
             }
@@ -10234,6 +10267,7 @@ function transformExpressionsInOp(op, transform, flags) {
         case OpKind.SourceLocation:
         case OpKind.ConditionalCreate:
         case OpKind.ConditionalBranchCreate:
+        case OpKind.ControlCreate:
             // These operations contain no expressions.
             break;
         default:
@@ -11134,6 +11168,10 @@ function createSourceLocationOp(templatePath, locations) {
         ...NEW_OP,
     };
 }
+/** Creates a {@link ControlCreateOp}. */
+function createControlCreateOp(sourceSpan) {
+    return { kind: OpKind.ControlCreate, sourceSpan, ...NEW_OP };
+}
 
 function createDomPropertyOp(name, expression, bindingKind, i18nContext, securityContext, sourceSpan) {
     return {
@@ -11612,6 +11650,14 @@ function extractAttributes(job) {
                         /* i18nMessage */ null, op.securityContext), lookupElement$3(elements, op.target));
                     }
                     break;
+                case OpKind.Control:
+                    OpList.insertBefore(
+                    // Deliberately null i18nMessage value
+                    createExtractedAttributeOp(op.target, BindingKind.Property, null, 'control', 
+                    /* expression */ null, 
+                    /* i18nContext */ null, 
+                    /* i18nMessage */ null, op.securityContext), lookupElement$3(elements, op.target));
+                    break;
                 case OpKind.TwoWayProperty:
                     OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.TwoWayProperty, null, op.name, 
                     /* expression */ null, 
@@ -11770,6 +11816,9 @@ function specializeBindings(job) {
                     }
                     else if (job.kind === CompilationJobKind.Host) {
                         OpList.replace(op, createDomPropertyOp(op.name, op.expression, op.bindingKind, op.i18nContext, op.securityContext, op.sourceSpan));
+                    }
+                    else if (op.name === 'control') {
+                        OpList.replace(op, createControlOp(op));
                     }
                     else {
                         OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind, op.securityContext, op.isStructuralTemplateAttribute, op.templateKind, op.i18nContext, op.i18nMessage, op.sourceSpan));
@@ -23749,6 +23798,22 @@ function ariaProperty(name, expression, sourceSpan) {
 function property(name, expression, sanitizer, sourceSpan) {
     return propertyBase(Identifiers.property, name, expression, sanitizer, sourceSpan);
 }
+function control(expression, sanitizer, sourceSpan) {
+    const args = [];
+    if (expression instanceof Interpolation) {
+        args.push(interpolationToExpression(expression, sourceSpan));
+    }
+    else {
+        args.push(expression);
+    }
+    if (sanitizer !== null) {
+        args.push(sanitizer);
+    }
+    return call(Identifiers.control, args, sourceSpan);
+}
+function controlCreate(sourceSpan) {
+    return call(Identifiers.controlCreate, [], sourceSpan);
+}
 function twoWayProperty(name, expression, sanitizer, sourceSpan) {
     const args = [literal(name), expression];
     if (sanitizer !== null) {
@@ -24309,6 +24374,9 @@ function reifyCreateOperations(unit, ops) {
                 }));
                 OpList.replace(op, attachSourceLocation(op.templatePath, locationsLiteral));
                 break;
+            case OpKind.ControlCreate:
+                OpList.replace(op, controlCreate(op.sourceSpan));
+                break;
             case OpKind.Statement:
                 // Pass statement operations directly through.
                 break;
@@ -24330,6 +24398,9 @@ function reifyUpdateOperations(unit, ops) {
                     op.bindingKind !== BindingKind.Animation
                     ? reifyDomProperty(op)
                     : reifyProperty(op));
+                break;
+            case OpKind.Control:
+                OpList.replace(op, reifyControl(op));
                 break;
             case OpKind.TwoWayProperty:
                 OpList.replace(op, twoWayProperty(op.name, op.expression, op.sanitizer, op.sourceSpan));
@@ -24425,6 +24496,9 @@ function reifyProperty(op) {
     return isAriaAttribute(op.name)
         ? ariaProperty(op.name, op.expression, op.sourceSpan)
         : property(op.name, op.expression, op.sanitizer, op.sourceSpan);
+}
+function reifyControl(op) {
+    return control(op.expression, op.sanitizer, op.sourceSpan);
 }
 function reifyIrExpression(expr) {
     if (!isIrExpression(expr)) {
@@ -25938,6 +26012,7 @@ function varsUsedByOp(op) {
             return slots;
         case OpKind.Property:
         case OpKind.DomProperty:
+        case OpKind.Control:
             slots = 1;
             // We need to assign a slot even for singleton interpolations, because the
             // runtime needs to store both the raw value and the stringified one.
@@ -27405,6 +27480,11 @@ function ingestElementBindings(unit, op, element) {
         }
         // All dynamic bindings (both attribute and property bindings).
         bindings.push(createBindingOp(op.xref, BINDING_KINDS.get(input.type), input.name, convertAstWithInterpolation(unit.job, astOf(input.value), input.i18n), input.unit, input.securityContext, false, false, null, asMessage(input.i18n) ?? null, input.sourceSpan));
+        // If the input name is 'control', this could be a form control binding which requires a
+        // `ControlCreateOp` to properly initialize.
+        if (input.type === exports.BindingType.Property && input.name === 'control') {
+            unit.create.push(createControlCreateOp(input.sourceSpan));
+        }
     }
     unit.create.push(bindings.filter((b) => b?.kind === OpKind.ExtractedAttribute));
     unit.update.push(bindings.filter((b) => b?.kind === OpKind.Binding));
@@ -30360,7 +30440,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
         : TemplateCompilationMode.Full;
     // First the template is ingested into IR:
     const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, compilationMode, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn, meta.relativeTemplatePath, getTemplateSourceLocationsEnabled());
-    // Then the IR is transformed to prepare it for cod egeneration.
+    // Then the IR is transformed to prepare it for code generation.
     transform(tpl, CompilationJobKind.Tmpl);
     // Finally we emit the template function:
     const templateFn = emitTemplateFn(tpl, constantPool);
@@ -32909,7 +32989,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.6+sha-548ea02');
+const VERSION = new Version('21.0.0-next.6+sha-effccff');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33972,7 +34052,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-sFatqIE5.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BbVhi4fG.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
