@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.6+sha-62bbce6
+ * @license Angular v21.0.0-next.6+sha-e279f30
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -67,9 +67,13 @@ declare const MAX_ANIMATION_TIMEOUT: InjectionToken<number>;
  * @publicApi 20.2
  */
 type AnimationFunction = (event: AnimationCallbackEvent) => void;
+interface NodeAnimations {
+    animateFns: Function[];
+    resolvers?: VoidFunction[];
+}
 interface AnimationLViewData {
-    enter?: Map<number, Function[]>;
-    leave?: Map<number, Function[]>;
+    enter?: Map<number, NodeAnimations>;
+    leave?: Map<number, NodeAnimations>;
     running?: Promise<unknown>;
     skipLeaveAnimations?: boolean;
 }

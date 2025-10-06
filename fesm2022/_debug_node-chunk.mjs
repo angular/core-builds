@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.6+sha-62bbce6
+ * @license Angular v21.0.0-next.6+sha-e279f30
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7375,7 +7375,7 @@ function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
     const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
     if (parent !== null && enterAnimations && enterAnimations.has(tNode.index)) {
         const animationQueue = injector.get(ANIMATION_QUEUE);
-        for (const animateFn of enterAnimations.get(tNode.index)) {
+        for (const animateFn of enterAnimations.get(tNode.index).animateFns) {
             animationQueue.queue.add(animateFn);
         }
     }
@@ -7638,9 +7638,10 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
             const leaveAnimations = leaveAnimationMap.get(tNode.index);
             const runningAnimations = [];
             if (leaveAnimations) {
-                for (let index = 0; index < leaveAnimations.length; index++) {
-                    const animationFn = leaveAnimations[index];
-                    runningAnimations.push(animationFn());
+                for (let index = 0; index < leaveAnimations.animateFns.length; index++) {
+                    const animationFn = leaveAnimations.animateFns[index];
+                    const { promise } = animationFn();
+                    runningAnimations.push(promise);
                 }
             }
             animations.running = Promise.allSettled(runningAnimations);
@@ -13770,7 +13771,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.6+sha-62bbce6']
+        ? ['ng-version', '21.0.0-next.6+sha-e279f30']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21537,8 +21538,11 @@ function elementHasClassList(element, classList) {
  */
 function isLongestAnimation(event, nativeElement) {
     const longestAnimation = longestAnimations.get(nativeElement);
+    // If we don't have any record of a longest animation, then we shouldn't
+    // block the animationend/transitionend event from doing its work.
+    if (longestAnimation === undefined)
+        return true;
     return (nativeElement === event.target &&
-        longestAnimation !== undefined &&
         ((longestAnimation.animationName !== undefined &&
             event.animationName === longestAnimation.animationName) ||
             (longestAnimation.propertyName !== undefined &&
@@ -21552,9 +21556,24 @@ function isLongestAnimation(event, nativeElement) {
  * @param fn The animation function to be called later
  */
 function addAnimationToLView(animations, tNode, fn) {
-    const animationFns = animations.get(tNode.index) ?? [];
-    animationFns.push(fn);
-    animations.set(tNode.index, animationFns);
+    const nodeAnimations = animations.get(tNode.index) ?? { animateFns: [] };
+    nodeAnimations.animateFns.push(fn);
+    animations.set(tNode.index, nodeAnimations);
+}
+function cleanupAfterLeaveAnimations(resolvers, cleanupFns) {
+    if (resolvers) {
+        for (const fn of resolvers) {
+            fn();
+        }
+    }
+    for (const fn of cleanupFns) {
+        fn();
+    }
+}
+function clearLViewNodeAnimationResolvers(lView, tNode) {
+    const nodeAnimations = getLViewLeaveAnimations(lView).get(tNode.index);
+    if (nodeAnimations)
+        nodeAnimations.resolvers = undefined;
 }
 
 /**
@@ -21719,22 +21738,24 @@ function runLeaveAnimations(lView, tNode, value) {
     const renderer = lView[RENDERER];
     const ngZone = lView[INJECTOR].get(NgZone);
     allLeavingAnimations.add(lView);
+    (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
     const activeClasses = getClassListFromValue(value);
     if (activeClasses && activeClasses.length > 0) {
-        animateLeaveClassRunner(nativeElement, tNode, activeClasses, renderer, ngZone, resolve);
+        animateLeaveClassRunner(nativeElement, tNode, lView, activeClasses, renderer, ngZone);
     }
     else {
         resolve();
     }
-    return promise;
+    return { promise, resolve };
 }
 /**
  * This function actually adds the classes that animate element that's leaving the DOM.
  * Once it finishes, it calls the remove function that was provided by the DOM renderer.
  */
-function animateLeaveClassRunner(el, tNode, classList, renderer, ngZone, resolver) {
+function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) {
     cancelAnimationsIfRunning(el, renderer);
     const cleanupFns = [];
+    const resolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
     const handleOutAnimationEnd = (event) => {
         // this early exit case is to prevent issues with bubbling events that are from child element animations
         if (event.target !== el)
@@ -21755,10 +21776,8 @@ function animateLeaveClassRunner(el, tNode, classList, renderer, ngZone, resolve
                     renderer.removeClass(el, item);
                 }
             }
-        }
-        resolver();
-        for (const fn of cleanupFns) {
-            fn();
+            cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+            clearLViewNodeAnimationResolvers(lView, tNode);
         }
     };
     ngZone.runOutsideAngular(() => {
@@ -21777,10 +21796,8 @@ function animateLeaveClassRunner(el, tNode, classList, renderer, ngZone, resolve
             determineLongestAnimation(el, longestAnimations, areAnimationSupported);
             if (!longestAnimations.has(el)) {
                 clearLeavingNodes(tNode, el);
-                resolver();
-                for (const fn of cleanupFns) {
-                    fn();
-                }
+                cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+                clearLViewNodeAnimationResolvers(lView, tNode);
             }
         });
     });
@@ -21855,8 +21872,8 @@ function queueEnterAnimations(lView) {
     const enterAnimations = lView[ANIMATIONS]?.enter;
     if (enterAnimations) {
         const animationQueue = lView[INJECTOR].get(ANIMATION_QUEUE);
-        for (const [_, animateFns] of enterAnimations) {
-            for (const animateFn of animateFns) {
+        for (const [_, nodeAnimations] of enterAnimations) {
+            for (const animateFn of nodeAnimations.animateFns) {
                 animationQueue.queue.add(animateFn);
             }
         }
