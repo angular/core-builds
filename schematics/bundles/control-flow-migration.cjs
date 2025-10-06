@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.6+sha-470dca1
+ * @license Angular v21.0.0-next.6+sha-62bbce6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1847,6 +1847,9 @@ function migrate(options) {
         const basePath = process.cwd();
         let pathToMigrate;
         if (options.path) {
+            if (options.path.startsWith('..')) {
+                throw new schematics.SchematicsException('Cannot run control flow migration outside of the current project.');
+            }
             pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
             if (pathToMigrate.trim() !== '') {
                 allPaths.push(pathToMigrate);
@@ -1857,33 +1860,31 @@ function migrate(options) {
             allPaths = [...buildPaths, ...testPaths];
         }
         if (!allPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the http providers migration.');
+            context.logger.warn('Could not find any tsconfig file. Cannot run the control flow migration.');
+            return;
         }
         let errors = [];
+        let sourceFilesCount = 0;
         for (const tsconfigPath of allPaths) {
-            const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
+            const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
+            const sourceFiles = program
+                .getSourceFiles()
+                .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
+                compiler_host.canMigrateFile(basePath, sourceFile, program));
+            const migrateErrors = runControlFlowMigration(tree, sourceFiles, basePath, options);
             errors = [...errors, ...migrateErrors];
+            sourceFilesCount += sourceFiles.length;
         }
         if (errors.length > 0) {
             context.logger.warn(`WARNING: ${errors.length} errors occurred during your migration:\n`);
-            errors.forEach((err) => {
-                context.logger.warn(err);
-            });
+            errors.forEach((err) => context.logger.warn(err));
+        }
+        else if (sourceFilesCount === 0) {
+            context.logger.warn('Control flow migration did not find any files to migrate');
         }
     };
 }
-function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions) {
-    if (schematicOptions?.path?.startsWith('..')) {
-        throw new schematics.SchematicsException('Cannot run control flow migration outside of the current project.');
-    }
-    const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
-    const sourceFiles = program
-        .getSourceFiles()
-        .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
-        compiler_host.canMigrateFile(basePath, sourceFile, program));
-    if (sourceFiles.length === 0) {
-        throw new schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the control flow migration.`);
-    }
+function runControlFlowMigration(tree, sourceFiles, basePath, schematicOptions) {
     const analysis = new Map();
     const migrateErrors = new Map();
     for (const sourceFile of sourceFiles) {
