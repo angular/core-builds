@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.3+sha-67bffa2
+ * @license Angular v20.3.3+sha-11d83d1
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5444,6 +5444,9 @@ interface HostBindingDecorator {
      * change detection, and if a binding changes it updates the host element of the directive.
      *
      * @usageNotes
+     *
+     * NOTE:  **Always** prefer using the `host` property over `@HostBinding`.
+     * This decorator exist exclusively for backwards compatibility.
      *
      * The following example creates a directive that sets the `valid` and `invalid`
      * class, a style color, and an id on the DOM element that has an `ngModel` directive on it.
