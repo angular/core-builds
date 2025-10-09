@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-e873c22
+ * @license Angular v21.0.0-next.7+sha-f521c1f
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13771,7 +13771,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.7+sha-e873c22']
+        ? ['ng-version', '21.0.0-next.7+sha-f521c1f']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22142,11 +22142,11 @@ function updateCustomControl(lView, componentIndex, modelName, control) {
     maybeWriteToDirectiveInput(componentDef, component, 'disabledReasons', state.disabledReasons);
     maybeWriteToDirectiveInput(componentDef, component, 'max', state.max);
     maybeWriteToDirectiveInput(componentDef, component, 'maxLength', state.maxLength);
-    maybeWriteToDirectiveInput(componentDef, component, 'min', state.max);
+    maybeWriteToDirectiveInput(componentDef, component, 'min', state.min);
     maybeWriteToDirectiveInput(componentDef, component, 'minLength', state.minLength);
     maybeWriteToDirectiveInput(componentDef, component, 'name', state.name);
     maybeWriteToDirectiveInput(componentDef, component, 'pattern', state.pattern);
-    maybeWriteToDirectiveInput(componentDef, component, 'readOnly', state.readonly);
+    maybeWriteToDirectiveInput(componentDef, component, 'readonly', state.readonly);
     maybeWriteToDirectiveInput(componentDef, component, 'required', state.required);
     maybeWriteToDirectiveInput(componentDef, component, 'touched', state.touched);
 }
@@ -22178,19 +22178,48 @@ function updateNativeControl(tNode, lView, control) {
     // * check if bindings changed before writing.
     setNativeControlValue(input, state.value());
     renderer.setAttribute(input, 'name', state.name());
-    setBooleanAttribute(renderer, input, 'disable', state.disabled());
+    setBooleanAttribute(renderer, input, 'disabled', state.disabled());
     setBooleanAttribute(renderer, input, 'readonly', state.readonly());
     setBooleanAttribute(renderer, input, 'required', state.required());
     // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131711472
-    // * use tag and type attribute to determine which of these properties to bind.
-    setOptionalAttribute(renderer, input, 'max', state.max());
-    setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
-    setOptionalAttribute(renderer, input, 'min', state.min());
-    setOptionalAttribute(renderer, input, 'minLength', state.minLength());
+    // * cache this in `tNode.flags`.
+    if (isNumericInput(input)) {
+        setOptionalAttribute(renderer, input, 'max', state.max());
+        setOptionalAttribute(renderer, input, 'min', state.min());
+    }
+    // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131711472
+    // * cache this in `tNode.flags`.
+    if (isTextInput(input)) {
+        setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
+        setOptionalAttribute(renderer, input, 'minLength', state.minLength());
+    }
 }
 /** Checks if a given value is a Date or null */
 function isDateOrNull(value) {
     return value === null || value instanceof Date;
+}
+/** Returns whether `control` has a numeric input type. */
+function isNumericInput(control) {
+    switch (control.type) {
+        case 'date':
+        case 'datetime-local':
+        case 'month':
+        case 'number':
+        case 'range':
+        case 'time':
+        case 'week':
+            return true;
+    }
+    return false;
+}
+/**
+ * Returns whether `control` is a text-based input.
+ *
+ * This is not the same as an input with `type="text"`, but rather any input that accepts
+ * text-based input which includes numeric types.
+ */
+function isTextInput(control) {
+    return !(control instanceof HTMLSelectElement);
 }
 /**
  * Returns the value from a native control element.
