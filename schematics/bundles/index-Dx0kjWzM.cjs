@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-9af3cf7
+ * @license Angular v21.0.0-next.7+sha-e1da41f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-__qn84ki.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BuEXx5Hr.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-9af3cf7'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e1da41f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5617,7 +5617,7 @@ class InjectableClassRegistry {
  * If no such metadata is present, this function returns `null`. Otherwise, the call is returned
  * as a `Statement` for inclusion along with the class.
  */
-function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompiler, angularDecoratorTransform = (dec) => dec) {
+function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompiler, angularDecoratorTransform = (dec) => dec, undecoratedMetadataExtractor = () => null) {
     if (!reflection.isClass(clazz)) {
         return null;
     }
@@ -5651,21 +5651,47 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
     // Do the same for property decorators.
     let metaPropDecorators = null;
     const classMembers = reflection.getMembersOfClass(clazz).filter((member) => !member.isStatic &&
-        member.decorators !== null &&
-        member.decorators.length > 0 &&
         // Private fields are not supported in the metadata emit
         member.accessLevel !== project_tsconfig_paths.ClassMemberAccessLevel.EcmaScriptPrivate);
-    const duplicateDecoratedMembers = classMembers.filter((member, i, arr) => arr.findIndex((arrayMember) => arrayMember.name === member.name) < i);
-    if (duplicateDecoratedMembers.length > 0) {
+    const decoratedMembers = [];
+    const seenMemberNames = new Set();
+    let duplicateDecoratedMembers = null;
+    for (const member of classMembers) {
+        const shouldQuoteName = member.nameNode !== null && ts.isStringLiteralLike(member.nameNode);
+        if (member.decorators !== null && member.decorators.length > 0) {
+            decoratedMembers.push({
+                key: member.name,
+                quoted: shouldQuoteName,
+                value: decoratedClassMemberToMetadata(member.decorators, isCore),
+            });
+            if (seenMemberNames.has(member.name)) {
+                duplicateDecoratedMembers ??= [];
+                duplicateDecoratedMembers.push(member);
+            }
+            else {
+                seenMemberNames.add(member.name);
+            }
+        }
+        else {
+            const undecoratedMetadata = undecoratedMetadataExtractor(member);
+            if (undecoratedMetadata !== null) {
+                decoratedMembers.push({
+                    key: member.name,
+                    quoted: shouldQuoteName,
+                    value: undecoratedMetadata,
+                });
+            }
+        }
+    }
+    if (duplicateDecoratedMembers !== null) {
         // This should theoretically never happen, because the only way to have duplicate instance
         // member names is getter/setter pairs and decorators cannot appear in both a getter and the
         // corresponding setter.
         throw new project_tsconfig_paths.FatalDiagnosticError(project_tsconfig_paths.ErrorCode.DUPLICATE_DECORATED_PROPERTIES, duplicateDecoratedMembers[0].nameNode ?? clazz, `Duplicate decorated properties found on class '${clazz.name.text}': ` +
             duplicateDecoratedMembers.map((member) => member.name).join(', '));
     }
-    const decoratedMembers = classMembers.map((member) => classMemberToMetadata(member.nameNode ?? member.name, member.decorators, isCore));
     if (decoratedMembers.length > 0) {
-        metaPropDecorators = new project_tsconfig_paths.WrappedNodeExpr(ts.factory.createObjectLiteralExpression(decoratedMembers));
+        metaPropDecorators = project_tsconfig_paths.literalMap(decoratedMembers);
     }
     return {
         type: new project_tsconfig_paths.WrappedNodeExpr(id),
@@ -5699,12 +5725,11 @@ function ctorParameterToMetadata(param, isCore) {
 /**
  * Convert a reflected class member to metadata.
  */
-function classMemberToMetadata(name, decorators, isCore) {
+function decoratedClassMemberToMetadata(decorators, isCore) {
     const ngDecorators = decorators
         .filter((dec) => isAngularDecorator$1(dec, isCore))
-        .map((decorator) => decoratorToMetadata(decorator));
-    const decoratorMeta = ts.factory.createArrayLiteralExpression(ngDecorators);
-    return ts.factory.createPropertyAssignment(name, decoratorMeta);
+        .map((decorator) => new project_tsconfig_paths.WrappedNodeExpr(decoratorToMetadata(decorator)));
+    return new project_tsconfig_paths.LiteralArrayExpr(ngDecorators);
 }
 /**
  * Convert a reflected decorator to metadata.
@@ -7879,9 +7904,11 @@ class DirectiveDecoratorHandler {
         this.usePoisonedData = usePoisonedData;
         this.typeCheckHostBindings = typeCheckHostBindings;
         this.emitDeclarationOnly = emitDeclarationOnly;
+        this.undecoratedMetadataExtractor = project_tsconfig_paths.getDirectiveUndecoratedMetadataExtractor(reflector, importTracker);
     }
     precedence = project_tsconfig_paths.HandlerPrecedence.PRIMARY;
     name = 'DirectiveDecoratorHandler';
+    undecoratedMetadataExtractor;
     detect(node, decorators) {
         // If a class is undecorated but uses Angular features, we detect it as an
         // abstract directive. This is an unsupported pattern as of v10, but we want
@@ -7934,7 +7961,7 @@ class DirectiveDecoratorHandler {
                 hostDirectives: directiveResult.hostDirectives,
                 rawHostDirectives: directiveResult.rawHostDirectives,
                 classMetadata: this.includeClassMetadata
-                    ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler)
+                    ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, undefined, this.undecoratedMetadataExtractor)
                     : null,
                 baseClass: project_tsconfig_paths.readBaseClass(node, this.reflector, this.evaluator),
                 typeCheckMeta: project_tsconfig_paths.extractDirectiveTypeCheckMeta(node, directiveResult.inputs, this.reflector),
@@ -10265,6 +10292,7 @@ class ComponentDecoratorHandler {
             enableSelectorless: this.enableSelectorless,
             preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
         };
+        this.undecoratedMetadataExtractor = project_tsconfig_paths.getDirectiveUndecoratedMetadataExtractor(reflector, importTracker);
         // Dependencies can't be deferred during HMR, because the HMR update module can't have
         // dynamic imports and its dependencies need to be passed in directly. If dependencies
         // are deferred, their imports will be deleted so we may lose the reference to them.
@@ -10272,6 +10300,7 @@ class ComponentDecoratorHandler {
     }
     literalCache = new Map();
     elementSchemaRegistry = new project_tsconfig_paths.DomElementSchemaRegistry();
+    undecoratedMetadataExtractor;
     /**
      * During the asynchronous preanalyze phase, it's necessary to parse the template to extract
      * any potential <link> tags which might need to be loaded. This cache ensures that work is not
@@ -10731,7 +10760,7 @@ class ComponentDecoratorHandler {
                 },
                 typeCheckMeta: project_tsconfig_paths.extractDirectiveTypeCheckMeta(node, inputs, this.reflector),
                 classMetadata: this.includeClassMetadata
-                    ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, (dec) => transformDecoratorResources(dec, component, styles, template))
+                    ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, (dec) => transformDecoratorResources(dec, component, styles, template), this.undecoratedMetadataExtractor)
                     : null,
                 classDebugInfo: extractClassDebugInfo(node, this.reflector, this.compilerHost, this.rootDirs, 
                 /* forbidOrphanRenderering */ this.forbidOrphanRendering),
@@ -12321,7 +12350,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.7+sha-9af3cf7');
+new project_tsconfig_paths.Version('21.0.0-next.7+sha-e1da41f');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -20425,7 +20454,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.7+sha-9af3cf7` usually means that core is at head so it supports
+    // A version of `21.0.0-next.7+sha-e1da41f` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
