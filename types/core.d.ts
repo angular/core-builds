@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, ValueEqualityFn as ValueEqualityFn$1 } from './_formatter-chunk.js';
+import { SIGNAL } from './_formatter-chunk.js';
 import { Signal, WritableSignal, OutputRef, Provider, EnvironmentProviders, Type as Type$1, ModuleWithProviders, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, StaticProvider, Injector, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectionToken, InternalInjectFlags, InjectOptions, ValueEqualityFn, EventCallback, isSignal, enableProfiling as enableProfiling$1 } from './_chrome_dev_tools_performance-chunk.js';
 export { AbstractType, CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
 import { InputSignalNode, TypeDecorator, AfterRenderRef, EffectCleanupRegisterFn, SchemaMetadata, ComponentDef, DirectiveDef, CssSelectorList, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, TConstantsOrFactory, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, InputFlags, InputTransformFunction, EmbeddedViewRef, LView, ApplicationRef, ChangeDetectorRef, ComponentFactory as ComponentFactory$1, NgModuleRef as NgModuleRef$1, EnvironmentInjector, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, ElementRef, ComponentFactoryResolver as ComponentFactoryResolver$1, InternalNgModuleRef, NgModuleFactory as NgModuleFactory$1, ViewRef as ViewRef$1, PlatformRef, NgZone, ɵɵFactoryDeclaration as __FactoryDeclaration, ɵɵInjectableDeclaration as __InjectableDeclaration, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, DeferBlockDependencyInterceptor, DeferBlockConfig, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, RNode, Component, TrustedHTML, DehydratedDeferBlock, CompilerOptions, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, ProjectionSlots, QueryFlags, QueryList, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript, PipeType, DirectiveType } from './_discovery-chunk.js';
@@ -5590,7 +5590,7 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
     private resolvePendingTask;
     private destroyed;
     private unregisterOnDestroy;
-    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn$1<T> | undefined, injector: Injector, throwErrorsFromValue?: boolean);
+    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, injector: Injector, throwErrorsFromValue?: boolean);
     readonly status: Signal<ResourceStatus>;
     readonly error: Signal<Error | undefined>;
     /**
@@ -6345,19 +6345,19 @@ declare function ɵɵdeferHydrateOnInteraction(): void;
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnViewport(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferOnViewport(triggerIndex: number, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
 /**
  * Creates runtime data structures for the `on viewport` hydrate trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferHydrateOnViewport(): void;
+declare function ɵɵdeferHydrateOnViewport(options?: IntersectionObserverInit): void;
 
 /**
  * Advances to an element for later binding instructions.

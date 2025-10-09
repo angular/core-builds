@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3880,9 +3880,7 @@ const interactionEventNames = ['click', 'keydown'];
 /** Names of the events considered as hover events. */
 const hoverEventNames = ['mouseenter', 'mouseover', 'focusin'];
 /** `IntersectionObserver` used to observe `viewport` triggers. */
-let intersectionObserver = null;
-/** Number of elements currently observed with `viewport` triggers. */
-let observedViewportElements = 0;
+const intersectionObservers = new Map();
 /** Object keeping track of registered callbacks for a deferred block trigger. */
 class DeferEventEntry {
     callbacks = new Set();
@@ -3965,14 +3963,15 @@ function onHover(trigger, callback) {
  * Used to create an IntersectionObserver instance.
  * @return IntersectionObserver that is used by onViewport
  */
-function createIntersectionObserver() {
+function createIntersectionObserver(options) {
+    const key = getIntersectionObserverKey(options);
     return new IntersectionObserver((entries) => {
         for (const current of entries) {
             if (current.isIntersecting && viewportTriggers.has(current.target)) {
-                viewportTriggers.get(current.target).listener();
+                viewportTriggers.get(current.target)?.get(key)?.listener();
             }
         }
-    });
+    }, options);
 }
 /**
  * Registers a viewport trigger.
@@ -3983,31 +3982,56 @@ function createIntersectionObserver() {
  * and tells the intersection observer to stop observing trigger Element and set
  * intersectionObserver to null if there are no more Elements to observe
  */
-function onViewport(trigger, callback, observerFactoryFn) {
-    let entry = viewportTriggers.get(trigger);
-    intersectionObserver = intersectionObserver || observerFactoryFn();
+function onViewport(trigger, callback, observerFactoryFn, options) {
+    const key = getIntersectionObserverKey(options);
+    let entry = viewportTriggers.get(trigger)?.get(key);
+    if (!intersectionObservers.has(key)) {
+        intersectionObservers.set(key, { observer: observerFactoryFn(options), count: 0 });
+    }
+    const config = intersectionObservers.get(key);
     if (!entry) {
         entry = new DeferEventEntry();
-        intersectionObserver.observe(trigger);
-        viewportTriggers.set(trigger, entry);
-        observedViewportElements++;
+        config.observer.observe(trigger);
+        let triggerConfig = viewportTriggers.get(trigger);
+        if (triggerConfig) {
+            triggerConfig.set(key, entry);
+        }
+        else {
+            triggerConfig = new Map();
+            viewportTriggers.set(trigger, triggerConfig);
+        }
+        triggerConfig.set(key, entry);
+        config.count++;
     }
     entry.callbacks.add(callback);
     return () => {
-        if (!viewportTriggers.has(trigger)) {
+        if (!viewportTriggers.get(trigger)?.has(key)) {
             return;
         }
         entry.callbacks.delete(callback);
         if (entry.callbacks.size === 0) {
-            intersectionObserver?.unobserve(trigger);
-            viewportTriggers.delete(trigger);
-            observedViewportElements--;
+            config.observer.unobserve(trigger);
+            config.count--;
+            const triggerConfig = viewportTriggers.get(trigger);
+            if (triggerConfig) {
+                triggerConfig.delete(key);
+                if (triggerConfig.size === 0) {
+                    viewportTriggers.delete(trigger);
+                }
+            }
         }
-        if (observedViewportElements === 0) {
-            intersectionObserver?.disconnect();
-            intersectionObserver = null;
+        if (config.count === 0) {
+            config.observer.disconnect();
+            intersectionObservers.delete(key);
         }
     };
+}
+/** Generates a string that can be used to find identical intersection observer option objects. */
+function getIntersectionObserverKey(options) {
+    if (!options) {
+        return '';
+    }
+    return `${options.rootMargin}/${typeof options.threshold === 'number' ? options.threshold : options.threshold?.join('\n')}`;
 }
 
 const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
@@ -4727,6 +4751,20 @@ function getHydrateTimerTrigger(blockData) {
     const trigger = blockData[DEFER_HYDRATE_TRIGGERS]?.find((t) => isTimerTrigger(t));
     return trigger?.delay ?? null;
 }
+function getHydrateViewportTrigger(blockData) {
+    const details = blockData[DEFER_HYDRATE_TRIGGERS];
+    if (details) {
+        for (const current of details) {
+            if (current === 2 /* DeferBlockTrigger.Viewport */) {
+                return true;
+            }
+            else if (typeof current === 'object' && current.trigger === 2 /* DeferBlockTrigger.Viewport */) {
+                return current.intersectionObserverOptions || true;
+            }
+        }
+    }
+    return null;
+}
 function hasHydrateTrigger(blockData, trigger) {
     return blockData[DEFER_HYDRATE_TRIGGERS]?.includes(trigger) ?? false;
 }
@@ -4741,7 +4779,7 @@ function createBlockSummary(blockInfo) {
             idle: hasHydrateTrigger(blockInfo, 0 /* DeferBlockTrigger.Idle */),
             immediate: hasHydrateTrigger(blockInfo, 1 /* DeferBlockTrigger.Immediate */),
             timer: getHydrateTimerTrigger(blockInfo),
-            viewport: hasHydrateTrigger(blockInfo, 2 /* DeferBlockTrigger.Viewport */),
+            viewport: getHydrateViewportTrigger(blockInfo),
         },
     };
 }
@@ -13771,7 +13809,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.7+sha-f521c1f']
+        ? ['ng-version', '21.0.0-next.7+sha-68df976']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -16831,9 +16869,9 @@ function trackTriggerForDebugging(tView, tNode, textRepresentation) {
  * @param callback Callback to be invoked when the trigger comes into the viewport.
  * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
-function onViewportWrapper(trigger, callback, injector) {
+function onViewportWrapper(trigger, callback, injector, wrapperOptions) {
     const ngZone = injector.get(NgZone);
-    return onViewport(trigger, () => ngZone.run(callback), () => ngZone.runOutsideAngular(() => createIntersectionObserver()));
+    return onViewport(trigger, () => ngZone.run(callback), (options) => ngZone.runOutsideAngular(() => createIntersectionObserver(options)), wrapperOptions);
 }
 /**
  * Helper function to get the LView in which a deferred block's trigger is rendered.
@@ -16886,7 +16924,7 @@ function getTriggerElement(triggerLView, triggerIndex) {
  *     the deferred block.
  * @param type Trigger type to distinguish between regular and prefetch triggers.
  */
-function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type, options) {
     const injector = initialLView[INJECTOR];
     const zone = injector.get(NgZone);
     let poll;
@@ -16925,7 +16963,7 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
                 }
                 callback();
             });
-        }, injector);
+        }, injector, options);
         // The trigger and deferred block might be in different LViews.
         // For the main LView the cleanup would happen as a part of
         // `storeTriggerCleanupFn` logic. For trigger LView we register
@@ -20652,6 +20690,9 @@ function processAndInitTriggers(injector, blockData, nodes) {
                     timerElements.push(elementTrigger);
                 }
                 if (blockSummary.hydrate.viewport) {
+                    if (typeof blockSummary.hydrate.viewport !== 'boolean') {
+                        elementTrigger.intersectionObserverOptions = blockSummary.hydrate.viewport;
+                    }
                     viewportElements.push(elementTrigger);
                 }
             }
@@ -20674,7 +20715,7 @@ function setViewportTriggers(injector, elementTriggers) {
     if (elementTriggers.length > 0) {
         const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
         for (let elementTrigger of elementTriggers) {
-            const cleanupFn = onViewportWrapper(elementTrigger.el, () => triggerHydrationFromBlockName(injector, elementTrigger.blockName), injector);
+            const cleanupFn = onViewportWrapper(elementTrigger.el, () => triggerHydrationFromBlockName(injector, elementTrigger.blockName), injector, elementTrigger.intersectionObserverOptions);
             registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
         }
     }
@@ -21097,7 +21138,7 @@ function ɵɵdeferHydrateOnTimer(delay) {
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
-    hydrateTriggers.set(5 /* DeferBlockTrigger.Timer */, { delay });
+    hydrateTriggers.set(5 /* DeferBlockTrigger.Timer */, { type: 5 /* DeferBlockTrigger.Timer */, delay });
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(2 /* TriggerType.Hydrate */, lView, tNode);
@@ -21234,18 +21275,25 @@ function ɵɵdeferHydrateOnInteraction() {
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
+function ɵɵdeferOnViewport(triggerIndex, walkUpTimes, options) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     if (ngDevMode) {
-        trackTriggerForDebugging(lView[TVIEW], tNode, `on viewport${walkUpTimes === -1 ? '' : '(<target>)'}`);
+        const args = [];
+        if (walkUpTimes !== undefined && walkUpTimes !== -1) {
+            args.push('<target>');
+        }
+        if (options) {
+            args.push(JSON.stringify(options));
+        }
+        trackTriggerForDebugging(lView[TVIEW], tNode, `on viewport${args.length === 0 ? '' : `(${args.join(', ')})`}`);
     }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     renderPlaceholder(lView, tNode);
     // Avoid adding event listeners when this instruction is invoked on the server.
     if (!(typeof ngServerMode !== 'undefined' && ngServerMode)) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerDeferBlock(0 /* TriggerType.Regular */, lView, tNode), 0 /* TriggerType.Regular */);
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerDeferBlock(0 /* TriggerType.Regular */, lView, tNode), 0 /* TriggerType.Regular */, options);
     }
 }
 /**
@@ -21254,34 +21302,46 @@ function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
+function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes, options) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     if (ngDevMode) {
-        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on viewport${walkUpTimes === -1 ? '' : '(<target>)'}`);
+        const args = [];
+        if (walkUpTimes !== undefined && walkUpTimes !== -1) {
+            args.push('<target>');
+        }
+        if (options) {
+            args.push(JSON.stringify(options));
+        }
+        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on viewport${args.length === 0 ? '' : `(${args.join(', ')})`}`);
     }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewportWrapper, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */, options);
     }
 }
 /**
  * Creates runtime data structures for the `on viewport` hydrate trigger.
  * @codeGenApi
  */
-function ɵɵdeferHydrateOnViewport() {
+function ɵɵdeferHydrateOnViewport(options) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     if (ngDevMode) {
-        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on viewport');
+        trackTriggerForDebugging(lView[TVIEW], tNode, `hydrate on viewport${options ? `(${JSON.stringify(options)})` : ''}`);
     }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
-    hydrateTriggers.set(2 /* DeferBlockTrigger.Viewport */, null);
+    hydrateTriggers.set(2 /* DeferBlockTrigger.Viewport */, options
+        ? {
+            type: 2 /* DeferBlockTrigger.Viewport */,
+            intersectionObserverOptions: options,
+        }
+        : null);
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(2 /* TriggerType.Hydrate */, lView, tNode);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3384,8 +3384,11 @@ function serializeHydrateTriggers(triggerMap) {
             if (details === null) {
                 triggers.push(trigger);
             }
-            else {
+            else if (details.type === 5 /* DeferBlockTrigger.Timer */) {
                 triggers.push({ trigger, delay: details.delay });
+            }
+            else {
+                triggers.push({ trigger, intersectionObserverOptions: details.intersectionObserverOptions });
             }
         }
     }

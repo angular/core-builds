@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2849,12 +2849,18 @@ declare const enum DeferBlockTrigger {
     When = 6,
     Never = 7
 }
-/** * Describes specified delay (in ms) in the `hydrate on timer()` trigger. */
+/** Describes specified delay (in ms) in the `hydrate on timer()` trigger. */
 interface HydrateTimerTriggerDetails {
-    delay: number;
+    type: DeferBlockTrigger.Timer;
+    delay?: number;
+}
+/** Describes the config for a `hydrate on viewport` trigger. */
+interface HydrateViewportTriggerDetails {
+    type: DeferBlockTrigger.Viewport;
+    intersectionObserverOptions?: IntersectionObserverInit;
 }
 /** * Describes all possible hydration trigger details specified in a template. */
-type HydrateTriggerDetails = HydrateTimerTriggerDetails;
+type HydrateTriggerDetails = HydrateTimerTriggerDetails | HydrateViewportTriggerDetails;
 /**
  * Internal structure used for configuration of defer block behavior.
  * */

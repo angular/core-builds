@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -28,6 +28,8 @@ type Signal<T> = (() => T) & {
 declare function isSignal(value: unknown): value is Signal<unknown>;
 /**
  * A comparison function which can determine if two values are equal.
+ *
+ * @publicApi 17.0
  */
 type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 

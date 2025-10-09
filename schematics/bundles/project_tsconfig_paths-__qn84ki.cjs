@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-f521c1f
+ * @license Angular v21.0.0-next.7+sha-68df976
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4833,9 +4833,11 @@ class InteractionDeferredTrigger extends DeferredTrigger {
 }
 class ViewportDeferredTrigger extends DeferredTrigger {
     reference;
-    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+    options;
+    constructor(reference, options, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
         super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
         this.reference = reference;
+        this.options = options;
     }
 }
 class BlockNode {
@@ -23669,7 +23671,7 @@ function deferOn(trigger, args, modifier, sourceSpan) {
     if (instructionToCall === undefined) {
         throw new Error(`Unable to determine instruction for trigger ${trigger}`);
     }
-    return call(instructionToCall, args.map((a) => literal(a)), sourceSpan);
+    return call(instructionToCall, args, sourceSpan);
 }
 function projectionDef(def) {
     return call(Identifiers.projectionDef, def ? [def] : [], null);
@@ -24260,11 +24262,30 @@ function reifyCreateOperations(unit, ops) {
                     case DeferTriggerKind.Immediate:
                         break;
                     case DeferTriggerKind.Timer:
-                        args = [op.trigger.delay];
+                        args = [literal(op.trigger.delay)];
+                        break;
+                    case DeferTriggerKind.Viewport:
+                        // `hydrate` triggers don't support targets.
+                        if (op.modifier === "hydrate" /* ir.DeferOpModifierKind.HYDRATE */) {
+                            args = op.trigger.options ? [op.trigger.options] : [];
+                        }
+                        else {
+                            // The slots not being defined at this point is invalid, however we
+                            // catch it during type checking. Pass in null in such cases.
+                            args = [literal(op.trigger.targetSlot?.slot ?? null)];
+                            if (op.trigger.targetSlotViewSteps !== 0) {
+                                args.push(literal(op.trigger.targetSlotViewSteps));
+                            }
+                            else if (op.trigger.options) {
+                                args.push(literal(null));
+                            }
+                            if (op.trigger.options) {
+                                args.push(op.trigger.options);
+                            }
+                        }
                         break;
                     case DeferTriggerKind.Interaction:
                     case DeferTriggerKind.Hover:
-                    case DeferTriggerKind.Viewport:
                         // `hydrate` triggers don't support targets.
                         if (op.modifier === "hydrate" /* ir.DeferOpModifierKind.HYDRATE */) {
                             args = [];
@@ -24272,9 +24293,9 @@ function reifyCreateOperations(unit, ops) {
                         else {
                             // The slots not being defined at this point is invalid, however we
                             // catch it during type checking. Pass in null in such cases.
-                            args = [op.trigger.targetSlot?.slot ?? null];
+                            args = [literal(op.trigger.targetSlot?.slot ?? null)];
                             if (op.trigger.targetSlotViewSteps !== 0) {
-                                args.push(op.trigger.targetSlotViewSteps);
+                                args.push(literal(op.trigger.targetSlotViewSteps));
                             }
                         }
                         break;
@@ -27150,6 +27171,9 @@ function ingestDeferTriggers(modifier, triggers, onOps, whenOps, unit, deferXref
             targetSlot: null,
             targetView: null,
             targetSlotViewSteps: null,
+            options: triggers.viewport.options
+                ? convertAst(triggers.viewport.options, unit.job, triggers.viewport.sourceSpan)
+                : null,
         }, modifier, triggers.viewport.sourceSpan);
         onOps.push(deferOnOp);
     }
@@ -29025,7 +29049,7 @@ function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, e
     }
 }
 /** Parses an `on` trigger */
-function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholder) {
+function parseOnTrigger({ expression, sourceSpan }, bindingParser, triggers, errors, placeholder) {
     const onIndex = expression.indexOf('on');
     const onSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(onIndex), sourceSpan.start.moveBy(onIndex + 'on'.length));
     const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
@@ -29037,9 +29061,10 @@ function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholde
     }
     else {
         const start = getTriggerParametersStart(expression, onIndex + 1);
-        const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, expression.startsWith('hydrate')
+        const isHydrationTrigger = expression.startsWith('hydrate');
+        const parser = new OnTriggerParser(expression, bindingParser, start, sourceSpan, triggers, errors, isHydrationTrigger
             ? validateHydrateReferenceBasedTrigger
-            : validatePlainReferenceBasedTrigger, placeholder, prefetchSpan, onSourceSpan, hydrateSpan);
+            : validatePlainReferenceBasedTrigger, isHydrationTrigger, prefetchSpan, onSourceSpan, hydrateSpan);
         parser.parse();
     }
 }
@@ -29057,25 +29082,27 @@ function getHydrateSpan(expression, sourceSpan) {
 }
 class OnTriggerParser {
     expression;
+    bindingParser;
     start;
     span;
     triggers;
     errors;
     validator;
-    placeholder;
+    isHydrationTrigger;
     prefetchSpan;
     onSourceSpan;
     hydrateSpan;
     index = 0;
     tokens;
-    constructor(expression, start, span, triggers, errors, validator, placeholder, prefetchSpan, onSourceSpan, hydrateSpan) {
+    constructor(expression, bindingParser, start, span, triggers, errors, validator, isHydrationTrigger, prefetchSpan, onSourceSpan, hydrateSpan) {
         this.expression = expression;
+        this.bindingParser = bindingParser;
         this.start = start;
         this.span = span;
         this.triggers = triggers;
         this.errors = errors;
         this.validator = validator;
-        this.placeholder = placeholder;
+        this.isHydrationTrigger = isHydrationTrigger;
         this.prefetchSpan = prefetchSpan;
         this.onSourceSpan = onSourceSpan;
         this.hydrateSpan = hydrateSpan;
@@ -29149,10 +29176,10 @@ class OnTriggerParser {
                     this.trackTrigger('immediate', createImmediateTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan));
                     break;
                 case OnTriggerType.HOVER:
-                    this.trackTrigger('hover', createHoverTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.placeholder, this.validator));
+                    this.trackTrigger('hover', createHoverTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.validator));
                     break;
                 case OnTriggerType.VIEWPORT:
-                    this.trackTrigger('viewport', createViewportTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.validator));
+                    this.trackTrigger('viewport', createViewportTrigger(this.start, this.isHydrationTrigger, this.bindingParser, parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.validator));
                     break;
                 default:
                     throw new Error(`Unrecognized trigger type "${identifier}"`);
@@ -29170,15 +29197,15 @@ class OnTriggerParser {
         }
         this.advance();
         const commaDelimStack = [];
-        let current = '';
+        let tokens = [];
         while (this.index < this.tokens.length) {
             const token = this.token();
             // Stop parsing if we've hit the end character and we're outside of a comma-delimited syntax.
             // Note that we don't need to account for strings here since the lexer already parsed them
             // into string tokens.
             if (token.isCharacter($RPAREN) && commaDelimStack.length === 0) {
-                if (current.length) {
-                    parameters.push(current);
+                if (tokens.length) {
+                    parameters.push({ expression: this.tokenRangeText(tokens), start: tokens[0].index });
                 }
                 break;
             }
@@ -29197,14 +29224,14 @@ class OnTriggerParser {
             }
             // If we hit a comma outside of a comma-delimited syntax, it means
             // that we're at the top level and we're starting a new parameter.
-            if (commaDelimStack.length === 0 && token.isCharacter($COMMA) && current.length > 0) {
-                parameters.push(current);
-                current = '';
+            if (commaDelimStack.length === 0 && token.isCharacter($COMMA) && tokens.length > 0) {
+                parameters.push({ expression: this.tokenRangeText(tokens), start: tokens[0].index });
                 this.advance();
+                tokens = [];
                 continue;
             }
             // Otherwise treat the token as a plain text character in the current parameter.
-            current += this.tokenText();
+            tokens.push(token);
             this.advance();
         }
         if (!this.token().isCharacter($RPAREN) || commaDelimStack.length > 0) {
@@ -29216,10 +29243,11 @@ class OnTriggerParser {
         }
         return parameters;
     }
-    tokenText() {
-        // Tokens have a toString already which we could use, but for string tokens it omits the quotes.
-        // Eventually we could expose this information on the token directly.
-        return this.expression.slice(this.start + this.token().index, this.start + this.token().end);
+    tokenRangeText(tokens) {
+        if (tokens.length === 0) {
+            return '';
+        }
+        return this.expression.slice(this.start + tokens[0].index, this.start + tokens[tokens.length - 1].end);
     }
     trackTrigger(name, trigger) {
         trackTrigger(name, this.triggers, this.errors, trigger);
@@ -29252,7 +29280,7 @@ function createTimerTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSo
     if (parameters.length !== 1) {
         throw new Error(`"${OnTriggerType.TIMER}" trigger must have exactly one parameter`);
     }
-    const delay = parseDeferredTime(parameters[0]);
+    const delay = parseDeferredTime(parameters[0].expression);
     if (delay === null) {
         throw new Error(`Could not parse time value of trigger "${OnTriggerType.TIMER}"`);
     }
@@ -29264,17 +29292,61 @@ function createImmediateTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, 
     }
     return new ImmediateDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createHoverTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, placeholder, validator) {
+function createHoverTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, validator) {
     validator(OnTriggerType.HOVER, parameters);
-    return new HoverDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
+    return new HoverDeferredTrigger(parameters[0]?.expression ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
 function createInteractionTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, validator) {
     validator(OnTriggerType.INTERACTION, parameters);
-    return new InteractionDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
+    return new InteractionDeferredTrigger(parameters[0]?.expression ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createViewportTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, validator) {
+function createViewportTrigger(start, isHydrationTrigger, bindingParser, parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, validator) {
     validator(OnTriggerType.VIEWPORT, parameters);
-    return new ViewportDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
+    let reference;
+    let options;
+    if (parameters.length === 0) {
+        reference = options = null;
+    }
+    else if (!parameters[0].expression.startsWith('{')) {
+        reference = parameters[0].expression;
+        options = null;
+    }
+    else {
+        const parsed = bindingParser.parseBinding(parameters[0].expression, false, sourceSpan, sourceSpan.start.offset + start + parameters[0].start);
+        if (!(parsed.ast instanceof LiteralMap)) {
+            throw new Error('Options parameter of the "viewport" trigger must be an object literal');
+        }
+        else if (parsed.ast.keys.some((key) => key.key === 'root')) {
+            throw new Error('The "root" option is not supported in the options parameter of the "viewport" trigger');
+        }
+        const triggerIndex = parsed.ast.keys.findIndex((key) => key.key === 'trigger');
+        if (triggerIndex === -1) {
+            reference = null;
+            options = parsed.ast;
+        }
+        else {
+            const value = parsed.ast.values[triggerIndex];
+            const triggerFilter = (_, index) => index !== triggerIndex;
+            if (!(value instanceof PropertyRead) ||
+                !(value.receiver instanceof ImplicitReceiver) ||
+                value.receiver instanceof ThisReceiver) {
+                throw new Error(`"trigger" option of the "viewport" trigger must be an identifier`);
+            }
+            reference = value.name;
+            options = new LiteralMap(parsed.ast.span, parsed.ast.sourceSpan, parsed.ast.keys.filter(triggerFilter), parsed.ast.values.filter(triggerFilter));
+        }
+    }
+    if (isHydrationTrigger && reference !== null) {
+        throw new Error(`"viewport" hydration trigger cannot have a "trigger"`);
+    }
+    else if (options) {
+        const dynamicNode = DynamicAstValidator.findDynamicNode(options);
+        if (dynamicNode !== null) {
+            throw new Error(`Options of the "viewport" trigger must be an object ` +
+                `literal containing only literal values, but "${dynamicNode.constructor.name}" was found`);
+        }
+    }
+    return new ViewportDeferredTrigger(reference, options, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
 /**
  * Checks whether the structure of a non-hydrate reference-based trigger is valid.
@@ -29292,6 +29364,12 @@ function validatePlainReferenceBasedTrigger(type, parameters) {
  * @param parameters Parameters of the trigger.
  */
 function validateHydrateReferenceBasedTrigger(type, parameters) {
+    if (type === OnTriggerType.VIEWPORT) {
+        if (parameters.length > 1) {
+            throw new Error(`Hydration trigger "${type}" cannot have more than one parameter`);
+        }
+        return;
+    }
     if (parameters.length > 0) {
         throw new Error(`Hydration trigger "${type}" cannot have parameters`);
     }
@@ -29320,6 +29398,25 @@ function parseDeferredTime(value) {
     }
     const [time, units] = match;
     return parseFloat(time) * (units === 's' ? 1000 : 1);
+}
+class DynamicAstValidator extends RecursiveAstVisitor {
+    dynamicNode = null;
+    static findDynamicNode(ast) {
+        const visitor = new DynamicAstValidator();
+        visitor.visit(ast);
+        return visitor.dynamicNode;
+    }
+    visit(ast) {
+        if (!(ast instanceof ASTWithSource) &&
+            !(ast instanceof LiteralPrimitive) &&
+            !(ast instanceof LiteralArray) &&
+            !(ast instanceof LiteralMap)) {
+            this.dynamicNode = ast;
+        }
+        else {
+            super.visit(ast);
+        }
+    }
 }
 
 /** Pattern to identify a `prefetch when` trigger. */
@@ -29351,7 +29448,7 @@ function isConnectedDeferLoopBlock(name) {
 function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
     const errors = [];
     const { placeholder, loading, error } = parseConnectedBlocks(connectedBlocks, errors, visitor);
-    const { triggers, prefetchTriggers, hydrateTriggers } = parsePrimaryTriggers(ast, bindingParser, errors, placeholder);
+    const { triggers, prefetchTriggers, hydrateTriggers } = parsePrimaryTriggers(ast, bindingParser, errors);
     // The `defer` block has a main span encompassing all of the connected branches as well.
     let lastEndSourceSpan = ast.endSourceSpan;
     let endOfLastSourceSpan = ast.sourceSpan.end;
@@ -29473,19 +29570,19 @@ function parsePrimaryTriggers(ast, bindingParser, errors, placeholder) {
             parseWhenTrigger(param, bindingParser, triggers, errors);
         }
         else if (ON_PARAMETER_PATTERN.test(param.expression)) {
-            parseOnTrigger(param, triggers, errors, placeholder);
+            parseOnTrigger(param, bindingParser, triggers, errors);
         }
         else if (PREFETCH_WHEN_PATTERN.test(param.expression)) {
             parseWhenTrigger(param, bindingParser, prefetchTriggers, errors);
         }
         else if (PREFETCH_ON_PATTERN.test(param.expression)) {
-            parseOnTrigger(param, prefetchTriggers, errors, placeholder);
+            parseOnTrigger(param, bindingParser, prefetchTriggers, errors);
         }
         else if (HYDRATE_WHEN_PATTERN.test(param.expression)) {
             parseWhenTrigger(param, bindingParser, hydrateTriggers, errors);
         }
         else if (HYDRATE_ON_PATTERN.test(param.expression)) {
-            parseOnTrigger(param, hydrateTriggers, errors, placeholder);
+            parseOnTrigger(param, bindingParser, hydrateTriggers, errors);
         }
         else if (HYDRATE_NEVER_PATTERN.test(param.expression)) {
             parseNeverTrigger(param, hydrateTriggers, errors);
@@ -30894,6 +30991,9 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     visitDeferredTrigger(trigger) {
         if (trigger instanceof BoundDeferredTrigger) {
             this.visit(trigger.value);
+        }
+        else if (trigger instanceof ViewportDeferredTrigger && trigger.options !== null) {
+            this.visit(trigger.options);
         }
     }
     visitDeferredBlockPlaceholder(block) {
@@ -32989,7 +33089,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.7+sha-f521c1f');
+const VERSION = new Version('21.0.0-next.7+sha-68df976');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -34052,7 +34152,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BbVhi4fG.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-__qn84ki.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -44775,10 +44875,10 @@ class OutOfBandDiagnosticRecorderImpl {
         this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), node.keySpan || node.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.UNCLAIMED_DIRECTIVE_BINDING), errorMsg));
     }
     deferImplicitTriggerMissingPlaceholder(id, trigger) {
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_MISSING_PLACEHOLDER), 'Trigger with no parameters can only be placed on an @defer that has a @placeholder block'));
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_MISSING_PLACEHOLDER), 'Trigger with no target can only be placed on an @defer that has a @placeholder block'));
     }
     deferImplicitTriggerInvalidPlaceholder(id, trigger) {
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER), 'Trigger with no parameters can only be placed on an @defer that has a ' +
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), trigger.sourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER), 'Trigger with no target can only be placed on an @defer that has a ' +
             '@placeholder block with exactly one root element node'));
     }
 }
@@ -46997,6 +47097,28 @@ class TcbForOfOp extends TcbOp {
     }
 }
 /**
+ * A `TcbOp` which can be used to type check the options of an `IntersectionObserver`.
+ */
+class TcbIntersectionObserverOp extends TcbOp {
+    tcb;
+    scope;
+    options;
+    constructor(tcb, scope, options) {
+        super();
+        this.tcb = tcb;
+        this.scope = scope;
+        this.options = options;
+    }
+    optional = false;
+    execute() {
+        const options = tcbExpression(this.options, this.tcb, this.scope);
+        const callback = ts.factory.createNonNullExpression(ts.factory.createNull());
+        const expression = ts.factory.createNewExpression(ts.factory.createIdentifier('IntersectionObserver'), undefined, [callback, options]);
+        this.scope.addStatement(ts.factory.createExpressionStatement(expression));
+        return null;
+    }
+}
+/**
  * Overall generation context for the type check block.
  *
  * `Context` handles operations during code generation which are global with respect to the whole
@@ -47766,6 +47888,9 @@ class Scope {
     appendDeferredTriggers(block, triggers) {
         if (triggers.when !== undefined) {
             this.opQueue.push(new TcbExpressionOp(this.tcb, this, triggers.when.value));
+        }
+        if (triggers.viewport !== undefined && triggers.viewport.options !== null) {
+            this.opQueue.push(new TcbIntersectionObserverOp(this.tcb, this, triggers.viewport.options));
         }
         if (triggers.hover !== undefined) {
             this.validateReferenceBasedDeferredTrigger(block, triggers.hover);
