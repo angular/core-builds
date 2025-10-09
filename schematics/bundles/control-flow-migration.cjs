@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.4+sha-6e4bcc7
+ * @license Angular v20.3.4+sha-8dec92f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var schematics = require('@angular-devkit/schematics');
 var path = require('node:path');
-var compiler_host = require('./compiler_host-DJHZ7M9N.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-Dqd0J7st.cjs');
+var compiler_host = require('./compiler_host-9wq3FYhu.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-6STpryH8.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -1876,6 +1876,9 @@ function migrate(options) {
         const basePath = process.cwd();
         let pathToMigrate;
         if (options.path) {
+            if (options.path.startsWith('..')) {
+                throw new schematics.SchematicsException('Cannot run control flow migration outside of the current project.');
+            }
             pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
             if (pathToMigrate.trim() !== '') {
                 allPaths.push(pathToMigrate);
@@ -1886,33 +1889,31 @@ function migrate(options) {
             allPaths = [...buildPaths, ...testPaths];
         }
         if (!allPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the http providers migration.');
+            context.logger.warn('Could not find any tsconfig file. Cannot run the control flow migration.');
+            return;
         }
         let errors = [];
+        let sourceFilesCount = 0;
         for (const tsconfigPath of allPaths) {
-            const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
+            const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
+            const sourceFiles = program
+                .getSourceFiles()
+                .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
+                compiler_host.canMigrateFile(basePath, sourceFile, program));
+            const migrateErrors = runControlFlowMigration(tree, sourceFiles, basePath, options);
             errors = [...errors, ...migrateErrors];
+            sourceFilesCount += sourceFiles.length;
         }
         if (errors.length > 0) {
             context.logger.warn(`WARNING: ${errors.length} errors occurred during your migration:\n`);
-            errors.forEach((err) => {
-                context.logger.warn(err);
-            });
+            errors.forEach((err) => context.logger.warn(err));
+        }
+        else if (sourceFilesCount === 0) {
+            context.logger.warn('Control flow migration did not find any files to migrate');
         }
     };
 }
-function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions) {
-    if (schematicOptions?.path?.startsWith('..')) {
-        throw new schematics.SchematicsException('Cannot run control flow migration outside of the current project.');
-    }
-    const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
-    const sourceFiles = program
-        .getSourceFiles()
-        .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
-        compiler_host.canMigrateFile(basePath, sourceFile, program));
-    if (sourceFiles.length === 0) {
-        throw new schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the control flow migration.`);
-    }
+function runControlFlowMigration(tree, sourceFiles, basePath, schematicOptions) {
     const analysis = new Map();
     const migrateErrors = new Map();
     for (const sourceFile of sourceFiles) {
