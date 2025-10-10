@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.4+sha-c4812fe
+ * @license Angular v20.3.4+sha-da38cd9
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('20.3.4+sha-c4812fe');
+const VERSION = /* @__PURE__ */ new Version('20.3.4+sha-da38cd9');
 
 /**
  * Base URL for the error details page.
@@ -2397,6 +2397,8 @@ function isInInjectionContext() {
  * context](guide/di/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @see [Asserts the context](guide/di/dependency-injection-context#asserts-the-context)
  *
  * @publicApi
  */
