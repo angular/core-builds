@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-eee8eab
+ * @license Angular v21.0.0-next.7+sha-eb80c30
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -33113,7 +33113,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.7+sha-eee8eab');
+const VERSION = new Version('21.0.0-next.7+sha-eb80c30');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33490,6 +33490,12 @@ exports.ErrorCode = void 0;
      */
     ErrorCode[ErrorCode["DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER"] = 8020] = "DEFER_IMPLICIT_TRIGGER_INVALID_PLACEHOLDER";
     /**
+     * Raised when an `@defer` block defines unreachable or redundant triggers.
+     * Examples: multiple main triggers, 'on immediate' together with other mains or any prefetch,
+     * prefetch timer delay that is not earlier than the main timer, or an identical prefetch
+     */
+    ErrorCode[ErrorCode["DEFER_TRIGGER_MISCONFIGURATION"] = 8021] = "DEFER_TRIGGER_MISCONFIGURATION";
+    /**
      * A two way binding in a template has an incorrect syntax,
      * parentheses outside brackets. For example:
      *
@@ -33850,6 +33856,7 @@ exports.ExtendedTemplateDiagnosticName = void 0;
     ExtendedTemplateDiagnosticName["UNUSED_STANDALONE_IMPORTS"] = "unusedStandaloneImports";
     ExtendedTemplateDiagnosticName["UNPARENTHESIZED_NULLISH_COALESCING"] = "unparenthesizedNullishCoalescing";
     ExtendedTemplateDiagnosticName["UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION"] = "uninvokedFunctionInTextInterpolation";
+    ExtendedTemplateDiagnosticName["DEFER_TRIGGER_MISCONFIGURATION"] = "deferTriggerMisconfiguration";
 })(exports.ExtendedTemplateDiagnosticName || (exports.ExtendedTemplateDiagnosticName = {}));
 
 /**
@@ -34176,7 +34183,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-afk5QFYO.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BP6O7cP-.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -51335,6 +51342,7 @@ exports.Declaration = Declaration;
 exports.DeclareFunctionStmt = DeclareFunctionStmt;
 exports.DeclareVarStmt = DeclareVarStmt;
 exports.DefaultImportTracker = DefaultImportTracker;
+exports.DeferredBlock = DeferredBlock;
 exports.DefinitionMap = DefinitionMap;
 exports.Directive = Directive$1;
 exports.DomElementSchemaRegistry = DomElementSchemaRegistry;
@@ -51349,14 +51357,17 @@ exports.FatalDiagnosticError = FatalDiagnosticError;
 exports.FnParam = FnParam;
 exports.ForLoopBlock = ForLoopBlock;
 exports.FunctionExpr = FunctionExpr;
+exports.HoverDeferredTrigger = HoverDeferredTrigger;
 exports.HtmlParser = HtmlParser;
 exports.INPUT_INITIALIZER_FN = INPUT_INITIALIZER_FN;
 exports.Icu = Icu;
 exports.IcuPlaceholder = IcuPlaceholder;
 exports.Identifiers = Identifiers;
 exports.IfBlock = IfBlock;
+exports.ImmediateDeferredTrigger = ImmediateDeferredTrigger;
 exports.ImplicitReceiver = ImplicitReceiver;
 exports.ImportManager = ImportManager;
+exports.InteractionDeferredTrigger = InteractionDeferredTrigger;
 exports.Interpolation = Interpolation$1;
 exports.InvokeFunctionExpr = InvokeFunctionExpr;
 exports.KeyedRead = KeyedRead;
@@ -51411,6 +51422,7 @@ exports.Text$1 = Text$1;
 exports.Text$2 = Text$2;
 exports.TextAttribute = TextAttribute;
 exports.ThisReceiver = ThisReceiver;
+exports.TimerDeferredTrigger = TimerDeferredTrigger;
 exports.Trait = Trait;
 exports.TypeCheckShimGenerator = TypeCheckShimGenerator;
 exports.TypeScriptReflectionHost = TypeScriptReflectionHost;
@@ -51418,6 +51430,7 @@ exports.UNSAFE_OBJECT_KEY_NAME_REGEXP = UNSAFE_OBJECT_KEY_NAME_REGEXP;
 exports.UnifiedModulesStrategy = UnifiedModulesStrategy;
 exports.Variable = Variable;
 exports.Version = Version;
+exports.ViewportDeferredTrigger = ViewportDeferredTrigger;
 exports.WhitespaceVisitor = WhitespaceVisitor;
 exports.WrappedNodeExpr = WrappedNodeExpr;
 exports.Xmb = Xmb;

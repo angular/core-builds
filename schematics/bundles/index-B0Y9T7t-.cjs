@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-eee8eab
+ * @license Angular v21.0.0-next.7+sha-eb80c30
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-afk5QFYO.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BP6O7cP-.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eee8eab'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-eb80c30'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12350,7 +12350,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.7+sha-eee8eab');
+new project_tsconfig_paths.Version('21.0.0-next.7+sha-eb80c30');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16566,7 +16566,7 @@ function buildDiagnosticForSignal(ctx, node, component) {
     }
     return [];
 }
-const factory$e = {
+const factory$f = {
     code: project_tsconfig_paths.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.INTERPOLATED_SIGNAL_NOT_INVOKED,
     create: () => new InterpolatedSignalCheck(),
@@ -16592,7 +16592,7 @@ class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$d = {
+const factory$e = {
     code: project_tsconfig_paths.ErrorCode.INVALID_BANANA_IN_BOX,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.INVALID_BANANA_IN_BOX,
     create: () => new InvalidBananaInBoxCheck(),
@@ -16653,7 +16653,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$c = {
+const factory$d = {
     code: project_tsconfig_paths.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.MISSING_CONTROL_FLOW_DIRECTIVE,
     create: (options) => {
@@ -16686,7 +16686,7 @@ class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$b = {
+const factory$c = {
     code: project_tsconfig_paths.ErrorCode.MISSING_NGFOROF_LET,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.MISSING_NGFOROF_LET,
     create: () => new MissingNgForOfLetCheck(),
@@ -16741,7 +16741,7 @@ class MissingStructuralDirectiveCheck extends TemplateCheckWithVisitor {
         return [ctx.makeTemplateDiagnostic(sourceSpan, errorMessage)];
     }
 }
-const factory$a = {
+const factory$b = {
     code: project_tsconfig_paths.ErrorCode.MISSING_STRUCTURAL_DIRECTIVE,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.MISSING_STRUCTURAL_DIRECTIVE,
     create: () => new MissingStructuralDirectiveCheck(),
@@ -16786,7 +16786,7 @@ class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$9 = {
+const factory$a = {
     code: project_tsconfig_paths.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.NULLISH_COALESCING_NOT_NULLABLE,
     create: (options) => {
@@ -16854,7 +16854,7 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$8 = {
+const factory$9 = {
     code: project_tsconfig_paths.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.OPTIONAL_CHAIN_NOT_NULLABLE,
     create: (options) => {
@@ -16895,7 +16895,7 @@ class NgSkipHydrationSpec extends TemplateCheckWithVisitor {
         return [];
     }
 }
-const factory$7 = {
+const factory$8 = {
     code: project_tsconfig_paths.ErrorCode.SKIP_HYDRATION_NOT_STATIC,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.SKIP_HYDRATION_NOT_STATIC,
     create: () => new NgSkipHydrationSpec(),
@@ -16919,7 +16919,7 @@ class SuffixNotSupportedCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$6 = {
+const factory$7 = {
     code: project_tsconfig_paths.ErrorCode.SUFFIX_NOT_SUPPORTED,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.SUFFIX_NOT_SUPPORTED,
     create: () => new SuffixNotSupportedCheck(),
@@ -16964,7 +16964,7 @@ class TextAttributeNotBindingSpec extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$5 = {
+const factory$6 = {
     code: project_tsconfig_paths.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.TEXT_ATTRIBUTE_NOT_BINDING,
     create: () => new TextAttributeNotBindingSpec(),
@@ -17024,7 +17024,7 @@ function assertExpressionInvoked$1(expression, component, node, expressionText, 
 function generateStringFromExpression$1(expression, source) {
     return source.substring(expression.span.start, expression.span.end);
 }
-const factory$4 = {
+const factory$5 = {
     code: project_tsconfig_paths.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.UNINVOKED_FUNCTION_IN_EVENT_BINDING,
     create: () => new UninvokedFunctionInEventBindingSpec(),
@@ -17057,7 +17057,7 @@ class UnparenthesizedNullishCoalescing extends TemplateCheckWithVisitor {
         return [];
     }
 }
-const factory$3 = {
+const factory$4 = {
     code: project_tsconfig_paths.ErrorCode.UNPARENTHESIZED_NULLISH_COALESCING,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.UNPARENTHESIZED_NULLISH_COALESCING,
     create: () => new UnparenthesizedNullishCoalescing(),
@@ -17101,7 +17101,7 @@ class UnusedLetDeclarationCheck extends TemplateCheckWithVisitor {
         return this.analysis.get(node);
     }
 }
-const factory$2 = {
+const factory$3 = {
     code: project_tsconfig_paths.ErrorCode.UNUSED_LET_DECLARATION,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.UNUSED_LET_DECLARATION,
     create: () => new UnusedLetDeclarationCheck(),
@@ -17139,7 +17139,7 @@ class UninvokedTrackFunctionCheck extends TemplateCheckWithVisitor {
 function generateStringFromExpression(expression, source) {
     return source.substring(expression.span.start, expression.span.end);
 }
-const factory$1 = {
+const factory$2 = {
     code: project_tsconfig_paths.ErrorCode.UNINVOKED_TRACK_FUNCTION,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.UNINVOKED_TRACK_FUNCTION,
     create: () => new UninvokedTrackFunctionCheck(),
@@ -17169,10 +17169,96 @@ function assertExpressionInvoked(expression, component, ctx) {
     }
     return [];
 }
-const factory = {
+const factory$1 = {
     code: project_tsconfig_paths.ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION,
     name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION,
     create: () => new UninvokedFunctionInTextInterpolation(),
+};
+
+/**
+ * This check implements warnings for unreachable or redundant @defer triggers.
+ * Emits ErrorCode.DEFER_TRIGGER_MISCONFIGURATION with messages matching the project's
+ * expected text.
+ */
+class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
+    code = project_tsconfig_paths.ErrorCode.DEFER_TRIGGER_MISCONFIGURATION;
+    visitNode(ctx, component, node) {
+        if (!(node instanceof project_tsconfig_paths.DeferredBlock))
+            return [];
+        const mainKeys = Object.keys(node.triggers);
+        const prefetchKeys = Object.keys(node.prefetchTriggers);
+        // Gather actual trigger objects for mains and prefetch (only defined ones)
+        const mains = mainKeys
+            .map((k) => node.triggers[k])
+            .filter((t) => t !== undefined && t !== null);
+        const prefetches = prefetchKeys
+            .map((k) => node.prefetchTriggers[k])
+            .filter((t) => t !== undefined && t !== null);
+        const diags = [];
+        //  'on immediate' dominance
+        const hasImmediateMain = mains.some((t) => t instanceof project_tsconfig_paths.ImmediateDeferredTrigger);
+        if (hasImmediateMain) {
+            if (mains.length > 1) {
+                const msg = `The 'immediate' trigger makes additional triggers redundant.`;
+                diags.push(ctx.makeTemplateDiagnostic(node.sourceSpan, msg));
+            }
+            if (prefetches.length > 0) {
+                const msg = `Prefetch triggers have no effect because 'immediate' executes earlier.`;
+                diags.push(ctx.makeTemplateDiagnostic(node.sourceSpan, msg));
+            }
+        }
+        // If there is exactly one main and at least one prefetch, compare them.
+        if (mains.length === 1 && prefetches.length > 0) {
+            const main = mains[0];
+            for (const pre of prefetches) {
+                // Timer vs Timer: warn when prefetch delay >= main delay
+                const isTimerTriggger = main instanceof project_tsconfig_paths.TimerDeferredTrigger && pre instanceof project_tsconfig_paths.TimerDeferredTrigger;
+                if (isTimerTriggger) {
+                    const mainDelay = main.delay;
+                    const preDelay = pre.delay;
+                    if (preDelay >= mainDelay) {
+                        const msg = `The Prefetch 'timer(${preDelay}ms)' is not scheduled before the main 'timer(${mainDelay}ms)', so it won’t run prior to rendering. Lower the prefetch delay or remove it.`;
+                        diags.push(ctx.makeTemplateDiagnostic(pre.sourceSpan ?? node.sourceSpan, msg));
+                    }
+                }
+                // Reference-based triggers (hover/interaction/viewport): only warn if both
+                // have a reference and the references are identical. If references differ
+                // (or one is missing), the prefetch targets a different element and
+                // provides potential value.
+                const isHoverTrigger = main instanceof project_tsconfig_paths.HoverDeferredTrigger && pre instanceof project_tsconfig_paths.HoverDeferredTrigger;
+                const isInteractionTrigger = main instanceof project_tsconfig_paths.InteractionDeferredTrigger &&
+                    pre instanceof project_tsconfig_paths.InteractionDeferredTrigger;
+                const isViewportTrigger = main instanceof project_tsconfig_paths.ViewportDeferredTrigger &&
+                    pre instanceof project_tsconfig_paths.ViewportDeferredTrigger;
+                if (isHoverTrigger || isInteractionTrigger || isViewportTrigger) {
+                    const mainRef = main.reference;
+                    const preRef = pre.reference;
+                    if (mainRef && preRef && mainRef === preRef) {
+                        const kindName = main.constructor.name.replace('DeferredTrigger', '').toLowerCase();
+                        const msg = `Prefetch '${kindName}' matches the main trigger and provides no benefit. Remove the prefetch modifier.`;
+                        diags.push(ctx.makeTemplateDiagnostic(pre.sourceSpan ?? node.sourceSpan, msg));
+                    }
+                    // otherwise, different references or missing reference => no warning
+                    continue;
+                }
+                // Syntactic identical: same class for immediate/idle/never etc. (timers handled above)
+                if (main.constructor === pre.constructor &&
+                    !(main instanceof project_tsconfig_paths.TimerDeferredTrigger)) {
+                    const kind = main instanceof project_tsconfig_paths.ImmediateDeferredTrigger
+                        ? 'immediate'
+                        : main.constructor.name.replace('DeferredTrigger', '').toLowerCase();
+                    const msg = `Prefetch '${kind}' matches the main trigger and provides no benefit. Remove the prefetch modifier.`;
+                    diags.push(ctx.makeTemplateDiagnostic(pre.sourceSpan ?? node.sourceSpan, msg));
+                }
+            }
+        }
+        return diags;
+    }
+}
+const factory = {
+    code: project_tsconfig_paths.ErrorCode.DEFER_TRIGGER_MISCONFIGURATION,
+    name: project_tsconfig_paths.ExtendedTemplateDiagnosticName.DEFER_TRIGGER_MISCONFIGURATION,
+    create: () => new DeferTriggerMisconfiguration(),
 };
 
 /**
@@ -17262,19 +17348,20 @@ function assertNever(value) {
 }
 
 const ALL_DIAGNOSTIC_FACTORIES = [
-    factory$d,
-    factory$9,
-    factory$8,
-    factory$c,
-    factory$5,
-    factory$b,
-    factory$a,
-    factory$6,
     factory$e,
+    factory$a,
+    factory$9,
+    factory$d,
+    factory$6,
+    factory$c,
+    factory$b,
+    factory$7,
+    factory$f,
+    factory$5,
+    factory$3,
+    factory$8,
     factory$4,
     factory$2,
-    factory$7,
-    factory$3,
     factory$1,
     factory,
 ];
@@ -20454,7 +20541,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.7+sha-eee8eab` usually means that core is at head so it supports
+    // A version of `21.0.0-next.7+sha-eb80c30` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
