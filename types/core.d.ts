@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-6a96844
+ * @license Angular v21.0.0-next.7+sha-32f86d3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4794,7 +4794,7 @@ declare const enum RuntimeErrorCode {
     NO_BINDING_TARGET = 315,
     INVALID_BINDING_TARGET = 316,
     INVALID_SET_INPUT_CALL = 317,
-    INVALID_CONTROL_HOST = 318,
+    INVALID_FIELD_DIRECTIVE_HOST = 318,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = -401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,

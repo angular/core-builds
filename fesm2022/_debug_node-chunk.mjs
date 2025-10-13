@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-6a96844
+ * @license Angular v21.0.0-next.7+sha-32f86d3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13809,7 +13809,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.7+sha-6a96844']
+        ? ['ng-version', '21.0.0-next.7+sha-32f86d3']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21991,31 +21991,22 @@ const ɵCONTROL = Symbol('CONTROL');
  */
 function ɵɵcontrolCreate() {
     const lView = getLView();
+    const tView = getTView();
     const tNode = getCurrentTNode();
-    // TODO(https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131712274)
-    // * cache the field directive index or instance for reuse.
-    const control = getControlDirective(tNode, lView);
+    const control = tView.firstCreatePass
+        ? getControlDirectiveFirstCreatePass(tView, tNode, lView)
+        : getControlDirective(tNode, lView);
     if (!control) {
         return;
     }
-    // TODO(https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131712274):
-    // * cache the custom control component index or instance for reuse.
-    // * cache the control model name for reuse.
-    const customControl = getCustomControlComponent(tNode);
-    if (customControl) {
-        const [componentIndex, modelName] = customControl;
-        listenToCustomControl(lView, tNode, control, componentIndex, modelName);
+    if (tNode.flags & 2048 /* TNodeFlags.isFormValueControl */) {
+        listenToCustomControl(lView, tNode, control, 'value');
     }
-    else if (isNativeControl(lView, tNode)) {
-        listenToNativeControl(lView, tNode, control);
+    else if (tNode.flags & 4096 /* TNodeFlags.isFormCheckboxControl */) {
+        listenToCustomControl(lView, tNode, control, 'checked');
     }
     else {
-        // For example, user wrote <div [control]="f">.
-        // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131860276
-        const tagName = tNode.value;
-        throw new RuntimeError(318 /* RuntimeErrorCode.INVALID_CONTROL_HOST */, `'<${tagName}>' is an invalid control host. The host must be a native form control (such ` +
-            `as <input>', '<select>', or '<textarea>') or a custom form control component with a ` +
-            `'value' or 'checked' model.`);
+        listenToNativeControl(lView, tNode, control);
     }
     control.register();
 }
@@ -22032,27 +22023,75 @@ function ɵɵcontrolCreate() {
  */
 function ɵɵcontrol(value, sanitizer) {
     const lView = getLView();
-    const bindingIndex = nextBindingIndex();
     const tNode = getSelectedTNode();
+    const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         setPropertyAndInputs(tNode, lView, 'field', value, lView[RENDERER], sanitizer);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, 'field', bindingIndex);
     }
-    // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131711472
-    // * only run if this is really a control binding determine in the create pass.
     const control = getControlDirective(tNode, lView);
-    if (!control) {
+    if (control) {
+        if (tNode.flags & 2048 /* TNodeFlags.isFormValueControl */) {
+            updateCustomControl(tNode, lView, control, 'value');
+        }
+        else if (tNode.flags & 4096 /* TNodeFlags.isFormCheckboxControl */) {
+            updateCustomControl(tNode, lView, control, 'checked');
+        }
+        else {
+            updateNativeControl(tNode, lView, control);
+        }
+    }
+}
+function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
+    const directiveIndices = tNode.inputs?.['field'];
+    if (!directiveIndices) {
+        // There are no matching inputs for the `[field]` property binding.
         return;
     }
-    const customControl = getCustomControlComponent(tNode);
-    if (customControl) {
-        const [componentIndex, modelName] = customControl;
-        updateCustomControl(lView, componentIndex, modelName, control);
+    let componentIndex;
+    if (isComponentHost(tNode)) {
+        componentIndex = tNode.directiveStart + tNode.componentOffset;
+        if (directiveIndices.includes(componentIndex)) {
+            // If component has a `field` input, we assume that it will handle binding the field to the
+            // appropriate native/custom control in its template, so we do not attempt to bind any inputs
+            // on this component.
+            return;
+        }
     }
-    else {
-        updateNativeControl(tNode, lView, control);
+    // Search for the `ɵControl` directive.
+    const control = findControlDirective(lView, directiveIndices);
+    if (!control) {
+        // The `ɵControl` directive was not imported by this component.
+        return;
     }
+    tNode.flags |= 1024 /* TNodeFlags.isFormControl */;
+    if (isComponentHost(tNode)) {
+        const componentDef = tView.data[componentIndex];
+        // TODO: should we check that any additional field state inputs are signal based?
+        if (hasModelInput(componentDef, 'value')) {
+            tNode.flags |= 2048 /* TNodeFlags.isFormValueControl */;
+            return control;
+        }
+        else if (hasModelInput(componentDef, 'checked')) {
+            tNode.flags |= 4096 /* TNodeFlags.isFormCheckboxControl */;
+            return control;
+        }
+    }
+    const nativeElement = lView[tNode.index];
+    if (isNativeControl(nativeElement)) {
+        if (isNumericInput(nativeElement)) {
+            tNode.flags |= 8192 /* TNodeFlags.isNativeNumericControl */;
+        }
+        if (isTextControl(nativeElement)) {
+            tNode.flags |= 16384 /* TNodeFlags.isNativeTextControl */;
+        }
+        return control;
+    }
+    const tagName = tNode.value;
+    throw new RuntimeError(318 /* RuntimeErrorCode.INVALID_FIELD_DIRECTIVE_HOST */, `'<${tagName}>' is an invalid [field] directive host. The host must be a native form control ` +
+        `(such as <input>', '<select>', or '<textarea>') or a custom form control component with a ` +
+        `'value' or 'checked' model.`);
 }
 /**
  * Returns the {@link ɵControl} directive on the specified node, if one is present and a `field`
@@ -22064,21 +22103,11 @@ function ɵɵcontrol(value, sanitizer) {
  * @param lView The `LView` that contains the element.
  */
 function getControlDirective(tNode, lView) {
-    const directiveIndices = tNode.inputs?.['field'];
-    if (!directiveIndices) {
-        // There are no matching inputs for the `[control]` property binding.
-        return;
-    }
-    if (isComponentHost(tNode)) {
-        const componentIndex = tNode.directiveStart + tNode.componentOffset;
-        if (directiveIndices.includes(componentIndex)) {
-            // If component has a `field` input, we assume that it will handle binding the field to the
-            // appropriate native/custom control in its template, so we do not attempt to bind any inputs
-            // on this component.
-            return;
-        }
-    }
-    // Search for the `Field` directive.
+    return tNode.flags & 1024 /* TNodeFlags.isFormControl */
+        ? findControlDirective(lView, tNode.inputs['field'])
+        : undefined;
+}
+function findControlDirective(lView, directiveIndices) {
     for (let index of directiveIndices) {
         const directive = lView[index];
         if (ɵCONTROL in directive) {
@@ -22086,34 +22115,6 @@ function getControlDirective(tNode, lView) {
         }
     }
     // The `Field` directive was not imported by this component.
-    return;
-}
-/**
- * Returns information about the component on the specified node, if it appears to be a custom form
- * control.
- *
- * A component is considered a custom form control if it has a model input named `value` or
- * `checked`.
- *
- * @param tNode The `TNode` of the element to check.
- * @returns an array containing the component index and model input name if it's a custom form
- *  control, or undefined.
- */
-function getCustomControlComponent(tNode) {
-    if (!isComponentHost(tNode)) {
-        return;
-    }
-    const tView = getTView();
-    const componentIndex = tNode.directiveStart + tNode.componentOffset;
-    const componentDef = tView.data[componentIndex];
-    if (hasModelInput(componentDef, 'value')) {
-        return [componentIndex, 'value'];
-    }
-    if (hasModelInput(componentDef, 'checked')) {
-        return [componentIndex, 'checked'];
-    }
-    // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131861022
-    // * should we check that any additional field state inputs are signal based?
     return;
 }
 /** Returns whether the specified `componentDef` has a model input named `name`. */
@@ -22138,7 +22139,8 @@ function hasOutput(componentDef, name) {
  * @param componentIndex The index of the custom form control component in the `LView`.
  * @param modelName The name of the model property on the custom form control.
  */
-function listenToCustomControl(lView, tNode, control, componentIndex, modelName) {
+function listenToCustomControl(lView, tNode, control, modelName) {
+    const componentIndex = tNode.directiveStart + tNode.componentOffset;
     const outputName = modelName + 'Change';
     listenToOutput(tNode, lView, componentIndex, outputName, outputName, wrapListener(tNode, lView, (newValue) => {
         control.state().value.set(newValue);
@@ -22152,8 +22154,7 @@ function listenToCustomControl(lView, tNode, control, componentIndex, modelName)
         }));
     }
 }
-function isNativeControl(lView, tNode) {
-    const element = lView[tNode.index];
+function isNativeControl(element) {
     return (element instanceof HTMLInputElement ||
         element instanceof HTMLSelectElement ||
         element instanceof HTMLTextAreaElement);
@@ -22188,8 +22189,9 @@ function listenToNativeControl(lView, tNode, control) {
  * @param modelName The name of the model property on the custom form control.
  * @param control The `ɵControl` directive instance.
  */
-function updateCustomControl(lView, componentIndex, modelName, control) {
+function updateCustomControl(tNode, lView, control, modelName) {
     const tView = getTView();
+    const componentIndex = tNode.directiveStart + tNode.componentOffset;
     const component = lView[componentIndex];
     const componentDef = tView.data[componentIndex];
     const state = control.state();
@@ -22241,15 +22243,11 @@ function updateNativeControl(tNode, lView, control) {
     setBooleanAttribute(renderer, input, 'disabled', state.disabled());
     setBooleanAttribute(renderer, input, 'readonly', state.readonly());
     setBooleanAttribute(renderer, input, 'required', state.required());
-    // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131711472
-    // * cache this in `tNode.flags`.
-    if (isNumericInput(input)) {
+    if (tNode.flags & 8192 /* TNodeFlags.isNativeNumericControl */) {
         setOptionalAttribute(renderer, input, 'max', state.max());
         setOptionalAttribute(renderer, input, 'min', state.min());
     }
-    // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131711472
-    // * cache this in `tNode.flags`.
-    if (isTextInput(input)) {
+    if (tNode.flags & 16384 /* TNodeFlags.isNativeTextControl */) {
         setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
         setOptionalAttribute(renderer, input, 'minLength', state.minLength());
     }
@@ -22278,7 +22276,7 @@ function isNumericInput(control) {
  * This is not the same as an input with `type="text"`, but rather any input that accepts
  * text-based input which includes numeric types.
  */
-function isTextInput(control) {
+function isTextControl(control) {
     return !(control instanceof HTMLSelectElement);
 }
 /**
