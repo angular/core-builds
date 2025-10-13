@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-e34776a
+ * @license Angular v21.0.0-next.7+sha-84f6e36
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.0.0-next.7+sha-e34776a');
+const VERSION = /* @__PURE__ */ new Version('21.0.0-next.7+sha-84f6e36');
 
 /**
  * Base URL for the error details page.
@@ -4267,6 +4267,9 @@ function hasApplyArgsData(applyArgs, key) {
  * ```
  *
  * @publicApi
+ *
+ * @see [Unhandled errors in Angular](best-practices/error-handling)
+ *
  */
 class ErrorHandler {
     /**
