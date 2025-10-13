@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.4+sha-da50733
+ * @license Angular v20.3.4+sha-9cbe5b6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4719,6 +4719,9 @@ declare class ApplicationModule {
  * ```
  *
  * @publicApi
+ *
+ * @see [Unhandled errors in Angular](best-practices/error-handling)
+ *
  */
 declare class ErrorHandler {
     handleError(error: any): void;

@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v20.3.4+sha-da50733
+ * @license Angular v20.3.4+sha-9cbe5b6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-JBCQRfRD.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-C877sOTW.cjs');
 var ts = require('typescript');
 require('os');
 var project_tsconfig_paths = require('./project_tsconfig_paths-6STpryH8.cjs');
