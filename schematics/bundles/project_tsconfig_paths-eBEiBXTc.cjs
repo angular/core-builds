@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.4+sha-9cbe5b6
+ * @license Angular v20.3.4+sha-b4b19b6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28438,6 +28438,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
             // main `for` body, use `mainSourceSpan`.
             const endSpan = empty?.endSourceSpan ?? ast.endSourceSpan;
             const sourceSpan = new ParseSourceSpan(ast.sourceSpan.start, endSpan?.end ?? ast.sourceSpan.end);
+            validateTrackByExpression(params.trackBy.expression, params.trackBy.keywordSpan, errors);
             node = new ForLoopBlock(params.itemName, params.expression, params.trackBy.expression, params.trackBy.keywordSpan, params.context, visitAll(visitor, ast.children, ast.children), empty, sourceSpan, ast.sourceSpan, ast.startSourceSpan, endSpan, ast.nameSpan, ast.i18n);
         }
     }
@@ -28536,6 +28537,13 @@ function parseForLoopParameters(block, errors, bindingParser) {
         errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop parameter "${param.expression}"`));
     }
     return result;
+}
+function validateTrackByExpression(expression, parseSourceSpan, errors) {
+    const visitor = new PipeVisitor();
+    expression.ast.visit(visitor);
+    if (visitor.hasPipe) {
+        errors.push(new ParseError(parseSourceSpan, 'Cannot use pipes in track expressions'));
+    }
 }
 /** Parses the `let` parameter of a `for` loop block. */
 function parseLetParameter(sourceSpan, expression, span, loopItemName, context, errors) {
@@ -28746,6 +28754,12 @@ function stripOptionalParentheses(param, errors) {
         return null;
     }
     return expression.slice(start, end);
+}
+class PipeVisitor extends RecursiveAstVisitor {
+    hasPipe = false;
+    visitPipe() {
+        this.hasPipe = true;
+    }
 }
 
 /** Pattern for a timing value in a trigger. */
@@ -32778,7 +32792,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.4+sha-9cbe5b6');
+const VERSION = new Version('20.3.4+sha-b4b19b6');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33840,7 +33854,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-6STpryH8.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-eBEiBXTc.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
