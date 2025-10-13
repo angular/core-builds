@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-84f6e36
+ * @license Angular v21.0.0-next.7+sha-62cda78
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6480,15 +6480,15 @@ declare function ɵɵcomponentInstance(): unknown;
 /**
  * Possibly sets up a {@link ɵControl} to manage a native or custom form control.
  *
- * Setup occurs if a `control` input is bound to a {@link ɵControl} directive on the current node,
- * but not to a component. If a `control` input is bound to a component, we assume the component
+ * Setup occurs if a `field` input is bound to a {@link ɵControl} directive on the current node,
+ * but not to a component. If a `field` input is bound to a component, we assume the component
  * will manage the control in its own template.
  *
  * @codeGenApi
  */
 declare function ɵɵcontrolCreate(): void;
 /**
- * Updates a `control` property, and possibly other form control properties, on the current element.
+ * Updates a `field` property, and possibly other form control properties, on the current element.
  *
  * This is a specialized version of the `ɵɵproperty` instruction that handles updating additional
  * form control properties, if set up to do so by {@link ɵɵcontrolCreate} during creation.
@@ -8213,8 +8213,8 @@ interface ɵControl<T> {
      * Registers this directive as a control of its associated form field.
      *
      * The presence of this directive alone is not sufficient to determine whether it'll control
-     * the bound field. If this directive's host is a component with a `control` input, we assume
-     * the component will forward the bound field to another control directive in its own template,
+     * the bound field. If this directive's host is a component with a `field` input, we assume
+     * the component will forward the bound field to another field directive in its own template,
      * and do nothing.
      */
     register(): void;

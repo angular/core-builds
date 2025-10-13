@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-84f6e36
+ * @license Angular v21.0.0-next.7+sha-62cda78
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8672,14 +8672,14 @@ var OpKind;
      */
     OpKind[OpKind["AnimationListener"] = 56] = "AnimationListener";
     /**
-     * An operation to bind an expression to a `control` property of an element.
+     * An operation to bind an expression to a `field` property of an element.
      */
     OpKind[OpKind["Control"] = 57] = "Control";
     /**
      * An operation to set up a corresponding {@link Control} operation.
      *
      * This is responsible for setting up event listeners on a native or custom form control when
-     * bound to a specialized control directive.
+     * bound to a specialized field directive.
      */
     OpKind[OpKind["ControlCreate"] = 58] = "ControlCreate";
 })(OpKind || (OpKind = {}));
@@ -11665,7 +11665,7 @@ function extractAttributes(job) {
                 case OpKind.Control:
                     OpList.insertBefore(
                     // Deliberately null i18nMessage value
-                    createExtractedAttributeOp(op.target, BindingKind.Property, null, 'control', 
+                    createExtractedAttributeOp(op.target, BindingKind.Property, null, 'field', 
                     /* expression */ null, 
                     /* i18nContext */ null, 
                     /* i18nMessage */ null, op.securityContext), lookupElement$3(elements, op.target));
@@ -11829,7 +11829,7 @@ function specializeBindings(job) {
                     else if (job.kind === CompilationJobKind.Host) {
                         OpList.replace(op, createDomPropertyOp(op.name, op.expression, op.bindingKind, op.i18nContext, op.securityContext, op.sourceSpan));
                     }
-                    else if (op.name === 'control') {
+                    else if (op.name === 'field') {
                         OpList.replace(op, createControlOp(op));
                     }
                     else {
@@ -27514,9 +27514,9 @@ function ingestElementBindings(unit, op, element) {
         }
         // All dynamic bindings (both attribute and property bindings).
         bindings.push(createBindingOp(op.xref, BINDING_KINDS.get(input.type), input.name, convertAstWithInterpolation(unit.job, astOf(input.value), input.i18n), input.unit, input.securityContext, false, false, null, asMessage(input.i18n) ?? null, input.sourceSpan));
-        // If the input name is 'control', this could be a form control binding which requires a
+        // If the input name is 'field', this could be a form control binding which requires a
         // `ControlCreateOp` to properly initialize.
-        if (input.type === exports.BindingType.Property && input.name === 'control') {
+        if (input.type === exports.BindingType.Property && input.name === 'field') {
             unit.create.push(createControlCreateOp(input.sourceSpan));
         }
     }
@@ -28695,6 +28695,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
             // main `for` body, use `mainSourceSpan`.
             const endSpan = empty?.endSourceSpan ?? ast.endSourceSpan;
             const sourceSpan = new ParseSourceSpan(ast.sourceSpan.start, endSpan?.end ?? ast.sourceSpan.end);
+            validateTrackByExpression(params.trackBy.expression, params.trackBy.keywordSpan, errors);
             node = new ForLoopBlock(params.itemName, params.expression, params.trackBy.expression, params.trackBy.keywordSpan, params.context, visitAll(visitor, ast.children, ast.children), empty, sourceSpan, ast.sourceSpan, ast.startSourceSpan, endSpan, ast.nameSpan, ast.i18n);
         }
     }
@@ -28793,6 +28794,13 @@ function parseForLoopParameters(block, errors, bindingParser) {
         errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop parameter "${param.expression}"`));
     }
     return result;
+}
+function validateTrackByExpression(expression, parseSourceSpan, errors) {
+    const visitor = new PipeVisitor();
+    expression.ast.visit(visitor);
+    if (visitor.hasPipe) {
+        errors.push(new ParseError(parseSourceSpan, 'Cannot use pipes in track expressions'));
+    }
 }
 /** Parses the `let` parameter of a `for` loop block. */
 function parseLetParameter(sourceSpan, expression, span, loopItemName, context, errors) {
@@ -29003,6 +29011,12 @@ function stripOptionalParentheses(param, errors) {
         return null;
     }
     return expression.slice(start, end);
+}
+class PipeVisitor extends RecursiveAstVisitor {
+    hasPipe = false;
+    visitPipe() {
+        this.hasPipe = true;
+    }
 }
 
 /** Pattern for a timing value in a trigger. */
@@ -33099,7 +33113,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('21.0.0-next.7+sha-84f6e36');
+const VERSION = new Version('21.0.0-next.7+sha-62cda78');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -34162,7 +34176,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BuEXx5Hr.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-afk5QFYO.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
