@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-c0510cd
+ * @license Angular v21.0.0-next.7+sha-e941e6b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -306,24 +306,25 @@ function resource(options) {
     }
     const oldNameForParams = options.request;
     const params = (options.params ?? oldNameForParams ?? (() => null));
-    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
+    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
  */
 class BaseWritableResource {
     value;
-    constructor(value) {
+    isLoading;
+    constructor(value, debugName) {
         this.value = value;
         this.value.set = this.set.bind(this);
         this.value.update = this.update.bind(this);
         this.value.asReadonly = signalAsReadonlyFn;
+        this.isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading', ngDevMode ? createDebugNameObject(debugName, 'isLoading') : undefined);
     }
     isError = computed(() => this.status() === 'error');
     update(updateFn) {
         this.set(updateFn(untracked(this.value)));
     }
-    isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading');
     // Use a computed here to avoid triggering reactive consumers if the value changes while staying
     // either defined or undefined.
     isValueDefined = computed(() => {
@@ -346,6 +347,7 @@ class BaseWritableResource {
 class ResourceImpl extends BaseWritableResource {
     loaderFn;
     equal;
+    debugName;
     pendingTasks;
     /**
      * The current state of the resource. Status, value, and error are derived from this.
@@ -361,7 +363,9 @@ class ResourceImpl extends BaseWritableResource {
     resolvePendingTask = undefined;
     destroyed = false;
     unregisterOnDestroy;
-    constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
+    status;
+    error;
+    constructor(request, loaderFn, defaultValue, equal, debugName, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
         super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
         // `WritableSignal` that delegates to `ResourceImpl.set`.
@@ -383,13 +387,15 @@ class ResourceImpl extends BaseWritableResource {
                 }
             }
             return streamValue.value;
-        }, { equal }));
+        }, { equal, ...(ngDevMode ? createDebugNameObject(debugName, 'value') : undefined) }), debugName);
         this.loaderFn = loaderFn;
         this.equal = equal;
+        this.debugName = debugName;
         // Extend `request()` to include a writable reload signal.
         this.extRequest = linkedSignal({
             source: request,
             computation: (request) => ({ request, reload: 0 }),
+            ...(ngDevMode ? createDebugNameObject(debugName, 'extRequest') : undefined),
         });
         // The main resource state is managed in a `linkedSignal`, which allows the resource to change
         // state instantaneously when the request signal changes.
@@ -419,20 +425,22 @@ class ResourceImpl extends BaseWritableResource {
                     };
                 }
             },
+            ...(ngDevMode ? createDebugNameObject(debugName, 'state') : undefined),
         });
         this.effectRef = effect(this.loadEffect.bind(this), {
             injector,
             manualCleanup: true,
+            ...(ngDevMode ? createDebugNameObject(debugName, 'loadEffect') : undefined),
         });
         this.pendingTasks = injector.get(PendingTasks);
         // Cancel any pending request when the resource itself is destroyed.
         this.unregisterOnDestroy = injector.get(DestroyRef).onDestroy(() => this.destroy());
+        this.status = computed(() => projectStatusOfState(this.state()), ngDevMode ? createDebugNameObject(debugName, 'status') : undefined);
+        this.error = computed(() => {
+            const stream = this.state().stream?.();
+            return stream && !isResolved(stream) ? stream.error : undefined;
+        }, ngDevMode ? createDebugNameObject(debugName, 'error') : undefined);
     }
-    status = computed(() => projectStatusOfState(this.state()));
-    error = computed(() => {
-        const stream = this.state().stream?.();
-        return stream && !isResolved(stream) ? stream.error : undefined;
-    });
     /**
      * Called either directly via `WritableResource.set` or via `.value.set()`.
      */
@@ -454,7 +462,7 @@ class ResourceImpl extends BaseWritableResource {
             extRequest: state.extRequest,
             status: 'local',
             previousStatus: 'local',
-            stream: signal({ value }),
+            stream: signal({ value }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined),
         });
         // We're departing from whatever state the resource was in previously, so cancel any in-progress
         // loading operations.
@@ -545,7 +553,7 @@ class ResourceImpl extends BaseWritableResource {
                 extRequest,
                 status: 'resolved',
                 previousStatus: 'error',
-                stream: signal({ error: encapsulateResourceError(err) }),
+                stream: signal({ error: encapsulateResourceError(err) }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined),
             });
         }
         finally {
@@ -574,10 +582,10 @@ function getLoader(options) {
     }
     return async (params) => {
         try {
-            return signal({ value: await options.loader(params) });
+            return signal({ value: await options.loader(params) }, ngDevMode ? createDebugNameObject(options.debugName, 'stream') : undefined);
         }
         catch (err) {
-            return signal({ error: encapsulateResourceError(err) });
+            return signal({ error: encapsulateResourceError(err) }, ngDevMode ? createDebugNameObject(options.debugName, 'stream') : undefined);
         }
     };
 }
@@ -599,6 +607,14 @@ function projectStatusOfState(state) {
 }
 function isResolved(state) {
     return state.error === undefined;
+}
+/**
+ * Creates a debug name object for an internal signal.
+ */
+function createDebugNameObject(resourceDebugName, internalSignalDebugName) {
+    return {
+        debugName: `Resource${resourceDebugName ? '#' + resourceDebugName : ''}.${internalSignalDebugName}`,
+    };
 }
 function encapsulateResourceError(error) {
     if (error instanceof Error) {

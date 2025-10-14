@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-c0510cd
+ * @license Angular v21.0.0-next.7+sha-e941e6b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7667,6 +7667,8 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
         animations.skipLeaveAnimations = false;
         return callback(false);
     }
+    if (lView)
+        allLeavingAnimations.add(lView);
     addToAnimationQueue(injector, () => {
         // it's possible that in the time between when the leave animation was
         // and the time it was executed, the data structure changed. So we need
@@ -13809,7 +13811,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.7+sha-c0510cd']
+        ? ['ng-version', '21.0.0-next.7+sha-e941e6b']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22078,12 +22080,11 @@ function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
             return control;
         }
     }
-    const nativeElement = lView[tNode.index];
-    if (isNativeControl(nativeElement)) {
-        if (isNumericInput(nativeElement)) {
+    if (isNativeControl(tNode)) {
+        if (isNumericInput(tNode)) {
             tNode.flags |= 8192 /* TNodeFlags.isNativeNumericControl */;
         }
-        if (isTextControl(nativeElement)) {
+        if (isTextControl(tNode)) {
             tNode.flags |= 16384 /* TNodeFlags.isNativeTextControl */;
         }
         return control;
@@ -22154,10 +22155,12 @@ function listenToCustomControl(lView, tNode, control, modelName) {
         }));
     }
 }
-function isNativeControl(element) {
-    return (element instanceof HTMLInputElement ||
-        element instanceof HTMLSelectElement ||
-        element instanceof HTMLTextAreaElement);
+function isNativeControl(tNode) {
+    if (tNode.type !== 2 /* TNodeType.Element */) {
+        return false;
+    }
+    const tagName = tNode.value;
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select';
 }
 /**
  * Adds event listeners to a native form control element to notify the `field` of changes.
@@ -22257,16 +22260,25 @@ function isDateOrNull(value) {
     return value === null || value instanceof Date;
 }
 /** Returns whether `control` has a numeric input type. */
-function isNumericInput(control) {
-    switch (control.type) {
-        case 'date':
-        case 'datetime-local':
-        case 'month':
-        case 'number':
-        case 'range':
-        case 'time':
-        case 'week':
-            return true;
+function isNumericInput(tNode) {
+    if (!tNode.attrs || tNode.value !== 'input') {
+        return false;
+    }
+    for (let i = 0; i < tNode.attrs.length; i += 2) {
+        const name = tNode.attrs[i];
+        if (isNameOnlyAttributeMarker(name)) {
+            break;
+        }
+        if (name === 'type') {
+            const value = tNode.attrs[i + 1];
+            return (value === 'date' ||
+                value === 'datetime-local' ||
+                value === 'month' ||
+                value === 'number' ||
+                value === 'range' ||
+                value === 'time' ||
+                value === 'week');
+        }
     }
     return false;
 }
@@ -22276,8 +22288,8 @@ function isNumericInput(control) {
  * This is not the same as an input with `type="text"`, but rather any input that accepts
  * text-based input which includes numeric types.
  */
-function isTextControl(control) {
-    return !(control instanceof HTMLSelectElement);
+function isTextControl(tNode) {
+    return tNode.value !== 'select';
 }
 /**
  * Returns the value from a native control element.
