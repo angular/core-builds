@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.4+sha-a2773b5
+ * @license Angular v20.3.4+sha-11b006e
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7617,6 +7617,8 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
         animations.skipLeaveAnimations = false;
         return callback(false);
     }
+    if (lView)
+        allLeavingAnimations.add(lView);
     addToAnimationQueue(injector, () => {
         // it's possible that in the time between when the leave animation was
         // and the time it was executed, the data structure changed. So we need
@@ -13756,7 +13758,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.4+sha-a2773b5']
+        ? ['ng-version', '20.3.4+sha-11b006e']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
