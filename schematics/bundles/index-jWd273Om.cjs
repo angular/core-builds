@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-4d1d962
+ * @license Angular v21.0.0-next.7+sha-49377d2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-BP6O7cP-.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CdhVNYMk.cjs');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-4d1d962'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12366,7 +12366,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.7+sha-4d1d962');
+new project_tsconfig_paths.Version('21.0.0-next.7+sha-49377d2');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16474,32 +16474,23 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
                 .filter((item) => item instanceof project_tsconfig_paths.PropertyRead)
                 .flatMap((item) => buildDiagnosticForSignal(ctx, item, component));
         }
-        // bound properties like `[prop]="mySignal"`
-        else if (node instanceof project_tsconfig_paths.BoundAttribute) {
-            const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
-            if (symbol?.kind === project_tsconfig_paths.SymbolKind.Input &&
-                symbol.bindings.length > 0 &&
-                symbol.bindings.some((binding) => binding.target.kind === project_tsconfig_paths.SymbolKind.Directive)) {
-                return [];
-            }
-            // otherwise, we check if the node is
-            const nodeAst = isPropertyReadNodeAst(node);
-            if (
-            // a bound property like `[prop]="mySignal"`
-            (node.type === project_tsconfig_paths.BindingType.Property ||
-                // or a class binding like `[class.myClass]="mySignal"`
-                node.type === project_tsconfig_paths.BindingType.Class ||
-                // or a style binding like `[style.width]="mySignal"`
-                node.type === project_tsconfig_paths.BindingType.Style ||
-                // or an attribute binding like `[attr.role]="mySignal"`
-                node.type === project_tsconfig_paths.BindingType.Attribute ||
-                // or an animation binding like `[animate.enter]="mySignal"`
-                node.type === project_tsconfig_paths.BindingType.Animation ||
-                // or an animation binding like `[@myAnimation]="mySignal"`
-                node.type === project_tsconfig_paths.BindingType.LegacyAnimation) &&
-                nodeAst) {
-                return buildDiagnosticForSignal(ctx, nodeAst, component);
-            }
+        // check bound inputs like `[prop]="mySignal"` on an element or inline template
+        else if (node instanceof project_tsconfig_paths.Element$1 && node.inputs.length > 0) {
+            const directivesOfElement = ctx.templateTypeChecker.getDirectivesOfNode(component, node);
+            return node.inputs.flatMap((input) => checkBoundAttribute(ctx, component, directivesOfElement, input));
+        }
+        else if (node instanceof project_tsconfig_paths.Template && node.tagName === 'ng-template') {
+            const directivesOfElement = ctx.templateTypeChecker.getDirectivesOfNode(component, node);
+            const inputDiagnostics = node.inputs.flatMap((input) => {
+                return checkBoundAttribute(ctx, component, directivesOfElement, input);
+            });
+            const templateAttrDiagnostics = node.templateAttrs.flatMap((attr) => {
+                if (!(attr instanceof project_tsconfig_paths.BoundAttribute)) {
+                    return [];
+                }
+                return checkBoundAttribute(ctx, component, directivesOfElement, attr);
+            });
+            return inputDiagnostics.concat(templateAttrDiagnostics);
         }
         // if blocks like `@if(mySignal) { ... }`
         else if (node instanceof project_tsconfig_paths.IfBlock) {
@@ -16524,6 +16515,32 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
         }
         return [];
     }
+}
+function checkBoundAttribute(ctx, component, directivesOfElement, node) {
+    // we skip the check if the node is an input binding
+    if (directivesOfElement !== null &&
+        directivesOfElement.some((dir) => dir.inputs.getByBindingPropertyName(node.name) !== null)) {
+        return [];
+    }
+    // otherwise, we check if the node is
+    const nodeAst = isPropertyReadNodeAst(node);
+    if (
+    // a bound property like `[prop]="mySignal"`
+    (node.type === project_tsconfig_paths.BindingType.Property ||
+        // or a class binding like `[class.myClass]="mySignal"`
+        node.type === project_tsconfig_paths.BindingType.Class ||
+        // or a style binding like `[style.width]="mySignal"`
+        node.type === project_tsconfig_paths.BindingType.Style ||
+        // or an attribute binding like `[attr.role]="mySignal"`
+        node.type === project_tsconfig_paths.BindingType.Attribute ||
+        // or an animation binding like `[animate.enter]="mySignal"`
+        node.type === project_tsconfig_paths.BindingType.Animation ||
+        // or an animation binding like `[@myAnimation]="mySignal"`
+        node.type === project_tsconfig_paths.BindingType.LegacyAnimation) &&
+        nodeAst) {
+        return buildDiagnosticForSignal(ctx, nodeAst, component);
+    }
+    return [];
 }
 function isPropertyReadNodeAst(node) {
     if (node.value instanceof project_tsconfig_paths.ASTWithSource === false) {
@@ -16557,9 +16574,11 @@ function buildDiagnosticForSignal(ctx, node, component) {
     // error.
     // We also check for `{{ mySignal.set }}` or `{{ mySignal.update }}` or
     // `{{ mySignal.asReadonly }}` as these are the names of instance properties of Signal
+    if (!isFunctionInstanceProperty(node.name) && !isSignalInstanceProperty(node.name)) {
+        return [];
+    }
     const symbolOfReceiver = ctx.templateTypeChecker.getSymbolOfNode(node.receiver, component);
-    if ((isFunctionInstanceProperty(node.name) || isSignalInstanceProperty(node.name)) &&
-        symbolOfReceiver !== null &&
+    if (symbolOfReceiver !== null &&
         symbolOfReceiver.kind === project_tsconfig_paths.SymbolKind.Expression &&
         isSignalReference(symbolOfReceiver)) {
         const templateMapping = ctx.templateTypeChecker.getSourceMappingAtTcbLocation(symbolOfReceiver.tcbLocation);
@@ -20561,7 +20580,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.7+sha-4d1d962` usually means that core is at head so it supports
+    // A version of `21.0.0-next.7+sha-49377d2` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

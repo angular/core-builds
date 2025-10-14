@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.7+sha-4d1d962
+ * @license Angular v21.0.0-next.7+sha-49377d2
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13816,7 +13816,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.7+sha-4d1d962']
+        ? ['ng-version', '21.0.0-next.7+sha-49377d2']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21643,6 +21643,11 @@ function clearLViewNodeAnimationResolvers(lView, tNode) {
     if (nodeAnimations)
         nodeAnimations.resolvers = undefined;
 }
+function leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns) {
+    clearLeavingNodes(tNode, nativeElement);
+    cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+    clearLViewNodeAnimationResolvers(lView, tNode);
+}
 
 /**
  * Instruction to handle the `animate.enter` behavior for class bindings.
@@ -21904,36 +21909,36 @@ function runLeaveAnimationFunction(lView, tNode, value) {
     const { promise, resolve } = promiseWithResolvers();
     const nativeElement = getNativeByTNode(tNode, lView);
     ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
+    const cleanupFns = [];
     const renderer = lView[RENDERER];
     const animationsDisabled = areAnimationsDisabled(lView);
     const ngZone = lView[INJECTOR].get(NgZone);
     const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
+    (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
+    const resolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
     if (animationsDisabled) {
-        resolve();
+        leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns);
     }
     else {
-        const timeoutId = setTimeout(() => {
-            clearLeavingNodes(tNode, nativeElement);
-            resolve();
-        }, maxAnimationTimeout);
+        const timeoutId = setTimeout(() => leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns), maxAnimationTimeout);
         const event = {
             target: nativeElement,
             animationComplete: () => {
-                clearLeavingNodes(tNode, nativeElement);
+                leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns);
                 clearTimeout(timeoutId);
-                resolve();
             },
         };
         trackLeavingNodes(tNode, nativeElement);
         ngZone.runOutsideAngular(() => {
-            renderer.listen(nativeElement, 'animationend', () => {
-                resolve();
-            }, { once: true });
+            cleanupFns.push(renderer.listen(nativeElement, 'animationend', () => {
+                leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns);
+                clearTimeout(timeoutId);
+            }, { once: true }));
         });
         value.call(lView[CONTEXT], event);
     }
     // Ensure cleanup if the LView is destroyed before the animation runs.
-    return promise;
+    return { promise, resolve };
 }
 function queueEnterAnimations(lView) {
     enableAnimationQueueScheduler(lView[INJECTOR]);
