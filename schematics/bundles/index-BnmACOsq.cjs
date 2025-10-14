@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-49377d2
+ * @license Angular v21.0.0-next.7+sha-fc65107
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-49377d2'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-fc65107'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5124,24 +5124,26 @@ function nodeArrayFromDecoratorsArray(decorators) {
 function insertDebugNameIntoCallExpression(callExpression, debugName) {
     const signalExpressionIsRequired = isRequiredSignalFunction(callExpression.expression);
     let configPosition = signalExpressionIsRequired ? 0 : 1;
+    const nodeArgs = Array.from(callExpression.arguments);
     // 1. If the call expression has no arguments, we pretend that the config object is at position 0.
     // We do this so that we can insert a spread element at the start of the args list in a way where
     // undefined can be the first argument but still get tree-shaken out in production builds.
     // or
-    // 2. If the signal has an object-only definition (e.g. `linkedSignal` or `resource`), we set
-    // the argument position to 0, i.e. reusing the existing object.
+    // 2. Since `linkedSignal` with computation uses a single object for both computation logic
+    // and options (unlike other signal-based primitives), we set the argument position to 0, i.e.
+    // reusing the computation logic object.
     const signalExpressionHasNoArguments = callExpression.arguments.length === 0;
-    const signalWithObjectOnlyDefinition = isSignalWithObjectOnlyDefinition(callExpression);
-    if (signalExpressionHasNoArguments || signalWithObjectOnlyDefinition) {
+    const isLinkedSignal = callExpression.expression.getText() === 'linkedSignal';
+    const isComputationLinkedSignal = isLinkedSignal && nodeArgs[0].kind === ts.SyntaxKind.ObjectLiteralExpression;
+    if (signalExpressionHasNoArguments || isComputationLinkedSignal) {
         configPosition = 0;
     }
-    const nodeArgs = Array.from(callExpression.arguments);
     let existingArgument = nodeArgs[configPosition];
     if (existingArgument === undefined) {
         existingArgument = ts.factory.createObjectLiteralExpression([]);
     }
     // Do nothing if an identifier is used as the config object
-    // Ex:
+    // Ex -
     // const defaultObject = { equals: () => false };
     // signal(123, defaultObject)
     if (ts.isIdentifier(existingArgument)) {
@@ -5184,16 +5186,15 @@ function insertDebugNameIntoCallExpression(callExpression, debugName) {
     /* question token */ undefined, devModeCase, 
     /* colon token */ undefined, nonDevModeCase)));
     let transformedSignalArgs;
-    if (signalExpressionIsRequired ||
-        signalExpressionHasNoArguments ||
-        signalWithObjectOnlyDefinition) {
+    if (signalExpressionIsRequired || signalExpressionHasNoArguments || isComputationLinkedSignal) {
         // 1. If the call expression is a required signal function, there is no args other than the config object.
         // So we just use the spread element as the only argument.
         // or
         // 2. If the call expression has no arguments (ex. input(), model(), etc), we already added the undefined
         // identifier in the spread element above. So we use that spread Element as is.
         // or
-        // 3. We are transforming a signal with object-only definition.
+        // 3. We are transforming a `linkedSignal` with computation (i.e. we have a single object for both
+        // logic and options).
         transformedSignalArgs = ts.factory.createNodeArray([spreadElementContainingUpdatedOptions]);
     }
     else {
@@ -5288,20 +5289,6 @@ function isPropertyDeclarationCase(node) {
     }
     return ts.isIdentifier(expression) && isSignalFunction(expression);
 }
-const signalFunctions = new Map([
-    ['signal', 'core'],
-    ['computed', 'core'],
-    ['linkedSignal', 'core'],
-    ['input', 'core'],
-    ['model', 'core'],
-    ['viewChild', 'core'],
-    ['viewChildren', 'core'],
-    ['contentChild', 'core'],
-    ['contentChildren', 'core'],
-    ['effect', 'core'],
-    ['resource', 'core'],
-    ['httpResource', 'common'],
-]);
 /**
  *
  * Determines if a node is an expression that references an @angular/core imported symbol.
@@ -5311,7 +5298,7 @@ const signalFunctions = new Map([
  * const mySignal = signal(123); // expressionIsUsingAngularImportedSymbol === true
  * ```
  */
-function expressionIsUsingAngularImportedSymbol(program, expression) {
+function expressionIsUsingAngularCoreImportedSymbol(program, expression) {
     const symbol = program.getTypeChecker().getSymbolAtLocation(expression);
     if (symbol === undefined) {
         return false;
@@ -5339,11 +5326,21 @@ function expressionIsUsingAngularImportedSymbol(program, expression) {
         return false;
     }
     const specifier = importDeclaration.moduleSpecifier.text;
-    const packageName = signalFunctions.get(expression.getText());
     return (specifier !== undefined &&
-        packageName !== undefined &&
-        (specifier === `@angular/${packageName}` || specifier.startsWith(`@angular/${packageName}/`)));
+        (specifier === '@angular/core' || specifier.startsWith('@angular/core/')));
 }
+const signalFunctions = new Set([
+    'signal',
+    'computed',
+    'linkedSignal',
+    'input',
+    'model',
+    'viewChild',
+    'viewChildren',
+    'contentChild',
+    'contentChildren',
+    'effect',
+]);
 function isSignalFunction(expression) {
     const text = expression.text;
     return signalFunctions.has(text);
@@ -5365,11 +5362,11 @@ function transformVariableDeclaration(program, node) {
         return node;
     const expression = node.initializer.expression;
     if (ts.isPropertyAccessExpression(expression)) {
-        if (!expressionIsUsingAngularImportedSymbol(program, expression.expression)) {
+        if (!expressionIsUsingAngularCoreImportedSymbol(program, expression.expression)) {
             return node;
         }
     }
-    else if (!expressionIsUsingAngularImportedSymbol(program, expression)) {
+    else if (!expressionIsUsingAngularCoreImportedSymbol(program, expression)) {
         return node;
     }
     try {
@@ -5384,11 +5381,11 @@ function transformVariableDeclaration(program, node) {
 function transformPropertyAssignment(program, node) {
     const expression = node.expression.right.expression;
     if (ts.isPropertyAccessExpression(expression)) {
-        if (!expressionIsUsingAngularImportedSymbol(program, expression.expression)) {
+        if (!expressionIsUsingAngularCoreImportedSymbol(program, expression.expression)) {
             return node;
         }
     }
-    else if (!expressionIsUsingAngularImportedSymbol(program, expression)) {
+    else if (!expressionIsUsingAngularCoreImportedSymbol(program, expression)) {
         return node;
     }
     return ts.factory.updateExpressionStatement(node, ts.factory.createBinaryExpression(node.expression.left, node.expression.operatorToken, insertDebugNameIntoCallExpression(node.expression.right, node.expression.left.name.text)));
@@ -5398,11 +5395,11 @@ function transformPropertyDeclaration(program, node) {
         return node;
     const expression = node.initializer.expression;
     if (ts.isPropertyAccessExpression(expression)) {
-        if (!expressionIsUsingAngularImportedSymbol(program, expression.expression)) {
+        if (!expressionIsUsingAngularCoreImportedSymbol(program, expression.expression)) {
             return node;
         }
     }
-    else if (!expressionIsUsingAngularImportedSymbol(program, expression)) {
+    else if (!expressionIsUsingAngularCoreImportedSymbol(program, expression)) {
         return node;
     }
     try {
@@ -5413,19 +5410,6 @@ function transformPropertyDeclaration(program, node) {
     catch {
         return node;
     }
-}
-/**
- * The function determines whether the target signal has an object-only definition, that includes
- * both the computation logic and the options (unlike other signal-based primitives), or not.
- * Ex: `linkedSignal` with computation, `resource`
- */
-function isSignalWithObjectOnlyDefinition(callExpression) {
-    const callExpressionText = callExpression.expression.getText();
-    const nodeArgs = Array.from(callExpression.arguments);
-    const isLinkedSignal = callExpressionText === 'linkedSignal';
-    const isComputationLinkedSignal = isLinkedSignal && nodeArgs[0].kind === ts.SyntaxKind.ObjectLiteralExpression;
-    const isResource = callExpressionText === 'resource';
-    return isComputationLinkedSignal || isResource;
 }
 /**
  *
@@ -12366,7 +12350,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.7+sha-49377d2');
+new project_tsconfig_paths.Version('21.0.0-next.7+sha-fc65107');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -20580,7 +20564,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.7+sha-49377d2` usually means that core is at head so it supports
+    // A version of `21.0.0-next.7+sha-fc65107` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
