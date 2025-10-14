@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.4+sha-5f4f624
+ * @license Angular v20.3.4+sha-07d8c60
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8834,8 +8834,10 @@ declare function getTransferState(injector: Injector): Record<string, unknown>;
  * tools are patched (window.ng).
  * */
 declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
-interface NgGlobalPublishUtils {
+interface ExternalGlobalUtils {
     ɵgetLoadedRoutes(route: any): any;
+    ɵnavigateByUrl(router: any, url: string): any;
+    ɵgetRouterInstance(injector: any): any;
 }
 declare const globalUtilsFunctions: {
     /**
@@ -8864,7 +8866,6 @@ declare const globalUtilsFunctions: {
     isSignal: typeof isSignal;
     enableProfiling: typeof enableProfiling$1;
 };
-type ExternalGlobalUtilsFunctions = keyof NgGlobalPublishUtils;
 /**
  * Default debug tools available under `window.ng`.
  */
@@ -8881,12 +8882,12 @@ type GlobalDevModeUtils = {
  */
 type FrameworkAgnosticGlobalUtils = Omit<typeof globalUtilsFunctions, 'getDirectiveMetadata'> & {
     getDirectiveMetadata(directiveOrComponentInstance: any): DirectiveDebugMetadata | null;
-};
+} & ExternalGlobalUtils;
 /**
  * Publishes the given function to `window.ng` from package other than @angular/core
  * So that it can be used from the browser console when an application is not in production.
  */
-declare function publishExternalGlobalUtil<K extends ExternalGlobalUtilsFunctions>(name: K, fn: NgGlobalPublishUtils[K]): void;
+declare function publishExternalGlobalUtil<K extends keyof ExternalGlobalUtils>(name: K, fn: ExternalGlobalUtils[K]): void;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
