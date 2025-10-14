@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.7+sha-e941e6b
+ * @license Angular v21.0.0-next.7+sha-d03970f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-e941e6b'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.7+sha-d03970f'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12366,7 +12366,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.7+sha-e941e6b');
+new project_tsconfig_paths.Version('21.0.0-next.7+sha-d03970f');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16404,16 +16404,6 @@ function isSignalSymbol(symbol) {
  */
 class TemplateCheckWithVisitor {
     /**
-     * When extended diagnostics were first introduced, the visitor wasn't implemented correctly
-     * which meant that it wasn't visiting the `templateAttrs` of structural directives (e.g.
-     * the expression of `*ngIf`). Fixing the issue causes a lot of internal breakages and will likely
-     * need to be done in a major version to avoid external breakages. This flag is used to opt out
-     * pre-existing diagnostics from the correct behavior until the breakages have been fixed while
-     * ensuring that newly-written diagnostics are correct from the beginning.
-     * TODO(crisbeto): remove this flag and fix the internal brekages.
-     */
-    canVisitStructuralAttributes = true;
-    /**
      * Base implementation for run function, visits all nodes in template and calls
      * `visitNode()` for each one.
      */
@@ -16451,11 +16441,8 @@ class TemplateVisitor extends project_tsconfig_paths.CombinedRecursiveAstVisitor
             this.visitAllTemplateNodes(template.outputs);
         }
         this.visitAllTemplateNodes(template.directives);
-        // TODO(crisbeto): remove this condition when deleting `canVisitStructuralAttributes`.
-        if (this.check.canVisitStructuralAttributes || isInlineTemplate) {
-            // `templateAttrs` aren't transferred over to the inner element so we always have to visit them.
-            this.visitAllTemplateNodes(template.templateAttrs);
-        }
+        // `templateAttrs` aren't transferred over to the inner element so we always have to visit them.
+        this.visitAllTemplateNodes(template.templateAttrs);
         this.visitAllTemplateNodes(template.variables);
         this.visitAllTemplateNodes(template.references);
         this.visitAllTemplateNodes(template.children);
@@ -16770,7 +16757,6 @@ const factory$b = {
  * otherwise it would produce inaccurate results.
  */
 class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
-    canVisitStructuralAttributes = false;
     code = project_tsconfig_paths.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE;
     visitNode(ctx, component, node) {
         if (!(node instanceof project_tsconfig_paths.Binary) || node.operation !== '??')
@@ -16823,7 +16809,6 @@ const factory$a = {
  */
 class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
     noUncheckedIndexedAccess;
-    canVisitStructuralAttributes = false;
     code = project_tsconfig_paths.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE;
     constructor(noUncheckedIndexedAccess) {
         super();
@@ -20557,7 +20542,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.7+sha-e941e6b` usually means that core is at head so it supports
+    // A version of `21.0.0-next.7+sha-d03970f` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
