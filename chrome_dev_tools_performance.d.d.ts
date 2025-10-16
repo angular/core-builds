@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.5+sha-957fc05
+ * @license Angular v20.3.5+sha-911d682
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -243,7 +243,7 @@ interface ValueSansProvider {
 }
 /**
  * Configures the `Injector` to return a value for a token.
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -288,7 +288,7 @@ interface StaticClassSansProvider {
 }
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -318,7 +318,7 @@ interface StaticClassProvider extends StaticClassSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -338,7 +338,7 @@ interface ConstructorSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -365,7 +365,7 @@ interface ConstructorProvider extends ConstructorSansProvider {
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
  * @see {@link ExistingProvider}
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @publicApi
  */
@@ -378,7 +378,7 @@ interface ExistingSansProvider {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -405,7 +405,7 @@ interface ExistingProvider extends ExistingSansProvider {
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
  * @see {@link FactoryProvider}
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @publicApi
  */
@@ -423,7 +423,7 @@ interface FactorySansProvider {
 }
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -480,7 +480,7 @@ interface TypeProvider extends Type<any> {
  * Configures the `Injector` to return a value by invoking a `useClass` function.
  * Base for `ClassProvider` decorator.
  *
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @publicApi
  */
@@ -492,7 +492,7 @@ interface ClassSansProvider {
 }
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @usageNotes
  *
@@ -521,7 +521,7 @@ interface ClassProvider extends ClassSansProvider {
 }
 /**
  * Describes how the `Injector` should be configured.
- * @see [Dependency Injection Guide](guide/di/dependency-injection.
+ * @see [Dependency Injection Guide](guide/di/dependency-injection)
  *
  * @see {@link StaticProvider}
  *
