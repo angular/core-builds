@@ -1,12 +1,12 @@
 /**
- * @license Angular v21.0.0-next.8+sha-4833fa7
+ * @license Angular v21.0.0-next.8+sha-b7c47d8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, consumerMarkDirty, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './_signal-chunk.mjs';
-export { SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from './_signal-chunk.mjs';
-export { BASE_EFFECT_NODE, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, runEffect, untracked } from './_effect-chunk.mjs';
+import { SIGNAL, consumerMarkDirty, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './_effect-chunk.mjs';
+export { BASE_EFFECT_NODE, SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.mjs';
+export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from './_untracked-chunk.mjs';
 export { setAlternateWeakRefImpl } from './_weak_ref-chunk.mjs';
 
 /**
