@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2e46596
+ * @license Angular v21.0.0-next.8+sha-aab7367
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, ANIMATIONS, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, ChangeDetectionScheduler, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, NgZone, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_root_effect_scheduler-chunk.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_root_effect_scheduler-chunk.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_signal-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -7380,13 +7380,267 @@ function determineLongestAnimationFromElementAnimations(el, animationsMap, anima
 }
 const allLeavingAnimations = new Set();
 
+/** Actions that are supported by the tracing framework. */
+var TracingAction;
+(function (TracingAction) {
+    TracingAction[TracingAction["CHANGE_DETECTION"] = 0] = "CHANGE_DETECTION";
+    TracingAction[TracingAction["AFTER_NEXT_RENDER"] = 1] = "AFTER_NEXT_RENDER";
+})(TracingAction || (TracingAction = {}));
 /**
- * A [DI token](api/core/InjectionToken) that enables or disables all enter and leave animations.
+ * Injection token for a `TracingService`, optionally provided.
  */
-const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
-    providedIn: 'root',
-    factory: () => false,
-});
+const TracingService = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TracingService' : '');
+
+const markedFeatures = new Set();
+// tslint:disable:ban
+/**
+ * A guarded `performance.mark` for feature marking.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
+    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
+}
+
+class AfterRenderManager {
+    impl = null;
+    execute() {
+        this.impl?.execute();
+    }
+    /** @nocollapse */
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
+        token: AfterRenderManager,
+        providedIn: 'root',
+        factory: () => new AfterRenderManager(),
+    });
+}
+const AFTER_RENDER_PHASES = /* @__PURE__ **/ (() => [
+    0 /* AfterRenderPhase.EarlyRead */,
+    1 /* AfterRenderPhase.Write */,
+    2 /* AfterRenderPhase.MixedReadWrite */,
+    3 /* AfterRenderPhase.Read */,
+])();
+class AfterRenderImpl {
+    ngZone = inject(NgZone);
+    scheduler = inject(ChangeDetectionScheduler);
+    errorHandler = inject(ErrorHandler, { optional: true });
+    /** Current set of active sequences. */
+    sequences = new Set();
+    /** Tracks registrations made during the current set of executions. */
+    deferredRegistrations = new Set();
+    /** Whether the `AfterRenderManager` is currently executing hooks. */
+    executing = false;
+    constructor() {
+        // Inject the tracing service to make sure it's initialized.
+        inject(TracingService, { optional: true });
+    }
+    /**
+     * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
+     * might be scheduled.
+     */
+    execute() {
+        const hasSequencesToExecute = this.sequences.size > 0;
+        if (hasSequencesToExecute) {
+            profiler(16 /* ProfilerEvent.AfterRenderHooksStart */);
+        }
+        this.executing = true;
+        for (const phase of AFTER_RENDER_PHASES) {
+            for (const sequence of this.sequences) {
+                if (sequence.erroredOrDestroyed || !sequence.hooks[phase]) {
+                    continue;
+                }
+                try {
+                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => {
+                        const hookFn = sequence.hooks[phase];
+                        const value = hookFn(sequence.pipelinedValue);
+                        return value;
+                    }, sequence.snapshot));
+                }
+                catch (err) {
+                    sequence.erroredOrDestroyed = true;
+                    this.errorHandler?.handleError(err);
+                }
+            }
+        }
+        this.executing = false;
+        // Cleanup step to reset sequence state and also collect one-shot sequences for removal.
+        for (const sequence of this.sequences) {
+            sequence.afterRun();
+            if (sequence.once) {
+                this.sequences.delete(sequence);
+                // Destroy the sequence so its on destroy callbacks can be cleaned up
+                // immediately, instead of waiting until the injector is destroyed.
+                sequence.destroy();
+            }
+        }
+        for (const sequence of this.deferredRegistrations) {
+            this.sequences.add(sequence);
+        }
+        if (this.deferredRegistrations.size > 0) {
+            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
+        }
+        this.deferredRegistrations.clear();
+        if (hasSequencesToExecute) {
+            profiler(17 /* ProfilerEvent.AfterRenderHooksEnd */);
+        }
+    }
+    register(sequence) {
+        const { view } = sequence;
+        if (view !== undefined) {
+            // Delay adding it to the manager, add it to the view instead.
+            (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
+            // Mark the view for traversal to ensure we eventually schedule the afterNextRender.
+            markAncestorsForTraversal(view);
+            view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+        }
+        else if (!this.executing) {
+            this.addSequence(sequence);
+        }
+        else {
+            this.deferredRegistrations.add(sequence);
+        }
+    }
+    addSequence(sequence) {
+        this.sequences.add(sequence);
+        // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
+        // new render hook that needs to run.
+        this.scheduler.notify(7 /* NotificationSource.RenderHook */);
+    }
+    unregister(sequence) {
+        if (this.executing && this.sequences.has(sequence)) {
+            // We can't remove an `AfterRenderSequence` in the middle of iteration.
+            // Instead, mark it as destroyed so it doesn't run any more, and mark it as one-shot so it'll
+            // be removed at the end of the current execution.
+            sequence.erroredOrDestroyed = true;
+            sequence.pipelinedValue = undefined;
+            sequence.once = true;
+        }
+        else {
+            // It's safe to directly remove this sequence.
+            this.sequences.delete(sequence);
+            this.deferredRegistrations.delete(sequence);
+        }
+    }
+    maybeTrace(fn, snapshot) {
+        // Only trace the execution if the snapshot is defined.
+        return snapshot ? snapshot.run(TracingAction.AFTER_NEXT_RENDER, fn) : fn();
+    }
+    /** @nocollapse */
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
+        token: AfterRenderImpl,
+        providedIn: 'root',
+        factory: () => new AfterRenderImpl(),
+    });
+}
+class AfterRenderSequence {
+    impl;
+    hooks;
+    view;
+    once;
+    snapshot;
+    /**
+     * Whether this sequence errored or was destroyed during this execution, and hooks should no
+     * longer run for it.
+     */
+    erroredOrDestroyed = false;
+    /**
+     * The value returned by the last hook execution (if any), ready to be pipelined into the next
+     * one.
+     */
+    pipelinedValue = undefined;
+    unregisterOnDestroy;
+    constructor(impl, hooks, view, once, destroyRef, snapshot = null) {
+        this.impl = impl;
+        this.hooks = hooks;
+        this.view = view;
+        this.once = once;
+        this.snapshot = snapshot;
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    afterRun() {
+        this.erroredOrDestroyed = false;
+        this.pipelinedValue = undefined;
+        // Clear the tracing snapshot after the initial run. This snapshot only
+        // associates the initial run of the hook with the context that created it.
+        // Follow-up runs are independent of that initial context and have different
+        // triggers.
+        this.snapshot?.dispose();
+        this.snapshot = null;
+    }
+    destroy() {
+        this.impl.unregister(this);
+        this.unregisterOnDestroy?.();
+        const scheduled = this.view?.[AFTER_RENDER_SEQUENCES_TO_ADD];
+        if (scheduled) {
+            this.view[AFTER_RENDER_SEQUENCES_TO_ADD] = scheduled.filter((s) => s !== this);
+        }
+    }
+}
+
+function afterEveryRender(callbackOrSpec, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(afterEveryRender, 'Call `afterEveryRender` outside of a reactive context. For example, schedule the render ' +
+            'callback inside the component constructor`.');
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(afterEveryRender);
+    }
+    const injector = options?.injector ?? inject(Injector);
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performanceMarkFeature('NgAfterRender');
+    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ false);
+}
+function afterNextRender(callbackOrSpec, options) {
+    if (ngDevMode && !options?.injector) {
+        assertInInjectionContext(afterNextRender);
+    }
+    const injector = options?.injector ?? inject(Injector);
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performanceMarkFeature('NgAfterNextRender');
+    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ true);
+}
+function getHooks(callbackOrSpec) {
+    if (callbackOrSpec instanceof Function) {
+        return [undefined, undefined, /* MixedReadWrite */ callbackOrSpec, undefined];
+    }
+    else {
+        return [
+            callbackOrSpec.earlyRead,
+            callbackOrSpec.write,
+            callbackOrSpec.mixedReadWrite,
+            callbackOrSpec.read,
+        ];
+    }
+}
+/**
+ * Shared implementation for `afterEveryRender` and `afterNextRender`.
+ */
+function afterEveryRenderImpl(callbackOrSpec, injector, options, once) {
+    const manager = injector.get(AfterRenderManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterEveryRender` and `afterNextRender` aren't used.
+    manager.impl ??= injector.get(AfterRenderImpl);
+    const tracing = injector.get(TracingService, null, { optional: true });
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const viewContext = injector.get(ViewContext, null, { optional: true });
+    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec), viewContext?.view, once, destroyRef, tracing?.snapshot(null));
+    manager.impl.register(sequence);
+    return sequence;
+}
+/** `AfterRenderRef` that does nothing. */
+const NOOP_AFTER_RENDER_REF = {
+    destroy() { },
+};
+
 /**
  * A [DI token](api/core/InjectionToken) for the queue of all animations.
  */
@@ -7396,31 +7650,51 @@ const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && n
         return {
             queue: new Set(),
             isScheduled: false,
+            scheduler: null,
         };
     },
 });
-/**
- * A [DI token](api/core/InjectionToken) that configures the maximum animation timeout
- * before element removal. The default value mirrors from Chrome's cross document
- * navigation view transition timeout. It's intended to prevent people from accidentally
- * forgetting to call the removal function in their callback. Also serves as a delay
- * for when stylesheets are pruned.
- *
- * @publicApi 20.2
- */
-const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
-    providedIn: 'root',
-    factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT,
-});
-const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
+function addToAnimationQueue(injector, animationFns) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    if (Array.isArray(animationFns)) {
+        for (const animateFn of animationFns) {
+            animationQueue.queue.add(animateFn);
+        }
+    }
+    else {
+        animationQueue.queue.add(animationFns);
+    }
+    animationQueue.scheduler && animationQueue.scheduler(injector);
+}
+function scheduleAnimationQueue(injector) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    // We only want to schedule the animation queue if it hasn't already been scheduled.
+    if (!animationQueue.isScheduled) {
+        afterNextRender(() => {
+            animationQueue.isScheduled = false;
+            for (let animateFn of animationQueue.queue) {
+                animateFn();
+            }
+            animationQueue.queue.clear();
+        }, { injector });
+        animationQueue.isScheduled = true;
+    }
+}
+function initializeAnimationQueueScheduler(injector) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    animationQueue.scheduler = scheduleAnimationQueue;
+    animationQueue.scheduler(injector);
+}
+function queueEnterAnimations(injector, enterAnimations) {
+    for (const [_, nodeAnimations] of enterAnimations) {
+        addToAnimationQueue(injector, nodeAnimations.animateFns);
+    }
+}
 
 function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
     const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
     if (parent !== null && enterAnimations && enterAnimations.has(tNode.index)) {
-        const animationQueue = injector.get(ANIMATION_QUEUE);
-        for (const animateFn of enterAnimations.get(tNode.index).animateFns) {
-            animationQueue.queue.add(animateFn);
-        }
+        queueEnterAnimations(injector, enterAnimations);
     }
 }
 /**
@@ -7476,17 +7750,6 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
         if (lContainer != null) {
             applyContainer(renderer, action, injector, lContainer, tNode, parent, beforeNode);
         }
-    }
-}
-function addToAnimationQueue(injector, animationFns) {
-    const animationQueue = injector.get(ANIMATION_QUEUE);
-    if (Array.isArray(animationFns)) {
-        for (const animateFn of animationFns) {
-            animationQueue.queue.add(animateFn);
-        }
-    }
-    else {
-        animationQueue.queue.add(animationFns);
     }
 }
 /**
@@ -13816,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-2e46596']
+        ? ['ng-version', '21.0.0-next.8+sha-aab7367']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -15120,23 +15383,6 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
         throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_IFRAME_ATTRS */, errorMessage);
     }
     return attrValue;
-}
-
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
 }
 
 /**
@@ -16480,250 +16726,6 @@ function getCleanupFnKeyByType(type) {
     }
     return key;
 }
-
-/** Actions that are supported by the tracing framework. */
-var TracingAction;
-(function (TracingAction) {
-    TracingAction[TracingAction["CHANGE_DETECTION"] = 0] = "CHANGE_DETECTION";
-    TracingAction[TracingAction["AFTER_NEXT_RENDER"] = 1] = "AFTER_NEXT_RENDER";
-})(TracingAction || (TracingAction = {}));
-/**
- * Injection token for a `TracingService`, optionally provided.
- */
-const TracingService = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TracingService' : '');
-
-class AfterRenderManager {
-    impl = null;
-    execute() {
-        this.impl?.execute();
-    }
-    /** @nocollapse */
-    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
-        token: AfterRenderManager,
-        providedIn: 'root',
-        factory: () => new AfterRenderManager(),
-    });
-}
-const AFTER_RENDER_PHASES = /* @__PURE__ **/ (() => [
-    0 /* AfterRenderPhase.EarlyRead */,
-    1 /* AfterRenderPhase.Write */,
-    2 /* AfterRenderPhase.MixedReadWrite */,
-    3 /* AfterRenderPhase.Read */,
-])();
-class AfterRenderImpl {
-    ngZone = inject(NgZone);
-    scheduler = inject(ChangeDetectionScheduler);
-    errorHandler = inject(ErrorHandler, { optional: true });
-    /** Current set of active sequences. */
-    sequences = new Set();
-    /** Tracks registrations made during the current set of executions. */
-    deferredRegistrations = new Set();
-    /** Whether the `AfterRenderManager` is currently executing hooks. */
-    executing = false;
-    constructor() {
-        // Inject the tracing service to make sure it's initialized.
-        inject(TracingService, { optional: true });
-    }
-    /**
-     * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
-     * might be scheduled.
-     */
-    execute() {
-        const hasSequencesToExecute = this.sequences.size > 0;
-        if (hasSequencesToExecute) {
-            profiler(16 /* ProfilerEvent.AfterRenderHooksStart */);
-        }
-        this.executing = true;
-        for (const phase of AFTER_RENDER_PHASES) {
-            for (const sequence of this.sequences) {
-                if (sequence.erroredOrDestroyed || !sequence.hooks[phase]) {
-                    continue;
-                }
-                try {
-                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => {
-                        const hookFn = sequence.hooks[phase];
-                        const value = hookFn(sequence.pipelinedValue);
-                        return value;
-                    }, sequence.snapshot));
-                }
-                catch (err) {
-                    sequence.erroredOrDestroyed = true;
-                    this.errorHandler?.handleError(err);
-                }
-            }
-        }
-        this.executing = false;
-        // Cleanup step to reset sequence state and also collect one-shot sequences for removal.
-        for (const sequence of this.sequences) {
-            sequence.afterRun();
-            if (sequence.once) {
-                this.sequences.delete(sequence);
-                // Destroy the sequence so its on destroy callbacks can be cleaned up
-                // immediately, instead of waiting until the injector is destroyed.
-                sequence.destroy();
-            }
-        }
-        for (const sequence of this.deferredRegistrations) {
-            this.sequences.add(sequence);
-        }
-        if (this.deferredRegistrations.size > 0) {
-            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
-        }
-        this.deferredRegistrations.clear();
-        if (hasSequencesToExecute) {
-            profiler(17 /* ProfilerEvent.AfterRenderHooksEnd */);
-        }
-    }
-    register(sequence) {
-        const { view } = sequence;
-        if (view !== undefined) {
-            // Delay adding it to the manager, add it to the view instead.
-            (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
-            // Mark the view for traversal to ensure we eventually schedule the afterNextRender.
-            markAncestorsForTraversal(view);
-            view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
-        }
-        else if (!this.executing) {
-            this.addSequence(sequence);
-        }
-        else {
-            this.deferredRegistrations.add(sequence);
-        }
-    }
-    addSequence(sequence) {
-        this.sequences.add(sequence);
-        // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
-        // new render hook that needs to run.
-        this.scheduler.notify(7 /* NotificationSource.RenderHook */);
-    }
-    unregister(sequence) {
-        if (this.executing && this.sequences.has(sequence)) {
-            // We can't remove an `AfterRenderSequence` in the middle of iteration.
-            // Instead, mark it as destroyed so it doesn't run any more, and mark it as one-shot so it'll
-            // be removed at the end of the current execution.
-            sequence.erroredOrDestroyed = true;
-            sequence.pipelinedValue = undefined;
-            sequence.once = true;
-        }
-        else {
-            // It's safe to directly remove this sequence.
-            this.sequences.delete(sequence);
-            this.deferredRegistrations.delete(sequence);
-        }
-    }
-    maybeTrace(fn, snapshot) {
-        // Only trace the execution if the snapshot is defined.
-        return snapshot ? snapshot.run(TracingAction.AFTER_NEXT_RENDER, fn) : fn();
-    }
-    /** @nocollapse */
-    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ __defineInjectable({
-        token: AfterRenderImpl,
-        providedIn: 'root',
-        factory: () => new AfterRenderImpl(),
-    });
-}
-class AfterRenderSequence {
-    impl;
-    hooks;
-    view;
-    once;
-    snapshot;
-    /**
-     * Whether this sequence errored or was destroyed during this execution, and hooks should no
-     * longer run for it.
-     */
-    erroredOrDestroyed = false;
-    /**
-     * The value returned by the last hook execution (if any), ready to be pipelined into the next
-     * one.
-     */
-    pipelinedValue = undefined;
-    unregisterOnDestroy;
-    constructor(impl, hooks, view, once, destroyRef, snapshot = null) {
-        this.impl = impl;
-        this.hooks = hooks;
-        this.view = view;
-        this.once = once;
-        this.snapshot = snapshot;
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
-    }
-    afterRun() {
-        this.erroredOrDestroyed = false;
-        this.pipelinedValue = undefined;
-        // Clear the tracing snapshot after the initial run. This snapshot only
-        // associates the initial run of the hook with the context that created it.
-        // Follow-up runs are independent of that initial context and have different
-        // triggers.
-        this.snapshot?.dispose();
-        this.snapshot = null;
-    }
-    destroy() {
-        this.impl.unregister(this);
-        this.unregisterOnDestroy?.();
-        const scheduled = this.view?.[AFTER_RENDER_SEQUENCES_TO_ADD];
-        if (scheduled) {
-            this.view[AFTER_RENDER_SEQUENCES_TO_ADD] = scheduled.filter((s) => s !== this);
-        }
-    }
-}
-
-function afterEveryRender(callbackOrSpec, options) {
-    ngDevMode &&
-        assertNotInReactiveContext(afterEveryRender, 'Call `afterEveryRender` outside of a reactive context. For example, schedule the render ' +
-            'callback inside the component constructor`.');
-    if (ngDevMode && !options?.injector) {
-        assertInInjectionContext(afterEveryRender);
-    }
-    const injector = options?.injector ?? inject(Injector);
-    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performanceMarkFeature('NgAfterRender');
-    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ false);
-}
-function afterNextRender(callbackOrSpec, options) {
-    if (ngDevMode && !options?.injector) {
-        assertInInjectionContext(afterNextRender);
-    }
-    const injector = options?.injector ?? inject(Injector);
-    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performanceMarkFeature('NgAfterNextRender');
-    return afterEveryRenderImpl(callbackOrSpec, injector, options, /* once */ true);
-}
-function getHooks(callbackOrSpec) {
-    if (callbackOrSpec instanceof Function) {
-        return [undefined, undefined, /* MixedReadWrite */ callbackOrSpec, undefined];
-    }
-    else {
-        return [
-            callbackOrSpec.earlyRead,
-            callbackOrSpec.write,
-            callbackOrSpec.mixedReadWrite,
-            callbackOrSpec.read,
-        ];
-    }
-}
-/**
- * Shared implementation for `afterEveryRender` and `afterNextRender`.
- */
-function afterEveryRenderImpl(callbackOrSpec, injector, options, once) {
-    const manager = injector.get(AfterRenderManager);
-    // Lazily initialize the handler implementation, if necessary. This is so that it can be
-    // tree-shaken if `afterEveryRender` and `afterNextRender` aren't used.
-    manager.impl ??= injector.get(AfterRenderImpl);
-    const tracing = injector.get(TracingService, null, { optional: true });
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const viewContext = injector.get(ViewContext, null, { optional: true });
-    const sequence = new AfterRenderSequence(manager.impl, getHooks(callbackOrSpec), viewContext?.view, once, destroyRef, tracing?.snapshot(null));
-    manager.impl.register(sequence);
-    return sequence;
-}
-/** `AfterRenderRef` that does nothing. */
-const NOOP_AFTER_RENDER_REF = {
-    destroy() { },
-};
 
 /**
  * Calculates a data slot index for defer block info (either static or
@@ -21416,6 +21418,28 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     return ɵɵattribute;
 }
 
+/**
+ * A [DI token](api/core/InjectionToken) that enables or disables all enter and leave animations.
+ */
+const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
+    providedIn: 'root',
+    factory: () => false,
+});
+/**
+ * A [DI token](api/core/InjectionToken) that configures the maximum animation timeout
+ * before element removal. The default value mirrors from Chrome's cross document
+ * navigation view transition timeout. It's intended to prevent people from accidentally
+ * forgetting to call the removal function in their callback. Also serves as a delay
+ * for when stylesheets are pruned.
+ *
+ * @publicApi 20.2
+ */
+const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
+    providedIn: 'root',
+    factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT,
+});
+const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
+
 const DEFAULT_ANIMATIONS_DISABLED = false;
 const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) &&
     typeof document !== 'undefined' &&
@@ -21670,7 +21694,10 @@ function ɵɵanimateEnter(value) {
     const tNode = getCurrentTNode();
     cancelLeavingNodes(tNode, lView);
     addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value));
-    queueEnterAnimations(lView);
+    initializeAnimationQueueScheduler(lView[INJECTOR]);
+    // TODO(thePunderWoman): it's unclear why we need to queue animations here, but without this,
+    // animating through host bindings fails
+    queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
     return ɵɵanimateEnter; // For chaining
 }
 function runEnterAnimation(lView, tNode, value) {
@@ -21767,7 +21794,10 @@ function ɵɵanimateEnterListener(value) {
     const tNode = getCurrentTNode();
     cancelLeavingNodes(tNode, lView);
     addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimationFunction(lView, tNode, value));
-    queueEnterAnimations(lView);
+    initializeAnimationQueueScheduler(lView[INJECTOR]);
+    // TODO(thePunderWoman): it's unclear why we need to queue animations here, but without this,
+    // animating through host bindings fails
+    queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
     return ɵɵanimateEnterListener;
 }
 /**
@@ -21801,7 +21831,7 @@ function ɵɵanimateLeave(value) {
     }
     const tNode = getCurrentTNode();
     addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value));
-    enableAnimationQueueScheduler(lView[INJECTOR]);
+    initializeAnimationQueueScheduler(lView[INJECTOR]);
     return ɵɵanimateLeave; // For chaining
 }
 function runLeaveAnimations(lView, tNode, value) {
@@ -21899,7 +21929,7 @@ function ɵɵanimateLeaveListener(value) {
     const tNode = getCurrentTNode();
     allLeavingAnimations.add(lView);
     addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value));
-    enableAnimationQueueScheduler(lView[INJECTOR]);
+    initializeAnimationQueueScheduler(lView[INJECTOR]);
     return ɵɵanimateLeaveListener; // For chaining
 }
 /**
@@ -21939,35 +21969,6 @@ function runLeaveAnimationFunction(lView, tNode, value) {
     }
     // Ensure cleanup if the LView is destroyed before the animation runs.
     return { promise, resolve };
-}
-function queueEnterAnimations(lView) {
-    enableAnimationQueueScheduler(lView[INJECTOR]);
-    const enterAnimations = lView[ANIMATIONS]?.enter;
-    if (enterAnimations) {
-        const animationQueue = lView[INJECTOR].get(ANIMATION_QUEUE);
-        for (const [_, nodeAnimations] of enterAnimations) {
-            for (const animateFn of nodeAnimations.animateFns) {
-                animationQueue.queue.add(animateFn);
-            }
-        }
-    }
-}
-function enableAnimationQueueScheduler(injector) {
-    const animationQueue = injector.get(ANIMATION_QUEUE);
-    // We only need to schedule the animation queue runner once per application.
-    if (!animationQueue.isScheduled) {
-        afterEveryRender(() => {
-            runQueuedAnimations(injector);
-        }, { injector });
-        animationQueue.isScheduled = true;
-    }
-}
-function runQueuedAnimations(injector) {
-    const animationQueue = injector.get(ANIMATION_QUEUE);
-    for (let animateFn of animationQueue.queue) {
-        animateFn();
-    }
-    animationQueue.queue.clear();
 }
 
 /*!

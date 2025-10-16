@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2e46596
+ * @license Angular v21.0.0-next.8+sha-aab7367
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1432,7 +1432,7 @@ interface InjectDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      *
-     * @see [Dependency Injection Guide](guide/di/dependency-injection
+     * @see [Dependency Injection Guide](guide/di/dependency-injection)
      *
      */
     (token: any): any;
@@ -1476,7 +1476,7 @@ interface OptionalDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='Optional'}
      *
-     * @see [Dependency Injection Guide](guide/di/dependency-injection.
+     * @see [Dependency Injection Guide](guide/di/dependency-injection)
      */
     (): any;
     new (): Optional;
@@ -1729,7 +1729,7 @@ interface InjectableDecorator {
      * provided and injected as a dependency.
      *
      * @see [Introduction to Services and DI](guide/di)
-     * @see [Dependency Injection Guide](guide/di/dependency-injection
+     * @see [Dependency Injection Guide](guide/di/dependency-injection)
      *
      * @usageNotes
      *

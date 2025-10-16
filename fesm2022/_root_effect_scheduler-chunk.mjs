@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2e46596
+ * @license Angular v21.0.0-next.8+sha-aab7367
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.0.0-next.8+sha-2e46596');
+const VERSION = /* @__PURE__ */ new Version('21.0.0-next.8+sha-aab7367');
 
 /**
  * Base URL for the error details page.
@@ -4425,18 +4425,6 @@ function isWritableSignal(value) {
 }
 
 /**
- * Injectable that is notified when an `LView` is made aware of changes to application state.
- */
-class ChangeDetectionScheduler {
-}
-/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
-const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => true });
-/** Token used to indicate `provideZonelessChangeDetection` was used. */
-const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
-// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
-const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');
-
-/**
  * Asserts that the current stack frame is not within a reactive context. Useful
  * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs-interop/toSignal toSignal})
  *
@@ -4469,6 +4457,18 @@ class ViewContext {
 function injectViewContext() {
     return new ViewContext(getLView(), getCurrentTNode());
 }
+
+/**
+ * Injectable that is notified when an `LView` is made aware of changes to application state.
+ */
+class ChangeDetectionScheduler {
+}
+/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
+const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => true });
+/** Token used to indicate `provideZonelessChangeDetection` was used. */
+const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
+// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
+const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');
 
 /**
  * Service that keeps track of pending tasks contributing to the stableness of Angular

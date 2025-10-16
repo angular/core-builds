@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2e46596
+ * @license Angular v21.0.0-next.8+sha-aab7367
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6826,7 +6826,7 @@ interface NgModule {
      * The set of injectable objects that are available in the injector
      * of this module.
      *
-     * @see [Dependency Injection guide](guide/di/dependency-injection
+     * @see [Dependency Injection guide](guide/di/dependency-injection)
      * @see [NgModule guide](guide/ngmodules/providers)
      *
      * @usageNotes
