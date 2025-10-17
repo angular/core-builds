@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-7d7b4be
+ * @license Angular v21.0.0-next.8+sha-e974066
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-7d7b4be']
+        ? ['ng-version', '21.0.0-next.8+sha-e974066']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22202,7 +22202,6 @@ function listenToNativeControl(lView, tNode, control) {
     };
     listenToDomEvent(tNode, tView, lView, undefined, renderer, 'input', inputListener, wrapListener(tNode, lView, inputListener));
     const blurListener = () => {
-        // TODO: https://github.com/orgs/angular/projects/60/views/1?pane=issue&itemId=131860538
         control.state().markAsTouched();
     };
     listenToDomEvent(tNode, tView, lView, undefined, renderer, 'blur', blurListener, wrapListener(tNode, lView, blurListener));
