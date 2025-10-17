@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-e974066
+ * @license Angular v21.0.0-next.8+sha-1d40465
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-e974066']
+        ? ['ng-version', '21.0.0-next.8+sha-1d40465']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22167,7 +22167,9 @@ function listenToCustomControl(lView, tNode, control, modelName) {
     const componentIndex = tNode.directiveStart + tNode.componentOffset;
     const outputName = modelName + 'Change';
     listenToOutput(tNode, lView, componentIndex, outputName, outputName, wrapListener(tNode, lView, (newValue) => {
-        control.state().value.set(newValue);
+        const state = control.state();
+        state.value.set(newValue);
+        state.markAsDirty();
     }));
     const tView = getTView();
     const componentDef = tView.data[componentIndex];
@@ -22197,8 +22199,9 @@ function listenToNativeControl(lView, tNode, control) {
     const renderer = lView[RENDERER];
     const inputListener = () => {
         const element = getNativeByTNode(tNode, lView);
-        const value = control.state().value;
-        value.set(getNativeControlValue(element, value));
+        const state = control.state();
+        state.value.set(getNativeControlValue(element, state.value));
+        state.markAsDirty();
     };
     listenToDomEvent(tNode, tView, lView, undefined, renderer, 'input', inputListener, wrapListener(tNode, lView, inputListener));
     const blurListener = () => {
