@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.8+sha-062a696
+ * @license Angular v21.0.0-next.8+sha-9a7529d
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-BsnCX6yC.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-C0W8fCtx.cjs');
 
 /**
  * parses the template string into the Html AST
