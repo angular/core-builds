@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-25d45ba
+ * @license Angular v21.0.0-next.8+sha-7fb7511
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -494,6 +494,15 @@ function getParentCtor(ctor) {
     return parentCtor || Object;
 }
 
+function applyValueToInputField(instance, inputSignalNode, privateName, value) {
+    if (inputSignalNode !== null) {
+        inputSignalNode.applyValueToInputSignal(inputSignalNode, value);
+    }
+    else {
+        instance[privateName] = value;
+    }
+}
+
 /**
  * Represents a basic change from a previous to a new value for a single
  * property on a directive instance. Passed as a value in a
@@ -517,15 +526,6 @@ class SimpleChange {
      */
     isFirstChange() {
         return this.firstChange;
-    }
-}
-
-function applyValueToInputField(instance, inputSignalNode, privateName, value) {
-    if (inputSignalNode !== null) {
-        inputSignalNode.applyValueToInputSignal(inputSignalNode, value);
-    }
-    else {
-        instance[privateName] = value;
     }
 }
 
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-25d45ba']
+        ? ['ng-version', '21.0.0-next.8+sha-7fb7511']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;

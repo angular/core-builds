@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-25d45ba
+ * @license Angular v21.0.0-next.8+sha-7fb7511
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -612,11 +612,11 @@ declare const Attribute: AttributeDecorator;
  *
  * @publicApi
  */
-declare class SimpleChange {
-    previousValue: any;
-    currentValue: any;
+declare class SimpleChange<T = any> {
+    previousValue: T;
+    currentValue: T;
     firstChange: boolean;
-    constructor(previousValue: any, currentValue: any, firstChange: boolean);
+    constructor(previousValue: T, currentValue: T, firstChange: boolean);
     /**
      * Check whether the new value is the first value assigned.
      */
@@ -625,15 +625,20 @@ declare class SimpleChange {
 /**
  * A hashtable of changes represented by {@link SimpleChange} objects stored
  * at the declared property name they belong to on a Directive or Component. This is
- * the type passed to the `ngOnChanges` hook.
+ * the type passed to the `ngOnChanges` hook. Pass the current class or `this` as the
+ * first generic argument for stronger type checking (e.g. `SimpleChanges<YourComponent>`).
  *
  * @see {@link OnChanges}
  *
  * @publicApi
  */
-interface SimpleChanges {
+type SimpleChanges<T = unknown> = T extends object ? {
+    [Key in keyof T]?: SimpleChange<T[Key] extends {
+        [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: infer V;
+    } ? V : T[Key]>;
+} : {
     [propName: string]: SimpleChange;
-}
+};
 
 /**
  * @description
