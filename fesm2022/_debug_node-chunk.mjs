@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-9c7029c
+ * @license Angular v21.0.0-next.8+sha-e464aac
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-9c7029c']
+        ? ['ng-version', '21.0.0-next.8+sha-e464aac']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22030,10 +22030,13 @@ function ɵɵcontrolCreate() {
     else if (tNode.flags & 4096 /* TNodeFlags.isFormCheckboxControl */) {
         listenToCustomControl(lView, tNode, control, 'checked');
     }
+    else if (tNode.flags & 8192 /* TNodeFlags.isInteropControl */) {
+        control.ɵinteropControlCreate();
+    }
     else {
         listenToNativeControl(lView, tNode, control);
     }
-    control.register();
+    control.ɵregister();
 }
 /**
  * Updates a `field` property, and possibly other form control properties, on the current element.
@@ -22062,6 +22065,9 @@ function ɵɵcontrol(value, sanitizer) {
         }
         else if (tNode.flags & 4096 /* TNodeFlags.isFormCheckboxControl */) {
             updateCustomControl(tNode, lView, control, 'checked');
+        }
+        else if (tNode.flags & 8192 /* TNodeFlags.isInteropControl */) {
+            control.ɵinteropControlUpdate();
         }
         else {
             updateNativeControl(tNode, lView, control);
@@ -22103,12 +22109,16 @@ function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
             return control;
         }
     }
+    if (control.ɵhasInteropControl) {
+        tNode.flags |= 8192 /* TNodeFlags.isInteropControl */;
+        return control;
+    }
     if (isNativeControl(tNode)) {
         if (isNumericInput(tNode)) {
-            tNode.flags |= 8192 /* TNodeFlags.isNativeNumericControl */;
+            tNode.flags |= 16384 /* TNodeFlags.isNativeNumericControl */;
         }
         if (isTextControl(tNode)) {
-            tNode.flags |= 16384 /* TNodeFlags.isNativeTextControl */;
+            tNode.flags |= 32768 /* TNodeFlags.isNativeTextControl */;
         }
         return control;
     }
@@ -22271,11 +22281,11 @@ function updateNativeControl(tNode, lView, control) {
     setBooleanAttribute(renderer, input, 'disabled', state.disabled());
     setBooleanAttribute(renderer, input, 'readonly', state.readonly());
     setBooleanAttribute(renderer, input, 'required', state.required());
-    if (tNode.flags & 8192 /* TNodeFlags.isNativeNumericControl */) {
+    if (tNode.flags & 16384 /* TNodeFlags.isNativeNumericControl */) {
         setOptionalAttribute(renderer, input, 'max', state.max());
         setOptionalAttribute(renderer, input, 'min', state.min());
     }
-    if (tNode.flags & 16384 /* TNodeFlags.isNativeTextControl */) {
+    if (tNode.flags & 32768 /* TNodeFlags.isNativeTextControl */) {
         setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
         setOptionalAttribute(renderer, input, 'minLength', state.minLength());
     }
