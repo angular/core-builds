@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.8+sha-9b7a79a
+ * @license Angular v21.0.0-next.8+sha-bc9c814
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var index = require('./index-82jLyaSK.cjs');
+var index = require('./index-C6WelfII.cjs');
 var fs = require('fs');
 var p = require('path');
 var ts = require('typescript');

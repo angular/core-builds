@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.8+sha-9b7a79a
+ * @license Angular v21.0.0-next.8+sha-bc9c814
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -888,7 +888,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -906,7 +906,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1001,7 +1001,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1414,7 +1414,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1449,7 +1449,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1500,7 +1500,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1533,7 +1533,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1584,7 +1584,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new project_tsconfig_paths.DefinitionMap();
     definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-9b7a79a'));
+    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.8+sha-bc9c814'));
     definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -12350,7 +12350,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.8+sha-9b7a79a');
+new project_tsconfig_paths.Version('21.0.0-next.8+sha-bc9c814');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -13540,21 +13540,6 @@ var MemberTags;
     MemberTags["Inherited"] = "override";
 })(MemberTags || (MemberTags = {}));
 
-/** Gets whether a symbol's name indicates it is an Angular-private API. */
-function isAngularPrivateName(name) {
-    const firstChar = name[0] ?? '';
-    return firstChar === 'ɵ' || firstChar === '_';
-}
-
-/** Gets a list of all the generic type parameters for a declaration. */
-function extractGenerics(declaration) {
-    return (declaration.typeParameters?.map((typeParam) => ({
-        name: typeParam.name.getText(),
-        constraint: typeParam.constraint?.getText(),
-        default: typeParam.default?.getText(),
-    })) ?? []);
-}
-
 /**
  * RegExp to match the `@` character follow by any Angular decorator, used to escape Angular
  * decorators in JsDoc blocks so that they're not parsed as JsDoc tags.
@@ -13619,6 +13604,21 @@ function escapeAngularDecorators(comment) {
 /** Unescapes the `@` character for Angular decorators. */
 function unescapeAngularDecorators(comment) {
     return comment.replace(/_NG_AT_/g, '@');
+}
+
+/** Gets whether a symbol's name indicates it is an Angular-private API. */
+function isAngularPrivateName(name) {
+    const firstChar = name[0] ?? '';
+    return firstChar === 'ɵ' || firstChar === '_';
+}
+
+/** Gets a list of all the generic type parameters for a declaration. */
+function extractGenerics(declaration) {
+    return (declaration.typeParameters?.map((typeParam) => ({
+        name: typeParam.name.getText(),
+        constraint: typeParam.constraint?.getText(),
+        default: typeParam.default?.getText(),
+    })) ?? []);
 }
 
 /** Gets the string representation of a node's resolved type. */
@@ -13765,7 +13765,7 @@ function hasLeadingInternalComment(member) {
 }
 
 /** Extractor to pull info for API reference documentation for a TypeScript class or interface. */
-class ClassExtractor {
+class PropertiesExtractor {
     declaration;
     typeChecker;
     constructor(declaration, typeChecker) {
@@ -13775,18 +13775,8 @@ class ClassExtractor {
     /** Extract docs info specific to classes. */
     extract() {
         return {
-            name: this.declaration.name.text,
-            isAbstract: this.isAbstract(),
-            entryType: ts.isInterfaceDeclaration(this.declaration)
-                ? EntryType.Interface
-                : EntryType.UndecoratedClass,
             members: this.extractSignatures().concat(this.extractAllClassMembers()),
             generics: extractGenerics(this.declaration),
-            description: extractJsDocDescription(this.declaration),
-            jsdocTags: extractJsDocTags(this.declaration),
-            rawComment: extractRawJsDoc(this.declaration),
-            extends: this.extractInheritance(this.declaration),
-            implements: this.extractInterfaceConformance(this.declaration),
         };
     }
     /** Extracts doc info for a class's members. */
@@ -13872,22 +13862,6 @@ class ClassExtractor {
             memberType: MemberType.Method,
             memberTags: this.getMemberTags(constructorDeclaration),
         };
-    }
-    extractInheritance(declaration) {
-        if (!declaration.heritageClauses) {
-            return undefined;
-        }
-        for (const clause of declaration.heritageClauses) {
-            if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
-                // We are assuming a single class can only extend one class.
-                const types = clause.types;
-                if (types.length > 0) {
-                    const baseClass = types[0];
-                    return baseClass.getText();
-                }
-            }
-        }
-        return undefined;
     }
     extractInterfaceConformance(declaration) {
         const implementClause = declaration.heritageClauses?.find((clause) => clause.token === ts.SyntaxKind.ImplementsKeyword);
@@ -14042,11 +14016,6 @@ class ClassExtractor {
     isDocumentableSignature(signature) {
         return (ts.isConstructSignatureDeclaration(signature) || ts.isCallSignatureDeclaration(signature));
     }
-    /** Gets whether the declaration for this extractor is abstract. */
-    isAbstract() {
-        const modifiers = this.declaration.modifiers ?? [];
-        return modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword);
-    }
     /**
      * Check wether a member has a private computed property name like [ɵWRITABLE_SIGNAL]
      *
@@ -14054,6 +14023,48 @@ class ClassExtractor {
      */
     hasPrivateComputedProperty(property) {
         return (ts.isComputedPropertyName(property.name) && property.name.expression.getText().startsWith('ɵ'));
+    }
+}
+
+/** Extractor to pull info for API reference documentation for a TypeScript class or interface. */
+class ClassExtractor extends PropertiesExtractor {
+    constructor(declaration, typeChecker) {
+        super(declaration, typeChecker);
+    }
+    /** Extract docs info specific to classes. */
+    extract() {
+        return {
+            name: this.declaration.name.text,
+            isAbstract: this.isAbstract(),
+            entryType: EntryType.UndecoratedClass,
+            ...super.extract(),
+            description: extractJsDocDescription(this.declaration),
+            jsdocTags: extractJsDocTags(this.declaration),
+            rawComment: extractRawJsDoc(this.declaration),
+            extends: this.extractInheritance(this.declaration),
+            implements: this.extractInterfaceConformance(this.declaration),
+        };
+    }
+    /** Gets whether the declaration for this extractor is abstract. */
+    isAbstract() {
+        const modifiers = this.declaration.modifiers ?? [];
+        return modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword);
+    }
+    extractInheritance(declaration) {
+        if (!declaration.heritageClauses) {
+            return undefined;
+        }
+        for (const clause of declaration.heritageClauses) {
+            if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
+                // We are assuming a single class can only extend one class.
+                const types = clause.types;
+                if (types.length > 0) {
+                    const baseClass = types[0];
+                    return baseClass.getText();
+                }
+            }
+        }
+        return undefined;
     }
 }
 /** Extractor to pull info for API reference documentation for an Angular directive. */
@@ -14159,11 +14170,6 @@ function extractClass(classDeclaration, metadataReader, typeChecker) {
     }
     return extractor.extract();
 }
-/** Extracts documentation info for an interface. */
-function extractInterface(declaration, typeChecker) {
-    const extractor = new ClassExtractor(declaration, typeChecker);
-    return extractor.extract();
-}
 function extractPipeSyntax(metadata, classDeclaration) {
     const transformParams = classDeclaration.members.find((member) => {
         return (ts.isMethodDeclaration(member) &&
@@ -14253,6 +14259,46 @@ function extractLiteralPropertiesAsEnumMembers(declaration) {
             memberTags: [],
         };
     });
+}
+
+/** Extractor to pull info for API reference documentation for a TypeScript class or interface. */
+class InterfaceExtractor extends PropertiesExtractor {
+    constructor(declaration, typeChecker) {
+        super(declaration, typeChecker);
+    }
+    /** Extract docs info specific to classes. */
+    extract() {
+        return {
+            name: this.declaration.name.text,
+            entryType: EntryType.Interface,
+            ...super.extract(),
+            description: extractJsDocDescription(this.declaration),
+            jsdocTags: extractJsDocTags(this.declaration),
+            rawComment: extractRawJsDoc(this.declaration),
+            extends: this.extractInheritance(this.declaration),
+            implements: this.extractInterfaceConformance(this.declaration),
+        };
+    }
+    extractInheritance(declaration) {
+        if (!declaration.heritageClauses) {
+            return [];
+        }
+        for (const clause of declaration.heritageClauses) {
+            if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
+                // We are assuming a single class can only extend one class.
+                const types = clause.types;
+                if (types.length > 0) {
+                    return types.map((t) => t.getText());
+                }
+            }
+        }
+        return [];
+    }
+}
+/** Extracts documentation info for an interface. */
+function extractInterface(declaration, typeChecker) {
+    const extractor = new InterfaceExtractor(declaration, typeChecker);
+    return extractor.extract();
 }
 
 /** Extracts an API documentation entry for an Angular decorator. */
@@ -20564,7 +20610,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.8+sha-9b7a79a` usually means that core is at head so it supports
+    // A version of `21.0.0-next.8+sha-bc9c814` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
