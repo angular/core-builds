@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-f6a73f1
+ * @license Angular v21.0.0-next.8+sha-9b7a79a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -39,6 +39,7 @@ interface ReactiveLink {
     nextConsumer: ReactiveLink | undefined;
     nextProducer: ReactiveLink | undefined;
 }
+type ReactiveNodeKind = 'signal' | 'computed' | 'effect' | 'template' | 'linkedSignal' | 'afterRenderEffectPhase' | 'unknown';
 /**
  * A producer and/or consumer which participates in the reactive graph.
  *
@@ -125,7 +126,7 @@ interface ReactiveNode {
      *
      * Used in Angular DevTools to identify the kind of signal.
      */
-    kind: string;
+    kind: ReactiveNodeKind;
 }
 /**
  * Called by implementations when a producer's signal is read.
@@ -211,4 +212,4 @@ declare global {
 declare function installDevToolsSignalFormatter(): void;
 
 export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
-export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn };
+export type { Reactive, ReactiveHookFn, ReactiveNode, ReactiveNodeKind, ValueEqualityFn };

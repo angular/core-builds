@@ -1,11 +1,11 @@
 /**
- * @license Angular v21.0.0-next.8+sha-f6a73f1
+ * @license Angular v21.0.0-next.8+sha-9b7a79a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { ReactiveNode, ValueEqualityFn, SIGNAL } from './_formatter-chunk.js';
-export { REACTIVE_NODE, Reactive, ReactiveHookFn, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from './_formatter-chunk.js';
+export { REACTIVE_NODE, Reactive, ReactiveHookFn, ReactiveNodeKind, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from './_formatter-chunk.js';
 import { SignalNode } from './_effect-chunk.js';
 export { BASE_EFFECT_NODE, BaseEffectNode, SIGNAL_NODE, SignalGetter, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.js';
 export { setAlternateWeakRefImpl } from './_weak_ref-chunk.js';
