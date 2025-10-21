@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.6+sha-cfd8ed3
+ * @license Angular v20.3.6+sha-e568ddb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('20.3.6+sha-cfd8ed3');
+const VERSION = /* @__PURE__ */ new Version('20.3.6+sha-e568ddb');
 
 /**
  * Base URL for the error details page.
@@ -3545,6 +3545,8 @@ const DOCUMENT = new InjectionToken(ngDevMode ? 'DocumentToken' : '');
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
  * is injected in a component or directive, the callbacks run when that component or
  * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @see [Lifecycle DestroyRef](guide/components/lifecycle#destroyref)
  *
  * @publicApi
  */

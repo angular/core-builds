@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.6+sha-cfd8ed3
+ * @license Angular v20.3.6+sha-e568ddb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14630,7 +14630,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.6+sha-cfd8ed3']
+        ? ['ng-version', '20.3.6+sha-e568ddb']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -20810,7 +20810,7 @@ function scheduleDelayedTrigger(scheduleFn) {
  *
  * @param scheduleFn A function that does the scheduling.
  */
-function scheduleDelayedPrefetching(scheduleFn, trigger) {
+function scheduleDelayedPrefetching(scheduleFn) {
     if (typeof ngServerMode !== 'undefined' && ngServerMode)
         return;
     const lView = getLView();
@@ -22240,8 +22240,11 @@ function ɵɵanimateEnter(value) {
     cancelLeavingNodes(tNode, lView);
     addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value));
     initializeAnimationQueueScheduler(lView[INJECTOR]);
-    // TODO(thePunderWoman): it's unclear why we need to queue animations here, but without this,
-    // animating through host bindings fails
+    // We have to queue here due to the animation instruction being invoked after the element
+    // instruction. The DOM node has to exist before we can queue an animation. Any node that
+    // is not inside of control flow needs to get queued here. For nodes inside of control
+    // flow, those are queued in node_manipulation.ts and are deduped by a Set in the animation
+    // queue.
     queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
     return ɵɵanimateEnter; // For chaining
 }
@@ -22340,8 +22343,11 @@ function ɵɵanimateEnterListener(value) {
     cancelLeavingNodes(tNode, lView);
     addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimationFunction(lView, tNode, value));
     initializeAnimationQueueScheduler(lView[INJECTOR]);
-    // TODO(thePunderWoman): it's unclear why we need to queue animations here, but without this,
-    // animating through host bindings fails
+    // We have to queue here due to the animation instruction being invoked after the element
+    // instruction. The DOM node has to exist before we can queue an animation. Any node that
+    // is not inside of control flow needs to get queued here. For nodes inside of control
+    // flow, those are queued in node_manipulation.ts and are deduped by a Set in the animation
+    // queue.
     queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
     return ɵɵanimateEnterListener;
 }
