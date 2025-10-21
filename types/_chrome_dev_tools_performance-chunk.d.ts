@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-bc9c814
+ * @license Angular v21.0.0-next.8+sha-196fa50
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -728,6 +728,8 @@ interface DestroyableInjector extends Injector {
  * is injected in a component or directive, the callbacks run when that component or
  * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
  *
+ * @see [Lifecycle DestroyRef](guide/components/lifecycle#destroyref)
+ *
  * @publicApi
  */
 declare abstract class DestroyRef {
@@ -746,10 +748,16 @@ declare abstract class DestroyRef {
      * // stop the destroy callback from executing if needed
      * unregisterFn();
      * ```
+     *
+     * @see [Lifecycle DestroyRef](guide/components/lifecycle#destroyref)
+     *
      */
     abstract onDestroy(callback: () => void): () => void;
     /**
      * Indicates whether the instance has already been destroyed.
+     *
+     * @see [Detecting instance destruction](guide/components/lifecycle#detecting-instance-destruction)
+     *
      */
     abstract get destroyed(): boolean;
 }
