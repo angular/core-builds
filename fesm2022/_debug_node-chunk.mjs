@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2b257b3
+ * @license Angular v21.0.0-next.8+sha-fd9af2a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-2b257b3']
+        ? ['ng-version', '21.0.0-next.8+sha-fd9af2a']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22244,17 +22244,18 @@ function updateCustomControl(tNode, lView, control, modelName) {
     // * cache which inputs exist.
     writeToDirectiveInput(componentDef, component, modelName, state.value());
     maybeWriteToDirectiveInput(componentDef, component, 'errors', state.errors);
+    maybeWriteToDirectiveInput(componentDef, component, 'invalid', state.invalid);
     maybeWriteToDirectiveInput(componentDef, component, 'disabled', state.disabled);
     maybeWriteToDirectiveInput(componentDef, component, 'disabledReasons', state.disabledReasons);
+    maybeWriteToDirectiveInput(componentDef, component, 'name', state.name);
+    maybeWriteToDirectiveInput(componentDef, component, 'readonly', state.readonly);
+    maybeWriteToDirectiveInput(componentDef, component, 'touched', state.touched);
     maybeWriteToDirectiveInput(componentDef, component, 'max', state.max);
     maybeWriteToDirectiveInput(componentDef, component, 'maxLength', state.maxLength);
     maybeWriteToDirectiveInput(componentDef, component, 'min', state.min);
     maybeWriteToDirectiveInput(componentDef, component, 'minLength', state.minLength);
-    maybeWriteToDirectiveInput(componentDef, component, 'name', state.name);
     maybeWriteToDirectiveInput(componentDef, component, 'pattern', state.pattern);
-    maybeWriteToDirectiveInput(componentDef, component, 'readonly', state.readonly);
     maybeWriteToDirectiveInput(componentDef, component, 'required', state.required);
-    maybeWriteToDirectiveInput(componentDef, component, 'touched', state.touched);
 }
 /**
  * Writes the specified value to a directive input if the input exists.
@@ -22265,7 +22266,7 @@ function updateCustomControl(tNode, lView, control, modelName) {
  * @param source A function that returns the value to write.
  */
 function maybeWriteToDirectiveInput(componentDef, component, inputName, source) {
-    if (inputName in componentDef.inputs) {
+    if (source && inputName in componentDef.inputs) {
         writeToDirectiveInput(componentDef, component, inputName, source());
     }
 }
@@ -22286,14 +22287,24 @@ function updateNativeControl(tNode, lView, control) {
     renderer.setAttribute(input, 'name', state.name());
     setBooleanAttribute(renderer, input, 'disabled', state.disabled());
     setBooleanAttribute(renderer, input, 'readonly', state.readonly());
-    setBooleanAttribute(renderer, input, 'required', state.required());
+    if (state.required) {
+        setBooleanAttribute(renderer, input, 'required', state.required());
+    }
     if (tNode.flags & 16384 /* TNodeFlags.isNativeNumericControl */) {
-        setOptionalAttribute(renderer, input, 'max', state.max());
-        setOptionalAttribute(renderer, input, 'min', state.min());
+        if (state.max) {
+            setOptionalAttribute(renderer, input, 'max', state.max());
+        }
+        if (state.min) {
+            setOptionalAttribute(renderer, input, 'min', state.min());
+        }
     }
     if (tNode.flags & 32768 /* TNodeFlags.isNativeTextControl */) {
-        setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
-        setOptionalAttribute(renderer, input, 'minLength', state.minLength());
+        if (state.maxLength) {
+            setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
+        }
+        if (state.minLength) {
+            setOptionalAttribute(renderer, input, 'minLength', state.minLength());
+        }
     }
 }
 /** Checks if a given value is a Date or null */

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-2b257b3
+ * @license Angular v21.0.0-next.8+sha-fd9af2a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8254,6 +8254,10 @@ interface ɵFieldState<T> {
      */
     readonly errors: Signal<unknown>;
     /**
+     * A signal indicating whether the field is valid.
+     */
+    readonly invalid: Signal<boolean>;
+    /**
      * A signal indicating whether the field is currently disabled.
      */
     readonly disabled: Signal<boolean>;
@@ -8266,25 +8270,25 @@ interface ɵFieldState<T> {
      *
      * Applies to `<input>` with a numeric or date `type` attribute and custom controls.
      */
-    readonly max: Signal<number | undefined>;
+    readonly max?: Signal<number | undefined>;
     /**
      * A signal indicating the field's maximum string length, if applicable.
      *
      * Applies to `<input>`, `<textarea>`, and custom controls.
      */
-    readonly maxLength: Signal<number | undefined>;
+    readonly maxLength?: Signal<number | undefined>;
     /**
      * A signal indicating the field's minimum value, if applicable.
      *
      * Applies to `<input>` with a numeric or date `type` attribute and custom controls.
      */
-    readonly min: Signal<number | undefined>;
+    readonly min?: Signal<number | undefined>;
     /**
      * A signal indicating the field's minimum string length, if applicable.
      *
      * Applies to `<input>`, `<textarea>`, and custom controls.
      */
-    readonly minLength: Signal<number | undefined>;
+    readonly minLength?: Signal<number | undefined>;
     /**
      * A signal of a unique name for the field, by default based on the name of its parent field.
      */
@@ -8292,7 +8296,7 @@ interface ɵFieldState<T> {
     /**
      * A signal indicating the patterns the field must match.
      */
-    readonly pattern: Signal<readonly RegExp[]>;
+    readonly pattern?: Signal<readonly RegExp[]>;
     /**
      * A signal indicating whether the field is currently readonly.
      */
@@ -8300,7 +8304,7 @@ interface ɵFieldState<T> {
     /**
      * A signal indicating whether the field is required.
      */
-    readonly required: Signal<boolean>;
+    readonly required?: Signal<boolean>;
     /**
      * A signal indicating whether the field has been touched by the user.
      */
