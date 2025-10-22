@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.8+sha-a3e91b2
+ * @license Angular v21.0.0-next.8+sha-81bd671
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.8+sha-a3e91b2']
+        ? ['ng-version', '21.0.0-next.8+sha-81bd671']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -21847,6 +21847,7 @@ function ɵɵanimateLeave(value) {
         return ɵɵanimateLeave;
     }
     const tNode = getCurrentTNode();
+    cancelLeavingNodes(tNode, lView);
     addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value));
     initializeAnimationQueueScheduler(lView[INJECTOR]);
     return ɵɵanimateLeave; // For chaining
@@ -21944,6 +21945,7 @@ function ɵɵanimateLeaveListener(value) {
     // So we don't have an early return here.
     const lView = getLView();
     const tNode = getCurrentTNode();
+    cancelLeavingNodes(tNode, lView);
     allLeavingAnimations.add(lView);
     addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value));
     initializeAnimationQueueScheduler(lView[INJECTOR]);
