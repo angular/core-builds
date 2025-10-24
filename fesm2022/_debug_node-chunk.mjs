@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-1a0d2da
+ * @license Angular v21.1.0-next.0+sha-029ed83
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.1.0-next.0+sha-1a0d2da']
+        ? ['ng-version', '21.1.0-next.0+sha-029ed83']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
