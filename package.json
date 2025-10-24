@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "21.0.0-next.9+sha-d430d99",
+  "version": "21.0.0-next.9+sha-5099ed4",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "21.0.0-next.9+sha-d430d99",
+    "@angular/compiler": "21.0.0-next.9+sha-5099ed4",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0"
   },
@@ -83,6 +83,12 @@
       "@angular/localize",
       "@angular/service-worker"
     ]
+  },
+  "angular": {
+    "bestPractices": {
+      "format": "markdown",
+      "path": "./resources/best-practices.md"
+    }
   },
   "schematics": "./schematics/collection.json",
   "sideEffects": false,
