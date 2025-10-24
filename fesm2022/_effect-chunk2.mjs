@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-0d38cbf
+ * @license Angular v21.1.0-next.0+sha-1a0d2da
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('21.1.0-next.0+sha-0d38cbf');
+const VERSION = /* @__PURE__ */ new Version('21.1.0-next.0+sha-1a0d2da');
 
 /**
  * Base URL for the error details page.
