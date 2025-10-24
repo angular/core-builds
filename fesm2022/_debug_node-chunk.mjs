@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.9+sha-d7e85a4
+ * @license Angular v21.0.0-next.9+sha-c02aa80
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14079,7 +14079,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '21.0.0-next.9+sha-d7e85a4']
+        ? ['ng-version', '21.0.0-next.9+sha-c02aa80']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22544,15 +22544,20 @@ function recordDuplicateKeys(keyToIdx, key, idx) {
  * @param newCollection the new, incoming collection;
  * @param trackByFn key generation function that determines equality between items in the life and
  *     incoming collection;
+ * @param reactiveConsumer the reactive consumer to be used when accessing the length or iterator of
+ *     the {@link newCollection}. This ensures that if the object is a proxy, reactive reads that
+ *     occur when accessing the length or iterator are tracked.
  */
-function reconcile(liveCollection, newCollection, trackByFn) {
+function reconcile(liveCollection, newCollection, trackByFn, reactiveConsumer) {
     let detachedItems = undefined;
     let liveKeysInTheFuture = undefined;
     let liveStartIdx = 0;
     let liveEndIdx = liveCollection.length - 1;
     const duplicateKeys = ngDevMode ? new Map() : undefined;
     if (Array.isArray(newCollection)) {
+        setActiveConsumer$1(reactiveConsumer);
         let newEndIdx = newCollection.length - 1;
+        setActiveConsumer$1(null);
         while (liveStartIdx <= liveEndIdx && liveStartIdx <= newEndIdx) {
             // compare from the beginning
             const liveStartValue = liveCollection.at(liveStartIdx);
@@ -22640,7 +22645,9 @@ function reconcile(liveCollection, newCollection, trackByFn) {
     }
     else if (newCollection != null) {
         // iterable - immediately fallback to the slow path
+        setActiveConsumer$1(reactiveConsumer);
         const newCollectionIterator = newCollection[Symbol.iterator]();
+        setActiveConsumer$1(null);
         let newIterationResult = newCollectionIterator.next();
         while (!newIterationResult.done && liveStartIdx <= liveEndIdx) {
             const liveValue = liveCollection.at(liveStartIdx);
@@ -23129,7 +23136,7 @@ function ɵɵrepeater(collection) {
             metadata.liveCollection.reset();
         }
         const liveCollection = metadata.liveCollection;
-        reconcile(liveCollection, collection, metadata.trackByFn);
+        reconcile(liveCollection, collection, metadata.trackByFn, prevConsumer);
         // Warn developers about situations where the entire collection was re-created as part of the
         // reconciliation pass. Note that this warning might be "overreacting" and report cases where
         // the collection re-creation is the intended behavior. Still, the assumption is that most of
