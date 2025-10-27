@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.7+sha-14b5590
+ * @license Angular v20.3.7+sha-ca3fd78
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11770,6 +11770,8 @@ function icuContainerIteratorNext(state) {
     }
     else {
         if (state.stack.length === 0) {
+            // Clear the lView reference when iteration completes to allow garbage collection
+            state.lView = undefined;
             return null;
         }
         else {
@@ -14630,7 +14632,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.7+sha-14b5590']
+        ? ['ng-version', '20.3.7+sha-ca3fd78']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
