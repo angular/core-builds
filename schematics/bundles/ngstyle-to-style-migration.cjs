@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-b8c8bc6
+ * @license Angular v21.1.0-next.0+sha-59e6489
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,16 +15,16 @@ require('path');
 require('node:path');
 var project_paths = require('./project_paths-Co58y57J.cjs');
 var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
-var imports = require('./imports-DwPXlGFl.cjs');
+var imports = require('./imports-DP72APSx.cjs');
 var parse_html = require('./parse_html-D2a8L_Z0.cjs');
-var ng_component_template = require('./ng_component_template-DO_cntfP.cjs');
+var ng_component_template = require('./ng_component_template-DtRqyiiy.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
 require('url');
 require('@angular-devkit/schematics');
-require('./ng_decorators-BI0uV7KI.cjs');
+require('./ng_decorators-DSFlWYQY.cjs');
 require('./property_name-BBwFuqMe.cjs');
 
 const ngStyleStr = 'NgStyle';

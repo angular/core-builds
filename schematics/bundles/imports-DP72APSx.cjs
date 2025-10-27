@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-b8c8bc6
+ * @license Angular v21.1.0-next.0+sha-59e6489
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -103,30 +103,8 @@ function findImportSpecifier(nodes, specifierName) {
         return propertyName ? propertyName.text === specifierName : name.text === specifierName;
     });
 }
-/**
- * Gets the relative path between two files.
- * @param from Path of the file that is importing from another file.
- * @param to Path of the file that is being imported.
- */
-function getRelativePath(from, to) {
-    const fromParts = from.split('/').slice(0, -1);
-    const toParts = to.split('/');
-    while (fromParts.length > 0 && toParts.length > 0 && fromParts[0] === toParts[0]) {
-        fromParts.shift();
-        toParts.shift();
-    }
-    let relativePath = fromParts.map(() => '..').join('/') + (fromParts.length > 0 ? '/' : '') + toParts.join('/');
-    if (relativePath.endsWith('.ts')) {
-        relativePath = relativePath.slice(0, -3);
-    }
-    if (!relativePath.startsWith('.')) {
-        relativePath = './' + relativePath;
-    }
-    return relativePath;
-}
 
 exports.getImportOfIdentifier = getImportOfIdentifier;
 exports.getImportSpecifier = getImportSpecifier;
 exports.getImportSpecifiers = getImportSpecifiers;
 exports.getNamedImports = getNamedImports;
-exports.getRelativePath = getRelativePath;
