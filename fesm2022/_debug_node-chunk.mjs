@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.9+sha-8511759
+ * @license Angular v21.0.0-next.9+sha-54ad230
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6366,6 +6366,7 @@ function icuContainerIteratorNext(state) {
     }
   } else {
     if (state.stack.length === 0) {
+      state.lView = undefined;
       return null;
     } else {
       state.removes = state.stack.pop();
@@ -8210,7 +8211,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-next.9+sha-8511759'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-next.9+sha-54ad230'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;

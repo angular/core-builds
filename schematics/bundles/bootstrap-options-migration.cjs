@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-8511759
+ * @license Angular v21.0.0-next.9+sha-54ad230
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,7 +18,7 @@ require('path');
 require('node:path');
 var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
-var imports = require('./imports-DwPXlGFl.cjs');
+var imports = require('./imports-DP72APSx.cjs');
 var symbol = require('./symbol-BObKoqes.cjs');
 require('@angular-devkit/schematics');
 require('fs');
@@ -28,6 +28,12 @@ require('url');
 const CORE_PACKAGE = '@angular/core';
 const PROVIDE_ZONE_CHANGE_DETECTION = 'provideZoneChangeDetection';
 const ZONE_CD_PROVIDER = `${PROVIDE_ZONE_CHANGE_DETECTION}()`;
+const SAFE_TO_REMOVE_OPTIONS = [
+    'ignoreChangesOutsideZone',
+    'ngZoneRunCoalescing',
+    'ngZoneEventCoalescing',
+];
+const BOOTSTRAP_OPTIONS = ['ngZone', ...SAFE_TO_REMOVE_OPTIONS];
 class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         let replacements = [];
@@ -43,7 +49,7 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
             // If none of the imports related to bootstraping are present, we can skip the file.
             if (specifiers === null)
                 continue;
-            const { bootstrapAppSpecifier, platformBrowserDynamicSpecifier, platformBrowserSpecifier, testBedSpecifier, createApplicationSpecifier, getTestBedSpecifier, } = specifiers;
+            const { bootstrapAppSpecifier, testBedSpecifier, createApplicationSpecifier, getTestBedSpecifier, } = specifiers;
             const typeChecker = info.program.getTypeChecker();
             const isCreateApplicationNode = (node) => {
                 return (ts.isCallExpression(node) &&
@@ -59,9 +65,7 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 return (ts.isCallExpression(node) &&
                     ts.isPropertyAccessExpression(node.expression) &&
                     node.expression.name.text === 'bootstrapModule' &&
-                    ts.isCallExpression(node.expression.expression) &&
-                    (symbol.isReferenceToImport(typeChecker, node.expression.expression.expression, platformBrowserSpecifier) ||
-                        symbol.isReferenceToImport(typeChecker, node.expression.expression.expression, platformBrowserDynamicSpecifier)));
+                    node.arguments.length > 0);
             };
             const isTestBedInitEnvironmentNode = (node) => {
                 return (ts.isCallExpression(node) &&
@@ -89,15 +93,12 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
             };
             sourceFile.forEachChild(walk);
         }
-        // The combine method might not run when there is a single target.
-        // So we deduplicate here
-        replacements = deduplicateReplacements(replacements);
         apply_import_manager.applyImportManagerChanges(importManager, replacements, info.sourceFiles, info);
         return project_paths.confirmAsSerializable({ replacements });
     }
     async combine(unitA, unitB) {
         const combined = [...unitA.replacements, ...unitB.replacements];
-        return project_paths.confirmAsSerializable({ replacements: deduplicateReplacements(combined) });
+        return project_paths.confirmAsSerializable({ replacements: combined });
     }
     async globalMeta(data) {
         return project_paths.confirmAsSerializable(data);
@@ -210,27 +211,42 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
         if (!ngModule) {
             return;
         }
-        const moduleSourceFile = moduleClass.getSourceFile();
-        const moduleProjectFile = project_paths.projectFile(moduleSourceFile, info);
-        if (moduleSourceFile.getText().includes('ZoneChangeDetectionModule')) {
-            // If the file already contains the ZoneChangeDetectionModule, we can skip it.
-            return;
-        }
-        // Always remove the options argument
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({ position: moduleIdentifier.getEnd(), end: node.getEnd() - 1, toInsert: '' })));
+        const optionsNode = node.arguments[1];
+        const file = project_paths.projectFile(sourceFile, info);
+        replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
+            position: moduleIdentifier.getEnd(),
+            end: node.getEnd() - 1,
+            toInsert: '',
+        })));
         const hasExistingChangeDetectionProvider = hasChangeDetectionProvider(ngModule, typeChecker);
         if (hasExistingChangeDetectionProvider) {
             return;
         }
         // Let's try to understand the bootstrap options.
-        const optionsNode = node.arguments[1];
-        const options = optionsNode && ts.isObjectLiteralExpression(optionsNode)
-            ? evaluator.evaluate(optionsNode)
-            : null;
+        let options = optionsNode ? evaluator.evaluate(optionsNode) : null;
+        let extraOptions = new Map();
         let zoneCdProvider = ZONE_CD_PROVIDER;
         let zoneInstanceProvider = null;
+        if (Array.isArray(options)) {
+            const mergedOptions = options.reduce((acc, item) => {
+                if (item instanceof Map) {
+                    for (const [k, v] of item) {
+                        acc.set(k, v);
+                        if (!SAFE_TO_REMOVE_OPTIONS.includes(k)) {
+                            extraOptions.set(k, v);
+                        }
+                    }
+                }
+                return acc;
+            }, new Map());
+            options = mergedOptions;
+        }
         if (options instanceof Map) {
-            const ngZoneOption = options.get('ngZone');
+            [...options.entries()].forEach(([k, v]) => {
+                if (!BOOTSTRAP_OPTIONS.includes(k) && typeof v !== 'string') {
+                    extraOptions.set(k, v);
+                }
+            });
             if (options.has('ngZoneRunCoalescing') || options.has('ngZoneEventCoalescing')) {
                 const config = [];
                 if (options.get('ngZoneRunCoalescing')) {
@@ -241,27 +257,18 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 }
                 zoneCdProvider = `${PROVIDE_ZONE_CHANGE_DETECTION}(${config.length > 0 ? `{ ${config.join(', ')} }` : ''})`;
             }
+            const ngZoneOption = options.get('ngZone');
             if (ngZoneOption instanceof project_tsconfig_paths.Reference) {
-                importManager.addImport({
-                    exportModuleSpecifier: CORE_PACKAGE,
-                    exportSymbolName: 'NgZone',
-                    requestedFile: moduleSourceFile,
-                });
                 const clazz = ngZoneOption.node;
                 if (ts.isClassDeclaration(clazz) && clazz.name) {
-                    const customZoneSourceFile = clazz.getSourceFile();
-                    const exportModuleSpecifier = ngZoneOption.bestGuessOwningModule?.specifier ??
-                        imports.getRelativePath(moduleSourceFile.fileName, customZoneSourceFile.fileName);
-                    importManager.addImport({
-                        exportModuleSpecifier,
-                        exportSymbolName: clazz.name.text,
-                        requestedFile: moduleSourceFile,
-                    });
                     zoneInstanceProvider = `{provide: NgZone, useClass: ${clazz.name.text}}`;
+                    removePropertiesFromLiteral(file, optionsNode, ['ngZone'], replacements);
                 }
             }
-            else if (typeof ngZoneOption === 'string' && ngZoneOption === 'noop') {
-                return;
+            else if (typeof ngZoneOption === 'string') {
+                if (ngZoneOption === 'noop') {
+                    return;
+                }
             }
             else if (ngZoneOption && typeof ngZoneOption !== 'string') {
                 // This is a case where we're not able to migrate automatically
@@ -277,13 +284,8 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 });
                 if (ngZoneValue) {
                     // We re-add the ngZone option
-                    replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
-                        position: moduleIdentifier.getEnd(),
-                        end: node.getEnd() - 1,
-                        toInsert: `, {ngZone: ${ngZoneValue}}`,
-                    })));
+                    extraOptions.set('ngZone', ngZoneValue);
                 }
-                // And add the TODO
                 replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
                     position: node.getStart() - 1,
                     end: node.getStart() - 1,
@@ -295,14 +297,20 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
         if (zoneInstanceProvider) {
             providers.push(zoneInstanceProvider);
         }
-        if (providers.length > 0) {
-            importManager.addImport({
-                exportModuleSpecifier: CORE_PACKAGE,
-                exportSymbolName: PROVIDE_ZONE_CHANGE_DETECTION,
-                requestedFile: moduleSourceFile,
-            });
-            addProvidersToNgModule(moduleProjectFile, moduleSourceFile, ngModule, providers.join(',\n'), replacements);
-        }
+        importManager.addImport({
+            exportModuleSpecifier: CORE_PACKAGE,
+            exportSymbolName: PROVIDE_ZONE_CHANGE_DETECTION,
+            requestedFile: sourceFile,
+        });
+        // if we only use the key, we use the a shorthand asignment
+        const extraOptionsStr = [...extraOptions.entries()]
+            .map(([k, v]) => (k != v ? `${k}: ${v},` : `${k},`))
+            .join(', ');
+        replacements.push(new project_paths.Replacement(file, new project_paths.TextUpdate({
+            position: moduleIdentifier.end,
+            end: moduleIdentifier.end,
+            toInsert: `, { applicationProviders: [${providers.join(', ')}], ${extraOptionsStr}}`,
+        })));
     }
     analyzeTestBedInitEnvironment(callExpr, sourceFile, info, typeChecker, importManager, replacements) {
         const hasExistingChangeDetectionProvider = hasChangeDetectionProvider(callExpr, typeChecker);
@@ -328,30 +336,6 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
         });
         addZoneCDModule(ZONE_CD_PROVIDER, moduleProjectFile, insertPosition, replacements);
         insertZoneCDModule(ngModules, moduleProjectFile, replacements, 'ZoneChangeDetectionModule');
-    }
-}
-function addProvidersToNgModule(projectFile, moduleSourceFile, ngModule, providersText, replacements) {
-    //                             ObjLiteral => callExp => Decorator => ClassExpression
-    const moduleClassDeclaration = ngModule.parent.parent.parent;
-    const insertPosition = moduleClassDeclaration.getStart(moduleSourceFile, true) - 1;
-    addZoneCDModule(providersText, projectFile, insertPosition, replacements);
-    const importsNode = property_name.findLiteralProperty(ngModule, 'imports');
-    if (importsNode && ts.isPropertyAssignment(importsNode)) {
-        insertZoneCDModule(importsNode.initializer, projectFile, replacements, 'ZoneChangeDetectionModule');
-    }
-    else {
-        const text = `imports: [ZoneChangeDetectionModule]`;
-        const toInsert = `${text},\n`;
-        let position = ngModule.getStart() + 1;
-        if (ngModule.properties.length > 0) {
-            const firstProperty = ngModule.properties[0];
-            position = firstProperty.getStart();
-        }
-        replacements.push(new project_paths.Replacement(projectFile, new project_paths.TextUpdate({
-            position,
-            end: position,
-            toInsert,
-        })));
     }
 }
 function addZoneCDModule(providersText, projectFile, location, replacements) {
@@ -553,7 +537,6 @@ function getSpecifiers(sourceFile) {
     const ngModuleSpecifier = imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule');
     if (!createApplicationSpecifier &&
         !bootstrapAppSpecifier &&
-        !platformBrowserDynamicSpecifier &&
         !platformBrowserSpecifier &&
         !testBedSpecifier &&
         !ngModuleSpecifier &&
@@ -571,46 +554,6 @@ function getSpecifiers(sourceFile) {
     };
 }
 /**
- * Removes duplicate replacements and for replacements at the same position, takes the longest one.
- */
-function deduplicateReplacements(replacements) {
-    if (replacements.length <= 1) {
-        return replacements;
-    }
-    // Group replacements by file and position
-    const groupedByFileAndPosition = new Map();
-    for (const replacement of replacements) {
-        const fileKey = replacement.projectFile.id;
-        const position = replacement.update.data.position;
-        if (!groupedByFileAndPosition.has(fileKey)) {
-            groupedByFileAndPosition.set(fileKey, new Map());
-        }
-        const fileReplacements = groupedByFileAndPosition.get(fileKey);
-        if (!fileReplacements.has(position)) {
-            fileReplacements.set(position, []);
-        }
-        fileReplacements.get(position).push(replacement);
-    }
-    const result = [];
-    for (const fileReplacements of groupedByFileAndPosition.values()) {
-        for (const positionReplacements of fileReplacements.values()) {
-            if (positionReplacements.length === 1) {
-                result.push(positionReplacements[0]);
-            }
-            else {
-                // For multiple replacements at the same position, take the one with the longest content
-                const longestReplacement = positionReplacements.reduce((longest, current) => {
-                    const longestLength = longest.update.data.toInsert.length;
-                    const currentLength = current.update.data.toInsert.length;
-                    return currentLength > longestLength ? current : longest;
-                });
-                result.push(longestReplacement);
-            }
-        }
-    }
-    return result;
-}
-/**
  * In the case we're looking to insert a new ZoneChangeDetectionModule, we need to check if we already inserted one.
  *
  * This function also checks if the existing one has fewer options (shorter text length), which means the previous migration strategy inserted one
@@ -623,6 +566,28 @@ function replacementsHaveZoneCdModule(rootRelativePath, replacements, text) {
         return (isSameFile &&
             text.includes('ZoneChangeDetectionModule') &&
             exisitingText.length >= text.length);
+    });
+}
+function removePropertiesFromLiteral(projectFile, literal, propertyNames, replacements) {
+    const syntaxList = literal.getChildren().find((ch) => ch.kind === ts.SyntaxKind.SyntaxList);
+    const optionsElements = syntaxList.getChildren();
+    const optionsToRemove = [];
+    optionsElements.forEach((node, i, children) => {
+        if (ts.isPropertyAssignment(node) &&
+            ts.isIdentifier(node.name) &&
+            propertyNames.includes(node.name.text)) {
+            // Look ahead for comma
+            const next = children[i + 1];
+            if (next && next.kind === ts.SyntaxKind.CommaToken) {
+                optionsToRemove.push({ start: node.getStart(), end: next.getEnd() });
+            }
+            else {
+                optionsToRemove.push({ start: node.getStart(), end: node.getEnd() });
+            }
+        }
+    });
+    optionsToRemove.forEach((toRemove) => {
+        replacements.push(new project_paths.Replacement(projectFile, new project_paths.TextUpdate({ position: toRemove.start, end: toRemove.end, toInsert: '' })));
     });
 }
 

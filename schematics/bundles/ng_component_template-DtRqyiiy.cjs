@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-8511759
+ * @license Angular v21.0.0-next.9+sha-54ad230
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-BI0uV7KI.cjs');
+var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 require('os');
 var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
