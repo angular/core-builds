@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-04dd75b
+ * @license Angular v21.0.0-next.9+sha-8511759
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,11 +8,12 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
-var index = require('./index-DNN-eDYd.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+var o = require('@angular/compiler');
+var index = require('./index-CEsWjb5E.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-BwcHVl4A.cjs');
+var project_paths = require('./project_paths-Co58y57J.cjs');
 
 function getMemberName(member) {
     if (member.name === undefined) {
@@ -189,7 +190,7 @@ function lookupPropertyAccess(checker, type, path, options = {}) {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateReferenceVisitor extends project_tsconfig_paths.RecursiveVisitor {
+class TemplateReferenceVisitor extends o.TmplAstRecursiveVisitor {
     result = [];
     /**
      * Whether we are currently descending into HTML AST nodes
@@ -236,21 +237,21 @@ class TemplateReferenceVisitor extends project_tsconfig_paths.RecursiveVisitor {
         // of signal calls in templates.
         // TODO: Remove with: https://github.com/angular/angular/pull/55456.
         this.templateAttributeReferencedFields = [];
-        project_tsconfig_paths.visitAll(this, template.attributes);
-        project_tsconfig_paths.visitAll(this, template.templateAttrs);
+        o.tmplAstVisitAll(this, template.attributes);
+        o.tmplAstVisitAll(this, template.templateAttrs);
         // If we are dealing with a microsyntax template, do not check
         // inputs and outputs as those are already passed to the children.
         // Template attributes may contain relevant expressions though.
         if (template.tagName === 'ng-template') {
-            project_tsconfig_paths.visitAll(this, template.inputs);
-            project_tsconfig_paths.visitAll(this, template.outputs);
+            o.tmplAstVisitAll(this, template.inputs);
+            o.tmplAstVisitAll(this, template.outputs);
         }
         const referencedInputs = this.templateAttributeReferencedFields;
         this.templateAttributeReferencedFields = null;
         this.descendAndCheckForNarrowedSimilarReferences(referencedInputs, () => {
-            project_tsconfig_paths.visitAll(this, template.children);
-            project_tsconfig_paths.visitAll(this, template.references);
-            project_tsconfig_paths.visitAll(this, template.variables);
+            o.tmplAstVisitAll(this, template.children);
+            o.tmplAstVisitAll(this, template.references);
+            o.tmplAstVisitAll(this, template.variables);
         });
     }
     visitIfBlockBranch(block) {
@@ -317,7 +318,7 @@ class TemplateReferenceVisitor extends project_tsconfig_paths.RecursiveVisitor {
  * This resolution is important to be able to migrate references to inputs
  * that will be migrated to signal inputs.
  */
-class TemplateExpressionReferenceVisitor extends project_tsconfig_paths.RecursiveAstVisitor {
+class TemplateExpressionReferenceVisitor extends o.RecursiveAstVisitor {
     typeChecker;
     templateTypeChecker;
     componentClass;
@@ -364,7 +365,7 @@ class TemplateExpressionReferenceVisitor extends project_tsconfig_paths.Recursiv
         super.visitPropertyRead(ast, context);
     }
     visitBinary(ast, context) {
-        if (ast.operation === '=' && ast.left instanceof project_tsconfig_paths.PropertyRead) {
+        if (ast.operation === '=' && ast.left instanceof o.PropertyRead) {
             this._inspectPropertyAccess(ast.left, true, [...context, ast, ast.left]);
         }
         else {
@@ -464,7 +465,7 @@ class TemplateExpressionReferenceVisitor extends project_tsconfig_paths.Recursiv
     _isPartOfNarrowingTernary(read) {
         // Note: We do not safe check that the reads are fully matching 1:1. This is acceptable
         // as worst case we just skip an input from being migrated. This is very unlikely too.
-        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof project_tsconfig_paths.PropertyRead || r instanceof project_tsconfig_paths.SafePropertyRead) && r.name === read.name);
+        return this.insideConditionalExpressionsWithReads.some((r) => (r instanceof o.PropertyRead || r instanceof o.SafePropertyRead) && r.name === read.name);
     }
 }
 /**
@@ -474,11 +475,11 @@ class TemplateExpressionReferenceVisitor extends project_tsconfig_paths.Recursiv
 function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
     const path = [readOrWrite.name];
     let node = readOrWrite;
-    while (node.receiver instanceof project_tsconfig_paths.PropertyRead) {
+    while (node.receiver instanceof o.PropertyRead) {
         node = node.receiver;
         path.unshift(node.name);
     }
-    if (!(node.receiver instanceof project_tsconfig_paths.ImplicitReceiver || node.receiver instanceof project_tsconfig_paths.ThisReceiver)) {
+    if (!(node.receiver instanceof o.ImplicitReceiver || node.receiver instanceof o.ThisReceiver)) {
         return null;
     }
     const classType = checker.getTypeAtLocation(componentClass.name);
@@ -490,8 +491,8 @@ function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
 }
 /** Whether the given node refers to a two-way binding AST node. */
 function isTwoWayBindingNode(node) {
-    return ((node instanceof project_tsconfig_paths.BoundAttribute && node.type === project_tsconfig_paths.BindingType.TwoWay) ||
-        (node instanceof project_tsconfig_paths.BoundEvent && node.type === project_tsconfig_paths.ParsedEventType.TwoWay));
+    return ((node instanceof o.TmplAstBoundAttribute && node.type === o.BindingType.TwoWay) ||
+        (node instanceof o.TmplAstBoundEvent && node.type === o.ParsedEventType.TwoWay));
 }
 
 /** Possible types of references to known fields detected. */
@@ -583,11 +584,11 @@ function identifyHostBindingReferences(node, programInfo, checker, reflector, re
         if (!isPropertyBinding && !isEventBinding) {
             continue;
         }
-        const parser = project_tsconfig_paths.makeBindingParser();
-        const sourceSpan = new project_tsconfig_paths.ParseSourceSpan(
+        const parser = o.makeBindingParser();
+        const sourceSpan = new o.ParseSourceSpan(
         // Fake source span to keep parsing offsets zero-based.
         // We then later combine these with the expression TS node offsets.
-        new project_tsconfig_paths.ParseLocation({ content: '', url: '' }, 0, 0, 0), new project_tsconfig_paths.ParseLocation({ content: '', url: '' }, 0, 0, 0));
+        new o.ParseLocation({ content: '', url: '' }, 0, 0, 0), new o.ParseLocation({ content: '', url: '' }, 0, 0, 0));
         const name = rawName.substring(1, rawName.length - 1);
         let parsed = undefined;
         if (isEventBinding) {

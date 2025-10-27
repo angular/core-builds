@@ -1,14 +1,15 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-04dd75b
+ * @license Angular v21.0.0-next.9+sha-8511759
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
+var o = require('@angular/compiler');
 var ts = require('typescript');
 var p = require('path');
+var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
 require('os');
 
 function _interopNamespaceDefault(e) {
@@ -29,1711 +30,6 @@ function _interopNamespaceDefault(e) {
 }
 
 var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
-
-class XmlTagDefinition {
-    closedByParent = false;
-    implicitNamespacePrefix = null;
-    isVoid = false;
-    ignoreFirstLf = false;
-    canSelfClose = true;
-    preventNamespaceInheritance = false;
-    requireExtraParent(currentParent) {
-        return false;
-    }
-    isClosedByChild(name) {
-        return false;
-    }
-    getContentType() {
-        return project_tsconfig_paths.TagContentType.PARSABLE_DATA;
-    }
-}
-const _TAG_DEFINITION = new XmlTagDefinition();
-function getXmlTagDefinition(tagName) {
-    return _TAG_DEFINITION;
-}
-
-class XmlParser extends project_tsconfig_paths.Parser {
-    constructor() {
-        super(getXmlTagDefinition);
-    }
-    parse(source, url, options = {}) {
-        // Blocks and let declarations aren't supported in an XML context.
-        return super.parse(source, url, {
-            ...options,
-            tokenizeBlocks: false,
-            tokenizeLet: false,
-            selectorlessEnabled: false,
-        });
-    }
-}
-
-const _VERSION$1 = '1.2';
-const _XMLNS$1 = 'urn:oasis:names:tc:xliff:document:1.2';
-// TODO(vicb): make this a param (s/_/-/)
-const _DEFAULT_SOURCE_LANG$1 = 'en';
-const _PLACEHOLDER_TAG$1 = 'x';
-const _MARKER_TAG$1 = 'mrk';
-const _FILE_TAG = 'file';
-const _SOURCE_TAG$1 = 'source';
-const _SEGMENT_SOURCE_TAG = 'seg-source';
-const _ALT_TRANS_TAG = 'alt-trans';
-const _TARGET_TAG$1 = 'target';
-const _UNIT_TAG$1 = 'trans-unit';
-const _CONTEXT_GROUP_TAG = 'context-group';
-const _CONTEXT_TAG = 'context';
-// https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html
-// https://docs.oasis-open.org/xliff/v1.2/xliff-profile-html/xliff-profile-html-1.2.html
-class Xliff extends project_tsconfig_paths.Serializer {
-    write(messages, locale) {
-        const visitor = new _WriteVisitor$1();
-        const transUnits = [];
-        messages.forEach((message) => {
-            let contextTags = [];
-            message.sources.forEach((source) => {
-                let contextGroupTag = new project_tsconfig_paths.Tag(_CONTEXT_GROUP_TAG, { purpose: 'location' });
-                contextGroupTag.children.push(new project_tsconfig_paths.CR(10), new project_tsconfig_paths.Tag(_CONTEXT_TAG, { 'context-type': 'sourcefile' }, [
-                    new project_tsconfig_paths.Text$1(source.filePath),
-                ]), new project_tsconfig_paths.CR(10), new project_tsconfig_paths.Tag(_CONTEXT_TAG, { 'context-type': 'linenumber' }, [
-                    new project_tsconfig_paths.Text$1(`${source.startLine}`),
-                ]), new project_tsconfig_paths.CR(8));
-                contextTags.push(new project_tsconfig_paths.CR(8), contextGroupTag);
-            });
-            const transUnit = new project_tsconfig_paths.Tag(_UNIT_TAG$1, { id: message.id, datatype: 'html' });
-            transUnit.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag(_SOURCE_TAG$1, {}, visitor.serialize(message.nodes)), ...contextTags);
-            if (message.description) {
-                transUnit.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag('note', { priority: '1', from: 'description' }, [
-                    new project_tsconfig_paths.Text$1(message.description),
-                ]));
-            }
-            if (message.meaning) {
-                transUnit.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag('note', { priority: '1', from: 'meaning' }, [new project_tsconfig_paths.Text$1(message.meaning)]));
-            }
-            transUnit.children.push(new project_tsconfig_paths.CR(6));
-            transUnits.push(new project_tsconfig_paths.CR(6), transUnit);
-        });
-        const body = new project_tsconfig_paths.Tag('body', {}, [...transUnits, new project_tsconfig_paths.CR(4)]);
-        const file = new project_tsconfig_paths.Tag('file', {
-            'source-language': locale || _DEFAULT_SOURCE_LANG$1,
-            datatype: 'plaintext',
-            original: 'ng2.template',
-        }, [new project_tsconfig_paths.CR(4), body, new project_tsconfig_paths.CR(2)]);
-        const xliff = new project_tsconfig_paths.Tag('xliff', { version: _VERSION$1, xmlns: _XMLNS$1 }, [
-            new project_tsconfig_paths.CR(2),
-            file,
-            new project_tsconfig_paths.CR(),
-        ]);
-        return project_tsconfig_paths.serialize([
-            new project_tsconfig_paths.Declaration({ version: '1.0', encoding: 'UTF-8' }),
-            new project_tsconfig_paths.CR(),
-            xliff,
-            new project_tsconfig_paths.CR(),
-        ]);
-    }
-    load(content, url) {
-        // xliff to xml nodes
-        const xliffParser = new XliffParser();
-        const { locale, msgIdToHtml, errors } = xliffParser.parse(content, url);
-        // xml nodes to i18n nodes
-        const i18nNodesByMsgId = {};
-        const converter = new XmlToI18n$1();
-        Object.keys(msgIdToHtml).forEach((msgId) => {
-            const { i18nNodes, errors: e } = converter.convert(msgIdToHtml[msgId], url);
-            errors.push(...e);
-            i18nNodesByMsgId[msgId] = i18nNodes;
-        });
-        if (errors.length) {
-            throw new Error(`xliff parse errors:\n${errors.join('\n')}`);
-        }
-        return { locale: locale, i18nNodesByMsgId };
-    }
-    digest(message) {
-        return project_tsconfig_paths.digest(message);
-    }
-}
-let _WriteVisitor$1 = class _WriteVisitor {
-    visitText(text, context) {
-        return [new project_tsconfig_paths.Text$1(text.value)];
-    }
-    visitContainer(container, context) {
-        const nodes = [];
-        container.children.forEach((node) => nodes.push(...node.visit(this)));
-        return nodes;
-    }
-    visitIcu(icu, context) {
-        const nodes = [new project_tsconfig_paths.Text$1(`{${icu.expressionPlaceholder}, ${icu.type}, `)];
-        Object.keys(icu.cases).forEach((c) => {
-            nodes.push(new project_tsconfig_paths.Text$1(`${c} {`), ...icu.cases[c].visit(this), new project_tsconfig_paths.Text$1(`} `));
-        });
-        nodes.push(new project_tsconfig_paths.Text$1(`}`));
-        return nodes;
-    }
-    visitTagPlaceholder(ph, context) {
-        const ctype = getCtypeForTag(ph.tag);
-        if (ph.isVoid) {
-            // void tags have no children nor closing tags
-            return [
-                new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, { id: ph.startName, ctype, 'equiv-text': `<${ph.tag}/>` }),
-            ];
-        }
-        const startTagPh = new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, {
-            id: ph.startName,
-            ctype,
-            'equiv-text': `<${ph.tag}>`,
-        });
-        const closeTagPh = new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, {
-            id: ph.closeName,
-            ctype,
-            'equiv-text': `</${ph.tag}>`,
-        });
-        return [startTagPh, ...this.serialize(ph.children), closeTagPh];
-    }
-    visitPlaceholder(ph, context) {
-        return [new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, { id: ph.name, 'equiv-text': `{{${ph.value}}}` })];
-    }
-    visitBlockPlaceholder(ph, context) {
-        const ctype = `x-${ph.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-        const startTagPh = new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, {
-            id: ph.startName,
-            ctype,
-            'equiv-text': `@${ph.name}`,
-        });
-        const closeTagPh = new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, { id: ph.closeName, ctype, 'equiv-text': `}` });
-        return [startTagPh, ...this.serialize(ph.children), closeTagPh];
-    }
-    visitIcuPlaceholder(ph, context) {
-        const equivText = `{${ph.value.expression}, ${ph.value.type}, ${Object.keys(ph.value.cases)
-            .map((value) => value + ' {...}')
-            .join(' ')}}`;
-        return [new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG$1, { id: ph.name, 'equiv-text': equivText })];
-    }
-    serialize(nodes) {
-        return [].concat(...nodes.map((node) => node.visit(this)));
-    }
-};
-// TODO(vicb): add error management (structure)
-// Extract messages as xml nodes from the xliff file
-class XliffParser {
-    // using non-null assertions because they're re(set) by parse()
-    _unitMlString;
-    _errors;
-    _msgIdToHtml;
-    _locale = null;
-    parse(xliff, url) {
-        this._unitMlString = null;
-        this._msgIdToHtml = {};
-        const xml = new XmlParser().parse(xliff, url);
-        this._errors = xml.errors;
-        project_tsconfig_paths.visitAll$1(this, xml.rootNodes, null);
-        return {
-            msgIdToHtml: this._msgIdToHtml,
-            errors: this._errors,
-            locale: this._locale,
-        };
-    }
-    visitElement(element, context) {
-        switch (element.name) {
-            case _UNIT_TAG$1:
-                this._unitMlString = null;
-                const idAttr = element.attrs.find((attr) => attr.name === 'id');
-                if (!idAttr) {
-                    this._addError(element, `<${_UNIT_TAG$1}> misses the "id" attribute`);
-                }
-                else {
-                    const id = idAttr.value;
-                    if (this._msgIdToHtml.hasOwnProperty(id)) {
-                        this._addError(element, `Duplicated translations for msg ${id}`);
-                    }
-                    else {
-                        project_tsconfig_paths.visitAll$1(this, element.children, null);
-                        if (typeof this._unitMlString === 'string') {
-                            this._msgIdToHtml[id] = this._unitMlString;
-                        }
-                        else {
-                            this._addError(element, `Message ${id} misses a translation`);
-                        }
-                    }
-                }
-                break;
-            // ignore those tags
-            case _SOURCE_TAG$1:
-            case _SEGMENT_SOURCE_TAG:
-            case _ALT_TRANS_TAG:
-                break;
-            case _TARGET_TAG$1:
-                const innerTextStart = element.startSourceSpan.end.offset;
-                const innerTextEnd = element.endSourceSpan.start.offset;
-                const content = element.startSourceSpan.start.file.content;
-                const innerText = content.slice(innerTextStart, innerTextEnd);
-                this._unitMlString = innerText;
-                break;
-            case _FILE_TAG:
-                const localeAttr = element.attrs.find((attr) => attr.name === 'target-language');
-                if (localeAttr) {
-                    this._locale = localeAttr.value;
-                }
-                project_tsconfig_paths.visitAll$1(this, element.children, null);
-                break;
-            default:
-                // TODO(vicb): assert file structure, xliff version
-                // For now only recurse on unhandled nodes
-                project_tsconfig_paths.visitAll$1(this, element.children, null);
-        }
-    }
-    visitAttribute(attribute, context) { }
-    visitText(text, context) { }
-    visitComment(comment, context) { }
-    visitExpansion(expansion, context) { }
-    visitExpansionCase(expansionCase, context) { }
-    visitBlock(block, context) { }
-    visitBlockParameter(parameter, context) { }
-    visitLetDeclaration(decl, context) { }
-    visitComponent(component, context) { }
-    visitDirective(directive, context) { }
-    _addError(node, message) {
-        this._errors.push(new project_tsconfig_paths.ParseError(node.sourceSpan, message));
-    }
-}
-// Convert ml nodes (xliff syntax) to i18n nodes
-let XmlToI18n$1 = class XmlToI18n {
-    // using non-null assertion because it's re(set) by convert()
-    _errors;
-    convert(message, url) {
-        const xmlIcu = new XmlParser().parse(message, url, { tokenizeExpansionForms: true });
-        this._errors = xmlIcu.errors;
-        const i18nNodes = this._errors.length > 0 || xmlIcu.rootNodes.length == 0
-            ? []
-            : [].concat(...project_tsconfig_paths.visitAll$1(this, xmlIcu.rootNodes));
-        return {
-            i18nNodes: i18nNodes,
-            errors: this._errors,
-        };
-    }
-    visitText(text, context) {
-        return new project_tsconfig_paths.Text$2(text.value, text.sourceSpan);
-    }
-    visitElement(el, context) {
-        if (el.name === _PLACEHOLDER_TAG$1) {
-            const nameAttr = el.attrs.find((attr) => attr.name === 'id');
-            if (nameAttr) {
-                return new project_tsconfig_paths.Placeholder('', nameAttr.value, el.sourceSpan);
-            }
-            this._addError(el, `<${_PLACEHOLDER_TAG$1}> misses the "id" attribute`);
-            return null;
-        }
-        if (el.name === _MARKER_TAG$1) {
-            return [].concat(...project_tsconfig_paths.visitAll$1(this, el.children));
-        }
-        this._addError(el, `Unexpected tag`);
-        return null;
-    }
-    visitExpansion(icu, context) {
-        const caseMap = {};
-        project_tsconfig_paths.visitAll$1(this, icu.cases).forEach((c) => {
-            caseMap[c.value] = new project_tsconfig_paths.Container(c.nodes, icu.sourceSpan);
-        });
-        return new project_tsconfig_paths.Icu(icu.switchValue, icu.type, caseMap, icu.sourceSpan);
-    }
-    visitExpansionCase(icuCase, context) {
-        return {
-            value: icuCase.value,
-            nodes: project_tsconfig_paths.visitAll$1(this, icuCase.expression),
-        };
-    }
-    visitComment(comment, context) { }
-    visitAttribute(attribute, context) { }
-    visitBlock(block, context) { }
-    visitBlockParameter(parameter, context) { }
-    visitLetDeclaration(decl, context) { }
-    visitComponent(component, context) {
-        this._addError(component, 'Unexpected node');
-    }
-    visitDirective(directive, context) {
-        this._addError(directive, 'Unexpected node');
-    }
-    _addError(node, message) {
-        this._errors.push(new project_tsconfig_paths.ParseError(node.sourceSpan, message));
-    }
-};
-function getCtypeForTag(tag) {
-    switch (tag.toLowerCase()) {
-        case 'br':
-            return 'lb';
-        case 'img':
-            return 'image';
-        default:
-            return `x-${tag}`;
-    }
-}
-
-const _VERSION = '2.0';
-const _XMLNS = 'urn:oasis:names:tc:xliff:document:2.0';
-// TODO(vicb): make this a param (s/_/-/)
-const _DEFAULT_SOURCE_LANG = 'en';
-const _PLACEHOLDER_TAG = 'ph';
-const _PLACEHOLDER_SPANNING_TAG = 'pc';
-const _MARKER_TAG = 'mrk';
-const _XLIFF_TAG = 'xliff';
-const _SOURCE_TAG = 'source';
-const _TARGET_TAG = 'target';
-const _UNIT_TAG = 'unit';
-// https://docs.oasis-open.org/xliff/xliff-core/v2.0/os/xliff-core-v2.0-os.html
-class Xliff2 extends project_tsconfig_paths.Serializer {
-    write(messages, locale) {
-        const visitor = new _WriteVisitor();
-        const units = [];
-        messages.forEach((message) => {
-            const unit = new project_tsconfig_paths.Tag(_UNIT_TAG, { id: message.id });
-            const notes = new project_tsconfig_paths.Tag('notes');
-            if (message.description || message.meaning) {
-                if (message.description) {
-                    notes.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag('note', { category: 'description' }, [new project_tsconfig_paths.Text$1(message.description)]));
-                }
-                if (message.meaning) {
-                    notes.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag('note', { category: 'meaning' }, [new project_tsconfig_paths.Text$1(message.meaning)]));
-                }
-            }
-            message.sources.forEach((source) => {
-                notes.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag('note', { category: 'location' }, [
-                    new project_tsconfig_paths.Text$1(`${source.filePath}:${source.startLine}${source.endLine !== source.startLine ? ',' + source.endLine : ''}`),
-                ]));
-            });
-            notes.children.push(new project_tsconfig_paths.CR(6));
-            unit.children.push(new project_tsconfig_paths.CR(6), notes);
-            const segment = new project_tsconfig_paths.Tag('segment');
-            segment.children.push(new project_tsconfig_paths.CR(8), new project_tsconfig_paths.Tag(_SOURCE_TAG, {}, visitor.serialize(message.nodes)), new project_tsconfig_paths.CR(6));
-            unit.children.push(new project_tsconfig_paths.CR(6), segment, new project_tsconfig_paths.CR(4));
-            units.push(new project_tsconfig_paths.CR(4), unit);
-        });
-        const file = new project_tsconfig_paths.Tag('file', { 'original': 'ng.template', id: 'ngi18n' }, [
-            ...units,
-            new project_tsconfig_paths.CR(2),
-        ]);
-        const xliff = new project_tsconfig_paths.Tag(_XLIFF_TAG, { version: _VERSION, xmlns: _XMLNS, srcLang: locale || _DEFAULT_SOURCE_LANG }, [new project_tsconfig_paths.CR(2), file, new project_tsconfig_paths.CR()]);
-        return project_tsconfig_paths.serialize([
-            new project_tsconfig_paths.Declaration({ version: '1.0', encoding: 'UTF-8' }),
-            new project_tsconfig_paths.CR(),
-            xliff,
-            new project_tsconfig_paths.CR(),
-        ]);
-    }
-    load(content, url) {
-        // xliff to xml nodes
-        const xliff2Parser = new Xliff2Parser();
-        const { locale, msgIdToHtml, errors } = xliff2Parser.parse(content, url);
-        // xml nodes to i18n nodes
-        const i18nNodesByMsgId = {};
-        const converter = new XmlToI18n();
-        Object.keys(msgIdToHtml).forEach((msgId) => {
-            const { i18nNodes, errors: e } = converter.convert(msgIdToHtml[msgId], url);
-            errors.push(...e);
-            i18nNodesByMsgId[msgId] = i18nNodes;
-        });
-        if (errors.length) {
-            throw new Error(`xliff2 parse errors:\n${errors.join('\n')}`);
-        }
-        return { locale: locale, i18nNodesByMsgId };
-    }
-    digest(message) {
-        return project_tsconfig_paths.decimalDigest(message);
-    }
-}
-class _WriteVisitor {
-    _nextPlaceholderId = 0;
-    visitText(text, context) {
-        return [new project_tsconfig_paths.Text$1(text.value)];
-    }
-    visitContainer(container, context) {
-        const nodes = [];
-        container.children.forEach((node) => nodes.push(...node.visit(this)));
-        return nodes;
-    }
-    visitIcu(icu, context) {
-        const nodes = [new project_tsconfig_paths.Text$1(`{${icu.expressionPlaceholder}, ${icu.type}, `)];
-        Object.keys(icu.cases).forEach((c) => {
-            nodes.push(new project_tsconfig_paths.Text$1(`${c} {`), ...icu.cases[c].visit(this), new project_tsconfig_paths.Text$1(`} `));
-        });
-        nodes.push(new project_tsconfig_paths.Text$1(`}`));
-        return nodes;
-    }
-    visitTagPlaceholder(ph, context) {
-        const type = getTypeForTag(ph.tag);
-        if (ph.isVoid) {
-            const tagPh = new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG, {
-                id: (this._nextPlaceholderId++).toString(),
-                equiv: ph.startName,
-                type: type,
-                disp: `<${ph.tag}/>`,
-            });
-            return [tagPh];
-        }
-        const tagPc = new project_tsconfig_paths.Tag(_PLACEHOLDER_SPANNING_TAG, {
-            id: (this._nextPlaceholderId++).toString(),
-            equivStart: ph.startName,
-            equivEnd: ph.closeName,
-            type: type,
-            dispStart: `<${ph.tag}>`,
-            dispEnd: `</${ph.tag}>`,
-        });
-        const nodes = [].concat(...ph.children.map((node) => node.visit(this)));
-        if (nodes.length) {
-            nodes.forEach((node) => tagPc.children.push(node));
-        }
-        else {
-            tagPc.children.push(new project_tsconfig_paths.Text$1(''));
-        }
-        return [tagPc];
-    }
-    visitPlaceholder(ph, context) {
-        const idStr = (this._nextPlaceholderId++).toString();
-        return [
-            new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG, {
-                id: idStr,
-                equiv: ph.name,
-                disp: `{{${ph.value}}}`,
-            }),
-        ];
-    }
-    visitBlockPlaceholder(ph, context) {
-        const tagPc = new project_tsconfig_paths.Tag(_PLACEHOLDER_SPANNING_TAG, {
-            id: (this._nextPlaceholderId++).toString(),
-            equivStart: ph.startName,
-            equivEnd: ph.closeName,
-            type: 'other',
-            dispStart: `@${ph.name}`,
-            dispEnd: `}`,
-        });
-        const nodes = [].concat(...ph.children.map((node) => node.visit(this)));
-        if (nodes.length) {
-            nodes.forEach((node) => tagPc.children.push(node));
-        }
-        else {
-            tagPc.children.push(new project_tsconfig_paths.Text$1(''));
-        }
-        return [tagPc];
-    }
-    visitIcuPlaceholder(ph, context) {
-        const cases = Object.keys(ph.value.cases)
-            .map((value) => value + ' {...}')
-            .join(' ');
-        const idStr = (this._nextPlaceholderId++).toString();
-        return [
-            new project_tsconfig_paths.Tag(_PLACEHOLDER_TAG, {
-                id: idStr,
-                equiv: ph.name,
-                disp: `{${ph.value.expression}, ${ph.value.type}, ${cases}}`,
-            }),
-        ];
-    }
-    serialize(nodes) {
-        this._nextPlaceholderId = 0;
-        return [].concat(...nodes.map((node) => node.visit(this)));
-    }
-}
-// Extract messages as xml nodes from the xliff file
-class Xliff2Parser {
-    // using non-null assertions because they're all (re)set by parse()
-    _unitMlString;
-    _errors;
-    _msgIdToHtml;
-    _locale = null;
-    parse(xliff, url) {
-        this._unitMlString = null;
-        this._msgIdToHtml = {};
-        const xml = new XmlParser().parse(xliff, url);
-        this._errors = xml.errors;
-        project_tsconfig_paths.visitAll$1(this, xml.rootNodes, null);
-        return {
-            msgIdToHtml: this._msgIdToHtml,
-            errors: this._errors,
-            locale: this._locale,
-        };
-    }
-    visitElement(element, context) {
-        switch (element.name) {
-            case _UNIT_TAG:
-                this._unitMlString = null;
-                const idAttr = element.attrs.find((attr) => attr.name === 'id');
-                if (!idAttr) {
-                    this._addError(element, `<${_UNIT_TAG}> misses the "id" attribute`);
-                }
-                else {
-                    const id = idAttr.value;
-                    if (this._msgIdToHtml.hasOwnProperty(id)) {
-                        this._addError(element, `Duplicated translations for msg ${id}`);
-                    }
-                    else {
-                        project_tsconfig_paths.visitAll$1(this, element.children, null);
-                        if (typeof this._unitMlString === 'string') {
-                            this._msgIdToHtml[id] = this._unitMlString;
-                        }
-                        else {
-                            this._addError(element, `Message ${id} misses a translation`);
-                        }
-                    }
-                }
-                break;
-            case _SOURCE_TAG:
-                // ignore source message
-                break;
-            case _TARGET_TAG:
-                const innerTextStart = element.startSourceSpan.end.offset;
-                const innerTextEnd = element.endSourceSpan.start.offset;
-                const content = element.startSourceSpan.start.file.content;
-                const innerText = content.slice(innerTextStart, innerTextEnd);
-                this._unitMlString = innerText;
-                break;
-            case _XLIFF_TAG:
-                const localeAttr = element.attrs.find((attr) => attr.name === 'trgLang');
-                if (localeAttr) {
-                    this._locale = localeAttr.value;
-                }
-                const versionAttr = element.attrs.find((attr) => attr.name === 'version');
-                if (versionAttr) {
-                    const version = versionAttr.value;
-                    if (version !== '2.0') {
-                        this._addError(element, `The XLIFF file version ${version} is not compatible with XLIFF 2.0 serializer`);
-                    }
-                    else {
-                        project_tsconfig_paths.visitAll$1(this, element.children, null);
-                    }
-                }
-                break;
-            default:
-                project_tsconfig_paths.visitAll$1(this, element.children, null);
-        }
-    }
-    visitAttribute(attribute, context) { }
-    visitText(text, context) { }
-    visitComment(comment, context) { }
-    visitExpansion(expansion, context) { }
-    visitExpansionCase(expansionCase, context) { }
-    visitBlock(block, context) { }
-    visitBlockParameter(parameter, context) { }
-    visitLetDeclaration(decl, context) { }
-    visitComponent(component, context) { }
-    visitDirective(directive, context) { }
-    _addError(node, message) {
-        this._errors.push(new project_tsconfig_paths.ParseError(node.sourceSpan, message));
-    }
-}
-// Convert ml nodes (xliff syntax) to i18n nodes
-class XmlToI18n {
-    // using non-null assertion because re(set) by convert()
-    _errors;
-    convert(message, url) {
-        const xmlIcu = new XmlParser().parse(message, url, { tokenizeExpansionForms: true });
-        this._errors = xmlIcu.errors;
-        const i18nNodes = this._errors.length > 0 || xmlIcu.rootNodes.length == 0
-            ? []
-            : [].concat(...project_tsconfig_paths.visitAll$1(this, xmlIcu.rootNodes));
-        return {
-            i18nNodes,
-            errors: this._errors,
-        };
-    }
-    visitText(text, context) {
-        return new project_tsconfig_paths.Text$2(text.value, text.sourceSpan);
-    }
-    visitElement(el, context) {
-        switch (el.name) {
-            case _PLACEHOLDER_TAG:
-                const nameAttr = el.attrs.find((attr) => attr.name === 'equiv');
-                if (nameAttr) {
-                    return [new project_tsconfig_paths.Placeholder('', nameAttr.value, el.sourceSpan)];
-                }
-                this._addError(el, `<${_PLACEHOLDER_TAG}> misses the "equiv" attribute`);
-                break;
-            case _PLACEHOLDER_SPANNING_TAG:
-                const startAttr = el.attrs.find((attr) => attr.name === 'equivStart');
-                const endAttr = el.attrs.find((attr) => attr.name === 'equivEnd');
-                if (!startAttr) {
-                    this._addError(el, `<${_PLACEHOLDER_TAG}> misses the "equivStart" attribute`);
-                }
-                else if (!endAttr) {
-                    this._addError(el, `<${_PLACEHOLDER_TAG}> misses the "equivEnd" attribute`);
-                }
-                else {
-                    const startId = startAttr.value;
-                    const endId = endAttr.value;
-                    const nodes = [];
-                    return nodes.concat(new project_tsconfig_paths.Placeholder('', startId, el.sourceSpan), ...el.children.map((node) => node.visit(this, null)), new project_tsconfig_paths.Placeholder('', endId, el.sourceSpan));
-                }
-                break;
-            case _MARKER_TAG:
-                return [].concat(...project_tsconfig_paths.visitAll$1(this, el.children));
-            default:
-                this._addError(el, `Unexpected tag`);
-        }
-        return null;
-    }
-    visitExpansion(icu, context) {
-        const caseMap = {};
-        project_tsconfig_paths.visitAll$1(this, icu.cases).forEach((c) => {
-            caseMap[c.value] = new project_tsconfig_paths.Container(c.nodes, icu.sourceSpan);
-        });
-        return new project_tsconfig_paths.Icu(icu.switchValue, icu.type, caseMap, icu.sourceSpan);
-    }
-    visitExpansionCase(icuCase, context) {
-        return {
-            value: icuCase.value,
-            nodes: [].concat(...project_tsconfig_paths.visitAll$1(this, icuCase.expression)),
-        };
-    }
-    visitComment(comment, context) { }
-    visitAttribute(attribute, context) { }
-    visitBlock(block, context) { }
-    visitBlockParameter(parameter, context) { }
-    visitLetDeclaration(decl, context) { }
-    visitComponent(component, context) {
-        this._addError(component, 'Unexpected node');
-    }
-    visitDirective(directive, context) {
-        this._addError(directive, 'Unexpected node');
-    }
-    _addError(node, message) {
-        this._errors.push(new project_tsconfig_paths.ParseError(node.sourceSpan, message));
-    }
-}
-function getTypeForTag(tag) {
-    switch (tag.toLowerCase()) {
-        case 'br':
-        case 'b':
-        case 'i':
-        case 'u':
-            return 'fmt';
-        case 'img':
-            return 'image';
-        case 'a':
-            return 'link';
-        default:
-            return 'other';
-    }
-}
-
-/**
- * A container for message extracted from the templates.
- */
-class MessageBundle {
-    _htmlParser;
-    _implicitTags;
-    _implicitAttrs;
-    _locale;
-    _preserveWhitespace;
-    _messages = [];
-    constructor(_htmlParser, _implicitTags, _implicitAttrs, _locale = null, _preserveWhitespace = true) {
-        this._htmlParser = _htmlParser;
-        this._implicitTags = _implicitTags;
-        this._implicitAttrs = _implicitAttrs;
-        this._locale = _locale;
-        this._preserveWhitespace = _preserveWhitespace;
-    }
-    updateFromTemplate(source, url) {
-        const htmlParserResult = this._htmlParser.parse(source, url, { tokenizeExpansionForms: true });
-        if (htmlParserResult.errors.length) {
-            return htmlParserResult.errors;
-        }
-        // Trim unnecessary whitespace from extracted messages if requested. This
-        // makes the messages more durable to trivial whitespace changes without
-        // affected message IDs.
-        const rootNodes = this._preserveWhitespace
-            ? htmlParserResult.rootNodes
-            : project_tsconfig_paths.visitAllWithSiblings(new project_tsconfig_paths.WhitespaceVisitor(/* preserveSignificantWhitespace */ false), htmlParserResult.rootNodes);
-        const i18nParserResult = project_tsconfig_paths.extractMessages(rootNodes, this._implicitTags, this._implicitAttrs, 
-        /* preserveSignificantWhitespace */ this._preserveWhitespace);
-        if (i18nParserResult.errors.length) {
-            return i18nParserResult.errors;
-        }
-        this._messages.push(...i18nParserResult.messages);
-        return [];
-    }
-    // Return the message in the internal format
-    // The public (serialized) format might be different, see the `write` method.
-    getMessages() {
-        return this._messages;
-    }
-    write(serializer, filterSources) {
-        const messages = {};
-        const mapperVisitor = new MapPlaceholderNames();
-        // Deduplicate messages based on their ID
-        this._messages.forEach((message) => {
-            const id = serializer.digest(message);
-            if (!messages.hasOwnProperty(id)) {
-                messages[id] = message;
-            }
-            else {
-                messages[id].sources.push(...message.sources);
-            }
-        });
-        // Transform placeholder names using the serializer mapping
-        const msgList = Object.keys(messages).map((id) => {
-            const mapper = serializer.createNameMapper(messages[id]);
-            const src = messages[id];
-            const nodes = mapper ? mapperVisitor.convert(src.nodes, mapper) : src.nodes;
-            let transformedMessage = new project_tsconfig_paths.Message(nodes, {}, {}, src.meaning, src.description, id);
-            transformedMessage.sources = src.sources;
-            if (filterSources) {
-                transformedMessage.sources.forEach((source) => (source.filePath = filterSources(source.filePath)));
-            }
-            return transformedMessage;
-        });
-        return serializer.write(msgList, this._locale);
-    }
-}
-// Transform an i18n AST by renaming the placeholder nodes with the given mapper
-class MapPlaceholderNames extends project_tsconfig_paths.CloneVisitor {
-    convert(nodes, mapper) {
-        return mapper ? nodes.map((n) => n.visit(this, mapper)) : nodes;
-    }
-    visitTagPlaceholder(ph, mapper) {
-        const startName = mapper.toPublicName(ph.startName);
-        const closeName = ph.closeName ? mapper.toPublicName(ph.closeName) : ph.closeName;
-        const children = ph.children.map((n) => n.visit(this, mapper));
-        return new project_tsconfig_paths.TagPlaceholder(ph.tag, ph.attrs, startName, closeName, children, ph.isVoid, ph.sourceSpan, ph.startSourceSpan, ph.endSourceSpan);
-    }
-    visitBlockPlaceholder(ph, mapper) {
-        const startName = mapper.toPublicName(ph.startName);
-        const closeName = ph.closeName ? mapper.toPublicName(ph.closeName) : ph.closeName;
-        const children = ph.children.map((n) => n.visit(this, mapper));
-        return new project_tsconfig_paths.BlockPlaceholder(ph.name, ph.parameters, startName, closeName, children, ph.sourceSpan, ph.startSourceSpan, ph.endSourceSpan);
-    }
-    visitPlaceholder(ph, mapper) {
-        return new project_tsconfig_paths.Placeholder(ph.value, mapper.toPublicName(ph.name), ph.sourceSpan);
-    }
-    visitIcuPlaceholder(ph, mapper) {
-        return new project_tsconfig_paths.IcuPlaceholder(ph.value, mapper.toPublicName(ph.name), ph.sourceSpan);
-    }
-}
-
-function compileClassMetadata(metadata) {
-    const fnCall = internalCompileClassMetadata(metadata);
-    return project_tsconfig_paths.arrowFn([], [project_tsconfig_paths.devOnlyGuardedExpression(fnCall).toStmt()]).callFn([]);
-}
-/** Compiles only the `setClassMetadata` call without any additional wrappers. */
-function internalCompileClassMetadata(metadata) {
-    return project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.setClassMetadata)
-        .callFn([
-        metadata.type,
-        metadata.decorators,
-        metadata.ctorParameters ?? project_tsconfig_paths.literal(null),
-        metadata.propDecorators ?? project_tsconfig_paths.literal(null),
-    ]);
-}
-/**
- * Wraps the `setClassMetadata` function with extra logic that dynamically
- * loads dependencies from `@defer` blocks.
- *
- * Generates a call like this:
- * ```ts
- * setClassMetadataAsync(type, () => [
- *   import('./cmp-a').then(m => m.CmpA);
- *   import('./cmp-b').then(m => m.CmpB);
- * ], (CmpA, CmpB) => {
- *   setClassMetadata(type, decorators, ctorParameters, propParameters);
- * });
- * ```
- *
- * Similar to the `setClassMetadata` call, it's wrapped into the `ngDevMode`
- * check to tree-shake away this code in production mode.
- */
-function compileComponentClassMetadata(metadata, dependencies) {
-    if (dependencies === null || dependencies.length === 0) {
-        // If there are no deferrable symbols - just generate a regular `setClassMetadata` call.
-        return compileClassMetadata(metadata);
-    }
-    return internalCompileSetClassMetadataAsync(metadata, dependencies.map((dep) => new project_tsconfig_paths.FnParam(dep.symbolName, project_tsconfig_paths.DYNAMIC_TYPE)), compileComponentMetadataAsyncResolver(dependencies));
-}
-/**
- * Internal logic used to compile a `setClassMetadataAsync` call.
- * @param metadata Class metadata for the internal `setClassMetadata` call.
- * @param wrapperParams Parameters to be set on the callback that wraps `setClassMetata`.
- * @param dependencyResolverFn Function to resolve the deferred dependencies.
- */
-function internalCompileSetClassMetadataAsync(metadata, wrapperParams, dependencyResolverFn) {
-    // Omit the wrapper since it'll be added around `setClassMetadataAsync` instead.
-    const setClassMetadataCall = internalCompileClassMetadata(metadata);
-    const setClassMetaWrapper = project_tsconfig_paths.arrowFn(wrapperParams, [setClassMetadataCall.toStmt()]);
-    const setClassMetaAsync = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.setClassMetadataAsync)
-        .callFn([metadata.type, dependencyResolverFn, setClassMetaWrapper]);
-    return project_tsconfig_paths.arrowFn([], [project_tsconfig_paths.devOnlyGuardedExpression(setClassMetaAsync).toStmt()]).callFn([]);
-}
-/**
- * Compiles the function that loads the dependencies for the
- * entire component in `setClassMetadataAsync`.
- */
-function compileComponentMetadataAsyncResolver(dependencies) {
-    const dynamicImports = dependencies.map(({ symbolName, importPath, isDefaultImport }) => {
-        // e.g. `(m) => m.CmpA`
-        const innerFn = 
-        // Default imports are always accessed through the `default` property.
-        project_tsconfig_paths.arrowFn([new project_tsconfig_paths.FnParam('m', project_tsconfig_paths.DYNAMIC_TYPE)], project_tsconfig_paths.variable('m').prop(isDefaultImport ? 'default' : symbolName));
-        // e.g. `import('./cmp-a').then(...)`
-        return new project_tsconfig_paths.DynamicImportExpr(importPath).prop('then').callFn([innerFn]);
-    });
-    // e.g. `() => [ ... ];`
-    return project_tsconfig_paths.arrowFn([], project_tsconfig_paths.literalArr(dynamicImports));
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION$5 = '12.0.0';
-/**
- * Minimum version at which deferred blocks are supported in the linker.
- */
-const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
-function compileDeclareClassMetadata(metadata) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', metadata.type);
-    definitionMap.set('decorators', metadata.decorators);
-    definitionMap.set('ctorParameters', metadata.ctorParameters);
-    definitionMap.set('propDecorators', metadata.propDecorators);
-    return project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareClassMetadata).callFn([definitionMap.toLiteralMap()]);
-}
-function compileComponentDeclareClassMetadata(metadata, dependencies) {
-    if (dependencies === null || dependencies.length === 0) {
-        return compileDeclareClassMetadata(metadata);
-    }
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    const callbackReturnDefinitionMap = new project_tsconfig_paths.DefinitionMap();
-    callbackReturnDefinitionMap.set('decorators', metadata.decorators);
-    callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? project_tsconfig_paths.literal(null));
-    callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? project_tsconfig_paths.literal(null));
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', metadata.type);
-    definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
-    definitionMap.set('resolveMetadata', project_tsconfig_paths.arrowFn(dependencies.map((dep) => new project_tsconfig_paths.FnParam(dep.symbolName, project_tsconfig_paths.DYNAMIC_TYPE)), callbackReturnDefinitionMap.toLiteralMap()));
-    return project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareClassMetadataAsync).callFn([definitionMap.toLiteralMap()]);
-}
-
-/**
- * Creates an array literal expression from the given array, mapping all values to an expression
- * using the provided mapping function. If the array is empty or null, then null is returned.
- *
- * @param values The array to transfer into literal array expression.
- * @param mapper The logic to use for creating an expression for the array's values.
- * @returns An array literal expression representing `values`, or null if `values` is empty or
- * is itself null.
- */
-function toOptionalLiteralArray(values, mapper) {
-    if (values === null || values.length === 0) {
-        return null;
-    }
-    return project_tsconfig_paths.literalArr(values.map((value) => mapper(value)));
-}
-/**
- * Creates an object literal expression from the given object, mapping all values to an expression
- * using the provided mapping function. If the object has no keys, then null is returned.
- *
- * @param object The object to transfer into an object literal expression.
- * @param mapper The logic to use for creating an expression for the object's values.
- * @returns An object literal expression representing `object`, or null if `object` does not have
- * any keys.
- */
-function toOptionalLiteralMap(object, mapper) {
-    const entries = Object.keys(object).map((key) => {
-        const value = object[key];
-        return { key, value: mapper(value), quoted: true };
-    });
-    if (entries.length > 0) {
-        return project_tsconfig_paths.literalMap(entries);
-    }
-    else {
-        return null;
-    }
-}
-function compileDependencies(deps) {
-    if (deps === 'invalid') {
-        // The `deps` can be set to the string "invalid"  by the `unwrapConstructorDependencies()`
-        // function, which tries to convert `ConstructorDeps` into `R3DependencyMetadata[]`.
-        return project_tsconfig_paths.literal('invalid');
-    }
-    else if (deps === null) {
-        return project_tsconfig_paths.literal(null);
-    }
-    else {
-        return project_tsconfig_paths.literalArr(deps.map(compileDependency));
-    }
-}
-function compileDependency(dep) {
-    const depMeta = new project_tsconfig_paths.DefinitionMap();
-    depMeta.set('token', dep.token);
-    if (dep.attributeNameType !== null) {
-        depMeta.set('attribute', project_tsconfig_paths.literal(true));
-    }
-    if (dep.host) {
-        depMeta.set('host', project_tsconfig_paths.literal(true));
-    }
-    if (dep.optional) {
-        depMeta.set('optional', project_tsconfig_paths.literal(true));
-    }
-    if (dep.self) {
-        depMeta.set('self', project_tsconfig_paths.literal(true));
-    }
-    if (dep.skipSelf) {
-        depMeta.set('skipSelf', project_tsconfig_paths.literal(true));
-    }
-    return depMeta.toLiteralMap();
-}
-
-/**
- * Compile a directive declaration defined by the `R3DirectiveMetadata`.
- */
-function compileDeclareDirectiveFromMetadata(meta) {
-    const definitionMap = createDirectiveDefinitionMap(meta);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareDirective).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createDirectiveType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for a directive into a `DefinitionMap`. This allows for reusing
- * this logic for components, as they extend the directive metadata.
- */
-function createDirectiveDefinitionMap(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    const minVersion = getMinimumVersionForPartialOutput(meta);
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(minVersion));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    // e.g. `type: MyDirective`
-    definitionMap.set('type', meta.type.value);
-    if (meta.isStandalone !== undefined) {
-        definitionMap.set('isStandalone', project_tsconfig_paths.literal(meta.isStandalone));
-    }
-    if (meta.isSignal) {
-        definitionMap.set('isSignal', project_tsconfig_paths.literal(meta.isSignal));
-    }
-    // e.g. `selector: 'some-dir'`
-    if (meta.selector !== null) {
-        definitionMap.set('selector', project_tsconfig_paths.literal(meta.selector));
-    }
-    definitionMap.set('inputs', needsNewInputPartialOutput(meta)
-        ? createInputsPartialMetadata(meta.inputs)
-        : legacyInputsPartialMetadata(meta.inputs));
-    definitionMap.set('outputs', project_tsconfig_paths.conditionallyCreateDirectiveBindingLiteral(meta.outputs));
-    definitionMap.set('host', compileHostMetadata(meta.host));
-    definitionMap.set('providers', meta.providers);
-    if (meta.queries.length > 0) {
-        definitionMap.set('queries', project_tsconfig_paths.literalArr(meta.queries.map(compileQuery)));
-    }
-    if (meta.viewQueries.length > 0) {
-        definitionMap.set('viewQueries', project_tsconfig_paths.literalArr(meta.viewQueries.map(compileQuery)));
-    }
-    if (meta.exportAs !== null) {
-        definitionMap.set('exportAs', project_tsconfig_paths.asLiteral(meta.exportAs));
-    }
-    if (meta.usesInheritance) {
-        definitionMap.set('usesInheritance', project_tsconfig_paths.literal(true));
-    }
-    if (meta.lifecycle.usesOnChanges) {
-        definitionMap.set('usesOnChanges', project_tsconfig_paths.literal(true));
-    }
-    if (meta.hostDirectives?.length) {
-        definitionMap.set('hostDirectives', createHostDirectives(meta.hostDirectives));
-    }
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    return definitionMap;
-}
-/**
- * Determines the minimum linker version for the partial output
- * generated for this directive.
- *
- * Every time we make a breaking change to the declaration interface or partial-linker
- * behavior, we must update the minimum versions to prevent old partial-linkers from
- * incorrectly processing the declaration.
- *
- * NOTE: Do not include any prerelease in these versions as they are ignored.
- */
-function getMinimumVersionForPartialOutput(meta) {
-    // We are starting with the oldest minimum version that can work for common
-    // directive partial compilation output. As we discover usages of new features
-    // that require a newer partial output emit, we bump the `minVersion`. Our goal
-    // is to keep libraries as much compatible with older linker versions as possible.
-    let minVersion = '14.0.0';
-    // Note: in order to allow consuming Angular libraries that have been compiled with 16.1+ in
-    // Angular 16.0, we only force a minimum version of 16.1 if input transform feature as introduced
-    // in 16.1 is actually used.
-    const hasDecoratorTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
-    if (hasDecoratorTransformFunctions) {
-        minVersion = '16.1.0';
-    }
-    // If there are input flags and we need the new emit, use the actual minimum version,
-    // where this was introduced. i.e. in 17.1.0
-    // TODO(legacy-partial-output-inputs): Remove in v18.
-    if (needsNewInputPartialOutput(meta)) {
-        minVersion = '17.1.0';
-    }
-    // If there are signal-based queries, partial output generates an extra field
-    // that should be parsed by linkers. Ensure a proper minimum linker version.
-    if (meta.queries.some((q) => q.isSignal) || meta.viewQueries.some((q) => q.isSignal)) {
-        minVersion = '17.2.0';
-    }
-    return minVersion;
-}
-/**
- * Gets whether the given directive needs the new input partial output structure
- * that can hold additional metadata like `isRequired`, `isSignal` etc.
- */
-function needsNewInputPartialOutput(meta) {
-    return Object.values(meta.inputs).some((input) => input.isSignal);
-}
-/**
- * Compiles the metadata of a single query into its partial declaration form as declared
- * by `R3DeclareQueryMetadata`.
- */
-function compileQuery(query) {
-    const meta = new project_tsconfig_paths.DefinitionMap();
-    meta.set('propertyName', project_tsconfig_paths.literal(query.propertyName));
-    if (query.first) {
-        meta.set('first', project_tsconfig_paths.literal(true));
-    }
-    meta.set('predicate', Array.isArray(query.predicate)
-        ? project_tsconfig_paths.asLiteral(query.predicate)
-        : project_tsconfig_paths.convertFromMaybeForwardRefExpression(query.predicate));
-    if (!query.emitDistinctChangesOnly) {
-        // `emitDistinctChangesOnly` is special because we expect it to be `true`.
-        // Therefore we explicitly emit the field, and explicitly place it only when it's `false`.
-        meta.set('emitDistinctChangesOnly', project_tsconfig_paths.literal(false));
-    }
-    if (query.descendants) {
-        meta.set('descendants', project_tsconfig_paths.literal(true));
-    }
-    meta.set('read', query.read);
-    if (query.static) {
-        meta.set('static', project_tsconfig_paths.literal(true));
-    }
-    if (query.isSignal) {
-        meta.set('isSignal', project_tsconfig_paths.literal(true));
-    }
-    return meta.toLiteralMap();
-}
-/**
- * Compiles the host metadata into its partial declaration form as declared
- * in `R3DeclareDirectiveMetadata['host']`
- */
-function compileHostMetadata(meta) {
-    const hostMetadata = new project_tsconfig_paths.DefinitionMap();
-    hostMetadata.set('attributes', toOptionalLiteralMap(meta.attributes, (expression) => expression));
-    hostMetadata.set('listeners', toOptionalLiteralMap(meta.listeners, project_tsconfig_paths.literal));
-    hostMetadata.set('properties', toOptionalLiteralMap(meta.properties, project_tsconfig_paths.literal));
-    if (meta.specialAttributes.styleAttr) {
-        hostMetadata.set('styleAttribute', project_tsconfig_paths.literal(meta.specialAttributes.styleAttr));
-    }
-    if (meta.specialAttributes.classAttr) {
-        hostMetadata.set('classAttribute', project_tsconfig_paths.literal(meta.specialAttributes.classAttr));
-    }
-    if (hostMetadata.values.length > 0) {
-        return hostMetadata.toLiteralMap();
-    }
-    else {
-        return null;
-    }
-}
-function createHostDirectives(hostDirectives) {
-    const expressions = hostDirectives.map((current) => {
-        const keys = [
-            {
-                key: 'directive',
-                value: current.isForwardReference
-                    ? project_tsconfig_paths.generateForwardRef(current.directive.type)
-                    : current.directive.type,
-                quoted: false,
-            },
-        ];
-        const inputsLiteral = current.inputs ? project_tsconfig_paths.createHostDirectivesMappingArray(current.inputs) : null;
-        const outputsLiteral = current.outputs
-            ? project_tsconfig_paths.createHostDirectivesMappingArray(current.outputs)
-            : null;
-        if (inputsLiteral) {
-            keys.push({ key: 'inputs', value: inputsLiteral, quoted: false });
-        }
-        if (outputsLiteral) {
-            keys.push({ key: 'outputs', value: outputsLiteral, quoted: false });
-        }
-        return project_tsconfig_paths.literalMap(keys);
-    });
-    // If there's a forward reference, we generate a `function() { return [{directive: HostDir}] }`,
-    // otherwise we can save some bytes by using a plain array, e.g. `[{directive: HostDir}]`.
-    return project_tsconfig_paths.literalArr(expressions);
-}
-/**
- * Generates partial output metadata for inputs of a directive.
- *
- * The generated structure is expected to match `R3DeclareDirectiveFacade['inputs']`.
- */
-function createInputsPartialMetadata(inputs) {
-    const keys = Object.getOwnPropertyNames(inputs);
-    if (keys.length === 0) {
-        return null;
-    }
-    return project_tsconfig_paths.literalMap(keys.map((declaredName) => {
-        const value = inputs[declaredName];
-        return {
-            key: declaredName,
-            // put quotes around keys that contain potentially unsafe characters
-            quoted: project_tsconfig_paths.UNSAFE_OBJECT_KEY_NAME_REGEXP.test(declaredName),
-            value: project_tsconfig_paths.literalMap([
-                { key: 'classPropertyName', quoted: false, value: project_tsconfig_paths.asLiteral(value.classPropertyName) },
-                { key: 'publicName', quoted: false, value: project_tsconfig_paths.asLiteral(value.bindingPropertyName) },
-                { key: 'isSignal', quoted: false, value: project_tsconfig_paths.asLiteral(value.isSignal) },
-                { key: 'isRequired', quoted: false, value: project_tsconfig_paths.asLiteral(value.required) },
-                { key: 'transformFunction', quoted: false, value: value.transformFunction ?? project_tsconfig_paths.NULL_EXPR },
-            ]),
-        };
-    }));
-}
-/**
- * Pre v18 legacy partial output for inputs.
- *
- * Previously, inputs did not capture metadata like `isSignal` in the partial compilation output.
- * To enable capturing such metadata, we restructured how input metadata is communicated in the
- * partial output. This would make libraries incompatible with older Angular FW versions where the
- * linker would not know how to handle this new "format". For this reason, if we know this metadata
- * does not need to be captured- we fall back to the old format. This is what this function
- * generates.
- *
- * See:
- * https://github.com/angular/angular/blob/d4b423690210872b5c32a322a6090beda30b05a3/packages/core/src/compiler/compiler_facade_interface.ts#L197-L199
- */
-function legacyInputsPartialMetadata(inputs) {
-    // TODO(legacy-partial-output-inputs): Remove function in v18.
-    const keys = Object.getOwnPropertyNames(inputs);
-    if (keys.length === 0) {
-        return null;
-    }
-    return project_tsconfig_paths.literalMap(keys.map((declaredName) => {
-        const value = inputs[declaredName];
-        const publicName = value.bindingPropertyName;
-        const differentDeclaringName = publicName !== declaredName;
-        let result;
-        if (differentDeclaringName || value.transformFunction !== null) {
-            const values = [project_tsconfig_paths.asLiteral(publicName), project_tsconfig_paths.asLiteral(declaredName)];
-            if (value.transformFunction !== null) {
-                values.push(value.transformFunction);
-            }
-            result = project_tsconfig_paths.literalArr(values);
-        }
-        else {
-            result = project_tsconfig_paths.asLiteral(publicName);
-        }
-        return {
-            key: declaredName,
-            // put quotes around keys that contain potentially unsafe characters
-            quoted: project_tsconfig_paths.UNSAFE_OBJECT_KEY_NAME_REGEXP.test(declaredName),
-            value: result,
-        };
-    }));
-}
-
-/**
- * Compile a component declaration defined by the `R3ComponentMetadata`.
- */
-function compileDeclareComponentFromMetadata(meta, template, additionalTemplateInfo) {
-    const definitionMap = createComponentDefinitionMap(meta, template, additionalTemplateInfo);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareComponent).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createComponentType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for a component into a `DefinitionMap`.
- */
-function createComponentDefinitionMap(meta, template, templateInfo) {
-    const definitionMap = createDirectiveDefinitionMap(meta);
-    const blockVisitor = new BlockPresenceVisitor();
-    project_tsconfig_paths.visitAll(blockVisitor, template.nodes);
-    definitionMap.set('template', getTemplateExpression(template, templateInfo));
-    if (templateInfo.isInline) {
-        definitionMap.set('isInline', project_tsconfig_paths.literal(true));
-    }
-    // Set the minVersion to 17.0.0 if the component is using at least one block in its template.
-    // We don't do this for templates without blocks, in order to preserve backwards compatibility.
-    if (blockVisitor.hasBlocks) {
-        definitionMap.set('minVersion', project_tsconfig_paths.literal('17.0.0'));
-    }
-    definitionMap.set('styles', toOptionalLiteralArray(meta.styles, project_tsconfig_paths.literal));
-    definitionMap.set('dependencies', compileUsedDependenciesMetadata(meta));
-    definitionMap.set('viewProviders', meta.viewProviders);
-    definitionMap.set('animations', meta.animations);
-    if (meta.changeDetection !== null) {
-        if (typeof meta.changeDetection === 'object') {
-            throw new Error('Impossible state! Change detection flag is not resolved!');
-        }
-        definitionMap.set('changeDetection', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.ChangeDetectionStrategy)
-            .prop(project_tsconfig_paths.ChangeDetectionStrategy[meta.changeDetection]));
-    }
-    if (meta.encapsulation !== project_tsconfig_paths.ViewEncapsulation.Emulated) {
-        definitionMap.set('encapsulation', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.ViewEncapsulation).prop(project_tsconfig_paths.ViewEncapsulation[meta.encapsulation]));
-    }
-    if (template.preserveWhitespaces === true) {
-        definitionMap.set('preserveWhitespaces', project_tsconfig_paths.literal(true));
-    }
-    if (meta.defer.mode === 0 /* DeferBlockDepsEmitMode.PerBlock */) {
-        const resolvers = [];
-        let hasResolvers = false;
-        for (const deps of meta.defer.blocks.values()) {
-            // Note: we need to push a `null` even if there are no dependencies, because matching of
-            // defer resolver functions to defer blocks happens by index and not adding an array
-            // entry for a block can throw off the blocks coming after it.
-            if (deps === null) {
-                resolvers.push(project_tsconfig_paths.literal(null));
-            }
-            else {
-                resolvers.push(deps);
-                hasResolvers = true;
-            }
-        }
-        // If *all* the resolvers are null, we can skip the field.
-        if (hasResolvers) {
-            definitionMap.set('deferBlockDependencies', project_tsconfig_paths.literalArr(resolvers));
-        }
-    }
-    else {
-        throw new Error('Unsupported defer function emit mode in partial compilation');
-    }
-    return definitionMap;
-}
-function getTemplateExpression(template, templateInfo) {
-    // If the template has been defined using a direct literal, we use that expression directly
-    // without any modifications. This is ensures proper source mapping from the partially
-    // compiled code to the source file declaring the template. Note that this does not capture
-    // template literals referenced indirectly through an identifier.
-    if (templateInfo.inlineTemplateLiteralExpression !== null) {
-        return templateInfo.inlineTemplateLiteralExpression;
-    }
-    // If the template is defined inline but not through a literal, the template has been resolved
-    // through static interpretation. We create a literal but cannot provide any source span. Note
-    // that we cannot use the expression defining the template because the linker expects the template
-    // to be defined as a literal in the declaration.
-    if (templateInfo.isInline) {
-        return project_tsconfig_paths.literal(templateInfo.content, null, null);
-    }
-    // The template is external so we must synthesize an expression node with
-    // the appropriate source-span.
-    const contents = templateInfo.content;
-    const file = new project_tsconfig_paths.ParseSourceFile(contents, templateInfo.sourceUrl);
-    const start = new project_tsconfig_paths.ParseLocation(file, 0, 0, 0);
-    const end = computeEndLocation(file, contents);
-    const span = new project_tsconfig_paths.ParseSourceSpan(start, end);
-    return project_tsconfig_paths.literal(contents, null, span);
-}
-function computeEndLocation(file, contents) {
-    const length = contents.length;
-    let lineStart = 0;
-    let lastLineStart = 0;
-    let line = 0;
-    do {
-        lineStart = contents.indexOf('\n', lastLineStart);
-        if (lineStart !== -1) {
-            lastLineStart = lineStart + 1;
-            line++;
-        }
-    } while (lineStart !== -1);
-    return new project_tsconfig_paths.ParseLocation(file, length, line, length - lastLineStart);
-}
-function compileUsedDependenciesMetadata(meta) {
-    const wrapType = meta.declarationListEmitMode !== 0 /* DeclarationListEmitMode.Direct */
-        ? project_tsconfig_paths.generateForwardRef
-        : (expr) => expr;
-    if (meta.declarationListEmitMode === 3 /* DeclarationListEmitMode.RuntimeResolved */) {
-        throw new Error(`Unsupported emit mode`);
-    }
-    return toOptionalLiteralArray(meta.declarations, (decl) => {
-        switch (decl.kind) {
-            case project_tsconfig_paths.R3TemplateDependencyKind.Directive:
-                const dirMeta = new project_tsconfig_paths.DefinitionMap();
-                dirMeta.set('kind', project_tsconfig_paths.literal(decl.isComponent ? 'component' : 'directive'));
-                dirMeta.set('type', wrapType(decl.type));
-                dirMeta.set('selector', project_tsconfig_paths.literal(decl.selector));
-                dirMeta.set('inputs', toOptionalLiteralArray(decl.inputs, project_tsconfig_paths.literal));
-                dirMeta.set('outputs', toOptionalLiteralArray(decl.outputs, project_tsconfig_paths.literal));
-                dirMeta.set('exportAs', toOptionalLiteralArray(decl.exportAs, project_tsconfig_paths.literal));
-                return dirMeta.toLiteralMap();
-            case project_tsconfig_paths.R3TemplateDependencyKind.Pipe:
-                const pipeMeta = new project_tsconfig_paths.DefinitionMap();
-                pipeMeta.set('kind', project_tsconfig_paths.literal('pipe'));
-                pipeMeta.set('type', wrapType(decl.type));
-                pipeMeta.set('name', project_tsconfig_paths.literal(decl.name));
-                return pipeMeta.toLiteralMap();
-            case project_tsconfig_paths.R3TemplateDependencyKind.NgModule:
-                const ngModuleMeta = new project_tsconfig_paths.DefinitionMap();
-                ngModuleMeta.set('kind', project_tsconfig_paths.literal('ngmodule'));
-                ngModuleMeta.set('type', wrapType(decl.type));
-                return ngModuleMeta.toLiteralMap();
-        }
-    });
-}
-class BlockPresenceVisitor extends project_tsconfig_paths.RecursiveVisitor {
-    hasBlocks = false;
-    visitDeferredBlock() {
-        this.hasBlocks = true;
-    }
-    visitDeferredBlockPlaceholder() {
-        this.hasBlocks = true;
-    }
-    visitDeferredBlockLoading() {
-        this.hasBlocks = true;
-    }
-    visitDeferredBlockError() {
-        this.hasBlocks = true;
-    }
-    visitIfBlock() {
-        this.hasBlocks = true;
-    }
-    visitIfBlockBranch() {
-        this.hasBlocks = true;
-    }
-    visitForLoopBlock() {
-        this.hasBlocks = true;
-    }
-    visitForLoopBlockEmpty() {
-        this.hasBlocks = true;
-    }
-    visitSwitchBlock() {
-        this.hasBlocks = true;
-    }
-    visitSwitchBlockCase() {
-        this.hasBlocks = true;
-    }
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
-function compileDeclareFactoryFunction(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', meta.type.value);
-    definitionMap.set('deps', compileDependencies(meta.deps));
-    definitionMap.set('target', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.FactoryTarget).prop(project_tsconfig_paths.FactoryTarget[meta.target]));
-    return {
-        expression: project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareFactory).callFn([definitionMap.toLiteralMap()]),
-        statements: [],
-        type: project_tsconfig_paths.createFactoryType(meta),
-    };
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION$3 = '12.0.0';
-/**
- * Compile a Injectable declaration defined by the `R3InjectableMetadata`.
- */
-function compileDeclareInjectableFromMetadata(meta) {
-    const definitionMap = createInjectableDefinitionMap(meta);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareInjectable).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createInjectableType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for a Injectable into a `DefinitionMap`.
- */
-function createInjectableDefinitionMap(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', meta.type.value);
-    // Only generate providedIn property if it has a non-null value
-    if (meta.providedIn !== undefined) {
-        const providedIn = project_tsconfig_paths.convertFromMaybeForwardRefExpression(meta.providedIn);
-        if (providedIn.value !== null) {
-            definitionMap.set('providedIn', providedIn);
-        }
-    }
-    if (meta.useClass !== undefined) {
-        definitionMap.set('useClass', project_tsconfig_paths.convertFromMaybeForwardRefExpression(meta.useClass));
-    }
-    if (meta.useExisting !== undefined) {
-        definitionMap.set('useExisting', project_tsconfig_paths.convertFromMaybeForwardRefExpression(meta.useExisting));
-    }
-    if (meta.useValue !== undefined) {
-        definitionMap.set('useValue', project_tsconfig_paths.convertFromMaybeForwardRefExpression(meta.useValue));
-    }
-    // Factories do not contain `ForwardRef`s since any types are already wrapped in a function call
-    // so the types will not be eagerly evaluated. Therefore we do not need to process this expression
-    // with `convertFromProviderExpression()`.
-    if (meta.useFactory !== undefined) {
-        definitionMap.set('useFactory', meta.useFactory);
-    }
-    if (meta.deps !== undefined) {
-        definitionMap.set('deps', project_tsconfig_paths.literalArr(meta.deps.map(compileDependency)));
-    }
-    return definitionMap;
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION$2 = '12.0.0';
-function compileDeclareInjectorFromMetadata(meta) {
-    const definitionMap = createInjectorDefinitionMap(meta);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareInjector).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createInjectorType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for an Injector into a `DefinitionMap`.
- */
-function createInjectorDefinitionMap(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', meta.type.value);
-    definitionMap.set('providers', meta.providers);
-    if (meta.imports.length > 0) {
-        definitionMap.set('imports', project_tsconfig_paths.literalArr(meta.imports));
-    }
-    return definitionMap;
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION$1 = '14.0.0';
-function compileDeclareNgModuleFromMetadata(meta) {
-    const definitionMap = createNgModuleDefinitionMap(meta);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declareNgModule).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createNgModuleType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for an NgModule into a `DefinitionMap`.
- */
-function createNgModuleDefinitionMap(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    if (meta.kind === project_tsconfig_paths.R3NgModuleMetadataKind.Local) {
-        throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
-    }
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    definitionMap.set('type', meta.type.value);
-    // We only generate the keys in the metadata if the arrays contain values.
-    // We must wrap the arrays inside a function if any of the values are a forward reference to a
-    // not-yet-declared class. This is to support JIT execution of the `ɵɵngDeclareNgModule()` call.
-    // In the linker these wrappers are stripped and then reapplied for the `ɵɵdefineNgModule()` call.
-    if (meta.bootstrap.length > 0) {
-        definitionMap.set('bootstrap', project_tsconfig_paths.refsToArray(meta.bootstrap, meta.containsForwardDecls));
-    }
-    if (meta.declarations.length > 0) {
-        definitionMap.set('declarations', project_tsconfig_paths.refsToArray(meta.declarations, meta.containsForwardDecls));
-    }
-    if (meta.imports.length > 0) {
-        definitionMap.set('imports', project_tsconfig_paths.refsToArray(meta.imports, meta.containsForwardDecls));
-    }
-    if (meta.exports.length > 0) {
-        definitionMap.set('exports', project_tsconfig_paths.refsToArray(meta.exports, meta.containsForwardDecls));
-    }
-    if (meta.schemas !== null && meta.schemas.length > 0) {
-        definitionMap.set('schemas', project_tsconfig_paths.literalArr(meta.schemas.map((ref) => ref.value)));
-    }
-    if (meta.id !== null) {
-        definitionMap.set('id', meta.id);
-    }
-    return definitionMap;
-}
-
-/**
- * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
- * must update this constant to prevent old partial-linkers from incorrectly processing the
- * declaration.
- *
- * Do not include any prerelease in these versions as they are ignored.
- */
-const MINIMUM_PARTIAL_LINKER_VERSION = '14.0.0';
-/**
- * Compile a Pipe declaration defined by the `R3PipeMetadata`.
- */
-function compileDeclarePipeFromMetadata(meta) {
-    const definitionMap = createPipeDefinitionMap(meta);
-    const expression = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.declarePipe).callFn([definitionMap.toLiteralMap()]);
-    const type = project_tsconfig_paths.createPipeType(meta);
-    return { expression, type, statements: [] };
-}
-/**
- * Gathers the declaration fields for a Pipe into a `DefinitionMap`.
- */
-function createPipeDefinitionMap(meta) {
-    const definitionMap = new project_tsconfig_paths.DefinitionMap();
-    definitionMap.set('minVersion', project_tsconfig_paths.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', project_tsconfig_paths.literal('21.0.0-next.9+sha-04dd75b'));
-    definitionMap.set('ngImport', project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.core));
-    // e.g. `type: MyPipe`
-    definitionMap.set('type', meta.type.value);
-    if (meta.isStandalone !== undefined) {
-        definitionMap.set('isStandalone', project_tsconfig_paths.literal(meta.isStandalone));
-    }
-    // e.g. `name: "myPipe"`
-    definitionMap.set('name', project_tsconfig_paths.literal(meta.pipeName ?? meta.name));
-    if (meta.pure === false) {
-        // e.g. `pure: false`
-        definitionMap.set('pure', project_tsconfig_paths.literal(meta.pure));
-    }
-    return definitionMap;
-}
-
-/**
- * Generate an ngDevMode guarded call to setClassDebugInfo with the debug info about the class
- * (e.g., the file name in which the class is defined)
- */
-function compileClassDebugInfo(debugInfo) {
-    const debugInfoObject = {
-        className: debugInfo.className,
-    };
-    // Include file path and line number only if the file relative path is calculated successfully.
-    if (debugInfo.filePath) {
-        debugInfoObject.filePath = debugInfo.filePath;
-        debugInfoObject.lineNumber = debugInfo.lineNumber;
-    }
-    // Include forbidOrphanRendering only if it's set to true (to reduce generated code)
-    if (debugInfo.forbidOrphanRendering) {
-        debugInfoObject.forbidOrphanRendering = project_tsconfig_paths.literal(true);
-    }
-    const fnCall = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.setClassDebugInfo)
-        .callFn([debugInfo.type, project_tsconfig_paths.mapLiteral(debugInfoObject)]);
-    const iife = project_tsconfig_paths.arrowFn([], [project_tsconfig_paths.devOnlyGuardedExpression(fnCall).toStmt()]);
-    return iife.callFn([]);
-}
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-/**
- * Compiles the expression that initializes HMR for a class.
- * @param meta HMR metadata extracted from the class.
- */
-function compileHmrInitializer(meta) {
-    const moduleName = 'm';
-    const dataName = 'd';
-    const timestampName = 't';
-    const idName = 'id';
-    const importCallbackName = `${meta.className}_HmrLoad`;
-    const namespaces = meta.namespaceDependencies.map((dep) => {
-        return new project_tsconfig_paths.ExternalExpr({ moduleName: dep.moduleName, name: null });
-    });
-    // m.default
-    const defaultRead = project_tsconfig_paths.variable(moduleName).prop('default');
-    // ɵɵreplaceMetadata(Comp, m.default, [...namespaces], [...locals], import.meta, id);
-    const replaceCall = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.replaceMetadata)
-        .callFn([
-        meta.type,
-        defaultRead,
-        project_tsconfig_paths.literalArr(namespaces),
-        project_tsconfig_paths.literalArr(meta.localDependencies.map((l) => l.runtimeRepresentation)),
-        project_tsconfig_paths.variable('import').prop('meta'),
-        project_tsconfig_paths.variable(idName),
-    ]);
-    // (m) => m.default && ɵɵreplaceMetadata(...)
-    const replaceCallback = project_tsconfig_paths.arrowFn([new project_tsconfig_paths.FnParam(moduleName)], defaultRead.and(replaceCall));
-    // getReplaceMetadataURL(id, timestamp, import.meta.url)
-    const url = project_tsconfig_paths.importExpr(project_tsconfig_paths.Identifiers.getReplaceMetadataURL)
-        .callFn([
-        project_tsconfig_paths.variable(idName),
-        project_tsconfig_paths.variable(timestampName),
-        project_tsconfig_paths.variable('import').prop('meta').prop('url'),
-    ]);
-    // function Cmp_HmrLoad(t) {
-    //   import(/* @vite-ignore */ url).then((m) => m.default && replaceMetadata(...));
-    // }
-    const importCallback = new project_tsconfig_paths.DeclareFunctionStmt(importCallbackName, [new project_tsconfig_paths.FnParam(timestampName)], [
-        // The vite-ignore special comment is required to prevent Vite from generating a superfluous
-        // warning for each usage within the development code. If Vite provides a method to
-        // programmatically avoid this warning in the future, this added comment can be removed here.
-        new project_tsconfig_paths.DynamicImportExpr(url, null, '@vite-ignore')
-            .prop('then')
-            .callFn([replaceCallback])
-            .toStmt(),
-    ], null, project_tsconfig_paths.StmtModifier.Final);
-    // (d) => d.id === id && Cmp_HmrLoad(d.timestamp)
-    const updateCallback = project_tsconfig_paths.arrowFn([new project_tsconfig_paths.FnParam(dataName)], project_tsconfig_paths.variable(dataName)
-        .prop('id')
-        .identical(project_tsconfig_paths.variable(idName))
-        .and(project_tsconfig_paths.variable(importCallbackName).callFn([project_tsconfig_paths.variable(dataName).prop('timestamp')])));
-    // Cmp_HmrLoad(Date.now());
-    // Initial call to kick off the loading in order to avoid edge cases with components
-    // coming from lazy chunks that change before the chunk has loaded.
-    const initialCall = project_tsconfig_paths.variable(importCallbackName)
-        .callFn([project_tsconfig_paths.variable('Date').prop('now').callFn([])]);
-    // import.meta.hot
-    const hotRead = project_tsconfig_paths.variable('import').prop('meta').prop('hot');
-    // import.meta.hot.on('angular:component-update', () => ...);
-    const hotListener = hotRead
-        .clone()
-        .prop('on')
-        .callFn([project_tsconfig_paths.literal('angular:component-update'), updateCallback]);
-    return project_tsconfig_paths.arrowFn([], [
-        // const id = <id>;
-        new project_tsconfig_paths.DeclareVarStmt(idName, project_tsconfig_paths.literal(encodeURIComponent(`${meta.filePath}@${meta.className}`)), null, project_tsconfig_paths.StmtModifier.Final),
-        // function Cmp_HmrLoad() {...}.
-        importCallback,
-        // ngDevMode && Cmp_HmrLoad(Date.now());
-        project_tsconfig_paths.devOnlyGuardedExpression(initialCall).toStmt(),
-        // ngDevMode && import.meta.hot && import.meta.hot.on(...)
-        project_tsconfig_paths.devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt(),
-    ])
-        .callFn([]);
-}
-/**
- * Compiles the HMR update callback for a class.
- * @param definitions Compiled definitions for the class (e.g. `defineComponent` calls).
- * @param constantStatements Supporting constants statements that were generated alongside
- *  the definition.
- * @param meta HMR metadata extracted from the class.
- */
-function compileHmrUpdateCallback(definitions, constantStatements, meta) {
-    const namespaces = 'ɵɵnamespaces';
-    const params = [meta.className, namespaces].map((name) => new project_tsconfig_paths.FnParam(name, project_tsconfig_paths.DYNAMIC_TYPE));
-    const body = [];
-    for (const local of meta.localDependencies) {
-        params.push(new project_tsconfig_paths.FnParam(local.name));
-    }
-    // Declare variables that read out the individual namespaces.
-    for (let i = 0; i < meta.namespaceDependencies.length; i++) {
-        body.push(new project_tsconfig_paths.DeclareVarStmt(meta.namespaceDependencies[i].assignedName, project_tsconfig_paths.variable(namespaces).key(project_tsconfig_paths.literal(i)), project_tsconfig_paths.DYNAMIC_TYPE, project_tsconfig_paths.StmtModifier.Final));
-    }
-    body.push(...constantStatements);
-    for (const field of definitions) {
-        if (field.initializer !== null) {
-            body.push(project_tsconfig_paths.variable(meta.className).prop(field.name).set(field.initializer).toStmt());
-            for (const stmt of field.statements) {
-                body.push(stmt);
-            }
-        }
-    }
-    return new project_tsconfig_paths.DeclareFunctionStmt(`${meta.className}_UpdateMetadata`, params, body, null, project_tsconfig_paths.StmtModifier.Final);
-}
 
 // Escape anything that isn't alphanumeric, '/' or '_'.
 const CHARS_TO_ESCAPE = /[^a-zA-Z0-9/_]/g;
@@ -1776,7 +72,7 @@ class UnifiedModulesAliasingHost {
         }
         // viaModule is the module it'll actually be imported from.
         const moduleName = this.unifiedModulesHost.fileNameToModuleName(via.fileName, via.fileName);
-        return new project_tsconfig_paths.ExternalExpr({ moduleName, name: this.aliasName(decl, via) });
+        return new o.ExternalExpr({ moduleName, name: this.aliasName(decl, via) });
     }
     /**
      * Generates an alias name based on the full module name of the file which declares the aliased
@@ -4988,7 +3284,7 @@ class IvyTransformationVisitor extends Visitor {
  * A transformer which operates on ts.SourceFiles and applies changes from an `IvyCompilation`.
  */
 function transformIvySourceFile(compilation, context, reflector, importRewriter, localCompilationExtraImportsTracker, file, isCore, isClosureCompilerEnabled, emitDeclarationOnly, recordWrappedNode) {
-    const constantPool = new project_tsconfig_paths.ConstantPool(isClosureCompilerEnabled);
+    const constantPool = new o.ConstantPool(isClosureCompilerEnabled);
     const importManager = new project_tsconfig_paths.ImportManager({
         ...project_tsconfig_paths.presetImportManagerForceNamespaceImports,
         rewriter: importRewriter,
@@ -5521,7 +3817,7 @@ function resolveEncapsulationEnumValueLocally(expr) {
         return null;
     }
     const exprText = expr.getText().trim();
-    for (const key in project_tsconfig_paths.ViewEncapsulation) {
+    for (const key in o.ViewEncapsulation) {
         if (!Number.isNaN(Number(key))) {
             continue;
         }
@@ -5529,7 +3825,7 @@ function resolveEncapsulationEnumValueLocally(expr) {
         // Check whether the enum is imported by name or used by import namespace (e.g.,
         // core.ViewEncapsulation.None)
         if (exprText === suffix || exprText.endsWith(`.${suffix}`)) {
-            const ans = Number(project_tsconfig_paths.ViewEncapsulation[key]);
+            const ans = Number(o.ViewEncapsulation[key]);
             return ans;
         }
     }
@@ -5555,7 +3851,7 @@ function resolveLiteral(decorator, literalCache) {
 }
 
 function compileNgFactoryDefField(metadata) {
-    const res = project_tsconfig_paths.compileFactoryFunction(metadata);
+    const res = o.compileFactoryFunction(metadata);
     return {
         name: 'ɵfac',
         initializer: res.expression,
@@ -5565,7 +3861,7 @@ function compileNgFactoryDefField(metadata) {
     };
 }
 function compileDeclareFactory(metadata) {
-    const res = compileDeclareFactoryFunction(metadata);
+    const res = o.compileDeclareFactoryFunction(metadata);
     return {
         name: 'ɵfac',
         initializer: res.expression,
@@ -5640,13 +3936,13 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
     if (ngClassDecorators.length === 0) {
         return null;
     }
-    const metaDecorators = new project_tsconfig_paths.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngClassDecorators));
+    const metaDecorators = new o.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngClassDecorators));
     // Convert the constructor parameters to metadata, passing null if none are present.
     let metaCtorParameters = null;
     const classCtorParameters = reflection.getConstructorParameters(clazz);
     if (classCtorParameters !== null) {
         const ctorParameters = classCtorParameters.map((param) => ctorParameterToMetadata(param, isCore));
-        metaCtorParameters = new project_tsconfig_paths.ArrowFunctionExpr([], new project_tsconfig_paths.LiteralArrayExpr(ctorParameters));
+        metaCtorParameters = new o.ArrowFunctionExpr([], new o.LiteralArrayExpr(ctorParameters));
     }
     // Do the same for property decorators.
     let metaPropDecorators = null;
@@ -5691,10 +3987,10 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
             duplicateDecoratedMembers.map((member) => member.name).join(', '));
     }
     if (decoratedMembers.length > 0) {
-        metaPropDecorators = project_tsconfig_paths.literalMap(decoratedMembers);
+        metaPropDecorators = o.literalMap(decoratedMembers);
     }
     return {
-        type: new project_tsconfig_paths.WrappedNodeExpr(id),
+        type: new o.WrappedNodeExpr(id),
         decorators: metaDecorators,
         ctorParameters: metaCtorParameters,
         propDecorators: metaPropDecorators,
@@ -5708,7 +4004,7 @@ function ctorParameterToMetadata(param, isCore) {
     // its type is undefined.
     const type = param.typeValueReference.kind !== 2 /* TypeValueReferenceKind.UNAVAILABLE */
         ? project_tsconfig_paths.valueReferenceToExpression(param.typeValueReference)
-        : new project_tsconfig_paths.LiteralExpr(undefined);
+        : new o.LiteralExpr(undefined);
     const mapEntries = [
         { key: 'type', value: type, quoted: false },
     ];
@@ -5717,10 +4013,10 @@ function ctorParameterToMetadata(param, isCore) {
         const ngDecorators = param.decorators
             .filter((dec) => isAngularDecorator$1(dec, isCore))
             .map((decorator) => decoratorToMetadata(decorator));
-        const value = new project_tsconfig_paths.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngDecorators));
+        const value = new o.WrappedNodeExpr(ts.factory.createArrayLiteralExpression(ngDecorators));
         mapEntries.push({ key: 'decorators', value, quoted: false });
     }
-    return project_tsconfig_paths.literalMap(mapEntries);
+    return o.literalMap(mapEntries);
 }
 /**
  * Convert a reflected class member to metadata.
@@ -5728,8 +4024,8 @@ function ctorParameterToMetadata(param, isCore) {
 function decoratedClassMemberToMetadata(decorators, isCore) {
     const ngDecorators = decorators
         .filter((dec) => isAngularDecorator$1(dec, isCore))
-        .map((decorator) => new project_tsconfig_paths.WrappedNodeExpr(decoratorToMetadata(decorator)));
-    return new project_tsconfig_paths.LiteralArrayExpr(ngDecorators);
+        .map((decorator) => new o.WrappedNodeExpr(decoratorToMetadata(decorator)));
+    return new o.LiteralArrayExpr(ngDecorators);
 }
 /**
  * Convert a reflected decorator to metadata.
@@ -5783,10 +4079,10 @@ function extractClassDebugInfo(clazz, reflection, compilerHost, rootDirs, forbid
     const srcFile = clazz.getSourceFile();
     const srcFileMaybeRelativePath = getProjectRelativePath(srcFile.fileName, rootDirs, compilerHost);
     return {
-        type: new project_tsconfig_paths.WrappedNodeExpr(clazz.name),
-        className: project_tsconfig_paths.literal(clazz.name.getText()),
-        filePath: srcFileMaybeRelativePath ? project_tsconfig_paths.literal(srcFileMaybeRelativePath) : null,
-        lineNumber: project_tsconfig_paths.literal(srcFile.getLineAndCharacterOfPosition(clazz.name.pos).line + 1),
+        type: new o.WrappedNodeExpr(clazz.name),
+        className: o.literal(clazz.name.getText()),
+        filePath: srcFileMaybeRelativePath ? o.literal(srcFileMaybeRelativePath) : null,
+        lineNumber: o.literal(srcFile.getLineAndCharacterOfPosition(clazz.name.pos).line + 1),
         forbidOrphanRendering,
     };
 }
@@ -5817,10 +4113,10 @@ function extractSchemas(rawExpr, evaluator, context) {
         // renamed when the user imported it, these names will match.
         switch (id.text) {
             case 'CUSTOM_ELEMENTS_SCHEMA':
-                schemas.push(project_tsconfig_paths.CUSTOM_ELEMENTS_SCHEMA);
+                schemas.push(o.CUSTOM_ELEMENTS_SCHEMA);
                 break;
             case 'NO_ERRORS_SCHEMA':
-                schemas.push(project_tsconfig_paths.NO_ERRORS_SCHEMA);
+                schemas.push(o.NO_ERRORS_SCHEMA);
                 break;
             default:
                 throw project_tsconfig_paths.createValueHasWrongTypeError(rawExpr, schemaRef, `'${schemaRef.debugName}' is not a valid ${context} schema`);
@@ -5845,7 +4141,7 @@ function compileInputTransformFields(inputs) {
         if (input.transform) {
             extraFields.push({
                 name: `ngAcceptInputType_${input.classPropertyName}`,
-                type: project_tsconfig_paths.transplantedType(input.transform.type),
+                type: o.outputAst.transplantedType(input.transform.type),
                 statements: [],
                 initializer: null,
                 deferrableImports: null,
@@ -6128,7 +4424,7 @@ class SemanticDepGraphUpdater {
     }
 }
 function getImportPath(expr) {
-    if (expr instanceof project_tsconfig_paths.ExternalExpr) {
+    if (expr instanceof o.ExternalExpr) {
         return `${expr.value.moduleName}\$${expr.value.name}`;
     }
     else {
@@ -6896,7 +5192,7 @@ class LocalModuleScopeRegistry {
                 return;
             }
             if (!reexportMap.has(exportName)) {
-                if (exportRef.alias && exportRef.alias instanceof project_tsconfig_paths.ExternalExpr) {
+                if (exportRef.alias && exportRef.alias instanceof o.ExternalExpr) {
                     reexports.push({
                         fromModule: exportRef.alias.value.moduleName,
                         symbolName: exportRef.alias.value.name,
@@ -6907,7 +5203,7 @@ class LocalModuleScopeRegistry {
                     const emittedRef = this.refEmitter.emit(exportRef.cloneWithNoIdentifiers(), sourceFile);
                     project_tsconfig_paths.assertSuccessfulReferenceEmit(emittedRef, ngModuleRef.node.name, 'class');
                     const expr = emittedRef.expression;
-                    if (!(expr instanceof project_tsconfig_paths.ExternalExpr) ||
+                    if (!(expr instanceof o.ExternalExpr) ||
                         expr.value.moduleName === null ||
                         expr.value.name === null) {
                         throw new Error('Expected ExternalExpr');
@@ -7232,7 +5528,7 @@ class TypeCheckScopeRegistry {
         return isExplicitlyDeferred === true ? { ...meta, isExplicitlyDeferred } : meta;
     }
     getSelectorMatcher(allDependencies) {
-        const matcher = new project_tsconfig_paths.SelectorMatcher();
+        const matcher = new o.SelectorMatcher();
         for (const meta of allDependencies) {
             if (meta.kind === project_tsconfig_paths.MetaKind.Directive && meta.selector !== null) {
                 const extMeta = this.getTypeCheckDirectiveMetadata(meta.ref);
@@ -7241,7 +5537,7 @@ class TypeCheckScopeRegistry {
                 }
                 // Carry over the `isExplicitlyDeferred` flag from the dependency info.
                 const directiveMeta = this.applyExplicitlyDeferredFlag(extMeta, meta.isExplicitlyDeferred);
-                matcher.addSelectables(project_tsconfig_paths.CssSelector.parse(meta.selector), this.combineWithHostDirectives(directiveMeta));
+                matcher.addSelectables(o.CssSelector.parse(meta.selector), this.combineWithHostDirectives(directiveMeta));
             }
         }
         return matcher;
@@ -7254,7 +5550,7 @@ class TypeCheckScopeRegistry {
                 registry.set(name, this.combineWithHostDirectives(extMeta));
             }
         }
-        return new project_tsconfig_paths.SelectorlessMatcher(registry);
+        return new o.SelectorlessMatcher(registry);
     }
     combineWithHostDirectives(meta) {
         return [...this.hostDirectivesResolver.resolve(meta), meta];
@@ -8042,7 +6338,7 @@ class DirectiveDecoratorHandler {
         }
         const hostElement = project_tsconfig_paths.createHostElement('directive', meta.meta.selector, node, meta.hostBindingNodes.literal, meta.hostBindingNodes.bindingDecorators, meta.hostBindingNodes.listenerDecorators);
         if (hostElement !== null && scope.directivesOnHost !== null) {
-            const binder = new project_tsconfig_paths.R3TargetBinder(scope.matcher);
+            const binder = new o.R3TargetBinder(scope.matcher);
             const hostBindingsContext = {
                 node: hostElement,
                 directives: scope.directivesOnHost,
@@ -8060,7 +6356,7 @@ class DirectiveDecoratorHandler {
         }
         const diagnostics = [];
         if (analysis.providersRequiringFactory !== null &&
-            analysis.meta.providers instanceof project_tsconfig_paths.WrappedNodeExpr) {
+            analysis.meta.providers instanceof o.WrappedNodeExpr) {
             const providerDiagnostics = project_tsconfig_paths.getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
             diagnostics.push(...providerDiagnostics);
         }
@@ -8082,29 +6378,29 @@ class DirectiveDecoratorHandler {
         return { data: {} };
     }
     compileFull(node, analysis, resolution, pool) {
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Directive));
-        const def = project_tsconfig_paths.compileDirectiveFromMetadata(analysis.meta, pool, project_tsconfig_paths.makeBindingParser());
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Directive));
+        const def = o.compileDirectiveFromMetadata(analysis.meta, pool, o.makeBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
-            ? compileClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵdir', inputTransformFields, null /* deferrableImports */);
     }
     compilePartial(node, analysis, resolution) {
-        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Directive));
-        const def = compileDeclareDirectiveFromMetadata(analysis.meta);
+        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Directive));
+        const def = o.compileDeclareDirectiveFromMetadata(analysis.meta);
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
-            ? compileDeclareClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileDeclareClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵdir', inputTransformFields, null /* deferrableImports */);
     }
     compileLocal(node, analysis, resolution, pool) {
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Directive));
-        const def = project_tsconfig_paths.compileDirectiveFromMetadata(analysis.meta, pool, project_tsconfig_paths.makeBindingParser());
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Directive));
+        const def = o.compileDirectiveFromMetadata(analysis.meta, pool, o.makeBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
-            ? compileClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵdir', inputTransformFields, null /* deferrableImports */);
     }
@@ -8506,7 +6802,7 @@ class NgModuleDecoratorHandler {
         if (ngModule.has('id')) {
             const idExpr = ngModule.get('id');
             if (!isModuleIdExpression(idExpr)) {
-                id = new project_tsconfig_paths.WrappedNodeExpr(idExpr);
+                id = new o.WrappedNodeExpr(idExpr);
             }
             else {
                 const diag = project_tsconfig_paths.makeDiagnostic(project_tsconfig_paths.ErrorCode.WARN_NGMODULE_ID_UNNECESSARY, idExpr, `Using 'module.id' for NgModule.id is a common anti-pattern that is ignored by the Angular compiler.`);
@@ -8537,23 +6833,23 @@ class NgModuleDecoratorHandler {
         let ngModuleMetadata;
         if (allowUnresolvedReferences) {
             ngModuleMetadata = {
-                kind: project_tsconfig_paths.R3NgModuleMetadataKind.Local,
+                kind: o.R3NgModuleMetadataKind.Local,
                 type,
-                bootstrapExpression: rawBootstrap ? new project_tsconfig_paths.WrappedNodeExpr(rawBootstrap) : null,
-                declarationsExpression: rawDeclarations ? new project_tsconfig_paths.WrappedNodeExpr(rawDeclarations) : null,
-                exportsExpression: rawExports ? new project_tsconfig_paths.WrappedNodeExpr(rawExports) : null,
-                importsExpression: rawImports ? new project_tsconfig_paths.WrappedNodeExpr(rawImports) : null,
+                bootstrapExpression: rawBootstrap ? new o.WrappedNodeExpr(rawBootstrap) : null,
+                declarationsExpression: rawDeclarations ? new o.WrappedNodeExpr(rawDeclarations) : null,
+                exportsExpression: rawExports ? new o.WrappedNodeExpr(rawExports) : null,
+                importsExpression: rawImports ? new o.WrappedNodeExpr(rawImports) : null,
                 id,
                 // Use `ɵɵsetNgModuleScope` to patch selector scopes onto the generated definition in a
                 // tree-shakeable way.
-                selectorScopeMode: project_tsconfig_paths.R3SelectorScopeMode.SideEffect,
+                selectorScopeMode: o.R3SelectorScopeMode.SideEffect,
                 // TODO: to be implemented as a part of FW-1004.
                 schemas: [],
             };
         }
         else {
             ngModuleMetadata = {
-                kind: project_tsconfig_paths.R3NgModuleMetadataKind.Global,
+                kind: o.R3NgModuleMetadataKind.Global,
                 type,
                 bootstrap,
                 declarations,
@@ -8568,8 +6864,8 @@ class NgModuleDecoratorHandler {
                 // Use `ɵɵsetNgModuleScope` to patch selector scopes onto the generated definition in a
                 // tree-shakeable way.
                 selectorScopeMode: this.includeSelectorScope
-                    ? project_tsconfig_paths.R3SelectorScopeMode.SideEffect
-                    : project_tsconfig_paths.R3SelectorScopeMode.Omit,
+                    ? o.R3SelectorScopeMode.SideEffect
+                    : o.R3SelectorScopeMode.Omit,
                 // TODO: to be implemented as a part of FW-1004.
                 schemas: [],
             };
@@ -8580,7 +6876,7 @@ class NgModuleDecoratorHandler {
         // and don't include the providers if it doesn't which saves us a few bytes.
         if (rawProviders !== null &&
             (!ts.isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
-            wrappedProviders = new project_tsconfig_paths.WrappedNodeExpr(this.annotateForClosureCompiler
+            wrappedProviders = new o.WrappedNodeExpr(this.annotateForClosureCompiler
                 ? project_tsconfig_paths.wrapFunctionExpressionsInParens(rawProviders)
                 : rawProviders);
         }
@@ -8632,12 +6928,12 @@ class NgModuleDecoratorHandler {
                 if (ts.isArrayLiteralExpression(exp)) {
                     // If array expression then add it entry-by-entry to the injector imports
                     if (exp.elements) {
-                        injectorMetadata.imports.push(...exp.elements.map((n) => new project_tsconfig_paths.WrappedNodeExpr(n)));
+                        injectorMetadata.imports.push(...exp.elements.map((n) => new o.WrappedNodeExpr(n)));
                     }
                 }
                 else {
                     // if not array expression then add it as is to the injector's imports field.
-                    injectorMetadata.imports.push(new project_tsconfig_paths.WrappedNodeExpr(exp));
+                    injectorMetadata.imports.push(new o.WrappedNodeExpr(exp));
                 }
             }
         }
@@ -8646,7 +6942,7 @@ class NgModuleDecoratorHandler {
             type,
             typeArgumentCount: 0,
             deps: project_tsconfig_paths.getValidConstructorDependencies(node, this.reflector, this.isCore),
-            target: project_tsconfig_paths.FactoryTarget.NgModule,
+            target: o.FactoryTarget.NgModule,
         };
         // Remote scoping is used when adding imports to a component file would create a cycle. In such
         // circumstances the component scope is monkey-patched from the NgModule file instead.
@@ -8745,7 +7041,7 @@ class NgModuleDecoratorHandler {
             if (topLevelImport.hasModuleWithProviders) {
                 // We have no choice but to emit expressions which contain MWPs, as we cannot filter on
                 // individual references.
-                data.injectorImports.push(new project_tsconfig_paths.WrappedNodeExpr(topLevelImport.expression));
+                data.injectorImports.push(new o.WrappedNodeExpr(topLevelImport.expression));
                 continue;
             }
             const refsToEmit = [];
@@ -8788,7 +7084,7 @@ class NgModuleDecoratorHandler {
             if (refsToEmit.length === topLevelImport.resolvedReferences.length) {
                 // All references within this top-level import should be emitted, so just use the user's
                 // expression.
-                data.injectorImports.push(new project_tsconfig_paths.WrappedNodeExpr(topLevelImport.expression));
+                data.injectorImports.push(new o.WrappedNodeExpr(topLevelImport.expression));
             }
             else {
                 // Some references have been filtered out. Emit references to individual classes.
@@ -8840,37 +7136,37 @@ class NgModuleDecoratorHandler {
     }
     compileFull(node, { inj, mod, fac, classMetadata, declarations, remoteScopesMayRequireCycleProtection, }, { injectorImports }) {
         const factoryFn = compileNgFactoryDefField(fac);
-        const ngInjectorDef = project_tsconfig_paths.compileInjector({
+        const ngInjectorDef = o.compileInjector({
             ...inj,
             imports: injectorImports,
         });
-        const ngModuleDef = project_tsconfig_paths.compileNgModule(mod);
+        const ngModuleDef = o.compileNgModule(mod);
         const statements = ngModuleDef.statements;
-        const metadata = classMetadata !== null ? compileClassMetadata(classMetadata) : null;
+        const metadata = classMetadata !== null ? o.compileClassMetadata(classMetadata) : null;
         this.insertMetadataStatement(statements, metadata);
         this.appendRemoteScopingStatements(statements, node, declarations, remoteScopesMayRequireCycleProtection);
         return this.compileNgModule(factoryFn, ngInjectorDef, ngModuleDef);
     }
     compilePartial(node, { inj, fac, mod, classMetadata }, { injectorImports }) {
         const factoryFn = compileDeclareFactory(fac);
-        const injectorDef = compileDeclareInjectorFromMetadata({
+        const injectorDef = o.compileDeclareInjectorFromMetadata({
             ...inj,
             imports: injectorImports,
         });
-        const ngModuleDef = compileDeclareNgModuleFromMetadata(mod);
-        const metadata = classMetadata !== null ? compileDeclareClassMetadata(classMetadata) : null;
+        const ngModuleDef = o.compileDeclareNgModuleFromMetadata(mod);
+        const metadata = classMetadata !== null ? o.compileDeclareClassMetadata(classMetadata) : null;
         this.insertMetadataStatement(ngModuleDef.statements, metadata);
         // NOTE: no remote scoping required as this is banned in partial compilation.
         return this.compileNgModule(factoryFn, injectorDef, ngModuleDef);
     }
     compileLocal(node, { inj, mod, fac, classMetadata, declarations, remoteScopesMayRequireCycleProtection, }) {
         const factoryFn = compileNgFactoryDefField(fac);
-        const ngInjectorDef = project_tsconfig_paths.compileInjector({
+        const ngInjectorDef = o.compileInjector({
             ...inj,
         });
-        const ngModuleDef = project_tsconfig_paths.compileNgModule(mod);
+        const ngModuleDef = o.compileNgModule(mod);
         const statements = ngModuleDef.statements;
-        const metadata = classMetadata !== null ? compileClassMetadata(classMetadata) : null;
+        const metadata = classMetadata !== null ? o.compileClassMetadata(classMetadata) : null;
         this.insertMetadataStatement(statements, metadata);
         this.appendRemoteScopingStatements(statements, node, declarations, remoteScopesMayRequireCycleProtection);
         return this.compileNgModule(factoryFn, ngInjectorDef, ngModuleDef);
@@ -8906,19 +7202,19 @@ class NgModuleDecoratorHandler {
                     project_tsconfig_paths.assertSuccessfulReferenceEmit(type, node, 'pipe');
                     return type.expression;
                 });
-                const directiveArray = new project_tsconfig_paths.LiteralArrayExpr(directives);
-                const pipesArray = new project_tsconfig_paths.LiteralArrayExpr(pipes);
+                const directiveArray = new o.LiteralArrayExpr(directives);
+                const pipesArray = new o.LiteralArrayExpr(pipes);
                 const directiveExpr = remoteScopesMayRequireCycleProtection && directives.length > 0
-                    ? new project_tsconfig_paths.FunctionExpr([], [new project_tsconfig_paths.ReturnStatement(directiveArray)])
+                    ? new o.FunctionExpr([], [new o.ReturnStatement(directiveArray)])
                     : directiveArray;
                 const pipesExpr = remoteScopesMayRequireCycleProtection && pipes.length > 0
-                    ? new project_tsconfig_paths.FunctionExpr([], [new project_tsconfig_paths.ReturnStatement(pipesArray)])
+                    ? new o.FunctionExpr([], [new o.ReturnStatement(pipesArray)])
                     : pipesArray;
                 const componentType = this.refEmitter.emit(decl, context);
                 project_tsconfig_paths.assertSuccessfulReferenceEmit(componentType, node, 'component');
                 const declExpr = componentType.expression;
-                const setComponentScope = new project_tsconfig_paths.ExternalExpr(project_tsconfig_paths.Identifiers.setComponentScope);
-                const callExpr = new project_tsconfig_paths.InvokeFunctionExpr(setComponentScope, [
+                const setComponentScope = new o.ExternalExpr(o.R3Identifiers.setComponentScope);
+                const callExpr = new o.InvokeFunctionExpr(setComponentScope, [
                     declExpr,
                     directiveExpr,
                     pipesExpr,
@@ -9189,7 +7485,7 @@ function createEmptyTemplate(componentClass, component, containingFile) {
         styles: [],
         styleUrls: [],
         ngContentSelectors: [],
-        file: new project_tsconfig_paths.ParseSourceFile('', ''),
+        file: new o.ParseSourceFile('', ''),
         sourceMapping: templateUrl
             ? { type: 'direct', node: template }
             : {
@@ -9229,7 +7525,7 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
         enableLetSyntax: options.enableLetSyntax,
         enableSelectorless: options.enableSelectorless,
     };
-    const parsedTemplate = project_tsconfig_paths.parseTemplate(sourceStr, sourceMapUrl ?? '', {
+    const parsedTemplate = o.parseTemplate(sourceStr, sourceMapUrl ?? '', {
         ...commonParseOptions,
         preserveWhitespaces: template.preserveWhitespaces,
         preserveSignificantWhitespace: options.preserveSignificantWhitespace,
@@ -9248,7 +7544,7 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
     //
     // In order to guarantee the correctness of diagnostics, templates are parsed a second time
     // with the above options set to preserve source mappings.
-    const { nodes: diagNodes } = project_tsconfig_paths.parseTemplate(sourceStr, sourceMapUrl ?? '', {
+    const { nodes: diagNodes } = o.parseTemplate(sourceStr, sourceMapUrl ?? '', {
         ...commonParseOptions,
         preserveWhitespaces: true,
         preserveLineEndings: true,
@@ -9258,7 +7554,7 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
     return {
         ...parsedTemplate,
         diagNodes,
-        file: new project_tsconfig_paths.ParseSourceFile(sourceStr, sourceMapUrl ?? ''),
+        file: new o.ParseSourceFile(sourceStr, sourceMapUrl ?? ''),
     };
 }
 function parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces) {
@@ -9726,336 +8022,6 @@ function isLikelyModuleWithProviders(value) {
  * found in the LICENSE file at https://angular.dev/license
  */
 /**
- * Determines the file-level dependencies that the HMR initializer needs to capture and pass along.
- * @param sourceFile File in which the file is being compiled.
- * @param definition Compiled component definition.
- * @param factory Compiled component factory.
- * @param deferBlockMetadata Metadata about the defer blocks in the component.
- * @param classMetadata Compiled `setClassMetadata` expression, if any.
- * @param debugInfo Compiled `setClassDebugInfo` expression, if any.
- */
-function extractHmrDependencies(node, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator) {
-    const name = ts.isClassDeclaration(node) && node.name ? node.name.text : null;
-    const visitor = new PotentialTopLevelReadsVisitor();
-    const sourceFile = ts.getOriginalNode(node).getSourceFile();
-    // Visit all of the compiled expressions to look for potential
-    // local references that would have to be retained.
-    definition.expression.visitExpression(visitor, null);
-    definition.statements.forEach((statement) => statement.visitStatement(visitor, null));
-    factory.initializer?.visitExpression(visitor, null);
-    factory.statements.forEach((statement) => statement.visitStatement(visitor, null));
-    classMetadata?.visitStatement(visitor, null);
-    debugInfo?.visitStatement(visitor, null);
-    if (deferBlockMetadata.mode === 0 /* DeferBlockDepsEmitMode.PerBlock */) {
-        deferBlockMetadata.blocks.forEach((loader) => loader?.visitExpression(visitor, null));
-    }
-    else {
-        deferBlockMetadata.dependenciesFn?.visitExpression(visitor, null);
-    }
-    // Filter out only the references to defined top-level symbols. This allows us to ignore local
-    // variables inside of functions. Note that we filter out the class name since it is always
-    // defined and it saves us having to repeat this logic wherever the locals are consumed.
-    const availableTopLevel = getTopLevelDeclarationNames(sourceFile);
-    const local = [];
-    const seenLocals = new Set();
-    for (const readNode of visitor.allReads) {
-        const readName = readNode instanceof project_tsconfig_paths.ReadVarExpr ? readNode.name : readNode.text;
-        if (readName !== name && !seenLocals.has(readName) && availableTopLevel.has(readName)) {
-            const runtimeRepresentation = getRuntimeRepresentation(readNode, reflection, evaluator);
-            if (runtimeRepresentation === null) {
-                return null;
-            }
-            local.push({ name: readName, runtimeRepresentation });
-            seenLocals.add(readName);
-        }
-    }
-    return {
-        local,
-        external: Array.from(visitor.namespaceReads, (name, index) => ({
-            moduleName: name,
-            assignedName: `ɵhmr${index}`,
-        })),
-    };
-}
-/**
- * Gets a node that can be used to represent an identifier in the HMR replacement code at runtime.
- */
-function getRuntimeRepresentation(node, reflection, evaluator) {
-    if (node instanceof project_tsconfig_paths.ReadVarExpr) {
-        return project_tsconfig_paths.variable(node.name);
-    }
-    // Const enums can't be passed by reference, because their values are inlined.
-    // Pass in an object literal with all of the values instead.
-    if (isConstEnumReference(node, reflection)) {
-        const evaluated = evaluator.evaluate(node);
-        if (evaluated instanceof Map) {
-            const members = [];
-            for (const [name, value] of evaluated.entries()) {
-                if (value instanceof project_tsconfig_paths.EnumValue &&
-                    (value.resolved == null ||
-                        typeof value.resolved === 'string' ||
-                        typeof value.resolved === 'boolean' ||
-                        typeof value.resolved === 'number')) {
-                    members.push({
-                        key: name,
-                        quoted: false,
-                        value: project_tsconfig_paths.literal(value.resolved),
-                    });
-                }
-                else {
-                    // TS is pretty restrictive about what values can be in a const enum so our evaluator
-                    // should be able to handle them, however if we happen to hit such a case, we return null
-                    // so the HMR update can be invalidated.
-                    return null;
-                }
-            }
-            return project_tsconfig_paths.literalMap(members);
-        }
-    }
-    return project_tsconfig_paths.variable(node.text);
-}
-/**
- * Gets the names of all top-level declarations within the file (imports, declared classes etc).
- * @param sourceFile File in which to search for locals.
- */
-function getTopLevelDeclarationNames(sourceFile) {
-    const results = new Set();
-    // Only look through the top-level statements.
-    for (const node of sourceFile.statements) {
-        // Class, function and const enum declarations need to be captured since they correspond
-        // to runtime code. Intentionally excludes interfaces and type declarations.
-        if (ts.isClassDeclaration(node) ||
-            ts.isFunctionDeclaration(node) ||
-            ts.isEnumDeclaration(node)) {
-            if (node.name) {
-                results.add(node.name.text);
-            }
-            continue;
-        }
-        // Variable declarations.
-        if (ts.isVariableStatement(node)) {
-            for (const decl of node.declarationList.declarations) {
-                trackBindingName(decl.name, results);
-            }
-            continue;
-        }
-        // Import declarations.
-        if (ts.isImportDeclaration(node) && node.importClause) {
-            const importClause = node.importClause;
-            // Skip over type-only imports since they won't be emitted to JS.
-            if (importClause.isTypeOnly) {
-                continue;
-            }
-            // import foo from 'foo'
-            if (importClause.name) {
-                results.add(importClause.name.text);
-            }
-            if (importClause.namedBindings) {
-                const namedBindings = importClause.namedBindings;
-                if (ts.isNamespaceImport(namedBindings)) {
-                    // import * as foo from 'foo';
-                    results.add(namedBindings.name.text);
-                }
-                else {
-                    // import {foo} from 'foo';
-                    namedBindings.elements.forEach((el) => {
-                        if (!el.isTypeOnly) {
-                            results.add(el.name.text);
-                        }
-                    });
-                }
-            }
-            continue;
-        }
-    }
-    return results;
-}
-/**
- * Adds all the variables declared through a `ts.BindingName` to a set of results.
- * @param node Node from which to start searching for variables.
- * @param results Set to which to add the matches.
- */
-function trackBindingName(node, results) {
-    if (ts.isIdentifier(node)) {
-        results.add(node.text);
-    }
-    else {
-        for (const el of node.elements) {
-            if (!ts.isOmittedExpression(el)) {
-                trackBindingName(el.name, results);
-            }
-        }
-    }
-}
-/**
- * Visitor that will traverse an AST looking for potential top-level variable reads.
- * The reads are "potential", because the visitor doesn't account for local variables
- * inside functions.
- */
-class PotentialTopLevelReadsVisitor extends project_tsconfig_paths.RecursiveAstVisitor$1 {
-    allReads = new Set();
-    namespaceReads = new Set();
-    visitExternalExpr(ast, context) {
-        if (ast.value.moduleName !== null) {
-            this.namespaceReads.add(ast.value.moduleName);
-        }
-        super.visitExternalExpr(ast, context);
-    }
-    visitReadVarExpr(ast, context) {
-        this.allReads.add(ast);
-        super.visitReadVarExpr(ast, context);
-    }
-    visitWrappedNodeExpr(ast, context) {
-        if (this.isTypeScriptNode(ast.node)) {
-            this.addAllTopLevelIdentifiers(ast.node);
-        }
-        super.visitWrappedNodeExpr(ast, context);
-    }
-    /**
-     * Traverses a TypeScript AST and tracks all the top-level reads.
-     * @param node Node from which to start the traversal.
-     */
-    addAllTopLevelIdentifiers = (node) => {
-        if (ts.isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
-            this.allReads.add(node);
-        }
-        else {
-            ts.forEachChild(node, this.addAllTopLevelIdentifiers);
-        }
-    };
-    /**
-     * TypeScript identifiers are used both when referring to a variable (e.g. `console.log(foo)`)
-     * and for names (e.g. `{foo: 123}`). This function determines if the identifier is a top-level
-     * variable read, rather than a nested name.
-     * @param identifier Identifier to check.
-     */
-    isTopLevelIdentifierReference(identifier) {
-        let node = identifier;
-        let parent = node.parent;
-        // The parent might be undefined for a synthetic node or if `setParentNodes` is set to false
-        // when the SourceFile was created. We can account for such cases using the type checker, at
-        // the expense of performance. At the moment of writing, we're keeping it simple since the
-        // compiler sets `setParentNodes: true`.
-        if (!parent) {
-            return false;
-        }
-        // Unwrap parenthesized identifiers, but use the closest parenthesized expression
-        // as the reference node so that we can check cases like `{prop: ((value))}`.
-        if (ts.isParenthesizedExpression(parent) && parent.expression === node) {
-            while (parent && ts.isParenthesizedExpression(parent)) {
-                node = parent;
-                parent = parent.parent;
-            }
-        }
-        // Identifier referenced at the top level. Unlikely.
-        if (ts.isSourceFile(parent)) {
-            return true;
-        }
-        // Identifier used inside a call is only top-level if it's an argument.
-        // This also covers decorators since their expression is usually a call.
-        if (ts.isCallExpression(parent)) {
-            return parent.expression === node || parent.arguments.includes(node);
-        }
-        // Identifier used in a nested expression is only top-level if it's the actual expression.
-        if (ts.isExpressionStatement(parent) ||
-            ts.isPropertyAccessExpression(parent) ||
-            ts.isComputedPropertyName(parent) ||
-            ts.isTemplateSpan(parent) ||
-            ts.isSpreadAssignment(parent) ||
-            ts.isSpreadElement(parent) ||
-            ts.isAwaitExpression(parent) ||
-            ts.isNonNullExpression(parent) ||
-            ts.isIfStatement(parent) ||
-            ts.isDoStatement(parent) ||
-            ts.isWhileStatement(parent) ||
-            ts.isSwitchStatement(parent) ||
-            ts.isCaseClause(parent) ||
-            ts.isThrowStatement(parent) ||
-            ts.isNewExpression(parent) ||
-            ts.isExpressionWithTypeArguments(parent)) {
-            return parent.expression === node;
-        }
-        // Identifier used in an array is only top-level if it's one of the elements.
-        if (ts.isArrayLiteralExpression(parent)) {
-            return parent.elements.includes(node);
-        }
-        // If the parent is an initialized node, the identifier is
-        // at the top level if it's the initializer itself.
-        if (ts.isPropertyAssignment(parent) ||
-            ts.isParameter(parent) ||
-            ts.isBindingElement(parent) ||
-            ts.isPropertyDeclaration(parent) ||
-            ts.isEnumMember(parent)) {
-            return parent.initializer === node;
-        }
-        // Identifier in a function is top level if it's either the name or the initializer.
-        if (ts.isVariableDeclaration(parent)) {
-            return parent.name === node || parent.initializer === node;
-        }
-        // Identifier in a declaration is only top level if it's the name.
-        // In shorthand assignments the name is also the value.
-        if (ts.isClassDeclaration(parent) ||
-            ts.isFunctionDeclaration(parent) ||
-            ts.isShorthandPropertyAssignment(parent)) {
-            return parent.name === node;
-        }
-        if (ts.isElementAccessExpression(parent)) {
-            return parent.expression === node || parent.argumentExpression === node;
-        }
-        if (ts.isBinaryExpression(parent)) {
-            return parent.left === node || parent.right === node;
-        }
-        if (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) {
-            return parent.expression === node || parent.initializer === node;
-        }
-        if (ts.isForStatement(parent)) {
-            return (parent.condition === node || parent.initializer === node || parent.incrementor === node);
-        }
-        if (ts.isArrowFunction(parent)) {
-            return parent.body === node;
-        }
-        // It's unlikely that we'll run into imports/exports in this use case.
-        // We handle them since it's simple and for completeness' sake.
-        if (ts.isImportSpecifier(parent) || ts.isExportSpecifier(parent)) {
-            return (parent.propertyName || parent.name) === node;
-        }
-        if (ts.isConditionalExpression(parent)) {
-            return parent.condition === node || parent.whenFalse === node || parent.whenTrue === node;
-        }
-        // Otherwise it's not top-level.
-        return false;
-    }
-    /** Checks if a value is a TypeScript AST node. */
-    isTypeScriptNode(value) {
-        // If this is too permissive, we can also check for `getSourceFile`. This code runs
-        // on a narrow set of use cases so checking for `kind` should be enough.
-        return !!value && typeof value.kind === 'number';
-    }
-}
-/** Checks whether a node is a reference to a const enum. */
-function isConstEnumReference(node, reflection) {
-    const parent = node.parent;
-    // Only check identifiers that are in the form of `Foo.bar` where `Foo` is the node being checked.
-    if (!parent ||
-        !ts.isPropertyAccessExpression(parent) ||
-        parent.expression !== node ||
-        !ts.isIdentifier(parent.name)) {
-        return false;
-    }
-    const declaration = reflection.getDeclarationOfIdentifier(node);
-    return (declaration !== null &&
-        ts.isEnumDeclaration(declaration.node) &&
-        !!declaration.node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ConstKeyword));
-}
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-/**
  * Extracts the HMR metadata for a class declaration.
  * @param clazz Class being analyzed.
  * @param reflection Reflection host.
@@ -10074,12 +8040,12 @@ function extractHmrMetatadata(clazz, reflection, evaluator, compilerHost, rootDi
     const sourceFile = ts.getOriginalNode(clazz).getSourceFile();
     const filePath = getProjectRelativePath(sourceFile.fileName, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
-    const dependencies = extractHmrDependencies(clazz, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator);
+    const dependencies = project_tsconfig_paths.extractHmrDependencies(clazz, definition, factory, deferBlockMetadata, classMetadata, debugInfo, reflection, evaluator);
     if (dependencies === null) {
         return null;
     }
     const meta = {
-        type: new project_tsconfig_paths.WrappedNodeExpr(clazz.name),
+        type: new o.outputAst.WrappedNodeExpr(clazz.name),
         className: clazz.name.text,
         filePath,
         localDependencies: dependencies.local,
@@ -10111,7 +8077,7 @@ function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, d
         ...project_tsconfig_paths.presetImportManagerForceNamespaceImports,
         rewriter: importRewriter,
     });
-    const callback = compileHmrUpdateCallback(compilationResults, constantStatements, meta);
+    const callback = o.compileHmrUpdateCallback(compilationResults, constantStatements, meta);
     const sourceFile = ts.getOriginalNode(declaration).getSourceFile();
     const node = project_tsconfig_paths.translateStatement(sourceFile, callback, importManager);
     // The output AST doesn't support modifiers so we have to emit to
@@ -10150,7 +8116,7 @@ class HmrModuleImportRewriter {
  */
 function analyzeTemplateForSelectorless(template) {
     const analyzer = new SelectorlessDirectivesAnalyzer();
-    project_tsconfig_paths.visitAll(analyzer, template);
+    o.tmplAstVisitAll(analyzer, template);
     const isSelectorless = analyzer.symbols !== null && analyzer.symbols.size > 0;
     const localReferencedSymbols = analyzer.symbols;
     // The template is considered selectorless only if there
@@ -10161,10 +8127,10 @@ function analyzeTemplateForSelectorless(template) {
  * Visitor that traverses all the template nodes and
  * expressions to look for selectorless references.
  */
-class SelectorlessDirectivesAnalyzer extends project_tsconfig_paths.CombinedRecursiveAstVisitor {
+class SelectorlessDirectivesAnalyzer extends o.CombinedRecursiveAstVisitor {
     symbols = null;
     visit(node) {
-        if (node instanceof project_tsconfig_paths.BindingPipe && node.type === project_tsconfig_paths.BindingPipeType.ReferencedDirectly) {
+        if (node instanceof o.BindingPipe && node.type === o.BindingPipeType.ReferencedDirectly) {
             this.trackSymbol(node.name);
         }
         super.visit(node);
@@ -10198,14 +8164,14 @@ const ANIMATE_LEAVE = `animate.leave`;
  */
 function analyzeTemplateForAnimations(template) {
     const analyzer = new AnimationsAnalyzer();
-    project_tsconfig_paths.visitAll(analyzer, template);
+    o.tmplAstVisitAll(analyzer, template);
     return { hasAnimations: analyzer.hasAnimations };
 }
 /**
  * Visitor that traverses all the template nodes and
  * expressions to look for animation references.
  */
-class AnimationsAnalyzer extends project_tsconfig_paths.CombinedRecursiveAstVisitor {
+class AnimationsAnalyzer extends o.CombinedRecursiveAstVisitor {
     hasAnimations = false;
     visitElement(element) {
         for (const attr of element.attributes) {
@@ -10223,8 +8189,8 @@ class AnimationsAnalyzer extends project_tsconfig_paths.CombinedRecursiveAstVisi
 }
 
 const EMPTY_ARRAY = [];
-const isUsedDirective = (decl) => decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.Directive;
-const isUsedPipe = (decl) => decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.Pipe;
+const isUsedDirective = (decl) => decl.kind === o.R3TemplateDependencyKind.Directive;
+const isUsedPipe = (decl) => decl.kind === o.R3TemplateDependencyKind.Pipe;
 /**
  * `DecoratorHandler` which handles the `@Component` annotation.
  */
@@ -10338,7 +8304,7 @@ class ComponentDecoratorHandler {
         this.canDeferDeps = !enableHmr;
     }
     literalCache = new Map();
-    elementSchemaRegistry = new project_tsconfig_paths.DomElementSchemaRegistry();
+    elementSchemaRegistry = new o.DomElementSchemaRegistry();
     undecoratedMetadataExtractor;
     /**
      * During the asynchronous preanalyze phase, it's necessary to parse the template to extract
@@ -10474,19 +8440,19 @@ class ComponentDecoratorHandler {
         const encapsulation = (this.compilationMode !== project_tsconfig_paths.CompilationMode.LOCAL
             ? resolveEnumValue(this.evaluator, component, 'encapsulation', 'ViewEncapsulation', this.isCore)
             : resolveEncapsulationEnumValueLocally(component.get('encapsulation'))) ??
-            project_tsconfig_paths.ViewEncapsulation.Emulated;
+            o.ViewEncapsulation.Emulated;
         let changeDetection = null;
         if (this.compilationMode !== project_tsconfig_paths.CompilationMode.LOCAL) {
             changeDetection = resolveEnumValue(this.evaluator, component, 'changeDetection', 'ChangeDetectionStrategy', this.isCore);
         }
         else if (component.has('changeDetection')) {
-            changeDetection = new project_tsconfig_paths.WrappedNodeExpr(component.get('changeDetection'));
+            changeDetection = new o.outputAst.WrappedNodeExpr(component.get('changeDetection'));
         }
         let animations = null;
         let legacyAnimationTriggerNames = null;
         if (component.has('animations')) {
             const animationExpression = component.get('animations');
-            animations = new project_tsconfig_paths.WrappedNodeExpr(animationExpression);
+            animations = new o.outputAst.WrappedNodeExpr(animationExpression);
             const animationsValue = this.evaluator.evaluate(animationExpression, legacyAnimationTriggerResolver);
             legacyAnimationTriggerNames = { includesDynamicAnimations: false, staticTriggerNames: [] };
             collectLegacyAnimationNames(animationsValue, legacyAnimationTriggerNames);
@@ -10511,7 +8477,7 @@ class ComponentDecoratorHandler {
         if (component.has('viewProviders')) {
             const viewProviders = component.get('viewProviders');
             viewProvidersRequiringFactory = project_tsconfig_paths.resolveProvidersRequiringFactory(viewProviders, this.reflector, this.evaluator);
-            wrappedViewProviders = new project_tsconfig_paths.WrappedNodeExpr(this.annotateForClosureCompiler
+            wrappedViewProviders = new o.outputAst.WrappedNodeExpr(this.annotateForClosureCompiler
                 ? project_tsconfig_paths.wrapFunctionExpressionsInParens(viewProviders)
                 : viewProviders);
         }
@@ -10719,8 +8685,8 @@ class ComponentDecoratorHandler {
                 diagnostics.push(makeResourceNotFoundError(styleUrl.url, styleUrl.expression, resourceType).toDiagnostic());
             }
         }
-        if ((encapsulation === project_tsconfig_paths.ViewEncapsulation.ShadowDom ||
-            encapsulation === project_tsconfig_paths.ViewEncapsulation.IsolatedShadowDom) &&
+        if ((encapsulation === o.ViewEncapsulation.ShadowDom ||
+            encapsulation === o.ViewEncapsulation.IsolatedShadowDom) &&
             metadata.selector !== null) {
             const selectorError = checkCustomElementSelectorForErrors(metadata.selector);
             if (selectorError !== null) {
@@ -10804,7 +8770,7 @@ class ComponentDecoratorHandler {
                     viewProviders: wrappedViewProviders,
                     i18nUseExternalIds: this.i18nUseExternalIds,
                     relativeContextFilePath,
-                    rawImports: rawImports !== null ? new project_tsconfig_paths.WrappedNodeExpr(rawImports) : undefined,
+                    rawImports: rawImports !== null ? new o.outputAst.WrappedNodeExpr(rawImports) : undefined,
                     relativeTemplatePath,
                 },
                 typeCheckMeta: project_tsconfig_paths.extractDirectiveTypeCheckMeta(node, inputs, this.reflector),
@@ -10902,7 +8868,7 @@ class ComponentDecoratorHandler {
             }
             matcher = createMatcherFromScope(scope, this.hostDirectivesResolver);
         }
-        const binder = new project_tsconfig_paths.R3TargetBinder(matcher);
+        const binder = new o.R3TargetBinder(matcher);
         const boundTemplate = binder.bind({ template: analysis.template.diagNodes });
         context.addComponent({
             declaration: node,
@@ -10925,7 +8891,7 @@ class ComponentDecoratorHandler {
             // Don't type-check components that had errors in their scopes, unless requested.
             return;
         }
-        const binder = new project_tsconfig_paths.R3TargetBinder(scope.matcher);
+        const binder = new o.R3TargetBinder(scope.matcher);
         const templateContext = {
             nodes: meta.template.diagNodes,
             pipes: scope.pipes,
@@ -11110,22 +9076,22 @@ class ComponentDecoratorHandler {
             ...resolution,
             defer,
         };
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, project_tsconfig_paths.FactoryTarget.Component));
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, o.FactoryTarget.Component));
         if (perComponentDeferredDeps !== null) {
             removeDeferrableTypesFromComponentDecorator(analysis, perComponentDeferredDeps);
         }
-        const def = project_tsconfig_paths.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
+        const def = o.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
-            ? compileComponentClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
+            ? o.compileComponentClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
             : null;
         const debugInfo = analysis.classDebugInfo !== null
-            ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
+            ? o.compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
             ? extractHmrMetatadata(node, this.reflector, this.evaluator, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
             : null;
-        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const hmrInitializer = hmrMeta ? o.compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
             ? this.deferredSymbolTracker.getDeferrableImportDecls()
             : null;
@@ -11140,7 +9106,7 @@ class ComponentDecoratorHandler {
             sourceUrl: analysis.template.declaration.resolvedTemplateUrl,
             isInline: analysis.template.declaration.isInline,
             inlineTemplateLiteralExpression: analysis.template.sourceMapping.type === 'direct'
-                ? new project_tsconfig_paths.WrappedNodeExpr(analysis.template.sourceMapping.node)
+                ? new o.outputAst.WrappedNodeExpr(analysis.template.sourceMapping.node)
                 : null,
         };
         const perComponentDeferredDeps = this.canDeferDeps
@@ -11152,16 +9118,16 @@ class ComponentDecoratorHandler {
             ...resolution,
             defer,
         };
-        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(meta, project_tsconfig_paths.FactoryTarget.Component));
+        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(meta, o.FactoryTarget.Component));
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
-        const def = compileDeclareComponentFromMetadata(meta, analysis.template, templateInfo);
+        const def = o.compileDeclareComponentFromMetadata(meta, analysis.template, templateInfo);
         const classMetadata = analysis.classMetadata !== null
-            ? compileComponentDeclareClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
+            ? o.compileComponentDeclareClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
             : null;
         const hmrMeta = this.enableHmr
             ? extractHmrMetatadata(node, this.reflector, this.evaluator, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, null)
             : null;
-        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const hmrInitializer = hmrMeta ? o.compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
             ? this.deferredSymbolTracker.getDeferrableImportDecls()
             : null;
@@ -11181,19 +9147,19 @@ class ComponentDecoratorHandler {
         if (deferrableTypes !== null) {
             removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
         }
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, project_tsconfig_paths.FactoryTarget.Component));
-        const def = project_tsconfig_paths.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, o.FactoryTarget.Component));
+        const def = o.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
-            ? compileComponentClassMetadata(analysis.classMetadata, deferrableTypes).toStmt()
+            ? o.compileComponentClassMetadata(analysis.classMetadata, deferrableTypes).toStmt()
             : null;
         const debugInfo = analysis.classDebugInfo !== null
-            ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
+            ? o.compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
             ? extractHmrMetatadata(node, this.reflector, this.evaluator, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
             : null;
-        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const hmrInitializer = hmrMeta ? o.compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
             ? this.deferredSymbolTracker.getDeferrableImportDecls()
             : null;
@@ -11204,20 +9170,20 @@ class ComponentDecoratorHandler {
             return null;
         }
         // Create a brand-new constant pool since there shouldn't be any constant sharing.
-        const pool = new project_tsconfig_paths.ConstantPool();
+        const pool = new o.ConstantPool();
         const defer = this.compileDeferBlocks(resolution);
         const meta = {
             ...analysis.meta,
             ...resolution,
             defer,
         };
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, project_tsconfig_paths.FactoryTarget.Component));
-        const def = project_tsconfig_paths.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(meta, o.FactoryTarget.Component));
+        const def = o.compileComponentFromMetadata(meta, pool, this.getNewBindingParser());
         const classMetadata = analysis.classMetadata !== null
-            ? compileComponentClassMetadata(analysis.classMetadata, null).toStmt()
+            ? o.compileComponentClassMetadata(analysis.classMetadata, null).toStmt()
             : null;
         const debugInfo = analysis.classDebugInfo !== null
-            ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
+            ? o.compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
             ? extractHmrMetatadata(node, this.reflector, this.evaluator, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
@@ -11294,7 +9260,7 @@ class ComponentDecoratorHandler {
             }
         }
         // Set up the R3TargetBinder.
-        const binder = new project_tsconfig_paths.R3TargetBinder(createMatcherFromScope(scope, this.hostDirectivesResolver));
+        const binder = new o.R3TargetBinder(createMatcherFromScope(scope, this.hostDirectivesResolver));
         let allDependencies = dependencies;
         let deferBlockBinder = binder;
         // If there are any explicitly deferred dependencies (via `@Component.deferredImports`),
@@ -11305,16 +9271,16 @@ class ComponentDecoratorHandler {
         // import, which is wrong.
         if (explicitlyDeferredDependencies !== null && explicitlyDeferredDependencies.length > 0) {
             allDependencies = [...explicitlyDeferredDependencies, ...dependencies];
-            const deferBlockMatcher = new project_tsconfig_paths.SelectorMatcher();
+            const deferBlockMatcher = new o.SelectorMatcher();
             for (const dep of allDependencies) {
                 if (dep.kind === project_tsconfig_paths.MetaKind.Pipe && dep.name !== null) {
                     pipes.set(dep.name, dep);
                 }
                 else if (dep.kind === project_tsconfig_paths.MetaKind.Directive && dep.selector !== null) {
-                    deferBlockMatcher.addSelectables(project_tsconfig_paths.CssSelector.parse(dep.selector), [dep]);
+                    deferBlockMatcher.addSelectables(o.CssSelector.parse(dep.selector), [dep]);
                 }
             }
-            deferBlockBinder = new project_tsconfig_paths.R3TargetBinder(deferBlockMatcher);
+            deferBlockBinder = new o.R3TargetBinder(deferBlockMatcher);
         }
         // Next, the component template AST is bound using the R3TargetBinder. This produces a
         // BoundTarget, which is similar to a ts.TypeChecker.
@@ -11389,7 +9355,7 @@ class ComponentDecoratorHandler {
                     const dirType = this.refEmitter.emit(dep.ref, context);
                     project_tsconfig_paths.assertSuccessfulReferenceEmit(dirType, node.name, dep.isComponent ? 'component' : 'directive');
                     declarations.set(dep.ref.node, {
-                        kind: project_tsconfig_paths.R3TemplateDependencyKind.Directive,
+                        kind: o.R3TemplateDependencyKind.Directive,
                         ref: dep.ref,
                         type: dirType.expression,
                         importedFile: dirType.importedFile,
@@ -11404,7 +9370,7 @@ class ComponentDecoratorHandler {
                     const ngModuleType = this.refEmitter.emit(dep.ref, context);
                     project_tsconfig_paths.assertSuccessfulReferenceEmit(ngModuleType, node.name, 'NgModule');
                     declarations.set(dep.ref.node, {
-                        kind: project_tsconfig_paths.R3TemplateDependencyKind.NgModule,
+                        kind: o.R3TemplateDependencyKind.NgModule,
                         type: ngModuleType.expression,
                         importedFile: ngModuleType.importedFile,
                     });
@@ -11418,7 +9384,7 @@ class ComponentDecoratorHandler {
             const pipeType = this.refEmitter.emit(dep.ref, context);
             project_tsconfig_paths.assertSuccessfulReferenceEmit(pipeType, node.name, 'pipe');
             declarations.set(dep.ref.node, {
-                kind: project_tsconfig_paths.R3TemplateDependencyKind.Pipe,
+                kind: o.R3TemplateDependencyKind.Pipe,
                 type: pipeType.expression,
                 // Use the local name for pipes to account for selectorless.
                 name: localName,
@@ -11431,7 +9397,7 @@ class ComponentDecoratorHandler {
     /** Handles any cycles in the dependencies of a component. */
     handleDependencyCycles(node, context, scope, data, analysis, metadata, declarations, eagerlyUsed, symbol) {
         const eagerDeclarations = Array.from(declarations.values()).filter((decl) => {
-            return decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.NgModule || eagerlyUsed.has(decl.ref.node);
+            return decl.kind === o.R3TemplateDependencyKind.NgModule || eagerlyUsed.has(decl.ref.node);
         });
         const cyclesFromDirectives = new Map();
         const cyclesFromPipes = new Map();
@@ -11445,10 +9411,10 @@ class ComponentDecoratorHandler {
                 const cycle = this._checkForCyclicImport(usedDep.importedFile, usedDep.type, context);
                 if (cycle !== null) {
                     switch (usedDep.kind) {
-                        case project_tsconfig_paths.R3TemplateDependencyKind.Directive:
+                        case o.R3TemplateDependencyKind.Directive:
                             cyclesFromDirectives.set(usedDep, cycle);
                             break;
-                        case project_tsconfig_paths.R3TemplateDependencyKind.Pipe:
+                        case o.R3TemplateDependencyKind.Pipe:
                             cyclesFromPipes.set(usedDep, cycle);
                             break;
                     }
@@ -11489,7 +9455,7 @@ class ComponentDecoratorHandler {
                 // best-guess extra imports globally to all files using
                 // `localCompilationExtraImportsTracker.addGlobalImportFromIdentifier`.
                 for (const { type } of eagerDeclarations) {
-                    if (type instanceof project_tsconfig_paths.ExternalExpr && type.value.moduleName) {
+                    if (type instanceof o.ExternalExpr && type.value.moduleName) {
                         this.localCompilationExtraImportsTracker.addImportForFile(context, type.value.moduleName);
                     }
                 }
@@ -11546,13 +9512,13 @@ class ComponentDecoratorHandler {
             diagnostics.push(...importDiagnostics);
         }
         if (analysis.providersRequiringFactory !== null &&
-            analysis.meta.providers instanceof project_tsconfig_paths.WrappedNodeExpr) {
+            analysis.meta.providers instanceof o.outputAst.WrappedNodeExpr) {
             const providerDiagnostics = project_tsconfig_paths.getProviderDiagnostics(analysis.providersRequiringFactory, analysis.meta.providers.node, this.injectableRegistry);
             diagnostics ??= [];
             diagnostics.push(...providerDiagnostics);
         }
         if (analysis.viewProvidersRequiringFactory !== null &&
-            analysis.meta.viewProviders instanceof project_tsconfig_paths.WrappedNodeExpr) {
+            analysis.meta.viewProviders instanceof o.outputAst.WrappedNodeExpr) {
             const viewProviderDiagnostics = project_tsconfig_paths.getProviderDiagnostics(analysis.viewProvidersRequiringFactory, analysis.meta.viewProviders.node, this.injectableRegistry);
             diagnostics ??= [];
             diagnostics.push(...viewProviderDiagnostics);
@@ -11577,7 +9543,7 @@ class ComponentDecoratorHandler {
      */
     locateDeferBlocksWithoutScope(template) {
         const deferBlocks = new Map();
-        const directivelessBinder = new project_tsconfig_paths.R3TargetBinder(null);
+        const directivelessBinder = new o.R3TargetBinder(null);
         const bound = directivelessBinder.bind({ template: template.nodes });
         const deferredBlocks = bound.getDeferBlocks();
         for (const block of deferredBlocks) {
@@ -11681,14 +9647,14 @@ class ComponentDecoratorHandler {
                 resolutionData.deferPerBlockDependencies.set(deferBlock, deps);
             }
             for (const decl of Array.from(deferrableDecls.values())) {
-                if (decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.NgModule) {
+                if (decl.kind === o.R3TemplateDependencyKind.NgModule) {
                     continue;
                 }
-                if (decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.Directive &&
+                if (decl.kind === o.R3TemplateDependencyKind.Directive &&
                     !usedDirectives.has(decl.ref.node)) {
                     continue;
                 }
-                if (decl.kind === project_tsconfig_paths.R3TemplateDependencyKind.Pipe && !usedPipes.has(decl.name)) {
+                if (decl.kind === o.R3TemplateDependencyKind.Pipe && !usedPipes.has(decl.name)) {
                     continue;
                 }
                 // Collect initial information about this dependency.
@@ -11791,7 +9757,7 @@ class ComponentDecoratorHandler {
             }
             const blocks = new Map();
             for (const [block, dependencies] of perBlockDeps) {
-                blocks.set(block, dependencies.length === 0 ? null : project_tsconfig_paths.compileDeferResolverFunction({ mode, dependencies }));
+                blocks.set(block, dependencies.length === 0 ? null : o.compileDeferResolverFunction({ mode, dependencies }));
             }
             return { mode, blocks };
         }
@@ -11803,14 +9769,14 @@ class ComponentDecoratorHandler {
                 mode,
                 dependenciesFn: perComponentDeps.length === 0
                     ? null
-                    : project_tsconfig_paths.compileDeferResolverFunction({ mode, dependencies: perComponentDeps }),
+                    : o.compileDeferResolverFunction({ mode, dependencies: perComponentDeps }),
             };
         }
         throw new Error(`Invalid deferBlockDepsEmitMode. Cannot compile deferred block metadata.`);
     }
     /** Creates a new binding parser. */
     getNewBindingParser() {
-        return project_tsconfig_paths.makeBindingParser(this.enableSelectorless);
+        return o.makeBindingParser(this.enableSelectorless);
     }
 }
 function createMatcherFromScope(scope, hostDirectivesResolver) {
@@ -11821,15 +9787,15 @@ function createMatcherFromScope(scope, hostDirectivesResolver) {
                 registry.set(name, [dep, ...hostDirectivesResolver.resolve(dep)]);
             }
         }
-        return new project_tsconfig_paths.SelectorlessMatcher(registry);
+        return new o.SelectorlessMatcher(registry);
     }
-    const matcher = new project_tsconfig_paths.SelectorMatcher();
+    const matcher = new o.SelectorMatcher();
     const dependencies = scope.kind === project_tsconfig_paths.ComponentScopeKind.NgModule
         ? scope.compilation.dependencies
         : scope.dependencies;
     for (const dep of dependencies) {
         if (dep.kind === project_tsconfig_paths.MetaKind.Directive && dep.selector !== null) {
-            matcher.addSelectables(project_tsconfig_paths.CssSelector.parse(dep.selector), [dep]);
+            matcher.addSelectables(o.CssSelector.parse(dep.selector), [dep]);
         }
     }
     return matcher;
@@ -11842,7 +9808,7 @@ function removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes) 
     if (analysis.classMetadata) {
         const deferrableSymbols = new Set(deferrableTypes.map((t) => t.symbolName));
         const rewrittenDecoratorsNode = removeIdentifierReferences(analysis.classMetadata.decorators.node, deferrableSymbols);
-        analysis.classMetadata.decorators = new project_tsconfig_paths.WrappedNodeExpr(rewrittenDecoratorsNode);
+        analysis.classMetadata.decorators = new o.outputAst.WrappedNodeExpr(rewrittenDecoratorsNode);
     }
 }
 /**
@@ -11998,19 +9964,19 @@ class InjectableDecoratorHandler {
         return {};
     }
     compileFull(node, analysis) {
-        return this.compile(compileNgFactoryDefField, (meta) => project_tsconfig_paths.compileInjectable(meta, false), compileClassMetadata, node, analysis);
+        return this.compile(compileNgFactoryDefField, (meta) => o.compileInjectable(meta, false), o.compileClassMetadata, node, analysis);
     }
     compilePartial(node, analysis) {
-        return this.compile(compileDeclareFactory, compileDeclareInjectableFromMetadata, compileDeclareClassMetadata, node, analysis);
+        return this.compile(compileDeclareFactory, o.compileDeclareInjectableFromMetadata, o.compileDeclareClassMetadata, node, analysis);
     }
     compileLocal(node, analysis) {
-        return this.compile(compileNgFactoryDefField, (meta) => project_tsconfig_paths.compileInjectable(meta, false), compileClassMetadata, node, analysis);
+        return this.compile(compileNgFactoryDefField, (meta) => o.compileInjectable(meta, false), o.compileClassMetadata, node, analysis);
     }
     compile(compileFactoryFn, compileInjectableFn, compileClassMetadataFn, node, analysis) {
         const results = [];
         if (analysis.needsFactory) {
             const meta = analysis.meta;
-            const factoryRes = compileFactoryFn(project_tsconfig_paths.toFactoryMetadata({ ...meta, deps: analysis.ctorDeps }, project_tsconfig_paths.FactoryTarget.Injectable));
+            const factoryRes = compileFactoryFn(project_tsconfig_paths.toFactoryMetadata({ ...meta, deps: analysis.ctorDeps }, o.FactoryTarget.Injectable));
             if (analysis.classMetadata !== null) {
                 factoryRes.statements.push(compileClassMetadataFn(analysis.classMetadata).toStmt());
             }
@@ -12052,7 +10018,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
             name,
             type,
             typeArgumentCount,
-            providedIn: project_tsconfig_paths.createMayBeForwardRefExpression(new project_tsconfig_paths.LiteralExpr(null), 0 /* ForwardRefHandling.None */),
+            providedIn: o.createMayBeForwardRefExpression(new o.LiteralExpr(null), 0 /* ForwardRefHandling.None */),
         };
     }
     else if (decorator.args.length === 1) {
@@ -12067,7 +10033,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
         const meta = project_tsconfig_paths.reflectObjectLiteral(metaNode);
         const providedIn = meta.has('providedIn')
             ? getProviderExpression(meta.get('providedIn'), reflector)
-            : project_tsconfig_paths.createMayBeForwardRefExpression(new project_tsconfig_paths.LiteralExpr(null), 0 /* ForwardRefHandling.None */);
+            : o.createMayBeForwardRefExpression(new o.LiteralExpr(null), 0 /* ForwardRefHandling.None */);
         let deps = undefined;
         if ((meta.has('useClass') || meta.has('useFactory')) && meta.has('deps')) {
             const depsExpr = meta.get('deps');
@@ -12088,7 +10054,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
             result.deps = deps;
         }
         else if (meta.has('useFactory')) {
-            result.useFactory = new project_tsconfig_paths.WrappedNodeExpr(meta.get('useFactory'));
+            result.useFactory = new o.WrappedNodeExpr(meta.get('useFactory'));
             result.deps = deps;
         }
         return result;
@@ -12106,7 +10072,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
  */
 function getProviderExpression(expression, reflector) {
     const forwardRefValue = project_tsconfig_paths.tryUnwrapForwardRef(expression, reflector);
-    return project_tsconfig_paths.createMayBeForwardRefExpression(new project_tsconfig_paths.WrappedNodeExpr(forwardRefValue ?? expression), forwardRefValue !== null ? 2 /* ForwardRefHandling.Unwrapped */ : 0 /* ForwardRefHandling.None */);
+    return o.createMayBeForwardRefExpression(new o.WrappedNodeExpr(forwardRefValue ?? expression), forwardRefValue !== null ? 2 /* ForwardRefHandling.Unwrapped */ : 0 /* ForwardRefHandling.None */);
 }
 function extractInjectableCtorDeps(clazz, meta, decorator, reflector, isCore, strictCtorDeps) {
     if (decorator.args === null) {
@@ -12151,7 +10117,7 @@ function requiresValidCtor(meta) {
 }
 function getDep(dep, reflector) {
     const meta = {
-        token: new project_tsconfig_paths.WrappedNodeExpr(dep),
+        token: new o.WrappedNodeExpr(dep),
         attributeNameType: null,
         host: false,
         optional: false,
@@ -12166,7 +10132,7 @@ function getDep(dep, reflector) {
         switch (source.name) {
             case 'Inject':
                 if (token !== undefined) {
-                    meta.token = new project_tsconfig_paths.WrappedNodeExpr(token);
+                    meta.token = new o.WrappedNodeExpr(token);
                 }
                 break;
             case 'Optional':
@@ -12194,7 +10160,7 @@ function getDep(dep, reflector) {
                 isDecorator = maybeUpdateDecorator(el.expression, reflector, token);
             }
             if (!isDecorator) {
-                meta.token = new project_tsconfig_paths.WrappedNodeExpr(el);
+                meta.token = new o.WrappedNodeExpr(el);
             }
         });
     }
@@ -12369,26 +10335,26 @@ class PipeDecoratorHandler {
         return {};
     }
     compileFull(node, analysis) {
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Pipe));
-        const def = project_tsconfig_paths.compilePipeFromMetadata(analysis.meta);
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Pipe));
+        const def = o.compilePipeFromMetadata(analysis.meta);
         const classMetadata = analysis.classMetadata !== null
-            ? compileClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵpipe', null, null /* deferrableImports */);
     }
     compilePartial(node, analysis) {
-        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Pipe));
-        const def = compileDeclarePipeFromMetadata(analysis.meta);
+        const fac = compileDeclareFactory(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Pipe));
+        const def = o.compileDeclarePipeFromMetadata(analysis.meta);
         const classMetadata = analysis.classMetadata !== null
-            ? compileDeclareClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileDeclareClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵpipe', null, null /* deferrableImports */);
     }
     compileLocal(node, analysis) {
-        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, project_tsconfig_paths.FactoryTarget.Pipe));
-        const def = project_tsconfig_paths.compilePipeFromMetadata(analysis.meta);
+        const fac = compileNgFactoryDefField(project_tsconfig_paths.toFactoryMetadata(analysis.meta, o.FactoryTarget.Pipe));
+        const def = o.compilePipeFromMetadata(analysis.meta);
         const classMetadata = analysis.classMetadata !== null
-            ? compileClassMetadata(analysis.classMetadata).toStmt()
+            ? o.compileClassMetadata(analysis.classMetadata).toStmt()
             : null;
         return project_tsconfig_paths.compileResults(fac, def, classMetadata, 'ɵpipe', null, null /* deferrableImports */);
     }
@@ -12399,7 +10365,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new project_tsconfig_paths.Version('21.0.0-next.9+sha-04dd75b');
+new o.Version('21.0.0-next.9+sha-8511759');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -13138,16 +11104,16 @@ function i18nSerialize(bundle, formatName, options) {
     let serializer;
     switch (format) {
         case 'xmb':
-            serializer = new project_tsconfig_paths.Xmb();
+            serializer = new o.Xmb();
             break;
         case 'xliff2':
         case 'xlf2':
-            serializer = new Xliff2();
+            serializer = new o.Xliff2();
             break;
         case 'xlf':
         case 'xliff':
         default:
-            serializer = new Xliff();
+            serializer = new o.Xliff();
     }
     return bundle.write(serializer, getPathNormalizer(options.basePath));
 }
@@ -15637,7 +13603,7 @@ class IndexingContext {
  * Visits the AST of a parsed Angular template. Discovers and stores
  * identifiers of interest, deferring to an `ExpressionVisitor` as needed.
  */
-let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.CombinedRecursiveAstVisitor {
+let TemplateVisitor$1 = class TemplateVisitor extends o.CombinedRecursiveAstVisitor {
     boundTemplate;
     // Identifiers of interest found in the template.
     identifiers = new Set();
@@ -15721,7 +13687,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
             source: attribute.valueSpan?.toString() || null,
             absoluteOffset: attribute.valueSpan ? attribute.valueSpan.start.offset : -1,
         };
-        this.visit(attribute.value instanceof project_tsconfig_paths.ASTWithSource ? attribute.value.ast : attribute.value);
+        this.visit(attribute.value instanceof o.ASTWithSource ? attribute.value.ast : attribute.value);
         this.currentAstWithSource = previous;
     }
     /** Creates an identifier for a template element or template node. */
@@ -15732,15 +13698,15 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
         }
         let name;
         let kind;
-        if (node instanceof project_tsconfig_paths.Template) {
+        if (node instanceof o.TmplAstTemplate) {
             name = node.tagName ?? 'ng-template';
             kind = IdentifierKind.Template;
         }
-        else if (node instanceof project_tsconfig_paths.Element$1) {
+        else if (node instanceof o.TmplAstElement) {
             name = node.name;
             kind = IdentifierKind.Element;
         }
-        else if (node instanceof project_tsconfig_paths.Component) {
+        else if (node instanceof o.TmplAstComponent) {
             name = node.fullName;
             kind = IdentifierKind.Component;
         }
@@ -15751,7 +13717,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
         // Namespaced elements have a particular format for `node.name` that needs to be handled.
         // For example, an `<svg>` element has a `node.name` of `':svg:svg'`.
         // TODO(alxhub): properly handle namespaced elements
-        if ((node instanceof project_tsconfig_paths.Template || node instanceof project_tsconfig_paths.Element$1) &&
+        if ((node instanceof o.TmplAstTemplate || node instanceof o.TmplAstElement) &&
             name.startsWith(':')) {
             name = name.split(':').pop();
         }
@@ -15803,7 +13769,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
         }
         const span = new AbsoluteSourceSpan(start, start + name.length);
         let identifier;
-        if (node instanceof project_tsconfig_paths.Reference$1) {
+        if (node instanceof o.TmplAstReference) {
             // If the node is a reference, we care about its target. The target can be an element, a
             // template, a directive applied on a template or element (in which case the directive field
             // is non-null), or nothing at all.
@@ -15812,10 +13778,10 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
             if (refTarget) {
                 let node = null;
                 let directive = null;
-                if (refTarget instanceof project_tsconfig_paths.Element$1 ||
-                    refTarget instanceof project_tsconfig_paths.Template ||
-                    refTarget instanceof project_tsconfig_paths.Component ||
-                    refTarget instanceof project_tsconfig_paths.Directive) {
+                if (refTarget instanceof o.TmplAstElement ||
+                    refTarget instanceof o.TmplAstTemplate ||
+                    refTarget instanceof o.TmplAstComponent ||
+                    refTarget instanceof o.TmplAstDirective) {
                     node = this.directiveHostToIdentifier(refTarget);
                 }
                 else {
@@ -15837,7 +13803,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
                 target,
             };
         }
-        else if (node instanceof project_tsconfig_paths.Variable) {
+        else if (node instanceof o.TmplAstVariable) {
             identifier = {
                 name,
                 span,
@@ -15870,7 +13836,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
      * @param node node whose expression to visit
      */
     visit(node) {
-        if (node instanceof project_tsconfig_paths.ASTWithSource) {
+        if (node instanceof o.ASTWithSource) {
             const previous = this.currentAstWithSource;
             this.currentAstWithSource = { source: node.source, absoluteOffset: node.sourceSpan.start };
             super.visit(node.ast);
@@ -15895,13 +13861,13 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
         // impossible to determine by an indexer and unsupported by the indexing module.
         // The indexing module also does not currently support references to identifiers declared in the
         // template itself, which have a non-null expression target.
-        if (!(ast.receiver instanceof project_tsconfig_paths.ImplicitReceiver)) {
+        if (!(ast.receiver instanceof o.ImplicitReceiver)) {
             return;
         }
         const { absoluteOffset, source: expressionStr } = this.currentAstWithSource;
         // The source span of the requested AST starts at a location that is offset from the expression.
         let identifierStart = ast.sourceSpan.start - absoluteOffset;
-        if (ast instanceof project_tsconfig_paths.PropertyRead) {
+        if (ast instanceof o.PropertyRead) {
             // For `PropertyRead` and the identifier starts at the `nameSpan`,
             // not necessarily the `sourceSpan`.
             identifierStart = ast.nameSpan.start - absoluteOffset;
@@ -15934,7 +13900,7 @@ let TemplateVisitor$1 = class TemplateVisitor extends project_tsconfig_paths.Com
 function getTemplateIdentifiers(boundTemplate) {
     const visitor = new TemplateVisitor$1(boundTemplate);
     if (boundTemplate.target.template !== undefined) {
-        project_tsconfig_paths.visitAll(visitor, boundTemplate.target.template);
+        o.tmplAstVisitAll(visitor, boundTemplate.target.template);
     }
     return { identifiers: visitor.identifiers, errors: visitor.errors };
 }
@@ -15958,7 +13924,7 @@ function generateAnalysis(context) {
         });
         // Get source files for the component and the template. If the template is inline, its source
         // file is the component's.
-        const componentFile = new project_tsconfig_paths.ParseSourceFile(declaration.getSourceFile().getFullText(), declaration.getSourceFile().fileName);
+        const componentFile = new o.ParseSourceFile(declaration.getSourceFile().getFullText(), declaration.getSourceFile().fileName);
         let templateFile;
         if (templateMeta.isInline) {
             templateFile = componentFile;
@@ -16494,7 +14460,7 @@ class TemplateCheckWithVisitor {
 /**
  * Visits all nodes in a template (TmplAstNode and AST) and calls `visitNode` for each one.
  */
-class TemplateVisitor extends project_tsconfig_paths.CombinedRecursiveAstVisitor {
+class TemplateVisitor extends o.CombinedRecursiveAstVisitor {
     ctx;
     component;
     check;
@@ -16547,24 +14513,24 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED;
     visitNode(ctx, component, node) {
         // interpolations like `{{ mySignal }}`
-        if (node instanceof project_tsconfig_paths.Interpolation) {
+        if (node instanceof o.Interpolation) {
             return node.expressions
-                .map((item) => (item instanceof project_tsconfig_paths.PrefixNot ? item.expression : item))
-                .filter((item) => item instanceof project_tsconfig_paths.PropertyRead)
+                .map((item) => (item instanceof o.PrefixNot ? item.expression : item))
+                .filter((item) => item instanceof o.PropertyRead)
                 .flatMap((item) => buildDiagnosticForSignal(ctx, item, component));
         }
         // check bound inputs like `[prop]="mySignal"` on an element or inline template
-        else if (node instanceof project_tsconfig_paths.Element$1 && node.inputs.length > 0) {
+        else if (node instanceof o.TmplAstElement && node.inputs.length > 0) {
             const directivesOfElement = ctx.templateTypeChecker.getDirectivesOfNode(component, node);
             return node.inputs.flatMap((input) => checkBoundAttribute(ctx, component, directivesOfElement, input));
         }
-        else if (node instanceof project_tsconfig_paths.Template && node.tagName === 'ng-template') {
+        else if (node instanceof o.TmplAstTemplate && node.tagName === 'ng-template') {
             const directivesOfElement = ctx.templateTypeChecker.getDirectivesOfNode(component, node);
             const inputDiagnostics = node.inputs.flatMap((input) => {
                 return checkBoundAttribute(ctx, component, directivesOfElement, input);
             });
             const templateAttrDiagnostics = node.templateAttrs.flatMap((attr) => {
-                if (!(attr instanceof project_tsconfig_paths.BoundAttribute)) {
+                if (!(attr instanceof o.TmplAstBoundAttribute)) {
                     return [];
                 }
                 return checkBoundAttribute(ctx, component, directivesOfElement, attr);
@@ -16572,23 +14538,23 @@ class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
             return inputDiagnostics.concat(templateAttrDiagnostics);
         }
         // if blocks like `@if(mySignal) { ... }`
-        else if (node instanceof project_tsconfig_paths.IfBlock) {
+        else if (node instanceof o.TmplAstIfBlock) {
             return node.branches
                 .map((branch) => branch.expression)
-                .filter((expr) => expr instanceof project_tsconfig_paths.ASTWithSource)
+                .filter((expr) => expr instanceof o.ASTWithSource)
                 .map((expr) => {
                 const ast = expr.ast;
-                return ast instanceof project_tsconfig_paths.PrefixNot ? ast.expression : ast;
+                return ast instanceof o.PrefixNot ? ast.expression : ast;
             })
-                .filter((ast) => ast instanceof project_tsconfig_paths.PropertyRead)
+                .filter((ast) => ast instanceof o.PropertyRead)
                 .flatMap((item) => buildDiagnosticForSignal(ctx, item, component));
         }
         // switch blocks like `@switch(mySignal) { ... }`
-        else if (node instanceof project_tsconfig_paths.SwitchBlock && node.expression instanceof project_tsconfig_paths.ASTWithSource) {
-            const expression = node.expression.ast instanceof project_tsconfig_paths.PrefixNot
+        else if (node instanceof o.TmplAstSwitchBlock && node.expression instanceof o.ASTWithSource) {
+            const expression = node.expression.ast instanceof o.PrefixNot
                 ? node.expression.ast.expression
                 : node.expression.ast;
-            if (expression instanceof project_tsconfig_paths.PropertyRead) {
+            if (expression instanceof o.PropertyRead) {
                 return buildDiagnosticForSignal(ctx, expression, component);
             }
         }
@@ -16605,30 +14571,30 @@ function checkBoundAttribute(ctx, component, directivesOfElement, node) {
     const nodeAst = isPropertyReadNodeAst(node);
     if (
     // a bound property like `[prop]="mySignal"`
-    (node.type === project_tsconfig_paths.BindingType.Property ||
+    (node.type === o.BindingType.Property ||
         // or a class binding like `[class.myClass]="mySignal"`
-        node.type === project_tsconfig_paths.BindingType.Class ||
+        node.type === o.BindingType.Class ||
         // or a style binding like `[style.width]="mySignal"`
-        node.type === project_tsconfig_paths.BindingType.Style ||
+        node.type === o.BindingType.Style ||
         // or an attribute binding like `[attr.role]="mySignal"`
-        node.type === project_tsconfig_paths.BindingType.Attribute ||
+        node.type === o.BindingType.Attribute ||
         // or an animation binding like `[animate.enter]="mySignal"`
-        node.type === project_tsconfig_paths.BindingType.Animation ||
+        node.type === o.BindingType.Animation ||
         // or an animation binding like `[@myAnimation]="mySignal"`
-        node.type === project_tsconfig_paths.BindingType.LegacyAnimation) &&
+        node.type === o.BindingType.LegacyAnimation) &&
         nodeAst) {
         return buildDiagnosticForSignal(ctx, nodeAst, component);
     }
     return [];
 }
 function isPropertyReadNodeAst(node) {
-    if (node.value instanceof project_tsconfig_paths.ASTWithSource === false) {
+    if (node.value instanceof o.ASTWithSource === false) {
         return undefined;
     }
-    if (node.value.ast instanceof project_tsconfig_paths.PrefixNot && node.value.ast.expression instanceof project_tsconfig_paths.PropertyRead) {
+    if (node.value.ast instanceof o.PrefixNot && node.value.ast.expression instanceof o.PropertyRead) {
         return node.value.ast.expression;
     }
-    if (node.value.ast instanceof project_tsconfig_paths.PropertyRead) {
+    if (node.value.ast instanceof o.PropertyRead) {
         return node.value.ast;
     }
     return undefined;
@@ -16681,7 +14647,7 @@ const factory$f = {
 class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.INVALID_BANANA_IN_BOX;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.BoundEvent))
+        if (!(node instanceof o.TmplAstBoundEvent))
             return [];
         const name = node.name;
         if (!name.startsWith('[') || !name.endsWith(']'))
@@ -16734,7 +14700,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
         return super.run(ctx, component, template);
     }
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.Template))
+        if (!(node instanceof o.TmplAstTemplate))
             return [];
         const controlFlowAttr = node.templateAttrs.find((attr) => KNOWN_CONTROL_FLOW_DIRECTIVES$1.has(attr.name));
         if (!controlFlowAttr)
@@ -16769,7 +14735,7 @@ const factory$d = {
 class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.MISSING_NGFOROF_LET;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.Template)) {
+        if (!(node instanceof o.TmplAstTemplate)) {
             return [];
         }
         if (node.templateAttrs.length === 0) {
@@ -16828,7 +14794,7 @@ class MissingStructuralDirectiveCheck extends TemplateCheckWithVisitor {
         return super.run(ctx, component, template);
     }
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.Template))
+        if (!(node instanceof o.TmplAstTemplate))
             return [];
         const customStructuralDirective = node.templateAttrs.find((attr) => !KNOWN_CONTROL_FLOW_DIRECTIVES.has(attr.name));
         if (!customStructuralDirective)
@@ -16862,7 +14828,7 @@ const factory$b = {
 class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.Binary) || node.operation !== '??')
+        if (!(node instanceof o.Binary) || node.operation !== '??')
             return [];
         const symbolLeft = ctx.templateTypeChecker.getSymbolOfNode(node.left, component);
         if (symbolLeft === null || symbolLeft.kind !== project_tsconfig_paths.SymbolKind.Expression) {
@@ -16918,14 +14884,14 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
         this.noUncheckedIndexedAccess = noUncheckedIndexedAccess;
     }
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.SafeCall) &&
-            !(node instanceof project_tsconfig_paths.SafePropertyRead) &&
-            !(node instanceof project_tsconfig_paths.SafeKeyedRead)) {
+        if (!(node instanceof o.SafeCall) &&
+            !(node instanceof o.SafePropertyRead) &&
+            !(node instanceof o.SafeKeyedRead)) {
             return [];
         }
         // When `noUncheckedIndexedAccess` is disabled, an indexed access is not checked
         // and may result in `undefined`.
-        if (node.receiver instanceof project_tsconfig_paths.KeyedRead && !this.noUncheckedIndexedAccess) {
+        if (node.receiver instanceof o.KeyedRead && !this.noUncheckedIndexedAccess) {
             return [];
         }
         const symbolLeft = ctx.templateTypeChecker.getSymbolOfNode(node.receiver, component);
@@ -16951,7 +14917,7 @@ class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
         if (templateMapping === null) {
             return [];
         }
-        const advice = node instanceof project_tsconfig_paths.SafePropertyRead
+        const advice = node instanceof o.SafePropertyRead
             ? `the '?.' operator can be replaced with the '.' operator`
             : `the '?.' operator can be safely removed`;
         const diagnostic = ctx.makeTemplateDiagnostic(templateMapping.span, `The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore ${advice}.`);
@@ -16981,14 +14947,14 @@ class NgSkipHydrationSpec extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.SKIP_HYDRATION_NOT_STATIC;
     visitNode(ctx, component, node) {
         /** Binding should always error */
-        if (node instanceof project_tsconfig_paths.BoundAttribute && node.name === NG_SKIP_HYDRATION_ATTR_NAME) {
+        if (node instanceof o.TmplAstBoundAttribute && node.name === NG_SKIP_HYDRATION_ATTR_NAME) {
             const errorString = `ngSkipHydration should not be used as a binding.`;
             const diagnostic = ctx.makeTemplateDiagnostic(node.sourceSpan, errorString);
             return [diagnostic];
         }
         /** No value, empty string or `"true"` are the only valid values */
         const acceptedValues = ['true', '' /* empty string */];
-        if (node instanceof project_tsconfig_paths.TextAttribute &&
+        if (node instanceof o.TmplAstTextAttribute &&
             node.name === NG_SKIP_HYDRATION_ATTR_NAME &&
             !acceptedValues.includes(node.value) &&
             node.value !== undefined) {
@@ -17013,7 +14979,7 @@ const STYLE_SUFFIXES = ['px', '%', 'em'];
 class SuffixNotSupportedCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.SUFFIX_NOT_SUPPORTED;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.BoundAttribute))
+        if (!(node instanceof o.TmplAstBoundAttribute))
             return [];
         if (!node.keySpan.toString().startsWith('attr.') ||
             !STYLE_SUFFIXES.some((suffix) => node.name.endsWith(`.${suffix}`))) {
@@ -17039,7 +15005,7 @@ const factory$7 = {
 class TextAttributeNotBindingSpec extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.TextAttribute))
+        if (!(node instanceof o.TmplAstTextAttribute))
             return [];
         const name = node.name;
         if (!name.startsWith('attr.') && !name.startsWith('style.') && !name.startsWith('class.')) {
@@ -17083,19 +15049,19 @@ class UninvokedFunctionInEventBindingSpec extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING;
     visitNode(ctx, component, node) {
         // If the node is not a bound event, skip it.
-        if (!(node instanceof project_tsconfig_paths.BoundEvent))
+        if (!(node instanceof o.TmplAstBoundEvent))
             return [];
         // If the node is not a regular or animation event, skip it.
-        if (node.type !== project_tsconfig_paths.ParsedEventType.Regular && node.type !== project_tsconfig_paths.ParsedEventType.LegacyAnimation)
+        if (node.type !== o.ParsedEventType.Regular && node.type !== o.ParsedEventType.LegacyAnimation)
             return [];
-        if (!(node.handler instanceof project_tsconfig_paths.ASTWithSource))
+        if (!(node.handler instanceof o.ASTWithSource))
             return [];
         const sourceExpressionText = node.handler.source || '';
-        if (node.handler.ast instanceof project_tsconfig_paths.Chain) {
+        if (node.handler.ast instanceof o.Chain) {
             // (click)="increment; decrement"
             return node.handler.ast.expressions.flatMap((expression) => assertExpressionInvoked$1(expression, component, node, sourceExpressionText, ctx));
         }
-        if (node.handler.ast instanceof project_tsconfig_paths.Conditional) {
+        if (node.handler.ast instanceof o.Conditional) {
             // (click)="true ? increment : decrement"
             const { trueExp, falseExp } = node.handler.ast;
             return [trueExp, falseExp].flatMap((expression) => assertExpressionInvoked$1(expression, component, node, sourceExpressionText, ctx));
@@ -17109,10 +15075,10 @@ class UninvokedFunctionInEventBindingSpec extends TemplateCheckWithVisitor {
  * If the expression is a property read, and it has a call signature, a diagnostic is generated.
  */
 function assertExpressionInvoked$1(expression, component, node, expressionText, ctx) {
-    if (expression instanceof project_tsconfig_paths.Call || expression instanceof project_tsconfig_paths.SafeCall) {
+    if (expression instanceof o.Call || expression instanceof o.SafeCall) {
         return []; // If the method is called, skip it.
     }
-    if (!(expression instanceof project_tsconfig_paths.PropertyRead) && !(expression instanceof project_tsconfig_paths.SafePropertyRead)) {
+    if (!(expression instanceof o.PropertyRead) && !(expression instanceof o.SafePropertyRead)) {
         return []; // If the expression is not a property read, skip it.
     }
     const symbol = ctx.templateTypeChecker.getSymbolOfNode(expression, component);
@@ -17141,10 +15107,10 @@ const factory$5 = {
 class UnparenthesizedNullishCoalescing extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.UNPARENTHESIZED_NULLISH_COALESCING;
     visitNode(ctx, component, node) {
-        if (node instanceof project_tsconfig_paths.Binary) {
+        if (node instanceof o.Binary) {
             if (node.operation === '&&' || node.operation === '||') {
-                if ((node.left instanceof project_tsconfig_paths.Binary && node.left.operation === '??') ||
-                    (node.right instanceof project_tsconfig_paths.Binary && node.right.operation === '??')) {
+                if ((node.left instanceof o.Binary && node.left.operation === '??') ||
+                    (node.right instanceof o.Binary && node.right.operation === '??')) {
                     const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
                     if (symbol?.kind !== project_tsconfig_paths.SymbolKind.Expression) {
                         return [];
@@ -17186,13 +15152,13 @@ class UnusedLetDeclarationCheck extends TemplateCheckWithVisitor {
         return diagnostics;
     }
     visitNode(ctx, component, node) {
-        if (node instanceof project_tsconfig_paths.LetDeclaration) {
+        if (node instanceof o.TmplAstLetDeclaration) {
             this.getAnalysis(component).allLetDeclarations.add(node);
         }
-        else if (node instanceof project_tsconfig_paths.AST) {
-            const unwrappedNode = node instanceof project_tsconfig_paths.ASTWithSource ? node.ast : node;
+        else if (node instanceof o.AST) {
+            const unwrappedNode = node instanceof o.ASTWithSource ? node.ast : node;
             const target = ctx.templateTypeChecker.getExpressionTarget(unwrappedNode, component);
-            if (target !== null && target instanceof project_tsconfig_paths.LetDeclaration) {
+            if (target !== null && target instanceof o.TmplAstLetDeclaration) {
                 this.getAnalysis(component).usedLetDeclarations.add(target);
             }
         }
@@ -17217,15 +15183,15 @@ const factory$3 = {
 class UninvokedTrackFunctionCheck extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.UNINVOKED_TRACK_FUNCTION;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.ForLoopBlock) || !node.trackBy) {
+        if (!(node instanceof o.TmplAstForLoopBlock) || !node.trackBy) {
             return [];
         }
-        if (node.trackBy.ast instanceof project_tsconfig_paths.Call || node.trackBy.ast instanceof project_tsconfig_paths.SafeCall) {
+        if (node.trackBy.ast instanceof o.Call || node.trackBy.ast instanceof o.SafeCall) {
             // If the method is called, skip it.
             return [];
         }
-        if (!(node.trackBy.ast instanceof project_tsconfig_paths.PropertyRead) &&
-            !(node.trackBy.ast instanceof project_tsconfig_paths.SafePropertyRead)) {
+        if (!(node.trackBy.ast instanceof o.PropertyRead) &&
+            !(node.trackBy.ast instanceof o.SafePropertyRead)) {
             // If the expression is not a property read, skip it.
             return [];
         }
@@ -17253,14 +15219,14 @@ class UninvokedFunctionInTextInterpolation extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION;
     visitNode(ctx, component, node) {
         // interpolations like `{{ myFunction }}`
-        if (node instanceof project_tsconfig_paths.Interpolation) {
+        if (node instanceof o.Interpolation) {
             return node.expressions.flatMap((item) => assertExpressionInvoked(item, component, ctx));
         }
         return [];
     }
 }
 function assertExpressionInvoked(expression, component, ctx) {
-    if (!(expression instanceof project_tsconfig_paths.PropertyRead) && !(expression instanceof project_tsconfig_paths.SafePropertyRead)) {
+    if (!(expression instanceof o.PropertyRead) && !(expression instanceof o.SafePropertyRead)) {
         return []; // If the expression is not a property read, skip it.
     }
     const symbol = ctx.templateTypeChecker.getSymbolOfNode(expression, component);
@@ -17287,7 +15253,7 @@ const factory$1 = {
 class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
     code = project_tsconfig_paths.ErrorCode.DEFER_TRIGGER_MISCONFIGURATION;
     visitNode(ctx, component, node) {
-        if (!(node instanceof project_tsconfig_paths.DeferredBlock))
+        if (!(node instanceof o.TmplAstDeferredBlock))
             return [];
         const mainKeys = Object.keys(node.triggers);
         const prefetchKeys = Object.keys(node.prefetchTriggers);
@@ -17300,7 +15266,7 @@ class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
             .filter((t) => t !== undefined && t !== null);
         const diags = [];
         //  'on immediate' dominance
-        const hasImmediateMain = mains.some((t) => t instanceof project_tsconfig_paths.ImmediateDeferredTrigger);
+        const hasImmediateMain = mains.some((t) => t instanceof o.TmplAstImmediateDeferredTrigger);
         if (hasImmediateMain) {
             if (mains.length > 1) {
                 const msg = `The 'immediate' trigger makes additional triggers redundant.`;
@@ -17316,7 +15282,7 @@ class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
             const main = mains[0];
             for (const pre of prefetches) {
                 // Timer vs Timer: warn when prefetch delay >= main delay
-                const isTimerTriggger = main instanceof project_tsconfig_paths.TimerDeferredTrigger && pre instanceof project_tsconfig_paths.TimerDeferredTrigger;
+                const isTimerTriggger = main instanceof o.TmplAstTimerDeferredTrigger && pre instanceof o.TmplAstTimerDeferredTrigger;
                 if (isTimerTriggger) {
                     const mainDelay = main.delay;
                     const preDelay = pre.delay;
@@ -17329,11 +15295,11 @@ class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
                 // have a reference and the references are identical. If references differ
                 // (or one is missing), the prefetch targets a different element and
                 // provides potential value.
-                const isHoverTrigger = main instanceof project_tsconfig_paths.HoverDeferredTrigger && pre instanceof project_tsconfig_paths.HoverDeferredTrigger;
-                const isInteractionTrigger = main instanceof project_tsconfig_paths.InteractionDeferredTrigger &&
-                    pre instanceof project_tsconfig_paths.InteractionDeferredTrigger;
-                const isViewportTrigger = main instanceof project_tsconfig_paths.ViewportDeferredTrigger &&
-                    pre instanceof project_tsconfig_paths.ViewportDeferredTrigger;
+                const isHoverTrigger = main instanceof o.TmplAstHoverDeferredTrigger && pre instanceof o.TmplAstHoverDeferredTrigger;
+                const isInteractionTrigger = main instanceof o.TmplAstInteractionDeferredTrigger &&
+                    pre instanceof o.TmplAstInteractionDeferredTrigger;
+                const isViewportTrigger = main instanceof o.TmplAstViewportDeferredTrigger &&
+                    pre instanceof o.TmplAstViewportDeferredTrigger;
                 if (isHoverTrigger || isInteractionTrigger || isViewportTrigger) {
                     const mainRef = main.reference;
                     const preRef = pre.reference;
@@ -17347,8 +15313,8 @@ class DeferTriggerMisconfiguration extends TemplateCheckWithVisitor {
                 }
                 // Syntactic identical: same class for immediate/idle/never etc. (timers handled above)
                 if (main.constructor === pre.constructor &&
-                    !(main instanceof project_tsconfig_paths.TimerDeferredTrigger)) {
-                    const kind = main instanceof project_tsconfig_paths.ImmediateDeferredTrigger
+                    !(main instanceof o.TmplAstTimerDeferredTrigger)) {
+                    const kind = main instanceof o.TmplAstImmediateDeferredTrigger
                         ? 'immediate'
                         : main.constructor.name.replace('DeferredTrigger', '').toLowerCase();
                     const msg = `Prefetch '${kind}' matches the main trigger and provides no benefit. Remove the prefetch modifier.`;
@@ -17488,7 +15454,7 @@ class TemplateSemanticsCheckerImpl {
     }
 }
 /** Visitor that verifies the semantics of a template. */
-class TemplateSemanticsVisitor extends project_tsconfig_paths.RecursiveVisitor {
+class TemplateSemanticsVisitor extends o.TmplAstRecursiveVisitor {
     expressionVisitor;
     constructor(expressionVisitor) {
         super();
@@ -17507,7 +15473,7 @@ class TemplateSemanticsVisitor extends project_tsconfig_paths.RecursiveVisitor {
     }
 }
 /** Visitor that verifies the semantics of the expressions within a template. */
-class ExpressionsSemanticsVisitor extends project_tsconfig_paths.RecursiveAstVisitor {
+class ExpressionsSemanticsVisitor extends o.RecursiveAstVisitor {
     templateTypeChecker;
     component;
     diagnostics;
@@ -17518,7 +15484,7 @@ class ExpressionsSemanticsVisitor extends project_tsconfig_paths.RecursiveAstVis
         this.diagnostics = diagnostics;
     }
     visitBinary(ast, context) {
-        if (project_tsconfig_paths.Binary.isAssignmentOperation(ast.operation) && ast.left instanceof project_tsconfig_paths.PropertyRead) {
+        if (o.Binary.isAssignmentOperation(ast.operation) && ast.left instanceof o.PropertyRead) {
             this.checkForIllegalWriteInEventBinding(ast.left, context);
         }
         else {
@@ -17530,26 +15496,26 @@ class ExpressionsSemanticsVisitor extends project_tsconfig_paths.RecursiveAstVis
         this.checkForIllegalWriteInTwoWayBinding(ast, context);
     }
     checkForIllegalWriteInEventBinding(ast, context) {
-        if (!(context instanceof project_tsconfig_paths.BoundEvent) || !(ast.receiver instanceof project_tsconfig_paths.ImplicitReceiver)) {
+        if (!(context instanceof o.TmplAstBoundEvent) || !(ast.receiver instanceof o.ImplicitReceiver)) {
             return;
         }
         const target = this.templateTypeChecker.getExpressionTarget(ast, this.component);
-        if (target instanceof project_tsconfig_paths.Variable) {
+        if (target instanceof o.TmplAstVariable) {
             const errorMessage = `Cannot use variable '${target.name}' as the left-hand side of an assignment expression. Template variables are read-only.`;
             this.diagnostics.push(this.makeIllegalTemplateVarDiagnostic(target, context, errorMessage));
         }
     }
     checkForIllegalWriteInTwoWayBinding(ast, context) {
         // Only check top-level property reads inside two-way bindings for illegal assignments.
-        if (!(context instanceof project_tsconfig_paths.BoundEvent) ||
-            context.type !== project_tsconfig_paths.ParsedEventType.TwoWay ||
-            !(ast.receiver instanceof project_tsconfig_paths.ImplicitReceiver) ||
+        if (!(context instanceof o.TmplAstBoundEvent) ||
+            context.type !== o.ParsedEventType.TwoWay ||
+            !(ast.receiver instanceof o.ImplicitReceiver) ||
             ast !== unwrapAstWithSource(context.handler)) {
             return;
         }
         const target = this.templateTypeChecker.getExpressionTarget(ast, this.component);
-        const isVariable = target instanceof project_tsconfig_paths.Variable;
-        const isLet = target instanceof project_tsconfig_paths.LetDeclaration;
+        const isVariable = target instanceof o.TmplAstVariable;
+        const isLet = target instanceof o.TmplAstLetDeclaration;
         if (!isVariable && !isLet) {
             return;
         }
@@ -17567,7 +15533,7 @@ class ExpressionsSemanticsVisitor extends project_tsconfig_paths.RecursiveAstVis
         }
     }
     makeIllegalTemplateVarDiagnostic(target, expressionNode, errorMessage) {
-        const span = target instanceof project_tsconfig_paths.Variable ? target.valueSpan || target.sourceSpan : target.sourceSpan;
+        const span = target instanceof o.TmplAstVariable ? target.valueSpan || target.sourceSpan : target.sourceSpan;
         return this.templateTypeChecker.makeTemplateDiagnostic(this.component, expressionNode.handlerSpan, ts.DiagnosticCategory.Error, project_tsconfig_paths.ngErrorCode(project_tsconfig_paths.ErrorCode.WRITE_TO_READ_ONLY_VARIABLE), errorMessage, [
             {
                 text: `'${target.name}' is declared here.`,
@@ -17579,7 +15545,7 @@ class ExpressionsSemanticsVisitor extends project_tsconfig_paths.RecursiveAstVis
     }
 }
 function unwrapAstWithSource(ast) {
-    return ast instanceof project_tsconfig_paths.ASTWithSource ? ast.ast : ast;
+    return ast instanceof o.ASTWithSource ? ast.ast : ast;
 }
 
 /*!
@@ -20664,7 +18630,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.9+sha-04dd75b` usually means that core is at head so it supports
+    // A version of `21.0.0-next.9+sha-8511759` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -22288,7 +20254,7 @@ class NgtscProgram {
         return [];
     }
     emitXi18n() {
-        const ctx = new MessageBundle(new project_tsconfig_paths.HtmlParser(), [], {}, this.options.i18nOutLocale ?? null, this.options.i18nPreserveWhitespaceForLegacyExtraction);
+        const ctx = new o.MessageBundle(new o.HtmlParser(), [], {}, this.options.i18nOutLocale ?? null, this.options.i18nPreserveWhitespaceForLegacyExtraction);
         this.compiler.xi18n(ctx);
         i18nExtract(this.options.i18nOutFormat ?? null, this.options.i18nOutFile ?? null, this.host, this.options, ctx, project_tsconfig_paths.resolve);
     }

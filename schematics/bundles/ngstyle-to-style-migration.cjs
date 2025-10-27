@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-04dd75b
+ * @license Angular v21.0.0-next.9+sha-8511759
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,15 +8,16 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
-require('./index-DNN-eDYd.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+var o = require('@angular/compiler');
+require('./index-CEsWjb5E.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-BwcHVl4A.cjs');
-var apply_import_manager = require('./apply_import_manager-D_S1xuiR.cjs');
+var project_paths = require('./project_paths-Co58y57J.cjs');
+var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
 var imports = require('./imports-DwPXlGFl.cjs');
-var parse_html = require('./parse_html-BPB0nOTo.cjs');
-var ng_component_template = require('./ng_component_template-CE6GV0X8.cjs');
+var parse_html = require('./parse_html-D2a8L_Z0.cjs');
+var ng_component_template = require('./ng_component_template-DO_cntfP.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -35,7 +36,7 @@ function migrateNgStyleBindings(template, config, componentNode, typeChecker) {
         return { migrated: template, changed: false, replacementCount: 0, canRemoveCommonModule: false };
     }
     const visitor = new NgStyleCollector(template, componentNode, typeChecker);
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes, config);
+    o.visitAll(visitor, parsed.tree.rootNodes, config);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -154,7 +155,7 @@ function replaceTemplate(template, replaceValue, start, end, offset) {
  * Visitor class that scans Angular templates and collects replacements
  * for [ngStyle] bindings that use static object literals.
  */
-class NgStyleCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class NgStyleCollector extends o.RecursiveVisitor {
     originalTemplate;
     replacements = [];
     isNgStyleImported = true; // Default to true (permissive)

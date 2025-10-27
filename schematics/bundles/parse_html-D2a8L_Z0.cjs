@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-04dd75b
+ * @license Angular v21.0.0-next.9+sha-8511759
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
+var o = require('@angular/compiler');
 
 /**
  * parses the template string into the Html AST
@@ -19,7 +19,7 @@ function parseTemplate(template) {
         // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
         // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
         // easily get the text-only ranges without having to reconstruct the original text.
-        parsed = new project_tsconfig_paths.HtmlParser().parse(template, '', {
+        parsed = new o.HtmlParser().parse(template, '', {
             // Allows for ICUs to be parsed.
             tokenizeExpansionForms: true,
             // Explicitly disable blocks so that their characters are treated as plain text.
@@ -83,13 +83,13 @@ function canRemoveCommonModule(template) {
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
-        project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+        o.visitAll(visitor, parsed.tree.rootNodes);
         removeCommonModule = visitor.count === 0;
     }
     return removeCommonModule;
 }
 /** Finds all non-control flow elements from common module. */
-class CommonCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class CommonCollector extends o.RecursiveVisitor {
     count = 0;
     visitElement(el) {
         if (el.attrs.length > 0) {

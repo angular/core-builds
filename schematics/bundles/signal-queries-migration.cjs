@@ -1,22 +1,23 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-04dd75b
+ * @license Angular v21.0.0-next.9+sha-8511759
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
+var o = require('@angular/compiler');
 var ts = require('typescript');
+var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
 require('os');
-var index$1 = require('./index-DNN-eDYd.cjs');
+var index$1 = require('./index-CEsWjb5E.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-BwcHVl4A.cjs');
-var apply_import_manager = require('./apply_import_manager-D_S1xuiR.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-DWhG3DQq.cjs');
+var project_paths = require('./project_paths-Co58y57J.cjs');
+var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-BdEe7Ntl.cjs');
 var assert = require('assert');
-var index = require('./index-CTgCodAc.cjs');
+var index = require('./index-JmTvBtKF.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -159,7 +160,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
         }
     }
     if (metadata.queryInfo.read !== null) {
-        assert(metadata.queryInfo.read instanceof project_tsconfig_paths.WrappedNodeExpr);
+        assert(metadata.queryInfo.read instanceof o.WrappedNodeExpr);
         optionProperties.push(ts.factory.createPropertyAssignment('read', metadata.queryInfo.read.node));
     }
     if (metadata.queryInfo.descendants !== defaultDescendants) {
@@ -203,7 +204,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     // If the original property type and the read type are matching, we can rely
     // on the TS inference, instead of repeating types, like in `viewChild<Button>(Button)`.
     if (type !== undefined &&
-        resolvedReadType instanceof project_tsconfig_paths.WrappedNodeExpr &&
+        resolvedReadType instanceof o.WrappedNodeExpr &&
         ts.isIdentifier(resolvedReadType.node) &&
         ts.isTypeReferenceNode(type) &&
         ts.isIdentifier(type.typeName) &&
@@ -532,7 +533,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof project_tsconfig_paths.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof o.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
@@ -570,7 +571,7 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
         return null;
     }
     const potentialCall = ref.from.readAstPath[accessIdx - 1];
-    if (potentialCall === undefined || !(potentialCall instanceof project_tsconfig_paths.Call)) {
+    if (potentialCall === undefined || !(potentialCall instanceof o.Call)) {
         return null;
     }
     return potentialCall;
