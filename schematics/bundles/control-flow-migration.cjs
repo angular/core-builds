@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-a5678f6
+ * @license Angular v21.1.0-next.0+sha-b8c8bc6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,11 @@
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-BFuRHK4q.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
+var compiler_host = require('./compiler_host-DYBfAqzd.cjs');
+var o = require('@angular/compiler');
 var ts = require('typescript');
-var parse_html = require('./parse_html-BPB0nOTo.cjs');
+var parse_html = require('./parse_html-D2a8L_Z0.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
 require('os');
 require('fs');
 require('module');
@@ -275,7 +276,7 @@ class AnalyzedFile {
     }
 }
 /** Finds all non-control flow elements from common module. */
-class CommonCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class CommonCollector extends o.RecursiveVisitor {
     count = 0;
     visitElement(el) {
         if (el.attrs.length > 0) {
@@ -314,7 +315,7 @@ class CommonCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
     }
 }
 /** Finds all elements that represent i18n blocks. */
-class i18nCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class i18nCollector extends o.RecursiveVisitor {
     elements = [];
     visitElement(el) {
         if (el.attrs.find((a) => a.name === 'i18n') !== undefined) {
@@ -324,7 +325,7 @@ class i18nCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class ElementCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class ElementCollector extends o.RecursiveVisitor {
     _attributes;
     elements = [];
     constructor(_attributes = []) {
@@ -377,7 +378,7 @@ class ElementCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class TemplateCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+class TemplateCollector extends o.RecursiveVisitor {
     elements = [];
     templates = new Map();
     visitElement(el) {
@@ -601,7 +602,7 @@ function validateMigratedTemplate(migrated, fileName) {
 }
 function validateI18nStructure(parsed, fileName) {
     const visitor = new i18nCollector();
-    project_tsconfig_paths.visitAll$1(visitor, parsed.rootNodes);
+    o.visitAll(visitor, parsed.rootNodes);
     const parents = visitor.elements.filter((el) => el.children.length > 0);
     for (const p of parents) {
         for (const el of visitor.elements) {
@@ -681,7 +682,7 @@ function getTemplates(template) {
     const parsed = parse_html.parseTemplate(template);
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
-        project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+        o.visitAll(visitor, parsed.tree.rootNodes);
         for (let [key, tmpl] of visitor.templates) {
             tmpl.count = countTemplateUsage(parsed.tree.rootNodes, key);
             tmpl.generateContents(template);
@@ -888,7 +889,7 @@ function canRemoveCommonModule(template) {
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
-        project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+        o.visitAll(visitor, parsed.tree.rootNodes);
         removeCommonModule = visitor.count === 0;
     }
     return removeCommonModule;
@@ -1011,7 +1012,7 @@ function generateI18nMarkers(tmpl) {
     let parsed = parse_html.parseTemplate(tmpl);
     if (parsed.tree !== undefined) {
         const visitor = new i18nCollector();
-        project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+        o.visitAll(visitor, parsed.tree.rootNodes);
         for (const [ix, el] of visitor.elements.entries()) {
             // we only care about elements with children and i18n tags
             // elements without children have nothing to translate
@@ -1213,7 +1214,7 @@ function migrateCase(template) {
     }
     let result = template;
     const visitor = new ElementCollector(cases);
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+    o.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1310,7 +1311,7 @@ function migrateFor(template) {
     }
     let result = template;
     const visitor = new ElementCollector(fors);
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+    o.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1515,7 +1516,7 @@ function migrateIf(template) {
     }
     let result = template;
     const visitor = new ElementCollector(ifs);
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+    o.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1708,7 +1709,7 @@ function migrateSwitch(template) {
     }
     let result = template;
     const visitor = new ElementCollector(switches);
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+    o.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1739,11 +1740,11 @@ function migrateSwitch(template) {
 }
 function assertValidSwitchStructure(children) {
     for (const child of children) {
-        if (child instanceof project_tsconfig_paths.Text && child.value.trim() !== '') {
+        if (child instanceof o.Text && child.value.trim() !== '') {
             throw new Error(`Text node: "${child.value}" would result in invalid migrated @switch block structure. ` +
                 `@switch can only have @case or @default as children.`);
         }
-        else if (child instanceof project_tsconfig_paths.Element) {
+        else if (child instanceof o.Element) {
             let hasCase = false;
             for (const attr of child.attrs) {
                 if (cases.includes(attr.name)) {

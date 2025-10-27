@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-a5678f6
+ * @license Angular v21.1.0-next.0+sha-b8c8bc6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,14 @@
 
 var ts = require('typescript');
 require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CYin8ZOK.cjs');
-require('./index-DNN-eDYd.cjs');
+require('./project_tsconfig_paths-FXqIDiIG.cjs');
+var o = require('@angular/compiler');
+require('./index-CEsWjb5E.cjs');
 require('path');
 require('node:path');
-var project_paths = require('./project_paths-BwcHVl4A.cjs');
-var ng_component_template = require('./ng_component_template-CE6GV0X8.cjs');
-var parse_html = require('./parse_html-BPB0nOTo.cjs');
+var project_paths = require('./project_paths-Co58y57J.cjs');
+var ng_component_template = require('./ng_component_template-DO_cntfP.cjs');
+var parse_html = require('./parse_html-D2a8L_Z0.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -31,7 +32,7 @@ function migrateTemplateToSelfClosingTags(template) {
         return { migrated: template, changed: false, replacementCount: 0 };
     }
     const visitor = new AngularElementCollector();
-    project_tsconfig_paths.visitAll$1(visitor, parsed.tree.rootNodes);
+    o.visitAll(visitor, parsed.tree.rootNodes);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -59,8 +60,8 @@ function replaceWithSelfClosingTag(html, tagName) {
 function replaceTemplate(template, replaceValue, start, end, offset) {
     return template.slice(0, start + offset) + replaceValue + template.slice(end + offset);
 }
-const ALL_HTML_TAGS = new project_tsconfig_paths.DomElementSchemaRegistry().allKnownElementNames();
-class AngularElementCollector extends project_tsconfig_paths.RecursiveVisitor$1 {
+const ALL_HTML_TAGS = new o.DomElementSchemaRegistry().allKnownElementNames();
+class AngularElementCollector extends o.RecursiveVisitor {
     elements = [];
     constructor() {
         super();
@@ -83,7 +84,7 @@ class AngularElementCollector extends project_tsconfig_paths.RecursiveVisitor$1 
         }
         if (element.children.length === 1) {
             const child = element.children[0];
-            return child instanceof project_tsconfig_paths.Text && /^\s*$/.test(child.value);
+            return child instanceof o.Text && /^\s*$/.test(child.value);
         }
         return false;
     }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-a5678f6
+ * @license Angular v21.1.0-next.0+sha-b8c8bc6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1805,13 +1805,6 @@ declare const Injectable: InjectableDecorator;
  */
 declare const ENVIRONMENT_INITIALIZER: InjectionToken<readonly (() => void)[]>;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Creates a token that can be used to inject static attributes of the host node.
  *
@@ -5615,13 +5608,6 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
 }
 declare function encapsulateResourceError(error: unknown): Error;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Gets the class name of the closest component to a node.
  * Warning! this function will return minified names if the name of the component is minified. The
@@ -5708,13 +5694,6 @@ declare class TimerScheduler {
     static ɵprov: unknown;
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Utility function used during template type checking to assert that a value is of a certain type.
  * @codeGenApi
@@ -6467,13 +6446,6 @@ declare function ɵɵanimateLeave(value: string | Function): typeof ɵɵanimateL
  */
 declare function ɵɵanimateLeaveListener(value: AnimationFunction): typeof ɵɵanimateLeaveListener;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Instruction that returns the component instance in which the current instruction is executing.
  * This is a constant-time version of `nextContent` for the case where we know that we need the
@@ -7613,14 +7585,6 @@ declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: a
  */
 declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-
 /**
  * Update a two-way bound property on a selected element.
  *
@@ -7654,13 +7618,6 @@ declare function ɵɵtwoWayBindingSet<T>(target: unknown, value: T): boolean;
  */
 declare function ɵɵtwoWayListener(eventName: string, listenerFn: EventCallback): typeof ɵɵtwoWayListener;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Declares an `@let` at a specific data slot. Returns itself to allow chaining.
  *
@@ -7685,13 +7642,6 @@ declare function ɵɵstoreLet<T>(value: T): T;
  */
 declare function ɵɵreadContextLet<T>(index: number): T;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Sets the location within the source template at which
  * each element in the current view was defined.
@@ -7703,14 +7653,6 @@ declare function ɵɵreadContextLet<T>(index: number): T;
  * @codeGenApi
  */
 declare function ɵɵattachSourceLocations(templatePath: string, locations: [index: number, offset: number, line: number, column: number][]): void;
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 
 /**
  * Interpolate a value with a single bound value and no prefixes or suffixes.
@@ -8166,14 +8108,6 @@ declare function ɵɵgetComponentDepsFactory(type: ComponentType<any>, rawImport
  */
 declare function ɵsetClassDebugInfo(type: Type$1<any>, debugInfo: ClassDebugInfo): void;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
-
 /** Represents `import.meta` plus some information that's not in the built-in types. */
 type ImportMetaExtended = ImportMeta & {
     hot?: {
@@ -8608,13 +8542,6 @@ declare function isNgModule<T>(value: Type$1<T>): value is Type$1<T> & {
     ɵmod: NgModuleDef<T>;
 };
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Profiler events is an enum used by the profiler to distinguish between different calls of user
  * code invoked throughout the application lifecycle.
@@ -8766,13 +8693,6 @@ declare function setProfiler(profiler: Profiler | null): () => void;
  */
 declare function applyChanges(component: {}): void;
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /** Retrieved information about a `@defer` block. */
 interface DeferBlockData {
     /** Current state of the block. */

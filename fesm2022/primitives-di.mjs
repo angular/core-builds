@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-a5678f6
+ * @license Angular v21.1.0-next.0+sha-b8c8bc6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7,16 +7,16 @@
 export { NOT_FOUND, NotFoundError, getCurrentInjector, inject, isNotFound, setCurrentInjector } from './_not_found-chunk.mjs';
 
 function defineInjectable(opts) {
-    return {
-        token: opts.token,
-        providedIn: opts.providedIn || null,
-        factory: opts.factory,
-        value: undefined,
-    };
+  return {
+    token: opts.token,
+    providedIn: opts.providedIn || null,
+    factory: opts.factory,
+    value: undefined
+  };
 }
 function registerInjectable(ctor, declaration) {
-    ctor.ɵprov = declaration;
-    return ctor;
+  ctor.ɵprov = declaration;
+  return ctor;
 }
 
 export { defineInjectable, registerInjectable };
