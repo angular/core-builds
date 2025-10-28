@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-81b8765
+ * @license Angular v21.0.0-next.9+sha-3fbaaa0
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10365,7 +10365,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new o.Version('21.0.0-next.9+sha-81b8765');
+new o.Version('21.0.0-next.9+sha-3fbaaa0');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -18630,7 +18630,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `21.0.0-next.9+sha-81b8765` usually means that core is at head so it supports
+    // A version of `21.0.0-next.9+sha-3fbaaa0` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

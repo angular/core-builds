@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-next.9+sha-81b8765
+ * @license Angular v21.0.0-next.9+sha-3fbaaa0
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3002,6 +3002,12 @@ interface TracingService<T extends TracingSnapshot> {
      * snapshot.
      */
     snapshot(linkedSnapshot: T | null): T;
+    /**
+     * Propagate the current tracing context to the provided function.
+     * @param fn A function.
+     * @return A function that will propagate the current tracing context.
+     */
+    propagate?<T extends Function>(fn: T): T;
     /**
      * Wrap an event listener bound by the framework for tracing.
      * @param element Element on which the event is bound.
