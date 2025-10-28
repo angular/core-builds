@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-3032332
+ * @license Angular v21.1.0-next.0+sha-5a93eeb
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -824,7 +824,7 @@ class NgCompilerHost extends DelegatingCompilerHost {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new o.Version('21.1.0-next.0+sha-3032332');
+new o.Version('21.1.0-next.0+sha-5a93eeb');
 
 const UNKNOWN_ERROR_CODE = 500;
 exports.EmitFlags = void 0;
