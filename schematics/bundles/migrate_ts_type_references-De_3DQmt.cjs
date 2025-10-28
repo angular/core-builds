@@ -1,21 +1,20 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-3fbaaa0
+ * @license Angular v21.0.0-next.9+sha-4f21ea7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('@angular/compiler');
-var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
-require('os');
 var assert = require('assert');
-var index = require('./index-JmTvBtKF.cjs');
-var project_paths = require('./project_paths-Co58y57J.cjs');
+var ts = require('typescript');
+require('@angular/compiler');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+require('os');
+var index = require('./index-_BM2fwrn.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-CEsWjb5E.cjs');
-require('path');
+require('./index-3VCyQlmQ.cjs');
 require('node:path');
 
 /**
@@ -866,18 +865,6 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
     }
 }
 
-function removeFromUnionIfPossible(union, filter) {
-    const filtered = union.types.filter(filter);
-    if (filtered.length === union.types.length) {
-        return union;
-    }
-    // If there is only item at this point, avoid the union structure.
-    if (filtered.length === 1) {
-        return filtered[0];
-    }
-    return ts.factory.updateUnionTypeNode(union, ts.factory.createNodeArray(filtered));
-}
-
 /**
  * Inserts a leading string for the given node, respecting
  * indentation of the given anchor node.
@@ -916,6 +903,18 @@ function cutStringToLineLimit(str, limit) {
         chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
     }
     return chunks;
+}
+
+function removeFromUnionIfPossible(union, filter) {
+    const filtered = union.types.filter(filter);
+    if (filtered.length === union.types.length) {
+        return union;
+    }
+    // If there is only item at this point, avoid the union structure.
+    if (filtered.length === 1) {
+        return filtered[0];
+    }
+    return ts.factory.updateUnionTypeNode(union, ts.factory.createNodeArray(filtered));
 }
 
 /**

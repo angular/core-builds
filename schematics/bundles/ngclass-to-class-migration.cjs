@@ -1,25 +1,25 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-3fbaaa0
+ * @license Angular v21.0.0-next.9+sha-4f21ea7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+require('./index-3VCyQlmQ.cjs');
 var o = require('@angular/compiler');
-var index = require('./index-CEsWjb5E.cjs');
-require('path');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+require('os');
 require('node:path');
-var project_paths = require('./project_paths-Co58y57J.cjs');
-var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 var parse_html = require('./parse_html-D2a8L_Z0.cjs');
-var ng_component_template = require('./ng_component_template-DtRqyiiy.cjs');
+var ng_component_template = require('./ng_component_template-Bu4Bnx46.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
+require('path');
 require('fs');
 require('module');
 require('url');
@@ -60,7 +60,7 @@ function migrateNgClassBindings(template, config, componentNode, typeChecker) {
  */
 function createNgClassImportsArrayRemoval(classNode, file, typeChecker, removeCommonModule) {
     const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
-    const evaluator = new index.PartialEvaluator(reflector, typeChecker, null);
+    const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, typeChecker, null);
     // Use ReflectionHost to get decorators instead of manual AST traversal
     const decorators = reflector.getDecoratorsOfDeclaration(classNode);
     if (!decorators) {

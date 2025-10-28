@@ -1,23 +1,23 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-3fbaaa0
+ * @license Angular v21.0.0-next.9+sha-4f21ea7
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+require('./index-3VCyQlmQ.cjs');
 var o = require('@angular/compiler');
-var index$1 = require('./index-CEsWjb5E.cjs');
-require('path');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+require('os');
 require('node:path');
-var project_paths = require('./project_paths-Co58y57J.cjs');
-var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
-var index = require('./index-JmTvBtKF.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var index = require('./index-_BM2fwrn.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
+require('path');
 require('fs');
 require('module');
 require('url');
@@ -258,8 +258,8 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         const filesWithOutputDeclarations = new Set();
         const checker = program.getTypeChecker();
         const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const dtsReader = new index$1.DtsMetadataReader(checker, reflector);
-        const evaluator = new index$1.PartialEvaluator(reflector, checker, null);
+        const dtsReader = new project_tsconfig_paths.DtsMetadataReader(checker, reflector);
+        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         // Pre-analyze the program and get access to the template type checker.
         // If we are processing a non-Angular target, there is no template info.
