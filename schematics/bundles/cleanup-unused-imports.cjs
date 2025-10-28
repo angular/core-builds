@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-07b8e95
+ * @license Angular v21.1.0-next.0+sha-8e50cdb
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,16 +8,16 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Co58y57J.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
 var ts = require('typescript');
-require('os');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+require('./index-3VCyQlmQ.cjs');
 require('@angular/compiler');
-var index = require('./index-CEsWjb5E.cjs');
-require('path');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+require('os');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
+var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
 require('@angular-devkit/schematics');
+require('path');
 require('fs');
 require('module');
 require('url');
@@ -30,7 +30,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             extendedDiagnostics: {
                 checks: {
                     // Ensure that the diagnostic is enabled.
-                    unusedStandaloneImports: index.DiagnosticCategoryLabel.Warning,
+                    unusedStandaloneImports: project_tsconfig_paths.DiagnosticCategoryLabel.Warning,
                 },
             },
         });

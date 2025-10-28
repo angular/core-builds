@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-07b8e95
+ * @license Angular v21.1.0-next.0+sha-8e50cdb
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,20 +8,20 @@
 
 var o = require('@angular/compiler');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
 require('os');
-var index$1 = require('./index-CEsWjb5E.cjs');
-require('path');
+require('./index-3VCyQlmQ.cjs');
 require('node:path');
-var project_paths = require('./project_paths-Co58y57J.cjs');
-var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-BdEe7Ntl.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-De_3DQmt.cjs');
 var assert = require('assert');
-var index = require('./index-JmTvBtKF.cjs');
+var index = require('./index-_BM2fwrn.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
 require('module');
+require('path');
 require('url');
 require('@angular-devkit/schematics');
 require('./leading_space-D9nQ8UQC.cjs');
@@ -742,7 +742,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         const { sourceFiles, program } = info;
         const checker = program.getTypeChecker();
         const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const evaluator = new index$1.PartialEvaluator(reflector, checker, null);
+        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
         const res = {
             knownQueryFields: {},
             potentialProblematicQueries: {},
@@ -930,7 +930,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         const { program, sourceFiles } = info;
         const checker = program.getTypeChecker();
         const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const evaluator = new index$1.PartialEvaluator(reflector, checker, null);
+        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
         const replacements = [];
         const importManager = new project_tsconfig_paths.ImportManager();
         const printer = ts.createPrinter();

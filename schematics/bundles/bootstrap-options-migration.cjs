@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-07b8e95
+ * @license Angular v21.1.0-next.0+sha-8e50cdb
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,19 +8,19 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Co58y57J.cjs');
-require('os');
-var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-FXqIDiIG.cjs');
+var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+require('./index-3VCyQlmQ.cjs');
 require('@angular/compiler');
-var index = require('./index-CEsWjb5E.cjs');
-require('path');
+var ts = require('typescript');
+var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+require('os');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-DLAIMz9K.cjs');
+var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 var symbol = require('./symbol-BObKoqes.cjs');
 require('@angular-devkit/schematics');
+require('path');
 require('fs');
 require('module');
 require('url');
@@ -75,7 +75,7 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                         symbol.isReferenceToImport(typeChecker, node.expression.expression, getTestBedSpecifier)));
             };
             const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
-            const evaluator = new index.PartialEvaluator(reflector, typeChecker, null);
+            const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, typeChecker, null);
             const walk = (node) => {
                 if (isBootstrapAppNode(node)) {
                     this.analyzeBootstrapApplication(node, sourceFile, info, typeChecker, importManager, replacements);

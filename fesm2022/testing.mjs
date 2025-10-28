@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-07b8e95
+ * @license Angular v21.1.0-next.0+sha-8e50cdb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1021,7 +1021,7 @@ class TestBedCompiler {
   compileTestModule() {
     class RootScopeModule {}
     compileNgModuleDefs(RootScopeModule, {
-      providers: [...this.rootProviderOverrides, provideZonelessChangeDetectionInternal(), [] , TestBedApplicationErrorHandler, {
+      providers: [...this.rootProviderOverrides, provideZonelessChangeDetectionInternal(), TestBedApplicationErrorHandler, {
         provide: ENVIRONMENT_INITIALIZER,
         multi: true,
         useValue: () => {

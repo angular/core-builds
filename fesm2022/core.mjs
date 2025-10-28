@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-07b8e95
+ * @license Angular v21.1.0-next.0+sha-8e50cdb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1712,7 +1712,6 @@ class ApplicationModule {
   }], null);
 })();
 
-const ZONELESS_BY_DEFAULT = true;
 function internalCreateApplication(config) {
   const {
     rootComponent,
@@ -1729,7 +1728,7 @@ function internalCreateApplication(config) {
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
       assertStandaloneComponentType(rootComponent);
     }
-    const allAppProviders = [provideZonelessChangeDetectionInternal(), ZONELESS_BY_DEFAULT ? [] : internalProvideZoneChangeDetection({}), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : []), ...(appProviders || [])];
+    const allAppProviders = [provideZonelessChangeDetectionInternal(), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : []), ...(appProviders || [])];
     const adapter = new EnvironmentNgModuleRefAdapter({
       providers: allAppProviders,
       parent: platformInjector,
