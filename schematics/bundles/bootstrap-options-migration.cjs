@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,22 +8,17 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-require('./index-3VCyQlmQ.cjs');
-require('@angular/compiler');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 var symbol = require('./symbol-BObKoqes.cjs');
 require('@angular-devkit/schematics');
-require('path');
-require('fs');
-require('module');
-require('url');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 const CORE_PACKAGE = '@angular/core';
 const PROVIDE_ZONE_CHANGE_DETECTION = 'provideZoneChangeDetection';
@@ -37,7 +32,7 @@ const BOOTSTRAP_OPTIONS = ['ngZone', ...SAFE_TO_REMOVE_OPTIONS];
 class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {
         let replacements = [];
-        const importManager = new project_tsconfig_paths.ImportManager();
+        const importManager = new migrations.ImportManager();
         for (const sourceFile of info.sourceFiles) {
             // We need to migration either
             // * `bootstrapApplication(App)
@@ -74,8 +69,8 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                     (symbol.isReferenceToImport(typeChecker, node.expression.expression, testBedSpecifier) ||
                         symbol.isReferenceToImport(typeChecker, node.expression.expression, getTestBedSpecifier)));
             };
-            const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
-            const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, typeChecker, null);
+            const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
+            const evaluator = new migrations.PartialEvaluator(reflector, typeChecker, null);
             const walk = (node) => {
                 if (isBootstrapAppNode(node)) {
                     this.analyzeBootstrapApplication(node, sourceFile, info, typeChecker, importManager, replacements);
@@ -203,7 +198,7 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
     analyzeBootstrapModule(node, sourceFile, reflector, evaluator, info, typeChecker, importManager, replacements) {
         const moduleIdentifier = node.arguments[0];
         const moduleType = evaluator.evaluate(moduleIdentifier);
-        if (!(moduleType instanceof project_tsconfig_paths.Reference) || !ts.isClassDeclaration(moduleType.node)) {
+        if (!(moduleType instanceof migrations.Reference) || !ts.isClassDeclaration(moduleType.node)) {
             return;
         }
         const moduleClass = moduleType.node;
@@ -258,7 +253,7 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 zoneCdProvider = `${PROVIDE_ZONE_CHANGE_DETECTION}(${config.length > 0 ? `{ ${config.join(', ')} }` : ''})`;
             }
             const ngZoneOption = options.get('ngZone');
-            if (ngZoneOption instanceof project_tsconfig_paths.Reference) {
+            if (ngZoneOption instanceof migrations.Reference) {
                 const clazz = ngZoneOption.node;
                 if (ts.isClassDeclaration(clazz) && clazz.name) {
                     zoneInstanceProvider = `{provide: NgZone, useClass: ${clazz.name.text}}`;
@@ -450,7 +445,7 @@ function addProvidersToBootstrapOption(projectFile, optionsNode, providersText, 
 function findNgModule(node, reflector) {
     const decorators = reflector.getDecoratorsOfDeclaration(node);
     if (decorators) {
-        const ngModuleDecorator = project_tsconfig_paths.getAngularDecorators(decorators, ['NgModule'], true)[0];
+        const ngModuleDecorator = migrations.getAngularDecorators(decorators, ['NgModule'], true)[0];
         if (ngModuleDecorator &&
             ngModuleDecorator.args &&
             ngModuleDecorator.args.length > 0 &&

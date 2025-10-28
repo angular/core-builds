@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,15 +8,12 @@
 
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
-var p = require('path');
-var compiler_host = require('./compiler_host-CmySh8zG.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+var path = require('path');
+var compiler_host = require('./compiler_host-DBwYMlTo.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 var ts = require('typescript');
-require('@angular/compiler');
-require('os');
+var migrations = require('@angular/compiler-cli/private/migrations');
 var property_name = require('./property_name-BBwFuqMe.cjs');
-require('module');
-require('url');
 require('@angular-devkit/core');
 
 /**
@@ -31,13 +28,6 @@ function findClassDeclaration(reference, typeChecker) {
         ?.declarations?.find(ts.isClassDeclaration) || null);
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Checks whether a component is standalone.
  * @param node Class being checked.
@@ -48,7 +38,7 @@ function isStandaloneComponent(node, reflector) {
     if (decorators === null) {
         return false;
     }
-    const decorator = project_tsconfig_paths.findAngularDecorator(decorators, 'Component', false);
+    const decorator = migrations.findAngularDecorator(decorators, 'Component', false);
     if (decorator === undefined || decorator.args === null || decorator.args.length !== 1) {
         return false;
     }
@@ -140,13 +130,6 @@ function isProvideRoutesCallExpression(node, typeChecker) {
     return false;
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Converts all application routes that are using standalone components to be lazy loaded.
  * @param sourceFile File that should be migrated.
@@ -154,7 +137,7 @@ function isProvideRoutesCallExpression(node, typeChecker) {
  */
 function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
-    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
+    const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
     const printer = ts.createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
@@ -391,7 +374,7 @@ function migrate(options) {
         const basePath = process.cwd();
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
         if (!buildPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the route lazy loading migration.');
         }
@@ -440,7 +423,7 @@ function standaloneRoutesMigration(tree, tsconfigPath, basePath, pathToMigrate, 
         const { pendingChanges, skippedRoutes: skipped, migratedRoutes: migrated, } = migrateFileToLazyRoutes(sourceFile, program);
         skippedRoutes.push(...skipped);
         migratedRoutes.push(...migrated);
-        const update = tree.beginUpdate(p.relative(basePath, sourceFile.fileName));
+        const update = tree.beginUpdate(path.relative(basePath, sourceFile.fileName));
         pendingChanges.forEach((change) => {
             if (change.removeLength != null) {
                 update.remove(change.start, change.removeLength);

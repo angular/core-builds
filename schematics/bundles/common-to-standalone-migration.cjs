@@ -1,29 +1,24 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var ng_component_template = require('./ng_component_template-Bu4Bnx46.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var ng_component_template = require('./ng_component_template-Dsuq1Lw7.cjs');
 var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('path');
-require('fs');
-require('module');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('./property_name-BBwFuqMe.cjs');
 
 const commonModuleStr = 'CommonModule';
@@ -82,7 +77,7 @@ function migrateCommonModuleUsage(template, componentNode, typeChecker) {
     };
 }
 function createCommonModuleImportsArrayRemoval(classNode, file, typeChecker, neededImports) {
-    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
+    const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
     const decorators = reflector.getDecoratorsOfDeclaration(classNode);
     if (!decorators) {
         return null;
@@ -150,7 +145,7 @@ function analyzeTemplateContent(templateContent) {
 }
 function hasCommonModuleInImports(componentNode, typeChecker) {
     // First check if there's a CommonModule in the imports array
-    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
+    const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
     const decorators = reflector.getDecoratorsOfDeclaration(componentNode);
     if (!decorators) {
         return false;
@@ -194,7 +189,7 @@ function processResolvedTemplate(template, componentNode, info, typeChecker, rep
         if (replacement) {
             replacements.push(replacement);
         }
-        const importManager = new project_tsconfig_paths.ImportManager({
+        const importManager = new migrations.ImportManager({
             shouldUseSingleQuotes: () => true,
         });
         // Always remove 'CommonModule' regardless of whether it's aliased or not

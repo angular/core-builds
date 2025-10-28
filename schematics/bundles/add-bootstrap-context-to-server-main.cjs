@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,27 +8,15 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-require('@angular/compiler');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
-require('./index-3VCyQlmQ.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
+require('@angular/compiler-cli');
 require('node:path');
 require('@angular-devkit/schematics');
-require('path');
-require('fs');
-require('module');
-require('url');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function findArrowFunction(node) {
     let current = node;
     while (current) {
@@ -76,7 +64,7 @@ class AddBootstrapContextToServerMainMigration extends project_paths.TsurgeFunne
                     })));
                 }
             }
-            importManager ??= new project_tsconfig_paths.ImportManager({
+            importManager ??= new migrations.ImportManager({
                 generateUniqueIdentifier: () => null,
                 shouldUseSingleQuotes: () => true,
             });
@@ -117,13 +105,6 @@ class AddBootstrapContextToServerMainMigration extends project_paths.TsurgeFunne
     }
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function migrate() {
     return async (tree) => {
         await project_paths.runMigrationInDevkit({

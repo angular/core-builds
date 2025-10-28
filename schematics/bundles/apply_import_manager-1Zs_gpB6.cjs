@@ -1,16 +1,14 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+var compilerCli = require('@angular/compiler-cli');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
 
 /**
  * Applies import manager changes, and writes them as replacements the
@@ -24,7 +22,7 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
     newImports.forEach((newImports, fileName) => {
         newImports.forEach((newImport) => {
             const printedImport = printer.printNode(ts.EmitHint.Unspecified, newImport, pathToFile.get(fileName));
-            replacements.push(new project_paths.Replacement(project_paths.projectFile(project_tsconfig_paths.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
+            replacements.push(new project_paths.Replacement(project_paths.projectFile(compilerCli.absoluteFrom(fileName), info), new project_paths.TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
         });
     });
     // Capture updated imports

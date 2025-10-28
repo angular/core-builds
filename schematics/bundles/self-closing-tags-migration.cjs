@@ -1,27 +1,23 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-var o = require('@angular/compiler');
-require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+require('@angular/compiler-cli');
+require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var ng_component_template = require('./ng_component_template-Bu4Bnx46.cjs');
-var parse_html = require('./parse_html-D2a8L_Z0.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var ng_component_template = require('./ng_component_template-Dsuq1Lw7.cjs');
+var compiler = require('@angular/compiler');
+var parse_html = require('./parse_html-8VLCL37B.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('path');
-require('fs');
-require('module');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('./ng_decorators-DSFlWYQY.cjs');
 require('./imports-DP72APSx.cjs');
 require('./property_name-BBwFuqMe.cjs');
@@ -32,7 +28,7 @@ function migrateTemplateToSelfClosingTags(template) {
         return { migrated: template, changed: false, replacementCount: 0 };
     }
     const visitor = new AngularElementCollector();
-    o.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll(visitor, parsed.tree.rootNodes);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -60,8 +56,8 @@ function replaceWithSelfClosingTag(html, tagName) {
 function replaceTemplate(template, replaceValue, start, end, offset) {
     return template.slice(0, start + offset) + replaceValue + template.slice(end + offset);
 }
-const ALL_HTML_TAGS = new o.DomElementSchemaRegistry().allKnownElementNames();
-class AngularElementCollector extends o.RecursiveVisitor {
+const ALL_HTML_TAGS = new compiler.DomElementSchemaRegistry().allKnownElementNames();
+class AngularElementCollector extends compiler.RecursiveVisitor {
     elements = [];
     constructor() {
         super();
@@ -84,7 +80,7 @@ class AngularElementCollector extends o.RecursiveVisitor {
         }
         if (element.children.length === 1) {
             const child = element.children[0];
-            return child instanceof o.Text && /^\s*$/.test(child.value);
+            return child instanceof compiler.Text && /^\s*$/.test(child.value);
         }
         return false;
     }

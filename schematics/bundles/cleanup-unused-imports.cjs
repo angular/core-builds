@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,19 +8,14 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+var compilerCli = require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
 require('@angular-devkit/schematics');
-require('path');
-require('fs');
-require('module');
-require('url');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Migration that cleans up unused imports from a project. */
 class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
@@ -30,7 +25,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             extendedDiagnostics: {
                 checks: {
                     // Ensure that the diagnostic is enabled.
-                    unusedStandaloneImports: project_tsconfig_paths.DiagnosticCategoryLabel.Warning,
+                    unusedStandaloneImports: migrations.DiagnosticCategoryLabel.Warning,
                 },
             },
         });
@@ -44,7 +39,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
             if (diag.file !== undefined &&
                 diag.start !== undefined &&
                 diag.length !== undefined &&
-                diag.code === project_tsconfig_paths.ngErrorCode(project_tsconfig_paths.ErrorCode.UNUSED_STANDALONE_IMPORTS)) {
+                diag.code === compilerCli.ngErrorCode(compilerCli.ErrorCode.UNUSED_STANDALONE_IMPORTS)) {
                 // Skip files that aren't owned by this compilation unit.
                 if (!info.sourceFiles.includes(diag.file)) {
                     return;
@@ -194,7 +189,7 @@ class UnusedImportsMigration extends project_paths.TsurgeFunnelMigration {
     generateReplacements(sourceFile, removalLocations, usages, info, replacements) {
         const { fullRemovals, partialRemovals, allRemovedIdentifiers } = removalLocations;
         const { importedSymbols, identifierCounts } = usages;
-        const importManager = new project_tsconfig_paths.ImportManager();
+        const importManager = new migrations.ImportManager();
         const sourceText = sourceFile.getFullText();
         // Replace full arrays with empty ones. This allows preserves more of the user's formatting.
         fullRemovals.forEach((node) => {

@@ -1,34 +1,23 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var p = require('path');
-var compiler_host = require('./compiler_host-CmySh8zG.cjs');
+var path = require('path');
+var compiler_host = require('./compiler_host-DBwYMlTo.cjs');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('@angular/compiler');
-require('os');
-require('fs');
-require('module');
-require('url');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('@angular/compiler-cli/private/migrations');
 require('@angular-devkit/core');
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /** Names of decorators that enable DI on a class declaration. */
 const DECORATORS_SUPPORTING_DI = new Set([
     'Component',
@@ -347,13 +336,6 @@ function isInlineFunction(node) {
     return (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node));
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Finds class property declarations without initializers whose constructor-based initialization
  * can be inlined into the declaration spot after migrating to `inject`. For example:
@@ -1343,7 +1325,7 @@ function migrate(options) {
         const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
         const basePath = process.cwd();
         const allPaths = [...buildPaths, ...testPaths];
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
         if (!allPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the inject migration.');
         }
@@ -1367,7 +1349,7 @@ function runInjectMigration(tree, tsconfigPath, basePath, pathToMigrate, schemat
     for (const sourceFile of sourceFiles) {
         const changes = migrateFile(sourceFile, schematicOptions);
         if (changes.length > 0) {
-            const update = tree.beginUpdate(p.relative(basePath, sourceFile.fileName));
+            const update = tree.beginUpdate(path.relative(basePath, sourceFile.fileName));
             for (const change of changes) {
                 if (change.removeLength != null) {
                     update.remove(change.start, change.removeLength);

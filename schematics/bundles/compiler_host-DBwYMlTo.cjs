@@ -1,16 +1,14 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-var p = require('path');
+var migrations = require('@angular/compiler-cli/private/migrations');
+var path = require('path');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
@@ -29,7 +27,7 @@ function _interopNamespaceDefault(e) {
     return Object.freeze(n);
 }
 
-var p__namespace = /*#__PURE__*/_interopNamespaceDefault(p);
+var path__namespace = /*#__PURE__*/_interopNamespaceDefault(path);
 
 /** Tracks changes that have to be made for specific files. */
 class ChangeTracker {
@@ -41,7 +39,7 @@ class ChangeTracker {
     constructor(_printer, _importRemapper) {
         this._printer = _printer;
         this._importRemapper = _importRemapper;
-        this._importManager = new project_tsconfig_paths.ImportManager({
+        this._importManager = new migrations.ImportManager({
             shouldUseSingleQuotes: (file) => this._getQuoteKind(file) === 0 /* QuoteKind.SINGLE */,
         });
     }
@@ -228,7 +226,7 @@ function parseTsconfigFile(tsconfigPath, basePath) {
     // Throw if incorrect arguments are passed to this function. Passing relative base paths
     // results in root directories not being resolved and in later type checking runtime errors.
     // More details can be found here: https://github.com/microsoft/TypeScript/issues/37731.
-    if (!p__namespace.isAbsolute(basePath)) {
+    if (!path__namespace.isAbsolute(basePath)) {
         throw Error('Unexpected relative base path has been specified.');
     }
     return ts.parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
@@ -262,8 +260,8 @@ function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additi
     // Resolve the tsconfig path to an absolute path. This is needed as TypeScript otherwise
     // is not able to resolve root directories in the given tsconfig. More details can be found
     // in the following issue: https://github.com/microsoft/TypeScript/issues/37731.
-    tsconfigPath = p.resolve(basePath, tsconfigPath);
-    const parsed = parseTsconfigFile(tsconfigPath, p.dirname(tsconfigPath));
+    tsconfigPath = path.resolve(basePath, tsconfigPath);
+    const parsed = parseTsconfigFile(tsconfigPath, path.dirname(tsconfigPath));
     const options = optionOverrides ? { ...parsed.options, ...optionOverrides } : parsed.options;
     const host = createMigrationCompilerHost(tree, options, basePath, fakeFileRead);
     return { rootNames: parsed.fileNames.concat([]), options, host };
@@ -276,7 +274,7 @@ function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
     // if we run multiple migrations we might have intersecting changes and
     // source files.
     host.readFile = (fileName) => {
-        const treeRelativePath = p.relative(basePath, fileName);
+        const treeRelativePath = path.relative(basePath, fileName);
         let result = fakeRead?.(treeRelativePath);
         if (typeof result !== 'string') {
             // If the relative path resolved to somewhere outside of the tree, fall back to
@@ -310,7 +308,7 @@ function canMigrateFile(basePath, sourceFile, program) {
     // project. We can't migrate files outside of the project, because our file system interactions
     // go through the CLI's `Tree` which assumes that all files are within the project. See:
     // https://github.com/angular/angular-cli/blob/0b0961c9c233a825b6e4bb59ab7f0790f9b14676/packages/angular_devkit/schematics/src/tree/host-tree.ts#L131
-    return !p.relative(basePath, sourceFile.fileName).startsWith('..');
+    return !path.relative(basePath, sourceFile.fileName).startsWith('..');
 }
 
 exports.ChangeTracker = ChangeTracker;

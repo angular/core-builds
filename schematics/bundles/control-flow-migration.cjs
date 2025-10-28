@@ -1,22 +1,19 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-5a93eeb
+ * @license Angular v21.1.0-next.0+sha-f80b51a
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var p = require('path');
-var compiler_host = require('./compiler_host-CmySh8zG.cjs');
-var o = require('@angular/compiler');
+var path = require('path');
+var compiler_host = require('./compiler_host-DBwYMlTo.cjs');
+var compiler = require('@angular/compiler');
 var ts = require('typescript');
-var parse_html = require('./parse_html-D2a8L_Z0.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-require('fs');
-require('module');
-require('url');
+var parse_html = require('./parse_html-8VLCL37B.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('@angular/compiler-cli/private/migrations');
 require('@angular-devkit/core');
 
 function lookupIdentifiersInSourceFile(sourceFile, names) {
@@ -276,7 +273,7 @@ class AnalyzedFile {
     }
 }
 /** Finds all non-control flow elements from common module. */
-class CommonCollector extends o.RecursiveVisitor {
+class CommonCollector extends compiler.RecursiveVisitor {
     count = 0;
     visitElement(el) {
         if (el.attrs.length > 0) {
@@ -315,7 +312,7 @@ class CommonCollector extends o.RecursiveVisitor {
     }
 }
 /** Finds all elements that represent i18n blocks. */
-class i18nCollector extends o.RecursiveVisitor {
+class i18nCollector extends compiler.RecursiveVisitor {
     elements = [];
     visitElement(el) {
         if (el.attrs.find((a) => a.name === 'i18n') !== undefined) {
@@ -325,7 +322,7 @@ class i18nCollector extends o.RecursiveVisitor {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class ElementCollector extends o.RecursiveVisitor {
+class ElementCollector extends compiler.RecursiveVisitor {
     _attributes;
     elements = [];
     constructor(_attributes = []) {
@@ -378,7 +375,7 @@ class ElementCollector extends o.RecursiveVisitor {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class TemplateCollector extends o.RecursiveVisitor {
+class TemplateCollector extends compiler.RecursiveVisitor {
     elements = [];
     templates = new Map();
     visitElement(el) {
@@ -551,8 +548,8 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
             case 'templateUrl':
                 // Leave the end as undefined which means that the range is until the end of the file.
                 if (ts.isStringLiteralLike(prop.initializer)) {
-                    const path = p.join(p.dirname(sourceFile.fileName), prop.initializer.text);
-                    AnalyzedFile.addRange(path, sourceFile, analyzedFiles, {
+                    const path$1 = path.join(path.dirname(sourceFile.fileName), prop.initializer.text);
+                    AnalyzedFile.addRange(path$1, sourceFile, analyzedFiles, {
                         start: 0,
                         node: prop,
                         type: 'templateUrl',
@@ -602,7 +599,7 @@ function validateMigratedTemplate(migrated, fileName) {
 }
 function validateI18nStructure(parsed, fileName) {
     const visitor = new i18nCollector();
-    o.visitAll(visitor, parsed.rootNodes);
+    compiler.visitAll(visitor, parsed.rootNodes);
     const parents = visitor.elements.filter((el) => el.children.length > 0);
     for (const p of parents) {
         for (const el of visitor.elements) {
@@ -682,7 +679,7 @@ function getTemplates(template) {
     const parsed = parse_html.parseTemplate(template);
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
-        o.visitAll(visitor, parsed.tree.rootNodes);
+        compiler.visitAll(visitor, parsed.tree.rootNodes);
         for (let [key, tmpl] of visitor.templates) {
             tmpl.count = countTemplateUsage(parsed.tree.rootNodes, key);
             tmpl.generateContents(template);
@@ -889,7 +886,7 @@ function canRemoveCommonModule(template) {
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
-        o.visitAll(visitor, parsed.tree.rootNodes);
+        compiler.visitAll(visitor, parsed.tree.rootNodes);
         removeCommonModule = visitor.count === 0;
     }
     return removeCommonModule;
@@ -1012,7 +1009,7 @@ function generateI18nMarkers(tmpl) {
     let parsed = parse_html.parseTemplate(tmpl);
     if (parsed.tree !== undefined) {
         const visitor = new i18nCollector();
-        o.visitAll(visitor, parsed.tree.rootNodes);
+        compiler.visitAll(visitor, parsed.tree.rootNodes);
         for (const [ix, el] of visitor.elements.entries()) {
             // we only care about elements with children and i18n tags
             // elements without children have nothing to translate
@@ -1214,7 +1211,7 @@ function migrateCase(template) {
     }
     let result = template;
     const visitor = new ElementCollector(cases);
-    o.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1311,7 +1308,7 @@ function migrateFor(template) {
     }
     let result = template;
     const visitor = new ElementCollector(fors);
-    o.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1516,7 +1513,7 @@ function migrateIf(template) {
     }
     let result = template;
     const visitor = new ElementCollector(ifs);
-    o.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1709,7 +1706,7 @@ function migrateSwitch(template) {
     }
     let result = template;
     const visitor = new ElementCollector(switches);
-    o.visitAll(visitor, parsed.tree.rootNodes);
+    compiler.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1740,11 +1737,11 @@ function migrateSwitch(template) {
 }
 function assertValidSwitchStructure(children) {
     for (const child of children) {
-        if (child instanceof o.Text && child.value.trim() !== '') {
+        if (child instanceof compiler.Text && child.value.trim() !== '') {
             throw new Error(`Text node: "${child.value}" would result in invalid migrated @switch block structure. ` +
                 `@switch can only have @case or @default as children.`);
         }
-        else if (child instanceof o.Element) {
+        else if (child instanceof compiler.Element) {
             let hasCase = false;
             for (const attr of child.attrs) {
                 if (cases.includes(attr.name)) {
@@ -1851,7 +1848,7 @@ function migrate(options) {
             if (options.path.startsWith('..')) {
                 throw new schematics.SchematicsException('Cannot run control flow migration outside of the current project.');
             }
-            pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+            pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
             if (pathToMigrate.trim() !== '') {
                 allPaths.push(pathToMigrate);
             }
@@ -1894,10 +1891,10 @@ function runControlFlowMigration(tree, sourceFiles, basePath, schematicOptions) 
     // sort files with .html files first
     // this ensures class files know if it's safe to remove CommonModule
     const paths = sortFilePaths([...analysis.keys()]);
-    for (const path of paths) {
-        const file = analysis.get(path);
+    for (const path$1 of paths) {
+        const file = analysis.get(path$1);
         const ranges = file.getSortedRanges();
-        const relativePath = p.relative(basePath, path);
+        const relativePath = path.relative(basePath, path$1);
         const content = tree.readText(relativePath);
         const update = tree.beginUpdate(relativePath);
         for (const { start, end, node, type } of ranges) {
@@ -1909,7 +1906,7 @@ function runControlFlowMigration(tree, sourceFiles, basePath, schematicOptions) 
                 update.insertLeft(start, migrated);
             }
             if (errors.length > 0) {
-                migrateErrors.set(path, errors);
+                migrateErrors.set(path$1, errors);
             }
         }
         tree.commitUpdate(update);
