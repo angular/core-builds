@@ -1,29 +1,25 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-var o = require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var compiler = require('@angular/compiler');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
 var imports = require('./imports-DP72APSx.cjs');
-var parse_html = require('./parse_html-D2a8L_Z0.cjs');
-var ng_component_template = require('./ng_component_template-Bu4Bnx46.cjs');
+var parse_html = require('./parse_html-8VLCL37B.cjs');
+var ng_component_template = require('./ng_component_template-Dsuq1Lw7.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('path');
-require('fs');
-require('module');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('./ng_decorators-DSFlWYQY.cjs');
 require('./property_name-BBwFuqMe.cjs');
 
@@ -36,7 +32,7 @@ function migrateNgClassBindings(template, config, componentNode, typeChecker) {
         return { migrated: template, changed: false, replacementCount: 0, canRemoveCommonModule: false };
     }
     const visitor = new NgClassCollector(template, componentNode, typeChecker);
-    o.visitAll(visitor, parsed.tree.rootNodes, config);
+    compiler.visitAll(visitor, parsed.tree.rootNodes, config);
     let newTemplate = template;
     let changedOffset = 0;
     let replacementCount = 0;
@@ -59,8 +55,8 @@ function migrateNgClassBindings(template, config, componentNode, typeChecker) {
  * Uses ReflectionHost + PartialEvaluator for robust AST analysis.
  */
 function createNgClassImportsArrayRemoval(classNode, file, typeChecker, removeCommonModule) {
-    const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(typeChecker);
-    const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, typeChecker, null);
+    const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
+    const evaluator = new migrations.PartialEvaluator(reflector, typeChecker, null);
     // Use ReflectionHost to get decorators instead of manual AST traversal
     const decorators = reflector.getDecoratorsOfDeclaration(classNode);
     if (!decorators) {
@@ -134,7 +130,7 @@ function getPropertyRemovalRange(property) {
 }
 function calculateImportReplacements(info, sourceFiles, filesToRemoveCommonModule) {
     const importReplacements = {};
-    const importManager = new project_tsconfig_paths.ImportManager();
+    const importManager = new migrations.ImportManager();
     for (const sf of sourceFiles) {
         const file = project_paths.projectFile(sf, info);
         // Always remove NgClass if it's imported directly.
@@ -161,7 +157,7 @@ function replaceTemplate(template, replaceValue, start, end, offset) {
  * Visitor class that scans Angular templates and collects replacements
  * for [ngClass] bindings that use static object literals.
  */
-class NgClassCollector extends o.RecursiveVisitor {
+class NgClassCollector extends compiler.RecursiveVisitor {
     componentNode;
     typeChecker;
     replacements = [];

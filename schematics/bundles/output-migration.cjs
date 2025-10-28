@@ -1,27 +1,23 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
-var o = require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
+require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
-var index = require('./index-_BM2fwrn.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var compiler = require('@angular/compiler');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
+var index = require('./index-B7I9sIUx.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('path');
-require('fs');
-require('module');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
@@ -68,7 +64,7 @@ function isOutputDeclaration(node, reflector, dtsReader) {
             node.parent.name === undefined) {
             return false;
         }
-        const ref = new project_tsconfig_paths.Reference(node.parent);
+        const ref = new migrations.Reference(node.parent);
         const directiveMeta = dtsReader.getDirectiveMetadata(ref);
         return !!directiveMeta?.outputs.getByClassPropertyName(node.name.text);
     }
@@ -85,7 +81,7 @@ function getTargetPropertyDeclaration(targetSymbol) {
 /** Returns Angular `@Output` decorator or null when a given property declaration is not an @Output */
 function getOutputDecorator(node, reflector) {
     const decorators = reflector.getDecoratorsOfDeclaration(node);
-    const ngDecorators = decorators !== null ? project_tsconfig_paths.getAngularDecorators(decorators, ['Output'], /* isCore */ false) : [];
+    const ngDecorators = decorators !== null ? migrations.getAngularDecorators(decorators, ['Output'], /* isCore */ false) : [];
     return ngDecorators.length > 0 ? ngDecorators[0] : null;
 }
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
@@ -115,7 +111,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof o.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof compiler.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
@@ -171,7 +167,7 @@ function calculateDeclarationReplacement(info, node, aliasParam) {
 function calculateImportReplacements(info, sourceFiles) {
     const importReplacements = {};
     for (const sf of sourceFiles) {
-        const importManager = new project_tsconfig_paths.ImportManager();
+        const importManager = new migrations.ImportManager();
         const addOnly = [];
         const addRemove = [];
         const file = project_paths.projectFile(sf, info);
@@ -206,7 +202,7 @@ function calculateCompleteCallReplacement(info, node) {
 function calculatePipeCallReplacement(info, node) {
     if (ts.isPropertyAccessExpression(node.expression)) {
         const sf = node.getSourceFile();
-        const importManager = new project_tsconfig_paths.ImportManager();
+        const importManager = new migrations.ImportManager();
         const outputToObservableIdent = importManager.addImport({
             requestedFile: sf,
             exportModuleSpecifier: '@angular/core/rxjs-interop',
@@ -257,9 +253,9 @@ class OutputMigration extends project_paths.TsurgeFunnelMigration {
         let problematicDeclarationCount = 0;
         const filesWithOutputDeclarations = new Set();
         const checker = program.getTypeChecker();
-        const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const dtsReader = new project_tsconfig_paths.DtsMetadataReader(checker, reflector);
-        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
+        const reflector = new migrations.TypeScriptReflectionHost(checker);
+        const dtsReader = new migrations.DtsMetadataReader(checker, reflector);
+        const evaluator = new migrations.PartialEvaluator(reflector, checker, null);
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         // Pre-analyze the program and get access to the template type checker.
         // If we are processing a non-Angular target, there is no template info.

@@ -1,29 +1,25 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var o = require('@angular/compiler');
+var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-require('./index-3VCyQlmQ.cjs');
+require('@angular/compiler-cli');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-De_3DQmt.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-UGIUl7En.cjs');
 var assert = require('assert');
-var index = require('./index-_BM2fwrn.cjs');
+var index = require('./index-B7I9sIUx.cjs');
+var compiler = require('@angular/compiler');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('fs');
-require('module');
-require('path');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 require('./leading_space-D9nQ8UQC.cjs');
 
 /**
@@ -160,7 +156,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
         }
     }
     if (metadata.queryInfo.read !== null) {
-        assert(metadata.queryInfo.read instanceof o.WrappedNodeExpr);
+        assert(metadata.queryInfo.read instanceof compiler.WrappedNodeExpr);
         optionProperties.push(ts.factory.createPropertyAssignment('read', metadata.queryInfo.read.node));
     }
     if (metadata.queryInfo.descendants !== defaultDescendants) {
@@ -204,7 +200,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     // If the original property type and the read type are matching, we can rely
     // on the TS inference, instead of repeating types, like in `viewChild<Button>(Button)`.
     if (type !== undefined &&
-        resolvedReadType instanceof o.WrappedNodeExpr &&
+        resolvedReadType instanceof compiler.WrappedNodeExpr &&
         ts.isIdentifier(resolvedReadType.node) &&
         ts.isTypeReferenceNode(type) &&
         ts.isIdentifier(type.typeName) &&
@@ -292,7 +288,7 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
         return null;
     }
     const decorators = reflector.getDecoratorsOfDeclaration(node) ?? [];
-    const ngDecorators = project_tsconfig_paths.getAngularDecorators(decorators, project_tsconfig_paths.queryDecoratorNames, /* isCore */ false);
+    const ngDecorators = migrations.getAngularDecorators(decorators, migrations.queryDecoratorNames, /* isCore */ false);
     if (ngDecorators.length === 0) {
         return null;
     }
@@ -319,10 +315,10 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
     }
     let queryInfo = null;
     try {
-        queryInfo = project_tsconfig_paths.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
+        queryInfo = migrations.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
     }
     catch (e) {
-        if (!(e instanceof project_tsconfig_paths.FatalDiagnosticError)) {
+        if (!(e instanceof migrations.FatalDiagnosticError)) {
             throw e;
         }
         console.error(`Skipping query: ${e.node.getSourceFile().fileName}: ${e.toString()}`);
@@ -533,7 +529,7 @@ function checkNonTsReferenceAccessesField(ref, fieldName) {
     if (ref.from.read !== readFromPath) {
         return null;
     }
-    if (!(parentRead instanceof o.PropertyRead) || parentRead.name !== fieldName) {
+    if (!(parentRead instanceof compiler.PropertyRead) || parentRead.name !== fieldName) {
         return null;
     }
     return parentRead;
@@ -571,7 +567,7 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
         return null;
     }
     const potentialCall = ref.from.readAstPath[accessIdx - 1];
-    if (potentialCall === undefined || !(potentialCall instanceof o.Call)) {
+    if (potentialCall === undefined || !(potentialCall instanceof compiler.Call)) {
         return null;
     }
     return potentialCall;
@@ -741,8 +737,8 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         }
         const { sourceFiles, program } = info;
         const checker = program.getTypeChecker();
-        const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
+        const reflector = new migrations.TypeScriptReflectionHost(checker);
+        const evaluator = new migrations.PartialEvaluator(reflector, checker, null);
         const res = {
             knownQueryFields: {},
             potentialProblematicQueries: {},
@@ -790,7 +786,7 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
                 }
                 // Migrating fields with `@HostBinding` is incompatible as
                 // the host binding decorator does not invoke the signal.
-                const hostBindingDecorators = project_tsconfig_paths.getAngularDecorators(extractedQuery.fieldDecorators, ['HostBinding'], 
+                const hostBindingDecorators = migrations.getAngularDecorators(extractedQuery.fieldDecorators, ['HostBinding'], 
                 /* isCore */ false);
                 if (hostBindingDecorators.length > 0) {
                     markFieldIncompatibleInMetadata(res.potentialProblematicQueries, extractedQuery.id, migrate_ts_type_references.FieldIncompatibilityReason.SignalIncompatibleWithHostBinding);
@@ -929,10 +925,10 @@ class SignalQueriesMigration extends project_paths.TsurgeComplexMigration {
         const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         const { program, sourceFiles } = info;
         const checker = program.getTypeChecker();
-        const reflector = new project_tsconfig_paths.TypeScriptReflectionHost(checker);
-        const evaluator = new project_tsconfig_paths.PartialEvaluator(reflector, checker, null);
+        const reflector = new migrations.TypeScriptReflectionHost(checker);
+        const evaluator = new migrations.PartialEvaluator(reflector, checker, null);
         const replacements = [];
-        const importManager = new project_tsconfig_paths.ImportManager();
+        const importManager = new migrations.ImportManager();
         const printer = ts.createPrinter();
         const filesWithSourceQueries = new Map();
         const filesWithIncompleteMigration = new Map();

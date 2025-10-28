@@ -1,39 +1,25 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var schematics = require('@angular-devkit/schematics');
-var index = require('./index-3VCyQlmQ.cjs');
+var compilerCli = require('@angular/compiler-cli');
 var fs = require('fs');
-var p = require('path');
+var path = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-CmySh8zG.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
+var compiler_host = require('./compiler_host-DBwYMlTo.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
 var nodes = require('./nodes-B16H9JUd.cjs');
 var symbol = require('./symbol-BObKoqes.cjs');
 var imports = require('./imports-DP72APSx.cjs');
-require('@angular/compiler');
-require('os');
-require('module');
-require('url');
+var migrations = require('@angular/compiler-cli/private/migrations');
 require('@angular-devkit/core');
 
-function createProgram({ rootNames, options, host, oldProgram, }) {
-    return new index.NgtscProgram(rootNames, options, host, oldProgram);
-}
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /** Utility class used to track a one-to-many relationship where all the items are unique. */
 class UniqueItemTracker {
     _nodes = new Map();
@@ -228,13 +214,13 @@ function findLiteralProperty(literal, name) {
 }
 /** Gets a relative path between two files that can be used inside a TypeScript import. */
 function getRelativeImportPath(fromFile, toFile) {
-    let path = p.relative(p.dirname(fromFile), toFile).replace(/\.ts$/, '');
+    let path$1 = path.relative(path.dirname(fromFile), toFile).replace(/\.ts$/, '');
     // `relative` returns paths inside the same directory without `./`
-    if (!path.startsWith('.')) {
-        path = './' + path;
+    if (!path$1.startsWith('.')) {
+        path$1 = './' + path$1;
     }
     // Using the Node utilities can yield paths with forward slashes on Windows.
-    return compiler_host.normalizePath(path);
+    return compiler_host.normalizePath(path$1);
 }
 /** Function used to remap the generated `imports` for a component to known shorter aliases. */
 function knownInternalAliasRemapper(imports) {
@@ -309,13 +295,6 @@ function isTestCall(typeChecker, node, testBedImport, catalystImport) {
     return !!(isTestBedCall || isCatalystCall);
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 /**
  * Converts all declarations in the specified files to standalone.
  * @param sourceFiles Files that should be migrated.
@@ -401,8 +380,8 @@ function getComponentImportExpressions(decl, allDeclarations, tracker, typeCheck
     const resolvedDependencies = [];
     for (const dep of templateDependencies) {
         const importLocation = findImportLocation(dep, decl, usedDependenciesInMigration.has(dep)
-            ? project_tsconfig_paths.PotentialImportMode.ForceDirect
-            : project_tsconfig_paths.PotentialImportMode.Normal, typeChecker);
+            ? migrations.PotentialImportMode.ForceDirect
+            : migrations.PotentialImportMode.Normal, typeChecker);
         if (importLocation) {
             // Create a unique key that includes both the symbol name and module specifier
             // to handle cases where the same symbol name is imported from different modules
@@ -641,13 +620,13 @@ function findImportLocation(target, inContext, importMode, typeChecker) {
     for (const location of importLocations) {
         // Prefer a standalone import, if we can find one.
         // Otherwise fall back to the first module-based import.
-        if (location.kind === project_tsconfig_paths.PotentialImportKind.Standalone) {
+        if (location.kind === migrations.PotentialImportKind.Standalone) {
             return location;
         }
         if (!location.moduleSpecifier && !firstSameFileImport) {
             firstSameFileImport = location;
         }
-        if (location.kind === project_tsconfig_paths.PotentialImportKind.NgModule &&
+        if (location.kind === migrations.PotentialImportKind.NgModule &&
             !firstModuleImport &&
             // ɵ is used for some internal Angular modules that we want to skip over.
             !location.symbolName.startsWith('ɵ')) {
@@ -928,13 +907,6 @@ function isStandaloneDeclaration(node, declarationsInMigration, templateTypeChec
     return metadata != null && metadata.isStandalone;
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
     const filesToRemove = new Set();
     const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
@@ -1216,7 +1188,7 @@ function replaceModulesInImportsArray(array, replacements, nodesToRemove, tracke
         }
         const potentialImports = [];
         for (const ref of replacementRefs) {
-            const importLocation = findImportLocation(ref, array, project_tsconfig_paths.PotentialImportMode.Normal, templateTypeChecker);
+            const importLocation = findImportLocation(ref, array, migrations.PotentialImportMode.Normal, templateTypeChecker);
             if (importLocation) {
                 potentialImports.push(importLocation);
             }
@@ -1453,13 +1425,6 @@ function isInImportsArray(closestAssignment, closestArray) {
         closestAssignment.name.text === 'imports');
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
     const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
     const typeChecker = program.getTsProgram().getTypeChecker();
@@ -1981,7 +1946,7 @@ function isOutsideRange(excludeStart, excludeEnd, start, end) {
  * @param specifier Specifier whose path is being remapped.
  */
 function remapRelativeImport(targetFileName, specifier) {
-    return getRelativeImportPath(targetFileName, p.join(p.dirname(specifier.getSourceFile().fileName), specifier.text));
+    return getRelativeImportPath(targetFileName, path.join(path.dirname(specifier.getSourceFile().fileName), specifier.text));
 }
 /**
  * Whether a node is exported.
@@ -2054,7 +2019,7 @@ function migrate(options) {
         const allPaths = [...buildPaths, ...testPaths];
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = compiler_host.normalizePath(p.join(basePath, options.path));
+        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
         let migratedFiles = 0;
         if (!allPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the standalone migration.');
@@ -2082,7 +2047,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
         skipDefaultLibCheck: true,
     });
     const referenceLookupExcludedFiles = /node_modules|\.ngtypecheck\.ts/;
-    const program = createProgram({ rootNames, host, options, oldProgram });
+    const program = compilerCli.createProgram({ rootNames, host, options, oldProgram });
     const printer = ts.createPrinter();
     if (fs.existsSync(pathToMigrate) && !fs.statSync(pathToMigrate).isDirectory()) {
         throw new schematics.SchematicsException(`Migration path ${pathToMigrate} has to be a directory. Cannot run the standalone migration.`);
@@ -2114,7 +2079,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
         if (filesToRemove?.has(file)) {
             continue;
         }
-        const update = tree.beginUpdate(p.relative(basePath, file.fileName));
+        const update = tree.beginUpdate(path.relative(basePath, file.fileName));
         changes.forEach((change) => {
             if (change.removeLength != null) {
                 update.remove(change.start, change.removeLength);
@@ -2125,7 +2090,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
     }
     if (filesToRemove) {
         for (const file of filesToRemove) {
-            tree.delete(p.relative(basePath, file.fileName));
+            tree.delete(path.relative(basePath, file.fileName));
         }
     }
     // Run the module pruning after the standalone bootstrap to automatically remove the root module.

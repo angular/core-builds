@@ -1,17 +1,15 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('./index-3VCyQlmQ.cjs');
+var compilerCli = require('@angular/compiler-cli');
 var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
 var property_name = require('./property_name-BBwFuqMe.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
 
 /**
  * Unwraps a given expression TypeScript node. Expressions can be wrapped within multiple
@@ -117,7 +115,7 @@ function findClosestLineStartPosition(linesMap, position, low = 0, high = linesM
 class NgComponentTemplateVisitor {
     typeChecker;
     resolvedTemplates = [];
-    fs = project_tsconfig_paths.getFileSystem();
+    fs = compilerCli.getFileSystem();
     constructor(typeChecker) {
         this.typeChecker = typeChecker;
     }

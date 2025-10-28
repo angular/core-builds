@@ -1,27 +1,22 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-require('@angular/compiler');
+var migrations = require('@angular/compiler-cli/private/migrations');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
+require('@angular/compiler-cli');
 require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
-require('./index-3VCyQlmQ.cjs');
 require('node:path');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
 var imports = require('./imports-DP72APSx.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('fs');
-require('module');
-require('path');
-require('url');
 require('@angular-devkit/schematics');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 /** Migration that moves the import of `ApplicationConfig` from `platform-browser` to `core`. */
 class ApplicationConfigCoreMigration extends project_paths.TsurgeFunnelMigration {
@@ -33,7 +28,7 @@ class ApplicationConfigCoreMigration extends project_paths.TsurgeFunnelMigration
             if (!specifier) {
                 continue;
             }
-            importManager ??= new project_tsconfig_paths.ImportManager({
+            importManager ??= new migrations.ImportManager({
                 // Prevent the manager from trying to generate a non-conflicting import.
                 generateUniqueIdentifier: () => null,
                 shouldUseSingleQuotes: () => true,
@@ -77,13 +72,6 @@ class ApplicationConfigCoreMigration extends project_paths.TsurgeFunnelMigration
     }
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function migrate() {
     return async (tree) => {
         await project_paths.runMigrationInDevkit({

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,11 @@
 
 var assert = require('assert');
 var ts = require('typescript');
-require('@angular/compiler');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
-var index = require('./index-_BM2fwrn.cjs');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
+var migrations = require('@angular/compiler-cli/private/migrations');
+var index = require('./index-B7I9sIUx.cjs');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
 var leading_space = require('./leading_space-D9nQ8UQC.cjs');
-require('./index-3VCyQlmQ.cjs');
+require('@angular/compiler-cli');
 require('node:path');
 
 /**
@@ -570,8 +568,8 @@ function checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisito
     const spyOnPattern = new SpyOnFieldPattern(checker, fields);
     const visitor = (node) => {
         // Check for manual class instantiations.
-        if (ts.isNewExpression(node) && ts.isIdentifier(project_tsconfig_paths.unwrapExpression(node.expression))) {
-            let newTarget = checker.getSymbolAtLocation(project_tsconfig_paths.unwrapExpression(node.expression));
+        if (ts.isNewExpression(node) && ts.isIdentifier(migrations.unwrapExpression(node.expression))) {
+            let newTarget = checker.getSymbolAtLocation(migrations.unwrapExpression(node.expression));
             // Plain identifier references can point to alias symbols (e.g. imports).
             if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
                 newTarget = checker.getAliasedSymbol(newTarget);
@@ -590,7 +588,7 @@ function checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisito
         problematicReferencesCheck: if (insidePropertyDeclaration !== null &&
             ts.isIdentifier(node) &&
             insidePropertyDeclaration.parent.heritageClauses !== undefined) {
-            let newTarget = checker.getSymbolAtLocation(project_tsconfig_paths.unwrapExpression(node));
+            let newTarget = checker.getSymbolAtLocation(migrations.unwrapExpression(node));
             // Plain identifier references can point to alias symbols (e.g. imports).
             if (newTarget !== undefined && newTarget.flags & ts.SymbolFlags.Alias) {
                 newTarget = checker.getAliasedSymbol(newTarget);
@@ -819,7 +817,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         if (metaRegistry !== null) {
             for (const derivedClasses of inheritanceGraph.traceDerivedClasses(inputClass)) {
                 const derivedMeta = ts.isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
-                    ? metaRegistry.getDirectiveMetadata(new project_tsconfig_paths.Reference(derivedClasses))
+                    ? metaRegistry.getDirectiveMetadata(new migrations.Reference(derivedClasses))
                     : null;
                 if (derivedMeta !== null && derivedMeta.inputFieldNamesFromMetadataArray !== null) {
                     derivedMeta.inputFieldNamesFromMetadataArray.forEach((b) => inputFieldNamesFromMetadataArray.add(b));

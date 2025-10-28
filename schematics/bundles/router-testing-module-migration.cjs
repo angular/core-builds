@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-next.9+sha-b41a070
+ * @license Angular v21.0.0-next.9+sha-6e004ca
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,19 +8,14 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-Ct4XYqz1.cjs');
-require('./index-3VCyQlmQ.cjs');
-require('@angular/compiler');
+var project_paths = require('./project_paths-DvD50ouC.cjs');
+require('@angular/compiler-cli');
+var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
-var project_tsconfig_paths = require('./project_tsconfig_paths-PsYr_U7n.cjs');
-require('os');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-BA3VOMvg.cjs');
+var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
 require('@angular-devkit/schematics');
-require('path');
-require('fs');
-require('module');
-require('url');
+require('./project_tsconfig_paths-CDVxT6Ov.cjs');
 
 const ROUTER_TESTING_MODULE = 'RouterTestingModule';
 const SPY_LOCATION = 'SpyLocation';
@@ -405,7 +400,7 @@ class RouterTestingModuleMigration extends project_paths.TsurgeFunnelMigration {
         const replacements = [];
         const migratedUsages = [];
         const filesWithLocationMocks = new Map();
-        const importManager = new project_tsconfig_paths.ImportManager({
+        const importManager = new migrations.ImportManager({
             shouldUseSingleQuotes: () => true,
         });
         for (const sourceFile of info.sourceFiles) {
@@ -462,13 +457,6 @@ class RouterTestingModuleMigration extends project_paths.TsurgeFunnelMigration {
     }
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.dev/license
- */
 function migrate(options) {
     return async (tree, context) => {
         await project_paths.runMigrationInDevkit({
