@@ -1,37 +1,11 @@
 /**
- * @license Angular v21.0.0-rc.0+sha-981fabc
+ * @license Angular v21.0.0-rc.0+sha-20b4b2c
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { SIGNAL } from './_formatter-chunk.js';
 import { EventContract } from './_event_dispatcher-chunk.js';
-
-/**
- * A reactive value which notifies consumers of any changes.
- *
- * Signals are functions which returns their current value. To access the current value of a signal,
- * call it.
- *
- * Ordinary values can be turned into `Signal`s with the `signal` function.
- *
- * @publicApi 17.0
- */
-type Signal<T> = (() => T) & {
-    [SIGNAL]: unknown;
-};
-/**
- * Checks if the given `value` is a reactive `Signal`.
- *
- * @publicApi 17.0
- */
-declare function isSignal(value: unknown): value is Signal<unknown>;
-/**
- * A comparison function which can determine if two values are equal.
- *
- * @publicApi 17.0
- */
-type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 
 /** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
 declare const ɵWRITABLE_SIGNAL: unique symbol;
@@ -82,6 +56,38 @@ interface CreateSignalOptions<T> {
  * Create a `Signal` that can be set or updated directly.
  */
 declare function signal<T>(initialValue: T, options?: CreateSignalOptions<T>): WritableSignal<T>;
+
+/**
+ * A reactive value which notifies consumers of any changes.
+ *
+ * Signals are functions which returns their current value. To access the current value of a signal,
+ * call it.
+ *
+ * Ordinary values can be turned into `Signal`s with the `signal` function.
+ *
+ * @publicApi 17.0
+ */
+type Signal<T> = (() => T) & {
+    [SIGNAL]: unknown;
+};
+/**
+ * Checks if the given `value` is a reactive `Signal`.
+ *
+ * @publicApi 17.0
+ */
+declare function isSignal(value: unknown): value is Signal<unknown>;
+/**
+ * A comparison function which can determine if two values are equal.
+ *
+ * @publicApi 17.0
+ */
+type ValueEqualityFn<T> = (a: T, b: T) => boolean;
+/**
+ * Checks if the given `value` is a writeable signal.
+ *
+ * @publicApi 21.1
+ */
+declare function isWritableSignal(value: unknown): value is WritableSignal<unknown>;
 
 /**
  * Function that can be used to manually clean up a
@@ -828,5 +834,5 @@ declare global {
  */
 declare function enableProfiling(): () => void;
 
-export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, signal, ɵunwrapWritableSignal };
+export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, isWritableSignal, signal, ɵunwrapWritableSignal };
 export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, EventCallback, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
