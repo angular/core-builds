@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.9+sha-3409fe8
+ * @license Angular v20.3.9+sha-88952b5
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32792,7 +32792,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.9+sha-3409fe8');
+const VERSION = new Version('20.3.9+sha-88952b5');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33854,7 +33854,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-C1bhMy6X.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CopGppNj.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -44602,7 +44602,27 @@ class OutOfBandDiagnosticRecorderImpl {
         const message = `Required input${inputAliases.length === 1 ? '' : 's'} ${inputAliases
             .map((n) => `'${n}'`)
             .join(', ')} from ${isComponent ? 'component' : 'directive'} ${directiveName} must be specified.`;
-        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), element.startSourceSpan, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
+        let span;
+        let name;
+        if (element instanceof Element$1 || element instanceof Directive$1) {
+            name = element.name;
+        }
+        else if (element instanceof Component$1) {
+            name = element.componentName;
+        }
+        else {
+            name = null;
+        }
+        if (name === null) {
+            span = element.startSourceSpan;
+        }
+        else {
+            // Only highlight the tag name since highlighting the entire start tag can be noisy.
+            const start = element.startSourceSpan.start.moveBy(1);
+            const end = element.startSourceSpan.end.moveBy(start.offset + name.length - element.startSourceSpan.end.offset);
+            span = new ParseSourceSpan(start, end);
+        }
+        this._diagnostics.push(makeTemplateDiagnostic(id, this.resolver.getTemplateSourceMapping(id), span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.MISSING_REQUIRED_INPUTS), message));
     }
     illegalForLoopTrackAccess(id, block, access) {
         const sourceSpan = this.resolver.toTemplateParseSourceSpan(id, access.sourceSpan);
