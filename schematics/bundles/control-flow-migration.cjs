@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.0-rc.0+sha-9c59ea8
+ * @license Angular v21.0.0-rc.0+sha-e1f933f
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -783,7 +783,7 @@ function analyzeTemplateUsage(nodes, templateName) {
             if (node.attrs) {
                 for (const attr of node.attrs) {
                     if ((attr.name === '*ngTemplateOutlet' || attr.name === '[ngTemplateOutlet]') &&
-                        attr.value?.split(';')[0] === templateName) {
+                        attr.value?.split(';')[0]?.trim() === templateName) {
                         isReferencedInTemplateOutlet = true;
                     }
                     if (attr.name.trim() === templateNameWithHash) {
