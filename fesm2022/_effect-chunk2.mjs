@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.0+sha-34f53aa
+ * @license Angular v21.0.0-rc.0+sha-3140b87
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.0.0-rc.0+sha-34f53aa');
+const VERSION = /* @__PURE__ */new Version('21.0.0-rc.0+sha-3140b87');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -2573,7 +2573,6 @@ class ErrorHandler {
   }
 }
 const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'internal error handler' : '', {
-  providedIn: 'root',
   factory: () => {
     const zone = inject(NgZone);
     const injector = inject(EnvironmentInjector);
@@ -2605,7 +2604,6 @@ const errorHandlerEnvironmentInitializer = {
   multi: true
 };
 const globalErrorListeners = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'GlobalErrorListeners' : '', {
-  providedIn: 'root',
   factory: () => {
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
       return;
@@ -2695,11 +2693,9 @@ function injectViewContext() {
 
 class ChangeDetectionScheduler {}
 const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', {
-  providedIn: 'root',
   factory: () => true
 });
 const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', {
-  providedIn: 'root',
   factory: () => false
 });
 const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');

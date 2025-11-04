@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.0+sha-34f53aa
+ * @license Angular v21.0.0-rc.0+sha-3140b87
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1889,7 +1889,6 @@ function getDocument() {
 }
 
 const APP_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AppId' : '', {
-  providedIn: 'root',
   factory: () => DEFAULT_APP_ID
 });
 const DEFAULT_APP_ID = 'ng';
@@ -1911,7 +1910,6 @@ const PLATFORM_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMo
 });
 const ANIMATION_MODULE_TYPE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AnimationModuleType' : '');
 const CSP_NONCE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'CSP nonce' : '', {
-  providedIn: 'root',
   factory: () => {
     return getDocument().body?.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
   }
@@ -1923,7 +1921,6 @@ const IMAGE_CONFIG_DEFAULTS = {
   disableImageLazyLoadWarning: false
 };
 const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ImageConfig' : '', {
-  providedIn: 'root',
   factory: () => IMAGE_CONFIG_DEFAULTS
 });
 
@@ -2011,7 +2008,6 @@ const DEFER_HYDRATE_TRIGGERS = 't';
 const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
 const PRESERVE_HOST_CONTENT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'PRESERVE_HOST_CONTENT' : '', {
-  providedIn: 'root',
   factory: () => PRESERVE_HOST_CONTENT_DEFAULT
 });
 const IS_I18N_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_I18N_HYDRATION_ENABLED' : '');
@@ -2019,7 +2015,6 @@ const IS_EVENT_REPLAY_ENABLED = new InjectionToken(typeof ngDevMode === 'undefin
 const EVENT_REPLAY_ENABLED_DEFAULT = false;
 const IS_INCREMENTAL_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_INCREMENTAL_HYDRATION_ENABLED' : '');
 const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
-  providedIn: 'root',
   factory: () => new Map()
 });
 const IS_ENABLED_BLOCKING_INITIAL_NAVIGATION = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_ENABLED_BLOCKING_INITIAL_NAVIGATION' : '');
@@ -2203,7 +2198,6 @@ const removeListeners = el => {
   el.__jsaction_fns = undefined;
 };
 const JSACTION_EVENT_CONTRACT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
-  providedIn: 'root',
   factory: () => ({})
 });
 function invokeListeners(event, currentTarget) {
@@ -3177,7 +3171,6 @@ function escapeCommentText(value) {
 
 const NG_REFLECT_ATTRS_FLAG_DEFAULT = false;
 const NG_REFLECT_ATTRS_FLAG = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'NG_REFLECT_FLAG' : '', {
-  providedIn: 'root',
   factory: () => NG_REFLECT_ATTRS_FLAG_DEFAULT
 });
 function provideNgReflectAttributes() {
@@ -4249,7 +4242,6 @@ const NOOP_AFTER_RENDER_REF = {
 };
 
 const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationQueue' : '', {
-  providedIn: 'root',
   factory: () => {
     return {
       queue: new Set(),
@@ -8211,7 +8203,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.0+sha-34f53aa'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.0+sha-3140b87'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12810,11 +12802,9 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
 }
 
 const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
-  providedIn: 'root',
   factory: () => false
 });
 const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
-  providedIn: 'root',
   factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT
 });
 const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
@@ -18137,14 +18127,12 @@ function getGlobalLocale() {
   }
 }
 const LOCALE_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'LocaleId' : '', {
-  providedIn: 'root',
   factory: () => inject(LOCALE_ID, {
     optional: true,
     skipSelf: true
   }) || getGlobalLocale()
 });
 const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DefaultCurrencyCode' : '', {
-  providedIn: 'root',
   factory: () => USD_CURRENCY_CODE
 });
 const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Translations' : '');
