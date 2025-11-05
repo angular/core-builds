@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-5b210e9
+ * @license Angular v21.1.0-next.0+sha-41be02d
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8230,7 +8230,7 @@ interface ɵFieldState<T> {
     /**
      * A signal indicating the patterns the field must match.
      */
-    readonly pattern?: Signal<readonly RegExp[]>;
+    readonly pattern: Signal<readonly RegExp[]>;
     /**
      * A signal indicating whether the field is currently readonly.
      */
@@ -8238,7 +8238,7 @@ interface ɵFieldState<T> {
     /**
      * A signal indicating whether the field is required.
      */
-    readonly required?: Signal<boolean>;
+    readonly required: Signal<boolean>;
     /**
      * A signal indicating whether the field has been touched by the user.
      */

@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.1.0-next.0+sha-5b210e9
+ * @license Angular v21.1.0-next.0+sha-41be02d
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, EffectRefImpl, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, ENVIRONMENT_INITIALIZER, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, renderStringify, ENVIRONMENT, makeEnvironmentProviders, isDirectiveHost, resetPreOrderHookFlags, PARENT, RENDERER, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getSelectedTNode, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, EnvironmentInjector, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, EffectRefImpl, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, getBindingIndex, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, scheduleCallbackWithMicrotask, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -8203,7 +8203,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-5b210e9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-41be02d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13225,6 +13225,7 @@ function ɵɵcontrol(value, sanitizer) {
       updateNativeControl(tNode, lView, control);
     }
   }
+  nextBindingIndex();
 }
 function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
   const directiveIndices = tNode.inputs?.['field'];
@@ -13336,52 +13337,58 @@ function updateCustomControl(tNode, lView, control, modelName) {
   const component = lView[componentIndex];
   const componentDef = tView.data[componentIndex];
   const state = control.state();
-  writeToDirectiveInput(componentDef, component, modelName, state.value());
-  maybeWriteToDirectiveInput(componentDef, component, 'errors', state.errors);
-  maybeWriteToDirectiveInput(componentDef, component, 'invalid', state.invalid);
-  maybeWriteToDirectiveInput(componentDef, component, 'disabled', state.disabled);
-  maybeWriteToDirectiveInput(componentDef, component, 'disabledReasons', state.disabledReasons);
-  maybeWriteToDirectiveInput(componentDef, component, 'name', state.name);
-  maybeWriteToDirectiveInput(componentDef, component, 'readonly', state.readonly);
-  maybeWriteToDirectiveInput(componentDef, component, 'touched', state.touched);
-  maybeWriteToDirectiveInput(componentDef, component, 'max', state.max);
-  maybeWriteToDirectiveInput(componentDef, component, 'maxLength', state.maxLength);
-  maybeWriteToDirectiveInput(componentDef, component, 'min', state.min);
-  maybeWriteToDirectiveInput(componentDef, component, 'minLength', state.minLength);
-  maybeWriteToDirectiveInput(componentDef, component, 'pattern', state.pattern);
-  maybeWriteToDirectiveInput(componentDef, component, 'required', state.required);
+  const bindings = getControlBindings(lView);
+  maybeUpdateInput(componentDef, component, bindings, state, VALUE, modelName);
+  for (const key of CONTROL_BINDING_KEYS) {
+    const inputName = CONTROL_BINDING_NAMES[key];
+    maybeUpdateInput(componentDef, component, bindings, state, key, inputName);
+  }
 }
-function maybeWriteToDirectiveInput(componentDef, component, inputName, source) {
-  if (source && inputName in componentDef.inputs) {
-    writeToDirectiveInput(componentDef, component, inputName, source());
+function maybeUpdateInput(componentDef, component, bindings, state, key, inputName) {
+  if (inputName in componentDef.inputs) {
+    const value = state[key]?.();
+    if (controlBindingUpdated(bindings, key, value)) {
+      writeToDirectiveInput(componentDef, component, inputName, value);
+    }
   }
 }
 function updateNativeControl(tNode, lView, control) {
-  const input = getNativeByTNode(tNode, lView);
+  const element = getNativeByTNode(tNode, lView);
   const renderer = lView[RENDERER];
   const state = control.state();
-  setNativeControlValue(input, state.value());
-  renderer.setAttribute(input, 'name', state.name());
-  setBooleanAttribute(renderer, input, 'disabled', state.disabled());
-  setBooleanAttribute(renderer, input, 'readonly', state.readonly());
-  if (state.required) {
-    setBooleanAttribute(renderer, input, 'required', state.required());
+  const bindings = getControlBindings(lView);
+  const value = state.value();
+  if (controlBindingUpdated(bindings, VALUE, value)) {
+    setNativeControlValue(element, value);
   }
+  const name = state.name();
+  if (controlBindingUpdated(bindings, NAME, name)) {
+    renderer.setAttribute(element, 'name', name);
+  }
+  updateBooleanAttribute(renderer, element, bindings, state, DISABLED);
+  updateBooleanAttribute(renderer, element, bindings, state, READONLY);
+  updateBooleanAttribute(renderer, element, bindings, state, REQUIRED);
   if (tNode.flags & 16384) {
-    if (state.max) {
-      setOptionalAttribute(renderer, input, 'max', state.max());
-    }
-    if (state.min) {
-      setOptionalAttribute(renderer, input, 'min', state.min());
-    }
+    updateOptionalAttribute(renderer, element, bindings, state, MAX);
+    updateOptionalAttribute(renderer, element, bindings, state, MIN);
   }
   if (tNode.flags & 32768) {
-    if (state.maxLength) {
-      setOptionalAttribute(renderer, input, 'maxLength', state.maxLength());
-    }
-    if (state.minLength) {
-      setOptionalAttribute(renderer, input, 'minLength', state.minLength());
-    }
+    updateOptionalAttribute(renderer, element, bindings, state, MAX_LENGTH);
+    updateOptionalAttribute(renderer, element, bindings, state, MIN_LENGTH);
+  }
+}
+function updateBooleanAttribute(renderer, element, bindings, state, key) {
+  const value = state[key]();
+  if (controlBindingUpdated(bindings, key, value)) {
+    const name = CONTROL_BINDING_NAMES[key];
+    setBooleanAttribute(renderer, element, name, value);
+  }
+}
+function updateOptionalAttribute(renderer, element, bindings, state, key) {
+  const value = state[key]?.();
+  if (controlBindingUpdated(bindings, key, value)) {
+    const name = CONTROL_BINDING_NAMES[key];
+    setOptionalAttribute(renderer, element, name, value);
   }
 }
 function isDateOrNull(value) {
@@ -13460,6 +13467,65 @@ function setNativeControlValue(element, value) {
       }
   }
   element.value = value;
+}
+const DISABLED = /* @__PURE__ */getClosureSafeProperty({
+  disabled: getClosureSafeProperty
+});
+const MAX = /* @__PURE__ */getClosureSafeProperty({
+  max: getClosureSafeProperty
+});
+const MAX_LENGTH = /* @__PURE__ */getClosureSafeProperty({
+  maxLength: getClosureSafeProperty
+});
+const MIN = /* @__PURE__ */getClosureSafeProperty({
+  min: getClosureSafeProperty
+});
+const MIN_LENGTH = /* @__PURE__ */getClosureSafeProperty({
+  minLength: getClosureSafeProperty
+});
+const NAME = /* @__PURE__ */getClosureSafeProperty({
+  name: getClosureSafeProperty
+});
+const READONLY = /* @__PURE__ */getClosureSafeProperty({
+  readonly: getClosureSafeProperty
+});
+const REQUIRED = /* @__PURE__ */getClosureSafeProperty({
+  required: getClosureSafeProperty
+});
+const VALUE = /* @__PURE__ */getClosureSafeProperty({
+  value: getClosureSafeProperty
+});
+const CONTROL_BINDING_NAMES = {
+  disabled: 'disabled',
+  disabledReasons: 'disabledReasons',
+  errors: 'errors',
+  invalid: 'invalid',
+  max: 'max',
+  maxLength: 'maxLength',
+  min: 'min',
+  minLength: 'minLength',
+  name: 'name',
+  pattern: 'pattern',
+  readonly: 'readonly',
+  required: 'required',
+  touched: 'touched'
+};
+const CONTROL_BINDING_KEYS = /* @__PURE__ */(() => Object.keys(CONTROL_BINDING_NAMES))();
+function getControlBindings(lView) {
+  const bindingIndex = getBindingIndex();
+  let bindings = lView[bindingIndex];
+  if (bindings === NO_CHANGE) {
+    bindings = lView[bindingIndex] = {};
+  }
+  return bindings;
+}
+function controlBindingUpdated(bindings, key, value) {
+  const oldValue = bindings[key];
+  if (Object.is(oldValue, value)) {
+    return false;
+  }
+  bindings[key] = value;
+  return true;
 }
 function setBooleanAttribute(renderer, element, name, value) {
   if (value) {
