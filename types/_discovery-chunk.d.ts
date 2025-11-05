@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.0+sha-507b346
+ * @license Angular v21.0.0-rc.0+sha-47578e0
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -67,7 +67,7 @@ declare const MAX_ANIMATION_TIMEOUT: InjectionToken<number>;
  * @publicApi 20.2
  */
 type AnimationFunction = (event: AnimationCallbackEvent) => void;
-type RunEnterAnimationFn = () => void;
+type RunEnterAnimationFn = VoidFunction;
 type RunLeaveAnimationFn = () => {
     promise: Promise<void>;
     resolve: VoidFunction;
@@ -84,7 +84,7 @@ interface AnimationLViewData {
     enter?: Map<number, EnterNodeAnimations>;
     leave?: Map<number, LeaveNodeAnimations>;
     running?: Promise<unknown>;
-    skipLeaveAnimations?: boolean;
+    detachedLeaveAnimationFns?: VoidFunction[];
 }
 /**
  * Function that returns the class or class list binded to the animate instruction
