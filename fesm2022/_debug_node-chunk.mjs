@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-1cd5b44
+ * @license Angular v21.1.0-next.0+sha-7c49c53
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4250,16 +4250,27 @@ const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && n
     };
   }
 });
-function addToAnimationQueue(injector, animationFns) {
+function addToAnimationQueue(injector, animationFns, animationData) {
   const animationQueue = injector.get(ANIMATION_QUEUE);
   if (Array.isArray(animationFns)) {
     for (const animateFn of animationFns) {
       animationQueue.queue.add(animateFn);
+      animationData?.detachedLeaveAnimationFns?.push(animateFn);
     }
   } else {
     animationQueue.queue.add(animationFns);
+    animationData?.detachedLeaveAnimationFns?.push(animationFns);
   }
   animationQueue.scheduler && animationQueue.scheduler(injector);
+}
+function removeFromAnimationQueue(injector, animationData) {
+  const animationQueue = injector.get(ANIMATION_QUEUE);
+  if (animationData.detachedLeaveAnimationFns) {
+    for (const animationFn of animationData.detachedLeaveAnimationFns) {
+      animationQueue.queue.delete(animationFn);
+    }
+    animationData.detachedLeaveAnimationFns = undefined;
+  }
 }
 function scheduleAnimationQueue(injector) {
   const animationQueue = injector.get(ANIMATION_QUEUE);
@@ -4422,10 +4433,6 @@ function cleanUpView(tView, lView) {
 function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
   const animations = lView?.[ANIMATIONS];
   if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index)) return callback(false);
-  if (animations.skipLeaveAnimations) {
-    animations.skipLeaveAnimations = false;
-    return callback(false);
-  }
   if (lView) allLeavingAnimations.add(lView);
   addToAnimationQueue(injector, () => {
     if (animations.leave && animations.leave.has(tNode.index)) {
@@ -4440,6 +4447,7 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
           } = animationFn();
           runningAnimations.push(promise);
         }
+        animations.detachedLeaveAnimationFns = undefined;
       }
       animations.running = Promise.allSettled(runningAnimations);
       runAfterLeaveAnimations(lView, callback);
@@ -4447,7 +4455,7 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
       if (lView) allLeavingAnimations.delete(lView);
       callback(false);
     }
-  });
+  }, animations);
 }
 function runAfterLeaveAnimations(lView, callback) {
   const runningAnimations = lView[ANIMATIONS]?.running;
@@ -8203,7 +8211,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-1cd5b44'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-7c49c53'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13558,7 +13566,7 @@ class LiveCollection {
     }
   }
   move(prevIndex, newIdx) {
-    this.attach(newIdx, this.detach(prevIndex, true));
+    this.attach(newIdx, this.detach(prevIndex));
   }
 }
 function valuesMatching(liveIdx, liveValue, newIdx, newValue, trackBy) {
@@ -13930,10 +13938,11 @@ class LiveCollectionLContainerImpl extends LiveCollection {
     const dehydratedView = lView[HYDRATION];
     this.needsIndexUpdate ||= index !== this.length;
     addLViewToLContainer(this.lContainer, lView, index, shouldAddViewToDom(this.templateTNode, dehydratedView));
+    clearDetachAnimationList(this.lContainer, index);
   }
-  detach(index, skipLeaveAnimations) {
+  detach(index) {
     this.needsIndexUpdate ||= index !== this.length - 1;
-    if (skipLeaveAnimations) setSkipLeaveAnimations(this.lContainer, index);
+    maybeInitDetachAnimationList(this.lContainer, index);
     return detachExistingView(this.lContainer, index);
   }
   create(index, value) {
@@ -14018,12 +14027,25 @@ function getLContainer(lView, index) {
   ngDevMode && assertLContainer(lContainer);
   return lContainer;
 }
-function setSkipLeaveAnimations(lContainer, index) {
+function clearDetachAnimationList(lContainer, index) {
   if (lContainer.length <= CONTAINER_HEADER_OFFSET) return;
   const indexInContainer = CONTAINER_HEADER_OFFSET + index;
   const viewToDetach = lContainer[indexInContainer];
-  if (viewToDetach && viewToDetach[ANIMATIONS]) {
-    viewToDetach[ANIMATIONS].skipLeaveAnimations = true;
+  const animations = viewToDetach ? viewToDetach[ANIMATIONS] : undefined;
+  if (viewToDetach && animations && animations.detachedLeaveAnimationFns && animations.detachedLeaveAnimationFns.length > 0) {
+    const injector = viewToDetach[INJECTOR];
+    removeFromAnimationQueue(injector, animations);
+    allLeavingAnimations.delete(viewToDetach);
+    animations.detachedLeaveAnimationFns = undefined;
+  }
+}
+function maybeInitDetachAnimationList(lContainer, index) {
+  if (lContainer.length <= CONTAINER_HEADER_OFFSET) return;
+  const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+  const viewToDetach = lContainer[indexInContainer];
+  const animations = viewToDetach ? viewToDetach[ANIMATIONS] : undefined;
+  if (animations && animations.leave && animations.leave.size > 0) {
+    animations.detachedLeaveAnimationFns = [];
   }
 }
 function detachExistingView(lContainer, index) {
