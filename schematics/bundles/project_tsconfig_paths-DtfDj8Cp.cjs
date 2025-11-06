@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.10+sha-ee578d3
+ * @license Angular v20.3.10+sha-036c5d2
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8128,7 +8128,13 @@ const _cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content:[\s]*([
 const _polyfillHost = '-shadowcsshost';
 // note: :host-context pre-processed to -shadowcsshostcontext.
 const _polyfillHostContext = '-shadowcsscontext';
-const _parenSuffix = '(?:\\((' + '(?:\\([^)(]*\\)|[^)(]*)+?' + ')\\))';
+// Matches text content with no parentheses, e.g., "foo"
+const _noParens = '[^)(]*';
+// Matches content with at most ONE level of nesting, e.g., "a(b)c"
+const _level1Parens = String.raw `(?:\(${_noParens}\)|${_noParens})+?`;
+// Matches content with at most TWO levels of nesting, e.g., "a(b(c)d)e"
+const _level2Parens = String.raw `(?:\(${_level1Parens}\)|${_noParens})+?`;
+const _parenSuffix = String.raw `(?:\((${_level2Parens})\))`;
 const _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix + '?([^,{]*)', 'gim');
 // note: :host-context patterns are terminated with `{`, as opposed to :host which
 // is both `{` and `,` because :host-context handles top-level commas differently.
@@ -32792,7 +32798,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.10+sha-ee578d3');
+const VERSION = new Version('20.3.10+sha-036c5d2');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33854,7 +33860,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CopGppNj.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DtfDj8Cp.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
