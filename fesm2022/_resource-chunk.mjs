@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-cf47ce2
+ * @license Angular v21.1.0-next.0+sha-85d9abb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -125,6 +125,23 @@ class BaseWritableResource {
     }
     return this.value() !== undefined;
   });
+  _snapshot;
+  get snapshot() {
+    return this._snapshot ??= computed(() => {
+      const status = this.status();
+      if (status === 'error') {
+        return {
+          status: 'error',
+          error: this.error()
+        };
+      } else {
+        return {
+          status,
+          value: this.value()
+        };
+      }
+    });
+  }
   hasValue() {
     return this.isValueDefined();
   }
@@ -374,5 +391,5 @@ class ResourceWrappedError extends Error {
   }
 }
 
-export { OutputEmitterRef, ResourceImpl, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+export { OutputEmitterRef, ResourceImpl, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
 //# sourceMappingURL=_resource-chunk.mjs.map

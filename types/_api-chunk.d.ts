@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-cf47ce2
+ * @license Angular v21.1.0-next.0+sha-85d9abb
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -134,6 +134,10 @@ interface Resource<T> {
      * Whether this resource is loading a new value (or reloading the existing one).
      */
     readonly isLoading: Signal<boolean>;
+    /**
+     * The current state of this resource, represented as a `ResourceSnapshot`.
+     */
+    readonly snapshot: Signal<ResourceSnapshot<T>>;
     /**
      * Whether this resource has a valid current value.
      *
@@ -280,6 +284,24 @@ type ResourceStreamItem<T> = {
 } | {
     error: Error;
 };
+/**
+ * An explicit representation of a resource's state.
+ *
+ * @experimental
+ */
+type ResourceSnapshot<T> = {
+    readonly status: 'idle';
+    readonly value: T;
+} | {
+    readonly status: 'loading' | 'reloading';
+    readonly value: T;
+} | {
+    readonly status: 'resolved' | 'local';
+    readonly value: T;
+} | {
+    readonly status: 'error';
+    readonly error: Error;
+};
 
 export { OutputEmitterRef, getOutputDestroyRef, output };
-export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceRef, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
+export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
