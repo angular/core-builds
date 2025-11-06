@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.10+sha-d6ef181
+ * @license Angular v20.3.10+sha-dcdd1bc
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8208,17 +8208,34 @@ const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && n
         };
     },
 });
-function addToAnimationQueue(injector, animationFns) {
+function addToAnimationQueue(injector, animationFns, animationData) {
     const animationQueue = injector.get(ANIMATION_QUEUE);
     if (Array.isArray(animationFns)) {
         for (const animateFn of animationFns) {
             animationQueue.queue.add(animateFn);
+            // If a node is detached, we need to keep track of the queued animation functions
+            // so we can later remove them from the global animation queue if the view
+            // is re-attached before the animation queue runs.
+            animationData?.detachedLeaveAnimationFns?.push(animateFn);
         }
     }
     else {
         animationQueue.queue.add(animationFns);
+        // If a node is detached, we need to keep track of the queued animation functions
+        // so we can later remove them from the global animation queue if the view
+        // is re-attached before the animation queue runs.
+        animationData?.detachedLeaveAnimationFns?.push(animationFns);
     }
     animationQueue.scheduler && animationQueue.scheduler(injector);
+}
+function removeFromAnimationQueue(injector, animationData) {
+    const animationQueue = injector.get(ANIMATION_QUEUE);
+    if (animationData.detachedLeaveAnimationFns) {
+        for (const animationFn of animationData.detachedLeaveAnimationFns) {
+            animationQueue.queue.delete(animationFn);
+        }
+        animationData.detachedLeaveAnimationFns = undefined;
+    }
 }
 function scheduleAnimationQueue(injector) {
     const animationQueue = injector.get(ANIMATION_QUEUE);
@@ -8483,12 +8500,6 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
     const animations = lView?.[ANIMATIONS];
     if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index))
         return callback(false);
-    // this is solely for move operations to prevent leave animations from running
-    // on the moved nodes, which would have deleted the node.
-    if (animations.skipLeaveAnimations) {
-        animations.skipLeaveAnimations = false;
-        return callback(false);
-    }
     if (lView)
         allLeavingAnimations.add(lView);
     addToAnimationQueue(injector, () => {
@@ -8505,6 +8516,7 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
                     const { promise } = animationFn();
                     runningAnimations.push(promise);
                 }
+                animations.detachedLeaveAnimationFns = undefined;
             }
             animations.running = Promise.allSettled(runningAnimations);
             runAfterLeaveAnimations(lView, callback);
@@ -8514,7 +8526,7 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
                 allLeavingAnimations.delete(lView);
             callback(false);
         }
-    });
+    }, animations);
 }
 function runAfterLeaveAnimations(lView, callback) {
     const runningAnimations = lView[ANIMATIONS]?.running;
@@ -14632,7 +14644,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.10+sha-d6ef181']
+        ? ['ng-version', '20.3.10+sha-dcdd1bc']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -22579,7 +22591,7 @@ class LiveCollection {
         // DOM nodes, which would trigger `animate.leave` bindings. We need to skip
         // those animations in the case of a move operation so the moving elements don't
         // unexpectedly disappear.
-        this.attach(newIdx, this.detach(prevIndex, true /* skipLeaveAnimations */));
+        this.attach(newIdx, this.detach(prevIndex));
     }
 }
 function valuesMatching(liveIdx, liveValue, newIdx, newValue, trackBy) {
@@ -23150,11 +23162,11 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         const dehydratedView = lView[HYDRATION];
         this.needsIndexUpdate ||= index !== this.length;
         addLViewToLContainer(this.lContainer, lView, index, shouldAddViewToDom(this.templateTNode, dehydratedView));
+        clearDetachAnimationList(this.lContainer, index);
     }
-    detach(index, skipLeaveAnimations) {
+    detach(index) {
         this.needsIndexUpdate ||= index !== this.length - 1;
-        if (skipLeaveAnimations)
-            setSkipLeaveAnimations(this.lContainer, index);
+        maybeInitDetachAnimationList(this.lContainer, index);
         return detachExistingView(this.lContainer, index);
     }
     create(index, value) {
@@ -23260,13 +23272,36 @@ function getLContainer(lView, index) {
     ngDevMode && assertLContainer(lContainer);
     return lContainer;
 }
-function setSkipLeaveAnimations(lContainer, index) {
+function clearDetachAnimationList(lContainer, index) {
     if (lContainer.length <= CONTAINER_HEADER_OFFSET)
         return;
     const indexInContainer = CONTAINER_HEADER_OFFSET + index;
     const viewToDetach = lContainer[indexInContainer];
-    if (viewToDetach && viewToDetach[ANIMATIONS]) {
-        viewToDetach[ANIMATIONS].skipLeaveAnimations = true;
+    const animations = viewToDetach
+        ? viewToDetach[ANIMATIONS]
+        : undefined;
+    if (viewToDetach &&
+        animations &&
+        animations.detachedLeaveAnimationFns &&
+        animations.detachedLeaveAnimationFns.length > 0) {
+        const injector = viewToDetach[INJECTOR];
+        removeFromAnimationQueue(injector, animations);
+        allLeavingAnimations.delete(viewToDetach);
+        animations.detachedLeaveAnimationFns = undefined;
+    }
+}
+// Initialize the detach leave animation list for a view about to be detached, but only
+// if it has leave animations.
+function maybeInitDetachAnimationList(lContainer, index) {
+    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
+        return;
+    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+    const viewToDetach = lContainer[indexInContainer];
+    const animations = viewToDetach
+        ? viewToDetach[ANIMATIONS]
+        : undefined;
+    if (animations && animations.leave && animations.leave.size > 0) {
+        animations.detachedLeaveAnimationFns = [];
     }
 }
 function detachExistingView(lContainer, index) {
