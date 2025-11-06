@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.10+sha-ab94cd2
+ * @license Angular v20.3.10+sha-d6ef181
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -211,4 +211,4 @@ declare global {
 declare function installDevToolsSignalFormatter(): void;
 
 export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn };
-export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn };
+export type { Reactive, ReactiveHookFn, ReactiveNode, ValueEqualityFn, Version };
