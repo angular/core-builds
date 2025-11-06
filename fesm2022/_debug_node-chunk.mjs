@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-de1f22c
+ * @license Angular v21.1.0-next.0+sha-e87f423
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8211,7 +8211,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-de1f22c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-e87f423'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13327,8 +13327,8 @@ function isNativeControl(tNode) {
 function listenToNativeControl(lView, tNode, control) {
   const tView = getTView();
   const renderer = lView[RENDERER];
+  const element = getNativeByTNode(tNode, lView);
   const inputListener = () => {
-    const element = getNativeByTNode(tNode, lView);
     const state = control.state();
     state.value.set(getNativeControlValue(element, state.value));
     state.markAsDirty();
@@ -13338,6 +13338,47 @@ function listenToNativeControl(lView, tNode, control) {
     control.state().markAsTouched();
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'blur', blurListener, wrapListener(tNode, lView, blurListener));
+  if (element instanceof HTMLSelectElement) {
+    const observer = observeSelectMutations(element, getControlDirective(tNode, lView));
+    storeCleanupWithContext(tView, lView, observer, observer.disconnect);
+  }
+}
+function observeSelectMutations(select, controlDirective) {
+  const observer = new MutationObserver(mutations => {
+    if (mutations.some(m => isRelevantSelectMutation(m))) {
+      setNativeControlValue(select, controlDirective.state().value());
+    }
+  });
+  observer.observe(select, {
+    attributes: true,
+    attributeFilter: ['value'],
+    characterData: true,
+    childList: true,
+    subtree: true
+  });
+  return observer;
+}
+function isRelevantSelectMutation(mutation) {
+  if (mutation.type === 'childList' || mutation.type === 'characterData') {
+    if (mutation.target instanceof Comment) {
+      return false;
+    }
+    for (const node of mutation.addedNodes) {
+      if (!(node instanceof Comment)) {
+        return true;
+      }
+    }
+    for (const node of mutation.removedNodes) {
+      if (!(node instanceof Comment)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (mutation.type === 'attributes' && mutation.target instanceof HTMLOptionElement) {
+    return true;
+  }
+  return false;
 }
 function updateCustomControl(tNode, lView, control, modelName) {
   const tView = getTView();
