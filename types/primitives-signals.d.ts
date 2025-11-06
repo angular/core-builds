@@ -1,11 +1,11 @@
 /**
- * @license Angular v21.1.0-next.0+sha-e87f423
+ * @license Angular v21.1.0-next.0+sha-ca3ef38
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { ReactiveNode, ValueEqualityFn, SIGNAL } from './_formatter-chunk.js';
-export { REACTIVE_NODE, Reactive, ReactiveHookFn, ReactiveNodeKind, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from './_formatter-chunk.js';
+export { REACTIVE_NODE, Reactive, ReactiveHookFn, ReactiveNodeKind, Version, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, installDevToolsSignalFormatter, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runPostProducerCreatedFn, setActiveConsumer, setPostProducerCreatedFn } from './_formatter-chunk.js';
 import { SignalNode } from './_effect-chunk.js';
 export { BASE_EFFECT_NODE, BaseEffectNode, SIGNAL_NODE, SignalGetter, createSignal, runEffect, runPostSignalSetFn, setPostSignalSetFn, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.js';
 export { setAlternateWeakRefImpl } from './_weak_ref-chunk.js';
@@ -40,10 +40,11 @@ type ComputedGetter<T> = (() => T) & {
  */
 declare function createComputed<T>(computation: () => T, equal?: ValueEqualityFn<T>): ComputedGetter<T>;
 
-type ComputationFn<S, D> = (source: S, previous?: {
+type ComputationFn<S, D> = (source: S, previous?: PreviousValue<S, D>) => D;
+type PreviousValue<S, D> = {
     source: S;
     value: D;
-}) => D;
+};
 interface LinkedSignalNode<S, D> extends ReactiveNode {
     /**
      * Value of the source signal that was used to derive the computed value.
@@ -120,4 +121,4 @@ declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sc
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
 export { ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
-export type { ComputationFn, ComputedNode, LinkedSignalGetter, LinkedSignalNode, Watch, WatchCleanupFn, WatchCleanupRegisterFn };
+export type { ComputationFn, ComputedNode, LinkedSignalGetter, LinkedSignalNode, PreviousValue, Watch, WatchCleanupFn, WatchCleanupRegisterFn };
