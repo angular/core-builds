@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-850f0d6
+ * @license Angular v21.1.0-next.0+sha-8bccd86
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1900,7 +1900,7 @@ class FakeNavigation {
       return;
     }
     const abortReason = reason ?? new DOMException('Navigation aborted', 'AbortError');
-    this.navigateEvent.cancel(abortReason);
+    this.navigateEvent.abort(abortReason);
   }
   userAgentNavigate(destination, result, options) {
     this.canSetInitialEntry = false;
@@ -2157,12 +2157,23 @@ function dispatchNavigateEvent({
       event.info = options.info;
     }
   }
+  function processNavigateEventHandlerFailure(reason) {
+    if (event.abortController.signal.aborted) {
+      return;
+    }
+    if (event !== navigation.navigateEvent) {
+      throw new Error('Event is no longer the current navigation event');
+    }
+    if (event.interceptionState !== 'intercepted') {
+      finishNavigationEvent(event, false);
+    }
+    event.abort(reason);
+  }
   function commit() {
     if (result.signal.aborted) {
       return;
     }
-    navigation.transition?.committedResolve();
-    if (event.interceptionState === 'intercepted') {
+    if (event.interceptionState !== 'none') {
       event.interceptionState = 'committed';
       switch (event.navigationType) {
         case 'push':
@@ -2183,6 +2194,7 @@ function dispatchNavigateEvent({
           }
       }
     }
+    navigation.transition?.committedResolve();
     const promisesList = handlers.map(handler => handler());
     if (promisesList.length === 0) {
       promisesList.push(Promise.resolve());
@@ -2207,27 +2219,11 @@ function dispatchNavigateEvent({
       navigation.eventTarget.dispatchEvent(navigatesuccessEvent);
       navigation.transition?.finishedResolve();
       navigation.transition = null;
-    }).catch(reason => {
-      if (!event.abortController.signal.aborted) {
-        event.cancel(reason);
-      }
-    });
+    }).catch(processNavigateEventHandlerFailure);
   }
-  event.cancel = function (reason) {
-    if (result.signal.aborted) {
-      return;
-    }
+  event.abort = function (reason) {
     this.abortController.abort(reason);
-    const isCurrentGlobalNavigationEvent = this === navigation.navigateEvent;
-    if (isCurrentGlobalNavigationEvent) {
-      navigation.navigateEvent = null;
-    }
-    if (this.interceptionState !== 'intercepted' && this.interceptionState !== 'finished') {
-      finishNavigationEvent(this, false);
-    } else if (this.interceptionState === 'intercepted') {
-      this.interceptionState = 'finished';
-    }
-    result.committedReject(reason);
+    navigation.navigateEvent = null;
     result.finishedReject(reason);
     const navigateerrorEvent = new Event('navigateerror', {
       bubbles: false,
@@ -2245,7 +2241,7 @@ function dispatchNavigateEvent({
     const dispatchResult = navigation.eventTarget.dispatchEvent(event);
     if (event.interceptionState === 'intercepted') {
       if (!navigation.currentEntry) {
-        event.cancel(new DOMException('Cannot create transition without a currentEntry for intercepted navigation.', 'InvalidStateError'));
+        event.abort(new DOMException('Cannot create transition without a currentEntry for intercepted navigation.', 'InvalidStateError'));
         return;
       }
       const transition = new InternalNavigationTransition(navigation.currentEntry, navigationType);
@@ -2255,7 +2251,7 @@ function dispatchNavigateEvent({
     }
     if (!dispatchResult && event.cancelable) {
       if (!event.abortController.signal.aborted) {
-        event.cancel(new DOMException('Navigation prevented by event.preventDefault()', 'AbortError'));
+        event.abort(new DOMException('Navigation prevented by event.preventDefault()', 'AbortError'));
       }
     } else {
       if (precommitHandlers.length === 0) {
@@ -2274,15 +2270,7 @@ function dispatchNavigateEvent({
           p.catch(() => {});
           return p;
         });
-        Promise.all(precommitPromisesList).then(() => commit()).catch(reason => {
-          if (event.abortController.signal.aborted) {
-            return;
-          }
-          if (navigation.transition) {
-            navigation.transition.committedReject(reason);
-          }
-          event.cancel(reason);
-        });
+        Promise.all(precommitPromisesList).then(() => commit()).catch(processNavigateEventHandlerFailure);
       }
     }
   }
@@ -2452,8 +2440,8 @@ class InternalNavigationResult {
         resolve(this.committedTo);
       };
       this.finishedReject = reason => {
+        this.committedReject(reason);
         reject(reason);
-        this.abortController.abort(reason);
       };
     });
     this.committed.catch(() => {});
