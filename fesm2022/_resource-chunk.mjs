@@ -1,12 +1,12 @@
 /**
- * @license Angular v21.1.0-next.0+sha-033ea75
+ * @license Angular v21.1.0-next.0+sha-850f0d6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, signal } from './_effect-chunk2.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, untracked, signal } from './_untracked-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
-import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
+import { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_linked_signal-chunk.mjs';
 
 class OutputEmitterRef {
   destroyed = false;
@@ -59,10 +59,6 @@ class OutputEmitterRef {
 }
 function getOutputDestroyRef(ref) {
   return ref.destroyRef;
-}
-
-function untracked(nonReactiveReadsFn) {
-  return untracked$1(nonReactiveReadsFn);
 }
 
 function computed(computation, options) {
@@ -374,5 +370,5 @@ class ResourceWrappedError extends Error {
   }
 }
 
-export { OutputEmitterRef, ResourceImpl, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+export { OutputEmitterRef, ResourceImpl, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource };
 //# sourceMappingURL=_resource-chunk.mjs.map
