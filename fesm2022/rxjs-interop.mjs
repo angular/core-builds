@@ -1,18 +1,18 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-aada582
+ * @license Angular v21.0.0-rc.1+sha-781a329
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, effect, assertNotInReactiveContext, signal, PendingTasks } from './_effect-chunk2.mjs';
-import { getOutputDestroyRef, untracked, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, effect, untracked, assertNotInReactiveContext, signal, PendingTasks } from './_untracked-chunk.mjs';
+import { getOutputDestroyRef, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
 import '@angular/core/primitives/signals';
 import '@angular/core/primitives/di';
-import './_untracked-chunk.mjs';
+import './_linked_signal-chunk.mjs';
 
 function takeUntilDestroyed(destroyRef) {
   if (!destroyRef) {
