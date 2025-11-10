@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-590244a
+ * @license Angular v21.0.0-rc.1+sha-5092a89
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6400,7 +6400,9 @@ function createIcuIterator(tIcu, lView) {
   return icuContainerIteratorNext.bind(null, state);
 }
 
-const REF_EXTRACTOR_REGEXP = /* @__PURE__ */new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+const REF_EXTRACTOR_REGEXP = /* @__PURE__ */(() => {
+  return new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+})();
 function compressNodeLocation(referenceNode, path) {
   const result = [referenceNode];
   for (const segment of path) {
@@ -8211,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-590244a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-5092a89'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13355,7 +13357,7 @@ function listenToNativeControl(lView, tNode, control) {
 function observeSelectMutations(select, controlDirective) {
   const observer = new MutationObserver(mutations => {
     if (mutations.some(m => isRelevantSelectMutation(m))) {
-      setNativeControlValue(select, controlDirective.state().value());
+      select.value = controlDirective.state().value();
     }
   });
   observer.observe(select, {
