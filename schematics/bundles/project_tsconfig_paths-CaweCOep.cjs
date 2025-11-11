@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.10+sha-f00fb46
+ * @license Angular v20.3.10+sha-9419ea3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8118,9 +8118,9 @@ class SafeSelector {
         });
         // Replaces the expression in `:nth-child(2n + 1)` with a placeholder.
         // WS and "+" would otherwise be interpreted as selector separators.
-        this._content = selector.replace(/(:nth-[-\w]+)(\([^)]+\))/g, (_, pseudo, exp) => {
+        this._content = selector.replace(nthRegex, (_, pseudo, exp) => {
             const replaceBy = `__ph-${this.index}__`;
-            this.placeholders.push(exp);
+            this.placeholders.push(`(${exp})`);
             this.index++;
             return pseudo + replaceBy;
         });
@@ -8159,6 +8159,7 @@ const _level1Parens = String.raw `(?:\(${_noParens}\)|${_noParens})+?`;
 // Matches content with at most TWO levels of nesting, e.g., "a(b(c)d)e"
 const _level2Parens = String.raw `(?:\(${_level1Parens}\)|${_noParens})+?`;
 const _parenSuffix = String.raw `(?:\((${_level2Parens})\))`;
+const nthRegex = new RegExp(String.raw `(:nth-[-\w]+)` + _parenSuffix, 'g');
 const _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix + '?([^,{]*)', 'gim');
 // note: :host-context patterns are terminated with `{`, as opposed to :host which
 // is both `{` and `,` because :host-context handles top-level commas differently.
@@ -32821,7 +32822,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.10+sha-f00fb46');
+const VERSION = new Version('20.3.10+sha-9419ea3');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33883,7 +33884,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Bw71LtyF.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CaweCOep.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
