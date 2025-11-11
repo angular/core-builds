@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-a278ee3
+ * @license Angular v21.0.0-rc.1+sha-7811d95
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5149,8 +5149,7 @@ declare const DEFAULT_LOCALE_ID = "en-US";
  *   selector: 'my-comp',
  *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
  * })
- * class MyComponent{
- * }
+ * class MyComponent { }
  *
  * // Calling `renderComponent` will fail because `renderComponent` is a synchronous process
  * // and `MyComponent`'s `@Component.templateUrl` needs to be resolved asynchronously.
@@ -5160,13 +5159,13 @@ declare const DEFAULT_LOCALE_ID = "en-US";
  *
  * // Use browser's `fetch()` function as the default resource resolution strategy.
  * resolveComponentResources(fetch).then(() => {
- *   // After resolution all URLs have been converted into `template` strings.
- *   renderComponent(MyComponent);
+ * // After resolution all URLs have been converted into `template` strings.
+ * renderComponent(MyComponent);
  * });
  *
  * ```
  *
- * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * @remarks In AOT the resolution happens during compilation, and so there should be no need
  * to call this method outside JIT mode.
  *
  * @param resourceResolver a function which is responsible for returning a `Promise` to the
