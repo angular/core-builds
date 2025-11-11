@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-d337cfb
+ * @license Angular v21.1.0-next.0+sha-4ed8781
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8213,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-d337cfb'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-4ed8781'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -8984,55 +8984,53 @@ function refreshSignalQuery(node, firstOnly) {
   }
 }
 
-function resolveComponentResources(resourceResolver) {
-  const componentResolved = [];
-  const urlMap = new Map();
+let componentResourceResolutionQueue = new Map();
+const componentDefPendingResolution = new Set();
+async function resolveComponentResources(resourceResolver) {
+  const currentQueue = componentResourceResolutionQueue;
+  componentResourceResolutionQueue = new Map();
+  const urlCache = new Map();
   function cachedResourceResolve(url) {
-    let promise = urlMap.get(url);
-    if (!promise) {
-      const resp = resourceResolver(url);
-      urlMap.set(url, promise = resp.then(res => unwrapResponse(url, res)));
+    const promiseCached = urlCache.get(url);
+    if (promiseCached) {
+      return promiseCached;
     }
+    const promise = resourceResolver(url).then(response => unwrapResponse(url, response));
+    urlCache.set(url, promise);
     return promise;
   }
-  componentResourceResolutionQueue.forEach((component, type) => {
-    const promises = [];
+  const resolutionPromises = Array.from(currentQueue).map(async ([type, component]) => {
+    if (component.styleUrl && component.styleUrls?.length) {
+      throw new Error('@Component cannot define both `styleUrl` and `styleUrls`. ' + 'Use `styleUrl` if the component has one stylesheet, or `styleUrls` if it has multiple');
+    }
+    const componentTasks = [];
     if (component.templateUrl) {
-      promises.push(cachedResourceResolve(component.templateUrl).then(template => {
+      componentTasks.push(cachedResourceResolve(component.templateUrl).then(template => {
         component.template = template;
       }));
     }
-    const styles = typeof component.styles === 'string' ? [component.styles] : component.styles || [];
+    const styles = typeof component.styles === 'string' ? [component.styles] : component.styles ?? [];
     component.styles = styles;
-    if (component.styleUrl && component.styleUrls?.length) {
-      throw new Error('@Component cannot define both `styleUrl` and `styleUrls`. ' + 'Use `styleUrl` if the component has one stylesheet, or `styleUrls` if it has multiple');
-    } else if (component.styleUrls?.length) {
-      const styleOffset = component.styles.length;
-      const styleUrls = component.styleUrls;
-      component.styleUrls.forEach((styleUrl, index) => {
-        styles.push('');
-        promises.push(cachedResourceResolve(styleUrl).then(style => {
-          styles[styleOffset + index] = style;
-          styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
-          if (styleUrls.length == 0) {
-            component.styleUrls = undefined;
-          }
-        }));
-      });
-    } else if (component.styleUrl) {
-      promises.push(cachedResourceResolve(component.styleUrl).then(style => {
-        styles.push(style);
-        component.styleUrl = undefined;
-      }));
+    let {
+      styleUrl,
+      styleUrls
+    } = component;
+    if (styleUrl) {
+      styleUrls = [styleUrl];
+      component.styleUrl = undefined;
     }
-    const fullyResolved = Promise.all(promises).then(() => componentDefResolved(type));
-    componentResolved.push(fullyResolved);
+    if (styleUrls?.length) {
+      const allFetched = Promise.all(styleUrls.map(url => cachedResourceResolve(url))).then(fetchedStyles => {
+        styles.push(...fetchedStyles);
+        component.styleUrls = undefined;
+      });
+      componentTasks.push(allFetched);
+    }
+    await Promise.all(componentTasks);
+    componentDefPendingResolution.delete(type);
   });
-  clearResolutionOfComponentResourcesQueue();
-  return Promise.all(componentResolved).then(() => undefined);
+  await Promise.all(resolutionPromises);
 }
-let componentResourceResolutionQueue = new Map();
-const componentDefPendingResolution = new Set();
 function maybeQueueResolutionOfComponentResources(type, metadata) {
   if (componentNeedsResolution(metadata)) {
     componentResourceResolutionQueue.set(type, metadata);
@@ -9043,7 +9041,7 @@ function isComponentDefPendingResolution(type) {
   return componentDefPendingResolution.has(type);
 }
 function componentNeedsResolution(component) {
-  return !!(component.templateUrl && !component.hasOwnProperty('template') || component.styleUrls && component.styleUrls.length || component.styleUrl);
+  return !!(component.templateUrl && !component.hasOwnProperty('template') || component.styleUrls?.length || component.styleUrl);
 }
 function clearResolutionOfComponentResourcesQueue() {
   const old = componentResourceResolutionQueue;
@@ -9052,23 +9050,22 @@ function clearResolutionOfComponentResourcesQueue() {
 }
 function restoreComponentResolutionQueue(queue) {
   componentDefPendingResolution.clear();
-  queue.forEach((_, type) => componentDefPendingResolution.add(type));
+  for (const type of queue.keys()) {
+    componentDefPendingResolution.add(type);
+  }
   componentResourceResolutionQueue = queue;
 }
 function isComponentResourceResolutionQueueEmpty() {
   return componentResourceResolutionQueue.size === 0;
 }
-function unwrapResponse(url, response) {
+async function unwrapResponse(url, response) {
   if (typeof response === 'string') {
     return response;
   }
   if (response.status !== undefined && response.status !== 200) {
-    return Promise.reject(new RuntimeError(918, ngDevMode && `Could not load resource: ${url}. Response status: ${response.status}`));
+    throw new RuntimeError(918, ngDevMode && `Could not load resource: ${url}. Response status: ${response.status}`);
   }
   return response.text();
-}
-function componentDefResolved(type) {
-  componentDefPendingResolution.delete(type);
 }
 
 const modules = new Map();
