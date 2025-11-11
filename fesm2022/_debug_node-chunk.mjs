@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-fc3a28e
+ * @license Angular v21.0.0-rc.1+sha-a278ee3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8213,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-fc3a28e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-a278ee3'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13284,18 +13284,12 @@ function hasOutput(componentDef, name) {
 function listenToCustomControl(lView, tNode, control, modelName) {
   const componentIndex = tNode.directiveStart + tNode.componentOffset;
   const outputName = modelName + 'Change';
-  listenToOutput(tNode, lView, componentIndex, outputName, outputName, wrapListener(tNode, lView, newValue => {
-    const state = control.state();
-    state.value.set(newValue);
-    state.markAsDirty();
-  }));
+  listenToOutput(tNode, lView, componentIndex, outputName, outputName, wrapListener(tNode, lView, value => control.state().setControlValue(value)));
   const tView = getTView();
   const componentDef = tView.data[componentIndex];
   const touchedOutputName = 'touchedChange';
   if (hasOutput(componentDef, touchedOutputName)) {
-    listenToOutput(tNode, lView, componentIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => {
-      control.state().markAsTouched();
-    }));
+    listenToOutput(tNode, lView, componentIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => control.state().markAsTouched()));
   }
 }
 function listenToInteropControl(control) {
@@ -13320,8 +13314,7 @@ function listenToNativeControl(lView, tNode, control) {
   const element = getNativeByTNode(tNode, lView);
   const inputListener = () => {
     const state = control.state();
-    state.value.set(getNativeControlValue(element, state.value));
-    state.markAsDirty();
+    state.setControlValue(getNativeControlValue(element, state.value));
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'input', inputListener, wrapListener(tNode, lView, inputListener));
   const blurListener = () => {
@@ -13377,7 +13370,7 @@ function updateCustomControl(tNode, lView, control, modelName) {
   const componentDef = tView.data[componentIndex];
   const state = control.state();
   const bindings = getControlBindings(lView);
-  maybeUpdateInput(componentDef, component, bindings, state, VALUE, modelName);
+  maybeUpdateInput(componentDef, component, bindings, state, CONTROL_VALUE, modelName);
   for (const key of CONTROL_BINDING_KEYS) {
     const inputName = CONTROL_BINDING_NAMES[key];
     maybeUpdateInput(componentDef, component, bindings, state, key, inputName);
@@ -13396,7 +13389,7 @@ function updateInteropControl(lView, control) {
   const bindings = getControlBindings(lView);
   const state = control.state();
   const value = state.value();
-  if (controlBindingUpdated(bindings, VALUE, value)) {
+  if (controlBindingUpdated(bindings, CONTROL_VALUE, value)) {
     untracked(() => interopControl.writeValue(value));
   }
   if (interopControl.setDisabledState) {
@@ -13411,9 +13404,9 @@ function updateNativeControl(tNode, lView, control) {
   const renderer = lView[RENDERER];
   const state = control.state();
   const bindings = getControlBindings(lView);
-  const value = state.value();
-  if (controlBindingUpdated(bindings, VALUE, value)) {
-    setNativeControlValue(element, value);
+  const controlValue = state.controlValue();
+  if (controlBindingUpdated(bindings, CONTROL_VALUE, controlValue)) {
+    setNativeControlValue(element, controlValue);
   }
   const name = state.name();
   if (controlBindingUpdated(bindings, NAME, name)) {
@@ -13546,8 +13539,8 @@ const READONLY = /* @__PURE__ */getClosureSafeProperty({
 const REQUIRED = /* @__PURE__ */getClosureSafeProperty({
   required: getClosureSafeProperty
 });
-const VALUE = /* @__PURE__ */getClosureSafeProperty({
-  value: getClosureSafeProperty
+const CONTROL_VALUE = /* @__PURE__ */getClosureSafeProperty({
+  controlValue: getClosureSafeProperty
 });
 const CONTROL_BINDING_NAMES = {
   disabled: 'disabled',

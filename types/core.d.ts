@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-fc3a28e
+ * @license Angular v21.0.0-rc.1+sha-a278ee3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8230,10 +8230,22 @@ interface ɵFieldState<T> {
      */
     readonly touched: Signal<boolean>;
     /**
-     * A writable signal containing the value for this field. Updating this signal will update the
-     * data model that the field is bound to.
+     * A writable signal containing the value for this field.
+     *
+     * Updating this signal will update the data model that the field is bound to.
+     *
+     * While updates from the UI control are eventually reflected here, they may be delayed if
+     * debounced.
      */
     readonly value: WritableSignal<T>;
+    /**
+     * A signal containing the value of the control to which this field is bound.
+     *
+     * This differs from {@link value} in that it's not subject to debouncing, and thus is used to
+     * buffer debounced updates from the control to the field. This will also not take into account
+     * the {@link controlValue} of children.
+     */
+    readonly controlValue: Signal<T>;
     /**
      * Sets the dirty status of the field to `true`.
      */
@@ -8242,6 +8254,10 @@ interface ɵFieldState<T> {
      * Sets the touched status of the field to `true`.
      */
     markAsTouched(): void;
+    /**
+     * Sets {@link controlValue} immediately and triggers synchronization to {@link value}.
+     */
+    setControlValue(value: T): void;
 }
 
 type Type = Function;
