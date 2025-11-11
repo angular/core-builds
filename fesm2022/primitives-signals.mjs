@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-91dbb4b
+ * @license Angular v21.0.0-rc.1+sha-c9f9778
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -60,7 +60,7 @@ const formatter = {
       object: sig,
       config: {
         ...config,
-        skipFormatting: true
+        ngSkipFormatting: true
       }
     }]]];
   }
@@ -96,7 +96,7 @@ function prettifyPreview(value) {
         return ['object', {
           object: value,
           config: {
-            skipFormatting: true
+            ngSkipFormatting: true
           }
         }];
       }
