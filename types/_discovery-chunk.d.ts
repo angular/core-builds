@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-0770387
+ * @license Angular v21.1.0-next.0+sha-75dd600
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2266,8 +2266,10 @@ declare enum ViewEncapsulation {
      * Similar to `ShadowDom`, but prevents any external styles from leaking into the
      * component's ShadowRoot. This is useful when you want to ensure that the component's
      * styles are completely isolated from the rest of the application, including global styles.
+     *
+     * @experimental 21.0
      */
-    IsolatedShadowDom = 4
+    ExperimentalIsolatedShadowDom = 4
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-0770387
+ * @license Angular v21.1.0-next.0+sha-75dd600
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -76,7 +76,7 @@ var ViewEncapsulation;
   ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
   ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
   ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-  ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
+  ViewEncapsulation[ViewEncapsulation["ExperimentalIsolatedShadowDom"] = 4] = "ExperimentalIsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 class HostAttributeToken {
@@ -2258,7 +2258,7 @@ function componentUsesShadowDomEncapsulation(lView) {
   const instance = lView[CONTEXT];
   if (!instance?.constructor) return false;
   const def = getComponentDef(instance.constructor);
-  return def?.encapsulation === ViewEncapsulation$1.ShadowDom || def?.encapsulation === ViewEncapsulation$1.IsolatedShadowDom;
+  return def?.encapsulation === ViewEncapsulation$1.ShadowDom || def?.encapsulation === ViewEncapsulation$1.ExperimentalIsolatedShadowDom;
 }
 function annotateHostElementForHydration(element, lView, parentDeferBlockId, context) {
   const renderer = lView[RENDERER];
