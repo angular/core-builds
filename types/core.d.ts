@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-557213e
+ * @license Angular v21.0.0-rc.1+sha-91dbb4b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8379,7 +8379,7 @@ declare enum ViewEncapsulation {
     Emulated = 0,
     None = 2,
     ShadowDom = 3,
-    IsolatedShadowDom = 4
+    ExperimentalIsolatedShadowDom = 4
 }
 type ChangeDetectionStrategy = number;
 interface R3DeclareQueryMetadataFacade {

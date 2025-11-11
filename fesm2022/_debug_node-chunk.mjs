@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.1+sha-557213e
+ * @license Angular v21.0.0-rc.1+sha-91dbb4b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2723,7 +2723,7 @@ var ViewEncapsulation;
   ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
   ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
   ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-  ViewEncapsulation[ViewEncapsulation["IsolatedShadowDom"] = 4] = "IsolatedShadowDom";
+  ViewEncapsulation[ViewEncapsulation["ExperimentalIsolatedShadowDom"] = 4] = "ExperimentalIsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 let policy$1;
@@ -4797,7 +4797,7 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNative
 }
 function locateHostElement(renderer, elementOrSelector, encapsulation, injector) {
   const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
-  const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom || encapsulation === ViewEncapsulation.IsolatedShadowDom;
+  const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom || encapsulation === ViewEncapsulation.ExperimentalIsolatedShadowDom;
   const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
   applyRootElementTransform(rootElement);
   return rootElement;
@@ -8213,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-557213e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.1+sha-91dbb4b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -16997,7 +16997,7 @@ function recreateLView(importMeta, id, newDef, oldDef, lView) {
   ngDevMode && assertNotEqual(newDef, oldDef, 'Expected different component definition');
   const zone = lView[INJECTOR].get(NgZone, null);
   const recreate = () => {
-    if (oldDef.encapsulation === ViewEncapsulation.ShadowDom || oldDef.encapsulation === ViewEncapsulation.IsolatedShadowDom) {
+    if (oldDef.encapsulation === ViewEncapsulation.ShadowDom || oldDef.encapsulation === ViewEncapsulation.ExperimentalIsolatedShadowDom) {
       const newHost = host.cloneNode(false);
       host.replaceWith(newHost);
       host = newHost;
