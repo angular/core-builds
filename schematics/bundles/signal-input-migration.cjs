@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.10+sha-9419ea3
+ * @license Angular v20.3.11+sha-3bafe23
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
