@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-1a94d71
+ * @license Angular v21.1.0-next.0+sha-1b895fe
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -179,7 +179,7 @@ const WATCH_NODE = /* @__PURE__ */(() => {
   };
 })();
 
-if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
   installDevToolsSignalFormatter();
 }
 
