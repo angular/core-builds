@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.11+sha-a586bd2
+ * @license Angular v20.3.11+sha-a02b957
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5655,7 +5655,7 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
     private resolvePendingTask;
     private destroyed;
     private unregisterOnDestroy;
-    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, injector: Injector, throwErrorsFromValue?: boolean);
+    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, injector: Injector);
     readonly status: Signal<ResourceStatus>;
     readonly error: Signal<Error | undefined>;
     /**

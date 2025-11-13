@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.11+sha-a586bd2
+ * @license Angular v20.3.11+sha-a02b957
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -294,19 +294,13 @@ function upgradeLinkedSignalGetter(getter, debugName) {
     return upgradedGetter;
 }
 
-/**
- * Whether a `Resource.value()` should throw an error when the resource is in the error state.
- *
- * This internal flag is being used to gradually roll out this behavior.
- */
-let RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
 function resource(options) {
     if (ngDevMode && !options?.injector) {
         assertInInjectionContext(resource);
     }
     const oldNameForParams = options.request;
     const params = (options.params ?? oldNameForParams ?? (() => null));
-    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
+    return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -361,7 +355,7 @@ class ResourceImpl extends BaseWritableResource {
     resolvePendingTask = undefined;
     destroyed = false;
     unregisterOnDestroy;
-    constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
+    constructor(request, loaderFn, defaultValue, equal, injector) {
         super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
         // `WritableSignal` that delegates to `ResourceImpl.set`.
@@ -375,12 +369,7 @@ class ResourceImpl extends BaseWritableResource {
                 return defaultValue;
             }
             if (!isResolved(streamValue)) {
-                if (throwErrorsFromValue) {
-                    throw new ResourceValueError(this.error());
-                }
-                else {
-                    return defaultValue;
-                }
+                throw new ResourceValueError(this.error());
             }
             return streamValue.value;
         }, { equal }));
