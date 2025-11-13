@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-b6a91d4
+ * @license Angular v21.1.0-next.0+sha-3f80ae7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8213,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-b6a91d4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-3f80ae7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13318,7 +13318,7 @@ function listenToNativeControl(lView, tNode, control) {
     control.state().markAsTouched();
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'blur', blurListener, wrapListener(tNode, lView, blurListener));
-  if (element instanceof HTMLSelectElement) {
+  if (tNode.type === 2 && tNode.value === 'select' && typeof MutationObserver === 'function') {
     const observer = observeSelectMutations(element, getControlDirective(tNode, lView));
     storeCleanupWithContext(tView, lView, observer, observer.disconnect);
   }

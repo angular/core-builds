@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-b6a91d4
+ * @license Angular v21.1.0-next.0+sha-3f80ae7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -93,14 +93,13 @@ function upgradeLinkedSignalGetter(getter, debugName) {
   return upgradedGetter;
 }
 
-let RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
 function resource(options) {
   if (ngDevMode && !options?.injector) {
     assertInInjectionContext(resource);
   }
   const oldNameForParams = options.request;
   const params = options.params ?? oldNameForParams ?? (() => null);
-  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector), RESOURCE_VALUE_THROWS_ERRORS_DEFAULT);
+  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
 }
 class BaseWritableResource {
   value;
@@ -139,7 +138,7 @@ class ResourceImpl extends BaseWritableResource {
   resolvePendingTask = undefined;
   destroyed = false;
   unregisterOnDestroy;
-  constructor(request, loaderFn, defaultValue, equal, injector, throwErrorsFromValue = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT) {
+  constructor(request, loaderFn, defaultValue, equal, injector) {
     super(computed(() => {
       const streamValue = this.state().stream?.();
       if (!streamValue) {
@@ -149,11 +148,7 @@ class ResourceImpl extends BaseWritableResource {
         return defaultValue;
       }
       if (!isResolved(streamValue)) {
-        if (throwErrorsFromValue) {
-          throw new ResourceValueError(this.error());
-        } else {
-          return defaultValue;
-        }
+        throw new ResourceValueError(this.error());
       }
       return streamValue.value;
     }, {
