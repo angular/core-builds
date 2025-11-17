@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-cc621ea
+ * @license Angular v21.0.0-rc.2+sha-ecea909
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5148,8 +5148,11 @@ function renderComponent(hostLView, componentHostIdx) {
     componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
   }
   profiler(18);
-  renderView(componentTView, componentView, componentView[CONTEXT]);
-  profiler(19, componentView[CONTEXT]);
+  try {
+    renderView(componentTView, componentView, componentView[CONTEXT]);
+  } finally {
+    profiler(19, componentView[CONTEXT]);
+  }
 }
 function syncViewWithBlueprint(tView, lView) {
   for (let i = lView.length; i < tView.blueprint.length; i++) {
@@ -5551,8 +5554,11 @@ function detectChangesInComponent(hostLView, componentHostIdx, mode) {
   ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
   profiler(18);
   const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-  detectChangesInViewIfAttached(componentView, mode);
-  profiler(19, componentView[CONTEXT]);
+  try {
+    detectChangesInViewIfAttached(componentView, mode);
+  } finally {
+    profiler(19, componentView[CONTEXT]);
+  }
 }
 function detectChangesInViewIfAttached(lView, mode) {
   if (!viewAttachedToChangeDetector(lView)) {
@@ -5615,8 +5621,11 @@ function processHostBindingOpCodes(tView, lView) {
         setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
         const context = lView[directiveIdx];
         profiler(24, context);
-        hostBindingFn(2, context);
-        profiler(25, context);
+        try {
+          hostBindingFn(2, context);
+        } finally {
+          profiler(25, context);
+        }
       }
     }
   } finally {
@@ -8213,7 +8222,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.2+sha-cc621ea'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.2+sha-ecea909'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11208,9 +11217,11 @@ function measureStart(startEvent) {
   console.timeStamp('Event_' + startEvent + '_' + counter++);
 }
 function measureEnd(startEvent, entryName, color) {
-  const top = eventsStack.pop();
-  assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
-  assertEqual(top[0], startEvent, `Profiling error: expected to see ${startEvent} event but got ${top[0]}`);
+  let top;
+  do {
+    top = eventsStack.pop();
+    assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
+  } while (top[0] !== startEvent);
   console.timeStamp(entryName, 'Event_' + top[0] + '_' + top[1], undefined, '\u{1F170}\uFE0F Angular', undefined, color);
 }
 const chromeDevToolsInjectorProfiler = event => {
@@ -11806,6 +11817,7 @@ class ApplicationRef {
   tickImpl = () => {
     (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
     if (this._runningTick) {
+      profiler(13);
       throw new RuntimeError(101, ngDevMode && 'ApplicationRef.tick is called recursively');
     }
     const prevConsumer = setActiveConsumer(null);
@@ -11835,8 +11847,11 @@ class ApplicationRef {
     let runs = 0;
     while (this.dirtyFlags !== 0 && runs++ < MAXIMUM_REFRESH_RERUNS) {
       profiler(14);
-      this.synchronizeOnce();
-      profiler(15);
+      try {
+        this.synchronizeOnce();
+      } finally {
+        profiler(15);
+      }
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
       throw new RuntimeError(103, ngDevMode && 'Infinite change detection while refreshing application views. ' + 'Ensure views are not calling `markForCheck` on every template execution or ' + 'that afterRender hooks always mark views for check.');
@@ -13213,6 +13228,7 @@ function ɵɵcontrol(value, sanitizer) {
   }
   nextBindingIndex();
 }
+const HAS_CONTROL_MASK = /* @__PURE__ */(() => 16384 | 2048 | 4096)();
 function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
   const directiveIndices = tNode.inputs?.['field'];
   if (!directiveIndices) {
@@ -13234,23 +13250,24 @@ function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
     const componentDef = tView.data[componentIndex];
     if (hasModelInput(componentDef, 'value')) {
       tNode.flags |= 2048;
-      return control;
     } else if (hasModelInput(componentDef, 'checked')) {
       tNode.flags |= 4096;
-      return control;
     }
   }
-  if (control.ɵinteropControl) {
+  if (!(tNode.flags & HAS_CONTROL_MASK) && control.ɵinteropControl) {
     tNode.flags |= 8192;
     return control;
   }
   if (isNativeControl(tNode)) {
+    tNode.flags |= 16384;
     if (isNumericInput(tNode)) {
-      tNode.flags |= 16384;
-    }
-    if (isTextControl(tNode)) {
       tNode.flags |= 32768;
     }
+    if (isTextControl(tNode)) {
+      tNode.flags |= 65536;
+    }
+  }
+  if (tNode.flags & HAS_CONTROL_MASK) {
     return control;
   }
   const tagName = tNode.value;
@@ -13368,6 +13385,9 @@ function updateCustomControl(tNode, lView, control, modelName) {
     const inputName = CONTROL_BINDING_NAMES[key];
     maybeUpdateInput(componentDef, component, bindings, state, key, inputName);
   }
+  if (tNode.flags & 16384) {
+    updateNativeControl(tNode, lView, control);
+  }
 }
 function maybeUpdateInput(componentDef, component, bindings, state, key, inputName) {
   if (inputName in componentDef.inputs) {
@@ -13408,11 +13428,11 @@ function updateNativeControl(tNode, lView, control) {
   updateBooleanAttribute(renderer, element, bindings, state, DISABLED);
   updateBooleanAttribute(renderer, element, bindings, state, READONLY);
   updateBooleanAttribute(renderer, element, bindings, state, REQUIRED);
-  if (tNode.flags & 16384) {
+  if (tNode.flags & 32768) {
     updateOptionalAttribute(renderer, element, bindings, state, MAX);
     updateOptionalAttribute(renderer, element, bindings, state, MIN);
   }
-  if (tNode.flags & 32768) {
+  if (tNode.flags & 65536) {
     updateOptionalAttribute(renderer, element, bindings, state, MAX_LENGTH);
     updateOptionalAttribute(renderer, element, bindings, state, MIN_LENGTH);
   }
@@ -13490,7 +13510,7 @@ function setNativeControlValue(element, value) {
     case 'range':
     case 'datetime-local':
       if (typeof value === 'number') {
-        element.valueAsNumber = value;
+        setNativeNumberControlValue(element, value);
         return;
       }
       break;
@@ -13502,11 +13522,18 @@ function setNativeControlValue(element, value) {
         element.valueAsDate = value;
         return;
       } else if (typeof value === 'number') {
-        element.valueAsNumber = value;
+        setNativeNumberControlValue(element, value);
         return;
       }
   }
   element.value = value;
+}
+function setNativeNumberControlValue(element, value) {
+  if (isNaN(value)) {
+    element.value = '';
+  } else {
+    element.valueAsNumber = value;
+  }
 }
 const DISABLED = /* @__PURE__ */getClosureSafeProperty({
   disabled: getClosureSafeProperty

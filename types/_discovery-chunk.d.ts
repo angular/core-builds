@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-cc621ea
+ * @license Angular v21.0.0-rc.2+sha-ecea909
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1190,17 +1190,24 @@ declare const enum TNodeFlags {
      */
     isInteropControl = 8192,
     /**
-     * Bit #15 - This bit is set if the node is a native control with a numeric type.
+     * Bit #15 - This bit is set if the node is a native control.
+     *
+     * This is used to determine whether we can bind common control properties to the host element of
+     * a custom control when it doesn't define a corresponding input.
+     */
+    isNativeControl = 16384,
+    /**
+     * Bit #16 - This bit is set if the node is a native control with a numeric type.
      *
      * This is used to determine whether the control supports the `min` and `max` properties.
      */
-    isNativeNumericControl = 16384,
+    isNativeNumericControl = 32768,
     /**
-     * Bit #16 - This bit is set if the node is a native text control.
+     * Bit #17 - This bit is set if the node is a native text control.
      *
      * This is used to determine whether control supports the `minLength` and `maxLength` properties.
      */
-    isNativeTextControl = 32768
+    isNativeTextControl = 65536
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
