@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-9e7ddca
+ * @license Angular v21.1.0-next.0+sha-88dfd96
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5148,11 +5148,8 @@ function renderComponent(hostLView, componentHostIdx) {
     componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
   }
   profiler(18);
-  try {
-    renderView(componentTView, componentView, componentView[CONTEXT]);
-  } finally {
-    profiler(19, componentView[CONTEXT]);
-  }
+  renderView(componentTView, componentView, componentView[CONTEXT]);
+  profiler(19, componentView[CONTEXT]);
 }
 function syncViewWithBlueprint(tView, lView) {
   for (let i = lView.length; i < tView.blueprint.length; i++) {
@@ -5554,11 +5551,8 @@ function detectChangesInComponent(hostLView, componentHostIdx, mode) {
   ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
   profiler(18);
   const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-  try {
-    detectChangesInViewIfAttached(componentView, mode);
-  } finally {
-    profiler(19, componentView[CONTEXT]);
-  }
+  detectChangesInViewIfAttached(componentView, mode);
+  profiler(19, componentView[CONTEXT]);
 }
 function detectChangesInViewIfAttached(lView, mode) {
   if (!viewAttachedToChangeDetector(lView)) {
@@ -5621,11 +5615,8 @@ function processHostBindingOpCodes(tView, lView) {
         setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
         const context = lView[directiveIdx];
         profiler(24, context);
-        try {
-          hostBindingFn(2, context);
-        } finally {
-          profiler(25, context);
-        }
+        hostBindingFn(2, context);
+        profiler(25, context);
       }
     }
   } finally {
@@ -8222,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-9e7ddca'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-88dfd96'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11217,11 +11208,9 @@ function measureStart(startEvent) {
   console.timeStamp('Event_' + startEvent + '_' + counter++);
 }
 function measureEnd(startEvent, entryName, color) {
-  let top;
-  do {
-    top = eventsStack.pop();
-    assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
-  } while (top[0] !== startEvent);
+  const top = eventsStack.pop();
+  assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
+  assertEqual(top[0], startEvent, `Profiling error: expected to see ${startEvent} event but got ${top[0]}`);
   console.timeStamp(entryName, 'Event_' + top[0] + '_' + top[1], undefined, '\u{1F170}\uFE0F Angular', undefined, color);
 }
 const chromeDevToolsInjectorProfiler = event => {
@@ -11817,7 +11806,6 @@ class ApplicationRef {
   tickImpl = () => {
     (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
     if (this._runningTick) {
-      profiler(13);
       throw new RuntimeError(101, ngDevMode && 'ApplicationRef.tick is called recursively');
     }
     const prevConsumer = setActiveConsumer(null);
@@ -11847,11 +11835,8 @@ class ApplicationRef {
     let runs = 0;
     while (this.dirtyFlags !== 0 && runs++ < MAXIMUM_REFRESH_RERUNS) {
       profiler(14);
-      try {
-        this.synchronizeOnce();
-      } finally {
-        profiler(15);
-      }
+      this.synchronizeOnce();
+      profiler(15);
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
       throw new RuntimeError(103, ngDevMode && 'Infinite change detection while refreshing application views. ' + 'Ensure views are not calling `markForCheck` on every template execution or ' + 'that afterRender hooks always mark views for check.');
