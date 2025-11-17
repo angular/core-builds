@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-a966ff1
+ * @license Angular v20.3.12+sha-820bb39
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9620,12 +9620,8 @@ function renderComponent(hostLView, componentHostIdx) {
         componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
     }
     profiler(18 /* ProfilerEvent.ComponentStart */);
-    try {
-        renderView(componentTView, componentView, componentView[CONTEXT]);
-    }
-    finally {
-        profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
-    }
+    renderView(componentTView, componentView, componentView[CONTEXT]);
+    profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
 }
 /**
  * Syncs an LView instance with its blueprint if they have gotten out of sync.
@@ -10261,12 +10257,8 @@ function detectChangesInComponent(hostLView, componentHostIdx, mode) {
     ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
     profiler(18 /* ProfilerEvent.ComponentStart */);
     const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-    try {
-        detectChangesInViewIfAttached(componentView, mode);
-    }
-    finally {
-        profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
-    }
+    detectChangesInViewIfAttached(componentView, mode);
+    profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
 }
 /**
  * Visits a view as part of change detection traversal.
@@ -10374,12 +10366,8 @@ function processHostBindingOpCodes(tView, lView) {
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
                 const context = lView[directiveIdx];
                 profiler(24 /* ProfilerEvent.HostBindingsUpdateStart */, context);
-                try {
-                    hostBindingFn(2 /* RenderFlags.Update */, context);
-                }
-                finally {
-                    profiler(25 /* ProfilerEvent.HostBindingsUpdateEnd */, context);
-                }
+                hostBindingFn(2 /* RenderFlags.Update */, context);
+                profiler(25 /* ProfilerEvent.HostBindingsUpdateEnd */, context);
             }
         }
     }
@@ -14663,7 +14651,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.12+sha-a966ff1']
+        ? ['ng-version', '20.3.12+sha-820bb39']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -19439,13 +19427,9 @@ function measureStart(startEvent) {
     console.timeStamp('Event_' + startEvent + '_' + counter++);
 }
 function measureEnd(startEvent, entryName, color) {
-    let top;
-    // The stack may be asymmetric when an end event for a prior start event is missing (e.g. when an exception
-    // has occurred), unroll the stack until a matching item has been found in that case.
-    do {
-        top = eventsStack.pop();
-        assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
-    } while (top[0] !== startEvent);
+    const top = eventsStack.pop();
+    assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
+    assertEqual(top[0], startEvent, `Profiling error: expected to see ${startEvent} event but got ${top[0]}`);
     console.timeStamp(entryName, 'Event_' + top[0] + '_' + top[1], undefined, '\u{1F170}\uFE0F Angular', undefined, color);
 }
 const chromeDevToolsInjectorProfiler = (event) => {
@@ -20571,7 +20555,6 @@ class ApplicationRef {
     tickImpl = () => {
         (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         if (this._runningTick) {
-            profiler(13 /* ProfilerEvent.ChangeDetectionEnd */);
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
         }
         const prevConsumer = setActiveConsumer(null);
@@ -20604,12 +20587,8 @@ class ApplicationRef {
         let runs = 0;
         while (this.dirtyFlags !== 0 /* ApplicationRefDirtyFlags.None */ && runs++ < MAXIMUM_REFRESH_RERUNS) {
             profiler(14 /* ProfilerEvent.ChangeDetectionSyncStart */);
-            try {
-                this.synchronizeOnce();
-            }
-            finally {
-                profiler(15 /* ProfilerEvent.ChangeDetectionSyncEnd */);
-            }
+            this.synchronizeOnce();
+            profiler(15 /* ProfilerEvent.ChangeDetectionSyncEnd */);
         }
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
             throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
