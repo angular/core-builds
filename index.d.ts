@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-a8cea23
+ * @license Angular v20.3.12+sha-2e00074
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9380,6 +9380,8 @@ declare const REQUEST_CONTEXT: InjectionToken<unknown>;
  * A DI Token representing the main rendering context.
  * In a browser and SSR this is the DOM Document.
  * When using SSR, that document is created by [Domino](https://github.com/angular/domino).
+ *
+ * @see [Accessing Document via DI](guide/ssr#accessing-document-via-di)
  *
  * @publicApi
  */
