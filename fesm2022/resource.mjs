@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -18,6 +18,8 @@ import { untracked as untracked$1, BASE_EFFECT_NODE, runEffect, createLinkedSign
  * ```html
  * <my-comp (valueChange)="processNewValue($event)" />
  * ```
+ *
+ * @see [Custom events with outputs](guide/components/outputs)
  *
  * @publicAPI
  */
@@ -85,6 +87,7 @@ function getOutputDestroyRef(ref) {
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
  * can, optionally, return a value.
+ * @see [Reading without tracking dependencies](guide/signals#reading-without-tracking-dependencies)
  */
 function untracked(nonReactiveReadsFn) {
     return untracked$1(nonReactiveReadsFn);
@@ -92,6 +95,7 @@ function untracked(nonReactiveReadsFn) {
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
+ * @see [Computed signals](guide/signals#computed-signals)
  */
 function computed(computation, options) {
     const getter = createComputed(computation, options?.equal);
@@ -126,6 +130,8 @@ class EffectRefImpl {
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
+ *
+ * @see [Effects](guide/signals#effects)
  *
  * @publicApi 20.0
  */

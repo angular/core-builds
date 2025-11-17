@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2400,6 +2400,8 @@ function createElementRef(tNode, lView) {
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](https://g.co/ng/security).
+ *
+ * @see [Using DOM APIs](guide/components/dom-apis)
  *
  * @publicApi
  */
@@ -7595,6 +7597,8 @@ let ngZoneInstanceId = 0;
  *   }
  * }
  * ```
+ *
+ * @see [Resolving zone pollution](best-practices/zone-pollution#run-tasks-outside-ngzone)
  *
  * @publicApi
  */
@@ -14366,6 +14370,7 @@ function inputBindingUpdate(targetDirectiveIdx, publicName, value) {
  *   bindings: [inputBinding('disabled', isDisabled)]
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 function inputBinding(publicName, value) {
     // Note: ideally we would use a class here, but it seems like they
@@ -14396,6 +14401,7 @@ function inputBinding(publicName, value) {
  *   ],
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 function outputBinding(eventName, listener) {
     // Note: ideally we would use a class here, but it seems like they
@@ -14431,6 +14437,7 @@ function outputBinding(eventName, listener) {
  *   ],
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 function twoWayBinding(publicName, value) {
     const input = inputBinding(publicName, value);
@@ -14644,7 +14651,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.12+sha-755b360']
+        ? ['ng-version', '20.3.12+sha-daae263']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -19534,6 +19541,7 @@ function getProviderTokenMeasureName(token) {
  * @experimental
  *
  * @returns a function that can be invoked to stop sending profiling data.
+ * @see [Profiling with the Chrome DevTools](best-practices/profiling-with-chrome-devtools#recording-a-profile)
  */
 function enableProfiling() {
     performanceMarkFeature('Chrome DevTools profiling');
@@ -21992,6 +22000,7 @@ const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' 
  * for when stylesheets are pruned.
  *
  * @publicApi 20.2
+ * @see [Animating your applications with animate.enter and animate.leave](guide/animations)
  */
 const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
     providedIn: 'root',
@@ -31214,6 +31223,7 @@ class ChangeDetectionSchedulerImpl {
  * @publicApi 20.2
  *
  * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
+ * @see [Angular without ZoneJS (Zoneless)](guide/zoneless)
  */
 function provideZonelessChangeDetection() {
     performanceMarkFeature('NgZoneless');

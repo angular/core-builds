@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -44,6 +44,8 @@ declare const ANIMATIONS_DISABLED: InjectionToken<boolean>;
  * The event type for when `animate.enter` and `animate.leave` are used with function
  * callbacks.
  *
+ * @see [Animating your applications with animate.enter and animate.leave](guide/animations)
+ *
  * @publicApi 20.2
  */
 type AnimationCallbackEvent = {
@@ -58,6 +60,7 @@ type AnimationCallbackEvent = {
  * for when stylesheets are pruned.
  *
  * @publicApi 20.2
+ * @see [Animating your applications with animate.enter and animate.leave](guide/animations)
  */
 declare const MAX_ANIMATION_TIMEOUT: InjectionToken<number>;
 /**
@@ -2072,6 +2075,8 @@ declare const INJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
  *
+ * @see [Types of injector hierarchies](guide/di/hierarchical-dependency-injection#types-of-injector-hierarchies)
+ *
  * @publicApi
  */
 declare abstract class EnvironmentInjector implements Injector {
@@ -3133,11 +3138,15 @@ interface CreateEffectOptions {
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
  *
+ * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
+ *
  * @publicApi 20.0
  */
 type EffectCleanupFn = () => void;
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
+ *
+ * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
  *
  * @publicApi 20.0
  */
@@ -3157,6 +3166,8 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
+ *
+ * @see [Effects](guide/signals#effects)
  *
  * @publicApi 20.0
  */
@@ -4718,6 +4729,12 @@ interface DirectiveDecorator {
 /**
  * Directive decorator and metadata.
  *
+ * @see [Built-in directives](guide/directives)
+ * @see [Including inputs and outputs](guide/directives/directive-composition-api#including-inputs-and-outputs)
+ * @see [Assigning a reference to an Angular directive](guide/templates/variables#assigning-a-reference-to-an-angular-directive)
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Binding to the host element](guide/components/host-elements#binding-to-the-host-element)
+ * @see [Host directive semantics](guide/directives/directive-composition-api#host-directive-semantics)
  * @Annotation
  * @publicApi
  */
@@ -5119,6 +5136,11 @@ interface ComponentDecorator {
 /**
  * Supplies configuration metadata for an Angular component.
  *
+ * @see [Anatomy of a component](guide/components)
+ * @see [ChangeDetectionStrategy](guide/components/advanced-configuration#changedetectionstrategy)
+ * @see [Using the viewProviders array](guide/di/hierarchical-dependency-injection#using-the-viewproviders-array)
+ * @see [Style scoping](guide/components/styling#style-scoping)
+ *
  * @publicApi
  */
 interface Component extends Directive {
@@ -5274,7 +5296,7 @@ interface PipeDecorator {
      * to a template. To make it a member of an NgModule,
      * list it in the `declarations` field of the `NgModule` metadata.
      *
-     * @see [Style Guide: Pipe Names](style-guide#02-09)
+     * @see [Pipes](/guide/templates/pipes)
      *
      */
     (obj: Pipe): TypeDecorator;
@@ -5757,6 +5779,7 @@ interface DirectiveWithBindings<T> {
  *   bindings: [inputBinding('disabled', isDisabled)]
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 declare function inputBinding(publicName: string, value: () => unknown): Binding;
 /**
@@ -5779,6 +5802,7 @@ declare function inputBinding(publicName: string, value: () => unknown): Binding
  *   ],
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
 /**
@@ -5800,6 +5824,7 @@ declare function outputBinding<T>(eventName: string, listener: (event: T) => unk
  *   ],
  * });
  * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
 
@@ -5812,6 +5837,8 @@ declare function twoWayBinding(publicName: string, value: WritableSignal<unknown
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](https://g.co/ng/security).
+ *
+ * @see [Using DOM APIs](guide/components/dom-apis)
  *
  * @publicApi
  */
@@ -6145,6 +6172,8 @@ declare abstract class ComponentFactory<C> {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
+ * @see [Declaring outputs with the @Output decorator](guide/components/outputs#declaring-outputs-with-the-output-decorator)
+ *
  * @publicApi
  */
 interface EventEmitter<T> extends Subject<T>, OutputRef<T> {
@@ -6260,6 +6289,8 @@ declare const EventEmitter: {
  *   }
  * }
  * ```
+ *
+ * @see [Resolving zone pollution](best-practices/zone-pollution#run-tasks-outside-ngzone)
  *
  * @publicApi
  */

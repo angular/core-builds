@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -21,6 +21,8 @@ import './effect.mjs';
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
+ *
+ * @see [Unsubscribing with takeUntilDestroyed](ecosystem/rxjs-interop/take-until-destroyed)
  *
  * @publicApi 19.0
  */
@@ -94,6 +96,7 @@ class OutputFromObservableRef {
  *   nameChange = outputFromObservable(this.nameChange$);
  * }
  * ```
+ * @see [RxJS interop with component and directive outputs](ecosystem/rxjs-interop/output-interop)
  *
  * @publicApi 19.0
  */
@@ -108,6 +111,8 @@ function outputFromObservable(observable, opts) {
  * It creates an observable that represents the stream of "events firing" in an output.
  *
  * You can subscribe to the output via `Observable.subscribe` then.
+ *
+ * @see [RxJS interop with component and directive outputs](ecosystem/rxjs-interop/output-interop)
  *
  * @publicApi 19.0
  */
@@ -133,6 +138,9 @@ function outputToObservable(ref) {
  * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
+ *
+ * @see [RxJS interop with Angular signals](ecosystem/rxjs-interop)
+ * @see [Create an RxJS Observable from a signal with toObservable](ecosystem/rxjs-interop#create-an-rxjs-observable-from-a-signal-with-toobservable)
  *
  * @publicApi 20.0
  */
@@ -181,6 +189,8 @@ function toObservable(source, options) {
  * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
  * option can be specified instead, which disables the automatic subscription teardown. No injection
  * context is needed in this configuration as well.
+ *
+ * @see [RxJS interop with Angular signals](ecosystem/rxjs-interop)
  */
 function toSignal(source, options) {
     typeof ngDevMode !== 'undefined' &&

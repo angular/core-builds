@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -118,6 +118,7 @@ var ViewEncapsulation;
  *   attr: string | null = inject(new HostAttributeToken('some-attr'), {optional: true});
  * }
  * ```
+ * @see [Injecting host element attributes](guide/components/host-elements#injecting-host-element-attributes)
  * @publicApi
  */
 class HostAttributeToken {
@@ -228,6 +229,9 @@ function getDevModeNodeName(tNode) {
  *   this.nameChange.emit(newName);
  * }
  * ```
+ *
+ * @see [Custom events with outputs](guide/components/outputs#customizing-output-names)
+ *
  * @initializerApiFunction {"showTypesInSignaturePreview": true}
  * @publicApi 19.0
  */
@@ -329,6 +333,8 @@ function viewChildRequiredFn(locator, opts) {
  *
  * @publicApi 19.0
  * @initializerApiFunction
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Required queries](guide/components/queries#required-queries)
  */
 const viewChild = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -356,6 +362,8 @@ const viewChild = (() => {
  *
  * @initializerApiFunction
  * @publicApi 19.0
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Required queries](guide/components/queries#required-queries)
  */
 function viewChildren(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChildren);
@@ -420,6 +428,8 @@ const contentChild = (() => {
  *
  * @initializerApiFunction
  * @publicApi 19.0
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Content queries](guide/components/queries#content-queries)
  */
 function contentChildren(locator, opts) {
     return createMultiResultQuerySignalFn(opts);
@@ -520,6 +530,9 @@ function modelRequiredFunction(opts) {
  *   this.firstName.set(newFirstName);
  * }
  * ```
+ * @see [Two-way binding between components](guide/templates/two-way-binding#two-way-binding-between-components)
+ * @see [Model inputs](guide/components/inputs#model-inputs)
+ * @see [Customizing model inputs](guide/components/inputs#customizing-model-inputs)
  *
  * @publicApi 19.0
  * @initializerApiFunction
@@ -2675,6 +2688,9 @@ function shouldEnableEventReplay(injector) {
 /**
  * Returns a set of providers required to setup support for event replay.
  * Requires hydration to be enabled separately.
+ *
+ * @see [Capturing and replaying event](guide/hydration#capturing-and-replaying-events)
+ *
  */
 function withEventReplay() {
     const providers = [
@@ -3769,6 +3785,7 @@ function withDomHydration() {
 /**
  * Returns a set of providers required to setup support for i18n hydration.
  * Requires hydration to be enabled separately.
+ * @see [I18N](guide/hydration#i18n)
  */
 function withI18nSupport() {
     return [
@@ -3793,6 +3810,7 @@ function withI18nSupport() {
  * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
  * Enabling incremental hydration also enables event replay for the entire app.
+ * @see [Incremental Hydration](guide/incremental-hydration#how-do-you-enable-incremental-hydration-in-angular)
  */
 function withIncrementalHydration() {
     const providers = [
@@ -3853,6 +3871,8 @@ function logWarningOnStableTimedout(time, console) {
  *  ```
  * @param value Value to be transformed.
  *
+ * @see [Built-in transformations](guide/components/inputs#built-in-transformations)
+ *
  * @publicApi
  */
 function booleanAttribute(value) {
@@ -3870,6 +3890,7 @@ function booleanAttribute(value) {
  *  ```
  *
  * @publicApi
+ * @see [Built-in transformations](guide/components/inputs#built-in-transformations)
  */
 function numberAttribute(value, fallbackValue = NaN) {
     // parseFloat(value) handles most of the cases we're interested in (it treats null, empty string,
@@ -4370,6 +4391,9 @@ function phaseDebugName(phase) {
  *  * `bindings` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
+ * @see [Host view using `ViewContainerRef.createComponent`](guide/components/programmatic-rendering#host-view-using-viewcontainerrefcreatecomponent)
+ * @see [Popup attached to `document.body` with `createComponent` + `hostElement`](guide/components/programmatic-rendering#popup-attached-to-documentbody-with-createcomponent--hostelement)
+ *
  * @publicApi
  */
 function createComponent(component, options) {
@@ -4478,6 +4502,8 @@ function mergeApplicationConfig(...configs) {
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
  *
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
+ *
  * @publicApi
  */
 const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST' : '', {
@@ -4501,6 +4527,7 @@ const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
  *
  * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
  */
 const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'RESPONSE_INIT' : '', {
     providedIn: 'platform',
@@ -4515,6 +4542,7 @@ const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngD
  * This token is only available during server-side rendering and will be `null` in other contexts.
  *
  * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
  */
 const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST_CONTEXT' : '', {
     providedIn: 'platform',

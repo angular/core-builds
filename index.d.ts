@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -20,6 +20,8 @@ import '@angular/core/primitives/di';
 
 /**
  * @publicAPI
+ * @see [Input aliases](guide/components/inputs#input-aliases)
+ * @see [Input transforms](guide/components/inputs#input-transforms)
  *
  * Options for signal inputs.
  */
@@ -108,6 +110,9 @@ interface InputSignal<T> extends InputSignalWithTransform<T, T> {
  * The function exposes an API for also declaring required inputs via the
  * `input.required` function.
  *
+ * @see [Accepting data with input properties](guide/components/inputs)
+ * @see [Required inputs](guide/components/inputs#required-inputs)
+ * @see [Input transforms](guide/components/inputs#input-transforms)
  * @publicAPI
  * @docsPrivate Ignored because `input` is the canonical API entry.
  */
@@ -252,6 +257,10 @@ interface ModelSignal<T> extends WritableSignal<T>, InputSignal<T>, OutputRef<T>
  * The function exposes an API for also declaring required models via the
  * `model.required` function.
  *
+ * @see [Two-way binding between components](guide/templates/two-way-binding#two-way-binding-between-components)
+ * @see [Model inputs](guide/components/inputs#model-inputs)
+ * @see [Customizing model inputs](guide/components/inputs#customizing-model-inputs)
+ *
  * @publicAPI
  * @docsPrivate Ignored because `model` is the canonical API entry.
  */
@@ -316,6 +325,9 @@ interface ModelFunction {
  *   this.firstName.set(newFirstName);
  * }
  * ```
+ * @see [Two-way binding between components](guide/templates/two-way-binding#two-way-binding-between-components)
+ * @see [Model inputs](guide/components/inputs#model-inputs)
+ * @see [Customizing model inputs](guide/components/inputs#customizing-model-inputs)
  *
  * @publicApi 19.0
  * @initializerApiFunction
@@ -468,6 +480,8 @@ interface ViewChildFunction {
  *
  * @publicApi 19.0
  * @initializerApiFunction
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Required queries](guide/components/queries#required-queries)
  */
 declare const viewChild: ViewChildFunction;
 declare function viewChildren<LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
@@ -1624,6 +1638,8 @@ declare const Host: HostDecorator;
  * from the given `Injector`. Note that `inject` is only usable synchronously, and cannot be used in
  * any asynchronous callbacks or after any `await` points.
  *
+ * @see [Run within an injection context](guide/di/dependency-injection-context#run-within-an-injection-context)
+ *
  * @param injector the injector which will satisfy calls to [`inject`](api/core/inject) while `fn`
  *     is executing
  * @param fn the closure to be run in the context of `injector`
@@ -1693,7 +1709,7 @@ interface ForwardRefFn {
  *    hideParent = input.required<boolean>();
  * }
  * ```
- *
+ * @see [Resolve circular dependencies with a forward reference](guide/di/di-in-action#resolve-circular-dependencies-with-a-forward-reference)
  * @publicApi
  */
 declare function forwardRef(forwardRefFn: ForwardRefFn): Type$1<any>;
@@ -1729,7 +1745,8 @@ interface InjectableDecorator {
      * provided and injected as a dependency.
      *
      * @see [Introduction to Services and DI](guide/di)
-     * @see [Dependency Injection Guide](guide/di/dependency-injection)
+     * @see [Creating and using services](guide/di/creating-and-using-services)
+     * @see [Defining dependency providers](guide/di/defining-dependency-providers)
      *
      * @usageNotes
      *
@@ -1754,6 +1771,7 @@ interface InjectableDecorator {
 }
 /**
  * Type of the Injectable metadata.
+ *
  *
  * @publicApi
  */
@@ -1826,6 +1844,7 @@ declare const ENVIRONMENT_INITIALIZER: InjectionToken<readonly (() => void)[]>;
  *   attr: string | null = inject(new HostAttributeToken('some-attr'), {optional: true});
  * }
  * ```
+ * @see [Injecting host element attributes](guide/components/host-elements#injecting-host-element-attributes)
  * @publicApi
  */
 declare class HostAttributeToken {
@@ -2170,6 +2189,7 @@ interface CreateComputedOptions<T> {
 }
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
+ * @see [Computed signals](guide/signals#computed-signals)
  */
 declare function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T>;
 
@@ -2189,6 +2209,7 @@ declare function linkedSignal<D>(computation: () => D, options?: {
  * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
  *
  * @publicApi 20.0
+ * @see [Dependent state with linkedSignal](guide/signals/linked-signal)
  */
 declare function linkedSignal<S, D>(options: {
     source: () => S;
@@ -2203,6 +2224,7 @@ declare function linkedSignal<S, D>(options: {
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
  * can, optionally, return a value.
+ * @see [Reading without tracking dependencies](guide/signals#reading-without-tracking-dependencies)
  */
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
@@ -2305,6 +2327,8 @@ interface AfterRenderOptions {
  *   }
  * }
  * ```
+ *
+ * @see [afterEveryRender and afterNextRender](guide/components/lifecycle#aftereveryrender-and-afternextrender)
  *
  * @publicApi 20.0
  */
@@ -2445,6 +2469,7 @@ declare function afterEveryRender(callback: VoidFunction, options?: AfterRenderO
  * ```
  *
  * @publicApi 20.0
+ * @see [afterEveryRender and afterNextRender](guide/components/lifecycle#aftereveryrender-and-afternextrender)
  */
 declare function afterNextRender<E = never, W = never, M = never>(spec: {
     earlyRead?: () => E;
@@ -3942,6 +3967,7 @@ declare class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {
  * @publicApi 20.2
  *
  * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
+ * @see [Angular without ZoneJS (Zoneless)](guide/zoneless)
  */
 declare function provideZonelessChangeDetection(): EnvironmentProviders;
 
@@ -3984,6 +4010,9 @@ declare class PendingTasksInternal implements OnDestroy {
  * // do work that should block application's stability and then:
  * taskCleanup();
  * ```
+ *
+ *
+ * @see [PendingTasks for Server Side Rendering (SSR)](guide/zoneless#pendingtasks-for-server-side-rendering-ssr)
  *
  * @publicApi 20.0
  */
@@ -4735,6 +4764,8 @@ declare const INTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => voi
  *
  * The listeners added are for the window's 'unhandledrejection' and 'error' events.
  *
+ * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
+ *
  * @publicApi
  */
 declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
@@ -5101,18 +5132,23 @@ declare function withDomHydration(): EnvironmentProviders;
 /**
  * Returns a set of providers required to setup support for i18n hydration.
  * Requires hydration to be enabled separately.
+ * @see [I18N](guide/hydration#i18n)
  */
 declare function withI18nSupport(): Provider[];
 /**
  * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
  * Enabling incremental hydration also enables event replay for the entire app.
+ * @see [Incremental Hydration](guide/incremental-hydration#how-do-you-enable-incremental-hydration-in-angular)
  */
 declare function withIncrementalHydration(): Provider[];
 
 /**
  * Returns a set of providers required to setup support for event replay.
  * Requires hydration to be enabled separately.
+ *
+ * @see [Capturing and replaying event](guide/hydration#capturing-and-replaying-events)
+ *
  */
 declare function withEventReplay(): Provider[];
 
@@ -5520,6 +5556,8 @@ declare function _sanitizeUrl(url: string): string;
  *  ```
  * @param value Value to be transformed.
  *
+ * @see [Built-in transformations](guide/components/inputs#built-in-transformations)
+ *
  * @publicApi
  */
 declare function booleanAttribute(value: unknown): boolean;
@@ -5535,6 +5573,7 @@ declare function booleanAttribute(value: unknown): boolean;
  *  ```
  *
  * @publicApi
+ * @see [Built-in transformations](guide/components/inputs#built-in-transformations)
  */
 declare function numberAttribute(value: unknown, fallbackValue?: number): number;
 
@@ -5597,6 +5636,8 @@ declare function disableProfiling(): void;
  * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
  * request object becomes available, which could prematurely abort mutations.
  *
+ * @see [Async reactivity with resources](guide/signals/resource)
+ *
  * @experimental 19.0
  */
 declare function resource<T, R>(options: ResourceOptions<T, R> & {
@@ -5611,6 +5652,7 @@ declare function resource<T, R>(options: ResourceOptions<T, R> & {
  * request object becomes available, which could prematurely abort mutations.
  *
  * @experimental 19.0
+ * @see [Async reactivity with resources](guide/signals/resource)
  */
 declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
 type WrappedRequest = {
@@ -9213,6 +9255,9 @@ declare const depsTracker: DepsTracker;
  *  * `bindings` (optional): Bindings to apply to the root component.
  * @returns ComponentRef instance that represents a given Component.
  *
+ * @see [Host view using `ViewContainerRef.createComponent`](guide/components/programmatic-rendering#host-view-using-viewcontainerrefcreatecomponent)
+ * @see [Popup attached to `document.body` with `createComponent` + `hostElement`](guide/components/programmatic-rendering#popup-attached-to-documentbody-with-createcomponent--hostelement)
+ *
  * @publicApi
  */
 declare function createComponent<C>(component: Type$1<C>, options: {
@@ -9342,6 +9387,8 @@ declare function mergeApplicationConfig(...configs: ApplicationConfig[]): Applic
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
  *
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
+ *
  * @publicApi
  */
 declare const REQUEST: InjectionToken<Request | null>;
@@ -9362,6 +9409,7 @@ declare const REQUEST: InjectionToken<Request | null>;
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
  *
  * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
  */
 declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
 /**
@@ -9373,6 +9421,7 @@ declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
  * This token is only available during server-side rendering and will be `null` in other contexts.
  *
  * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
  */
 declare const REQUEST_CONTEXT: InjectionToken<unknown>;
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.12+sha-755b360
+ * @license Angular v20.3.12+sha-daae263
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,7 +31,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = /* @__PURE__ */ new Version('20.3.12+sha-755b360');
+const VERSION = /* @__PURE__ */ new Version('20.3.12+sha-daae263');
 
 /**
  * Base URL for the error details page.
@@ -267,7 +267,7 @@ const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafe
  *    hideParent = input.required<boolean>();
  * }
  * ```
- *
+ * @see [Resolve circular dependencies with a forward reference](guide/di/di-in-action#resolve-circular-dependencies-with-a-forward-reference)
  * @publicApi
  */
 function forwardRef(forwardRefFn) {
@@ -554,6 +554,9 @@ const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
  * ### Tree-shakable InjectionToken
  *
  * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *
+ *
+ * @see [What is an InjectionToken?](guide/di/defining-dependency-providers#what-is-an-injectiontoken)
  *
  * @publicApi
  */
@@ -1135,6 +1138,8 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  *   }
  * }
  * ```
+ *
+ * @see [Injecting dependencies with inject()](guide/di#injecting-dependencies-with-inject)
  *
  * @publicApi
  */
@@ -1875,6 +1880,8 @@ function getNullInjector() {
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
  *
+ * @see [Types of injector hierarchies](guide/di/hierarchical-dependency-injection#types-of-injector-hierarchies)
+ *
  * @publicApi
  */
 class EnvironmentInjector {
@@ -2355,6 +2362,8 @@ function forEachSingleProvider(providers, fn) {
  * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject dependencies
  * from the given `Injector`. Note that `inject` is only usable synchronously, and cannot be used in
  * any asynchronous callbacks or after any `await` points.
+ *
+ * @see [Run within an injection context](guide/di/dependency-injection-context#run-within-an-injection-context)
  *
  * @param injector the injector which will satisfy calls to [`inject`](api/core/inject) while `fn`
  *     is executing
@@ -3504,6 +3513,8 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
  *
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
+ * @see [Types of injector hierarchies](guide/di/hierarchical-dependency-injection#types-of-injector-hierarchies)
+ *
  * @publicApi
  */
 class Injector {
@@ -3703,6 +3714,8 @@ const globalErrorListeners = new InjectionToken(ngDevMode ? 'GlobalErrorListener
  *
  * The listeners added are for the window's 'unhandledrejection' and 'error' events.
  *
+ * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
+ *
  * @publicApi
  */
 function provideBrowserGlobalErrorListeners() {
@@ -3731,6 +3744,7 @@ function ɵunwrapWritableSignal(value) {
 }
 /**
  * Create a `Signal` that can be set or updated directly.
+ * @see [Angular Signals](guide/signals)
  */
 function signal(initialValue, options) {
     const [get, set, update] = createSignal(initialValue, options?.equal);
@@ -3890,6 +3904,9 @@ class PendingTasksInternal {
  * // do work that should block application's stability and then:
  * taskCleanup();
  * ```
+ *
+ *
+ * @see [PendingTasks for Server Side Rendering (SSR)](guide/zoneless#pendingtasks-for-server-side-rendering-ssr)
  *
  * @publicApi 20.0
  */
