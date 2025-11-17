@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-3760feb
+ * @license Angular v21.1.0-next.0+sha-9e7ddca
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -837,7 +837,7 @@ declare global {
  *
  * Note: integration is enabled in the development mode only, this operation is noop in the production mode.
  *
- * @experimental
+ * @publicApi v21.0
  *
  * @returns a function that can be invoked to stop sending profiling data.
  * @see [Profiling with the Chrome DevTools](best-practices/profiling-with-chrome-devtools#recording-a-profile)
