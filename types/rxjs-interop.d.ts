@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-59543d6
+ * @license Angular v21.0.0-rc.2+sha-a7dddcc
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,6 +31,7 @@ import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
  *   nameChange = outputFromObservable(this.nameChange$);
  * }
  * ```
+ * @see [RxJS interop with component and directive outputs](ecosystem/rxjs-interop/output-interop)
  *
  * @publicApi 19.0
  */
@@ -43,6 +44,8 @@ declare function outputFromObservable<T>(observable: Observable<T>, opts?: Outpu
  *
  * You can subscribe to the output via `Observable.subscribe` then.
  *
+ * @see [RxJS interop with component and directive outputs](ecosystem/rxjs-interop/output-interop)
+ *
  * @publicApi 19.0
  */
 declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
@@ -54,6 +57,8 @@ declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
+ *
+ * @see [Unsubscribing with takeUntilDestroyed](ecosystem/rxjs-interop/take-until-destroyed)
  *
  * @publicApi 19.0
  */
@@ -80,6 +85,9 @@ interface ToObservableOptions {
  * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
  *
  * `toObservable` must be called in an injection context unless an injector is provided via options.
+ *
+ * @see [RxJS interop with Angular signals](ecosystem/rxjs-interop)
+ * @see [Create an RxJS Observable from a signal with toObservable](ecosystem/rxjs-interop#create-an-rxjs-observable-from-a-signal-with-toobservable)
  *
  * @publicApi 20.0
  */
@@ -168,6 +176,8 @@ interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
 /**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
  * resource's value.
+ *
+ * @see [Using rxResource for async data](ecosystem/rxjs-interop#using-rxresource-for-async-data)
  *
  * @experimental
  */

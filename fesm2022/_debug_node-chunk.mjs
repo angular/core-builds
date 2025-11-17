@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-59543d6
+ * @license Angular v21.0.0-rc.2+sha-a7dddcc
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8213,7 +8213,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.2+sha-59543d6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0-rc.2+sha-a7dddcc'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13291,11 +13291,7 @@ function listenToCustomControl(lView, tNode, control, modelName) {
 }
 function listenToInteropControl(control) {
   const interopControl = control.ɵinteropControl;
-  interopControl.registerOnChange(value => {
-    const state = control.state();
-    state.value.set(value);
-    state.markAsDirty();
-  });
+  interopControl.registerOnChange(value => control.state().setControlValue(value));
   interopControl.registerOnTouched(() => control.state().markAsTouched());
 }
 function isNativeControl(tNode) {

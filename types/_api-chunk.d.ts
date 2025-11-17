@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-59543d6
+ * @license Angular v21.0.0-rc.2+sha-a7dddcc
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -17,6 +17,8 @@ import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, V
  * <my-comp (valueChange)="processNewValue($event)" />
  * ```
  *
+ * @see [Custom events with outputs](guide/components/outputs)
+ *
  * @publicAPI
  */
 declare class OutputEmitterRef<T> implements OutputRef<T> {
@@ -33,6 +35,8 @@ declare function getOutputDestroyRef(ref: OutputRef<unknown>): DestroyRef | unde
 
 /**
  * Options for declaring an output.
+ *
+ * @see [Customizing output names](guide/components/outputs#customizing-output-names)
  *
  * @publicApi 19.0
  */
@@ -78,6 +82,9 @@ interface OutputOptions {
  *   this.nameChange.emit(newName);
  * }
  * ```
+ *
+ * @see [Custom events with outputs](guide/components/outputs#customizing-output-names)
+ *
  * @initializerApiFunction {"showTypesInSignaturePreview": true}
  * @publicApi 19.0
  */

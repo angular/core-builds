@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0-rc.2+sha-59543d6
+ * @license Angular v21.0.0-rc.2+sha-a7dddcc
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -54,6 +54,7 @@ interface CreateSignalOptions<T> {
 }
 /**
  * Create a `Signal` that can be set or updated directly.
+ * @see [Angular Signals](guide/signals)
  */
 declare function signal<T>(initialValue: T, options?: CreateSignalOptions<T>): WritableSignal<T>;
 
@@ -96,6 +97,8 @@ declare function isWritableSignal(value: unknown): value is WritableSignal<unkno
  * Note: Angular will automatically clean up subscriptions
  * when the directive/component of the output is destroyed.
  *
+ * @see [Subscribing to outputs programmatically](guide/components/outputs#subscribing-to-outputs-programmatically)
+ *
  * @publicAPI
  */
 interface OutputRefSubscription {
@@ -105,6 +108,7 @@ interface OutputRefSubscription {
  * A reference to an Angular output.
  *
  * @publicAPI
+ * @see [Subscribing to outputs programmatically](guide/components/outputs#subscribing-to-outputs-programmatically)
  */
 interface OutputRef<T> {
     /**
@@ -216,6 +220,9 @@ type Writable<T> = {
  * ### Tree-shakable InjectionToken
  *
  * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *
+ *
+ * @see [What is an InjectionToken?](guide/di/defining-dependency-providers#what-is-an-injectiontoken)
  *
  * @publicApi
  */
@@ -665,6 +672,8 @@ type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToken<T>;
  *
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
+ * @see [Types of injector hierarchies](guide/di/hierarchical-dependency-injection#types-of-injector-hierarchies)
+ *
  * @publicApi
  */
 declare abstract class Injector {
@@ -831,6 +840,7 @@ declare global {
  * @experimental
  *
  * @returns a function that can be invoked to stop sending profiling data.
+ * @see [Profiling with the Chrome DevTools](best-practices/profiling-with-chrome-devtools#recording-a-profile)
  */
 declare function enableProfiling(): () => void;
 
