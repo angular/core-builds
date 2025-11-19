@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-4c31f8e
+ * @license Angular v21.1.0-next.0+sha-34e1fe2
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -422,6 +422,36 @@ const profiler = function (event, instance = null, eventFn) {
   }
 };
 
+var ProfilerEvent;
+(function (ProfilerEvent) {
+  ProfilerEvent[ProfilerEvent["TemplateCreateStart"] = 0] = "TemplateCreateStart";
+  ProfilerEvent[ProfilerEvent["TemplateCreateEnd"] = 1] = "TemplateCreateEnd";
+  ProfilerEvent[ProfilerEvent["TemplateUpdateStart"] = 2] = "TemplateUpdateStart";
+  ProfilerEvent[ProfilerEvent["TemplateUpdateEnd"] = 3] = "TemplateUpdateEnd";
+  ProfilerEvent[ProfilerEvent["LifecycleHookStart"] = 4] = "LifecycleHookStart";
+  ProfilerEvent[ProfilerEvent["LifecycleHookEnd"] = 5] = "LifecycleHookEnd";
+  ProfilerEvent[ProfilerEvent["OutputStart"] = 6] = "OutputStart";
+  ProfilerEvent[ProfilerEvent["OutputEnd"] = 7] = "OutputEnd";
+  ProfilerEvent[ProfilerEvent["BootstrapApplicationStart"] = 8] = "BootstrapApplicationStart";
+  ProfilerEvent[ProfilerEvent["BootstrapApplicationEnd"] = 9] = "BootstrapApplicationEnd";
+  ProfilerEvent[ProfilerEvent["BootstrapComponentStart"] = 10] = "BootstrapComponentStart";
+  ProfilerEvent[ProfilerEvent["BootstrapComponentEnd"] = 11] = "BootstrapComponentEnd";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionStart"] = 12] = "ChangeDetectionStart";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionEnd"] = 13] = "ChangeDetectionEnd";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncStart"] = 14] = "ChangeDetectionSyncStart";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncEnd"] = 15] = "ChangeDetectionSyncEnd";
+  ProfilerEvent[ProfilerEvent["AfterRenderHooksStart"] = 16] = "AfterRenderHooksStart";
+  ProfilerEvent[ProfilerEvent["AfterRenderHooksEnd"] = 17] = "AfterRenderHooksEnd";
+  ProfilerEvent[ProfilerEvent["ComponentStart"] = 18] = "ComponentStart";
+  ProfilerEvent[ProfilerEvent["ComponentEnd"] = 19] = "ComponentEnd";
+  ProfilerEvent[ProfilerEvent["DeferBlockStateStart"] = 20] = "DeferBlockStateStart";
+  ProfilerEvent[ProfilerEvent["DeferBlockStateEnd"] = 21] = "DeferBlockStateEnd";
+  ProfilerEvent[ProfilerEvent["DynamicComponentStart"] = 22] = "DynamicComponentStart";
+  ProfilerEvent[ProfilerEvent["DynamicComponentEnd"] = 23] = "DynamicComponentEnd";
+  ProfilerEvent[ProfilerEvent["HostBindingsUpdateStart"] = 24] = "HostBindingsUpdateStart";
+  ProfilerEvent[ProfilerEvent["HostBindingsUpdateEnd"] = 25] = "HostBindingsUpdateEnd";
+})(ProfilerEvent || (ProfilerEvent = {}));
+
 function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
   ngDevMode && assertFirstCreatePass(tView);
   const {
@@ -519,13 +549,13 @@ function callHooks(currentView, arr, initPhase, currentNodeIndex) {
   }
 }
 function callHookInternal(directive, hook) {
-  profiler(4, directive, hook);
+  profiler(ProfilerEvent.LifecycleHookStart, directive, hook);
   const prevConsumer = setActiveConsumer(null);
   try {
     hook.call(directive);
   } finally {
     setActiveConsumer(prevConsumer);
-    profiler(5, directive, hook);
+    profiler(ProfilerEvent.LifecycleHookEnd, directive, hook);
   }
 }
 function callHook(currentView, initPhase, arr, i) {
@@ -1757,12 +1787,6 @@ function getDirectives(node) {
   }
   return context.directives === null ? [] : [...context.directives];
 }
-var Framework;
-(function (Framework) {
-  Framework["Angular"] = "angular";
-  Framework["ACX"] = "acx";
-  Framework["Wiz"] = "wiz";
-})(Framework || (Framework = {}));
 var AcxChangeDetectionStrategy;
 (function (AcxChangeDetectionStrategy) {
   AcxChangeDetectionStrategy[AcxChangeDetectionStrategy["Default"] = 0] = "Default";
@@ -4082,7 +4106,7 @@ class AfterRenderImpl {
   execute() {
     const hasSequencesToExecute = this.sequences.size > 0;
     if (hasSequencesToExecute) {
-      profiler(16);
+      profiler(ProfilerEvent.AfterRenderHooksStart);
     }
     this.executing = true;
     for (const phase of AFTER_RENDER_PHASES) {
@@ -4118,7 +4142,7 @@ class AfterRenderImpl {
     }
     this.deferredRegistrations.clear();
     if (hasSequencesToExecute) {
-      profiler(17);
+      profiler(ProfilerEvent.AfterRenderHooksEnd);
     }
   }
   register(sequence) {
@@ -4522,19 +4546,19 @@ function executeOnDestroys(tView, lView) {
           for (let j = 0; j < toCall.length; j += 2) {
             const callContext = context[toCall[j]];
             const hook = toCall[j + 1];
-            profiler(4, callContext, hook);
+            profiler(ProfilerEvent.LifecycleHookStart, callContext, hook);
             try {
               hook.call(callContext);
             } finally {
-              profiler(5, callContext, hook);
+              profiler(ProfilerEvent.LifecycleHookEnd, callContext, hook);
             }
           }
         } else {
-          profiler(4, context, toCall);
+          profiler(ProfilerEvent.LifecycleHookStart, context, toCall);
           try {
             toCall.call(context);
           } finally {
-            profiler(5, context, toCall);
+            profiler(ProfilerEvent.LifecycleHookEnd, context, toCall);
           }
         }
       }
@@ -4769,12 +4793,12 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
     if (isUpdatePhase && lView.length > HEADER_OFFSET) {
       selectIndexInternal(tView, lView, HEADER_OFFSET, !!ngDevMode && isInCheckNoChangesMode());
     }
-    const preHookType = isUpdatePhase ? 2 : 0;
+    const preHookType = isUpdatePhase ? ProfilerEvent.TemplateUpdateStart : ProfilerEvent.TemplateCreateStart;
     profiler(preHookType, context, templateFn);
     templateFn(rf, context);
   } finally {
     setSelectedIndex(prevSelectedIndex);
-    const postHookType = isUpdatePhase ? 3 : 1;
+    const postHookType = isUpdatePhase ? ProfilerEvent.TemplateUpdateEnd : ProfilerEvent.TemplateCreateEnd;
     profiler(postHookType, context, templateFn);
   }
 }
@@ -5147,9 +5171,9 @@ function renderComponent(hostLView, componentHostIdx) {
   if (hostRNode !== null && componentView[HYDRATION] === null) {
     componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
   }
-  profiler(18);
+  profiler(ProfilerEvent.ComponentStart);
   renderView(componentTView, componentView, componentView[CONTEXT]);
-  profiler(19, componentView[CONTEXT]);
+  profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
 }
 function syncViewWithBlueprint(tView, lView) {
   for (let i = lView.length; i < tView.blueprint.length; i++) {
@@ -5549,10 +5573,10 @@ function markTransplantedViewsForRefresh(lView) {
 }
 function detectChangesInComponent(hostLView, componentHostIdx, mode) {
   ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
-  profiler(18);
+  profiler(ProfilerEvent.ComponentStart);
   const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
   detectChangesInViewIfAttached(componentView, mode);
-  profiler(19, componentView[CONTEXT]);
+  profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
 }
 function detectChangesInViewIfAttached(lView, mode) {
   if (!viewAttachedToChangeDetector(lView)) {
@@ -5614,9 +5638,9 @@ function processHostBindingOpCodes(tView, lView) {
         const hostBindingFn = hostBindingOpCodes[++i];
         setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
         const context = lView[directiveIdx];
-        profiler(24, context);
+        profiler(ProfilerEvent.HostBindingsUpdateStart, context);
         hostBindingFn(2, context);
-        profiler(25, context);
+        profiler(ProfilerEvent.HostBindingsUpdateEnd, context);
       }
     }
   } finally {
@@ -7878,13 +7902,13 @@ function wrapListener(tNode, lView, listenerFn) {
 function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
   const prevConsumer = setActiveConsumer$1(null);
   try {
-    profiler(6, context, listenerFn);
+    profiler(ProfilerEvent.OutputStart, context, listenerFn);
     return listenerFn(e) !== false;
   } catch (error) {
     handleUncaughtError(lView, error);
     return false;
   } finally {
-    profiler(7, context, listenerFn);
+    profiler(ProfilerEvent.OutputEnd, context, listenerFn);
     setActiveConsumer$1(prevConsumer);
   }
 }
@@ -8169,7 +8193,7 @@ class ComponentFactory extends ComponentFactory$1 {
     this.isBoundToModule = !!ngModule;
   }
   create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings) {
-    profiler(22);
+    profiler(ProfilerEvent.DynamicComponentStart);
     const prevConsumer = setActiveConsumer(null);
     try {
       const cmpDef = this.componentDef;
@@ -8204,7 +8228,7 @@ class ComponentFactory extends ComponentFactory$1 {
         unregisterLView(rootLView);
         throw e;
       } finally {
-        profiler(23);
+        profiler(ProfilerEvent.DynamicComponentEnd);
         leaveView();
       }
       return new ComponentRef(this.componentType, rootLView, !!hasInputBindings);
@@ -8214,7 +8238,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-4c31f8e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-34e1fe2'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10299,7 +10323,7 @@ function findMatchingDehydratedViewForDeferBlock(lContainer, lDetails) {
   };
 }
 function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) {
-  profiler(20);
+  profiler(ProfilerEvent.DeferBlockStateStart);
   const stateTmplIndex = getTemplateIndexForState(newState, hostLView, tNode);
   if (stateTmplIndex !== null) {
     lDetails[DEFER_BLOCK_STATE] = newState;
@@ -10336,7 +10360,7 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
       lDetails[ON_COMPLETE_FNS] = null;
     }
   }
-  profiler(21);
+  profiler(ProfilerEvent.DeferBlockStateEnd);
 }
 function applyDeferBlockStateWithScheduling(newState, lDetails, lContainer, tNode, hostLView) {
   const now = Date.now();
@@ -11225,89 +11249,89 @@ const chromeDevToolsInjectorProfiler = event => {
 };
 const devToolsProfiler = (event, instance, eventFn) => {
   switch (event) {
-    case 8:
-    case 10:
-    case 12:
-    case 14:
-    case 16:
-    case 18:
-    case 20:
-    case 22:
-    case 0:
-    case 4:
-    case 2:
-    case 24:
-    case 6:
+    case ProfilerEvent.BootstrapApplicationStart:
+    case ProfilerEvent.BootstrapComponentStart:
+    case ProfilerEvent.ChangeDetectionStart:
+    case ProfilerEvent.ChangeDetectionSyncStart:
+    case ProfilerEvent.AfterRenderHooksStart:
+    case ProfilerEvent.ComponentStart:
+    case ProfilerEvent.DeferBlockStateStart:
+    case ProfilerEvent.DynamicComponentStart:
+    case ProfilerEvent.TemplateCreateStart:
+    case ProfilerEvent.LifecycleHookStart:
+    case ProfilerEvent.TemplateUpdateStart:
+    case ProfilerEvent.HostBindingsUpdateStart:
+    case ProfilerEvent.OutputStart:
       {
         measureStart(event);
         break;
       }
-    case 9:
+    case ProfilerEvent.BootstrapApplicationEnd:
       {
-        measureEnd(8, 'Bootstrap application', 'primary-dark');
+        measureEnd(ProfilerEvent.BootstrapApplicationStart, 'Bootstrap application', 'primary-dark');
         break;
       }
-    case 11:
+    case ProfilerEvent.BootstrapComponentEnd:
       {
-        measureEnd(10, 'Bootstrap component', 'primary-dark');
+        measureEnd(ProfilerEvent.BootstrapComponentStart, 'Bootstrap component', 'primary-dark');
         break;
       }
-    case 13:
+    case ProfilerEvent.ChangeDetectionEnd:
       {
         changeDetectionSyncRuns = 0;
-        measureEnd(12, 'Change detection ' + changeDetectionRuns++, 'primary-dark');
+        measureEnd(ProfilerEvent.ChangeDetectionStart, 'Change detection ' + changeDetectionRuns++, 'primary-dark');
         break;
       }
-    case 15:
+    case ProfilerEvent.ChangeDetectionSyncEnd:
       {
-        measureEnd(14, 'Synchronization ' + changeDetectionSyncRuns++, 'primary');
+        measureEnd(ProfilerEvent.ChangeDetectionSyncStart, 'Synchronization ' + changeDetectionSyncRuns++, 'primary');
         break;
       }
-    case 17:
+    case ProfilerEvent.AfterRenderHooksEnd:
       {
-        measureEnd(16, 'After render hooks', 'primary');
+        measureEnd(ProfilerEvent.AfterRenderHooksStart, 'After render hooks', 'primary');
         break;
       }
-    case 19:
-      {
-        const typeName = getComponentMeasureName(instance);
-        measureEnd(18, typeName, 'primary-light');
-        break;
-      }
-    case 21:
-      {
-        measureEnd(20, 'Defer block', 'primary-dark');
-        break;
-      }
-    case 23:
-      {
-        measureEnd(22, 'Dynamic component creation', 'primary-dark');
-        break;
-      }
-    case 3:
-      {
-        measureEnd(2, stringifyForError(eventFn) + ' (update)', 'secondary-dark');
-        break;
-      }
-    case 1:
-      {
-        measureEnd(0, stringifyForError(eventFn) + ' (create)', 'secondary');
-        break;
-      }
-    case 25:
-      {
-        measureEnd(24, 'HostBindings', 'secondary-dark');
-        break;
-      }
-    case 5:
+    case ProfilerEvent.ComponentEnd:
       {
         const typeName = getComponentMeasureName(instance);
-        measureEnd(4, `${typeName}:${stringifyForError(eventFn)}`, 'tertiary');
+        measureEnd(ProfilerEvent.ComponentStart, typeName, 'primary-light');
         break;
       }
-    case 7:
+    case ProfilerEvent.DeferBlockStateEnd:
       {
-        measureEnd(6, stringifyForError(eventFn), 'tertiary-light');
+        measureEnd(ProfilerEvent.DeferBlockStateStart, 'Defer block', 'primary-dark');
+        break;
+      }
+    case ProfilerEvent.DynamicComponentEnd:
+      {
+        measureEnd(ProfilerEvent.DynamicComponentStart, 'Dynamic component creation', 'primary-dark');
+        break;
+      }
+    case ProfilerEvent.TemplateUpdateEnd:
+      {
+        measureEnd(ProfilerEvent.TemplateUpdateStart, stringifyForError(eventFn) + ' (update)', 'secondary-dark');
+        break;
+      }
+    case ProfilerEvent.TemplateCreateEnd:
+      {
+        measureEnd(ProfilerEvent.TemplateCreateStart, stringifyForError(eventFn) + ' (create)', 'secondary');
+        break;
+      }
+    case ProfilerEvent.HostBindingsUpdateEnd:
+      {
+        measureEnd(ProfilerEvent.HostBindingsUpdateStart, 'HostBindings', 'secondary-dark');
+        break;
+      }
+    case ProfilerEvent.LifecycleHookEnd:
+      {
+        const typeName = getComponentMeasureName(instance);
+        measureEnd(ProfilerEvent.LifecycleHookStart, `${typeName}:${stringifyForError(eventFn)}`, 'tertiary');
+        break;
+      }
+    case ProfilerEvent.OutputEnd:
+      {
+        measureEnd(ProfilerEvent.OutputStart, stringifyForError(eventFn), 'tertiary-light');
         break;
       }
     default:
@@ -11750,7 +11774,7 @@ class ApplicationRef {
   bootstrapImpl(componentOrFactory, rootSelectorOrNode, injector = Injector.NULL) {
     const ngZone = this._injector.get(NgZone);
     return ngZone.run(() => {
-      profiler(10);
+      profiler(ProfilerEvent.BootstrapComponentStart);
       (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
       const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
       const initStatus = this._injector.get(ApplicationInitStatus);
@@ -11786,7 +11810,7 @@ class ApplicationRef {
         const _console = this._injector.get(Console);
         _console.log(`Angular is running in development mode.`);
       }
-      profiler(11, compRef);
+      profiler(ProfilerEvent.BootstrapComponentEnd, compRef);
       return compRef;
     });
   }
@@ -11797,7 +11821,7 @@ class ApplicationRef {
     this._tick();
   }
   _tick() {
-    profiler(12);
+    profiler(ProfilerEvent.ChangeDetectionStart);
     if (this.tracingSnapshot !== null) {
       this.tracingSnapshot.run(TracingAction.CHANGE_DETECTION, this.tickImpl);
     } else {
@@ -11824,7 +11848,7 @@ class ApplicationRef {
       this.tracingSnapshot = null;
       setActiveConsumer(prevConsumer);
       this.afterTick.next();
-      profiler(13);
+      profiler(ProfilerEvent.ChangeDetectionEnd);
     }
   };
   synchronize() {
@@ -11835,9 +11859,9 @@ class ApplicationRef {
     }
     let runs = 0;
     while (this.dirtyFlags !== 0 && runs++ < MAXIMUM_REFRESH_RERUNS) {
-      profiler(14);
+      profiler(ProfilerEvent.ChangeDetectionSyncStart);
       this.synchronizeOnce();
-      profiler(15);
+      profiler(ProfilerEvent.ChangeDetectionSyncEnd);
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
       throw new RuntimeError(103, ngDevMode && 'Infinite change detection while refreshing application views. ' + 'Ensure views are not calling `markForCheck` on every template execution or ' + 'that afterRender hooks always mark views for check.');
@@ -18595,5 +18619,5 @@ function getDebugNode(nativeNode) {
   return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSignal, isSubscribable, isTNodeShape, isViewDirty, isWritableSignal, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵCONTROL, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSignal, isSubscribable, isTNodeShape, isViewDirty, isWritableSignal, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵCONTROL, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=_debug_node-chunk.mjs.map
