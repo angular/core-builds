@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-47fc721
+ * @license Angular v21.0.0+sha-e0026c8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1165,49 +1165,42 @@ declare const enum TNodeFlags {
      */
     isInControlFlow = 512,
     /**
-     * Bit #11 - This bit is set if the node represents a form control.
-     *
-     * True when the node has an input binding to a `ɵControl` directive (but not also to a custom
-     * component).
-     */
-    isFormControl = 1024,
-    /**
-     * Bit #12 - This bit is set if the node hosts a custom control component.
+     * Bit #11 - This bit is set if the node hosts a custom control component.
      *
      * A custom control component's model property is named `value`.
      */
-    isFormValueControl = 2048,
+    isFormValueControl = 1024,
     /**
-     * Bit #13 - This bit is set if the node hosts a custom checkbox component.
+     * Bit #12 - This bit is set if the node hosts a custom checkbox component.
      *
      * A custom checkbox component's model property is named `checked`.
      */
-    isFormCheckboxControl = 4096,
+    isFormCheckboxControl = 2048,
     /**
-     * Bit #14 - This bit is set if the node hosts an interoperable control implementation.
+     * Bit #13 - This bit is set if the node hosts an interoperable control implementation.
      *
      * This is used to bind to a `ControlValueAccessor` from `@angular/forms`.
      */
-    isInteropControl = 8192,
+    isInteropControl = 4096,
     /**
-     * Bit #15 - This bit is set if the node is a native control.
+     * Bit #14 - This bit is set if the node is a native control.
      *
      * This is used to determine whether we can bind common control properties to the host element of
      * a custom control when it doesn't define a corresponding input.
      */
-    isNativeControl = 16384,
+    isNativeControl = 8192,
     /**
-     * Bit #16 - This bit is set if the node is a native control with a numeric type.
+     * Bit #15 - This bit is set if the node is a native control with a numeric type.
      *
      * This is used to determine whether the control supports the `min` and `max` properties.
      */
-    isNativeNumericControl = 32768,
+    isNativeNumericControl = 16384,
     /**
-     * Bit #17 - This bit is set if the node is a native text control.
+     * Bit #16 - This bit is set if the node is a native text control.
      *
      * This is used to determine whether control supports the `minLength` and `maxLength` properties.
      */
-    isNativeTextControl = 65536
+    isNativeTextControl = 32768
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
@@ -1354,6 +1347,11 @@ interface TNode {
      * `directiveStart + componentOffset`.
      */
     componentOffset: number;
+    /**
+     * Index at which the signal forms field directive is stored.
+     * Value is set to -1 if there are no field directives.
+     */
+    fieldIndex: number;
     /**
      * Stores the last directive which had a styling instruction.
      *

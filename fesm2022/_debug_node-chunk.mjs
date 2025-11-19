@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-47fc721
+ * @license Angular v21.0.0+sha-e0026c8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6211,6 +6211,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
     directiveEnd: -1,
     directiveStylingLast: -1,
     componentOffset: -1,
+    fieldIndex: -1,
     propertyBindings: null,
     flags,
     providerIndexes: 0,
@@ -8213,7 +8214,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-47fc721'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-e0026c8'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13175,15 +13176,18 @@ function ɵɵcontrolCreate() {
   const lView = getLView();
   const tView = getTView();
   const tNode = getCurrentTNode();
-  const control = tView.firstCreatePass ? getControlDirectiveFirstCreatePass(tView, tNode, lView) : getControlDirective(tNode, lView);
+  if (tView.firstCreatePass) {
+    initializeControlFirstCreatePass(tView, tNode, lView);
+  }
+  const control = getControlDirective(tNode, lView);
   if (!control) {
     return;
   }
-  if (tNode.flags & 2048) {
+  if (tNode.flags & 1024) {
     listenToCustomControl(lView, tNode, control, 'value');
-  } else if (tNode.flags & 4096) {
+  } else if (tNode.flags & 2048) {
     listenToCustomControl(lView, tNode, control, 'checked');
-  } else if (tNode.flags & 8192) {
+  } else if (tNode.flags & 4096) {
     listenToInteropControl(control);
   } else {
     listenToNativeControl(lView, tNode, control);
@@ -13201,11 +13205,11 @@ function ɵɵcontrol(value, sanitizer) {
   }
   const control = getControlDirective(tNode, lView);
   if (control) {
-    if (tNode.flags & 2048) {
+    if (tNode.flags & 1024) {
       updateCustomControl(tNode, lView, control, 'value');
-    } else if (tNode.flags & 4096) {
+    } else if (tNode.flags & 2048) {
       updateCustomControl(tNode, lView, control, 'checked');
-    } else if (tNode.flags & 8192) {
+    } else if (tNode.flags & 4096) {
       updateInteropControl(lView, control);
     } else {
       updateNativeControl(tNode, lView, control);
@@ -13213,8 +13217,9 @@ function ɵɵcontrol(value, sanitizer) {
   }
   nextBindingIndex();
 }
-const HAS_CONTROL_MASK = /* @__PURE__ */(() => 16384 | 2048 | 4096)();
-function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
+const HAS_CONTROL_MASK = /* @__PURE__ */(() => 8192 | 1024 | 2048)();
+function initializeControlFirstCreatePass(tView, tNode, lView) {
+  ngDevMode && assertFirstCreatePass(tView);
   const directiveIndices = tNode.inputs?.['field'];
   if (!directiveIndices) {
     return;
@@ -13226,49 +13231,48 @@ function getControlDirectiveFirstCreatePass(tView, tNode, lView) {
       return;
     }
   }
-  const control = findControlDirective(lView, directiveIndices);
-  if (!control) {
+  let controlIndex = -1;
+  for (let index of directiveIndices) {
+    if (ɵCONTROL in lView[index]) {
+      controlIndex = index;
+      break;
+    }
+  }
+  if (controlIndex === -1) {
     return;
   }
-  tNode.flags |= 1024;
+  const control = lView[controlIndex];
+  tNode.fieldIndex = controlIndex;
   if (isComponentHost(tNode)) {
     const componentDef = tView.data[componentIndex];
     if (hasModelInput(componentDef, 'value')) {
-      tNode.flags |= 2048;
+      tNode.flags |= 1024;
     } else if (hasModelInput(componentDef, 'checked')) {
-      tNode.flags |= 4096;
+      tNode.flags |= 2048;
     }
   }
   if (!(tNode.flags & HAS_CONTROL_MASK) && control.ɵinteropControl) {
-    tNode.flags |= 8192;
-    return control;
+    tNode.flags |= 4096;
+    return;
   }
   if (isNativeControl(tNode)) {
-    tNode.flags |= 16384;
+    tNode.flags |= 8192;
     if (isNumericInput(tNode)) {
-      tNode.flags |= 32768;
+      tNode.flags |= 16384;
     }
     if (isTextControl(tNode)) {
-      tNode.flags |= 65536;
+      tNode.flags |= 32768;
     }
   }
   if (tNode.flags & HAS_CONTROL_MASK) {
-    return control;
+    return;
   }
   const tagName = tNode.value;
   throw new RuntimeError(318, `'<${tagName}>' is an invalid [field] directive host. The host must be a native form control ` + `(such as <input>', '<select>', or '<textarea>') or a custom form control component with a ` + `'value' or 'checked' model.`);
 }
 function getControlDirective(tNode, lView) {
-  return tNode.flags & 1024 ? findControlDirective(lView, tNode.inputs['field']) : undefined;
-}
-function findControlDirective(lView, directiveIndices) {
-  for (let index of directiveIndices) {
-    const directive = lView[index];
-    if (ɵCONTROL in directive) {
-      return directive;
-    }
-  }
-  return;
+  const index = tNode.fieldIndex;
+  return index === -1 ? null : lView[index];
 }
 function hasModelInput(componentDef, name) {
   return hasSignalInput(componentDef, name) && hasOutput(componentDef, name + 'Change');
@@ -13370,7 +13374,7 @@ function updateCustomControl(tNode, lView, control, modelName) {
     const inputName = CONTROL_BINDING_NAMES[key];
     maybeUpdateInput(componentDef, component, bindings, state, key, inputName);
   }
-  if (tNode.flags & 16384) {
+  if (tNode.flags & 8192) {
     updateNativeControl(tNode, lView, control);
   }
 }
@@ -13413,11 +13417,11 @@ function updateNativeControl(tNode, lView, control) {
   updateBooleanAttribute(renderer, element, bindings, state, DISABLED);
   updateBooleanAttribute(renderer, element, bindings, state, READONLY);
   updateBooleanAttribute(renderer, element, bindings, state, REQUIRED);
-  if (tNode.flags & 32768) {
+  if (tNode.flags & 16384) {
     updateOptionalAttribute(renderer, element, bindings, state, MAX);
     updateOptionalAttribute(renderer, element, bindings, state, MIN);
   }
-  if (tNode.flags & 65536) {
+  if (tNode.flags & 32768) {
     updateOptionalAttribute(renderer, element, bindings, state, MAX_LENGTH);
     updateOptionalAttribute(renderer, element, bindings, state, MIN_LENGTH);
   }
