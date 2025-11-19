@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-22ad71d
+ * @license Angular v21.1.0-next.0+sha-e9ba63a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -643,6 +643,8 @@ declare class SimpleChange<T = any> {
  * first generic argument for stronger type checking (e.g. `SimpleChanges<YourComponent>`).
  *
  * @see {@link OnChanges}
+ *
+ * @see [Inspecting changes](guide/components/lifecycle#inspecting-changes)
  *
  * @publicApi
  */
