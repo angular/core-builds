@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-fc2e414
+ * @license Angular v21.1.0-next.0+sha-0812ac3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -110,14 +110,16 @@ function toSignal(source, options) {
     state = signal({
       kind: 0
     }, {
-      equal
+      equal,
+      ...(ngDevMode ? createDebugNameObject(options?.debugName, 'state') : undefined)
     });
   } else {
     state = signal({
       kind: 1,
       value: options?.initialValue
     }, {
-      equal
+      equal,
+      ...(ngDevMode ? createDebugNameObject(options?.debugName, 'state') : undefined)
     });
   }
   let destroyUnregisterFn;
@@ -152,11 +154,17 @@ function toSignal(source, options) {
         throw new RuntimeError(601, (typeof ngDevMode === 'undefined' || ngDevMode) && '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
   }, {
-    equal: options?.equal
+    equal: options?.equal,
+    ...(ngDevMode ? createDebugNameObject(options?.debugName, 'source') : undefined)
   });
 }
 function makeToSignalEqual(userEquality = Object.is) {
   return (a, b) => a.kind === 1 && b.kind === 1 && userEquality(a.value, b.value);
+}
+function createDebugNameObject(toSignalDebugName, internalSignalDebugName) {
+  return {
+    debugName: `toSignal${toSignalDebugName ? '#' + toSignalDebugName : ''}.${internalSignalDebugName}`
+  };
 }
 
 function pendingUntilEvent(injector) {
