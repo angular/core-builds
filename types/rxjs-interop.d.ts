@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-cf7579f
+ * @license Angular v21.0.0+sha-630a3b2
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -135,6 +135,10 @@ interface ToSignalOptions<T> {
      * Equality comparisons are executed against the initial value if one is provided.
      */
     equal?: ValueEqualityFn<T>;
+    /**
+     * A debug name for the signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
 declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | undefined>> & {
