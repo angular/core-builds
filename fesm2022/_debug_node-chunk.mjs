@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-183d194
+ * @license Angular v21.1.0-next.0+sha-913cde8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5172,8 +5172,11 @@ function renderComponent(hostLView, componentHostIdx) {
     componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
   }
   profiler(ProfilerEvent.ComponentStart);
-  renderView(componentTView, componentView, componentView[CONTEXT]);
-  profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
+  try {
+    renderView(componentTView, componentView, componentView[CONTEXT]);
+  } finally {
+    profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
+  }
 }
 function syncViewWithBlueprint(tView, lView) {
   for (let i = lView.length; i < tView.blueprint.length; i++) {
@@ -5575,8 +5578,11 @@ function detectChangesInComponent(hostLView, componentHostIdx, mode) {
   ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
   profiler(ProfilerEvent.ComponentStart);
   const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-  detectChangesInViewIfAttached(componentView, mode);
-  profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
+  try {
+    detectChangesInViewIfAttached(componentView, mode);
+  } finally {
+    profiler(ProfilerEvent.ComponentEnd, componentView[CONTEXT]);
+  }
 }
 function detectChangesInViewIfAttached(lView, mode) {
   if (!viewAttachedToChangeDetector(lView)) {
@@ -5639,8 +5645,11 @@ function processHostBindingOpCodes(tView, lView) {
         setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
         const context = lView[directiveIdx];
         profiler(ProfilerEvent.HostBindingsUpdateStart, context);
-        hostBindingFn(2, context);
-        profiler(ProfilerEvent.HostBindingsUpdateEnd, context);
+        try {
+          hostBindingFn(2, context);
+        } finally {
+          profiler(ProfilerEvent.HostBindingsUpdateEnd, context);
+        }
       }
     }
   } finally {
@@ -8238,7 +8247,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-183d194'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-913cde8'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11233,9 +11242,11 @@ function measureStart(startEvent) {
   console.timeStamp('Event_' + startEvent + '_' + counter++);
 }
 function measureEnd(startEvent, entryName, color) {
-  const top = eventsStack.pop();
-  assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
-  assertEqual(top[0], startEvent, `Profiling error: expected to see ${startEvent} event but got ${top[0]}`);
+  let top;
+  do {
+    top = eventsStack.pop();
+    assertDefined(top, 'Profiling error: could not find start event entry ' + startEvent);
+  } while (top[0] !== startEvent);
   console.timeStamp(entryName, 'Event_' + top[0] + '_' + top[1], undefined, '\u{1F170}\uFE0F Angular', undefined, color);
 }
 const chromeDevToolsInjectorProfiler = event => {
@@ -11831,6 +11842,7 @@ class ApplicationRef {
   tickImpl = () => {
     (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
     if (this._runningTick) {
+      profiler(ProfilerEvent.ChangeDetectionEnd);
       throw new RuntimeError(101, ngDevMode && 'ApplicationRef.tick is called recursively');
     }
     const prevConsumer = setActiveConsumer(null);
@@ -11860,8 +11872,11 @@ class ApplicationRef {
     let runs = 0;
     while (this.dirtyFlags !== 0 && runs++ < MAXIMUM_REFRESH_RERUNS) {
       profiler(ProfilerEvent.ChangeDetectionSyncStart);
-      this.synchronizeOnce();
-      profiler(ProfilerEvent.ChangeDetectionSyncEnd);
+      try {
+        this.synchronizeOnce();
+      } finally {
+        profiler(ProfilerEvent.ChangeDetectionSyncEnd);
+      }
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
       throw new RuntimeError(103, ngDevMode && 'Infinite change detection while refreshing application views. ' + 'Ensure views are not calling `markForCheck` on every template execution or ' + 'that afterRender hooks always mark views for check.');
