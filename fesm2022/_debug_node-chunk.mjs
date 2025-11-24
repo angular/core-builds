@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-534cc3d
+ * @license Angular v21.0.0+sha-4845a33
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6245,6 +6245,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
     directiveStylingLast: -1,
     componentOffset: -1,
     fieldIndex: -1,
+    customControlIndex: -1,
     propertyBindings: null,
     flags,
     providerIndexes: 0,
@@ -8247,7 +8248,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-534cc3d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-4845a33'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13256,82 +13257,84 @@ function ɵɵcontrol(value, sanitizer) {
   }
   nextBindingIndex();
 }
-const HAS_CONTROL_MASK = /* @__PURE__ */(() => 8192 | 1024 | 2048)();
 function initializeControlFirstCreatePass(tView, tNode, lView) {
   ngDevMode && assertFirstCreatePass(tView);
   const directiveIndices = tNode.inputs?.['field'];
   if (!directiveIndices) {
     return;
   }
-  let componentIndex;
-  if (isComponentHost(tNode)) {
-    componentIndex = tNode.directiveStart + tNode.componentOffset;
-    if (directiveIndices.includes(componentIndex)) {
-      return;
-    }
-  }
-  let controlIndex = -1;
-  for (let index of directiveIndices) {
-    if (ɵCONTROL in lView[index]) {
-      controlIndex = index;
-      break;
-    }
-  }
-  if (controlIndex === -1) {
+  if (isComponentHost(tNode) && directiveIndices.includes(tNode.directiveStart + tNode.componentOffset)) {
     return;
   }
-  const control = lView[controlIndex];
-  tNode.fieldIndex = controlIndex;
-  if (isComponentHost(tNode)) {
-    const componentDef = tView.data[componentIndex];
-    if (hasModelInput(componentDef, 'value')) {
-      tNode.flags |= 1024;
-    } else if (hasModelInput(componentDef, 'checked')) {
-      tNode.flags |= 2048;
-    }
+  const controlIndex = directiveIndices.find(index => ɵCONTROL in lView[index]);
+  if (controlIndex === undefined) {
+    return;
   }
-  if (!(tNode.flags & HAS_CONTROL_MASK) && control.ɵinteropControl) {
+  tNode.fieldIndex = controlIndex;
+  const isCustomControl = isCustomControlFirstCreatePass(tView, tNode);
+  if (!isCustomControl && lView[controlIndex].ɵinteropControl) {
     tNode.flags |= 4096;
     return;
   }
-  if (isNativeControl(tNode)) {
-    tNode.flags |= 8192;
-    if (isNumericInput(tNode)) {
-      tNode.flags |= 16384;
-    }
-    if (isTextControl(tNode)) {
-      tNode.flags |= 32768;
-    }
-  }
-  if (tNode.flags & HAS_CONTROL_MASK) {
+  const isNativeControl = isNativeControlFirstCreatePass(tView, tNode);
+  if (isNativeControl || isCustomControl) {
     return;
   }
   const tagName = tNode.value;
-  throw new RuntimeError(318, `'<${tagName}>' is an invalid [field] directive host. The host must be a native form control ` + `(such as <input>', '<select>', or '<textarea>') or a custom form control component with a ` + `'value' or 'checked' model.`);
+  throw new RuntimeError(318, `'<${tagName}>' is an invalid [field] directive host. The host must be a native form control ` + `(such as <input>', '<select>', or '<textarea>') or a custom form control with a 'value' or ` + `'checked' model.`);
+}
+function isCustomControlFirstCreatePass(tView, tNode) {
+  for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
+    const directiveDef = tView.data[i];
+    if (hasModelInput(directiveDef, 'value')) {
+      tNode.flags |= 1024;
+      tNode.customControlIndex = i;
+      return true;
+    }
+    if (hasModelInput(directiveDef, 'checked')) {
+      tNode.flags |= 2048;
+      tNode.customControlIndex = i;
+      return true;
+    }
+  }
+  return false;
+}
+function isNativeControlFirstCreatePass(tView, tNode) {
+  if (!isNativeControl(tNode)) {
+    return false;
+  }
+  tNode.flags |= 8192;
+  if (isNumericInput(tNode)) {
+    tNode.flags |= 16384;
+  }
+  if (isTextControl(tNode)) {
+    tNode.flags |= 32768;
+  }
+  return true;
 }
 function getControlDirective(tNode, lView) {
   const index = tNode.fieldIndex;
   return index === -1 ? null : lView[index];
 }
-function hasModelInput(componentDef, name) {
-  return hasSignalInput(componentDef, name) && hasOutput(componentDef, name + 'Change');
+function hasModelInput(directiveDef, name) {
+  return hasSignalInput(directiveDef, name) && hasOutput(directiveDef, name + 'Change');
 }
-function hasSignalInput(componentDef, name) {
-  const input = componentDef.inputs[name];
+function hasSignalInput(directiveDef, name) {
+  const input = directiveDef.inputs[name];
   return input && (input[1] & InputFlags.SignalBased) !== 0;
 }
-function hasOutput(componentDef, name) {
-  return name in componentDef.outputs;
+function hasOutput(directiveDef, name) {
+  return name in directiveDef.outputs;
 }
 function listenToCustomControl(lView, tNode, control, modelName) {
-  const componentIndex = tNode.directiveStart + tNode.componentOffset;
-  const outputName = modelName + 'Change';
-  listenToOutput(tNode, lView, componentIndex, outputName, outputName, wrapListener(tNode, lView, value => control.state().setControlValue(value)));
   const tView = getTView();
-  const componentDef = tView.data[componentIndex];
+  const directiveIndex = tNode.customControlIndex;
+  const outputName = modelName + 'Change';
+  listenToOutput(tNode, lView, directiveIndex, outputName, outputName, wrapListener(tNode, lView, value => control.state().setControlValue(value)));
+  const directiveDef = tView.data[directiveIndex];
   const touchedOutputName = 'touchedChange';
-  if (hasOutput(componentDef, touchedOutputName)) {
-    listenToOutput(tNode, lView, componentIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => control.state().markAsTouched()));
+  if (hasOutput(directiveDef, touchedOutputName)) {
+    listenToOutput(tNode, lView, directiveIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => control.state().markAsTouched()));
   }
 }
 function listenToInteropControl(control) {
@@ -13360,7 +13363,7 @@ function listenToNativeControl(lView, tNode, control) {
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'blur', blurListener, wrapListener(tNode, lView, blurListener));
   if (tNode.type === 2 && tNode.value === 'select' && typeof MutationObserver === 'function') {
-    const observer = observeSelectMutations(element, getControlDirective(tNode, lView));
+    const observer = observeSelectMutations(element, control);
     storeCleanupWithContext(tView, lView, observer, observer.disconnect);
   }
 }
@@ -13403,25 +13406,25 @@ function isRelevantSelectMutation(mutation) {
 }
 function updateCustomControl(tNode, lView, control, modelName) {
   const tView = getTView();
-  const componentIndex = tNode.directiveStart + tNode.componentOffset;
-  const component = lView[componentIndex];
-  const componentDef = tView.data[componentIndex];
+  const directiveIndex = tNode.customControlIndex;
+  const directive = lView[directiveIndex];
+  const directiveDef = tView.data[directiveIndex];
   const state = control.state();
   const bindings = getControlBindings(lView);
-  maybeUpdateInput(componentDef, component, bindings, state, CONTROL_VALUE, modelName);
+  maybeUpdateInput(directiveDef, directive, bindings, state, CONTROL_VALUE, modelName);
   for (const key of CONTROL_BINDING_KEYS) {
     const inputName = CONTROL_BINDING_NAMES[key];
-    maybeUpdateInput(componentDef, component, bindings, state, key, inputName);
+    maybeUpdateInput(directiveDef, directive, bindings, state, key, inputName);
   }
   if (tNode.flags & 8192) {
     updateNativeControl(tNode, lView, control);
   }
 }
-function maybeUpdateInput(componentDef, component, bindings, state, key, inputName) {
-  if (inputName in componentDef.inputs) {
+function maybeUpdateInput(directiveDef, directive, bindings, state, key, inputName) {
+  if (inputName in directiveDef.inputs) {
     const value = state[key]?.();
     if (controlBindingUpdated(bindings, key, value)) {
-      writeToDirectiveInput(componentDef, component, inputName, value);
+      writeToDirectiveInput(directiveDef, directive, inputName, value);
     }
   }
 }
