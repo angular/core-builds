@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-102cb87
+ * @license Angular v21.0.0+sha-9852033
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -99,21 +99,22 @@ function resource(options) {
   }
   const oldNameForParams = options.request;
   const params = options.params ?? oldNameForParams ?? (() => null);
-  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
+  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector));
 }
 class BaseWritableResource {
   value;
-  constructor(value) {
+  isLoading;
+  constructor(value, debugName) {
     this.value = value;
     this.value.set = this.set.bind(this);
     this.value.update = this.update.bind(this);
     this.value.asReadonly = signalAsReadonlyFn;
+    this.isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading', ngDevMode ? createDebugNameObject(debugName, 'isLoading') : undefined);
   }
   isError = computed(() => this.status() === 'error');
   update(updateFn) {
     this.set(updateFn(untracked(this.value)));
   }
-  isLoading = computed(() => this.status() === 'loading' || this.status() === 'reloading');
   isValueDefined = computed(() => {
     if (this.isError()) {
       return false;
@@ -130,6 +131,7 @@ class BaseWritableResource {
 class ResourceImpl extends BaseWritableResource {
   loaderFn;
   equal;
+  debugName;
   pendingTasks;
   state;
   extRequest;
@@ -138,7 +140,9 @@ class ResourceImpl extends BaseWritableResource {
   resolvePendingTask = undefined;
   destroyed = false;
   unregisterOnDestroy;
-  constructor(request, loaderFn, defaultValue, equal, injector) {
+  status;
+  error;
+  constructor(request, loaderFn, defaultValue, equal, debugName, injector) {
     super(computed(() => {
       const streamValue = this.state().stream?.();
       if (!streamValue) {
@@ -152,16 +156,19 @@ class ResourceImpl extends BaseWritableResource {
       }
       return streamValue.value;
     }, {
-      equal
-    }));
+      equal,
+      ...(ngDevMode ? createDebugNameObject(debugName, 'value') : undefined)
+    }), debugName);
     this.loaderFn = loaderFn;
     this.equal = equal;
+    this.debugName = debugName;
     this.extRequest = linkedSignal({
       source: request,
       computation: request => ({
         request,
         reload: 0
-      })
+      }),
+      ...(ngDevMode ? createDebugNameObject(debugName, 'extRequest') : undefined)
     });
     this.state = linkedSignal({
       source: this.extRequest,
@@ -182,20 +189,22 @@ class ResourceImpl extends BaseWritableResource {
             stream: previous.value.extRequest.request === extRequest.request ? previous.value.stream : undefined
           };
         }
-      }
+      },
+      ...(ngDevMode ? createDebugNameObject(debugName, 'state') : undefined)
     });
     this.effectRef = effect(this.loadEffect.bind(this), {
       injector,
-      manualCleanup: true
+      manualCleanup: true,
+      ...(ngDevMode ? createDebugNameObject(debugName, 'loadEffect') : undefined)
     });
     this.pendingTasks = injector.get(PendingTasks);
     this.unregisterOnDestroy = injector.get(DestroyRef).onDestroy(() => this.destroy());
+    this.status = computed(() => projectStatusOfState(this.state()), ngDevMode ? createDebugNameObject(debugName, 'status') : undefined);
+    this.error = computed(() => {
+      const stream = this.state().stream?.();
+      return stream && !isResolved(stream) ? stream.error : undefined;
+    }, ngDevMode ? createDebugNameObject(debugName, 'error') : undefined);
   }
-  status = computed(() => projectStatusOfState(this.state()));
-  error = computed(() => {
-    const stream = this.state().stream?.();
-    return stream && !isResolved(stream) ? stream.error : undefined;
-  });
   set(value) {
     if (this.destroyed) {
       return;
@@ -214,7 +223,7 @@ class ResourceImpl extends BaseWritableResource {
       previousStatus: 'local',
       stream: signal({
         value
-      })
+      }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined)
     });
     this.abortInProgressLoad();
   }
@@ -295,7 +304,7 @@ class ResourceImpl extends BaseWritableResource {
         previousStatus: 'error',
         stream: signal({
           error: encapsulateResourceError(err)
-        })
+        }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined)
       });
     } finally {
       resolvePendingTask?.();
@@ -320,11 +329,11 @@ function getLoader(options) {
     try {
       return signal({
         value: await options.loader(params)
-      });
+      }, ngDevMode ? createDebugNameObject(options.debugName, 'stream') : undefined);
     } catch (err) {
       return signal({
         error: encapsulateResourceError(err)
-      });
+      }, ngDevMode ? createDebugNameObject(options.debugName, 'stream') : undefined);
     }
   };
 }
@@ -343,6 +352,11 @@ function projectStatusOfState(state) {
 }
 function isResolved(state) {
   return state.error === undefined;
+}
+function createDebugNameObject(resourceDebugName, internalSignalDebugName) {
+  return {
+    debugName: `Resource${resourceDebugName ? '#' + resourceDebugName : ''}.${internalSignalDebugName}`
+  };
 }
 function encapsulateResourceError(error) {
   if (error instanceof Error) {
