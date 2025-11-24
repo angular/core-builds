@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-4845a33
+ * @license Angular v21.0.0+sha-70507b8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2704,6 +2704,7 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
   scheduler;
   lastPhase = null;
   nodes = [undefined, undefined, undefined, undefined];
+  onDestroyFns = null;
   constructor(impl, effectHooks, view, scheduler, injector, snapshot = null) {
     super(impl, [undefined, undefined, undefined, undefined], view, false, injector.get(DestroyRef), snapshot);
     this.scheduler = scheduler;
@@ -2735,6 +2736,11 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
     this.lastPhase = null;
   }
   destroy() {
+    if (this.onDestroyFns !== null) {
+      for (const fn of this.onDestroyFns) {
+        fn();
+      }
+    }
     super.destroy();
     for (const node of this.nodes) {
       if (node) {

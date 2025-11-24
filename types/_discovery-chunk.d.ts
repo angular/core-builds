@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-4845a33
+ * @license Angular v21.0.0+sha-70507b8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3239,7 +3239,7 @@ interface EffectNode extends BaseEffectNode, SchedulableEffect {
     cleanupFns: EffectCleanupFn[] | undefined;
     injector: Injector;
     notifier: ChangeDetectionScheduler;
-    onDestroyFn: () => void;
+    onDestroyFns: (() => void)[] | null;
 }
 interface ViewEffectNode extends EffectNode {
     view: LView;

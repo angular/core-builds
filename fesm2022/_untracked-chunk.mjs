@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-4845a33
+ * @license Angular v21.0.0+sha-70507b8
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.0.0+sha-4845a33');
+const VERSION = /* @__PURE__ */new Version('21.0.0+sha-70507b8');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -2834,7 +2834,7 @@ function effect(effectFn, options) {
   }
   node.injector = injector;
   if (destroyRef !== null) {
-    node.onDestroyFn = destroyRef.onDestroy(() => node.destroy());
+    node.onDestroyFns = [destroyRef.onDestroy(() => node.destroy())];
   }
   const effectRef = new EffectRefImpl(node);
   if (ngDevMode) {
@@ -2855,7 +2855,7 @@ const EFFECT_NODE = /* @__PURE__ */(() => ({
   ...BASE_EFFECT_NODE,
   cleanupFns: undefined,
   zone: null,
-  onDestroyFn: noop,
+  onDestroyFns: null,
   run() {
     if (ngDevMode && isInNotificationPhase()) {
       throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
@@ -2890,7 +2890,11 @@ const ROOT_EFFECT_NODE = /* @__PURE__ */(() => ({
   },
   destroy() {
     consumerDestroy(this);
-    this.onDestroyFn();
+    if (this.onDestroyFns !== null) {
+      for (const fn of this.onDestroyFns) {
+        fn();
+      }
+    }
     this.cleanup();
     this.scheduler.remove(this);
   }
@@ -2904,7 +2908,11 @@ const VIEW_EFFECT_NODE = /* @__PURE__ */(() => ({
   },
   destroy() {
     consumerDestroy(this);
-    this.onDestroyFn();
+    if (this.onDestroyFns !== null) {
+      for (const fn of this.onDestroyFns) {
+        fn();
+      }
+    }
     this.cleanup();
     this.view[EFFECTS]?.delete(this);
   }
