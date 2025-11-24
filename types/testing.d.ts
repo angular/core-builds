@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-a62162d
+ * @license Angular v21.0.0+sha-534cc3d
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -147,6 +147,8 @@ declare class ComponentFixture<T> {
 }
 
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
@@ -154,6 +156,8 @@ declare class ComponentFixture<T> {
  */
 declare function resetFakeAsyncZone(): void;
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Wraps a function to be executed in the `fakeAsync` zone:
  * - Microtasks are manually executed by calling `flushMicrotasks()`.
  * - Timers are synchronous; `tick()` simulates the asynchronous passage of time.
@@ -181,6 +185,8 @@ declare function fakeAsync(fn: Function, options?: {
     flush?: boolean;
 }): (...args: any[]) => any;
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone.
  *
  * The microtasks queue is drained at the very start of this function and after any timer callback
@@ -248,6 +254,8 @@ declare function tick(millis?: number, tickOptions?: {
     processNewMacroTasksSynchronously: boolean;
 }): void;
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Flushes any pending microtasks and simulates the asynchronous passage of time for the timers in
  * the `fakeAsync` zone by
  * draining the macrotask queue until it is empty.
@@ -260,12 +268,16 @@ declare function tick(millis?: number, tickOptions?: {
  */
 declare function flush(maxTurns?: number): number;
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Discard all remaining periodic tasks.
  *
  * @publicApi
  */
 declare function discardPeriodicTasks(): void;
 /**
+ * IMPORTANT: This API requires Zone.js
+ *
  * Flush any pending microtasks.
  *
  * @publicApi
