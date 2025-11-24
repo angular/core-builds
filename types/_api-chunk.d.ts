@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-b5ae62c
+ * @license Angular v21.1.0-next.0+sha-0f4b11c
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -278,7 +278,12 @@ interface StreamingResourceOptions<T, R> extends BaseResourceOptions<T, R> {
 /**
  * @experimental
  */
-type ResourceOptions<T, R> = PromiseResourceOptions<T, R> | StreamingResourceOptions<T, R>;
+type ResourceOptions<T, R> = (PromiseResourceOptions<T, R> | StreamingResourceOptions<T, R>) & {
+    /**
+     * A debug name for the reactive node. Used in Angular DevTools to identify the node.
+     */
+    debugName?: string;
+};
 /**
  * @experimental
  */
