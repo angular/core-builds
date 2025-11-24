@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-70507b8
+ * @license Angular v21.0.0+sha-0e458c7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -621,7 +621,6 @@ function bootstrap(config) {
       if (envInjector.get(PROVIDED_ZONELESS) && envInjector.get(PROVIDED_NG_ZONE)) {
         console.warn(formatRuntimeError(408, 'Both provideZoneChangeDetection and provideZonelessChangeDetection are provided. ' + 'This is likely a mistake. Update the application providers to use only one of the two.'));
       }
-      if (!envInjector.get(PROVIDED_ZONELESS) && !envInjector.get(PROVIDED_NG_ZONE)) ;
     }
     let onErrorSubscription;
     ngZone.runOutsideAngular(() => {
@@ -721,8 +720,7 @@ class PlatformRef {
     this._injector = _injector;
   }
   bootstrapModuleFactory(moduleFactory, options) {
-    const defaultZoneCdProviders = [];
-    const allAppProviders = [provideZonelessChangeDetectionInternal(), ...defaultZoneCdProviders, ...(options?.applicationProviders ?? []), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : [])];
+    const allAppProviders = [provideZonelessChangeDetectionInternal(), ...(options?.applicationProviders ?? []), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : [])];
     const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, allAppProviders);
     setModuleBootstrapImpl();
     return bootstrap({
