@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-d442c72
+ * @license Angular v21.1.0-next.0+sha-f97a1d4
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1352,6 +1352,11 @@ interface TNode {
      * Value is set to -1 if there are no field directives.
      */
     fieldIndex: number;
+    /**
+     * Index at which the custom control directive is stored.
+     * Value is set to -1 if there is no custom control directive.
+     */
+    customControlIndex: number;
     /**
      * Stores the last directive which had a styling instruction.
      *
