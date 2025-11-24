@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-b26fe73
+ * @license Angular v21.1.0-next.0+sha-a4f50bd
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -39,8 +39,10 @@ const PATTERN_IMPORTS = [
     { pattern: /\[ngStyle\]/g, imports: ['NgStyle'] },
     // Match ngSwitch as property binding [ngSwitch] or attribute ngSwitch="value"
     { pattern: /(\[ngSwitch\]|\s+ngSwitch\s*=)/g, imports: ['NgSwitch'] },
-    { pattern: /\[ngTemplateOutlet\]/g, imports: ['NgTemplateOutlet'] },
-    { pattern: /\[ngComponentOutlet\]/g, imports: ['NgComponentOutlet'] },
+    // Match ngTemplateOutlet as structural (*ngTemplateOutlet) or property binding [ngTemplateOutlet]
+    { pattern: /(\*ngTemplateOutlet\b|\[ngTemplateOutlet\])/g, imports: ['NgTemplateOutlet'] },
+    // Match ngComponentOutlet as structural (*ngComponentOutlet) or property binding [ngComponentOutlet]
+    { pattern: /(\*ngComponentOutlet\b|\[ngComponentOutlet\])/g, imports: ['NgComponentOutlet'] },
     // Common pipes
     { pattern: /\|\s*async\b/g, imports: ['AsyncPipe'] },
     { pattern: /\|\s*json\b/g, imports: ['JsonPipe'] },
