@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-3a1eb07
+ * @license Angular v21.1.0-next.0+sha-67d41e9
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2989,6 +2989,8 @@ declare enum SecurityContext {
 
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
+ *
+ * @see [Sanitization and security contexts](best-practices/security#sanitization-and-security-contexts)
  *
  * @publicApi
  */
@@ -6069,6 +6071,8 @@ declare abstract class EmbeddedViewRef<C> extends ViewRef {
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
+ *
+ * @see [Programmatically rendering components](guide/components/programmatic-rendering)
  *
  * @publicApi
  */
