@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-67d41e9
+ * @license Angular v21.1.0-next.0+sha-c70e246
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8248,7 +8248,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-67d41e9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.0+sha-c70e246'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13255,6 +13255,7 @@ function ɵɵcontrol(value, sanitizer) {
   }
   const control = getControlDirective(tNode, lView);
   if (control) {
+    updateControlClasses(lView, tNode, control);
     if (tNode.flags & 1024) {
       updateCustomControl(tNode, lView, control, 'value');
     } else if (tNode.flags & 2048) {
@@ -13413,6 +13414,25 @@ function isRelevantSelectMutation(mutation) {
     return true;
   }
   return false;
+}
+function updateControlClasses(lView, tNode, control) {
+  if (control.classes) {
+    const bindings = getControlBindings(lView);
+    bindings.classes ??= {};
+    control.state();
+    const renderer = lView[RENDERER];
+    const element = getNativeByTNode(tNode, lView);
+    for (const [className, enabled] of control.classes) {
+      const isEnabled = enabled();
+      if (controlClassBindingUpdated(bindings.classes, className, isEnabled)) {
+        if (isEnabled) {
+          renderer.addClass(element, className);
+        } else {
+          renderer.removeClass(element, className);
+        }
+      }
+    }
+  }
 }
 function updateCustomControl(tNode, lView, control, modelName) {
   const tView = getTView();
@@ -13633,6 +13653,14 @@ function controlBindingUpdated(bindings, key, value) {
     return false;
   }
   bindings[key] = value;
+  return true;
+}
+function controlClassBindingUpdated(bindings, className, value) {
+  const oldValue = bindings[className];
+  if (Object.is(oldValue, value)) {
+    return false;
+  }
+  bindings[className] = value;
   return true;
 }
 function setBooleanAttribute(renderer, element, name, value) {

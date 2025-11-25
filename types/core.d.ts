@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-67d41e9
+ * @license Angular v21.1.0-next.0+sha-c70e246
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8319,6 +8319,8 @@ interface ɵControl<T> {
     readonly [ɵCONTROL]: undefined;
     /** The state of the field bound to this control. */
     readonly state: Signal<ɵFieldState<T>>;
+    /** Options for the control. */
+    readonly classes: ReadonlyArray<readonly [string, Signal<boolean>]>;
     /** A reference to the interoperable control, if one is present. */
     readonly ɵinteropControl: ɵInteropControl | undefined;
     /**
