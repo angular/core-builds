@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-8acf5d2
+ * @license Angular v21.0.0+sha-477df38
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4081,6 +4081,8 @@ declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserA
  * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
  * from the `ngCspNonce` attribute of the application root node.
  *
+ * @see [Content security policy](best-practices/security#content-security-policy)
+ *
  * @publicApi
  */
 declare const CSP_NONCE: InjectionToken<string | null>;
@@ -4111,6 +4113,8 @@ declare const IMAGE_CONFIG_DEFAULTS: ImageConfig;
  *
  * @see {@link NgOptimizedImage}
  * @see {@link ImageConfig}
+ * @see [Responsive images](guide/image-optimization#responsive-images)
+ * @see [Using placeholders](guide/image-optimization#using-placeholders)
  * @publicApi
  */
 declare const IMAGE_CONFIG: InjectionToken<ImageConfig>;
