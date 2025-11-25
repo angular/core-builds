@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.0+sha-49ad7c6
+ * @license Angular v21.0.0+sha-908b5a4
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1951,20 +1951,19 @@ const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevM
 function makeStateKey(key) {
   return key;
 }
-function initTransferState() {
-  const transferState = new TransferState();
-  if (typeof ngServerMode === 'undefined' || !ngServerMode) {
-    transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
-  }
-  return transferState;
-}
 class TransferState {
   static ɵprov =
   /* @__PURE__ */
   __defineInjectable({
     token: TransferState,
     providedIn: 'root',
-    factory: initTransferState
+    factory: () => {
+      const transferState = new TransferState();
+      if (typeof ngServerMode === 'undefined' || !ngServerMode) {
+        transferState.store = retrieveTransferredState(inject(DOCUMENT$1), inject(APP_ID));
+      }
+      return transferState;
+    }
   });
   store = {};
   onSerializeCallbacks = {};
@@ -8248,7 +8247,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-49ad7c6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.0+sha-908b5a4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11387,7 +11386,7 @@ function enableProfiling() {
 }
 
 function getTransferState(injector) {
-  const doc = getDocument();
+  const doc = injector.get(DOCUMENT$1);
   const appId = injector.get(APP_ID);
   const transferState = retrieveTransferredState(doc, appId);
   const filteredEntries = {};
@@ -13233,6 +13232,7 @@ function ɵɵcontrolCreate() {
   if (!control) {
     return;
   }
+  performanceMarkFeature('NgSignalForms');
   if (tNode.flags & 1024) {
     listenToCustomControl(lView, tNode, control, 'value');
   } else if (tNode.flags & 2048) {
@@ -16491,6 +16491,7 @@ function ɵɵtwoWayListener(eventName, listenerFn) {
 
 const UNINITIALIZED_LET = {};
 function ɵɵdeclareLet(index) {
+  performanceMarkFeature('NgLet');
   const tView = getTView();
   const lView = getLView();
   const adjustedIndex = index + HEADER_OFFSET;
@@ -16500,7 +16501,6 @@ function ɵɵdeclareLet(index) {
   return ɵɵdeclareLet;
 }
 function ɵɵstoreLet(value) {
-  performanceMarkFeature('NgLet');
   const tView = getTView();
   const lView = getLView();
   const index = getSelectedIndex();
