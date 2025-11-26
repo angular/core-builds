@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.0+sha-42e73ff
+ * @license Angular v21.1.0-next.0+sha-8f3fdc3
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -118,13 +118,11 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
                 optionLiteral = optionsNode;
                 addProvidersToBootstrapOption(optionProjectFile, optionLiteral, providerFn, replacements);
             }
+            else if (this.isServerConfigZoneless(optionsNode, typeChecker)) {
+                // Nothing to migrate for the SSR bootstrap
+                return;
+            }
             else if (ts.isIdentifier(optionsNode)) {
-                // This case handled both `bootstrapApplication(App, appConfig)` and the server () => bootstrapApplication(App, appConfig)
-                // where appConfig is the result of a `mergeApplicationConfig` call.
-                // This is tricky case to handle, in G3 we're might not be able to resolve the identifier's value
-                // Our best alternative is to assume there is not CD providers set and add the ZoneChangeDetection provider
-                // In the cases where it is, we'll just override the zone provider we just set by re-used inthe appConfig providers
-                // TODO: Should we insert a TODO to clean this up ?
                 const text = `{...${optionsNode.getText()}, providers: [${providerFn}, ...${optionsNode.getText()}.providers]}`;
                 replacements.push(new project_paths.Replacement(currentProjectFile, new project_paths.TextUpdate({
                     position: optionsNode.getStart(),
@@ -147,6 +145,53 @@ class BootstrapOptionsMigration extends project_paths.TsurgeFunnelMigration {
             exportSymbolName: 'provideZoneChangeDetection',
             requestedFile: sourceFile,
         });
+    }
+    /**
+     * The optionsNode can be a appConfig built with mergeApplicationConfig
+     * In this case we need to analyze if the base config uses provideZonelessChangeDetection
+     */
+    isServerConfigZoneless(optionsNode, typeChecker) {
+        // Check if optionsNode is a result of mergeApplicationConfig
+        let symbol = typeChecker.getSymbolAtLocation(optionsNode);
+        if (symbol && (symbol.flags & ts.SymbolFlags.Alias) !== 0) {
+            symbol = typeChecker.getAliasedSymbol(symbol);
+        }
+        const optionDeclaration = symbol?.getDeclarations()?.[0];
+        if (!optionDeclaration) {
+            return false;
+        }
+        if (!ts.isVariableDeclaration(optionDeclaration) ||
+            !optionDeclaration.initializer ||
+            !ts.isCallExpression(optionDeclaration.initializer) ||
+            !ts.isIdentifier(optionDeclaration.initializer.expression) ||
+            optionDeclaration.initializer.expression.text !== 'mergeApplicationConfig') {
+            // We didn't find a mergeApplicationConfig call, this isn't a server config
+            return false;
+        }
+        let maybeAppConfig = optionDeclaration.initializer.arguments[0];
+        if (ts.isIdentifier(maybeAppConfig)) {
+            const resolved = getObjectLiteralFromIdentifier(maybeAppConfig, typeChecker);
+            if (resolved) {
+                maybeAppConfig = resolved;
+            }
+        }
+        if (maybeAppConfig && ts.isObjectLiteralExpression(maybeAppConfig)) {
+            for (const prop of maybeAppConfig.properties) {
+                if (ts.isPropertyAssignment(prop) &&
+                    ts.isIdentifier(prop.name) &&
+                    prop.name.text === 'providers' &&
+                    ts.isArrayLiteralExpression(prop.initializer)) {
+                    for (const el of prop.initializer.elements) {
+                        if (ts.isCallExpression(el) &&
+                            ts.isIdentifier(el.expression) &&
+                            el.expression.text === 'provideZonelessChangeDetection') {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
     analyzeCreateApplication(node, sourceFile, info, typeChecker, importManager, replacements) {
         const hasExistingChangeDetectionProvider = hasChangeDetectionProvider(node, typeChecker);
