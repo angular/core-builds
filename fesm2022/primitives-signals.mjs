@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-add8c41
+ * @license Angular v21.1.0-next.0+sha-a0930e1
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -15,8 +15,8 @@ const formatter = {
     let value;
     try {
       value = sig();
-    } catch {
-      return ['span', 'Signal(⚠️ Error)'];
+    } catch (e) {
+      return ['span', `Signal(⚠️ Error)${e.message ? `: ${e.message}` : ''}`];
     }
     const kind = 'computation' in sig[SIGNAL] ? 'Computed' : 'Signal';
     const isPrimitive = value === null || !Array.isArray(value) && typeof value !== 'object';
