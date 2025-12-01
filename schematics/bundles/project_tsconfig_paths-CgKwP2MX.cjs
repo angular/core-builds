@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.14+sha-136e923
+ * @license Angular v20.3.14+sha-d1ca8ae
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -479,6 +479,7 @@ var SecurityContext;
     SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
     SecurityContext[SecurityContext["URL"] = 4] = "URL";
     SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+    SecurityContext[SecurityContext["ATTRIBUTE_NO_BINDING"] = 6] = "ATTRIBUTE_NO_BINDING";
 })(SecurityContext || (SecurityContext = {}));
 var MissingTranslationStrategy;
 (function (MissingTranslationStrategy) {
@@ -2857,6 +2858,10 @@ class Identifiers {
     // sanitization-related functions
     static sanitizeHtml = { name: 'ɵɵsanitizeHtml', moduleName: CORE };
     static sanitizeStyle = { name: 'ɵɵsanitizeStyle', moduleName: CORE };
+    static validateAttribute = {
+        name: 'ɵɵvalidateAttribute',
+        moduleName: CORE,
+    };
     static sanitizeResourceUrl = {
         name: 'ɵɵsanitizeResourceUrl',
         moduleName: CORE,
@@ -2870,10 +2875,6 @@ class Identifiers {
     static trustConstantHtml = { name: 'ɵɵtrustConstantHtml', moduleName: CORE };
     static trustConstantResourceUrl = {
         name: 'ɵɵtrustConstantResourceUrl',
-        moduleName: CORE,
-    };
-    static validateIframeAttribute = {
-        name: 'ɵɵvalidateIframeAttribute',
         moduleName: CORE,
     };
     // Decorators
@@ -20216,7 +20217,6 @@ function interleave(left, right) {
 // =================================================================================================
 //
 //        DO NOT EDIT THIS LIST OF SECURITY SENSITIVE PROPERTIES WITHOUT A SECURITY REVIEW!
-//                               Reach out to mprobst for details.
 //
 // =================================================================================================
 /** Map from tagName|propertyName to SecurityContext. Properties applying to all tags use '*'. */
@@ -20234,6 +20234,7 @@ function SECURITY_SCHEMA() {
             'area|ping',
             'audio|src',
             'a|href',
+            'a|xlink:href',
             'a|ping',
             'blockquote|cite',
             'body|background',
@@ -20247,6 +20248,74 @@ function SECURITY_SCHEMA() {
             'track|src',
             'video|poster',
             'video|src',
+            // MathML namespace
+            // https://crsrc.org/c/third_party/blink/renderer/core/sanitizer/sanitizer.cc;l=753-768;drc=b3eb16372dcd3317d65e9e0265015e322494edcd;bpv=1;bpt=1
+            'annotation|href',
+            'annotation|xlink:href',
+            'annotation-xml|href',
+            'annotation-xml|xlink:href',
+            'maction|href',
+            'maction|xlink:href',
+            'malignmark|href',
+            'malignmark|xlink:href',
+            'math|href',
+            'math|xlink:href',
+            'mroot|href',
+            'mroot|xlink:href',
+            'msqrt|href',
+            'msqrt|xlink:href',
+            'merror|href',
+            'merror|xlink:href',
+            'mfrac|href',
+            'mfrac|xlink:href',
+            'mglyph|href',
+            'mglyph|xlink:href',
+            'msub|href',
+            'msub|xlink:href',
+            'msup|href',
+            'msup|xlink:href',
+            'msubsup|href',
+            'msubsup|xlink:href',
+            'mmultiscripts|href',
+            'mmultiscripts|xlink:href',
+            'mprescripts|href',
+            'mprescripts|xlink:href',
+            'mi|href',
+            'mi|xlink:href',
+            'mn|href',
+            'mn|xlink:href',
+            'mo|href',
+            'mo|xlink:href',
+            'mpadded|href',
+            'mpadded|xlink:href',
+            'mphantom|href',
+            'mphantom|xlink:href',
+            'mrow|href',
+            'mrow|xlink:href',
+            'ms|href',
+            'ms|xlink:href',
+            'mspace|href',
+            'mspace|xlink:href',
+            'mstyle|href',
+            'mstyle|xlink:href',
+            'mtable|href',
+            'mtable|xlink:href',
+            'mtd|href',
+            'mtd|xlink:href',
+            'mtr|href',
+            'mtr|xlink:href',
+            'mtext|href',
+            'mtext|xlink:href',
+            'mover|href',
+            'mover|xlink:href',
+            'munder|href',
+            'munder|xlink:href',
+            'munderover|href',
+            'munderover|xlink:href',
+            'semantics|href',
+            'semantics|xlink:href',
+            'none|href',
+            'none|xlink:href',
         ]);
         registerContext(SecurityContext.RESOURCE_URL, [
             'applet|code',
@@ -20263,38 +20332,35 @@ function SECURITY_SCHEMA() {
             'object|data',
             'script|src',
         ]);
+        // Keep this in sync with SECURITY_SENSITIVE_ELEMENTS in packages/core/src/sanitization/sanitization.ts
+        // Unknown is the internal tag name for unknown elements example used for host-bindings.
+        // These are unsafe as `attributeName` can be `href` or `xlink:href`
+        // See: http://b/463880509#comment7
+        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, [
+            'animate|attributeName',
+            'set|attributeName',
+            'animateMotion|attributeName',
+            'animateTransform|attributeName',
+            'unknown|attributeName',
+            'iframe|sandbox',
+            'iframe|allow',
+            'iframe|allowFullscreen',
+            'iframe|referrerPolicy',
+            'iframe|csp',
+            'iframe|fetchPriority',
+            'unknown|sandbox',
+            'unknown|allow',
+            'unknown|allowFullscreen',
+            'unknown|referrerPolicy',
+            'unknown|csp',
+            'unknown|fetchPriority',
+        ]);
     }
     return _SECURITY_SCHEMA;
 }
 function registerContext(ctx, specs) {
     for (const spec of specs)
         _SECURITY_SCHEMA[spec.toLowerCase()] = ctx;
-}
-/**
- * The set of security-sensitive attributes of an `<iframe>` that *must* be
- * applied as a static attribute only. This ensures that all security-sensitive
- * attributes are taken into account while creating an instance of an `<iframe>`
- * at runtime.
- *
- * Note: avoid using this set directly, use the `isIframeSecuritySensitiveAttr` function
- * in the code instead.
- */
-const IFRAME_SECURITY_SENSITIVE_ATTRS = new Set([
-    'sandbox',
-    'allow',
-    'allowfullscreen',
-    'referrerpolicy',
-    'csp',
-    'fetchpriority',
-]);
-/**
- * Checks whether a given attribute name might represent a security-sensitive
- * attribute of an <iframe>.
- */
-function isIframeSecuritySensitiveAttr(attrName) {
-    // The `setAttribute` DOM API is case-insensitive, so we lowercase the value
-    // before checking it against a known security-sensitive attributes.
-    return IFRAME_SECURITY_SENSITIVE_ATTRS.has(attrName.toLowerCase());
 }
 
 class ElementSchemaRegistry {
@@ -25078,6 +25144,7 @@ const sanitizerFns = new Map([
     [SecurityContext.SCRIPT, Identifiers.sanitizeScript],
     [SecurityContext.STYLE, Identifiers.sanitizeStyle],
     [SecurityContext.URL, Identifiers.sanitizeUrl],
+    [SecurityContext.ATTRIBUTE_NO_BINDING, Identifiers.validateAttribute],
 ]);
 /**
  * Map of security contexts to their trusted value function.
@@ -25091,7 +25158,6 @@ const trustedValueFns = new Map([
  */
 function resolveSanitizers(job) {
     for (const unit of job.units) {
-        const elements = createOpXrefMap(unit);
         // For normal element bindings we create trusted values for security sensitive constant
         // attributes. However, for host bindings we skip this step (this matches what
         // TemplateDefinitionBuilder does).
@@ -25112,8 +25178,8 @@ function resolveSanitizers(job) {
                     let sanitizerFn = null;
                     if (Array.isArray(op.securityContext) &&
                         op.securityContext.length === 2 &&
-                        op.securityContext.indexOf(SecurityContext.URL) > -1 &&
-                        op.securityContext.indexOf(SecurityContext.RESOURCE_URL) > -1) {
+                        op.securityContext.includes(SecurityContext.URL) &&
+                        op.securityContext.includes(SecurityContext.RESOURCE_URL)) {
                         // When the host element isn't known, some URL attributes (such as "src" and "href") may
                         // be part of multiple different security contexts. In this case we use special
                         // sanitization function and select the actual sanitizer at runtime based on a tag name
@@ -25124,42 +25190,10 @@ function resolveSanitizers(job) {
                         sanitizerFn = sanitizerFns.get(getOnlySecurityContext(op.securityContext)) ?? null;
                     }
                     op.sanitizer = sanitizerFn !== null ? importExpr(sanitizerFn) : null;
-                    // If there was no sanitization function found based on the security context of an
-                    // attribute/property, check whether this attribute/property is one of the
-                    // security-sensitive <iframe> attributes (and that the current element is actually an
-                    // <iframe>).
-                    if (op.sanitizer === null) {
-                        let isIframe = false;
-                        if (job.kind === CompilationJobKind.Host || op.kind === OpKind.DomProperty) {
-                            // Note: for host bindings defined on a directive, we do not try to find all
-                            // possible places where it can be matched, so we can not determine whether
-                            // the host element is an <iframe>. In this case, we just assume it is and append a
-                            // validation function, which is invoked at runtime and would have access to the
-                            // underlying DOM element to check if it's an <iframe> and if so - run extra checks.
-                            isIframe = true;
-                        }
-                        else {
-                            // For a normal binding we can just check if the element its on is an iframe.
-                            const ownerOp = elements.get(op.target);
-                            if (ownerOp === undefined || !isElementOrContainerOp(ownerOp)) {
-                                throw Error('Property should have an element-like owner');
-                            }
-                            isIframe = isIframeElement(ownerOp);
-                        }
-                        if (isIframe && isIframeSecuritySensitiveAttr(op.name)) {
-                            op.sanitizer = importExpr(Identifiers.validateIframeAttribute);
-                        }
-                    }
                     break;
             }
         }
     }
-}
-/**
- * Checks whether the given op represents an iframe element.
- */
-function isIframeElement(op) {
-    return op.kind === OpKind.ElementStart && op.tag?.toLowerCase() === 'iframe';
 }
 /**
  * Asserts that there is only a single security context and returns it.
@@ -32792,7 +32826,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.14+sha-136e923');
+const VERSION = new Version('20.3.14+sha-d1ca8ae');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33854,7 +33888,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CopGppNj.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-CgKwP2MX.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
