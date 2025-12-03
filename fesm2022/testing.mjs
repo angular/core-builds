@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-d608784
+ * @license Angular v21.1.0-next.0+sha-7d1e502
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1120,14 +1120,23 @@ class TestBedCompiler {
   }
   patchDefWithProviderOverrides(declaration, field) {
     const def = declaration[field];
-    if (def && def.providersResolver) {
+    if (!def) {
+      return;
+    }
+    if (def.viewProvidersResolver) {
       this.maybeStoreNgDef(field, declaration);
-      const resolver = def.providersResolver;
-      const processProvidersFn = providers => this.getOverriddenProviders(providers);
+      const viewProvidersResolver = def.viewProvidersResolver;
+      this.storeFieldOfDefOnType(declaration, field, 'viewProvidersResolver');
+      def.viewProvidersResolver = ngDef => viewProvidersResolver(ngDef, this.processProviderOverrides);
+    }
+    if (def.providersResolver) {
+      this.maybeStoreNgDef(field, declaration);
+      const providersResolver = def.providersResolver;
       this.storeFieldOfDefOnType(declaration, field, 'providersResolver');
-      def.providersResolver = ngDef => resolver(ngDef, processProvidersFn);
+      def.providersResolver = ngDef => providersResolver(ngDef, this.processProviderOverrides);
     }
   }
+  processProviderOverrides = providers => this.getOverriddenProviders(providers);
 }
 function initResolvers() {
   return {

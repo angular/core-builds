@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.0+sha-d608784
+ * @license Angular v21.1.0-next.0+sha-7d1e502
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2319,6 +2319,8 @@ type ComponentTemplate<T> = {
  * Definition of what a view queries function should look like.
  */
 type ViewQueriesFunction<T> = <U extends T>(rf: RenderFlags, ctx: U) => void;
+/** Function that resolves providers and publishes them to the DI system. */
+type ProvidersResolver = (def: DirectiveDef<unknown>, processProvidersFn?: ProcessProvidersFunction) => void;
 /**
  * Definition of what a content queries function should look like.
  */
@@ -2459,8 +2461,10 @@ interface DirectiveDef<T> {
     readonly hostAttrs: TAttributes | null;
     /** Token representing the directive. Used by DI. */
     readonly type: Type<T>;
-    /** Function that resolves providers and publishes them into the DI system. */
-    providersResolver: (<U extends T>(def: DirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
+    /** Function that resolves `providers` and publishes them into the DI system. */
+    providersResolver: ProvidersResolver | null;
+    /** Function that resolves `viewProviders` and publishes them into the DI system. */
+    viewProvidersResolver: ProvidersResolver | null;
     /** The selectors that will be used to match nodes to this directive. */
     readonly selectors: CssSelectorList;
     /**
