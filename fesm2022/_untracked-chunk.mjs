@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-c3bd22d
+ * @license Angular v21.0.3+sha-28e7546
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.0.3+sha-c3bd22d');
+const VERSION = /* @__PURE__ */new Version('21.0.3+sha-28e7546');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -466,6 +466,37 @@ const NG_ENV_ID = getClosureSafeProperty({
   __NG_ENV_ID__: getClosureSafeProperty
 });
 
+function getNgModuleDef(type) {
+  return type[NG_MOD_DEF] || null;
+}
+function getNgModuleDefOrThrow(type) {
+  const ngModuleDef = getNgModuleDef(type);
+  if (!ngModuleDef) {
+    throw new RuntimeError(915, (typeof ngDevMode === 'undefined' || ngDevMode) && `Type ${stringify(type)} does not have 'ɵmod' property.`);
+  }
+  return ngModuleDef;
+}
+function getComponentDef(type) {
+  return type[NG_COMP_DEF] || null;
+}
+function getDirectiveDefOrThrow(type) {
+  const def = getDirectiveDef(type);
+  if (!def) {
+    throw new RuntimeError(916, (typeof ngDevMode === 'undefined' || ngDevMode) && `Type ${stringify(type)} does not have 'ɵdir' property.`);
+  }
+  return def;
+}
+function getDirectiveDef(type) {
+  return type[NG_DIR_DEF] || null;
+}
+function getPipeDef(type) {
+  return type[NG_PIPE_DEF] || null;
+}
+function isStandalone(type) {
+  const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
+  return def !== null && def.standalone;
+}
+
 function renderStringify(value) {
   if (typeof value === 'string') return value;
   if (value == null) return '';
@@ -479,7 +510,7 @@ function stringifyForError(value) {
   return renderStringify(value);
 }
 function debugStringifyTypeForError(type) {
-  let componentDef = type[NG_COMP_DEF] || null;
+  const componentDef = getComponentDef(type);
   if (componentDef !== null && componentDef.debugInfo) {
     return stringifyTypeFromDebugInfo(componentDef.debugInfo);
   }
@@ -839,37 +870,6 @@ class NullInjector {
     }
     return notFoundValue;
   }
-}
-
-function getNgModuleDef(type) {
-  return type[NG_MOD_DEF] || null;
-}
-function getNgModuleDefOrThrow(type) {
-  const ngModuleDef = getNgModuleDef(type);
-  if (!ngModuleDef) {
-    throw new RuntimeError(915, (typeof ngDevMode === 'undefined' || ngDevMode) && `Type ${stringify(type)} does not have 'ɵmod' property.`);
-  }
-  return ngModuleDef;
-}
-function getComponentDef(type) {
-  return type[NG_COMP_DEF] || null;
-}
-function getDirectiveDefOrThrow(type) {
-  const def = getDirectiveDef(type);
-  if (!def) {
-    throw new RuntimeError(916, (typeof ngDevMode === 'undefined' || ngDevMode) && `Type ${stringify(type)} does not have 'ɵdir' property.`);
-  }
-  return def;
-}
-function getDirectiveDef(type) {
-  return type[NG_DIR_DEF] || null;
-}
-function getPipeDef(type) {
-  return type[NG_PIPE_DEF] || null;
-}
-function isStandalone(type) {
-  const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
-  return def !== null && def.standalone;
 }
 
 function makeEnvironmentProviders(providers) {
