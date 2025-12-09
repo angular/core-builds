@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.1+sha-253dc95
+ * @license Angular v21.1.0-next.1+sha-9ace7d7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -99,7 +99,7 @@ class HostAttributeToken {
 
 const HOST_TAG_NAME = /* @__PURE__ */(() => {
   
-  const HOST_TAG_NAME_TOKEN = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'HOST_TAG_NAME' : '');
+  const HOST_TAG_NAME_TOKEN = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'HOST_TAG_NAME' : '');
   HOST_TAG_NAME_TOKEN.__NG_ELEMENT_ID__ = flags => {
     const tNode = getCurrentTNode();
     if (tNode === null) {
@@ -601,9 +601,9 @@ function logOversizedImageWarning(src) {
   console.warn(formatRuntimeError(-913, `An image with src ${src} has intrinsic file dimensions much larger than its ` + `rendered size. This can negatively impact application loading performance. ` + `For more information about addressing or disabling this warning, see ` + `https://angular.dev/errors/NG0913`));
 }
 
-const PLATFORM_DESTROY_LISTENERS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'PlatformDestroyListeners' : '');
+const PLATFORM_DESTROY_LISTENERS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'PlatformDestroyListeners' : '');
 
-const ENABLE_ROOT_COMPONENT_BOOTSTRAP = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ENABLE_ROOT_COMPONENT_BOOTSTRAP' : '');
+const ENABLE_ROOT_COMPONENT_BOOTSTRAP = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'ENABLE_ROOT_COMPONENT_BOOTSTRAP' : '');
 function isApplicationBootstrapConfig(config) {
   return !config.moduleRef;
 }

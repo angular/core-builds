@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.1+sha-253dc95
+ * @license Angular v21.1.0-next.1+sha-9ace7d7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1912,7 +1912,7 @@ function getDocument() {
   throw new RuntimeError(210, (typeof ngDevMode === 'undefined' || ngDevMode) && `The document object is not available in this context. Make sure the DOCUMENT injection token is provided.`);
 }
 
-const APP_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AppId' : '', {
+const APP_ID = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AppId' : '', {
   factory: () => DEFAULT_APP_ID
 });
 const DEFAULT_APP_ID = 'ng';
@@ -1927,13 +1927,13 @@ const validAppIdInitializer = {
     }
   }
 };
-const PLATFORM_INITIALIZER = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Platform Initializer' : '');
-const PLATFORM_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Platform ID' : '', {
+const PLATFORM_INITIALIZER = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Platform Initializer' : '');
+const PLATFORM_ID = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Platform ID' : '', {
   providedIn: 'platform',
   factory: () => 'unknown'
 });
-const ANIMATION_MODULE_TYPE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'AnimationModuleType' : '');
-const CSP_NONCE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'CSP nonce' : '', {
+const ANIMATION_MODULE_TYPE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationModuleType' : '');
+const CSP_NONCE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'CSP nonce' : '', {
   factory: () => {
     return inject(DOCUMENT$1).body?.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
   }
@@ -1944,7 +1944,7 @@ const IMAGE_CONFIG_DEFAULTS = {
   disableImageSizeWarning: false,
   disableImageLazyLoadWarning: false
 };
-const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ImageConfig' : '', {
+const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'ImageConfig' : '', {
   factory: () => IMAGE_CONFIG_DEFAULTS
 });
 
@@ -2037,7 +2037,7 @@ const IS_I18N_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode === 'undef
 const IS_EVENT_REPLAY_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_EVENT_REPLAY_ENABLED' : '');
 const EVENT_REPLAY_ENABLED_DEFAULT = false;
 const IS_INCREMENTAL_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_INCREMENTAL_HYDRATION_ENABLED' : '');
-const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
+const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
   factory: () => new Map()
 });
 const IS_ENABLED_BLOCKING_INITIAL_NAVIGATION = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'IS_ENABLED_BLOCKING_INITIAL_NAVIGATION' : '');
@@ -2220,7 +2220,7 @@ const removeListeners = el => {
   el.removeAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE);
   el.__jsaction_fns = undefined;
 };
-const JSACTION_EVENT_CONTRACT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
+const JSACTION_EVENT_CONTRACT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
   factory: () => ({})
 });
 function invokeListeners(event, currentTarget) {
@@ -2253,7 +2253,7 @@ function enableStashEventListenerImpl() {
   }
 }
 
-const DEHYDRATED_BLOCK_REGISTRY = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DEHYDRATED_BLOCK_REGISTRY' : '');
+const DEHYDRATED_BLOCK_REGISTRY = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DEHYDRATED_BLOCK_REGISTRY' : '');
 class DehydratedBlockRegistry {
   registry = new Map();
   cleanupFns = new Map();
@@ -4092,7 +4092,7 @@ var TracingAction;
   TracingAction[TracingAction["CHANGE_DETECTION"] = 0] = "CHANGE_DETECTION";
   TracingAction[TracingAction["AFTER_NEXT_RENDER"] = 1] = "AFTER_NEXT_RENDER";
 })(TracingAction || (TracingAction = {}));
-const TracingService = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TracingService' : '');
+const TracingService = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'TracingService' : '');
 
 const markedFeatures = new Set();
 function performanceMarkFeature(feature) {
@@ -5287,7 +5287,7 @@ function shouldAddViewToDom(tNode, dehydratedView) {
 }
 
 const USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT = false;
-const UseExhaustiveCheckNoChanges = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'exhaustive checkNoChanges' : '');
+const UseExhaustiveCheckNoChanges = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'exhaustive checkNoChanges' : '');
 
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
   while (tNode !== null) {
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.1+sha-253dc95'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.1+sha-9ace7d7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10328,7 +10328,7 @@ class CachedInjectorService {
 }
 
 const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = /* @__PURE__ */new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
-const DEFER_BLOCK_CONFIG = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
+const DEFER_BLOCK_CONFIG = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
 function getOrCreateEnvironmentInjector(parentInjector, tDetails, providers) {
   return parentInjector.get(CachedInjectorService).getOrCreateInjector(tDetails, parentInjector, providers, ngDevMode ? 'DeferBlock Injector' : '');
 }
@@ -13689,7 +13689,9 @@ const CONTROL_VALUE = /* @__PURE__ */getClosureSafeProperty({
 const CONTROL_BINDING_NAMES = {
   disabled: 'disabled',
   disabledReasons: 'disabledReasons',
+  dirty: 'dirty',
   errors: 'errors',
+  hidden: 'hidden',
   invalid: 'invalid',
   max: 'max',
   maxLength: 'maxLength',
@@ -13697,6 +13699,7 @@ const CONTROL_BINDING_NAMES = {
   minLength: 'minLength',
   name: 'name',
   pattern: 'pattern',
+  pending: 'pending',
   readonly: 'readonly',
   required: 'required',
   touched: 'touched'
@@ -14141,19 +14144,19 @@ class LiveCollectionLContainerImpl extends LiveCollection {
     const embeddedLView = createAndRenderEmbeddedLView(this.hostLView, this.templateTNode, new RepeaterContext(this.lContainer, value, index), {
       dehydratedView
     });
-    this.operationsCounter?.recordCreate();
+    ngDevMode && this.operationsCounter?.recordCreate();
     return embeddedLView;
   }
   destroy(lView) {
     destroyLView(lView[TVIEW], lView);
-    this.operationsCounter?.recordDestroy();
+    ngDevMode && this.operationsCounter?.recordDestroy();
   }
   updateValue(index, value) {
     this.getLView(index)[CONTEXT].$implicit = value;
   }
   reset() {
     this.needsIndexUpdate = false;
-    this.operationsCounter?.reset();
+    ngDevMode && this.operationsCounter?.reset();
   }
   updateIndexes() {
     if (this.needsIndexUpdate) {
@@ -15740,9 +15743,11 @@ function insertFallbackContent(lView, tView, fallbackIndex) {
 
 function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
   createContentQuery(directiveIndex, predicate, flags, read);
+  return ɵɵcontentQuery;
 }
 function ɵɵviewQuery(predicate, flags, read) {
   createViewQuery(predicate, flags, read);
+  return ɵɵviewQuery;
 }
 function ɵɵqueryRefresh(queryList) {
   const lView = getLView();
@@ -15768,9 +15773,11 @@ function ɵɵloadQuery() {
 
 function ɵɵcontentQuerySignal(directiveIndex, target, predicate, flags, read) {
   bindQueryToSignal(target, createContentQuery(directiveIndex, predicate, flags, read));
+  return ɵɵcontentQuerySignal;
 }
 function ɵɵviewQuerySignal(target, predicate, flags, read) {
   bindQueryToSignal(target, createViewQuery(predicate, flags, read));
+  return ɵɵviewQuerySignal;
 }
 function ɵɵqueryAdvance(indexOffset = 1) {
   setCurrentQueryIndex(getCurrentQueryIndex() + indexOffset);
@@ -18179,7 +18186,7 @@ class Compiler {
     }]
   }], null, null);
 })();
-const COMPILER_OPTIONS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'compilerOptions' : '');
+const COMPILER_OPTIONS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'compilerOptions' : '');
 class CompilerFactory {}
 
 const CONSECUTIVE_MICROTASK_NOTIFICATION_LIMIT = 100;
@@ -18403,17 +18410,17 @@ function getGlobalLocale() {
     return typeof $localize !== 'undefined' && $localize.locale || DEFAULT_LOCALE_ID;
   }
 }
-const LOCALE_ID = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'LocaleId' : '', {
+const LOCALE_ID = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'LocaleId' : '', {
   factory: () => inject(LOCALE_ID, {
     optional: true,
     skipSelf: true
   }) || getGlobalLocale()
 });
-const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DefaultCurrencyCode' : '', {
+const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DefaultCurrencyCode' : '', {
   factory: () => USD_CURRENCY_CODE
 });
-const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Translations' : '');
-const TRANSLATIONS_FORMAT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'TranslationsFormat' : '');
+const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Translations' : '');
+const TRANSLATIONS_FORMAT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'TranslationsFormat' : '');
 var MissingTranslationStrategy;
 (function (MissingTranslationStrategy) {
   MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.1+sha-253dc95
+ * @license Angular v21.1.0-next.1+sha-9ace7d7
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1768,8 +1768,14 @@ interface InjectableDecorator {
      *
      */
     (): TypeDecorator;
+    /**
+     * @deprecated The `providedIn: NgModule` or `providedIn:'any'` options are deprecated. Please use the other signatures.
+     */
     (options?: {
-        providedIn: Type$1<any> | 'root' | 'platform' | 'any' | null;
+        providedIn: Type$1<any> | 'any';
+    } & InjectableProvider): TypeDecorator;
+    (options?: {
+        providedIn: 'root' | 'platform' | null;
     } & InjectableProvider): TypeDecorator;
     new (): Injectable;
     new (options?: {
@@ -7349,7 +7355,7 @@ declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: Sanitiz
  *
  * @codeGenApi
  */
-declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): void;
+declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): typeof ɵɵcontentQuery;
 /**
  * Creates a new view query by initializing internal data structures.
  *
@@ -7359,7 +7365,7 @@ declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Provider
  *
  * @codeGenApi
  */
-declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): void;
+declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): typeof ɵɵviewQuery;
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
@@ -7388,7 +7394,7 @@ declare function ɵɵloadQuery<T>(): QueryList<T>;
  *
  * @codeGenApi
  */
-declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signal<T>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signal<T>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): typeof ɵɵcontentQuerySignal;
 /**
  * Creates a new view query by initializing internal data structures and binding a new query to the
  * target signal.
@@ -7400,7 +7406,7 @@ declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signa
  *
  * @codeGenApi
  */
-declare function ɵɵviewQuerySignal(target: Signal<unknown>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: ProviderToken<unknown>): void;
+declare function ɵɵviewQuerySignal(target: Signal<unknown>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: ProviderToken<unknown>): typeof ɵɵviewQuerySignal;
 /**
  * Advances the current query index by a specified offset.
  *
@@ -8435,6 +8441,18 @@ interface ɵFieldState<T> {
      * A signal indicating whether the field has been touched by the user.
      */
     readonly touched: Signal<boolean>;
+    /**
+     * A signal indicating whether the field value has been changed by user.
+     */
+    readonly dirty: Signal<boolean>;
+    /**
+     * A signal indicating whether the field is hidden.
+     */
+    readonly hidden: Signal<boolean>;
+    /**
+     * A signal indicating whether there are any validators still pending for this field.
+     */
+    readonly pending: Signal<boolean>;
     /**
      * A writable signal containing the value for this field.
      *
