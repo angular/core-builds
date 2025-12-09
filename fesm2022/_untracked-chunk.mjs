@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-7f96799
+ * @license Angular v21.0.3+sha-96bb4c6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.0.3+sha-7f96799');
+const VERSION = /* @__PURE__ */new Version('21.0.3+sha-96bb4c6');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -854,11 +854,11 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
   Object.freeze(EMPTY_ARRAY);
 }
 
-const ENVIRONMENT_INITIALIZER = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'ENVIRONMENT_INITIALIZER' : '');
+const ENVIRONMENT_INITIALIZER = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'ENVIRONMENT_INITIALIZER' : '');
 
-const INJECTOR$1 = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'INJECTOR' : '', -1);
+const INJECTOR$1 = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'INJECTOR' : '', -1);
 
-const INJECTOR_DEF_TYPES = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'INJECTOR_DEF_TYPES' : '');
+const INJECTOR_DEF_TYPES = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'INJECTOR_DEF_TYPES' : '');
 
 class NullInjector {
   get(token, notFoundValue = THROW_IF_NOT_FOUND) {
@@ -1054,7 +1054,7 @@ function isClassProvider(value) {
   return !!value.useClass;
 }
 
-const INJECTOR_SCOPE = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'Set Injector scope.' : '');
+const INJECTOR_SCOPE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Set Injector scope.' : '');
 
 const NOT_YET = {};
 const CIRCULAR = {};
@@ -2135,7 +2135,7 @@ class Injector {
   static __NG_ELEMENT_ID__ = -1;
 }
 
-const DOCUMENT = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'DocumentToken' : '');
+const DOCUMENT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DocumentToken' : '');
 
 class DestroyRef {
   static __NG_ELEMENT_ID__ = injectDestroyRef;
@@ -2603,7 +2603,7 @@ const errorHandlerEnvironmentInitializer = {
   },
   multi: true
 };
-const globalErrorListeners = new InjectionToken(typeof ngDevMode !== undefined && ngDevMode ? 'GlobalErrorListeners' : '', {
+const globalErrorListeners = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'GlobalErrorListeners' : '', {
   factory: () => {
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
       return;

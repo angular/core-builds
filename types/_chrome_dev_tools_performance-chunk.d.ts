@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-7f96799
+ * @license Angular v21.0.3+sha-96bb4c6
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -237,6 +237,13 @@ type Writable<T> = {
 declare class InjectionToken<T> {
     protected _desc: string;
     readonly ɵprov: unknown;
+    /**
+     * @deprecated The `providedIn: NgModule` or `providedIn:'any'` options are deprecated. Please use the other signature.
+     */
+    constructor(_desc: string, options: {
+        providedIn?: Type<any> | 'any';
+        factory: () => T;
+    });
     /**
      * @param _desc   Description for the token,
      *                used only for debugging purposes,
