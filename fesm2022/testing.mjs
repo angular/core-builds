@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-96bb4c6
+ * @license Angular v21.0.3+sha-01ab257
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2205,9 +2205,7 @@ function dispatchNavigateEvent({
     }
     navigation.transition?.committedResolve();
     const promisesList = handlers.map(handler => handler());
-    if (promisesList.length === 0) {
-      promisesList.push(Promise.resolve());
-    }
+    promisesList.push(result.committed);
     Promise.all(promisesList).then(() => {
       if (result.signal.aborted) {
         return;
