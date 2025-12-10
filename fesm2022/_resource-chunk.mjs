@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.1+sha-9ace7d7
+ * @license Angular v21.1.0-next.1+sha-d355205
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -359,10 +359,13 @@ function createDebugNameObject(resourceDebugName, internalSignalDebugName) {
   };
 }
 function encapsulateResourceError(error) {
-  if (error instanceof Error) {
+  if (isErrorLike(error)) {
     return error;
   }
   return new ResourceWrappedError(error);
+}
+function isErrorLike(error) {
+  return error instanceof Error || typeof error === 'object' && typeof error.name === 'string' && typeof error.message === 'string';
 }
 class ResourceValueError extends Error {
   constructor(error) {
