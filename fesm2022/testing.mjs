@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-2dd971b
+ * @license Angular v21.0.3+sha-497c0e3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2251,7 +2251,7 @@ function dispatchNavigateEvent({
         event.abort(new DOMException('Cannot create transition without a currentEntry for intercepted navigation.', 'InvalidStateError'));
         return;
       }
-      const transition = new InternalNavigationTransition(navigation.currentEntry, navigationType);
+      const transition = new InternalNavigationTransition(navigation.currentEntry, event.destination, navigationType);
       navigation.transition = transition;
       transition.finished.catch(() => {});
       transition.committed.catch(() => {});
@@ -2395,6 +2395,7 @@ function isHashChange(from, to) {
 }
 class InternalNavigationTransition {
   from;
+  to;
   navigationType;
   finished;
   committed;
@@ -2402,8 +2403,9 @@ class InternalNavigationTransition {
   finishedReject;
   committedResolve;
   committedReject;
-  constructor(from, navigationType) {
+  constructor(from, to, navigationType) {
     this.from = from;
+    this.to = to;
     this.navigationType = navigationType;
     this.finished = new Promise((resolve, reject) => {
       this.finishedReject = reject;

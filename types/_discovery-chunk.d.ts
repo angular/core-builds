@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.3+sha-2dd971b
+ * @license Angular v21.0.3+sha-497c0e3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7410,6 +7410,7 @@ declare class Navigation extends EventTarget {
 declare class NavigationTransition {
     readonly navigationType: NavigationTypeString;
     readonly from: NavigationHistoryEntry;
+    readonly to: NavigationDestination;
     readonly finished: Promise<void>;
     readonly committed: Promise<void>;
 }
