@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.1+sha-954c546
+ * @license Angular v21.1.0-next.1+sha-af6c01f
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1696,7 +1696,7 @@ interface ForwardRefFn {
  * @Component({
  *   imports: [ChildComponent],
  *   selector: 'app-parent',
- *   template: `<app-child [hideParent]="hideParent()"></app-child>`,
+ *   template: `<app-child [hideParent]="hideParent()"/>`,
  * })
  * export class ParentComponent {
  *    hideParent = input.required<boolean>();
@@ -1707,7 +1707,7 @@ interface ForwardRefFn {
  *   imports: [forwardRef(() => ParentComponent)],
  *   selector: 'app-child',
  *   template: `
- *    @if(!hideParent() {
+ *    @if(!hideParent()) {
  *       <app-parent/>
  *    }
  *  `,
@@ -2325,12 +2325,12 @@ interface AfterRenderOptions {
  *   template: `<span #content>{{ ... }}</span>`,
  * })
  * export class MyComponent {
- *   @ViewChild('content') contentRef: ElementRef;
+ *   contentRef = viewChild.required<ElementRef>('content');
  *
  *   constructor() {
  *     afterEveryRender({
  *       read: () => {
- *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *         console.log('content height: ' + this.contentRef().nativeElement.scrollHeight);
  *       }
  *     });
  *   }
@@ -2385,12 +2385,12 @@ declare function afterEveryRender<E = never, W = never, M = never>(spec: {
  *   template: `<span #content>{{ ... }}</span>`,
  * })
  * export class MyComponent {
- *   @ViewChild('content') contentRef: ElementRef;
+ *   contentRef = viewChild.required<ElementRef>('content');
  *
  *   constructor() {
  *     afterEveryRender({
  *       read: () => {
- *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *         console.log('content height: ' + this.contentRef().nativeElement.scrollHeight);
  *       }
  *     });
  *   }
@@ -2464,13 +2464,13 @@ declare function afterEveryRender(callback: VoidFunction, options?: AfterRenderO
  *   template: `<div #chart>{{ ... }}</div>`,
  * })
  * export class MyChartCmp {
- *   @ViewChild('chart') chartRef: ElementRef;
+ *   chartRef = viewChild.required<ElementRef>('chart');
  *   chart: MyChart|null;
  *
  *   constructor() {
  *     afterNextRender({
  *       write: () => {
- *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *         this.chart = new MyChart(this.chartRef().nativeElement);
  *       }
  *     });
  *   }
@@ -2524,13 +2524,13 @@ declare function afterNextRender<E = never, W = never, M = never>(spec: {
  *   template: `<div #chart>{{ ... }}</div>`,
  * })
  * export class MyChartCmp {
- *   @ViewChild('chart') chartRef: ElementRef;
+ *   chartRef = viewChild.required<ElementRef>('chart');
  *   chart: MyChart|null;
  *
  *   constructor() {
  *     afterNextRender({
  *       write: () => {
- *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *         this.chart = new MyChart(this.chartRef().nativeElement);
  *       }
  *     });
  *   }
