@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.4+sha-fa4e6e6
+ * @license Angular v21.0.4+sha-69d243a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -241,7 +241,7 @@ declare class InjectionToken<T> {
      * @deprecated The `providedIn: NgModule` or `providedIn:'any'` options are deprecated. Please use the other signature.
      */
     constructor(_desc: string, options: {
-        providedIn?: Type<any> | 'any';
+        providedIn: Type<any> | 'any';
         factory: () => T;
     });
     /**
