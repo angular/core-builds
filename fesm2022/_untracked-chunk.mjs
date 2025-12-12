@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.5+sha-87d20fd
+ * @license Angular v21.0.5+sha-81772b4
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.0.5+sha-87d20fd');
+const VERSION = /* @__PURE__ */new Version('21.0.5+sha-81772b4');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -467,6 +467,7 @@ const NG_ENV_ID = getClosureSafeProperty({
 });
 
 function getNgModuleDef(type) {
+  assertTypeDefined(type, '@NgModule');
   return type[NG_MOD_DEF] || null;
 }
 function getNgModuleDefOrThrow(type) {
@@ -477,6 +478,7 @@ function getNgModuleDefOrThrow(type) {
   return ngModuleDef;
 }
 function getComponentDef(type) {
+  assertTypeDefined(type, '@Component');
   return type[NG_COMP_DEF] || null;
 }
 function getDirectiveDefOrThrow(type) {
@@ -487,10 +489,17 @@ function getDirectiveDefOrThrow(type) {
   return def;
 }
 function getDirectiveDef(type) {
+  assertTypeDefined(type, '@Directive');
   return type[NG_DIR_DEF] || null;
 }
 function getPipeDef(type) {
+  assertTypeDefined(type, '@Pipe');
   return type[NG_PIPE_DEF] || null;
+}
+function assertTypeDefined(type, symbolType) {
+  if (type == null) {
+    throw new RuntimeError(919, (typeof ngDevMode === 'undefined' || ngDevMode) && `Cannot read ${symbolType} metadata. This can indicate a runtime ` + `circular dependency in your app that needs to be resolved.`);
+  }
 }
 function isStandalone(type) {
   const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
