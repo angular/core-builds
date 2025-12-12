@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.3+sha-23547f0
+ * @license Angular v21.1.0-next.3+sha-348f149
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4889,6 +4889,7 @@ declare const enum RuntimeErrorCode {
     MISSING_DIRECTIVE_DEFINITION = 916,
     NO_COMPONENT_FACTORY_FOUND = 917,
     EXTERNAL_RESOURCE_LOADING_FAILED = 918,
+    DEF_TYPE_UNDEFINED = 919,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
