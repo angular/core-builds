@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.3+sha-af77b89
+ * @license Angular v21.1.0-next.3+sha-bf2e508
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.1.0-next.3+sha-af77b89');
+const VERSION = /* @__PURE__ */new Version('21.1.0-next.3+sha-bf2e508');
 
 const ERROR_DETAILS_PAGE_BASE_URL = (() => {
   const versionSubDomain = VERSION.major !== '0' ? `v${VERSION.major}.` : '';
@@ -628,7 +628,7 @@ function injectRootLimpMode(token, notFoundValue, flags) {
   }
   if (flags & 8) return null;
   if (notFoundValue !== undefined) return notFoundValue;
-  throwProviderNotFoundError(token, 'Injector');
+  throwProviderNotFoundError(token, typeof ngDevMode !== 'undefined' && ngDevMode ? 'Injector' : '');
 }
 function assertInjectImplementationNotEqual(fn) {
   ngDevMode && assertNotEqual(_injectImplementation, fn, 'Calling ɵɵinject would cause infinite recursion');
