@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.3+sha-ae0c590
+ * @license Angular v21.1.0-next.3+sha-06be803
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6699,7 +6699,6 @@ declare class ApplicationRef {
     private readonly rootEffectScheduler;
     private allTestViews;
     private autoDetectTestViews;
-    private includeAllTestViews;
     /**
      * Indicates whether this instance was destroyed.
      */
