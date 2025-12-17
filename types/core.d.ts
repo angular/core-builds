@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.5+sha-feed89e
+ * @license Angular v21.0.5+sha-0eb623c
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2648,6 +2648,7 @@ declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
  * to disallow certain code from running inside a reactive context (see {@link /api/core/rxjs-interop/toSignal toSignal})
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
+ * @see [Asserts the reactive context](guide/signals#asserts-the-reactive-context)
  *
  * @publicApi
  */
