@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-c8d14d7
+ * @license Angular v21.0.6+sha-0edbee4
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -25,7 +25,7 @@ function createLinkedSignal(sourceFn, computationFn, equalityFn) {
   getter[SIGNAL] = node;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
-    getter.toString = () => `[LinkedSignal${debugName}: ${node.value}]`;
+    getter.toString = () => `[LinkedSignal${debugName}: ${String(node.value)}]`;
   }
   runPostProducerCreatedFn(node);
   return getter;
