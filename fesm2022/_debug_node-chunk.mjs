@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-069974a
+ * @license Angular v21.0.6+sha-d370c4b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2953,7 +2953,7 @@ function allowSanitizationBypassAndThrow(value, type) {
   const actualType = getSanitizationBypassType(value);
   if (actualType != null && actualType !== type) {
     if (actualType === "ResourceURL" && type === "URL") return true;
-    throw new Error(`Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
+    throw new RuntimeError(922, ngDevMode && `Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
   }
   return actualType === type;
 }
@@ -3148,7 +3148,7 @@ function getNodeName(node) {
   return typeof nodeName === 'string' ? nodeName : 'FORM';
 }
 function clobberedElementError(node) {
-  return new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
+  return new RuntimeError(921, ngDevMode && `Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
 }
 const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
 const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
@@ -3172,7 +3172,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
     let parsedHtml = unsafeHtml;
     do {
       if (mXSSAttempts === 0) {
-        throw new Error('Failed to sanitize html because the input is unstable');
+        throw new RuntimeError(920, ngDevMode && 'Failed to sanitize html because the input is unstable');
       }
       mXSSAttempts--;
       unsafeHtml = parsedHtml;
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-069974a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-d370c4b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13337,13 +13337,12 @@ function initializeControlFirstCreatePass(tView, tNode, lView) {
     return;
   }
   tNode.fieldIndex = controlIndex;
-  const isCustomControl = isCustomControlFirstCreatePass(tView, tNode);
-  if (!isCustomControl && lView[controlIndex].ɵinteropControl) {
-    tNode.flags |= 4096;
+  if (isInteropControlFirstCreatePass(tNode, lView)) {
     return;
   }
-  const isNativeControl = isNativeControlFirstCreatePass(tView, tNode);
-  if (isNativeControl || isCustomControl) {
+  const isCustomControl = isCustomControlFirstCreatePass(tView, tNode);
+  const isNativeControl = isNativeControlFirstCreatePass(tNode);
+  if (isCustomControl || isNativeControl) {
     return;
   }
   const host = describeElement(tView, tNode);
@@ -13356,6 +13355,14 @@ function describeElement(tView, tNode) {
     return `Component ${debugStringifyTypeForError(componentDef.type)}`;
   }
   return `<${tNode.value}>`;
+}
+function isInteropControlFirstCreatePass(tNode, lView) {
+  const control = lView[tNode.fieldIndex];
+  if (control.ɵinteropControl) {
+    tNode.flags |= 4096;
+    return true;
+  }
+  return false;
 }
 function isCustomControlFirstCreatePass(tView, tNode) {
   for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
@@ -13373,7 +13380,7 @@ function isCustomControlFirstCreatePass(tView, tNode) {
   }
   return false;
 }
-function isNativeControlFirstCreatePass(tView, tNode) {
+function isNativeControlFirstCreatePass(tNode) {
   if (!isNativeControl(tNode)) {
     return false;
   }
@@ -13391,11 +13398,10 @@ function getControlDirective(tNode, lView) {
   return index === -1 ? null : lView[index];
 }
 function hasModelInput(directiveDef, name) {
-  return hasSignalInput(directiveDef, name) && hasOutput(directiveDef, name + 'Change');
+  return hasInput(directiveDef, name) && hasOutput(directiveDef, name + 'Change');
 }
-function hasSignalInput(directiveDef, name) {
-  const input = directiveDef.inputs[name];
-  return input && (input[1] & InputFlags.SignalBased) !== 0;
+function hasInput(directiveDef, name) {
+  return name in directiveDef.inputs;
 }
 function hasOutput(directiveDef, name) {
   return name in directiveDef.outputs;
