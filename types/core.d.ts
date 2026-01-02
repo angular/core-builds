@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-d370c4b
+ * @license Angular v21.0.6+sha-f8b6a3f
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4891,9 +4891,6 @@ declare const enum RuntimeErrorCode {
     NO_COMPONENT_FACTORY_FOUND = 917,
     EXTERNAL_RESOURCE_LOADING_FAILED = 918,
     DEF_TYPE_UNDEFINED = -919,
-    HTML_SANITIZATION_UNSTABLE = 920,
-    HTML_SANITIZATION_CLOBBERED = 921,
-    SANITIZATION_BYPASS_TYPE_MISMATCH = 922,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,

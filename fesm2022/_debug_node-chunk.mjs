@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-d370c4b
+ * @license Angular v21.0.6+sha-f8b6a3f
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2953,7 +2953,7 @@ function allowSanitizationBypassAndThrow(value, type) {
   const actualType = getSanitizationBypassType(value);
   if (actualType != null && actualType !== type) {
     if (actualType === "ResourceURL" && type === "URL") return true;
-    throw new RuntimeError(922, ngDevMode && `Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
+    throw new Error(`Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
   }
   return actualType === type;
 }
@@ -3148,7 +3148,7 @@ function getNodeName(node) {
   return typeof nodeName === 'string' ? nodeName : 'FORM';
 }
 function clobberedElementError(node) {
-  return new RuntimeError(921, ngDevMode && `Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
+  return new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
 }
 const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
 const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
@@ -3172,7 +3172,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
     let parsedHtml = unsafeHtml;
     do {
       if (mXSSAttempts === 0) {
-        throw new RuntimeError(920, ngDevMode && 'Failed to sanitize html because the input is unstable');
+        throw new Error('Failed to sanitize html because the input is unstable');
       }
       mXSSAttempts--;
       unsafeHtml = parsedHtml;
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-d370c4b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-f8b6a3f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
