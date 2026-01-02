@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-5a146b3
+ * @license Angular v21.1.0-next.4+sha-d868a5b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -477,7 +477,7 @@ function traverseReceiverAndLookupSymbol(readOrWrite, componentClass, checker) {
         node = node.receiver;
         path.unshift(node.name);
     }
-    if (!(node.receiver instanceof compiler.ImplicitReceiver || node.receiver instanceof compiler.ThisReceiver)) {
+    if (!(node.receiver instanceof compiler.ImplicitReceiver)) {
         return null;
     }
     const classType = checker.getTypeAtLocation(componentClass.name);

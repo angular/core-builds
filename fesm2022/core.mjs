@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-5a146b3
+ * @license Angular v21.1.0-next.4+sha-d868a5b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2191,14 +2191,14 @@ function calcNumRootNodesInLContainer(lContainer) {
   collectNativeNodesInLContainer(lContainer, rootNodes);
   return rootNodes.length;
 }
-function annotateComponentLViewForHydration(lView, context, injector) {
+function annotateComponentLViewForHydration(lView, context) {
   const hostElement = lView[HOST];
   if (hostElement && !hostElement.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
     return annotateHostElementForHydration(hostElement, lView, null, context);
   }
   return null;
 }
-function annotateLContainerForHydration(lContainer, context, injector) {
+function annotateLContainerForHydration(lContainer, context) {
   const componentLView = unwrapLView(lContainer[HOST]);
   const componentLViewNghIndex = annotateComponentLViewForHydration(componentLView, context);
   if (componentLViewNghIndex === null) {

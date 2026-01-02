@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-5a146b3
+ * @license Angular v21.1.0-next.4+sha-d868a5b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4923,6 +4923,9 @@ declare const enum RuntimeErrorCode {
     NO_COMPONENT_FACTORY_FOUND = 917,
     EXTERNAL_RESOURCE_LOADING_FAILED = 918,
     DEF_TYPE_UNDEFINED = -919,
+    HTML_SANITIZATION_UNSTABLE = 920,
+    HTML_SANITIZATION_CLOBBERED = 921,
+    SANITIZATION_BYPASS_TYPE_MISMATCH = 922,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
@@ -5606,7 +5609,7 @@ declare const PERFORMANCE_MARK_PREFIX = "\uD83C\uDD70\uFE0F";
  * Function that will start measuring against the performance API
  * Should be used in pair with stopMeasuring
  */
-declare function startMeasuring<T>(label: string): void;
+declare function startMeasuring(label: string): void;
 /**
  * Function that will stop measuring against the performance API
  * Should be used in pair with startMeasuring
@@ -5784,7 +5787,7 @@ declare class DehydratedBlockRegistry {
  * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
  * are created inside a for loop).
  */
-declare class TimerScheduler {
+declare class TimerScheduler implements OnDestroy {
     executingCallbacks: boolean;
     timeoutId: number | null;
     invokeTimerAt: number | null;
