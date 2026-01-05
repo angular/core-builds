@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-73a3fd5
+ * @license Angular v21.0.6+sha-c1f22a3
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -965,6 +965,7 @@ interface ContentChildrenDecorator {
      * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
      *
      * @Annotation
+     * @see [Content queries](guide/components/queries#decorator-content-queries)
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
@@ -1057,6 +1058,7 @@ interface ContentChildDecorator {
      * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
      *
      * @Annotation
+     * @see [Content queries](guide/components/queries#decorator-content-queries)
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
@@ -1142,6 +1144,7 @@ interface ViewChildrenDecorator {
      * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
      *
      * @Annotation
+     * @see [View queries](guide/components/queries#decorator-view-queries)
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
@@ -1225,6 +1228,7 @@ interface ViewChildDecorator {
      * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
      *
      * @Annotation
+     * @see [View queries](guide/components/queries#decorator-view-queries)
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
@@ -3516,6 +3520,8 @@ declare function getNgModuleById<T>(id: string): Type$1<T>;
  *
  * @see {@link ViewContainerRef}
  *
+ * @see [Getting a reference to a template fragment](guide/templates/ng-template#getting-a-reference-to-a-template-fragment)
+ *
  * @publicApi
  */
 declare class TemplateRef<C> {
@@ -3587,6 +3593,7 @@ declare class TemplateRef<C> {
  *
  * @see {@link ComponentRef}
  * @see {@link EmbeddedViewRef}
+ * @see [Using ViewContainerRef](guide/components/programmatic-rendering#using-viewcontainerref)
  *
  * @publicApi
  */
@@ -4495,6 +4502,7 @@ declare const platformCore: (extraProviders?: StaticProvider[] | undefined) => P
  * ```
  *
  * @publicApi
+ * @see [Import global variants of the locale data](guide/i18n/import-global-variants)
  */
 declare const LOCALE_ID: InjectionToken<string>;
 /**
@@ -5122,7 +5130,7 @@ declare function registerLocaleData(data: any, localeId?: string | any, extraDat
  *
  * @param locale The locale code.
  * @returns The locale data.
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @see [Internationalization (i18n) Guide](guide/i18n)
  */
 declare function findLocaleData(locale: string): any;
 /**
