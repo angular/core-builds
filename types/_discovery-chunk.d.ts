@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-7e9dc56
+ * @license Angular v21.0.6+sha-9494b56
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5825,7 +5825,7 @@ interface DirectiveWithBindings<T> {
  * In this example we create an instance of the `MyButton` component and bind the value of
  * the `isDisabled` signal to its `disabled` input.
  *
- * ```
+ * ```ts
  * const isDisabled = signal(false);
  *
  * createComponent(MyButton, {
@@ -5844,7 +5844,7 @@ declare function inputBinding(publicName: string, value: () => unknown): Binding
  * In this example we create an instance of the `MyCheckbox` component and listen
  * to its `onChange` event.
  *
- * ```
+ * ```ts
  * interface CheckboxChange {
  *   value: string;
  * }
@@ -5868,7 +5868,7 @@ declare function outputBinding<T>(eventName: string, listener: (event: T) => unk
  * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
  * input using a two-way binding.
  *
- * ```
+ * ```ts
  * const checkboxValue = signal('');
  *
  * createComponent(MyCheckbox, {
