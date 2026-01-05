@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-46a276a
+ * @license Angular v21.1.0-next.4+sha-1532be9
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1322,7 +1322,7 @@ function getNgModuleById(id) {
   return type;
 }
 function noModuleError(id) {
-  return new Error(`No module with ID ${id} loaded`);
+  return new RuntimeError(920, ngDevMode && `No module with ID ${id} loaded`);
 }
 
 class ChangeDetectorRef {
