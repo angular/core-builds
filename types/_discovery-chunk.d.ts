@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-712d8f4
+ * @license Angular v21.1.0-next.4+sha-821d565
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3274,6 +3274,8 @@ interface ViewEffectNode extends EffectNode {
  * ```
  *
  * @publicApi
+ *
+ * @see [Using QueryList](guide/components/queries#using-querylist)
  */
 declare class QueryList<T> implements Iterable<T> {
     private _emitDistinctChangesOnly;
@@ -5990,7 +5992,7 @@ declare abstract class NgModuleFactory<T> {
 /**
  * Represents an Angular view.
  *
- * @see {@link /api/core/ChangeDetectorRef?tab=usage-notes Change detection usage}
+ * @see {@link /api/core/ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
