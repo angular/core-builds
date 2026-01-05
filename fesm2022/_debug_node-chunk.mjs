@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-1748c89
+ * @license Angular v21.0.6+sha-8f26a52
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-1748c89'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-8f26a52'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -8548,7 +8548,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
   insertImpl(viewRef, index, addToDOM) {
     const lView = viewRef._lView;
     if (ngDevMode && viewRef.destroyed) {
-      throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+      throw new RuntimeError(922, ngDevMode && 'Cannot insert a destroyed View in a ViewContainer!');
     }
     if (viewAttachedToContainer(lView)) {
       const prevIdx = this.indexOf(viewRef);
@@ -8570,7 +8570,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
   }
   move(viewRef, newIndex) {
     if (ngDevMode && viewRef.destroyed) {
-      throw new Error('Cannot move a destroyed View in a ViewContainer!');
+      throw new RuntimeError(923, ngDevMode && 'Cannot move a destroyed View in a ViewContainer!');
     }
     return this.insert(viewRef, newIndex);
   }
@@ -9169,7 +9169,7 @@ const modules = new Map();
 let checkForDuplicateNgModules = true;
 function assertSameOrNotExisting(id, type, incoming) {
   if (type && type !== incoming && checkForDuplicateNgModules) {
-    throw new Error(`Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
+    throw new RuntimeError(921, ngDevMode && `Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
   }
 }
 function registerNgModuleType(ngModuleType, id) {

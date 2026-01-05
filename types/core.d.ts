@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-1748c89
+ * @license Angular v21.0.6+sha-8f26a52
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4899,6 +4899,10 @@ declare const enum RuntimeErrorCode {
     NO_COMPONENT_FACTORY_FOUND = 917,
     EXTERNAL_RESOURCE_LOADING_FAILED = 918,
     DEF_TYPE_UNDEFINED = -919,
+    NG_MODULE_ID_NOT_FOUND = 920,
+    DUPLICATE_NG_MODULE_ID = 921,
+    VIEW_DESTROYED_INSERT_ERROR = 922,
+    VIEW_DESTROYED_MOVE_ERROR = 923,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = 952,
