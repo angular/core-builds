@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-e2e5b66
+ * @license Angular v21.1.0-next.4+sha-91dc91b
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3348,11 +3348,11 @@ function ɵɵtrustConstantResourceUrl(url) {
   }
   return trustedScriptURLFromString(url[0]);
 }
+const SRC_RESOURCE_TAGS = new Set(['embed', 'frame', 'iframe', 'media', 'script']);
+const HREF_RESOURCE_TAGS = new Set(['base', 'link', 'script']);
 function getUrlSanitizer(tag, prop) {
-  if (prop === 'src' && (tag === 'embed' || tag === 'frame' || tag === 'iframe' || tag === 'media' || tag === 'script') || prop === 'href' && (tag === 'base' || tag === 'link')) {
-    return ɵɵsanitizeResourceUrl;
-  }
-  return ɵɵsanitizeUrl;
+  const isResource = prop === 'src' && SRC_RESOURCE_TAGS.has(tag) || prop === 'href' && HREF_RESOURCE_TAGS.has(tag) || prop === 'xlink:href' && tag === 'script';
+  return isResource ? ɵɵsanitizeResourceUrl : ɵɵsanitizeUrl;
 }
 function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
   return getUrlSanitizer(tag, prop)(unsafeUrl);
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.4+sha-e2e5b66'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-next.4+sha-91dc91b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
