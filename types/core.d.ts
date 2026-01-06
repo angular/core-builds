@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-defc924
+ * @license Angular v21.0.6+sha-e3fba18
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6661,7 +6661,7 @@ declare function ɵɵcontrolCreate(): void;
  *
  * @codeGenApi
  */
-declare function ɵɵcontrol<T>(value: T, sanitizer?: SanitizerFn | null): void;
+declare function ɵɵcontrol<T>(value: T, name: string, sanitizer?: SanitizerFn | null): void;
 /**
  * Calls {@link updateControl} with the current `LView` and selected `TNode`.
  *

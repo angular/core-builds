@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-defc924
+ * @license Angular v21.0.6+sha-e3fba18
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-defc924'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-e3fba18'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13291,14 +13291,14 @@ function ɵɵcontrolCreate() {
   }
   control.ɵregister();
 }
-function ɵɵcontrol(value, sanitizer) {
+function ɵɵcontrol(value, name, sanitizer) {
   const lView = getLView();
   const tNode = getSelectedTNode();
   const bindingIndex = nextBindingIndex();
   if (bindingUpdated(lView, bindingIndex, value)) {
     const tView = getTView();
-    setPropertyAndInputs(tNode, lView, 'field', value, lView[RENDERER], sanitizer);
-    ngDevMode && storePropertyBindingMetadata(tView.data, tNode, 'field', bindingIndex);
+    setPropertyAndInputs(tNode, lView, name, value, lView[RENDERER], sanitizer);
+    ngDevMode && storePropertyBindingMetadata(tView.data, tNode, name, bindingIndex);
   }
   updateControl(lView, tNode);
 }
@@ -13325,7 +13325,7 @@ function updateControl(lView, tNode) {
 }
 function initializeControlFirstCreatePass(tView, tNode, lView) {
   ngDevMode && assertFirstCreatePass(tView);
-  const directiveIndices = tNode.inputs?.['field'];
+  const directiveIndices = tNode.inputs?.['field'] ?? tNode.inputs?.['formField'];
   if (!directiveIndices) {
     return;
   }
