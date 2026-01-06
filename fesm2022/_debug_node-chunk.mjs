@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-8e80874
+ * @license Angular v21.0.6+sha-af1d4ac
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-8e80874'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-af1d4ac'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13316,7 +13316,7 @@ function updateControl(lView, tNode) {
     } else if (tNode.flags & 2048) {
       updateCustomControl(tNode, lView, control, 'checked');
     } else if (tNode.flags & 4096) {
-      updateInteropControl(lView, control);
+      updateInteropControl(tNode, lView, control);
     } else {
       updateNativeControl(tNode, lView, control);
     }
@@ -13337,12 +13337,8 @@ function initializeControlFirstCreatePass(tView, tNode, lView) {
     return;
   }
   tNode.fieldIndex = controlIndex;
-  if (isInteropControlFirstCreatePass(tNode, lView)) {
-    return;
-  }
-  const isCustomControl = isCustomControlFirstCreatePass(tView, tNode);
-  const isNativeControl = isNativeControlFirstCreatePass(tNode);
-  if (isCustomControl || isNativeControl) {
+  const foundControl = isInteropControlFirstCreatePass(tNode, lView) || isCustomControlFirstCreatePass(tView, tNode);
+  if (isNativeControlFirstCreatePass(tNode) || foundControl) {
     return;
   }
   const host = describeElement(tView, tNode);
@@ -13510,35 +13506,47 @@ function updateCustomControl(tNode, lView, control, modelName) {
   const directiveDef = tView.data[directiveIndex];
   const state = control.state();
   const bindings = getControlBindings(lView);
-  maybeUpdateInput(directiveDef, directive, bindings, state, CONTROL_VALUE, modelName);
+  const controlValue = state.controlValue();
+  if (controlBindingUpdated(bindings, CONTROL_VALUE, controlValue)) {
+    writeToDirectiveInput(directiveDef, directive, modelName, controlValue);
+  }
+  const isNative = (tNode.flags & 8192) !== 0;
+  const element = isNative ? getNativeByTNode(tNode, lView) : null;
+  const renderer = lView[RENDERER];
   for (const key of CONTROL_BINDING_KEYS) {
-    const inputName = CONTROL_BINDING_NAMES[key];
-    maybeUpdateInput(directiveDef, directive, bindings, state, key, inputName);
-  }
-  if (tNode.flags & 8192) {
-    updateNativeControl(tNode, lView, control);
-  }
-}
-function maybeUpdateInput(directiveDef, directive, bindings, state, key, inputName) {
-  if (inputName in directiveDef.inputs) {
     const value = state[key]?.();
     if (controlBindingUpdated(bindings, key, value)) {
-      writeToDirectiveInput(directiveDef, directive, inputName, value);
+      const inputName = CONTROL_BINDING_NAMES[key];
+      updateDirectiveInputs(tNode, lView, inputName, value);
+      if (isNative && !(inputName in directiveDef.inputs)) {
+        updateNativeProperty(tNode, renderer, element, key, value, inputName);
+      }
     }
   }
 }
-function updateInteropControl(lView, control) {
+function updateInteropControl(tNode, lView, control) {
   const interopControl = control.ɵinteropControl;
   const bindings = getControlBindings(lView);
   const state = control.state();
+  const isNative = (tNode.flags & 8192) !== 0;
+  const element = isNative ? getNativeByTNode(tNode, lView) : null;
+  const renderer = lView[RENDERER];
   const value = state.value();
   if (controlBindingUpdated(bindings, CONTROL_VALUE, value)) {
     untracked(() => interopControl.writeValue(value));
   }
-  if (interopControl.setDisabledState) {
-    const disabled = state.disabled();
-    if (controlBindingUpdated(bindings, DISABLED, disabled)) {
-      untracked(() => interopControl.setDisabledState(disabled));
+  for (const key of CONTROL_BINDING_KEYS) {
+    const value = state[key]?.();
+    if (controlBindingUpdated(bindings, key, value)) {
+      const inputName = CONTROL_BINDING_NAMES[key];
+      const didUpdateInput = updateDirectiveInputs(tNode, lView, inputName, value);
+      if (key === DISABLED) {
+        if (interopControl.setDisabledState) {
+          untracked(() => interopControl.setDisabledState(value));
+        }
+      } else if (isNative && !didUpdateInput) {
+        updateNativeProperty(tNode, renderer, element, key, value, inputName);
+      }
     }
   }
 }
@@ -13551,34 +13559,50 @@ function updateNativeControl(tNode, lView, control) {
   if (controlBindingUpdated(bindings, CONTROL_VALUE, controlValue)) {
     setNativeControlValue(element, controlValue);
   }
-  const name = state.name();
-  if (controlBindingUpdated(bindings, NAME, name)) {
-    renderer.setAttribute(element, 'name', name);
-  }
-  updateBooleanAttribute(renderer, element, bindings, state, DISABLED);
-  updateBooleanAttribute(renderer, element, bindings, state, READONLY);
-  updateBooleanAttribute(renderer, element, bindings, state, REQUIRED);
-  if (tNode.flags & 16384) {
-    updateOptionalAttribute(renderer, element, bindings, state, MAX);
-    updateOptionalAttribute(renderer, element, bindings, state, MIN);
-  }
-  if (tNode.flags & 32768) {
-    updateOptionalAttribute(renderer, element, bindings, state, MAX_LENGTH);
-    updateOptionalAttribute(renderer, element, bindings, state, MIN_LENGTH);
+  for (const key of CONTROL_BINDING_KEYS) {
+    const value = state[key]?.();
+    if (controlBindingUpdated(bindings, key, value)) {
+      const inputName = CONTROL_BINDING_NAMES[key];
+      updateNativeProperty(tNode, renderer, element, key, value, inputName);
+      updateDirectiveInputs(tNode, lView, inputName, value);
+    }
   }
 }
-function updateBooleanAttribute(renderer, element, bindings, state, key) {
-  const value = state[key]();
-  if (controlBindingUpdated(bindings, key, value)) {
-    const name = CONTROL_BINDING_NAMES[key];
-    setBooleanAttribute(renderer, element, name, value);
+function updateDirectiveInputs(tNode, lView, inputName, value) {
+  const directiveIndices = tNode.inputs?.[inputName];
+  if (directiveIndices) {
+    const tView = getTView();
+    for (const index of directiveIndices) {
+      const directiveDef = tView.data[index];
+      const directive = lView[index];
+      writeToDirectiveInput(directiveDef, directive, inputName, value);
+    }
+    return true;
   }
+  return false;
 }
-function updateOptionalAttribute(renderer, element, bindings, state, key) {
-  const value = state[key]?.();
-  if (controlBindingUpdated(bindings, key, value)) {
-    const name = CONTROL_BINDING_NAMES[key];
-    setOptionalAttribute(renderer, element, name, value);
+function updateNativeProperty(tNode, renderer, element, key, value, name) {
+  switch (key) {
+    case NAME:
+      renderer.setAttribute(element, name, value);
+      break;
+    case DISABLED:
+    case READONLY:
+    case REQUIRED:
+      setBooleanAttribute(renderer, element, name, value);
+      break;
+    case MAX:
+    case MIN:
+      if (tNode.flags & 16384) {
+        setOptionalAttribute(renderer, element, name, value);
+      }
+      break;
+    case MAX_LENGTH:
+    case MIN_LENGTH:
+      if (tNode.flags & 32768) {
+        setOptionalAttribute(renderer, element, name, value);
+      }
+      break;
   }
 }
 function isDateOrNull(value) {
