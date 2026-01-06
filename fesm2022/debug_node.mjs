@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.15+sha-4755bbd
+ * @license Angular v20.3.15+sha-c2c2b4a
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6192,6 +6192,9 @@ function ɵɵtrustConstantResourceUrl(url) {
     }
     return trustedScriptURLFromString(url[0]);
 }
+// Define sets outside the function for O(1) lookups and memory efficiency
+const SRC_RESOURCE_TAGS = new Set(['embed', 'frame', 'iframe', 'media', 'script']);
+const HREF_RESOURCE_TAGS = new Set(['base', 'link', 'script']);
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
@@ -6200,16 +6203,10 @@ function ɵɵtrustConstantResourceUrl(url) {
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
 function getUrlSanitizer(tag, prop) {
-    if ((prop === 'src' &&
-        (tag === 'embed' ||
-            tag === 'frame' ||
-            tag === 'iframe' ||
-            tag === 'media' ||
-            tag === 'script')) ||
-        (prop === 'href' && (tag === 'base' || tag === 'link'))) {
-        return ɵɵsanitizeResourceUrl;
-    }
-    return ɵɵsanitizeUrl;
+    const isResource = (prop === 'src' && SRC_RESOURCE_TAGS.has(tag)) ||
+        (prop === 'href' && HREF_RESOURCE_TAGS.has(tag)) ||
+        (prop === 'xlink:href' && tag === 'script');
+    return isResource ? ɵɵsanitizeResourceUrl : ɵɵsanitizeUrl;
 }
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -14723,7 +14720,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.15+sha-4755bbd']
+        ? ['ng-version', '20.3.15+sha-c2c2b4a']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
