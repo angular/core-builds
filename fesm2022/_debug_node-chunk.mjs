@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-7738eb9
+ * @license Angular v21.0.6+sha-7c74674
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4490,7 +4490,7 @@ function cleanUpView(tView, lView) {
 function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
   const animations = lView?.[ANIMATIONS];
   if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index)) return callback(false);
-  if (lView) allLeavingAnimations.add(lView);
+  if (lView) allLeavingAnimations.add(lView[ID]);
   addToAnimationQueue(injector, () => {
     if (animations.leave && animations.leave.has(tNode.index)) {
       const leaveAnimationMap = animations.leave;
@@ -4509,7 +4509,7 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
       animations.running = Promise.allSettled(runningAnimations);
       runAfterLeaveAnimations(lView, callback);
     } else {
-      if (lView) allLeavingAnimations.delete(lView);
+      if (lView) allLeavingAnimations.delete(lView[ID]);
       callback(false);
     }
   }, animations);
@@ -4519,7 +4519,7 @@ function runAfterLeaveAnimations(lView, callback) {
   if (runningAnimations) {
     runningAnimations.then(() => {
       lView[ANIMATIONS].running = undefined;
-      allLeavingAnimations.delete(lView);
+      allLeavingAnimations.delete(lView[ID]);
       callback(true);
     });
     return;
@@ -8310,7 +8310,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-7738eb9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.0.6+sha-7c74674'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13155,7 +13155,7 @@ function runLeaveAnimations(lView, tNode, value) {
   ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
   const renderer = lView[RENDERER];
   const ngZone = lView[INJECTOR].get(NgZone);
-  allLeavingAnimations.add(lView);
+  allLeavingAnimations.add(lView[ID]);
   (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
   const activeClasses = getClassListFromValue(value);
   if (activeClasses && activeClasses.length > 0) {
@@ -13215,7 +13215,7 @@ function ɵɵanimateLeaveListener(value) {
   const lView = getLView();
   const tNode = getCurrentTNode();
   cancelLeavingNodes(tNode, lView);
-  allLeavingAnimations.add(lView);
+  allLeavingAnimations.add(lView[ID]);
   addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   return ɵɵanimateLeaveListener;
@@ -14259,7 +14259,7 @@ function clearDetachAnimationList(lContainer, index) {
   if (viewToDetach && animations && animations.detachedLeaveAnimationFns && animations.detachedLeaveAnimationFns.length > 0) {
     const injector = viewToDetach[INJECTOR];
     removeFromAnimationQueue(injector, animations);
-    allLeavingAnimations.delete(viewToDetach);
+    allLeavingAnimations.delete(viewToDetach[ID]);
     animations.detachedLeaveAnimationFns = undefined;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-7738eb9
+ * @license Angular v21.0.6+sha-7c74674
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5775,7 +5775,8 @@ declare class TimerScheduler implements OnDestroy {
  */
 declare function ɵassertType<T>(value: unknown): asserts value is T;
 
-declare const allLeavingAnimations: Set<LView<unknown>>;
+/** Tracks the IDs of LViews with leaving animations. */
+declare const allLeavingAnimations: Set<number>;
 
 declare function compileNgModuleFactory<M>(injector: Injector, options: CompilerOptions, moduleType: Type$1<M>): Promise<NgModuleFactory$1<M>>;
 
