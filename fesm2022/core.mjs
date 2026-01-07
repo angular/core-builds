@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-next.4+sha-5c75d29
+ * @license Angular v21.1.0-next.4+sha-bb0dc8c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1278,7 +1278,7 @@ function provideStabilityDebugging() {
     useValue: taskTracker
   }, provideAppInitializer(() => {
     if (typeof ngDevMode === 'undefined' || !ngDevMode) {
-      console.warn('Stability debugging untility was provided in production mode. ' + 'This will cause debug code to be included in production bundles. ' + 'If this is intentional because you are debugging stability issues in a production environment, you can ignore this warning.');
+      console.warn('Stability debugging utility was provided in production mode. ' + 'This will cause debug code to be included in production bundles. ' + 'If this is intentional because you are debugging stability issues in a production environment, you can ignore this warning.');
     }
     const ngZone = inject(NgZone);
     const applicationRef = inject(ApplicationRef);
