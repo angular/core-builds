@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -11,12 +11,12 @@ var compilerCli = require('@angular/compiler-cli');
 var fs = require('fs');
 var path = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-DBwYMlTo.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
-var nodes = require('./nodes-B16H9JUd.cjs');
-var symbol = require('./symbol-BObKoqes.cjs');
-var imports = require('./imports-DP72APSx.cjs');
+var compiler_host = require('./compiler_host-CY14HvaP.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
+var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
+var nodes = require('./nodes-ZSQ7WZRB.cjs');
+var symbol = require('./symbol-DZeHSR-V.cjs');
+var imports = require('./imports-CVmcbVA9.cjs');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('@angular-devkit/core');
 

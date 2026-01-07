@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -10,17 +10,17 @@ var ts = require('typescript');
 require('@angular/compiler-cli');
 require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-DvD50ouC.cjs');
-var ng_component_template = require('./ng_component_template-Dsuq1Lw7.cjs');
+var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var ng_component_template = require('./ng_component_template-BOuKAnQd.cjs');
 var compiler = require('@angular/compiler');
-var parse_html = require('./parse_html-8VLCL37B.cjs');
+var parse_html = require('./parse_html-C8eKA9px.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-require('./ng_decorators-DSFlWYQY.cjs');
-require('./imports-DP72APSx.cjs');
-require('./property_name-BBwFuqMe.cjs');
+require('./project_tsconfig_paths-DkkMibv-.cjs');
+require('./ng_decorators-DYy6II6x.cjs');
+require('./imports-CVmcbVA9.cjs');
+require('./property_name-BCpALNpZ.cjs');
 
 function migrateTemplateToSelfClosingTags(template) {
     let parsed = parse_html.parseTemplate(template);

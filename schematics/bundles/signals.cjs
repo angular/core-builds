@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -14,16 +14,16 @@ require('@angular/compiler-cli/private/migrations');
 require('typescript');
 require('@angular/compiler-cli');
 require('node:path');
-require('./project_paths-DvD50ouC.cjs');
+require('./project_paths-D2V-Uh2L.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-require('./apply_import_manager-1Zs_gpB6.cjs');
-require('./migrate_ts_type_references--PJz69_w.cjs');
+require('./project_tsconfig_paths-DkkMibv-.cjs');
+require('./apply_import_manager-CxA_YYgB.cjs');
+require('./migrate_ts_type_references-BV4tRqlo.cjs');
 require('assert');
-require('./index-CP6pC5TJ.cjs');
+require('./index-DU0sgNaL.cjs');
 require('@angular/compiler');
-require('./leading_space-D9nQ8UQC.cjs');
+require('./leading_space-BTPRV0wu.cjs');
 
 function migrate(options) {
     // The migrations are independent so we can run them in any order, but we sort them here

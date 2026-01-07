@@ -1,24 +1,24 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-DvD50ouC.cjs');
+var project_paths = require('./project_paths-D2V-Uh2L.cjs');
 require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
-var property_name = require('./property_name-BBwFuqMe.cjs');
-var imports = require('./imports-DP72APSx.cjs');
-var symbol = require('./symbol-BObKoqes.cjs');
+var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
+var property_name = require('./property_name-BCpALNpZ.cjs');
+var imports = require('./imports-CVmcbVA9.cjs');
+var symbol = require('./symbol-DZeHSR-V.cjs');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('./project_tsconfig_paths-DkkMibv-.cjs');
 
 const CORE_PACKAGE = '@angular/core';
 const PROVIDE_ZONE_CHANGE_DETECTION = 'provideZoneChangeDetection';

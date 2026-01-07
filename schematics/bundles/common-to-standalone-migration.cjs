@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -10,16 +10,16 @@ var ts = require('typescript');
 require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-DvD50ouC.cjs');
-var ng_component_template = require('./ng_component_template-Dsuq1Lw7.cjs');
-var ng_decorators = require('./ng_decorators-DSFlWYQY.cjs');
-var apply_import_manager = require('./apply_import_manager-1Zs_gpB6.cjs');
-var imports = require('./imports-DP72APSx.cjs');
+var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var ng_component_template = require('./ng_component_template-BOuKAnQd.cjs');
+var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
+var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
+var imports = require('./imports-CVmcbVA9.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
-require('./property_name-BBwFuqMe.cjs');
+require('./project_tsconfig_paths-DkkMibv-.cjs');
+require('./property_name-BCpALNpZ.cjs');
 
 const commonModuleStr = 'CommonModule';
 const angularCommonStr = '@angular/common';

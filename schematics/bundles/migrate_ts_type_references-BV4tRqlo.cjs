@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -9,9 +9,9 @@
 var assert = require('assert');
 var ts = require('typescript');
 var migrations = require('@angular/compiler-cli/private/migrations');
-var index = require('./index-CP6pC5TJ.cjs');
-var project_paths = require('./project_paths-DvD50ouC.cjs');
-var leading_space = require('./leading_space-D9nQ8UQC.cjs');
+var index = require('./index-DU0sgNaL.cjs');
+var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var leading_space = require('./leading_space-BTPRV0wu.cjs');
 require('@angular/compiler-cli');
 require('node:path');
 

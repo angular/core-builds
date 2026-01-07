@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-97fd1de
- * (c) 2010-2025 Google LLC. https://angular.io/
+ * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
@@ -10,13 +10,13 @@ var ts = require('typescript');
 require('@angular/compiler-cli');
 require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-DvD50ouC.cjs');
-var imports = require('./imports-DP72APSx.cjs');
-var symbol = require('./symbol-BObKoqes.cjs');
+var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var imports = require('./imports-CVmcbVA9.cjs');
+var symbol = require('./symbol-DZeHSR-V.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-CDVxT6Ov.cjs');
+require('./project_tsconfig_paths-DkkMibv-.cjs');
 
 /** Name of the method being replaced. */
 const METHOD_NAME = 'getCurrentNavigation';
