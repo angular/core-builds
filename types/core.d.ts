@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.6+sha-c3adc5a
+ * @license Angular v21.0.6+sha-ff53175
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8108,12 +8108,11 @@ declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, 
  *
  * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn Function that returns a value
- * @param thisArg Optional calling context of pureFn
  * @returns value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction0<T>(slotOffset: number, pureFn: () => T, thisArg?: any): T;
+declare function ɵɵpureFunction0<T>(slotOffset: number, pureFn: () => T): T;
 /**
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
@@ -8121,12 +8120,11 @@ declare function ɵɵpureFunction0<T>(slotOffset: number, pureFn: () => T, thisA
  * @param slotOffset the offset from binding root to the reserved slot
  * @param pureFn Function that returns an updated value
  * @param exp Updated expression value
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+declare function ɵɵpureFunction1(slotOffset: number, pureFn: (v: any) => any, exp: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8135,12 +8133,11 @@ declare function ɵɵpureFunction1(slotOffset: number, pureFn: (v: any) => any, 
  * @param pureFn
  * @param exp1
  * @param exp2
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+declare function ɵɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8150,12 +8147,11 @@ declare function ɵɵpureFunction2(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp1
  * @param exp2
  * @param exp3
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+declare function ɵɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8166,7 +8162,6 @@ declare function ɵɵpureFunction3(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp2
  * @param exp3
  * @param exp4
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
@@ -8183,12 +8178,11 @@ declare function ɵɵpureFunction4(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp3
  * @param exp4
  * @param exp5
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, thisArg?: any): any;
+declare function ɵɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8201,12 +8195,11 @@ declare function ɵɵpureFunction5(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp4
  * @param exp5
  * @param exp6
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, thisArg?: any): any;
+declare function ɵɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8220,12 +8213,11 @@ declare function ɵɵpureFunction6(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp5
  * @param exp6
  * @param exp7
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, thisArg?: any): any;
+declare function ɵɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any): any;
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
@@ -8240,12 +8232,11 @@ declare function ɵɵpureFunction7(slotOffset: number, pureFn: (v1: any, v2: any
  * @param exp6
  * @param exp7
  * @param exp8
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any, thisArg?: any): any;
+declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, exp5: any, exp6: any, exp7: any, exp8: any): any;
 /**
  * pureFunction instruction that can support any number of bindings.
  *
@@ -8256,12 +8247,11 @@ declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, v2: any
  * @param pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param exps An array of binding values
- * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  *
  * @codeGenApi
  */
-declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
+declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[]): any;
 
 /**
  *
