@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.1.0-next.4+sha-85ce5f3
+ * @license Angular v21.1.0-next.4+sha-80b0fbb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -349,7 +349,8 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
     // E.g. `{bla}` may be transformed to `{bla: bla()}`.
     visitLiteralMap(ast, context) {
         for (const [idx, key] of ast.keys.entries()) {
-            this.isInsideObjectShorthandExpression = !!key.isShorthandInitialized;
+            this.isInsideObjectShorthandExpression =
+                key.kind === 'property' && !!key.isShorthandInitialized;
             ast.values[idx].visit(this, context);
             this.isInsideObjectShorthandExpression = false;
         }
