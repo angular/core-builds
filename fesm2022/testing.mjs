@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.7+sha-8ff2776
+ * @license Angular v21.0.7+sha-5239e47
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1623,7 +1623,7 @@ class FakeNavigation {
   navigateEvent = null;
   traversalQueue = new Map();
   nextTraversal = Promise.resolve();
-  prospectiveEntryIndex = 0;
+  propsectiveTraversalDestinations = [];
   synchronousTraversals = false;
   canSetInitialEntry = true;
   eventTarget;
@@ -1784,7 +1784,7 @@ class FakeNavigation {
       index: entry.index,
       sameDocument: entry.sameDocument
     });
-    this.prospectiveEntryIndex = entry.index;
+    this.propsectiveTraversalDestinations.push(entry.index);
     const result = new InternalNavigationResult(this);
     this.traversalQueue.set(entry.key, result);
     this.runTraversal(() => {
@@ -1837,11 +1837,11 @@ class FakeNavigation {
     return this.traverseTo(entry.key, options);
   }
   go(direction) {
-    const targetIndex = this.prospectiveEntryIndex + direction;
+    const targetIndex = (this.propsectiveTraversalDestinations[this.propsectiveTraversalDestinations.length - 1] ?? this.currentEntryIndex) + direction;
     if (targetIndex >= this.entriesArr.length || targetIndex < 0) {
       return;
     }
-    this.prospectiveEntryIndex = targetIndex;
+    this.propsectiveTraversalDestinations.push(targetIndex);
     this.runTraversal(() => {
       if (targetIndex >= this.entriesArr.length || targetIndex < 0) {
         return;
@@ -1874,6 +1874,7 @@ class FakeNavigation {
   runTraversal(traversal) {
     if (this.synchronousTraversals) {
       traversal();
+      this.propsectiveTraversalDestinations.shift();
       return;
     }
     this.nextTraversal = this.nextTraversal.then(() => {
@@ -1881,6 +1882,7 @@ class FakeNavigation {
         setTimeout(() => {
           resolve();
           traversal();
+          this.propsectiveTraversalDestinations.shift();
         });
       });
     });
@@ -1958,7 +1960,7 @@ class FakeNavigation {
       }
     } else if (navigationType === 'push') {
       this.currentEntryIndex++;
-      this.prospectiveEntryIndex = this.currentEntryIndex;
+      this.propsectiveTraversalDestinations = [];
       disposedNHEs.push(...this.entriesArr.splice(this.currentEntryIndex));
     } else if (navigationType === 'replace') {
       disposedNHEs.push(oldCurrentNHE);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.0.7+sha-8ff2776
+ * @license Angular v21.0.7+sha-5239e47
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -593,7 +593,7 @@ declare class FakeNavigation implements Navigation {
      * A prospective current active entry index, which includes unresolved
      * traversals. Used by `go` to determine where navigations are intended to go.
      */
-    private prospectiveEntryIndex;
+    private propsectiveTraversalDestinations;
     /**
      * A test-only option to make traversals synchronous, rather than emulate
      * cross-process communication.
