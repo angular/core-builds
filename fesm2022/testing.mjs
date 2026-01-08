@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-rc.0+sha-6ad2ef6
+ * @license Angular v21.1.0-rc.0+sha-74af7d8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1652,7 +1652,7 @@ class FakeNavigation {
         return new EventTarget();
       }
     };
-    this._window = document.defaultView ?? this.createEventTarget();
+    this._window = doc.defaultView ?? this.createEventTarget();
     this.eventTarget = this.createEventTarget();
     this.setInitialEntryForTesting(startURL);
   }
