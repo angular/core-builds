@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-rc.0+sha-a59f51f
+ * @license Angular v21.1.0-rc.0+sha-c7d6053
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8116,7 +8116,7 @@ function controlBinding(binding, tNode) {
   return directive[ɵCONTROL];
 }
 function inputBinding(publicName, value) {
-  if (publicName === 'field') {
+  if (publicName === 'formField') {
     const binding = {
       [BINDING]: FIELD_BINDING_METADATA,
       create: () => {
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-rc.0+sha-a59f51f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-rc.0+sha-c7d6053'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13328,7 +13328,7 @@ function updateControl(lView, tNode) {
 }
 function initializeControlFirstCreatePass(tView, tNode, lView) {
   ngDevMode && assertFirstCreatePass(tView);
-  const directiveIndices = tNode.inputs?.['field'] ?? tNode.inputs?.['formField'];
+  const directiveIndices = tNode.inputs?.['formField'];
   if (!directiveIndices) {
     return;
   }
@@ -13344,7 +13344,7 @@ function initializeControlFirstCreatePass(tView, tNode, lView) {
   if (isNativeControlFirstCreatePass(tNode) || foundControl) {
     return;
   }
-  throw new RuntimeError(318, ngDevMode && `${describeElement(tView, tNode)} is an invalid [field] directive host. The host must be a native form control ` + `(such as <input>', '<select>', or '<textarea>') or a custom form control with a 'value' or ` + `'checked' model.`);
+  throw new RuntimeError(318, ngDevMode && `${describeElement(tView, tNode)} is an invalid [formField] directive host. The host must be a native form control ` + `(such as <input>', '<select>', or '<textarea>') or a custom form control with a 'value' or ` + `'checked' model.`);
 }
 function describeElement(tView, tNode) {
   if (ngDevMode && isComponentHost(tNode)) {

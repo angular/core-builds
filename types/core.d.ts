@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-rc.0+sha-a59f51f
+ * @license Angular v21.1.0-rc.0+sha-c7d6053
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6719,7 +6719,7 @@ declare function ɵɵcontrol<T>(value: T, name: string, sanitizer?: SanitizerFn 
  * Calls {@link updateControl} with the current `LView` and selected `TNode`.
  *
  * NOTE: This instruction exists solely to accommodate tree-shakeable, dynamic control bindings.
- * It's intended to be referenced exclusively by the Signal Forms `Field` directive and should not
+ * It's intended to be referenced exclusively by the Signal Forms `FormField` directive and should not
  * be referenced by any other means.
  */
 declare function ɵcontrolUpdate(): void;
