@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.0.8+sha-5bc072e
+ * @license Angular v21.0.8+sha-615a77b
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -107,10 +107,14 @@ function createCommonModuleImportsArrayRemoval(classNode, file, typeChecker, nee
             return true;
         return !isCommonModuleFromAngularCommon(typeChecker, el);
     });
-    const newElements = [
-        ...filteredElements,
-        ...neededImports.sort().map((imp) => ts.factory.createIdentifier(imp)),
-    ];
+    // Get existing import names to avoid duplicates
+    const existingImportNames = new Set(filteredElements.filter((el) => ts.isIdentifier(el)).map((el) => el.getText()));
+    // Only add imports that don't already exist
+    const importsToAdd = neededImports
+        .filter((imp) => !existingImportNames.has(imp))
+        .sort()
+        .map((imp) => ts.factory.createIdentifier(imp));
+    const newElements = [...filteredElements, ...importsToAdd];
     if (newElements.length === originalElements.length && neededImports.length === 0) {
         return null;
     }
