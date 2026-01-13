@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.2.0-next.0+sha-69da639
+ * @license Angular v21.2.0-next.0+sha-e8f8ac2
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -158,15 +158,16 @@ var BinaryOperator;
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 18] = "NullishCoalesce";
     BinaryOperator[BinaryOperator["Exponentiation"] = 19] = "Exponentiation";
     BinaryOperator[BinaryOperator["In"] = 20] = "In";
-    BinaryOperator[BinaryOperator["AdditionAssignment"] = 21] = "AdditionAssignment";
-    BinaryOperator[BinaryOperator["SubtractionAssignment"] = 22] = "SubtractionAssignment";
-    BinaryOperator[BinaryOperator["MultiplicationAssignment"] = 23] = "MultiplicationAssignment";
-    BinaryOperator[BinaryOperator["DivisionAssignment"] = 24] = "DivisionAssignment";
-    BinaryOperator[BinaryOperator["RemainderAssignment"] = 25] = "RemainderAssignment";
-    BinaryOperator[BinaryOperator["ExponentiationAssignment"] = 26] = "ExponentiationAssignment";
-    BinaryOperator[BinaryOperator["AndAssignment"] = 27] = "AndAssignment";
-    BinaryOperator[BinaryOperator["OrAssignment"] = 28] = "OrAssignment";
-    BinaryOperator[BinaryOperator["NullishCoalesceAssignment"] = 29] = "NullishCoalesceAssignment";
+    BinaryOperator[BinaryOperator["InstanceOf"] = 21] = "InstanceOf";
+    BinaryOperator[BinaryOperator["AdditionAssignment"] = 22] = "AdditionAssignment";
+    BinaryOperator[BinaryOperator["SubtractionAssignment"] = 23] = "SubtractionAssignment";
+    BinaryOperator[BinaryOperator["MultiplicationAssignment"] = 24] = "MultiplicationAssignment";
+    BinaryOperator[BinaryOperator["DivisionAssignment"] = 25] = "DivisionAssignment";
+    BinaryOperator[BinaryOperator["RemainderAssignment"] = 26] = "RemainderAssignment";
+    BinaryOperator[BinaryOperator["ExponentiationAssignment"] = 27] = "ExponentiationAssignment";
+    BinaryOperator[BinaryOperator["AndAssignment"] = 28] = "AndAssignment";
+    BinaryOperator[BinaryOperator["OrAssignment"] = 29] = "OrAssignment";
+    BinaryOperator[BinaryOperator["NullishCoalesceAssignment"] = 30] = "NullishCoalesceAssignment";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
