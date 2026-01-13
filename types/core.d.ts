@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-rc.0+sha-bf5db2b
+ * @license Angular v21.1.0-rc.0+sha-114d03f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -658,7 +658,8 @@ type SimpleChanges<T = unknown> = T extends object ? {
 
 /**
  * @description
- * A lifecycle hook that is called when any data-bound property of a directive changes.
+ * A lifecycle hook that is called when the value of one or more component or directive inputs
+ * change. This includes both signal-based and decorator-based inputs.
  * Define an `ngOnChanges()` method to handle the changes.
  *
  * @see {@link DoCheck}
@@ -667,9 +668,19 @@ type SimpleChanges<T = unknown> = T extends object ? {
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
- * define an on-changes handler for an input property.
+ * define an on-changes handler for an input property. While you should prefer
+ * `computed` and `effect` when working with signal-based inputs, the `ngOnChanges`
+ * method does include value changes for signal-based inputs.
  *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnChanges'}
+ * ```ts
+ * @Component({ ... })
+ * export class UserProfile implements OnChanges {
+ *   userId = input<number>(0);
+ *   ngOnChanges(changes: SimpleChanges<UserProfile>) {
+ *     // changes.userId contains the old and new value.
+ *   }
+ * }
+ * ```
  *
  * @publicApi
  */
