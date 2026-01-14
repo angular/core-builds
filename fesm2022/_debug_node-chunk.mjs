@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0-rc.0+sha-654ed65
+ * @license Angular v21.1.0-rc.0+sha-1ea5c97
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-rc.0+sha-654ed65'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0-rc.0+sha-1ea5c97'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13278,21 +13278,21 @@ function ɵɵcontrolCreate() {
   if (tView.firstCreatePass) {
     initializeControlFirstCreatePass(tView, tNode, lView);
   }
-  const control = getControlDirective(tNode, lView);
-  if (!control) {
+  const fieldDirective = getFieldDirective(tNode, lView);
+  if (!fieldDirective) {
     return;
   }
   performanceMarkFeature('NgSignalForms');
   if (tNode.flags & 1024) {
-    listenToCustomControl(lView, tNode, control, 'value');
+    initializeCustomControl(lView, tNode, fieldDirective, 'value');
   } else if (tNode.flags & 2048) {
-    listenToCustomControl(lView, tNode, control, 'checked');
+    initializeCustomControl(lView, tNode, fieldDirective, 'checked');
   } else if (tNode.flags & 4096) {
-    listenToInteropControl(control);
-  } else {
-    listenToNativeControl(lView, tNode, control);
+    initializeInteropControl(fieldDirective);
+  } else if (tNode.flags & 8192) {
+    initializeNativeControl(lView, tNode, fieldDirective);
   }
-  control.ɵregister();
+  fieldDirective.ɵregister();
 }
 function ɵɵcontrol(value, name, sanitizer) {
   const lView = getLView();
@@ -13311,17 +13311,17 @@ function ɵcontrolUpdate() {
   updateControl(lView, tNode);
 }
 function updateControl(lView, tNode) {
-  const control = getControlDirective(tNode, lView);
-  if (control) {
-    updateControlClasses(lView, tNode, control);
+  const fieldDirective = getFieldDirective(tNode, lView);
+  if (fieldDirective) {
+    updateControlClasses(lView, tNode, fieldDirective);
     if (tNode.flags & 1024) {
-      updateCustomControl(tNode, lView, control, 'value');
+      updateCustomControl(tNode, lView, fieldDirective, 'value');
     } else if (tNode.flags & 2048) {
-      updateCustomControl(tNode, lView, control, 'checked');
+      updateCustomControl(tNode, lView, fieldDirective, 'checked');
     } else if (tNode.flags & 4096) {
-      updateInteropControl(tNode, lView, control);
+      updateInteropControl(tNode, lView, fieldDirective);
     } else {
-      updateNativeControl(tNode, lView, control);
+      updateNativeControl(tNode, lView, fieldDirective);
     }
   }
   nextBindingIndex();
@@ -13391,7 +13391,7 @@ function isNativeControlFirstCreatePass(tNode) {
   }
   return true;
 }
-function getControlDirective(tNode, lView) {
+function getFieldDirective(tNode, lView) {
   const index = tNode.fieldIndex;
   return index === -1 ? null : lView[index];
 }
@@ -13404,21 +13404,24 @@ function hasInput(directiveDef, name) {
 function hasOutput(directiveDef, name) {
   return name in directiveDef.outputs;
 }
-function listenToCustomControl(lView, tNode, control, modelName) {
+function initializeCustomControl(lView, tNode, fieldDirective, modelName) {
   const tView = getTView();
   const directiveIndex = tNode.customControlIndex;
   const outputName = modelName + 'Change';
-  listenToOutput(tNode, lView, directiveIndex, outputName, outputName, wrapListener(tNode, lView, value => control.state().setControlValue(value)));
+  listenToOutput(tNode, lView, directiveIndex, outputName, outputName, wrapListener(tNode, lView, value => fieldDirective.state().setControlValue(value)));
   const directiveDef = tView.data[directiveIndex];
   const touchedOutputName = 'touchedChange';
   if (hasOutput(directiveDef, touchedOutputName)) {
-    listenToOutput(tNode, lView, directiveIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => control.state().markAsTouched()));
+    listenToOutput(tNode, lView, directiveIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => fieldDirective.state().markAsTouched()));
   }
+  const customControl = lView[directiveIndex];
+  fieldDirective.focus = () => customControl.focus ? customControl.focus() : fieldDirective.element.focus();
 }
-function listenToInteropControl(control) {
-  const interopControl = control.ɵinteropControl;
-  interopControl.registerOnChange(value => control.state().setControlValue(value));
-  interopControl.registerOnTouched(() => control.state().markAsTouched());
+function initializeInteropControl(fieldDirective) {
+  const interopControl = fieldDirective.ɵinteropControl;
+  interopControl.registerOnChange(value => fieldDirective.state().setControlValue(value));
+  interopControl.registerOnTouched(() => fieldDirective.state().markAsTouched());
+  fieldDirective.focus = () => fieldDirective.element.focus();
 }
 function isNativeControl(tNode) {
   if (tNode.type !== 2) {
@@ -13427,23 +13430,24 @@ function isNativeControl(tNode) {
   const tagName = tNode.value;
   return tagName === 'input' || tagName === 'textarea' || tagName === 'select';
 }
-function listenToNativeControl(lView, tNode, control) {
+function initializeNativeControl(lView, tNode, fieldDirective) {
   const tView = getTView();
   const renderer = lView[RENDERER];
   const element = getNativeByTNode(tNode, lView);
   const inputListener = () => {
-    const state = control.state();
+    const state = fieldDirective.state();
     state.setControlValue(getNativeControlValue(element, state.value));
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'input', inputListener, wrapListener(tNode, lView, inputListener));
   const blurListener = () => {
-    control.state().markAsTouched();
+    fieldDirective.state().markAsTouched();
   };
   listenToDomEvent(tNode, tView, lView, undefined, renderer, 'blur', blurListener, wrapListener(tNode, lView, blurListener));
   if (tNode.type === 2 && tNode.value === 'select' && typeof MutationObserver === 'function') {
-    const observer = observeSelectMutations(element, control);
+    const observer = observeSelectMutations(element, fieldDirective);
     storeCleanupWithContext(tView, lView, observer, observer.disconnect);
   }
+  fieldDirective.focus = () => element.focus();
 }
 function observeSelectMutations(select, controlDirective) {
   const observer = new MutationObserver(mutations => {
