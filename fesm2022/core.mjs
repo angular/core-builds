@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-074666b
+ * @license Angular v21.2.0-next.0+sha-c9f584b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -903,7 +903,6 @@ function isDevMode() {
 function enableProdMode() {
   if (typeof ngDevMode === 'undefined' || ngDevMode) {
     _global['ngDevMode'] = false;
-    _global['ng'] = undefined;
   }
 }
 
