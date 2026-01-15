@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.0+sha-aa39f87
+ * @license Angular v21.1.0+sha-ded654d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0+sha-aa39f87'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.0+sha-ded654d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -16256,6 +16256,10 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
   if (Array.isArray(unwrappedValue)) {
     for (let i = 0; i < unwrappedValue.length; i++) {
       keyValueArraySet(styleKeyValueArray, unwrappedValue[i], true);
+    }
+  } else if (unwrappedValue instanceof Set) {
+    for (const current of unwrappedValue) {
+      keyValueArraySet(styleKeyValueArray, current, true);
     }
   } else if (typeof unwrappedValue === 'object') {
     for (const key in unwrappedValue) {
