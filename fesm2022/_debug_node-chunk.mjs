@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-a792315
+ * @license Angular v21.2.0-next.0+sha-87f4797
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-a792315'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-87f4797'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13292,7 +13292,7 @@ function ɵɵcontrolCreate() {
   } else if (tNode.flags & 8192) {
     initializeNativeControl(lView, tNode, fieldDirective);
   }
-  fieldDirective.ɵregister();
+  fieldDirective.registerAsBinding(getCustomControl(tNode, lView));
 }
 function ɵɵcontrol(value, name, sanitizer) {
   const lView = getLView();
@@ -13393,7 +13393,11 @@ function isNativeControlFirstCreatePass(tNode) {
 }
 function getFieldDirective(tNode, lView) {
   const index = tNode.fieldIndex;
-  return index === -1 ? null : lView[index];
+  return index === -1 ? undefined : lView[index];
+}
+function getCustomControl(tNode, lView) {
+  const index = tNode.customControlIndex;
+  return index === -1 ? undefined : lView[index];
 }
 function hasModelInput(directiveDef, name) {
   return hasInput(directiveDef, name) && hasOutput(directiveDef, name + 'Change');
@@ -13414,14 +13418,11 @@ function initializeCustomControl(lView, tNode, fieldDirective, modelName) {
   if (hasOutput(directiveDef, touchedOutputName)) {
     listenToOutput(tNode, lView, directiveIndex, touchedOutputName, touchedOutputName, wrapListener(tNode, lView, () => fieldDirective.state().markAsTouched()));
   }
-  const customControl = lView[directiveIndex];
-  fieldDirective.focus = () => customControl.focus ? customControl.focus() : fieldDirective.element.focus();
 }
 function initializeInteropControl(fieldDirective) {
   const interopControl = fieldDirective.ɵinteropControl;
   interopControl.registerOnChange(value => fieldDirective.state().setControlValue(value));
   interopControl.registerOnTouched(() => fieldDirective.state().markAsTouched());
-  fieldDirective.focus = () => fieldDirective.element.focus();
 }
 function isNativeControl(tNode) {
   if (tNode.type !== 2) {
@@ -13447,7 +13448,6 @@ function initializeNativeControl(lView, tNode, fieldDirective) {
     const observer = observeSelectMutations(element, fieldDirective);
     storeCleanupWithContext(tView, lView, observer, observer.disconnect);
   }
-  fieldDirective.focus = () => element.focus();
 }
 function observeSelectMutations(select, controlDirective) {
   const observer = new MutationObserver(mutations => {
