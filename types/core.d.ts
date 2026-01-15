@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-417c385
+ * @license Angular v21.2.0-next.0+sha-d9c980a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7716,7 +7716,7 @@ declare function ɵɵstyleMap(styles: {
  */
 declare function ɵɵclassMap(classes: {
     [className: string]: boolean | undefined | null;
-} | string | undefined | null): void;
+} | string | string[] | Set<string> | undefined | null): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
