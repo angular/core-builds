@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-e55260f-with-local-changes
+ * @license Angular v21.2.0-next.0+sha-5d46554-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8576,7 +8576,7 @@ interface ɵFormFieldDirective<T> {
 /** A custom UI control for signal forms. */
 interface ɵFormFieldBindingOptions {
     /** Focuses the custom control. */
-    focus?(): void;
+    focus?(options?: FocusOptions): void;
 }
 /** Mirrors the `ControlValueAccessor` interface for interoperability.  */
 interface ɵInteropControl {
