@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-fc73252
+ * @license Angular v21.2.0-next.0+sha-75c40e7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9006,6 +9006,8 @@ interface DeferBlockData {
     };
     /** Stringified version of the block's triggers. */
     triggers: string[];
+    /** The comment host/container node next to which all of the root nodes are rendered. */
+    hostNode: Node;
     /** Element root nodes that are currently being shown in the block. */
     rootNodes: Node[];
 }

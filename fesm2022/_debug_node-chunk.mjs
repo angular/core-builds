@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-fc73252
+ * @license Angular v21.2.0-next.0+sha-75c40e7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-fc73252'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-75c40e7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10848,6 +10848,7 @@ function findDeferBlocks(node, lView, results) {
         minimumTime: tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null
       },
       triggers: tDetails.debug?.triggers ? Array.from(tDetails.debug.triggers).sort() : [],
+      hostNode: details.lContainer[HOST],
       rootNodes
     };
     results.push(data);
