@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-085784e
+ * @license Angular v21.2.0-next.0+sha-ebae211
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8313,7 +8313,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-085784e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-ebae211'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13506,12 +13506,12 @@ function updateControlClasses(lView, tNode, control) {
     }
   }
 }
-function updateCustomControl(tNode, lView, control, modelName) {
+function updateCustomControl(tNode, lView, fieldDirective, modelName) {
   const tView = getTView();
   const directiveIndex = tNode.customControlIndex;
   const directive = lView[directiveIndex];
   const directiveDef = tView.data[directiveIndex];
-  const state = control.state();
+  const state = fieldDirective.state();
   const bindings = getControlBindings(lView);
   const controlValue = state.controlValue();
   if (controlBindingUpdated(bindings, CONTROL_VALUE, controlValue)) {
@@ -13521,9 +13521,9 @@ function updateCustomControl(tNode, lView, control, modelName) {
   const element = isNative ? getNativeByTNode(tNode, lView) : null;
   const renderer = lView[RENDERER];
   for (const key of CONTROL_BINDING_KEYS) {
-    const value = state[key]?.();
+    const inputName = CONTROL_BINDING_NAMES[key];
+    const value = getValue(fieldDirective, state, key, inputName);
     if (controlBindingUpdated(bindings, key, value)) {
-      const inputName = CONTROL_BINDING_NAMES[key];
       updateDirectiveInputs(tNode, lView, inputName, value);
       if (isNative && !(inputName in directiveDef.inputs)) {
         updateNativeProperty(tNode, renderer, element, key, value, inputName);
@@ -13531,10 +13531,10 @@ function updateCustomControl(tNode, lView, control, modelName) {
     }
   }
 }
-function updateInteropControl(tNode, lView, control) {
-  const interopControl = control.ɵinteropControl;
+function updateInteropControl(tNode, lView, fieldDirective) {
+  const interopControl = fieldDirective.ɵinteropControl;
   const bindings = getControlBindings(lView);
-  const state = control.state();
+  const state = fieldDirective.state();
   const isNative = (tNode.flags & 8192) !== 0;
   const element = isNative ? getNativeByTNode(tNode, lView) : null;
   const renderer = lView[RENDERER];
@@ -13543,9 +13543,9 @@ function updateInteropControl(tNode, lView, control) {
     untracked(() => interopControl.writeValue(value));
   }
   for (const key of CONTROL_BINDING_KEYS) {
-    const value = state[key]?.();
+    const inputName = CONTROL_BINDING_NAMES[key];
+    const value = getValue(fieldDirective, state, key, inputName);
     if (controlBindingUpdated(bindings, key, value)) {
-      const inputName = CONTROL_BINDING_NAMES[key];
       const didUpdateInput = updateDirectiveInputs(tNode, lView, inputName, value);
       if (key === DISABLED) {
         if (interopControl.setDisabledState) {
@@ -13557,23 +13557,29 @@ function updateInteropControl(tNode, lView, control) {
     }
   }
 }
-function updateNativeControl(tNode, lView, control) {
+function updateNativeControl(tNode, lView, fieldDirective) {
   const element = getNativeByTNode(tNode, lView);
   const renderer = lView[RENDERER];
-  const state = control.state();
+  const state = fieldDirective.state();
   const bindings = getControlBindings(lView);
   const controlValue = state.controlValue();
   if (controlBindingUpdated(bindings, CONTROL_VALUE, controlValue)) {
     setNativeControlValue(element, controlValue);
   }
   for (const key of CONTROL_BINDING_KEYS) {
-    const value = state[key]?.();
+    const inputName = CONTROL_BINDING_NAMES[key];
+    const value = getValue(fieldDirective, state, key, inputName);
     if (controlBindingUpdated(bindings, key, value)) {
-      const inputName = CONTROL_BINDING_NAMES[key];
       updateNativeProperty(tNode, renderer, element, key, value, inputName);
       updateDirectiveInputs(tNode, lView, inputName, value);
     }
   }
+}
+function getValue(fieldDirective, state, fieldStateKey, inputName) {
+  if (inputName === 'errors') {
+    return fieldDirective[fieldStateKey]();
+  }
+  return state[fieldStateKey]?.();
 }
 function updateDirectiveInputs(tNode, lView, inputName, value) {
   const directiveIndices = tNode.inputs?.[inputName];
