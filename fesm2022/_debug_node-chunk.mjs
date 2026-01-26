@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-1d17779
+ * @license Angular v21.2.0-next.0+sha-8efee1c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1017,8 +1017,9 @@ function getNodeInjectable(lView, tView, index, tNode, flags) {
     const factory = value;
     ngDevMode && injectionPath.push(factory.name ?? 'unknown');
     if (factory.resolving) {
-      const token = stringifyForError(tData[index]);
+      let token = '';
       if (ngDevMode) {
+        token = stringifyForError(tData[index]);
         throw cyclicDependencyErrorWithDetails(token, injectionPath);
       } else {
         throw cyclicDependencyError(token);
@@ -8313,7 +8314,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-1d17779'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.0+sha-8efee1c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -16399,18 +16400,18 @@ function ɵɵtext(index, value = '') {
   const adjustedIndex = index + HEADER_OFFSET;
   ngDevMode && assertTNodeCreationIndex(lView, index);
   const tNode = tView.firstCreatePass ? getOrCreateTNode(tView, adjustedIndex, 1, value, null) : tView.data[adjustedIndex];
-  const textNative = _locateOrCreateTextNode(tView, lView, tNode, value, index);
+  const textNative = _locateOrCreateTextNode(tView, lView, tNode, value);
   lView[adjustedIndex] = textNative;
   if (wasLastNodeCreated()) {
     appendChild(tView, lView, textNative, tNode);
   }
   setCurrentTNode(tNode, false);
 }
-let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
+let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
   lastNodeWasCreated(true);
   return createTextNode(lView[RENDERER], value);
 };
-function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
+function locateOrCreateTextNodeImpl(tView, lView, tNode, value) {
   const isNodeCreationMode = !canHydrateNode(lView, tNode);
   lastNodeWasCreated(isNodeCreationMode);
   if (isNodeCreationMode) {
