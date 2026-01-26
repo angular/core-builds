@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-8bbe6dc
+ * @license Angular v21.2.0-next.0+sha-d306737
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9340,6 +9340,8 @@ declare function ɵɵvalidateAttribute(value: unknown, tagName: string, attribut
 
 /**
  * Creates a `Resource` driven by a source of `ResourceSnapshot`s.
+ *
+ * @see [Resource composition with snapshots](guide/signals/resource#resource-composition-with-snapshots)
  *
  * @experimental
  */
