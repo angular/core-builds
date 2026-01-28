@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.1+sha-31e6f0d
+ * @license Angular v21.1.1+sha-affd236
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4751,7 +4751,7 @@ interface DirectiveDecorator {
      *
      * ### Declaring directives
      *
-     * By default, directives are marked as [standalone](guide/components/importing), which makes
+     * By default, directives are marked as standalone, which makes
      * them available to other components in your application.
      *
      * ```ts
@@ -5025,12 +5025,7 @@ interface Directive {
      */
     jit?: true;
     /**
-     * Angular directives marked as `standalone` do not need to be declared in an NgModule. Such
-     * directives don't depend on any "intermediate context" of an NgModule (ex. configured
-     * providers).
-     *
-     * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/components/importing).
+     * Set `standalone` to `false` if you want to import the directive into an NgModule.
      */
     standalone?: boolean;
     /**
@@ -5290,12 +5285,7 @@ interface Component extends Directive {
      */
     preserveWhitespaces?: boolean;
     /**
-     * Angular components marked as `standalone` do not need to be declared in an NgModule. Such
-     * components directly manage their own template dependencies (components, directives, and pipes
-     * used in a template) via the imports property.
-     *
-     * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/components/importing).
+     * Set `standalone` to `false` if you want to import the directive into an NgModule.
      */
     standalone?: boolean;
     /**
@@ -5305,9 +5295,6 @@ interface Component extends Directive {
      *
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
-     *
-     * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/components/importing).
      */
     imports?: (Type<any> | ReadonlyArray<any>)[];
     /**
@@ -5316,9 +5303,6 @@ interface Component extends Directive {
      *
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
-     *
-     * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/components/importing).
      */
     schemas?: SchemaMetadata[];
 }
@@ -5388,9 +5372,6 @@ interface Pipe {
     /**
      * Angular pipes marked as `standalone` do not need to be declared in an NgModule. Such
      * pipes don't depend on any "intermediate context" of an NgModule (ex. configured providers).
-     *
-     * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/components/importing).
      */
     standalone?: boolean;
 }
