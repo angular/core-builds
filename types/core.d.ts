@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.0+sha-bea4cb7
+ * @license Angular v21.2.0-next.0+sha-a4f6d40
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -383,8 +383,6 @@ type ImportProvidersSource = Type$1<unknown> | ModuleWithProviders<unknown> | Ar
  * another environment injector (such as a route injector). They should not be used in component
  * providers.
  *
- * More information about standalone components can be found in [this
- * guide](guide/components/importing).
  *
  * @usageNotes
  * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
@@ -5754,7 +5752,6 @@ declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.
  * This will return false if passed anything other than a Component, Directive, or Pipe class
- * See [this guide](guide/components/importing) for additional information:
  *
  * @param type A reference to a Component, Directive or Pipe.
  * @publicApi
