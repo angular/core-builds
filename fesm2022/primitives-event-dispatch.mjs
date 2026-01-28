@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-5a6fefb
+ * @license Angular v21.2.0-next.1+sha-d072791
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -771,7 +771,7 @@ function bootstrapAppScopedEarlyEventContract(container, appId, bubbleEventTypes
 function getAppScopedQueuedEventInfos(appId, dataContainer = window) {
   return getQueuedEventInfos(dataContainer._ejsas?.[appId]);
 }
-function registerAppScopedDispatcher(restriction, appId, dispatcher, dataContainer = window) {
+function registerAppScopedDispatcher(appId, dispatcher, dataContainer = window) {
   registerDispatcher(dataContainer._ejsas?.[appId], dispatcher);
 }
 function removeAllAppScopedEventListeners(appId, dataContainer = window) {

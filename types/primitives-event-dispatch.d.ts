@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.0-next.1+sha-5a6fefb
+ * @license Angular v21.2.0-next.1+sha-d072791
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { EarlyJsactionDataContainer, EventInfo, Restriction } from './_event_dispatcher-chunk.js';
+import { EarlyJsactionDataContainer, EventInfo } from './_event_dispatcher-chunk.js';
 export { EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, registerDispatcher } from './_event_dispatcher-chunk.js';
 
 declare const Attribute: {
@@ -53,7 +53,7 @@ declare function getAppScopedQueuedEventInfos(appId: string, dataContainer?: Ear
  * Registers a dispatcher function on the `EarlyJsactionData` present on the nested object on the
  * window.
  */
-declare function registerAppScopedDispatcher(restriction: Restriction, appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
+declare function registerAppScopedDispatcher(appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
 /** Removes all event listener handlers. */
 declare function removeAllAppScopedEventListeners(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
 /** Clear the early event contract. */
