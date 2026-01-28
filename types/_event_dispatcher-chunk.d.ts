@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.2+sha-4f0d29d
+ * @license Angular v21.1.2+sha-cfe7340
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -368,5 +368,5 @@ declare class EventDispatcher {
  */
 declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
 
-export { EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, Restriction, registerDispatcher };
+export { EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, registerDispatcher };
 export type { EarlyJsactionDataContainer, EventInfo };
