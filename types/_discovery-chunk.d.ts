@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-d072791
+ * @license Angular v21.2.0-next.1+sha-0e04233
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5595,7 +5595,7 @@ interface HostListenerDecorator {
      *
      * @usageNotes
      *
-     * NOTE:  **Always** prefer using the `host` property over `@HostListener`.
+     * NOTE:  **Always** prefer using the [`host` property](guide/components/host-elements#binding-to-the-host-element) over `@HostListener`.
      * This decorator exist exclusively for backwards compatibility.
      *
      * The following example declares a directive
