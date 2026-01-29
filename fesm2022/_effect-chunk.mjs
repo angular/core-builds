@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-6990f88
+ * @license Angular v21.2.0-next.1+sha-a67e007
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -397,15 +397,6 @@ function signalValueChanged(node) {
   postSignalSetFn?.(node);
 }
 
-function untracked(nonReactiveReadsFn) {
-  const prevConsumer = setActiveConsumer(null);
-  try {
-    return nonReactiveReadsFn();
-  } finally {
-    setActiveConsumer(prevConsumer);
-  }
-}
-
 const BASE_EFFECT_NODE = /* @__PURE__ */(() => ({
   ...REACTIVE_NODE,
   consumerIsAlwaysLive: true,
@@ -428,5 +419,5 @@ function runEffect(node) {
   }
 }
 
-export { BASE_EFFECT_NODE, COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn, untracked };
+export { BASE_EFFECT_NODE, COMPUTING, ERRORED, REACTIVE_NODE, SIGNAL, SIGNAL_NODE, UNSET, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerMarkDirty, consumerPollProducersForChange, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn };
 //# sourceMappingURL=_effect-chunk.mjs.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-6990f88
+ * @license Angular v21.2.0-next.1+sha-a67e007
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1126,6 +1126,10 @@ declare const enum TNodeType {
      * The TNode contains information about a `@let` declaration.
      */
     LetDeclaration = 128,
+    /**
+     * The TNode contains a control directive's update function.
+     */
+    ControlDirective = 256,
     AnyRNode = 3,// Text | Element
     AnyContainer = 12
 }
@@ -1181,26 +1185,7 @@ declare const enum TNodeFlags {
      *
      * This is used to bind to a `ControlValueAccessor` from `@angular/forms`.
      */
-    isInteropControl = 4096,
-    /**
-     * Bit #14 - This bit is set if the node is a native control.
-     *
-     * This is used to determine whether we can bind common control properties to the host element of
-     * a custom control when it doesn't define a corresponding input.
-     */
-    isNativeControl = 8192,
-    /**
-     * Bit #15 - This bit is set if the node is a native control with a numeric type.
-     *
-     * This is used to determine whether the control supports the `min` and `max` properties.
-     */
-    isNativeNumericControl = 16384,
-    /**
-     * Bit #16 - This bit is set if the node is a native text control.
-     *
-     * This is used to determine whether control supports the `minLength` and `maxLength` properties.
-     */
-    isNativeTextControl = 32768
+    isPassThroughControl = 4096
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
@@ -1351,7 +1336,7 @@ interface TNode {
      * Index at which the signal forms field directive is stored.
      * Value is set to -1 if there are no field directives.
      */
-    fieldIndex: number;
+    controlDirectiveIndex: number;
     /**
      * Index at which the custom control directive is stored.
      * Value is set to -1 if there is no custom control directive.
@@ -2310,6 +2295,74 @@ declare enum InputFlags {
 }
 
 /**
+ * A control directive definition that captures control-related behavior for a directive.
+ *
+ * This is the type of `DirectiveDef.controlDef`.
+ *
+ * @see ɵɵControlFeature
+ */
+interface ControlDirectiveDef {
+    readonly passThroughInput: string | null;
+    readonly create: (instance: unknown, host: ControlDirectiveHost) => void;
+    readonly update: (instance: unknown, host: ControlDirectiveHost) => void;
+}
+/**
+ * Interface provided by the runtime to directives that act as form controls, as the argument to
+ * `ɵngControlCreate` and `ɵngControlUpdate` lifecycle hooks.
+ *
+ * @param _TPassthroughInput if given, the name of an input which, if found on other directives,
+ *   will cause the control infrastructure to recognize this usage as "pass-through". This sets
+ *   the `hasPassThrough` flag. This generic is only read by the compiler on the type declaration
+ *   of `ɵngControlCreate`, and has no impact on the type of the host.
+ */
+interface ControlDirectiveHost<_TPassthroughInput extends string | undefined = undefined> {
+    /**
+     * A string that describes this control directive, used for error messages.
+     */
+    readonly descriptor: string;
+    /**
+     * Whether any other directive on the element has an input that matches this directive's
+     * `_TPassThroughInput` declaration.
+     */
+    readonly hasPassThrough: boolean;
+    /**
+     * A `FormUiControl` instance that this directive is declared on.
+     */
+    readonly customControl: unknown | undefined;
+    /**
+     * Registers a listener that will be called when the custom control's value changes.
+     *
+     * This abstracts over the fact that different types of custom controls use different model
+     * names (`value` vs `checked`).
+     */
+    listenToCustomControlModel(listener: (value: unknown) => void): void;
+    /**
+     * Registers a listener that will be called when the custom control emits an output.
+     */
+    listenToCustomControlOutput(outputName: string, listener: () => void): void;
+    /**
+     * Sets the custom control's value.
+     *
+     * This abstracts over the fact that different types of custom controls use different model
+     * names (`value` vs `checked`).
+     */
+    setCustomControlModelInput(value: unknown): void;
+    /**
+     * Checks if the custom control has an input with the given name.
+     */
+    customControlHasInput(inputName: string): boolean;
+    /**
+     * Updates a property binding on all directives on this node, aside from the control directive
+     * itself.
+     */
+    setInputOnDirectives(inputName: string, value: unknown): boolean;
+    /**
+     * Listens to a DOM event on the host element.
+     */
+    listenToDom(eventName: string, listener: (event: Event) => void): void;
+}
+
+/**
  * Definition of what a template rendering function should look like for a component.
  */
 type ComponentTemplate<T> = {
@@ -2510,6 +2563,7 @@ interface DirectiveDef<T> {
      * distinguish if a function in the array is a `Type` or a `() => HostDirectiveConfig[]`.
      */
     hostDirectives: (HostDirectiveDef | (() => HostDirectiveConfig[]))[] | null;
+    controlDef: ControlDirectiveDef | null;
     setInput: (<U extends T>(this: DirectiveDef<U>, instance: U, inputSignalNode: null | InputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
 }
 /**
@@ -7495,4 +7549,4 @@ interface DeferBlockDetails extends DehydratedDeferBlock {
 declare function getDeferBlocks(lView: LView, deferBlocks: DeferBlockDetails[]): void;
 
 export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, InputFlags, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryFlags, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
-export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
+export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
