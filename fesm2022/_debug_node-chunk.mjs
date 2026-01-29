@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-907a94d
+ * @license Angular v21.2.0-next.1+sha-6990f88
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4358,6 +4358,16 @@ function queueEnterAnimations(injector, enterAnimations) {
     addToAnimationQueue(injector, nodeAnimations.animateFns);
   }
 }
+function removeAnimationsFromQueue(injector, animationFns) {
+  const animationQueue = injector.get(ANIMATION_QUEUE);
+  if (Array.isArray(animationFns)) {
+    for (const animateFn of animationFns) {
+      animationQueue.queue.delete(animateFn);
+    }
+  } else {
+    animationQueue.queue.delete(animationFns);
+  }
+}
 
 function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
   const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
@@ -4493,6 +4503,9 @@ function cleanUpView(tView, lView) {
 }
 function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
   const animations = lView?.[ANIMATIONS];
+  if (animations?.enter?.has(tNode.index)) {
+    removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
+  }
   if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index)) return callback(false);
   if (lView) allLeavingAnimations.add(lView[ID]);
   addToAnimationQueue(injector, () => {
@@ -8314,7 +8327,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.1+sha-907a94d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.1+sha-6990f88'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
