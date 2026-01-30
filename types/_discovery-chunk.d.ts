@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.1+sha-424ecf8
+ * @license Angular v21.2.0-next.1+sha-8d5210c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4748,8 +4748,15 @@ declare enum ChangeDetectionStrategy {
     /**
      * Use the default `CheckAlways` strategy, in which change detection is automatic until
      * explicitly deactivated.
+     * @deprecated Use `Eager` instead.
      */
-    Default = 1
+    Default = 1,
+    /**
+     * Use the `Eager` strategy, meaning that the component is checked eagerly when the change
+     * detection traversal reaches it, rather than only checking under certain circumstances (e.g.
+     * `markForCheck`, a signal in the template changed, etc).
+     */
+    Eager = 1
 }
 
 /**
