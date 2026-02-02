@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.0-next.1+sha-8ab433a
+ * @license Angular v21.2.0-next.1+sha-68ba9c4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, ERRORED, consumerAfterComputation, producerAccessed, setActiveConsumer } from './_effect-chunk.mjs';
+import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, ERRORED, signalUpdateFn, REACTIVE_NODE, UNSET, defaultEquals, COMPUTING, consumerBeforeComputation, consumerAfterComputation, producerAccessed, setActiveConsumer } from './_effect-chunk.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
   const node = Object.create(LINKED_SIGNAL_NODE);
@@ -37,6 +37,9 @@ function linkedSignalSetFn(node, newValue) {
 }
 function linkedSignalUpdateFn(node, updater) {
   producerUpdateValueVersion(node);
+  if (node.value === ERRORED) {
+    throw node.error;
+  }
   signalUpdateFn(node, updater);
   producerMarkClean(node);
 }
