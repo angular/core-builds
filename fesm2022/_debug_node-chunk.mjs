@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.2+sha-f15d33d
+ * @license Angular v21.1.2+sha-2cf4da0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7301,10 +7301,10 @@ function verifyStandaloneImport(depType, importingType) {
 }
 
 class DepsTracker {
-  ownerNgModule = new Map();
+  ownerNgModule = new WeakMap();
   ngModulesWithSomeUnresolvedDecls = new Set();
-  ngModulesScopeCache = new Map();
-  standaloneComponentsScopeCache = new Map();
+  ngModulesScopeCache = new WeakMap();
+  standaloneComponentsScopeCache = new WeakMap();
   resolveNgModulesDecls() {
     if (this.ngModulesWithSomeUnresolvedDecls.size === 0) {
       return;
@@ -8327,7 +8327,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.2+sha-f15d33d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.1.2+sha-2cf4da0'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
