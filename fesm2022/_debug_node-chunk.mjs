@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.0-next.2+sha-24c0c5a
+ * @license Angular v21.2.0-next.2+sha-15c71fb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, DOCUMENT as DOCUMENT$1, ENVIRONMENT_INITIALIZER, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, DOCUMENT as DOCUMENT$1, ENVIRONMENT_INITIALIZER, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, ANIMATIONS, INJECTOR as INJECTOR$1, CONTAINER_HEADER_OFFSET, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -4304,11 +4304,14 @@ const NOOP_AFTER_RENDER_REF = {
 
 const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationQueue' : '', {
   factory: () => {
+    const injector = inject(EnvironmentInjector);
+    const queue = new Set();
+    injector.onDestroy(() => queue.clear());
     return {
-      queue: new Set(),
+      queue,
       isScheduled: false,
       scheduler: null,
-      injector: inject(EnvironmentInjector)
+      injector
     };
   }
 });
@@ -4376,6 +4379,138 @@ function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
     queueEnterAnimations(injector, enterAnimations);
   }
 }
+function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
+  try {
+    injector.get(INJECTOR$1);
+  } catch {
+    return callback(false);
+  }
+  const animations = lView?.[ANIMATIONS];
+  if (animations?.enter?.has(tNode.index)) {
+    removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
+  }
+  const nodesWithExitAnimations = aggregateDescendantAnimations(lView, tNode, animations);
+  if (nodesWithExitAnimations.size === 0) {
+    let hasNestedAnimations = false;
+    if (lView) {
+      const nestedPromises = [];
+      collectNestedViewAnimations(lView, tNode, nestedPromises);
+      hasNestedAnimations = nestedPromises.length > 0;
+    }
+    if (!hasNestedAnimations) {
+      return callback(false);
+    }
+  }
+  if (lView) allLeavingAnimations.add(lView[ID]);
+  addToAnimationQueue(injector, () => executeLeaveAnimations(lView, tNode, animations || undefined, nodesWithExitAnimations, callback), animations || undefined);
+}
+function aggregateDescendantAnimations(lView, tNode, animations) {
+  const nodesWithExitAnimations = new Map();
+  const leaveAnimations = animations?.leave;
+  if (leaveAnimations && leaveAnimations.has(tNode.index)) {
+    nodesWithExitAnimations.set(tNode.index, leaveAnimations.get(tNode.index));
+  }
+  if (lView && leaveAnimations) {
+    for (const [index, animationData] of leaveAnimations) {
+      if (nodesWithExitAnimations.has(index)) continue;
+      const nestedTNode = lView[TVIEW].data[index];
+      let parent = nestedTNode.parent;
+      while (parent) {
+        if (parent === tNode) {
+          nodesWithExitAnimations.set(index, animationData);
+          break;
+        }
+        parent = parent.parent;
+      }
+    }
+  }
+  return nodesWithExitAnimations;
+}
+function executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimations, callback) {
+  const runningAnimations = [];
+  if (animations && animations.leave) {
+    for (const [index] of nodesWithExitAnimations) {
+      if (!animations.leave.has(index)) continue;
+      const currentAnimationData = animations.leave.get(index);
+      for (const animationFn of currentAnimationData.animateFns) {
+        const {
+          promise
+        } = animationFn();
+        runningAnimations.push(promise);
+      }
+      animations.detachedLeaveAnimationFns = undefined;
+    }
+  }
+  if (lView) {
+    collectNestedViewAnimations(lView, tNode, runningAnimations);
+  }
+  if (runningAnimations.length > 0) {
+    const currentAnimations = animations || lView?.[ANIMATIONS];
+    if (currentAnimations) {
+      const prevRunning = currentAnimations.running;
+      if (prevRunning) {
+        runningAnimations.push(prevRunning);
+      }
+      currentAnimations.running = Promise.allSettled(runningAnimations);
+      runAfterLeaveAnimations(lView, currentAnimations.running, callback);
+    } else {
+      Promise.allSettled(runningAnimations).then(() => {
+        if (lView) allLeavingAnimations.delete(lView[ID]);
+        callback(true);
+      });
+    }
+  } else {
+    if (lView) allLeavingAnimations.delete(lView[ID]);
+    callback(false);
+  }
+}
+function collectNestedViewAnimations(lView, tNode, collectedPromises) {
+  if (isComponentHost(tNode)) {
+    const componentView = getComponentLViewByIndex(tNode.index, lView);
+    collectAllViewLeaveAnimations(componentView, collectedPromises);
+  } else if (tNode.type & 12) {
+    const lContainer = lView[tNode.index];
+    if (isLContainer(lContainer)) {
+      for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const subView = lContainer[i];
+        collectAllViewLeaveAnimations(subView, collectedPromises);
+      }
+    }
+  }
+  let child = tNode.child;
+  while (child) {
+    collectNestedViewAnimations(lView, child, collectedPromises);
+    child = child.next;
+  }
+}
+function collectAllViewLeaveAnimations(view, collectedPromises) {
+  const animations = view[ANIMATIONS];
+  if (animations && animations.leave) {
+    for (const animationData of animations.leave.values()) {
+      for (const animationFn of animationData.animateFns) {
+        const {
+          promise
+        } = animationFn();
+        collectedPromises.push(promise);
+      }
+    }
+  }
+  let child = view[TVIEW].firstChild;
+  while (child) {
+    collectNestedViewAnimations(view, child, collectedPromises);
+    child = child.next;
+  }
+}
+function runAfterLeaveAnimations(lView, runningAnimations, callback) {
+  runningAnimations.then(() => {
+    if (lView[ANIMATIONS]?.running === runningAnimations) {
+      lView[ANIMATIONS].running = undefined;
+      allLeavingAnimations.delete(lView[ID]);
+    }
+    callback(true);
+  });
+}
+
 function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHandle, tNode, beforeNode, parentLView) {
   if (lNodeToHandle != null) {
     let lContainer;
@@ -4501,48 +4636,6 @@ function cleanUpView(tView, lView) {
   } finally {
     setActiveConsumer(prevConsumer);
   }
-}
-function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
-  const animations = lView?.[ANIMATIONS];
-  if (animations?.enter?.has(tNode.index)) {
-    removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
-  }
-  if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index)) return callback(false);
-  if (lView) allLeavingAnimations.add(lView[ID]);
-  addToAnimationQueue(injector, () => {
-    if (animations.leave && animations.leave.has(tNode.index)) {
-      const leaveAnimationMap = animations.leave;
-      const leaveAnimations = leaveAnimationMap.get(tNode.index);
-      const runningAnimations = [];
-      if (leaveAnimations) {
-        for (let index = 0; index < leaveAnimations.animateFns.length; index++) {
-          const animationFn = leaveAnimations.animateFns[index];
-          const {
-            promise
-          } = animationFn();
-          runningAnimations.push(promise);
-        }
-        animations.detachedLeaveAnimationFns = undefined;
-      }
-      animations.running = Promise.allSettled(runningAnimations);
-      runAfterLeaveAnimations(lView, callback);
-    } else {
-      if (lView) allLeavingAnimations.delete(lView[ID]);
-      callback(false);
-    }
-  }, animations);
-}
-function runAfterLeaveAnimations(lView, callback) {
-  const runningAnimations = lView[ANIMATIONS]?.running;
-  if (runningAnimations) {
-    runningAnimations.then(() => {
-      lView[ANIMATIONS].running = undefined;
-      allLeavingAnimations.delete(lView[ID]);
-      callback(true);
-    });
-    return;
-  }
-  callback(false);
 }
 function processCleanups(tView, lView) {
   ngDevMode && assertNotReactive(processCleanups.name);
@@ -8459,7 +8552,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.2+sha-24c0c5a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.2+sha-15c71fb'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
