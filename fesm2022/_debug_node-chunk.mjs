@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.2+sha-18003a3
+ * @license Angular v21.2.0-next.2+sha-bd2868e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8552,7 +8552,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.2+sha-18003a3'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.2+sha-bd2868e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13306,16 +13306,16 @@ function ɵɵanimateEnter(value) {
   }
   const tNode = getCurrentTNode();
   cancelLeavingNodes(tNode, lView);
-  addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value));
+  const ngZone = lView[INJECTOR].get(NgZone);
+  addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
   return ɵɵanimateEnter;
 }
-function runEnterAnimation(lView, tNode, value) {
+function runEnterAnimation(lView, tNode, value, ngZone) {
   const nativeElement = getNativeByTNode(tNode, lView);
   ngDevMode && assertElementNodes(nativeElement, 'animate.enter');
   const renderer = lView[RENDERER];
-  const ngZone = lView[INJECTOR].get(NgZone);
   const activeClasses = getClassListFromValue(value);
   const cleanupFns = [];
   const handleEnterAnimationStart = event => {
@@ -13400,11 +13400,12 @@ function ɵɵanimateLeave(value) {
   }
   const tNode = getCurrentTNode();
   cancelLeavingNodes(tNode, lView);
-  addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value));
+  const ngZone = lView[INJECTOR].get(NgZone);
+  addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   return ɵɵanimateLeave;
 }
-function runLeaveAnimations(lView, tNode, value) {
+function runLeaveAnimations(lView, tNode, value, ngZone) {
   const {
     promise,
     resolve
@@ -13412,7 +13413,6 @@ function runLeaveAnimations(lView, tNode, value) {
   const nativeElement = getNativeByTNode(tNode, lView);
   ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
   const renderer = lView[RENDERER];
-  const ngZone = lView[INJECTOR].get(NgZone);
   allLeavingAnimations.add(lView[ID]);
   (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
   const activeClasses = getClassListFromValue(value);
@@ -13474,11 +13474,13 @@ function ɵɵanimateLeaveListener(value) {
   const tNode = getCurrentTNode();
   cancelLeavingNodes(tNode, lView);
   allLeavingAnimations.add(lView[ID]);
-  addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value));
+  const ngZone = lView[INJECTOR].get(NgZone);
+  const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
+  addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value, ngZone, maxAnimationTimeout));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   return ɵɵanimateLeaveListener;
 }
-function runLeaveAnimationFunction(lView, tNode, value) {
+function runLeaveAnimationFunction(lView, tNode, value, ngZone, maxAnimationTimeout) {
   const {
     promise,
     resolve
@@ -13488,8 +13490,6 @@ function runLeaveAnimationFunction(lView, tNode, value) {
   const cleanupFns = [];
   const renderer = lView[RENDERER];
   const animationsDisabled = areAnimationsDisabled(lView);
-  const ngZone = lView[INJECTOR].get(NgZone);
-  const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
   (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
   const resolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
   if (animationsDisabled) {
