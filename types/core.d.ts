@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.3+sha-f67818a
+ * @license Angular v21.2.0-next.3+sha-17f1927
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4016,7 +4016,7 @@ declare function provideCheckNoChangesConfig(options: {
  * - `interval` will periodically run `checkNoChanges` on application views. This can be useful
  *   in zoneless applications to periodically ensure no changes have been made without notifying
  *   Angular that templates need to be refreshed.
- * - The exhaustive option will treat all application views as if they were `ChangeDetectionStrategy.Default` when verifying
+ * - The exhaustive option will treat all application views as if they were `ChangeDetectionStrategy.Eager`/`Default` when verifying
  *   no expressions have changed. All views attached to `ApplicationRef` and all the descendants of
  *   those views will be checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
  *   This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.

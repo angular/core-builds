@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.3+sha-f67818a
+ * @license Angular v21.2.0-next.3+sha-17f1927
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1813,7 +1813,7 @@ function getDirectiveMetadata$1(directiveOrComponentInstance) {
       inputs,
       outputs: componentDef.outputs,
       encapsulation: componentDef.encapsulation,
-      changeDetection: componentDef.onPush ? ChangeDetectionStrategy.OnPush : ChangeDetectionStrategy.Default
+      changeDetection: componentDef.onPush ? ChangeDetectionStrategy.OnPush : ChangeDetectionStrategy.Eager
     };
   }
   const directiveDef = getDirectiveDef(constructor);
@@ -8552,7 +8552,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-f67818a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-17f1927'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -17903,7 +17903,7 @@ function getPipeMetadata(type, meta) {
 
 const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => compileDirective(type, meta));
 const Component = makeDecorator('Component', (c = {}) => ({
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Eager,
   ...c
 }), Directive, undefined, (type, meta) => compileComponent(type, meta));
 const Pipe = makeDecorator('Pipe', p => ({
