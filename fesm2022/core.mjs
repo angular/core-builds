@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.3+sha-dfd5e3a
+ * @license Angular v21.2.0-next.3+sha-e10a634
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1182,6 +1182,7 @@ function withDomHydration() {
     }, {
       provide: APP_BOOTSTRAP_LISTENER,
       useFactory: () => {
+        const scheduler = inject(ChangeDetectionScheduler);
         if (inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
           const appRef = inject(ApplicationRef);
           return () => {
@@ -1194,6 +1195,7 @@ function withDomHydration() {
                 countBlocksSkippedByHydration(appRef.injector);
                 printHydrationStats(appRef.injector);
               }
+              scheduler.notify(7);
             });
           };
         }

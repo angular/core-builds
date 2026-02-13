@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.0-next.3+sha-dfd5e3a
+ * @license Angular v21.2.0-next.3+sha-e10a634
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, DOCUMENT as DOCUMENT$1, ENVIRONMENT_INITIALIZER, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, ANIMATIONS, INJECTOR as INJECTOR$1, CONTAINER_HEADER_OFFSET, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, DOCUMENT as DOCUMENT$1, ENVIRONMENT_INITIALIZER, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, stringify, ANIMATIONS, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR as INJECTOR$1, CONTAINER_HEADER_OFFSET, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_effect-chunk2.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -3994,6 +3994,163 @@ function ensureIcuContainerVisitorLoaded(loader) {
   }
 }
 
+const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
+  factory: () => false
+});
+const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
+  factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT
+});
+const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
+
+const DEFAULT_ANIMATIONS_DISABLED = false;
+const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) && typeof document !== 'undefined' && typeof document?.documentElement?.getAnimations === 'function';
+function areAnimationsDisabled(lView) {
+  const injector = lView[INJECTOR];
+  return injector.get(ANIMATIONS_DISABLED, DEFAULT_ANIMATIONS_DISABLED);
+}
+function assertAnimationTypes(value, instruction) {
+  if (value == null || typeof value !== 'string' && typeof value !== 'function') {
+    throw new RuntimeError(650, `'${instruction}' value must be a string of CSS classes or an animation function, got ${stringify(value)}`);
+  }
+}
+function assertElementNodes(nativeElement, instruction) {
+  if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
+    throw new RuntimeError(650, `'${instruction}' can only be used on an element node, got ${stringify(nativeElement.nodeType)}`);
+  }
+}
+function trackEnterClasses(el, classList, cleanupFns) {
+  const elementData = enterClassMap.get(el);
+  if (elementData) {
+    for (const klass of classList) {
+      elementData.classList.push(klass);
+    }
+    for (const fn of cleanupFns) {
+      elementData.cleanupFns.push(fn);
+    }
+  } else {
+    enterClassMap.set(el, {
+      classList,
+      cleanupFns
+    });
+  }
+}
+function cleanupEnterClassData(element) {
+  const elementData = enterClassMap.get(element);
+  if (elementData) {
+    for (const fn of elementData.cleanupFns) {
+      fn();
+    }
+    enterClassMap.delete(element);
+  }
+  longestAnimations.delete(element);
+}
+const noOpAnimationComplete = () => {};
+const enterClassMap = new WeakMap();
+const longestAnimations = new WeakMap();
+const leavingNodes = new WeakMap();
+function clearLeavingNodes(tNode, el) {
+  const nodes = leavingNodes.get(tNode);
+  if (nodes && nodes.length > 0) {
+    const ix = nodes.findIndex(node => node === el);
+    if (ix > -1) nodes.splice(ix, 1);
+  }
+  if (nodes?.length === 0) {
+    leavingNodes.delete(tNode);
+  }
+}
+function cancelLeavingNodes(tNode, newElement) {
+  const nodes = leavingNodes.get(tNode);
+  if (!nodes || nodes.length === 0) return;
+  const newParent = newElement.parentNode;
+  const prevSibling = newElement.previousSibling;
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const leavingEl = nodes[i];
+    const leavingParent = leavingEl.parentNode;
+    if (prevSibling && leavingEl === prevSibling || leavingParent && newParent && leavingParent !== newParent) {
+      nodes.splice(i, 1);
+      leavingEl.dispatchEvent(new CustomEvent('animationend', {
+        detail: {
+          cancel: true
+        }
+      }));
+      leavingEl.parentNode?.removeChild(leavingEl);
+    }
+  }
+}
+function trackLeavingNodes(tNode, el) {
+  const nodes = leavingNodes.get(tNode);
+  if (nodes) {
+    if (!nodes.includes(el)) {
+      nodes.push(el);
+    }
+  } else {
+    leavingNodes.set(tNode, [el]);
+  }
+}
+function getLViewEnterAnimations(lView) {
+  const animationData = lView[ANIMATIONS] ??= {};
+  return animationData.enter ??= new Map();
+}
+function getLViewLeaveAnimations(lView) {
+  const animationData = lView[ANIMATIONS] ??= {};
+  return animationData.leave ??= new Map();
+}
+function getClassListFromValue(value) {
+  const classes = typeof value === 'function' ? value() : value;
+  let classList = Array.isArray(classes) ? classes : null;
+  if (typeof classes === 'string') {
+    classList = classes.trim().split(/\s+/).filter(k => k);
+  }
+  return classList;
+}
+function cancelAnimationsIfRunning(element, renderer) {
+  if (!areAnimationSupported) return;
+  const elementData = enterClassMap.get(element);
+  if (elementData && elementData.classList.length > 0 && elementHasClassList(element, elementData.classList)) {
+    for (const klass of elementData.classList) {
+      renderer.removeClass(element, klass);
+    }
+  }
+  cleanupEnterClassData(element);
+}
+function elementHasClassList(element, classList) {
+  for (const className of classList) {
+    if (element.classList.contains(className)) return true;
+  }
+  return false;
+}
+function isLongestAnimation(event, nativeElement) {
+  const longestAnimation = longestAnimations.get(nativeElement);
+  if (longestAnimation === undefined) return true;
+  return nativeElement === event.target && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && event.propertyName === longestAnimation.propertyName);
+}
+function addAnimationToLView(animations, tNode, fn) {
+  const nodeAnimations = animations.get(tNode.index) ?? {
+    animateFns: []
+  };
+  nodeAnimations.animateFns.push(fn);
+  animations.set(tNode.index, nodeAnimations);
+}
+function cleanupAfterLeaveAnimations(resolvers, cleanupFns) {
+  if (resolvers) {
+    for (const fn of resolvers) {
+      fn();
+    }
+  }
+  for (const fn of cleanupFns) {
+    fn();
+  }
+}
+function clearLViewNodeAnimationResolvers(lView, tNode) {
+  const nodeAnimations = getLViewLeaveAnimations(lView).get(tNode.index);
+  if (nodeAnimations) nodeAnimations.resolvers = undefined;
+}
+function leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns) {
+  clearLeavingNodes(tNode, nativeElement);
+  cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+  clearLViewNodeAnimationResolvers(lView, tNode);
+}
+
 function parseCssTimeUnitsToMs(value) {
   if (!value) return 0;
   const multiplier = value.toLowerCase().indexOf('ms') > -1 ? 1 : 1000;
@@ -4362,16 +4519,6 @@ function queueEnterAnimations(injector, enterAnimations) {
     addToAnimationQueue(injector, nodeAnimations.animateFns);
   }
 }
-function removeAnimationsFromQueue(injector, animationFns) {
-  const animationQueue = injector.get(ANIMATION_QUEUE);
-  if (Array.isArray(animationFns)) {
-    for (const animateFn of animationFns) {
-      animationQueue.queue.delete(animateFn);
-    }
-  } else {
-    animationQueue.queue.delete(animationFns);
-  }
-}
 
 function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
   const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
@@ -4386,9 +4533,6 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
     return callback(false);
   }
   const animations = lView?.[ANIMATIONS];
-  if (animations?.enter?.has(tNode.index)) {
-    removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
-  }
   const nodesWithExitAnimations = aggregateDescendantAnimations(lView, tNode, animations);
   if (nodesWithExitAnimations.size === 0) {
     let hasNestedAnimations = false;
@@ -4533,7 +4677,11 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
     } else if (action === 1 && parent !== null) {
       maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
       nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
+      cancelLeavingNodes(tNode, rNode);
     } else if (action === 2) {
+      if (parentLView?.[ANIMATIONS]?.leave?.has(tNode.index)) {
+        trackLeavingNodes(tNode, rNode);
+      }
       runLeaveAnimationsWithCallback(parentLView, tNode, injector, nodeHasLeaveAnimations => {
         nativeRemoveNode(renderer, rNode, isComponent, nodeHasLeaveAnimations);
       });
@@ -8552,7 +8700,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-dfd5e3a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-e10a634'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13144,156 +13292,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
   return ɵɵattribute;
 }
 
-const ANIMATIONS_DISABLED = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationsDisabled' : '', {
-  factory: () => false
-});
-const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'MaxAnimationTimeout' : '', {
-  factory: () => MAX_ANIMATION_TIMEOUT_DEFAULT
-});
-const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
-
-const DEFAULT_ANIMATIONS_DISABLED = false;
-const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) && typeof document !== 'undefined' && typeof document?.documentElement?.getAnimations === 'function';
-function areAnimationsDisabled(lView) {
-  const injector = lView[INJECTOR];
-  return injector.get(ANIMATIONS_DISABLED, DEFAULT_ANIMATIONS_DISABLED);
-}
-function assertAnimationTypes(value, instruction) {
-  if (value == null || typeof value !== 'string' && typeof value !== 'function') {
-    throw new RuntimeError(650, `'${instruction}' value must be a string of CSS classes or an animation function, got ${stringify(value)}`);
-  }
-}
-function assertElementNodes(nativeElement, instruction) {
-  if (nativeElement.nodeType !== Node.ELEMENT_NODE) {
-    throw new RuntimeError(650, `'${instruction}' can only be used on an element node, got ${stringify(nativeElement.nodeType)}`);
-  }
-}
-function trackEnterClasses(el, classList, cleanupFns) {
-  const elementData = enterClassMap.get(el);
-  if (elementData) {
-    for (const klass of classList) {
-      elementData.classList.push(klass);
-    }
-    for (const fn of cleanupFns) {
-      elementData.cleanupFns.push(fn);
-    }
-  } else {
-    enterClassMap.set(el, {
-      classList,
-      cleanupFns
-    });
-  }
-}
-function cleanupEnterClassData(element) {
-  const elementData = enterClassMap.get(element);
-  if (elementData) {
-    for (const fn of elementData.cleanupFns) {
-      fn();
-    }
-    enterClassMap.delete(element);
-  }
-  longestAnimations.delete(element);
-}
-const noOpAnimationComplete = () => {};
-const enterClassMap = new WeakMap();
-const longestAnimations = new WeakMap();
-const leavingNodes = new WeakMap();
-function clearLeavingNodes(tNode, el) {
-  const nodes = leavingNodes.get(tNode);
-  if (nodes && nodes.length > 0) {
-    const ix = nodes.findIndex(node => node === el);
-    if (ix > -1) nodes.splice(ix, 1);
-  }
-  if (nodes?.length === 0) {
-    leavingNodes.delete(tNode);
-  }
-}
-function cancelLeavingNodes(tNode, lView) {
-  const leavingEl = leavingNodes.get(tNode)?.shift();
-  const lContainer = lView[DECLARATION_LCONTAINER];
-  if (lContainer) {
-    const beforeNode = getBeforeNodeForView(tNode.index, lContainer);
-    const previousNode = beforeNode?.previousSibling;
-    if (leavingEl && previousNode && leavingEl === previousNode) {
-      leavingEl.dispatchEvent(new CustomEvent('animationend', {
-        detail: {
-          cancel: true
-        }
-      }));
-    }
-  }
-}
-function trackLeavingNodes(tNode, el) {
-  if (leavingNodes.has(tNode)) {
-    leavingNodes.get(tNode)?.push(el);
-  } else {
-    leavingNodes.set(tNode, [el]);
-  }
-}
-function getLViewEnterAnimations(lView) {
-  const animationData = lView[ANIMATIONS] ??= {};
-  return animationData.enter ??= new Map();
-}
-function getLViewLeaveAnimations(lView) {
-  const animationData = lView[ANIMATIONS] ??= {};
-  return animationData.leave ??= new Map();
-}
-function getClassListFromValue(value) {
-  const classes = typeof value === 'function' ? value() : value;
-  let classList = Array.isArray(classes) ? classes : null;
-  if (typeof classes === 'string') {
-    classList = classes.trim().split(/\s+/).filter(k => k);
-  }
-  return classList;
-}
-function cancelAnimationsIfRunning(element, renderer) {
-  if (!areAnimationSupported) return;
-  const elementData = enterClassMap.get(element);
-  if (elementData && elementData.classList.length > 0 && elementHasClassList(element, elementData.classList)) {
-    for (const klass of elementData.classList) {
-      renderer.removeClass(element, klass);
-    }
-  }
-  cleanupEnterClassData(element);
-}
-function elementHasClassList(element, classList) {
-  for (const className of classList) {
-    if (element.classList.contains(className)) return true;
-  }
-  return false;
-}
-function isLongestAnimation(event, nativeElement) {
-  const longestAnimation = longestAnimations.get(nativeElement);
-  if (longestAnimation === undefined) return true;
-  return nativeElement === event.target && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && event.propertyName === longestAnimation.propertyName);
-}
-function addAnimationToLView(animations, tNode, fn) {
-  const nodeAnimations = animations.get(tNode.index) ?? {
-    animateFns: []
-  };
-  nodeAnimations.animateFns.push(fn);
-  animations.set(tNode.index, nodeAnimations);
-}
-function cleanupAfterLeaveAnimations(resolvers, cleanupFns) {
-  if (resolvers) {
-    for (const fn of resolvers) {
-      fn();
-    }
-  }
-  for (const fn of cleanupFns) {
-    fn();
-  }
-}
-function clearLViewNodeAnimationResolvers(lView, tNode) {
-  const nodeAnimations = getLViewLeaveAnimations(lView).get(tNode.index);
-  if (nodeAnimations) nodeAnimations.resolvers = undefined;
-}
-function leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, cleanupFns) {
-  clearLeavingNodes(tNode, nativeElement);
-  cleanupAfterLeaveAnimations(resolvers, cleanupFns);
-  clearLViewNodeAnimationResolvers(lView, tNode);
-}
-
 function ɵɵanimateEnter(value) {
   performanceMarkFeature('NgAnimateEnter');
   if (typeof ngServerMode !== 'undefined' && ngServerMode || !areAnimationSupported) {
@@ -13305,7 +13303,6 @@ function ɵɵanimateEnter(value) {
     return ɵɵanimateEnter;
   }
   const tNode = getCurrentTNode();
-  cancelLeavingNodes(tNode, lView);
   const ngZone = lView[INJECTOR].get(NgZone);
   addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
@@ -13373,7 +13370,6 @@ function ɵɵanimateEnterListener(value) {
     return ɵɵanimateEnterListener;
   }
   const tNode = getCurrentTNode();
-  cancelLeavingNodes(tNode, lView);
   addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimationFunction(lView, tNode, value));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
@@ -13399,7 +13395,6 @@ function ɵɵanimateLeave(value) {
     return ɵɵanimateLeave;
   }
   const tNode = getCurrentTNode();
-  cancelLeavingNodes(tNode, lView);
   const ngZone = lView[INJECTOR].get(NgZone);
   addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
@@ -13472,7 +13467,6 @@ function ɵɵanimateLeaveListener(value) {
   ngDevMode && assertAnimationTypes(value, 'animate.leave');
   const lView = getLView();
   const tNode = getCurrentTNode();
-  cancelLeavingNodes(tNode, lView);
   allLeavingAnimations.add(lView[ID]);
   const ngZone = lView[INJECTOR].get(NgZone);
   const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
