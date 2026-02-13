@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.3+sha-ddfc833
+ * @license Angular v21.2.0-next.3+sha-d5b35b1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1443,8 +1443,8 @@ function isI18nInSkipHydrationBlock(parentTNode) {
 var ChangeDetectionStrategy;
 (function (ChangeDetectionStrategy) {
   ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
-  ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
   ChangeDetectionStrategy[ChangeDetectionStrategy["Eager"] = 1] = "Eager";
+  ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
 })(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
 
 const TRACKED_LVIEWS = new Map();
@@ -8552,7 +8552,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-ddfc833'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-d5b35b1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
