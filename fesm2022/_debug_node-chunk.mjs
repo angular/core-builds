@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-next.3+sha-9a9f4e7
+ * @license Angular v21.2.0-next.3+sha-567f292
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8402,13 +8402,25 @@ class ControlDirectiveHostImpl {
   }
   setInputOnDirectives(inputName, value) {
     const directiveIndices = this.tNode.inputs?.[inputName];
-    if (!directiveIndices) {
+    const hostDirectiveInputs = this.tNode.hostDirectiveInputs?.[inputName];
+    if (!directiveIndices && !hostDirectiveInputs) {
       return false;
     }
-    for (const index of directiveIndices) {
-      const directiveDef = this.tView.data[index];
-      const directive = this.lView[index];
-      writeToDirectiveInput(directiveDef, directive, inputName, value);
+    if (directiveIndices) {
+      for (const index of directiveIndices) {
+        const directiveDef = this.tView.data[index];
+        const directive = this.lView[index];
+        writeToDirectiveInput(directiveDef, directive, inputName, value);
+      }
+    }
+    if (hostDirectiveInputs) {
+      for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
+        const index = hostDirectiveInputs[i];
+        const internalName = hostDirectiveInputs[i + 1];
+        const directiveDef = this.tView.data[index];
+        const directive = this.lView[index];
+        writeToDirectiveInput(directiveDef, directive, internalName, value);
+      }
     }
     return true;
   }
@@ -8700,7 +8712,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-9a9f4e7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-next.3+sha-567f292'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
