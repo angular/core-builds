@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.1.5+sha-c143de2
+ * @license Angular v21.1.5+sha-866da08
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.1.5+sha-c143de2');
+const VERSION = /* @__PURE__ */new Version('21.1.5+sha-866da08');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -563,9 +563,9 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
     throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}' - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`);
   } else if (isEnvironmentProviders(provider)) {
     if (provider.ɵfromNgModule) {
-      throw new RuntimeError(207, `Invalid providers from 'importProvidersFrom' present in a non-environment injector. 'importProvidersFrom' can't be used for component providers.`);
+      throw new RuntimeError(-207, `Invalid providers from 'importProvidersFrom' present in a non-environment injector. 'importProvidersFrom' can't be used for component providers.`);
     } else {
-      throw new RuntimeError(207, `Invalid providers present in a non-environment injector. 'EnvironmentProviders' can't be used for component providers.`);
+      throw new RuntimeError(-207, `Invalid providers present in a non-environment injector. 'EnvironmentProviders' can't be used for component providers.`);
     }
   } else {
     throw new Error('Invalid provider');
@@ -1348,17 +1348,17 @@ function injectableDefOrInjectorDefFactory(token) {
     return factory;
   }
   if (token instanceof InjectionToken) {
-    throw new RuntimeError(204, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
+    throw new RuntimeError(-204, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
   }
   if (token instanceof Function) {
     return getUndecoratedInjectableFactory(token);
   }
-  throw new RuntimeError(204, ngDevMode && 'unreachable');
+  throw new RuntimeError(-204, ngDevMode && 'unreachable');
 }
 function getUndecoratedInjectableFactory(token) {
   const paramLength = token.length;
   if (paramLength > 0) {
-    throw new RuntimeError(204, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${newArray(paramLength, '?').join(', ')}).`);
+    throw new RuntimeError(-204, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${newArray(paramLength, '?').join(', ')}).`);
   }
   const inheritedInjectableDef = getInheritedInjectableDef(token);
   if (inheritedInjectableDef !== null) {
@@ -1406,7 +1406,7 @@ function providerToFactory(provider, ngModuleType, providers) {
 }
 function assertNotDestroyed(injector) {
   if (injector.destroyed) {
-    throw new RuntimeError(205, ngDevMode && 'Injector has already been destroyed.');
+    throw new RuntimeError(-205, ngDevMode && 'Injector has already been destroyed.');
   }
 }
 function makeRecord(factory, value, multi = false) {
