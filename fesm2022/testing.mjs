@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-f90e556
+ * @license Angular v22.0.0-next.0+sha-246a984
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1305,6 +1305,9 @@ class TestBedImpl {
   static createComponent(component, options) {
     return TestBedImpl.INSTANCE.createComponent(component, options);
   }
+  static getFixture() {
+    return TestBedImpl.INSTANCE.getFixture();
+  }
   static resetTestingModule() {
     return TestBedImpl.INSTANCE.resetTestingModule();
   }
@@ -1480,6 +1483,15 @@ class TestBedImpl {
     const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
     this._activeFixtures.push(fixture);
     return fixture;
+  }
+  getFixture() {
+    if (this._activeFixtures.length === 0) {
+      throw new Error('No fixture has been created yet.');
+    }
+    if (this._activeFixtures.length > 1) {
+      throw new Error(`More than one component fixture has been created. Use \`TestBed.createComponent\` ` + `and store the fixture on the test context, rather than using \`TestBed.getFixture\`.`);
+    }
+    return this._activeFixtures[0];
   }
   get compiler() {
     if (this._compiler === null) {
