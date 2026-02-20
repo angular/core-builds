@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-rc.0+sha-c2cedd1
+ * @license Angular v21.2.0-rc.0+sha-390efd5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1212,7 +1212,7 @@ function reflectDependency(dep) {
         meta.token = param.token;
       } else if (param instanceof Attribute) {
         if (param.attributeName === undefined) {
-          throw new RuntimeError(204, ngDevMode && `Attribute name must be defined.`);
+          throw new RuntimeError(-204, ngDevMode && `Attribute name must be defined.`);
         }
         meta.attribute = param.attributeName;
       } else {
@@ -8712,7 +8712,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-rc.0+sha-c2cedd1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0-rc.0+sha-390efd5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;

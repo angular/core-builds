@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-rc.0+sha-c2cedd1
+ * @license Angular v21.2.0-rc.0+sha-390efd5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4863,9 +4863,9 @@ declare const enum RuntimeErrorCode {
     PROVIDER_NOT_FOUND = -201,
     INVALID_FACTORY_DEPENDENCY = 202,
     MISSING_INJECTION_CONTEXT = -203,
-    INVALID_INJECTION_TOKEN = 204,
-    INJECTOR_ALREADY_DESTROYED = 205,
-    PROVIDER_IN_WRONG_CONTEXT = 207,
+    INVALID_INJECTION_TOKEN = -204,
+    INJECTOR_ALREADY_DESTROYED = -205,
+    PROVIDER_IN_WRONG_CONTEXT = -207,
     MISSING_INJECTION_TOKEN = 208,
     INVALID_MULTI_PROVIDER = -209,
     MISSING_DOCUMENT = 210,
