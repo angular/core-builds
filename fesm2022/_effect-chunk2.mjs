@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0-rc.0+sha-8737289
+ * @license Angular v21.2.0-rc.0+sha-35f0663
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.2.0-rc.0+sha-8737289');
+const VERSION = /* @__PURE__ */new Version('21.2.0-rc.0+sha-35f0663');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -144,9 +144,11 @@ const __forward_ref__ = getClosureSafeProperty({
 });
 function forwardRef(forwardRefFn) {
   forwardRefFn.__forward_ref__ = forwardRef;
-  forwardRefFn.toString = function () {
-    return stringify(this());
-  };
+  if (ngDevMode) {
+    forwardRefFn.toString = function () {
+      return stringify(this());
+    };
+  }
   return forwardRefFn;
 }
 function resolveForwardRef(type) {
@@ -1255,12 +1257,15 @@ class R3Injector extends EnvironmentInjector {
     }
   }
   toString() {
-    const tokens = [];
-    const records = this.records;
-    for (const token of records.keys()) {
-      tokens.push(stringify(token));
+    if (ngDevMode) {
+      const tokens = [];
+      const records = this.records;
+      for (const token of records.keys()) {
+        tokens.push(stringify(token));
+      }
+      return `R3Injector[${tokens.join(', ')}]`;
     }
-    return `R3Injector[${tokens.join(', ')}]`;
+    return 'R3Injector[...]';
   }
   processProvider(provider) {
     provider = resolveForwardRef(provider);
@@ -1302,7 +1307,7 @@ class R3Injector extends EnvironmentInjector {
     const prevConsumer = setActiveConsumer(null);
     try {
       if (record.value === CIRCULAR) {
-        throw cyclicDependencyError(stringify(token));
+        throw cyclicDependencyError(ngDevMode ? stringify(token) : '');
       } else if (record.value === NOT_YET) {
         record.value = CIRCULAR;
         if (ngDevMode) {
@@ -2120,8 +2125,11 @@ function createInjector(defType, parent = null, additionalProviders = null, name
 }
 function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name, scopes = new Set()) {
   const providers = [additionalProviders || EMPTY_ARRAY, importProvidersFrom(defType)];
-  name = name || (typeof defType === 'object' ? undefined : stringify(defType));
-  return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
+  let source = undefined;
+  if (ngDevMode) {
+    source = name || (typeof defType === 'object' ? undefined : stringify(defType));
+  }
+  return new R3Injector(providers, parent || getNullInjector(), source || null, scopes);
 }
 
 class Injector {
