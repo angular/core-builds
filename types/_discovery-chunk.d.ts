@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-66b472e
+ * @license Angular v22.0.0-next.0+sha-b9b5c27
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -50,7 +50,7 @@ declare const ANIMATIONS_DISABLED: InjectionToken<boolean>;
  */
 type AnimationCallbackEvent = {
     target: Element;
-    animationComplete: Function;
+    animationComplete: VoidFunction;
 };
 /**
  * A [DI token](api/core/InjectionToken) that configures the maximum animation timeout

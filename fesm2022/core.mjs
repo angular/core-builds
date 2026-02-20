@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-66b472e
+ * @license Angular v22.0.0-next.0+sha-b9b5c27
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -103,7 +103,7 @@ const HOST_TAG_NAME = /* @__PURE__ */(() => {
   HOST_TAG_NAME_TOKEN.__NG_ELEMENT_ID__ = flags => {
     const tNode = getCurrentTNode();
     if (tNode === null) {
-      throw new RuntimeError(204, ngDevMode && 'HOST_TAG_NAME can only be injected in directives and components ' + 'during construction time (in a class constructor or as a class field initializer)');
+      throw new RuntimeError(-204, ngDevMode && 'HOST_TAG_NAME can only be injected in directives and components ' + 'during construction time (in a class constructor or as a class field initializer)');
     }
     if (tNode.type & 2) {
       return tNode.value;
@@ -111,7 +111,7 @@ const HOST_TAG_NAME = /* @__PURE__ */(() => {
     if (flags & 8) {
       return null;
     }
-    throw new RuntimeError(204, ngDevMode && `HOST_TAG_NAME was used on ${getDevModeNodeName(tNode)} which doesn't have an underlying element in the DOM. ` + `This is invalid, and so the dependency should be marked as optional.`);
+    throw new RuntimeError(-204, ngDevMode && `HOST_TAG_NAME was used on ${getDevModeNodeName(tNode)} which doesn't have an underlying element in the DOM. ` + `This is invalid, and so the dependency should be marked as optional.`);
   };
   return HOST_TAG_NAME_TOKEN;
 })();
