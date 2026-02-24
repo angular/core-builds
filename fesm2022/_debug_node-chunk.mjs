@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-8f5214e
+ * @license Angular v22.0.0-next.0+sha-8af73eb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8712,7 +8712,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-8f5214e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-8af73eb'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10520,49 +10520,39 @@ function onIdle(callback, injector) {
 const _requestIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
 const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
 class IdleScheduler {
-  executingCallbacks = false;
   idleId = null;
-  current = new Set();
-  deferred = new Set();
+  queue = new Set();
   ngZone = inject(NgZone);
   requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
   cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
   add(callback) {
-    const target = this.executingCallbacks ? this.deferred : this.current;
-    target.add(callback);
-    if (this.idleId === null) {
-      this.scheduleIdleCallback();
-    }
+    this.queue.add(callback);
+    this.scheduleIdleCallback();
   }
   remove(callback) {
-    const {
-      current,
-      deferred
-    } = this;
-    current.delete(callback);
-    deferred.delete(callback);
-    if (current.size === 0 && deferred.size === 0) {
+    this.queue.delete(callback);
+    if (this.queue.size === 0) {
       this.cancelIdleCallback();
     }
   }
   scheduleIdleCallback() {
-    const callback = () => {
+    if (this.idleId !== null) {
+      return;
+    }
+    const callback = deadline => {
       this.cancelIdleCallback();
-      this.executingCallbacks = true;
-      for (const callback of this.current) {
-        callback();
-      }
-      this.current.clear();
-      this.executingCallbacks = false;
-      if (this.deferred.size > 0) {
-        for (const callback of this.deferred) {
-          this.current.add(callback);
+      for (const callbackFn of this.queue) {
+        callbackFn();
+        this.queue.delete(callbackFn);
+        if (deadline && deadline.timeRemaining() === 0 && !deadline.didTimeout) {
+          break;
         }
-        this.deferred.clear();
+      }
+      if (this.queue.size > 0) {
         this.scheduleIdleCallback();
       }
     };
-    this.idleId = this.requestIdleCallbackFn(() => this.ngZone.run(callback));
+    this.idleId = this.requestIdleCallbackFn(deadline => this.ngZone.run(() => callback(deadline)));
   }
   cancelIdleCallback() {
     if (this.idleId !== null) {
@@ -10572,8 +10562,7 @@ class IdleScheduler {
   }
   ngOnDestroy() {
     this.cancelIdleCallback();
-    this.current.clear();
-    this.deferred.clear();
+    this.queue.clear();
   }
   static ɵprov =
   /* @__PURE__ */

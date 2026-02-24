@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-8f5214e
+ * @license Angular v22.0.0-next.0+sha-8af73eb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -108,21 +108,10 @@ function isRouterCallExpression(node, typeChecker) {
     return false;
 }
 /**
- * Checks whether a node is a call expression to router provide function.
- * Example: provideRoutes(routes)
- */
-function isRouterProviderCallExpression(node, typeChecker) {
-    if (ts.isIdentifier(node.expression)) {
-        const moduleSymbol = typeChecker.getSymbolAtLocation(node.expression);
-        return moduleSymbol && moduleSymbol.name === 'provideRoutes';
-    }
-    return false;
-}
-/**
  * Checks whether a node is a call expression to provideRouter function.
  * Example: provideRouter(routes)
  */
-function isProvideRoutesCallExpression(node, typeChecker) {
+function isProvideRouterCallExpression(node, typeChecker) {
     if (ts.isIdentifier(node.expression)) {
         const moduleSymbol = typeChecker.getSymbolAtLocation(node.expression);
         return moduleSymbol && moduleSymbol.name === 'provideRouter';
@@ -157,9 +146,8 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
     sourceFile.forEachChild(function walk(node) {
         if (ts.isCallExpression(node)) {
             if (isRouterModuleCallExpression(node, typeChecker) ||
-                isRouterProviderCallExpression(node, typeChecker) ||
                 isRouterCallExpression(node, typeChecker) ||
-                isProvideRoutesCallExpression(node, typeChecker)) {
+                isProvideRouterCallExpression(node, typeChecker)) {
                 const arg = node.arguments[0]; // ex: RouterModule.forRoot(routes) or provideRouter(routes)
                 const routeFileImports = sourceFile.statements.filter(ts.isImportDeclaration);
                 if (ts.isArrayLiteralExpression(arg) && arg.elements.length > 0) {
@@ -172,7 +160,7 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
                 }
                 else if (ts.isIdentifier(arg)) {
                     // ex: reference to routes array: RouterModule.forRoot(routes)
-                    // RouterModule.forRoot(routes), provideRouter(routes), provideRoutes(routes)
+                    // RouterModule.forRoot(routes), provideRouter(routes)
                     const symbol = typeChecker.getSymbolAtLocation(arg);
                     if (!symbol?.declarations)
                         return;
