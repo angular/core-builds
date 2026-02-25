@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.16+sha-f76d891
+ * @license Angular v20.3.16+sha-7f9de3c
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14720,7 +14720,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.16+sha-f76d891']
+        ? ['ng-version', '20.3.16+sha-7f9de3c']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -25243,7 +25243,6 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                         const attr = elAttrs.item(i);
                         const lowerAttrName = attr.name.toLowerCase();
                         const hasBinding = !!attr.value.match(BINDING_REGEXP);
-                        // we assume the input string is safe, unless it's using a binding
                         if (hasBinding) {
                             if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
                                 if (URI_ATTRS[lowerAttrName]) {
@@ -25260,8 +25259,27 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                                         `(see ${XSS_SECURITY_URL})`);
                             }
                         }
+                        else if (VALID_ATTRS[lowerAttrName]) {
+                            if (URI_ATTRS[lowerAttrName]) {
+                                // Don't sanitize, because no value is acceptable in sensitive attributes.
+                                // Translators are not allowed to create URIs.
+                                if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                    console.warn(`WARNING: ignoring unsafe attribute ` +
+                                        `${lowerAttrName} on element ${tagName} ` +
+                                        `(see ${XSS_SECURITY_URL})`);
+                                }
+                                addCreateAttribute(create, newIndex, attr.name, 'unsafe:blocked');
+                            }
+                            else {
+                                addCreateAttribute(create, newIndex, attr.name, attr.value);
+                            }
+                        }
                         else {
-                            addCreateAttribute(create, newIndex, attr);
+                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                console.warn(`WARNING: ignoring unknown attribute name ` +
+                                    `${lowerAttrName} on element ${tagName} ` +
+                                    `(see ${XSS_SECURITY_URL})`);
+                            }
                         }
                     }
                     const elementNode = {
@@ -25330,8 +25348,8 @@ function addCreateNodeAndAppend(create, marker, text, appendToParentIdx, createA
     }
     create.push(text, createAtIdx, icuCreateOpCode(0 /* IcuCreateOpCode.AppendChild */, appendToParentIdx, createAtIdx));
 }
-function addCreateAttribute(create, newIndex, attr) {
-    create.push((newIndex << 1 /* IcuCreateOpCode.SHIFT_REF */) | 1 /* IcuCreateOpCode.Attr */, attr.name, attr.value);
+function addCreateAttribute(create, newIndex, attrName, attrValue) {
+    create.push((newIndex << 1 /* IcuCreateOpCode.SHIFT_REF */) | 1 /* IcuCreateOpCode.Attr */, attrName, attrValue);
 }
 
 // i18nPostprocess consts
