@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-d1ebbbe
+ * @license Angular v22.0.0-next.0+sha-03db2ae
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,14 +11,15 @@ require('@angular/compiler-cli');
 require('@angular/compiler-cli/private/migrations');
 require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
-var ng_component_template = require('./ng_component_template-BCdT6e8W.cjs');
+var ng_component_template = require('./ng_component_template-DPAF1aEA.cjs');
 var compiler = require('@angular/compiler');
 var parse_html = require('./parse_html-C8eKA9px.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
-require('./ng_decorators-CwKJUSFO.cjs');
+require('./ng_decorators-IVztR9rk.cjs');
+require('./imports-CKV-ITqD.cjs');
 require('./property_name-BCpALNpZ.cjs');
 
 function migrateTemplateToSelfClosingTags(template) {

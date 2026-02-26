@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-d1ebbbe
+ * @license Angular v22.0.0-next.0+sha-03db2ae
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,13 +13,14 @@ require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
 var compiler = require('@angular/compiler');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
-var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
+var imports = require('./imports-CKV-ITqD.cjs');
 var parse_html = require('./parse_html-C8eKA9px.cjs');
-var ng_component_template = require('./ng_component_template-BCdT6e8W.cjs');
+var ng_component_template = require('./ng_component_template-DPAF1aEA.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
+require('./ng_decorators-IVztR9rk.cjs');
 require('./property_name-BCpALNpZ.cjs');
 
 const ngStyleStr = 'NgStyle';
@@ -160,11 +161,11 @@ class NgStyleCollector extends compiler.RecursiveVisitor {
         // If we have enough information, check if NgStyle is actually imported.
         // If not, we can confidently disable the migration for this component.
         if (componentNode && typeChecker) {
-            const imports = ng_decorators.getImportSpecifiers(componentNode.getSourceFile(), commonModuleStr, [
+            const imports$1 = imports.getImportSpecifiers(componentNode.getSourceFile(), commonModuleStr, [
                 ngStyleStr,
                 commonModuleImportsStr,
             ]);
-            if (imports.length === 0) {
+            if (imports$1.length === 0) {
                 this.isNgStyleImported = false;
             }
         }

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-d1ebbbe
+ * @license Angular v22.0.0-next.0+sha-03db2ae
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -86,8 +86,9 @@ function getImportSpecifiers(sourceFile, moduleName, specifierOrSpecifiers) {
 function getNamedImports(sourceFile, moduleName) {
     for (const node of sourceFile.statements) {
         if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-            const isMatch = node.moduleSpecifier.text === moduleName
-                ;
+            const isMatch = typeof moduleName === 'string'
+                ? node.moduleSpecifier.text === moduleName
+                : moduleName.test(node.moduleSpecifier.text);
             const namedBindings = node.importClause?.namedBindings;
             if (isMatch && namedBindings && ts.isNamedImports(namedBindings)) {
                 return namedBindings;
@@ -104,34 +105,6 @@ function findImportSpecifier(nodes, specifierName) {
     });
 }
 
-function getCallDecoratorImport(typeChecker, decorator) {
-    // Note that this does not cover the edge case where decorators are called from
-    // a namespace import: e.g. "@core.Component()". This is not handled by Ngtsc either.
-    if (!ts.isCallExpression(decorator.expression) ||
-        !ts.isIdentifier(decorator.expression.expression)) {
-        return null;
-    }
-    const identifier = decorator.expression.expression;
-    return getImportOfIdentifier(typeChecker, identifier);
-}
-
-/**
- * Gets all decorators which are imported from an Angular package (e.g. "@angular/core")
- * from a list of decorators.
- */
-function getAngularDecorators(typeChecker, decorators) {
-    return decorators
-        .map((node) => ({ node, importData: getCallDecoratorImport(typeChecker, node) }))
-        .filter(({ importData }) => importData && importData.importModule.startsWith('@angular/'))
-        .map(({ node, importData }) => ({
-        node: node,
-        name: importData.name,
-        moduleName: importData.importModule,
-        importNode: importData.node,
-    }));
-}
-
-exports.getAngularDecorators = getAngularDecorators;
 exports.getImportOfIdentifier = getImportOfIdentifier;
 exports.getImportSpecifier = getImportSpecifier;
 exports.getImportSpecifiers = getImportSpecifiers;
