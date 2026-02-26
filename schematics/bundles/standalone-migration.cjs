@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-01eadde
+ * @license Angular v22.0.0-next.0+sha-4c4a3db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,12 +13,25 @@ var path = require('path');
 var ts = require('typescript');
 var compiler_host = require('./compiler_host-CY14HvaP.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
-var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
+var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
 var nodes = require('./nodes-ZSQ7WZRB.cjs');
-var symbol = require('./symbol-DZeHSR-V.cjs');
-var imports = require('./imports-CVmcbVA9.cjs');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('@angular-devkit/core');
+
+/** Checks whether a node is referring to a specific import specifier. */
+function isReferenceToImport(typeChecker, node, importSpecifier) {
+    // If this function is called on an identifier (should be most cases), we can quickly rule out
+    // non-matches by comparing the identifier's string and the local name of the import specifier
+    // which saves us some calls to the type checker.
+    if (importSpecifier === null ||
+        (ts.isIdentifier(node) && node.text !== importSpecifier.name.text)) {
+        return false;
+    }
+    const nodeSymbol = typeChecker.getTypeAtLocation(node).getSymbol();
+    const importSymbol = typeChecker.getTypeAtLocation(importSpecifier).getSymbol();
+    return (!!(nodeSymbol?.declarations?.[0] && importSymbol?.declarations?.[0]) &&
+        nodeSymbol.declarations[0] === importSymbol.declarations[0]);
+}
 
 /** Utility class used to track a one-to-many relationship where all the items are unique. */
 class UniqueItemTracker {
@@ -267,8 +280,8 @@ function isClassReferenceInAngularModule(node, className, moduleName, typeChecke
  */
 function getTestingImports(sourceFile) {
     return {
-        testBed: imports.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed'),
-        catalyst: imports.getImportSpecifier(sourceFile, /testing\/catalyst(\/(fake_)?async)?$/, 'setupModule'),
+        testBed: ng_decorators.getImportSpecifier(sourceFile, '@angular/core/testing', 'TestBed'),
+        catalyst: ng_decorators.getImportSpecifier(sourceFile, /testing\/catalyst(\/(fake_)?async)?$/, 'setupModule'),
     };
 }
 /**
@@ -287,11 +300,11 @@ function isTestCall(typeChecker, node, testBedImport, catalystImport) {
         testBedImport &&
         ts.isPropertyAccessExpression(node.expression) &&
         node.expression.name.text === 'configureTestingModule' &&
-        symbol.isReferenceToImport(typeChecker, node.expression.expression, testBedImport);
+        isReferenceToImport(typeChecker, node.expression.expression, testBedImport);
     const isCatalystCall = isObjectLiteralCall &&
         catalystImport &&
         ts.isIdentifier(node.expression) &&
-        symbol.isReferenceToImport(typeChecker, node.expression, catalystImport);
+        isReferenceToImport(typeChecker, node.expression, catalystImport);
     return !!(isTestBedCall || isCatalystCall);
 }
 
@@ -653,7 +666,7 @@ function hasNgModuleMetadataElements(node) {
 /** Finds all modules whose declarations can be migrated. */
 function findNgModuleClassesToMigrate(sourceFile, typeChecker) {
     const modules = [];
-    if (imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
+    if (ng_decorators.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
         sourceFile.forEachChild(function walk(node) {
             if (ts.isClassDeclaration(node)) {
                 const decorator = ng_decorators.getAngularDecorators(typeChecker, ts.getDecorators(node) || []).find((current) => current.name === 'NgModule');

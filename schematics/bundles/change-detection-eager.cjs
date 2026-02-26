@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-01eadde
+ * @license Angular v22.0.0-next.0+sha-4c4a3db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,13 +11,12 @@ require('node:path/posix');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
+var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
 require('@angular/compiler-cli');
 require('node:path');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
-require('./imports-CVmcbVA9.cjs');
 
 class ChangeDetectionEagerMigration extends project_paths.TsurgeFunnelMigration {
     config;

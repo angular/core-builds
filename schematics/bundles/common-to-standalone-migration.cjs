@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-01eadde
+ * @license Angular v22.0.0-next.0+sha-4c4a3db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,10 +11,9 @@ require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
-var ng_component_template = require('./ng_component_template-BOuKAnQd.cjs');
-var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
+var ng_component_template = require('./ng_component_template-BCdT6e8W.cjs');
+var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
-var imports = require('./imports-CVmcbVA9.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
@@ -180,7 +179,7 @@ function hasCommonModuleInImports(componentNode, typeChecker) {
     });
 }
 function isCommonModuleFromAngularCommon(typeChecker, identifier) {
-    const importInfo = imports.getImportOfIdentifier(typeChecker, identifier);
+    const importInfo = ng_decorators.getImportOfIdentifier(typeChecker, identifier);
     return (importInfo !== null &&
         importInfo.name === commonModuleStr &&
         importInfo.importModule === angularCommonStr);

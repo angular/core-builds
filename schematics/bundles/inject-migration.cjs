@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-01eadde
+ * @license Angular v22.0.0-next.0+sha-4c4a3db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,8 +10,7 @@ var schematics = require('@angular-devkit/schematics');
 var path = require('path');
 var compiler_host = require('./compiler_host-CY14HvaP.cjs');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-DYy6II6x.cjs');
-var imports = require('./imports-CVmcbVA9.cjs');
+var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
 var nodes = require('./nodes-ZSQ7WZRB.cjs');
 var leading_space = require('./leading_space-BTPRV0wu.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
@@ -51,7 +50,7 @@ const UNINJECTABLE_TYPE_KINDS = new Set([
  * @param localTypeChecker Type checker scoped to the specific file.
  */
 function analyzeFile(sourceFile, localTypeChecker, options) {
-    const coreSpecifiers = imports.getNamedImports(sourceFile, '@angular/core');
+    const coreSpecifiers = ng_decorators.getNamedImports(sourceFile, '@angular/core');
     // Exit early if there are no Angular imports.
     if (coreSpecifiers === null || coreSpecifiers.elements.length === 0) {
         return null;
@@ -1071,7 +1070,7 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
     else if (ts.isCallExpression(firstArg) &&
         ts.isIdentifier(firstArg.expression) &&
         firstArg.arguments.length === 1) {
-        const callImport = imports.getImportOfIdentifier(localTypeChecker, firstArg.expression);
+        const callImport = ng_decorators.getImportOfIdentifier(localTypeChecker, firstArg.expression);
         const arrowFn = firstArg.arguments[0];
         // If the first parameter is a `forwardRef`, unwrap it for a more
         // accurate type and because it's no longer necessary.

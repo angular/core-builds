@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-01eadde
+ * @license Angular v22.0.0-next.0+sha-4c4a3db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,14 +13,13 @@ require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
 var compiler = require('@angular/compiler');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
-var imports = require('./imports-CVmcbVA9.cjs');
+var ng_decorators = require('./ng_decorators-CwKJUSFO.cjs');
 var parse_html = require('./parse_html-C8eKA9px.cjs');
-var ng_component_template = require('./ng_component_template-BOuKAnQd.cjs');
+var ng_component_template = require('./ng_component_template-BCdT6e8W.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
-require('./ng_decorators-DYy6II6x.cjs');
 require('./property_name-BCpALNpZ.cjs');
 
 const ngClassStr = 'NgClass';
@@ -171,11 +170,11 @@ class NgClassCollector extends compiler.RecursiveVisitor {
         // If we have enough information, check if NgClass is actually imported.
         // If not, we can confidently disable the migration for this component.
         if (componentNode && typeChecker) {
-            const imports$1 = imports.getImportSpecifiers(componentNode.getSourceFile(), commonModuleStr, [
+            const imports = ng_decorators.getImportSpecifiers(componentNode.getSourceFile(), commonModuleStr, [
                 ngClassStr,
                 commonModuleImportsStr,
             ]);
-            if (imports$1.length === 0) {
+            if (imports.length === 0) {
                 this.isNgClassImported = false;
             }
         }
