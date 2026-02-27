@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.0.0-next.0+sha-9bb4f02
+ * @license Angular v22.0.0-next.0+sha-73b6135
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, effect, assertNotInReactiveContext, signal, PendingTasks } from './_effect-chunk2.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, Injector, effect, assertNotInReactiveContext, signal, PendingTasks } from './_pending_tasks-chunk.mjs';
 import { getOutputDestroyRef, untracked, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';

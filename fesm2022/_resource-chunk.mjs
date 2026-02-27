@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.0+sha-9bb4f02
+ * @license Angular v22.0.0-next.0+sha-73b6135
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, signal } from './_effect-chunk2.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, signal } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -163,7 +163,7 @@ class ResourceImpl extends BaseWritableResource {
   unregisterOnDestroy;
   status;
   error;
-  constructor(request, loaderFn, defaultValue, equal, debugName, injector) {
+  constructor(request, loaderFn, defaultValue, equal, debugName, injector, getInitialStream) {
     super(computed(() => {
       const streamValue = this.state().stream?.();
       if (!streamValue) {
@@ -194,15 +194,18 @@ class ResourceImpl extends BaseWritableResource {
     this.state = linkedSignal({
       source: this.extRequest,
       computation: (extRequest, previous) => {
-        const status = extRequest.request === undefined ? 'idle' : 'loading';
         if (!previous) {
+          const initialStream = getInitialStream?.(extRequest.request);
+          getInitialStream = undefined;
+          const status = extRequest.request === undefined ? 'idle' : initialStream ? 'resolved' : 'loading';
           return {
             extRequest,
             status,
             previousStatus: 'idle',
-            stream: undefined
+            stream: initialStream
           };
         } else {
+          const status = extRequest.request === undefined ? 'idle' : 'loading';
           return {
             extRequest,
             status,
