@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0+sha-4e9648d
+ * @license Angular v21.2.0+sha-498d9cd
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -163,7 +163,7 @@ class ResourceImpl extends BaseWritableResource {
   unregisterOnDestroy;
   status;
   error;
-  constructor(request, loaderFn, defaultValue, equal, debugName, injector) {
+  constructor(request, loaderFn, defaultValue, equal, debugName, injector, getInitialStream) {
     super(computed(() => {
       const streamValue = this.state().stream?.();
       if (!streamValue) {
@@ -194,15 +194,18 @@ class ResourceImpl extends BaseWritableResource {
     this.state = linkedSignal({
       source: this.extRequest,
       computation: (extRequest, previous) => {
-        const status = extRequest.request === undefined ? 'idle' : 'loading';
         if (!previous) {
+          const initialStream = getInitialStream?.(extRequest.request);
+          getInitialStream = undefined;
+          const status = extRequest.request === undefined ? 'idle' : initialStream ? 'resolved' : 'loading';
           return {
             extRequest,
             status,
             previousStatus: 'idle',
-            stream: undefined
+            stream: initialStream
           };
         } else {
+          const status = extRequest.request === undefined ? 'idle' : 'loading';
           return {
             extRequest,
             status,
