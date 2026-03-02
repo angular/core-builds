@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-a2d5048
+ * @license Angular v22.0.0-next.0+sha-9758ea9
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4191,6 +4191,7 @@ function getLongestComputedAnimation(computedStyle) {
   const rawNames = parseCssPropertyValue(computedStyle, 'animation-name');
   const rawDelays = parseCssPropertyValue(computedStyle, 'animation-delay');
   const rawDurations = parseCssPropertyValue(computedStyle, 'animation-duration');
+  const rawIterationCounts = parseCssPropertyValue(computedStyle, 'animation-iteration-count');
   const longest = {
     animationName: '',
     propertyName: undefined,
@@ -4198,7 +4199,8 @@ function getLongestComputedAnimation(computedStyle) {
   };
   for (let i = 0; i < rawNames.length; i++) {
     const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
-    if (duration > longest.duration) {
+    const iterationCount = rawIterationCounts[i];
+    if (duration > longest.duration && iterationCount !== 'infinite') {
       longest.animationName = rawNames[i];
       longest.duration = duration;
     }
@@ -4234,6 +4236,9 @@ function determineLongestAnimationFromElementAnimations(el, animationsMap, anima
   };
   for (const animation of animations) {
     const timing = animation.effect?.getTiming();
+    if (timing?.iterations === Infinity) {
+      continue;
+    }
     const animDuration = typeof timing?.duration === 'number' ? timing.duration : 0;
     let duration = (timing?.delay ?? 0) + animDuration;
     let propertyName;
@@ -8725,7 +8730,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-a2d5048'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-9758ea9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
