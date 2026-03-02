@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-73b6135
+ * @license Angular v22.0.0-next.0+sha-2206efa
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -90,6 +90,33 @@ interface OutputOptions {
  */
 declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
 
+/** Error thrown when a `Resource` dependency of another resource errors. */
+declare class ResourceDependencyError extends Error {
+    /** The dependency that errored. */
+    readonly dependency: Resource<unknown>;
+    constructor(dependency: Resource<unknown>);
+}
+/**
+ * Special status codes that can be thrown from a resource's `params` or `request` function to
+ * indicate that the resource should transition to that status.
+ */
+declare class ResourceParamsStatus extends Error {
+    private readonly _brand;
+    private constructor();
+    /** Status code that transitions the resource to `idle` status. */
+    static readonly IDLE: ResourceParamsStatus;
+    /** Status code that transitions the resource to `loading` status. */
+    static readonly LOADING: ResourceParamsStatus;
+}
+/** Context received by a resource's `params` or `request` function. */
+interface ResourceParamsContext {
+    /**
+     * Chains the current params off of the value of another resource, returning the value
+     * of the other resource if it is available, or propagating the status to the current resource by
+     * throwing the appropriate status code if the value is not available.
+     */
+    readonly chain: <T>(resource: Resource<T>) => T;
+}
 /**
  * String value capturing the status of a `Resource`.
  *
@@ -233,7 +260,7 @@ interface BaseResourceOptions<T, R> {
      *
      * If a params function isn't provided, the loader won't rerun unless the resource is reloaded.
      */
-    params?: () => R;
+    params?: (ctx: ResourceParamsContext) => R;
     /**
      * The value which will be returned from the resource when a server value is unavailable, such as
      * when the resource is still loading.
@@ -316,5 +343,5 @@ type ResourceSnapshot<T> = {
     readonly error: Error;
 };
 
-export { OutputEmitterRef, getOutputDestroyRef, output };
-export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
+export { OutputEmitterRef, ResourceDependencyError, ResourceParamsStatus, getOutputDestroyRef, output };
+export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };

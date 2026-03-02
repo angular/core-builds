@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.0+sha-73b6135
+ * @license Angular v22.0.0-next.0+sha-2206efa
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, signal } from './_pending_tasks-chunk.mjs';
+import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, signal, effect, PendingTasks } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -61,10 +61,6 @@ function getOutputDestroyRef(ref) {
   return ref.destroyRef;
 }
 
-function untracked(nonReactiveReadsFn) {
-  return untracked$1(nonReactiveReadsFn);
-}
-
 function computed(computation, options) {
   const getter = createComputed(computation, options?.equal);
   if (ngDevMode) {
@@ -72,6 +68,29 @@ function computed(computation, options) {
     getter[SIGNAL].debugName = options?.debugName;
   }
   return getter;
+}
+
+function untracked(nonReactiveReadsFn) {
+  return untracked$1(nonReactiveReadsFn);
+}
+
+class ResourceDependencyError extends Error {
+  dependency;
+  constructor(dependency) {
+    super('Dependency error', {
+      cause: dependency.error()
+    });
+    this.name = 'ResourceDependencyError';
+    this.dependency = dependency;
+  }
+}
+class ResourceParamsStatus extends Error {
+  _brand;
+  constructor(msg) {
+    super(msg);
+  }
+  static IDLE = new ResourceParamsStatus('IDLE');
+  static LOADING = new ResourceParamsStatus('LOADING');
 }
 
 const identityFn = v => v;
@@ -183,36 +202,62 @@ class ResourceImpl extends BaseWritableResource {
     this.loaderFn = loaderFn;
     this.equal = equal;
     this.debugName = debugName;
-    this.extRequest = linkedSignal({
-      source: request,
-      computation: request => ({
-        request,
-        reload: 0
-      }),
-      ...(ngDevMode ? createDebugNameObject(debugName, 'extRequest') : undefined)
-    });
+    this.extRequest = linkedSignal(() => {
+      try {
+        return {
+          request: request(paramsContext),
+          reload: 0
+        };
+      } catch (error) {
+        if (error === ResourceParamsStatus.IDLE) {
+          return {
+            status: 'idle',
+            reload: 0
+          };
+        } else if (error === ResourceParamsStatus.LOADING) {
+          return {
+            status: 'loading',
+            reload: 0
+          };
+        }
+        return {
+          error: error,
+          reload: 0
+        };
+      }
+    }, ngDevMode ? createDebugNameObject(debugName, 'extRequest') : undefined);
     this.state = linkedSignal({
       source: this.extRequest,
       computation: (extRequest, previous) => {
-        if (!previous) {
-          const initialStream = getInitialStream?.(extRequest.request);
-          getInitialStream = undefined;
-          const status = extRequest.request === undefined ? 'idle' : initialStream ? 'resolved' : 'loading';
-          return {
-            extRequest,
-            status,
-            previousStatus: 'idle',
-            stream: initialStream
-          };
-        } else {
-          const status = extRequest.request === undefined ? 'idle' : 'loading';
-          return {
-            extRequest,
-            status,
-            previousStatus: projectStatusOfState(previous.value),
-            stream: previous.value.extRequest.request === extRequest.request ? previous.value.stream : undefined
-          };
+        let {
+          request,
+          status,
+          error
+        } = extRequest;
+        let stream;
+        if (error) {
+          status = 'resolved';
+          stream = signal({
+            error: encapsulateResourceError(error)
+          }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined);
+        } else if (!status) {
+          if (!previous) {
+            stream = getInitialStream?.(extRequest.request);
+            getInitialStream = undefined;
+            status = request === undefined ? 'idle' : stream ? 'resolved' : 'loading';
+          } else {
+            status = request === undefined ? 'idle' : 'loading';
+            if (previous.value.extRequest.request === request) {
+              stream = previous.value.stream;
+            }
+          }
         }
+        return {
+          extRequest,
+          status,
+          previousStatus: previous ? projectStatusOfState(previous.value) : 'idle',
+          stream
+        };
       },
       ...(ngDevMode ? createDebugNameObject(debugName, 'state') : undefined)
     });
@@ -405,6 +450,20 @@ class ResourceWrappedError extends Error {
     });
   }
 }
+const paramsContext = {
+  chain(resource) {
+    switch (resource.status()) {
+      case 'idle':
+        throw ResourceParamsStatus.IDLE;
+      case 'error':
+        throw new ResourceDependencyError(resource);
+      case 'loading':
+      case 'reloading':
+        throw ResourceParamsStatus.LOADING;
+    }
+    return resource.value();
+  }
+};
 
-export { OutputEmitterRef, ResourceImpl, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
 //# sourceMappingURL=_resource-chunk.mjs.map

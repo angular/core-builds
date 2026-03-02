@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-73b6135
+ * @license Angular v22.0.0-next.0+sha-2206efa
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4048,6 +4048,7 @@ const noOpAnimationComplete = () => {};
 const enterClassMap = new WeakMap();
 const longestAnimations = new WeakMap();
 const leavingNodes = new WeakMap();
+const reusedNodes = new WeakSet();
 function clearLeavingNodes(tNode, el) {
   const nodes = leavingNodes.get(tNode);
   if (nodes && nodes.length > 0) {
@@ -4066,7 +4067,15 @@ function cancelLeavingNodes(tNode, newElement) {
   for (let i = nodes.length - 1; i >= 0; i--) {
     const leavingEl = nodes[i];
     const leavingParent = leavingEl.parentNode;
-    if (prevSibling && leavingEl === prevSibling || leavingParent && newParent && leavingParent !== newParent) {
+    if (leavingEl === newElement) {
+      nodes.splice(i, 1);
+      reusedNodes.add(leavingEl);
+      leavingEl.dispatchEvent(new CustomEvent('animationend', {
+        detail: {
+          cancel: true
+        }
+      }));
+    } else if (prevSibling && leavingEl === prevSibling || leavingParent && newParent && leavingParent !== newParent) {
       nodes.splice(i, 1);
       leavingEl.dispatchEvent(new CustomEvent('animationend', {
         detail: {
@@ -4683,6 +4692,10 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
         trackLeavingNodes(tNode, rNode);
       }
       runLeaveAnimationsWithCallback(parentLView, tNode, injector, nodeHasLeaveAnimations => {
+        if (reusedNodes.has(rNode)) {
+          reusedNodes.delete(rNode);
+          return;
+        }
         nativeRemoveNode(renderer, rNode, isComponent, nodeHasLeaveAnimations);
       });
     } else if (action === 3) {
@@ -8712,7 +8725,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-73b6135'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-2206efa'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
