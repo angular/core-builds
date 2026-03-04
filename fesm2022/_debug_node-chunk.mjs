@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-d9e40cb
+ * @license Angular v22.0.0-next.0+sha-0c40212
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8730,7 +8730,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-d9e40cb'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-0c40212'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10529,7 +10529,7 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
   });
 }
 
-const _requestIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout).bind(globalThis);
+const _requestIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : cb => setTimeout(cb)).bind(globalThis);
 const _cancelIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout).bind(globalThis);
 const IDLE_SERVICE = new InjectionToken(ngDevMode ? 'IDLE_SERVICE' : '', {
   providedIn: 'root',
@@ -10544,8 +10544,8 @@ function provideIdleServiceWith(useExisting) {
 class RequestIdleCallbackService {
   requestIdleCallback = _requestIdleCallback();
   cancelIdleCallback = _cancelIdleCallback();
-  requestOnIdle(callback) {
-    return this.requestIdleCallback(callback);
+  requestOnIdle(callback, options) {
+    return this.requestIdleCallback(callback, options);
   }
   cancelOnIdle(id) {
     return this.cancelIdleCallback(id);
@@ -12130,57 +12130,83 @@ function remove(list, el) {
   }
 }
 
-function onIdle(callback, injector) {
+function onIdle(callback, injector, options) {
   const scheduler = injector.get(IdleScheduler);
   const cleanupFn = () => scheduler.remove(callback);
-  scheduler.add(callback);
+  scheduler.add(callback, options);
   return cleanupFn;
 }
+function onIdleWrapper(options) {
+  return (callback, injector) => onIdle(callback, injector, options);
+}
 class IdleScheduler {
-  idleId = null;
-  queue = new Set();
+  buckets = new Map();
+  callbackBucket = new Map();
   applicationRef = inject(ApplicationRef);
   ngZone = inject(NgZone);
   idleService = inject(IDLE_SERVICE);
-  add(callback) {
-    this.queue.add(callback);
-    this.scheduleIdleCallback();
+  add(callback, options) {
+    const key = getIdleRequestKey(options);
+    this.callbackBucket.set(callback, key);
+    let bucket = this.buckets.get(key);
+    if (bucket == null) {
+      bucket = {
+        idleId: null,
+        queue: new Set()
+      };
+      this.buckets.set(key, bucket);
+    }
+    bucket.queue.add(callback);
+    this.scheduleBucket(bucket, options);
   }
   remove(callback) {
-    this.queue.delete(callback);
-    if (this.queue.size === 0) {
-      this.cancelIdleCallback();
+    const key = this.callbackBucket.get(callback);
+    if (key === undefined) return;
+    this.callbackBucket.delete(callback);
+    const bucket = this.buckets.get(key);
+    if (!bucket) return;
+    bucket.queue.delete(callback);
+    if (bucket.queue.size === 0) {
+      this.cancelBucket(bucket);
+      this.buckets.delete(key);
     }
   }
-  scheduleIdleCallback() {
-    if (this.idleId !== null) {
+  scheduleBucket(bucket, options) {
+    if (bucket.idleId !== null) {
       return;
     }
+    const key = getIdleRequestKey(options);
     const callback = deadline => {
-      this.cancelIdleCallback();
-      for (const callbackFn of this.queue) {
-        callbackFn();
+      this.cancelBucket(bucket);
+      for (const cb of bucket.queue) {
+        cb();
         this.applicationRef._tick();
-        this.queue.delete(callbackFn);
+        bucket.queue.delete(cb);
+        this.callbackBucket.delete(cb);
         if (deadline && deadline.timeRemaining() === 0 && !deadline.didTimeout) {
           break;
         }
       }
-      if (this.queue.size > 0) {
-        this.scheduleIdleCallback();
+      if (bucket.queue.size > 0) {
+        this.scheduleBucket(bucket, options);
+      } else {
+        this.buckets.delete(key);
       }
     };
-    this.idleId = this.idleService.requestOnIdle(deadline => this.ngZone.run(() => callback(deadline)));
+    bucket.idleId = this.idleService.requestOnIdle(deadline => this.ngZone.run(() => callback(deadline)), options);
   }
-  cancelIdleCallback() {
-    if (this.idleId !== null) {
-      this.idleService.cancelOnIdle(this.idleId);
-      this.idleId = null;
+  cancelBucket(bucket) {
+    if (bucket.idleId !== null) {
+      this.idleService.cancelOnIdle(bucket.idleId);
+      bucket.idleId = null;
     }
   }
   ngOnDestroy() {
-    this.cancelIdleCallback();
-    this.queue.clear();
+    for (const bucket of this.buckets.values()) {
+      this.cancelBucket(bucket);
+    }
+    this.buckets.clear();
+    this.callbackBucket.clear();
   }
   static ɵprov =
   /* @__PURE__ */
@@ -12189,6 +12215,12 @@ class IdleScheduler {
     providedIn: 'root',
     factory: () => new IdleScheduler()
   });
+}
+function getIdleRequestKey(options) {
+  if (!options || options.timeout == null) {
+    return '';
+  }
+  return `${options.timeout}`;
 }
 
 function onTimer(delay) {
@@ -13055,29 +13087,36 @@ function ɵɵdeferHydrateNever() {
     triggerDeferBlock(2, lView, tNode);
   }
 }
-function ɵɵdeferOnIdle() {
+function ɵɵdeferOnIdle(timeout) {
   const lView = getLView();
   const tNode = getCurrentTNode();
   if (ngDevMode) {
-    trackTriggerForDebugging(lView[TVIEW], tNode, 'on idle');
+    const expression = timeout ? `on idle(${timeout})` : 'on idle';
+    trackTriggerForDebugging(lView[TVIEW], tNode, expression);
   }
   if (!shouldAttachTrigger(0, lView, tNode)) return;
-  scheduleDelayedTrigger(onIdle);
+  scheduleDelayedTrigger(onIdleWrapper({
+    timeout
+  }));
 }
-function ɵɵdeferPrefetchOnIdle() {
+function ɵɵdeferPrefetchOnIdle(timeout) {
   const lView = getLView();
   const tNode = getCurrentTNode();
   if (ngDevMode) {
-    trackTriggerForDebugging(lView[TVIEW], tNode, 'prefetch on idle');
+    const expression = timeout ? `prefetch on idle(${timeout})` : 'prefetch on idle';
+    trackTriggerForDebugging(lView[TVIEW], tNode, expression);
   }
   if (!shouldAttachTrigger(1, lView, tNode)) return;
-  scheduleDelayedPrefetching(onIdle);
+  scheduleDelayedPrefetching(onIdleWrapper({
+    timeout
+  }));
 }
-function ɵɵdeferHydrateOnIdle() {
+function ɵɵdeferHydrateOnIdle(timeout) {
   const lView = getLView();
   const tNode = getCurrentTNode();
   if (ngDevMode) {
-    trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on idle');
+    const expression = timeout ? `hydrate on idle(${timeout})` : 'hydrate on idle';
+    trackTriggerForDebugging(lView[TVIEW], tNode, expression);
   }
   if (!shouldAttachTrigger(2, lView, tNode)) return;
   const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -13085,7 +13124,9 @@ function ɵɵdeferHydrateOnIdle() {
   if (typeof ngServerMode !== 'undefined' && ngServerMode) {
     triggerDeferBlock(2, lView, tNode);
   } else {
-    scheduleDelayedHydrating(onIdle, lView, tNode);
+    scheduleDelayedHydrating(onIdleWrapper({
+      timeout
+    }), lView, tNode);
   }
 }
 function ɵɵdeferOnImmediate() {

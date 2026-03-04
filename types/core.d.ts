@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-d9e40cb
+ * @license Angular v22.0.0-next.0+sha-0c40212
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6635,17 +6635,17 @@ declare function ɵɵdeferHydrateNever(): void;
  * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnIdle(): void;
+declare function ɵɵdeferOnIdle(timeout?: number): void;
 /**
  * Sets up logic to handle the `prefetch on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnIdle(): void;
+declare function ɵɵdeferPrefetchOnIdle(timeout?: number): void;
 /**
  * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferHydrateOnIdle(): void;
+declare function ɵɵdeferHydrateOnIdle(timeout?: number): void;
 /**
  * Sets up logic to handle the `on immediate` deferred trigger.
  * @codeGenApi
@@ -9444,7 +9444,7 @@ interface IdleService {
      *
      * @returns an id which allows the scheduled callback to be cancelled before it executes.
      */
-    requestOnIdle(callback: (deadline?: IdleDeadline) => void): number;
+    requestOnIdle(callback: (deadline?: IdleDeadline) => void, options?: IdleRequestOptions): number;
     /**
      * Cancel a previously scheduled callback using the id associated with it.
      */
