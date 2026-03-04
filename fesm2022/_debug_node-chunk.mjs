@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.0+sha-84e79f5
+ * @license Angular v21.2.0+sha-b4ec3cc
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4131,7 +4131,7 @@ function elementHasClassList(element, classList) {
 function isLongestAnimation(event, nativeElement) {
   const longestAnimation = longestAnimations.get(nativeElement);
   if (longestAnimation === undefined) return true;
-  return nativeElement === event.target && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && event.propertyName === longestAnimation.propertyName);
+  return nativeElement === event.target && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && (longestAnimation.propertyName === 'all' || event.propertyName === longestAnimation.propertyName));
 }
 function addAnimationToLView(animations, tNode, fn) {
   const nodeAnimations = animations.get(tNode.index) ?? {
@@ -8730,7 +8730,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0+sha-84e79f5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.0+sha-b4ec3cc'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13345,6 +13345,7 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
   const renderer = lView[RENDERER];
   const activeClasses = getClassListFromValue(value);
   const cleanupFns = [];
+  let hasCompleted = false;
   const handleEnterAnimationStart = event => {
     if (event.target !== nativeElement) return;
     const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
@@ -13354,6 +13355,9 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
   };
   const handleEnterAnimationEnd = event => {
     if (event.target !== nativeElement) return;
+    if (isLongestAnimation(event, nativeElement)) {
+      hasCompleted = true;
+    }
     enterAnimationEnd(event, nativeElement, renderer);
   };
   if (activeClasses && activeClasses.length > 0) {
@@ -13367,6 +13371,7 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
     }
     ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
+        if (hasCompleted) return;
         determineLongestAnimation(nativeElement, longestAnimations, areAnimationSupported);
         if (!longestAnimations.has(nativeElement)) {
           for (const klass of activeClasses) {
@@ -13382,7 +13387,7 @@ function enterAnimationEnd(event, nativeElement, renderer) {
   const elementData = enterClassMap.get(nativeElement);
   if (event.target !== nativeElement || !elementData) return;
   if (isLongestAnimation(event, nativeElement)) {
-    event.stopImmediatePropagation();
+    event.stopPropagation();
     for (const klass of elementData.classList) {
       renderer.removeClass(nativeElement, klass);
     }
@@ -13454,11 +13459,15 @@ function runLeaveAnimations(lView, tNode, value, ngZone) {
 function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) {
   cancelAnimationsIfRunning(el, renderer);
   const cleanupFns = [];
-  const resolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
+  const componentResolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
+  let fallbackTimeoutId;
+  let hasCompleted = false;
   const handleOutAnimationEnd = event => {
-    if (event.target !== el) return;
-    if (event instanceof CustomEvent || isLongestAnimation(event, el)) {
-      event.stopImmediatePropagation();
+    if (event.target !== el && event.type !== 'animation-fallback') return;
+    if (event.type === 'animation-fallback' || isLongestAnimation(event, el)) {
+      hasCompleted = true;
+      if (fallbackTimeoutId) clearTimeout(fallbackTimeoutId);
+      if (event.type !== 'animation-fallback') event.stopPropagation();
       longestAnimations.delete(el);
       clearLeavingNodes(tNode, el);
       if (Array.isArray(tNode.projection)) {
@@ -13466,7 +13475,7 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
           renderer.removeClass(el, item);
         }
       }
-      cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+      cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
       clearLViewNodeAnimationResolvers(lView, tNode);
     }
   };
@@ -13480,11 +13489,18 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
   }
   ngZone.runOutsideAngular(() => {
     requestAnimationFrame(() => {
+      if (hasCompleted) return;
       determineLongestAnimation(el, longestAnimations, areAnimationSupported);
-      if (!longestAnimations.has(el)) {
+      const longest = longestAnimations.get(el);
+      if (!longest) {
         clearLeavingNodes(tNode, el);
-        cleanupAfterLeaveAnimations(resolvers, cleanupFns);
+        cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
         clearLViewNodeAnimationResolvers(lView, tNode);
+      } else {
+        fallbackTimeoutId = setTimeout(() => {
+          handleOutAnimationEnd(new CustomEvent('animation-fallback'));
+        }, longest.duration + 50);
+        cleanupFns.push(() => clearTimeout(fallbackTimeoutId));
       }
     });
   });
