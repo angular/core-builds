@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.0+sha-9208421
+ * @license Angular v22.0.0-next.0+sha-fda08b7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4128,10 +4128,13 @@ function elementHasClassList(element, classList) {
   }
   return false;
 }
+function getEventTarget(event) {
+  return event.composedPath ? event.composedPath()[0] : event.target;
+}
 function isLongestAnimation(event, nativeElement) {
   const longestAnimation = longestAnimations.get(nativeElement);
   if (longestAnimation === undefined) return true;
-  return nativeElement === event.target && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && (longestAnimation.propertyName === 'all' || event.propertyName === longestAnimation.propertyName));
+  return nativeElement === getEventTarget(event) && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && (longestAnimation.propertyName === 'all' || event.propertyName === longestAnimation.propertyName));
 }
 function addAnimationToLView(animations, tNode, fn) {
   const nodeAnimations = animations.get(tNode.index) ?? {
@@ -8730,7 +8733,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-9208421'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.0+sha-fda08b7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -13399,14 +13402,14 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
   const cleanupFns = [];
   let hasCompleted = false;
   const handleEnterAnimationStart = event => {
-    if (event.target !== nativeElement) return;
+    if (getEventTarget(event) !== nativeElement) return;
     const eventName = event instanceof AnimationEvent ? 'animationend' : 'transitionend';
     ngZone.runOutsideAngular(() => {
       renderer.listen(nativeElement, eventName, handleEnterAnimationEnd);
     });
   };
   const handleEnterAnimationEnd = event => {
-    if (event.target !== nativeElement) return;
+    if (getEventTarget(event) !== nativeElement) return;
     if (isLongestAnimation(event, nativeElement)) {
       hasCompleted = true;
     }
@@ -13437,7 +13440,7 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
 }
 function enterAnimationEnd(event, nativeElement, renderer) {
   const elementData = enterClassMap.get(nativeElement);
-  if (event.target !== nativeElement || !elementData) return;
+  if (getEventTarget(event) !== nativeElement || !elementData) return;
   if (isLongestAnimation(event, nativeElement)) {
     event.stopPropagation();
     for (const klass of elementData.classList) {
@@ -13515,7 +13518,8 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
   let fallbackTimeoutId;
   let hasCompleted = false;
   const handleOutAnimationEnd = event => {
-    if (event.target !== el && event.type !== 'animation-fallback') return;
+    const target = getEventTarget(event);
+    if (target !== el && event.type !== 'animation-fallback') return;
     if (event.type === 'animation-fallback' || isLongestAnimation(event, el)) {
       hasCompleted = true;
       if (fallbackTimeoutId) clearTimeout(fallbackTimeoutId);
