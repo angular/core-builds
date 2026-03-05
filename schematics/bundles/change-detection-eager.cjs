@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.0+sha-a6941ad
+ * @license Angular v22.0.0-next.0+sha-c767d67
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -15,6 +15,7 @@ var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
 require('@angular/compiler-cli');
 require('node:path');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
+var leading_space = require('./leading_space-BTPRV0wu.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
 require('./imports-CKV-ITqD.cjs');
@@ -70,12 +71,8 @@ class ChangeDetectionEagerMigration extends project_paths.TsurgeFunnelMigration 
                     let toInsert;
                     if (properties.length > 0) {
                         const lastProp = properties[properties.length - 1];
-                        insertPos = lastProp.getEnd();
-                        // Simpler approach: check comma after last property.
-                        const textAfter = sf.text.substring(lastProp.getEnd());
-                        const hasComma = /^\s*,/.test(textAfter);
-                        const prefix = hasComma ? '' : ',';
-                        toInsert = `${prefix}\n  changeDetection: ${exprText}.Eager`;
+                        insertPos = lastProp.getStart();
+                        toInsert = `changeDetection: ${exprText}.Eager,\n${leading_space.getLeadingLineWhitespaceOfNode(lastProp)}`;
                     }
                     else {
                         insertPos = metadata.getStart() + 1;
