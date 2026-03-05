@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-dd464e5
+ * @license Angular v22.0.0-next.1+sha-ac8418d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8733,7 +8733,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.1+sha-dd464e5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.1+sha-ac8418d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10658,7 +10658,6 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
 const _requestIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : cb => setTimeout(cb)).bind(globalThis);
 const _cancelIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout).bind(globalThis);
 const IDLE_SERVICE = new InjectionToken(ngDevMode ? 'IDLE_SERVICE' : '', {
-  providedIn: 'root',
   factory: () => new RequestIdleCallbackService()
 });
 function provideIdleServiceWith(useExisting) {

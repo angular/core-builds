@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-dd464e5
+ * @license Angular v22.0.0-next.1+sha-ac8418d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8826,6 +8826,9 @@ declare function ɵɵvalidateAttribute(value: unknown, tagName: string, attribut
  * Service which configures custom 'on idle' behavior for Angular features like `@defer`.
  *
  * @publicApi
+ *
+ * @see [Customizing `idle` behavior](guide/templates/defer#customizing-idle-behavior)
+ *
  */
 interface IdleService {
     /**
@@ -8846,6 +8849,8 @@ interface IdleService {
  * must implement the `IdleService` interface.
  *
  * @publicApi
+ *
+ * @see [Customizing `idle` behavior](guide/templates/defer#customizing-idle-behavior)
  */
 declare function provideIdleServiceWith(useExisting: AbstractType<IdleService> | InjectionToken<IdleService>): EnvironmentProviders;
 
