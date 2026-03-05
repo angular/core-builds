@@ -1,13 +1,13 @@
 /**
- * @license Angular v22.0.0-next.1+sha-9fe820d
+ * @license Angular v22.0.0-next.1+sha-3693687
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './_ng_module-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './_chrome_dev_tools_performance-chunk.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './_discovery-chunk.js';
 import * as i0 from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';

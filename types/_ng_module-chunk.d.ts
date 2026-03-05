@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-9fe820d
+ * @license Angular v22.0.0-next.1+sha-3693687
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4729,6 +4729,26 @@ type DestroyHookData = (HookEntry | HookData)[];
 type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | ProviderToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string | TDeferBlockDetails)[];
 
 /**
+ * An interface implemented by all Angular type decorators, which allows them to be used as
+ * decorators as well as Angular syntax.
+ *
+ * ```ts
+ * @ng.Component({...})
+ * class MyClass {...}
+ * ```
+ *
+ * @publicApi
+ */
+interface TypeDecorator {
+    /**
+     * Invoke as decorator.
+     */
+    <T extends Type<any>>(type: T): T;
+    (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
+    (target: unknown, context: unknown): void;
+}
+
+/**
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
@@ -4760,24 +4780,1472 @@ declare enum ChangeDetectionStrategy {
 }
 
 /**
- * An interface implemented by all Angular type decorators, which allows them to be used as
- * decorators as well as Angular syntax.
+ * @publicApi
+ */
+type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
+    [key: string]: string | {
+        alias: string | null;
+        required: boolean;
+        isSignal?: boolean;
+    };
+}, OutputMap extends {
+    [key: string]: string;
+}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+/**
+ * @publicApi
+ */
+type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
+    [key: string]: string | {
+        alias: string | null;
+        required: boolean;
+    };
+}, OutputMap extends {
+    [key: string]: string;
+}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+/**
+ * @publicApi
+ */
+type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
+/**
+ * @publicApi
+ */
+type ɵɵPipeDeclaration<T, Name extends string, IsStandalone extends boolean = false> = unknown;
+/**
+ * @publicApi
+ */
+type ɵɵInjectorDeclaration<T> = unknown;
+/**
+ * @publicApi
+ */
+type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
+/**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ *
+ * @publicApi
+ */
+type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
+
+/**
+ * Base class that provides change detection functionality.
+ * A change-detection tree collects all views that are to be checked for changes.
+ * Use the methods to add and remove views from the tree, initiate change-detection,
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/components/lifecycle#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection)
+ *
+ * @usageNotes
+ *
+ * The following examples demonstrate how to modify default change-detection behavior
+ * to perform explicit detection when needed.
+ *
+ * ### Use `markForCheck()` with `CheckOnce` strategy
+ *
+ * The following example sets the `OnPush` change-detection strategy for a component
+ * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+ * after an interval.
+ *
+ * {@example core/ts/change_detect/change-detection.ts region='mark-for-check'}
+ *
+ * ### Detach change detector to limit how often check occurs
+ *
+ * The following example defines a component with a large list of read-only data
+ * that is expected to change constantly, many times per second.
+ * To improve performance, we want to check and update the list
+ * less often than the changes actually occur. To do that, we detach
+ * the component's change detector and perform an explicit local check every five seconds.
+ *
+ * {@example core/ts/change_detect/change-detection.ts region='detach'}
+ *
+ *
+ * ### Reattaching a detached component
+ *
+ * The following example creates a component displaying live data.
+ * The component detaches its change detector from the main change detector tree
+ * when the `live` property is set to false, and reattaches it when the property
+ * becomes true.
+ *
+ * {@example core/ts/change_detect/change-detection.ts region='reattach'}
+ *
+ * @publicApi
+ */
+declare abstract class ChangeDetectorRef {
+    /**
+     * When a view uses the {@link ChangeDetectionStrategy#OnPush} (checkOnce)
+     * change detection strategy, explicitly marks the view as changed so that
+     * it can be checked again.
+     *
+     * Components are normally marked as dirty (in need of rerendering) when inputs
+     * have changed or events have fired in the view. Call this method to ensure that
+     * a component is checked even if these triggers have not occurred.
+     *
+     * <!-- TODO: Add a link to a chapter on OnPush components -->
+     *
+     */
+    abstract markForCheck(): void;
+    /**
+     * Detaches this view from the change-detection tree.
+     * A detached view is  not checked until it is reattached.
+     * Use in combination with `detectChanges()` to implement local change detection checks.
+     *
+     * Detached views are not checked during change detection runs until they are
+     * re-attached, even if they are marked as dirty.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     */
+    abstract detach(): void;
+    /**
+     * Checks this view and its children. Use in combination with {@link ChangeDetectorRef#detach}
+     * to implement local change detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     */
+    abstract detectChanges(): void;
+    /**
+     * Checks the change detector and its children, and throws if any changes are detected.
+     *
+     * Use in development mode to verify that running change detection doesn't introduce
+     * other changes. Calling it in production mode is a noop.
+     *
+     * @deprecated This is a test-only API that does not have a place in production interface.
+     * `checkNoChanges` is already part of an `ApplicationRef` tick when the app is running in dev
+     * mode. For more granular `checkNoChanges` validation, use `ComponentFixture`.
+     */
+    abstract checkNoChanges(): void;
+    /**
+     * Re-attaches the previously detached view to the change detection tree.
+     * Views are attached to the tree by default.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     *
+     */
+    abstract reattach(): void;
+}
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+declare function injectChangeDetectorRef(flags: InternalInjectFlags): ChangeDetectorRef;
+
+/** Symbol used to store and retrieve metadata about a binding. */
+declare const BINDING: unique symbol;
+/**
+ * A dynamically-defined binding targeting.
+ * For example, `inputBinding('value', () => 123)` creates an input binding.
+ */
+interface Binding {
+    readonly [BINDING]: unknown;
+}
+/**
+ * Represents a dynamically-created directive with bindings targeting it specifically.
+ */
+interface DirectiveWithBindings<T> {
+    /** Directive type that should be created. */
+    type: Type<T>;
+    /** Bindings that should be applied to the specific directive. */
+    bindings: Binding[];
+}
+/**
+ * Creates an input binding.
+ * @param publicName Public name of the input to bind to.
+ * @param value Callback that returns the current value for the binding. Can be either a signal or
+ *   a plain getter function.
+ *
+ * ### Usage Example
+ * In this example we create an instance of the `MyButton` component and bind the value of
+ * the `isDisabled` signal to its `disabled` input.
  *
  * ```ts
- * @ng.Component({...})
- * class MyClass {...}
+ * const isDisabled = signal(false);
+ *
+ * createComponent(MyButton, {
+ *   bindings: [inputBinding('disabled', isDisabled)]
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function inputBinding(publicName: string, value: () => unknown): Binding;
+/**
+ * Creates an output binding.
+ * @param eventName Public name of the output to listen to.
+ * @param listener Function to be called when the output emits.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and listen
+ * to its `onChange` event.
+ *
+ * ```ts
+ * interface CheckboxChange {
+ *   value: string;
+ * }
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
+ *   ],
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
+/**
+ * Creates a two-way binding.
+ * @param eventName Public name of the two-way compatible input.
+ * @param value Writable signal from which to get the current value and to which to write new
+ * values.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
+ * input using a two-way binding.
+ *
+ * ```ts
+ * const checkboxValue = signal('');
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    twoWayBinding('value', checkboxValue),
+ *   ],
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
+
+/**
+ * A wrapper around a native element inside of a View.
+ *
+ * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+ * element.
+ *
+ * @security Permitting direct access to the DOM can make your application more vulnerable to
+ * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+ * [Security Guide](https://g.co/ng/security).
+ *
+ * @see [Using DOM APIs](guide/components/dom-apis)
+ *
+ * @publicApi
+ */
+declare class ElementRef<T = any> {
+    /**
+     * <div class="docs-alert docs-alert-important">
+     *   <header>Use with caution</header>
+     *   <p>
+     *    Use this API as the last resort when direct access to DOM is needed. Use templating and
+     *    data-binding provided by Angular instead. If used, it is recommended in combination with
+     *    {@link /best-practices/security#direct-use-of-the-dom-apis-and-explicit-sanitization-calls DomSanitizer}
+     *    for maxiumum security;
+     *   </p>
+     * </div>
+     */
+    nativeElement: T;
+    constructor(nativeElement: T);
+}
+
+/**
+ * Represents an Angular view.
+ *
+ * @see {@link /api/core/ChangeDetectorRef#usage-notes Change detection usage}
+ *
+ * @publicApi
+ */
+declare abstract class ViewRef extends ChangeDetectorRef {
+    /**
+     * Destroys this view and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
+    /**
+     * Reports whether this view has been destroyed.
+     * @returns True after the `destroy()` method has been called, false otherwise.
+     */
+    abstract get destroyed(): boolean;
+    /**
+     * A lifecycle hook that provides additional developer-defined cleanup
+     * functionality for views.
+     * @param callback A handler function that cleans up developer-defined data
+     * associated with a view. Called when the `destroy()` method is invoked.
+     */
+    abstract onDestroy(callback: Function): void;
+}
+/**
+ * Represents an Angular view in a view container.
+ * An embedded view can be referenced from a component
+ * other than the hosting component whose template defines it, or it can be defined
+ * independently by a `TemplateRef`.
+ *
+ * Properties of elements in a view can change, but the structure (number and order) of elements in
+ * a view cannot. Change the structure of elements by inserting, moving, or
+ * removing nested views in a view container.
+ *
+ * @see {@link ViewContainerRef}
+ *
+ * @usageNotes
+ *
+ * The following template breaks down into two separate `TemplateRef` instances,
+ * an outer one and an inner one.
+ *
+ * ```html
+ * Count: {{items.length}}
+ * <ul>
+ *   <li *ngFor="let  item of items">{{item}}</li>
+ * </ul>
+ * ```
+ *
+ * This is the outer `TemplateRef`:
+ *
+ * ```html
+ * Count: {{items.length}}
+ * <ul>
+ *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
+ * </ul>
+ * ```
+ *
+ * This is the inner `TemplateRef`:
+ *
+ * ```html
+ *   <li>{{item}}</li>
+ * ```
+ *
+ * The outer and inner `TemplateRef` instances are assembled into views as follows:
+ *
+ * ```html
+ * <!-- ViewRef: outer-0 -->
+ * Count: 2
+ * <ul>
+ *   <ng-template view-container-ref></ng-template>
+ *   <!-- ViewRef: inner-1 --><li>first</li><!-- /ViewRef: inner-1 -->
+ *   <!-- ViewRef: inner-2 --><li>second</li><!-- /ViewRef: inner-2 -->
+ * </ul>
+ * <!-- /ViewRef: outer-0 -->
+ * ```
+ * @publicApi
+ */
+declare abstract class EmbeddedViewRef<C> extends ViewRef {
+    /**
+     * The context for this view, inherited from the anchor element.
+     */
+    abstract context: C;
+    /**
+     * The root nodes for this embedded view.
+     */
+    abstract get rootNodes(): any[];
+}
+
+/**
+ * Represents a component created by a `ComponentFactory`.
+ * Provides access to the component instance and related objects,
+ * and provides the means of destroying the instance.
+ *
+ * @see [Programmatically rendering components](guide/components/programmatic-rendering)
+ *
+ * @publicApi
+ */
+declare abstract class ComponentRef<C> {
+    /**
+     * Updates a specified input name to a new value. Using this method will properly mark for check
+     * component using the `OnPush` change detection strategy. It will also assure that the
+     * `OnChanges` lifecycle hook runs when a dynamically created component is change-detected.
+     *
+     * @param name The name of an input.
+     * @param value The new value of an input.
+     */
+    abstract setInput(name: string, value: unknown): void;
+    /**
+     * The host or anchor element for this component instance.
+     */
+    abstract get location(): ElementRef;
+    /**
+     * The dependency injector for this component instance.
+     */
+    abstract get injector(): Injector;
+    /**
+     * This component instance.
+     */
+    abstract get instance(): C;
+    /**
+     * The host view defined by the template
+     * for this component instance.
+     */
+    abstract get hostView(): ViewRef;
+    /**
+     * The change detector for this component instance.
+     */
+    abstract get changeDetectorRef(): ChangeDetectorRef;
+    /**
+     * The type of this component (as created by a `ComponentFactory` class).
+     */
+    abstract get componentType(): Type<any>;
+    /**
+     * Destroys the component instance and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
+    /**
+     * A lifecycle hook that provides additional developer-defined cleanup
+     * functionality for the component.
+     * @param callback A handler function that cleans up developer-defined data
+     * associated with this component. Called when the `destroy()` method is invoked.
+     */
+    abstract onDestroy(callback: Function): void;
+}
+/**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
+ */
+declare abstract class ComponentFactory<C> {
+    /**
+     * The component's HTML selector.
+     */
+    abstract get selector(): string;
+    /**
+     * The type of component the factory will create.
+     */
+    abstract get componentType(): Type<any>;
+    /**
+     * Selector for all <ng-content> elements in the component.
+     */
+    abstract get ngContentSelectors(): string[];
+    /**
+     * The inputs of the component.
+     */
+    abstract get inputs(): {
+        propName: string;
+        templateName: string;
+        transform?: (value: any) => any;
+        isSignal: boolean;
+    }[];
+    /**
+     * The outputs of the component.
+     */
+    abstract get outputs(): {
+        propName: string;
+        templateName: string;
+    }[];
+    /**
+     * Creates a new component.
+     */
+    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef<C>;
+}
+
+/**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * Note: since v13, dynamic component creation via
+ * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
+ * does **not** require resolving component factory: component class can be used directly.
+ *
+ * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
+ */
+declare abstract class ComponentFactoryResolver {
+    static NULL: ComponentFactoryResolver;
+    /**
+     * Retrieves the factory object that creates a component of the given type.
+     * @param component The component type.
+     */
+    abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
+}
+
+/**
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
+ *
+ * @publicApi
+ */
+declare abstract class NgModuleRef<T> {
+    /**
+     * The injector that contains all of the providers of the `NgModule`.
+     */
+    abstract get injector(): EnvironmentInjector;
+    /**
+     * The resolver that can retrieve component factories in a context of this module.
+     *
+     * Note: since v13, dynamic component creation via
+     * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
+     * does **not** require resolving component factory: component class can be used directly.
+     *
+     * @deprecated Angular no longer requires Component factories. Please use other APIs where
+     *     Component class can be used directly.
+     */
+    abstract get componentFactoryResolver(): ComponentFactoryResolver;
+    /**
+     * The `NgModule` instance.
+     */
+    abstract get instance(): T;
+    /**
+     * Destroys the module instance and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
+    /**
+     * Registers a callback to be executed when the module is destroyed.
+     */
+    abstract onDestroy(callback: () => void): void;
+}
+interface InternalNgModuleRef<T> extends NgModuleRef<T> {
+    _bootstrapComponents: Type<any>[];
+    resolveInjectorInitializers(): void;
+}
+/**
+ * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
+ * using factory-based ones.
+ */
+declare abstract class NgModuleFactory<T> {
+    abstract get moduleType(): Type<T>;
+    abstract create(parentInjector: Injector | null): NgModuleRef<T>;
+}
+
+/**
+ * Use in components with the `@Output` directive to emit custom events
+ * synchronously or asynchronously, and register handlers for those events
+ * by subscribing to an instance.
+ *
+ * @usageNotes
+ *
+ * Extends
+ * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
+ * for Angular by adding the `emit()` method.
+ *
+ * In the following example, a component defines two output properties
+ * that create event emitters. When the title is clicked, the emitter
+ * emits an open or close event to toggle the current visibility state.
+ *
+ * ```angular-ts
+ * @Component({
+ *   selector: 'zippy',
+ *   template: `
+ *   <div class="zippy">
+ *     <div (click)="toggle()">Toggle</div>
+ *     <div [hidden]="!visible">
+ *       <ng-content></ng-content>
+ *     </div>
+ *  </div>`})
+ * export class Zippy {
+ *   visible: boolean = true;
+ *   @Output() open: EventEmitter<any> = new EventEmitter();
+ *   @Output() close: EventEmitter<any> = new EventEmitter();
+ *
+ *   toggle() {
+ *     this.visible = !this.visible;
+ *     if (this.visible) {
+ *       this.open.emit(null);
+ *     } else {
+ *       this.close.emit(null);
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * Access the event object with the `$event` argument passed to the output event
+ * handler:
+ *
+ * ```html
+ * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
+ * ```
+ *
+ * @see [Declaring outputs with the @Output decorator](guide/components/outputs#declaring-outputs-with-the-output-decorator)
+ *
+ * @publicApi
+ */
+interface EventEmitter<T> extends Subject<T>, OutputRef<T> {
+    /**
+     * Creates an instance of this class that can
+     * deliver events synchronously or asynchronously.
+     *
+     * @param [isAsync=false] When true, deliver events asynchronously.
+     *
+     */
+    new (isAsync?: boolean): EventEmitter<T>;
+    /**
+     * Emits an event containing a given value.
+     * @param value The value to emit.
+     */
+    emit(value?: T): void;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param next When supplied, a custom handler for emitted events.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
+     *     object.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
+}
+/**
+ * @publicApi
+ */
+declare const EventEmitter: {
+    new (isAsync?: boolean): EventEmitter<any>;
+    new <T>(isAsync?: boolean): EventEmitter<T>;
+    readonly prototype: EventEmitter<any>;
+};
+
+/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```ts
+ * import {Component, NgZone} from '@angular/core';
+ *
+ * @Component({
+ *   selector: 'ng-zone-demo',
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     @if(progress >= 100) {
+ *        <p>Done processing {{label}} of Angular zone!</p>
+ *     }
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @see [Resolving zone pollution](best-practices/zone-pollution#run-tasks-outside-ngzone)
+ *
+ * @publicApi
+ */
+declare class NgZone {
+    readonly hasPendingMacrotasks: boolean;
+    readonly hasPendingMicrotasks: boolean;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    readonly isStable: boolean;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    readonly onUnstable: EventEmitter<any>;
+    /**
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    readonly onStable: EventEmitter<any>;
+    /**
+     * Notifies that an error has been delivered.
+     */
+    readonly onError: EventEmitter<any>;
+    constructor(options: {
+        enableLongStackTrace?: boolean;
+        shouldCoalesceEventChangeDetection?: boolean;
+        shouldCoalesceRunChangeDetection?: boolean;
+    });
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
+    static isInAngularZone(): boolean;
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
+    static assertInAngularZone(): void;
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
+    static assertNotInAngularZone(): void;
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], name?: string): T;
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+declare class NoopNgZone implements NgZone {
+    readonly hasPendingMicrotasks = false;
+    readonly hasPendingMacrotasks = false;
+    readonly isStable = true;
+    readonly onUnstable: EventEmitter<any>;
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    readonly onStable: EventEmitter<any>;
+    readonly onError: EventEmitter<any>;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any): T;
+    runGuarded<T>(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): T;
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T;
+}
+
+/**
+ * A DI token that provides a set of callbacks to
+ * be called for every component that is bootstrapped.
+ *
+ * Each callback must take a `ComponentRef` instance and return nothing.
+ *
+ * `(componentRef: ComponentRef) => void`
+ *
+ * @publicApi
+ */
+declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
+declare function isBoundToModule<C>(cf: ComponentFactory<C>): boolean;
+/**
+ * Provides additional options to the bootstrapping process.
+ *
+ * @publicApi
+ * @deprecated 20.2 Configure `NgZone` in the `providers` array of the application module instead.
+ */
+interface BootstrapOptions {
+    /**
+     * Optionally specify which `NgZone` should be used when not configured in the providers.
+     *
+     * - Provide your own `NgZone` instance.
+     * - `zone.js` - Use default `NgZone` which requires `Zone.js`.
+     * - `noop` - Use `NoopNgZone` which does nothing.
+     *
+     * @deprecated BootstrapOptions is deprecated. Provide `NgZone` in the `providers` array of the module instead.
+     */
+    ngZone?: NgZone | 'zone.js' | 'noop';
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * ```html
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     * ```
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can coalesce such kind of events to only trigger
+     * change detection only once.
+     *
+     * By default, this option will be false. So the events will not be
+     * coalesced and the change detection will be triggered multiple times.
+     * And if this option be set to true, the change detection will be
+     * triggered async by scheduling a animation frame. So in the case above,
+     * the change detection will only be triggered once.
+     *
+     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
+     */
+    ngZoneEventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     * ```ts
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     * ```
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
+     */
+    ngZoneRunCoalescing?: boolean;
+}
+/**
+ * A reference to an Angular application running on a page.
+ *
+ * @usageNotes
+ * ### isStable examples and caveats
+ *
+ * Note two important points about `isStable`, demonstrated in the examples below:
+ * - the application will never be stable if you start any kind
+ * of recurrent asynchronous task when the application starts
+ * (for example for a polling process, started with a `setInterval`, a `setTimeout`
+ * or using RxJS operators like `interval`);
+ * - the `isStable` Observable runs outside of the Angular zone.
+ *
+ * Let's imagine that you start a recurrent task
+ * (here incrementing a counter, using RxJS `interval`),
+ * and at the same time subscribe to `isStable`.
+ *
+ * ```ts
+ * constructor(appRef: ApplicationRef) {
+ *   appRef.isStable.pipe(
+ *      filter(stable => stable)
+ *   ).subscribe(() => console.log('App is stable now');
+ *   interval(1000).subscribe(counter => console.log(counter));
+ * }
+ * ```
+ * In this example, `isStable` will never emit `true`,
+ * and the trace "App is stable now" will never get logged.
+ *
+ * If you want to execute something when the app is stable,
+ * you have to wait for the application to be stable
+ * before starting your polling process.
+ *
+ * ```ts
+ * constructor(appRef: ApplicationRef) {
+ *   appRef.isStable.pipe(
+ *     first(stable => stable),
+ *     tap(stable => console.log('App is stable now')),
+ *     switchMap(() => interval(1000))
+ *   ).subscribe(counter => console.log(counter));
+ * }
+ * ```
+ * In this example, the trace "App is stable now" will be logged
+ * and then the counter starts incrementing every second.
+ *
+ * Note also that this Observable runs outside of the Angular zone,
+ * which means that the code in the subscription
+ * to this Observable will not trigger the change detection.
+ *
+ * Let's imagine that instead of logging the counter value,
+ * you update a field of your component
+ * and display it in its template.
+ *
+ * ```ts
+ * constructor(appRef: ApplicationRef) {
+ *   appRef.isStable.pipe(
+ *     first(stable => stable),
+ *     switchMap(() => interval(1000))
+ *   ).subscribe(counter => this.value = counter);
+ * }
+ * ```
+ * As the `isStable` Observable runs outside the zone,
+ * the `value` field will be updated properly,
+ * but the template will not be refreshed!
+ *
+ * You'll have to manually trigger the change detection to update the template.
+ *
+ * ```ts
+ * constructor(appRef: ApplicationRef, cd: ChangeDetectorRef) {
+ *   appRef.isStable.pipe(
+ *     first(stable => stable),
+ *     switchMap(() => interval(1000))
+ *   ).subscribe(counter => {
+ *     this.value = counter;
+ *     cd.detectChanges();
+ *   });
+ * }
+ * ```
+ *
+ * Or make the subscription callback run inside the zone.
+ *
+ * ```ts
+ * constructor(appRef: ApplicationRef, zone: NgZone) {
+ *   appRef.isStable.pipe(
+ *     first(stable => stable),
+ *     switchMap(() => interval(1000))
+ *   ).subscribe(counter => zone.run(() => this.value = counter));
+ * }
  * ```
  *
  * @publicApi
  */
-interface TypeDecorator {
+declare class ApplicationRef {
+    private _destroyed;
+    private _destroyListeners;
+    private readonly internalErrorHandler;
+    private readonly afterRenderManager;
+    private readonly zonelessEnabled;
+    private readonly rootEffectScheduler;
+    private allTestViews;
+    private autoDetectTestViews;
     /**
-     * Invoke as decorator.
+     * Indicates whether this instance was destroyed.
      */
-    <T extends Type<any>>(type: T): T;
-    (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
-    (target: unknown, context: unknown): void;
+    get destroyed(): boolean;
+    /**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     */
+    readonly componentTypes: Type<any>[];
+    /**
+     * Get a list of components registered to this application.
+     */
+    readonly components: ComponentRef<any>[];
+    private internalPendingTask;
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     */
+    get isStable(): Observable<boolean>;
+    constructor();
+    /**
+     * @returns A promise that resolves when the application becomes stable
+     */
+    whenStable(): Promise<void>;
+    private readonly _injector;
+    private _rendererFactory;
+    /**
+     * The `EnvironmentInjector` used to create this application.
+     */
+    get injector(): EnvironmentInjector;
+    /**
+     * Bootstrap a component onto the element identified by its selector or, optionally, to a
+     * specified element.
+     *
+     * @usageNotes
+     * ### Bootstrap process
+     *
+     * When bootstrapping a component, Angular mounts it onto a target DOM element
+     * and kicks off automatic change detection. The target DOM element can be
+     * provided using the `rootSelectorOrNode` argument.
+     *
+     * If the target DOM element is not provided, Angular tries to find one on a page
+     * using the `selector` of the component that is being bootstrapped
+     * (first matched element is used).
+     *
+     * ### Example
+     *
+     * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
+     * but it requires us to know the component while writing the application code.
+     *
+     * Imagine a situation where we have to wait for an API call to decide about the component to
+     * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
+     * dynamically bootstrap a component.
+     *
+     * {@example core/ts/platform/platform.ts region='componentSelector'}
+     *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * selector of the bootstrapped component.
+     *
+     * In the following example, we are providing a CSS selector to match the target element.
+     *
+     * {@example core/ts/platform/platform.ts region='cssSelector'}
+     *
+     * While in this example, we are providing reference to a DOM node.
+     *
+     * {@example core/ts/platform/platform.ts region='domNode'}
+     */
+    bootstrap<C>(component: Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
+    /**
+     * Bootstrap a component onto the element identified by its selector or, optionally, to a
+     * specified element.
+     *
+     * @usageNotes
+     * ### Bootstrap process
+     *
+     * When bootstrapping a component, Angular mounts it onto a target DOM element
+     * and kicks off automatic change detection. The target DOM element can be
+     * provided using the `rootSelectorOrNode` argument.
+     *
+     * If the target DOM element is not provided, Angular tries to find one on a page
+     * using the `selector` of the component that is being bootstrapped
+     * (first matched element is used).
+     *
+     * ### Example
+     *
+     * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
+     * but it requires us to know the component while writing the application code.
+     *
+     * Imagine a situation where we have to wait for an API call to decide about the component to
+     * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
+     * dynamically bootstrap a component.
+     *
+     * {@example core/ts/platform/platform.ts region='componentSelector'}
+     *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * selector of the bootstrapped component.
+     *
+     * In the following example, we are providing a CSS selector to match the target element.
+     *
+     * {@example core/ts/platform/platform.ts region='cssSelector'}
+     *
+     * While in this example, we are providing reference to a DOM node.
+     *
+     * {@example core/ts/platform/platform.ts region='domNode'}
+     *
+     * @deprecated Passing Component factories as the `Application.bootstrap` function argument is
+     *     deprecated. Pass Component Types instead.
+     */
+    bootstrap<C>(componentFactory: ComponentFactory<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
+    private bootstrapImpl;
+    /**
+     * Invoke this method to explicitly process change detection and its side-effects.
+     *
+     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+     * further changes are detected. If additional changes are picked up during this second cycle,
+     * bindings in the app have side-effects that cannot be resolved in a single change detection
+     * pass.
+     * In this case, Angular throws an error, since an Angular application can only have one change
+     * detection pass during which all change detection must complete.
+     */
+    tick(): void;
+    private tickImpl;
+    /**
+     * Performs the core work of synchronizing the application state with the UI, resolving any
+     * pending dirtiness (potentially in a loop).
+     */
+    private synchronize;
+    /**
+     * Perform a single synchronization pass.
+     */
+    private synchronizeOnce;
+    /**
+     * Checks `allViews` for views which require refresh/traversal, and updates `dirtyFlags`
+     * accordingly, with two potential behaviors:
+     *
+     * 1. If any of our views require updating, then this adds the `ViewTreeTraversal` dirty flag.
+     *    This _should_ be a no-op, since the scheduler should've added the flag at the same time the
+     *    view was marked as needing updating.
+     *
+     *    TODO(alxhub): figure out if this behavior is still needed for edge cases.
+     *
+     * 2. If none of our views require updating, then clear the view-related `dirtyFlag`s. This
+     *    happens when the scheduler is notified of a view becoming dirty, but the view itself isn't
+     *    reachable through traversal from our roots (e.g. it's detached from the CD tree).
+     */
+    private syncDirtyFlagsWithViews;
+    /**
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
+     */
+    attachView(viewRef: ViewRef): void;
+    /**
+     * Detaches a view from dirty checking again.
+     */
+    detachView(viewRef: ViewRef): void;
+    private _loadComponent;
+    /**
+     * Registers a listener to be called when an instance is destroyed.
+     *
+     * @param callback A callback function to add as a listener.
+     * @returns A function which unregisters a listener.
+     */
+    onDestroy(callback: () => void): VoidFunction;
+    /**
+     * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
+     * will destroy the associated environment injectors as well as all the bootstrapped components
+     * with their views.
+     */
+    destroy(): void;
+    /**
+     * Returns the number of attached views.
+     */
+    get viewCount(): number;
+    static ɵfac: ɵɵFactoryDeclaration<ApplicationRef, never>;
+    static ɵprov: ɵɵInjectableDeclaration<ApplicationRef>;
 }
+
+interface NavigationEventMap {
+    navigate: NavigateEvent;
+    navigatesuccess: Event;
+    navigateerror: ErrorEvent;
+    currententrychange: NavigationCurrentEntryChangeEvent;
+}
+interface NavigationResult {
+    committed: Promise<NavigationHistoryEntry>;
+    finished: Promise<NavigationHistoryEntry>;
+}
+declare class Navigation extends EventTarget {
+    entries(): NavigationHistoryEntry[];
+    readonly currentEntry: NavigationHistoryEntry | null;
+    updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void;
+    readonly transition: NavigationTransition | null;
+    readonly canGoBack: boolean;
+    readonly canGoForward: boolean;
+    navigate(url: string, options?: NavigationNavigateOptions): NavigationResult;
+    reload(options?: NavigationReloadOptions): NavigationResult;
+    traverseTo(key: string, options?: NavigationOptions): NavigationResult;
+    back(options?: NavigationOptions): NavigationResult;
+    forward(options?: NavigationOptions): NavigationResult;
+    onnavigate: ((this: Navigation, ev: NavigateEvent) => any) | null;
+    onnavigatesuccess: ((this: Navigation, ev: Event) => any) | null;
+    onnavigateerror: ((this: Navigation, ev: ErrorEvent) => any) | null;
+    oncurrententrychange: ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
+    addEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+declare class NavigationTransition {
+    readonly navigationType: NavigationTypeString;
+    readonly from: NavigationHistoryEntry;
+    readonly to: NavigationDestination;
+    readonly finished: Promise<void>;
+    readonly committed: Promise<void>;
+}
+interface NavigationHistoryEntryEventMap {
+    dispose: Event;
+}
+declare class NavigationHistoryEntry extends EventTarget {
+    readonly key: string;
+    readonly id: string;
+    readonly url: string | null;
+    readonly index: number;
+    readonly sameDocument: boolean;
+    getState(): unknown;
+    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
+    addEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+type NavigationTypeString = 'reload' | 'push' | 'replace' | 'traverse';
+interface NavigationUpdateCurrentEntryOptions {
+    state: unknown;
+}
+interface NavigationOptions {
+    info?: unknown;
+}
+interface NavigationNavigateOptions extends NavigationOptions {
+    state?: unknown;
+    history?: 'auto' | 'push' | 'replace';
+}
+interface NavigationReloadOptions extends NavigationOptions {
+    state?: unknown;
+}
+declare class NavigationCurrentEntryChangeEvent extends Event {
+    constructor(type: string, eventInit?: NavigationCurrentEntryChangeEventInit);
+    readonly navigationType: NavigationTypeString | null;
+    readonly from: NavigationHistoryEntry;
+}
+interface NavigationCurrentEntryChangeEventInit extends EventInit {
+    navigationType?: NavigationTypeString | null;
+    from: NavigationHistoryEntry;
+}
+declare class NavigateEvent extends Event {
+    constructor(type: string, eventInit?: NavigateEventInit);
+    readonly navigationType: NavigationTypeString;
+    readonly canIntercept: boolean;
+    readonly userInitiated: boolean;
+    readonly hashChange: boolean;
+    readonly destination: NavigationDestination;
+    readonly signal: AbortSignal;
+    readonly formData: FormData | null;
+    readonly downloadRequest: string | null;
+    readonly info?: unknown;
+    intercept(options?: NavigationInterceptOptions): void;
+    scroll(): void;
+}
+interface NavigateEventInit extends EventInit {
+    navigationType?: NavigationTypeString;
+    canIntercept?: boolean;
+    userInitiated?: boolean;
+    hashChange?: boolean;
+    destination: NavigationDestination;
+    signal: AbortSignal;
+    formData?: FormData | null;
+    downloadRequest?: string | null;
+    info?: unknown;
+}
+interface NavigationInterceptOptions {
+    handler?: () => Promise<void>;
+    focusReset?: 'after-transition' | 'manual';
+    scroll?: 'after-transition' | 'manual';
+}
+declare class NavigationDestination {
+    readonly url: string;
+    readonly key: string | null;
+    readonly id: string | null;
+    readonly index: number;
+    readonly sameDocument: boolean;
+    getState(): unknown;
+}
+
+/**
+ * Combination of NgModuleFactory and ComponentFactories.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ */
+declare class ModuleWithComponentFactories<T> {
+    ngModuleFactory: NgModuleFactory<T>;
+    componentFactories: ComponentFactory<any>[];
+    constructor(ngModuleFactory: NgModuleFactory<T>, componentFactories: ComponentFactory<any>[]);
+}
+/**
+ * Low-level service for running the angular compiler during runtime
+ * to create {@link ComponentFactory}s, which
+ * can later be used to create and render a Component instance.
+ *
+ * Each `@NgModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the ng module for compilation
+ * of components.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ */
+declare class Compiler {
+    /**
+     * Compiles the given NgModule and all of its components. All templates of the components
+     * have to be inlined.
+     */
+    compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
+    /**
+     * Compiles the given NgModule and all of its components
+     */
+    compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
+    /**
+     * Same as {@link Compiler#compileModuleSync compileModuleSync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
+    /**
+     * Same as {@link Compiler#compileModuleAsync compileModuleAsync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
+    /**
+     * Clears all caches.
+     */
+    clearCache(): void;
+    /**
+     * Clears the cache for the given component/ngModule.
+     */
+    clearCacheFor(type: Type<any>): void;
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType: Type<any>): string | undefined;
+    static ɵfac: ɵɵFactoryDeclaration<Compiler, never>;
+    static ɵprov: ɵɵInjectableDeclaration<Compiler>;
+}
+/**
+ * Options for creating a compiler.
+ *
+ * @publicApi
+ */
+type CompilerOptions = {
+    defaultEncapsulation?: ViewEncapsulation;
+    providers?: StaticProvider[];
+    preserveWhitespaces?: boolean;
+};
+/**
+ * Token to provide CompilerOptions in the platform injector.
+ *
+ * @publicApi
+ */
+declare const COMPILER_OPTIONS: InjectionToken<CompilerOptions[]>;
+/**
+ * A factory for creating a Compiler
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ */
+declare abstract class CompilerFactory {
+    abstract createCompiler(options?: CompilerOptions[]): Compiler;
+}
+
+/**
+ * The Angular platform is the entry point for Angular on a web page.
+ * Each page has exactly one platform. Services (such as reflection) which are common
+ * to every Angular application running on the page are bound in its scope.
+ * A page's platform is initialized implicitly when a platform is created using a platform
+ * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
+ *
+ * @publicApi
+ */
+declare class PlatformRef {
+    private _injector;
+    private _modules;
+    private _destroyListeners;
+    private _destroyed;
+    /**
+     * Creates an instance of an `@NgModule` for the given platform.
+     *
+     * @deprecated Passing NgModule factories as the `PlatformRef.bootstrapModuleFactory` function
+     *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
+     */
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, options?: BootstrapOptions & {
+        applicationProviders?: Array<Provider | EnvironmentProviders>;
+    }): Promise<NgModuleRef<M>>;
+    /**
+     * Creates an instance of an `@NgModule` for a given platform.
+     *
+     * @usageNotes
+     * ### Simple Example
+     *
+     * ```ts
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     *
+     */
+    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions & {
+        applicationProviders?: Array<Provider | EnvironmentProviders>;
+    }) | Array<CompilerOptions & BootstrapOptions & {
+        applicationProviders?: Array<Provider | EnvironmentProviders>;
+    }>): Promise<NgModuleRef<M>>;
+    /**
+     * Registers a listener to be called when the platform is destroyed.
+     */
+    onDestroy(callback: () => void): void;
+    /**
+     * Retrieves the platform {@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     */
+    get injector(): Injector;
+    /**
+     * Destroys the current Angular platform and all Angular applications on the page.
+     * Destroys all modules and listeners registered with the platform.
+     */
+    destroy(): void;
+    /**
+     * Indicates whether this instance was destroyed.
+     */
+    get destroyed(): boolean;
+    static ɵfac: ɵɵFactoryDeclaration<PlatformRef, never>;
+    static ɵprov: ɵɵInjectableDeclaration<PlatformRef>;
+}
+
+/**
+ * Defer block instance for testing.
+ */
+interface DeferBlockDetails extends DehydratedDeferBlock {
+    tDetails: TDeferBlockDetails;
+}
+/**
+ * Retrieves all defer blocks in a given LView.
+ *
+ * @param lView lView with defer blocks
+ * @param deferBlocks defer block aggregator array
+ */
+declare function getDeferBlocks(lView: LView, deferBlocks: DeferBlockDetails[]): void;
 
 /**
  * Type of the Directive decorator / constructor function.
@@ -5738,1188 +7206,169 @@ interface HostListener {
 declare const HostListener: HostListenerDecorator;
 
 /**
- * Base class that provides change detection functionality.
- * A change-detection tree collects all views that are to be checked for changes.
- * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
- *
- * @see [Using change detection hooks](guide/components/lifecycle#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection)
- *
- * @usageNotes
- *
- * The following examples demonstrate how to modify default change-detection behavior
- * to perform explicit detection when needed.
- *
- * ### Use `markForCheck()` with `CheckOnce` strategy
- *
- * The following example sets the `OnPush` change-detection strategy for a component
- * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval.
- *
- * {@example core/ts/change_detect/change-detection.ts region='mark-for-check'}
- *
- * ### Detach change detector to limit how often check occurs
- *
- * The following example defines a component with a large list of read-only data
- * that is expected to change constantly, many times per second.
- * To improve performance, we want to check and update the list
- * less often than the changes actually occur. To do that, we detach
- * the component's change detector and perform an explicit local check every five seconds.
- *
- * {@example core/ts/change_detect/change-detection.ts region='detach'}
- *
- *
- * ### Reattaching a detached component
- *
- * The following example creates a component displaying live data.
- * The component detaches its change detector from the main change detector tree
- * when the `live` property is set to false, and reattaches it when the property
- * becomes true.
- *
- * {@example core/ts/change_detect/change-detection.ts region='reattach'}
- *
  * @publicApi
  */
-declare abstract class ChangeDetectorRef {
-    /**
-     * When a view uses the {@link ChangeDetectionStrategy#OnPush} (checkOnce)
-     * change detection strategy, explicitly marks the view as changed so that
-     * it can be checked again.
-     *
-     * Components are normally marked as dirty (in need of rerendering) when inputs
-     * have changed or events have fired in the view. Call this method to ensure that
-     * a component is checked even if these triggers have not occurred.
-     *
-     * <!-- TODO: Add a link to a chapter on OnPush components -->
-     *
-     */
-    abstract markForCheck(): void;
-    /**
-     * Detaches this view from the change-detection tree.
-     * A detached view is  not checked until it is reattached.
-     * Use in combination with `detectChanges()` to implement local change detection checks.
-     *
-     * Detached views are not checked during change detection runs until they are
-     * re-attached, even if they are marked as dirty.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     */
-    abstract detach(): void;
-    /**
-     * Checks this view and its children. Use in combination with {@link ChangeDetectorRef#detach}
-     * to implement local change detection checks.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     */
-    abstract detectChanges(): void;
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * Use in development mode to verify that running change detection doesn't introduce
-     * other changes. Calling it in production mode is a noop.
-     *
-     * @deprecated This is a test-only API that does not have a place in production interface.
-     * `checkNoChanges` is already part of an `ApplicationRef` tick when the app is running in dev
-     * mode. For more granular `checkNoChanges` validation, use `ComponentFixture`.
-     */
-    abstract checkNoChanges(): void;
-    /**
-     * Re-attaches the previously detached view to the change detection tree.
-     * Views are attached to the tree by default.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     *
-     */
-    abstract reattach(): void;
-}
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-declare function injectChangeDetectorRef(flags: InternalInjectFlags): ChangeDetectorRef;
-
-/** Symbol used to store and retrieve metadata about a binding. */
-declare const BINDING: unique symbol;
-/**
- * A dynamically-defined binding targeting.
- * For example, `inputBinding('value', () => 123)` creates an input binding.
- */
-interface Binding {
-    readonly [BINDING]: unknown;
-}
-/**
- * Represents a dynamically-created directive with bindings targeting it specifically.
- */
-interface DirectiveWithBindings<T> {
-    /** Directive type that should be created. */
-    type: Type<T>;
-    /** Bindings that should be applied to the specific directive. */
-    bindings: Binding[];
-}
-/**
- * Creates an input binding.
- * @param publicName Public name of the input to bind to.
- * @param value Callback that returns the current value for the binding. Can be either a signal or
- *   a plain getter function.
- *
- * ### Usage Example
- * In this example we create an instance of the `MyButton` component and bind the value of
- * the `isDisabled` signal to its `disabled` input.
- *
- * ```ts
- * const isDisabled = signal(false);
- *
- * createComponent(MyButton, {
- *   bindings: [inputBinding('disabled', isDisabled)]
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function inputBinding(publicName: string, value: () => unknown): Binding;
-/**
- * Creates an output binding.
- * @param eventName Public name of the output to listen to.
- * @param listener Function to be called when the output emits.
- *
- * ### Usage example
- * In this example we create an instance of the `MyCheckbox` component and listen
- * to its `onChange` event.
- *
- * ```ts
- * interface CheckboxChange {
- *   value: string;
- * }
- *
- * createComponent(MyCheckbox, {
- *   bindings: [
- *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
- *   ],
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
-/**
- * Creates a two-way binding.
- * @param eventName Public name of the two-way compatible input.
- * @param value Writable signal from which to get the current value and to which to write new
- * values.
- *
- * ### Usage example
- * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
- * input using a two-way binding.
- *
- * ```ts
- * const checkboxValue = signal('');
- *
- * createComponent(MyCheckbox, {
- *   bindings: [
- *    twoWayBinding('value', checkboxValue),
- *   ],
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
-
-/**
- * A wrapper around a native element inside of a View.
- *
- * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
- * element.
- *
- * @security Permitting direct access to the DOM can make your application more vulnerable to
- * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](https://g.co/ng/security).
- *
- * @see [Using DOM APIs](guide/components/dom-apis)
- *
- * @publicApi
- */
-declare class ElementRef<T = any> {
-    /**
-     * <div class="docs-alert docs-alert-important">
-     *   <header>Use with caution</header>
-     *   <p>
-     *    Use this API as the last resort when direct access to DOM is needed. Use templating and
-     *    data-binding provided by Angular instead. If used, it is recommended in combination with
-     *    {@link /best-practices/security#direct-use-of-the-dom-apis-and-explicit-sanitization-calls DomSanitizer}
-     *    for maxiumum security;
-     *   </p>
-     * </div>
-     */
-    nativeElement: T;
-    constructor(nativeElement: T);
-}
-
-/**
- * A simple registry that maps `Components` to generated `ComponentFactory` classes
- * that can be used to create instances of components.
- * Use to obtain the factory for a given component type,
- * then use the factory's `create()` method to create a component of that type.
- *
- * Note: since v13, dynamic component creation via
- * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
- * does **not** require resolving component factory: component class can be used directly.
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
- */
-declare abstract class ComponentFactoryResolver {
-    static NULL: ComponentFactoryResolver;
-    /**
-     * Retrieves the factory object that creates a component of the given type.
-     * @param component The component type.
-     */
-    abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
-}
-
-/**
- * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
- * Provides access to the `NgModule` instance and related objects.
- *
- * @publicApi
- */
-declare abstract class NgModuleRef<T> {
-    /**
-     * The injector that contains all of the providers of the `NgModule`.
-     */
-    abstract get injector(): EnvironmentInjector;
-    /**
-     * The resolver that can retrieve component factories in a context of this module.
-     *
-     * Note: since v13, dynamic component creation via
-     * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
-     * does **not** require resolving component factory: component class can be used directly.
-     *
-     * @deprecated Angular no longer requires Component factories. Please use other APIs where
-     *     Component class can be used directly.
-     */
-    abstract get componentFactoryResolver(): ComponentFactoryResolver;
-    /**
-     * The `NgModule` instance.
-     */
-    abstract get instance(): T;
-    /**
-     * Destroys the module instance and all of the data structures associated with it.
-     */
-    abstract destroy(): void;
-    /**
-     * Registers a callback to be executed when the module is destroyed.
-     */
-    abstract onDestroy(callback: () => void): void;
-}
-interface InternalNgModuleRef<T> extends NgModuleRef<T> {
-    _bootstrapComponents: Type<any>[];
-    resolveInjectorInitializers(): void;
-}
-/**
- * @publicApi
- *
- * @deprecated
- * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
- * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
- * using factory-based ones.
- */
-declare abstract class NgModuleFactory<T> {
-    abstract get moduleType(): Type<T>;
-    abstract create(parentInjector: Injector | null): NgModuleRef<T>;
-}
-
-/**
- * Represents an Angular view.
- *
- * @see {@link /api/core/ChangeDetectorRef#usage-notes Change detection usage}
- *
- * @publicApi
- */
-declare abstract class ViewRef extends ChangeDetectorRef {
-    /**
-     * Destroys this view and all of the data structures associated with it.
-     */
-    abstract destroy(): void;
-    /**
-     * Reports whether this view has been destroyed.
-     * @returns True after the `destroy()` method has been called, false otherwise.
-     */
-    abstract get destroyed(): boolean;
-    /**
-     * A lifecycle hook that provides additional developer-defined cleanup
-     * functionality for views.
-     * @param callback A handler function that cleans up developer-defined data
-     * associated with a view. Called when the `destroy()` method is invoked.
-     */
-    abstract onDestroy(callback: Function): void;
-}
-/**
- * Represents an Angular view in a view container.
- * An embedded view can be referenced from a component
- * other than the hosting component whose template defines it, or it can be defined
- * independently by a `TemplateRef`.
- *
- * Properties of elements in a view can change, but the structure (number and order) of elements in
- * a view cannot. Change the structure of elements by inserting, moving, or
- * removing nested views in a view container.
- *
- * @see {@link ViewContainerRef}
- *
- * @usageNotes
- *
- * The following template breaks down into two separate `TemplateRef` instances,
- * an outer one and an inner one.
- *
- * ```html
- * Count: {{items.length}}
- * <ul>
- *   <li *ngFor="let  item of items">{{item}}</li>
- * </ul>
- * ```
- *
- * This is the outer `TemplateRef`:
- *
- * ```html
- * Count: {{items.length}}
- * <ul>
- *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
- * </ul>
- * ```
- *
- * This is the inner `TemplateRef`:
- *
- * ```html
- *   <li>{{item}}</li>
- * ```
- *
- * The outer and inner `TemplateRef` instances are assembled into views as follows:
- *
- * ```html
- * <!-- ViewRef: outer-0 -->
- * Count: 2
- * <ul>
- *   <ng-template view-container-ref></ng-template>
- *   <!-- ViewRef: inner-1 --><li>first</li><!-- /ViewRef: inner-1 -->
- *   <!-- ViewRef: inner-2 --><li>second</li><!-- /ViewRef: inner-2 -->
- * </ul>
- * <!-- /ViewRef: outer-0 -->
- * ```
- * @publicApi
- */
-declare abstract class EmbeddedViewRef<C> extends ViewRef {
-    /**
-     * The context for this view, inherited from the anchor element.
-     */
-    abstract context: C;
-    /**
-     * The root nodes for this embedded view.
-     */
-    abstract get rootNodes(): any[];
-}
-
-/**
- * Represents a component created by a `ComponentFactory`.
- * Provides access to the component instance and related objects,
- * and provides the means of destroying the instance.
- *
- * @see [Programmatically rendering components](guide/components/programmatic-rendering)
- *
- * @publicApi
- */
-declare abstract class ComponentRef<C> {
-    /**
-     * Updates a specified input name to a new value. Using this method will properly mark for check
-     * component using the `OnPush` change detection strategy. It will also assure that the
-     * `OnChanges` lifecycle hook runs when a dynamically created component is change-detected.
-     *
-     * @param name The name of an input.
-     * @param value The new value of an input.
-     */
-    abstract setInput(name: string, value: unknown): void;
-    /**
-     * The host or anchor element for this component instance.
-     */
-    abstract get location(): ElementRef;
-    /**
-     * The dependency injector for this component instance.
-     */
-    abstract get injector(): Injector;
-    /**
-     * This component instance.
-     */
-    abstract get instance(): C;
-    /**
-     * The host view defined by the template
-     * for this component instance.
-     */
-    abstract get hostView(): ViewRef;
-    /**
-     * The change detector for this component instance.
-     */
-    abstract get changeDetectorRef(): ChangeDetectorRef;
-    /**
-     * The type of this component (as created by a `ComponentFactory` class).
-     */
-    abstract get componentType(): Type<any>;
-    /**
-     * Destroys the component instance and all of the data structures associated with it.
-     */
-    abstract destroy(): void;
-    /**
-     * A lifecycle hook that provides additional developer-defined cleanup
-     * functionality for the component.
-     * @param callback A handler function that cleans up developer-defined data
-     * associated with this component. Called when the `destroy()` method is invoked.
-     */
-    abstract onDestroy(callback: Function): void;
-}
-/**
- * Base class for a factory that can create a component dynamically.
- * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
- * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
- */
-declare abstract class ComponentFactory<C> {
-    /**
-     * The component's HTML selector.
-     */
-    abstract get selector(): string;
-    /**
-     * The type of component the factory will create.
-     */
-    abstract get componentType(): Type<any>;
-    /**
-     * Selector for all <ng-content> elements in the component.
-     */
-    abstract get ngContentSelectors(): string[];
-    /**
-     * The inputs of the component.
-     */
-    abstract get inputs(): {
-        propName: string;
-        templateName: string;
-        transform?: (value: any) => any;
-        isSignal: boolean;
-    }[];
-    /**
-     * The outputs of the component.
-     */
-    abstract get outputs(): {
-        propName: string;
-        templateName: string;
-    }[];
-    /**
-     * Creates a new component.
-     */
-    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef<C>;
-}
-
-/**
- * Use in components with the `@Output` directive to emit custom events
- * synchronously or asynchronously, and register handlers for those events
- * by subscribing to an instance.
- *
- * @usageNotes
- *
- * Extends
- * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
- * for Angular by adding the `emit()` method.
- *
- * In the following example, a component defines two output properties
- * that create event emitters. When the title is clicked, the emitter
- * emits an open or close event to toggle the current visibility state.
- *
- * ```angular-ts
- * @Component({
- *   selector: 'zippy',
- *   template: `
- *   <div class="zippy">
- *     <div (click)="toggle()">Toggle</div>
- *     <div [hidden]="!visible">
- *       <ng-content></ng-content>
- *     </div>
- *  </div>`})
- * export class Zippy {
- *   visible: boolean = true;
- *   @Output() open: EventEmitter<any> = new EventEmitter();
- *   @Output() close: EventEmitter<any> = new EventEmitter();
- *
- *   toggle() {
- *     this.visible = !this.visible;
- *     if (this.visible) {
- *       this.open.emit(null);
- *     } else {
- *       this.close.emit(null);
- *     }
- *   }
- * }
- * ```
- *
- * Access the event object with the `$event` argument passed to the output event
- * handler:
- *
- * ```html
- * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
- * ```
- *
- * @see [Declaring outputs with the @Output decorator](guide/components/outputs#declaring-outputs-with-the-output-decorator)
- *
- * @publicApi
- */
-interface EventEmitter<T> extends Subject<T>, OutputRef<T> {
-    /**
-     * Creates an instance of this class that can
-     * deliver events synchronously or asynchronously.
-     *
-     * @param [isAsync=false] When true, deliver events asynchronously.
-     *
-     */
-    new (isAsync?: boolean): EventEmitter<T>;
-    /**
-     * Emits an event containing a given value.
-     * @param value The value to emit.
-     */
-    emit(value?: T): void;
-    /**
-     * Registers handlers for events emitted by this instance.
-     * @param next When supplied, a custom handler for emitted events.
-     * @param error When supplied, a custom handler for an error notification from this emitter.
-     * @param complete When supplied, a custom handler for a completion notification from this
-     *     emitter.
-     */
-    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
-    /**
-     * Registers handlers for events emitted by this instance.
-     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
-     *     object.
-     * @param error When supplied, a custom handler for an error notification from this emitter.
-     * @param complete When supplied, a custom handler for a completion notification from this
-     *     emitter.
-     */
-    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
+declare class DebugEventListener {
+    name: string;
+    callback: Function;
+    constructor(name: string, callback: Function);
 }
 /**
  * @publicApi
  */
-declare const EventEmitter: {
-    new (isAsync?: boolean): EventEmitter<any>;
-    new <T>(isAsync?: boolean): EventEmitter<T>;
-    readonly prototype: EventEmitter<any>;
-};
-
-/**
- * An injectable service for executing work inside or outside of the Angular zone.
- *
- * The most common use of this service is to optimize performance when starting a work consisting of
- * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
- * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
- * can reenter the Angular zone via {@link #run}.
- *
- * <!-- TODO: add/fix links to:
- *   - docs explaining zones and the use of zones in Angular and change-detection
- *   - link to runOutsideAngular/run (throughout this file!)
- *   -->
- *
- * @usageNotes
- * ### Example
- *
- * ```ts
- * import {Component, NgZone} from '@angular/core';
- *
- * @Component({
- *   selector: 'ng-zone-demo',
- *   template: `
- *     <h2>Demo: NgZone</h2>
- *
- *     <p>Progress: {{progress}}%</p>
- *     @if(progress >= 100) {
- *        <p>Done processing {{label}} of Angular zone!</p>
- *     }
- *
- *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
- *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
- *   `,
- * })
- * export class NgZoneDemo {
- *   progress: number = 0;
- *   label: string;
- *
- *   constructor(private _ngZone: NgZone) {}
- *
- *   // Loop inside the Angular zone
- *   // so the UI DOES refresh after each setTimeout cycle
- *   processWithinAngularZone() {
- *     this.label = 'inside';
- *     this.progress = 0;
- *     this._increaseProgress(() => console.log('Inside Done!'));
- *   }
- *
- *   // Loop outside of the Angular zone
- *   // so the UI DOES NOT refresh after each setTimeout cycle
- *   processOutsideOfAngularZone() {
- *     this.label = 'outside';
- *     this.progress = 0;
- *     this._ngZone.runOutsideAngular(() => {
- *       this._increaseProgress(() => {
- *         // reenter the Angular zone and display done
- *         this._ngZone.run(() => { console.log('Outside Done!'); });
- *       });
- *     });
- *   }
- *
- *   _increaseProgress(doneCallback: () => void) {
- *     this.progress += 1;
- *     console.log(`Current progress: ${this.progress}%`);
- *
- *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
- *     } else {
- *       doneCallback();
- *     }
- *   }
- * }
- * ```
- *
- * @see [Resolving zone pollution](best-practices/zone-pollution#run-tasks-outside-ngzone)
- *
- * @publicApi
- */
-declare class NgZone {
-    readonly hasPendingMacrotasks: boolean;
-    readonly hasPendingMicrotasks: boolean;
-    /**
-     * Whether there are no outstanding microtasks or macrotasks.
-     */
-    readonly isStable: boolean;
-    /**
-     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-     */
-    readonly onUnstable: EventEmitter<any>;
-    /**
-     * Notifies when there is no more microtasks enqueued in the current VM Turn.
-     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-     * For this reason this event can fire multiple times per VM Turn.
-     */
-    readonly onMicrotaskEmpty: EventEmitter<any>;
-    /**
-     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-     * implies we are about to relinquish VM turn.
-     * This event gets called just once.
-     */
-    readonly onStable: EventEmitter<any>;
-    /**
-     * Notifies that an error has been delivered.
-     */
-    readonly onError: EventEmitter<any>;
-    constructor(options: {
-        enableLongStackTrace?: boolean;
-        shouldCoalesceEventChangeDetection?: boolean;
-        shouldCoalesceRunChangeDetection?: boolean;
-    });
-    /**
-      This method checks whether the method call happens within an Angular Zone instance.
-    */
-    static isInAngularZone(): boolean;
-    /**
-      Assures that the method is called within the Angular Zone, otherwise throws an error.
-    */
-    static assertInAngularZone(): void;
-    /**
-      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
-    */
-    static assertNotInAngularZone(): void;
-    /**
-     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
-     * the function.
-     *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
-    /**
-     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
-     * returned by the function.
-     *
-     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], name?: string): T;
-    /**
-     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
-     * rethrown.
-     */
-    runGuarded<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
-    /**
-     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
-     * the function.
-     *
-     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
-     * work that
-     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * outside of the Angular zone.
-     *
-     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
-     */
-    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
-}
-/**
- * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
- * to framework to perform rendering.
- */
-declare class NoopNgZone implements NgZone {
-    readonly hasPendingMicrotasks = false;
-    readonly hasPendingMacrotasks = false;
-    readonly isStable = true;
-    readonly onUnstable: EventEmitter<any>;
-    readonly onMicrotaskEmpty: EventEmitter<any>;
-    readonly onStable: EventEmitter<any>;
-    readonly onError: EventEmitter<any>;
-    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any): T;
-    runGuarded<T>(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): T;
-    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
-    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T;
-}
-
+declare function asNativeElements(debugEls: DebugElement[]): any;
 /**
  * @publicApi
  */
-type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
-    [key: string]: string | {
-        alias: string | null;
-        required: boolean;
-        isSignal?: boolean;
+declare class DebugNode {
+    /**
+     * The underlying DOM node.
+     */
+    readonly nativeNode: any;
+    constructor(nativeNode: Node);
+    /**
+     * The `DebugElement` parent. Will be `null` if this is the root element.
+     */
+    get parent(): DebugElement | null;
+    /**
+     * The host dependency injector. For example, the root element's component instance injector.
+     */
+    get injector(): Injector;
+    /**
+     * The element's own component instance, if it has one.
+     */
+    get componentInstance(): any;
+    /**
+     * An object that provides parent context for this element. Often an ancestor component instance
+     * that governs this element.
+     *
+     * When an element is repeated within *ngFor, the context is an `NgForOf` whose `$implicit`
+     * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
+     * of heroes"`.
+     */
+    get context(): any;
+    /**
+     * The callbacks attached to the component's @Output properties and/or the element's event
+     * properties.
+     */
+    get listeners(): DebugEventListener[];
+    /**
+     * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
+     * variable name.
+     */
+    get references(): {
+        [key: string]: any;
     };
-}, OutputMap extends {
-    [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+    /**
+     * This component's injector lookup tokens. Includes the component itself plus the tokens that the
+     * component lists in its providers metadata.
+     */
+    get providerTokens(): any[];
+}
 /**
  * @publicApi
+ *
+ * @see [Component testing scenarios](guide/testing/components-scenarios)
+ * @see [Basics of testing components](guide/testing/components-basics)
+ * @see [Testing utility APIs](guide/testing/utility-apis)
  */
-type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
-    [key: string]: string | {
-        alias: string | null;
-        required: boolean;
+declare class DebugElement extends DebugNode {
+    constructor(nativeNode: Element);
+    /**
+     * The underlying DOM element at the root of the component.
+     */
+    get nativeElement(): any;
+    /**
+     * The element tag name, if it is an element.
+     */
+    get name(): string;
+    /**
+     *  Gets a map of property names to property values for an element.
+     *
+     *  This map includes:
+     *  - Regular property bindings (e.g. `[id]="id"`)
+     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
+     *  - Interpolated property bindings (e.g. `id="{{ value }}")
+     *
+     *  It does not include:
+     *  - input property bindings (e.g. `[myCustomInput]="value"`)
+     *  - attribute bindings (e.g. `[attr.role]="menu"`)
+     */
+    get properties(): {
+        [key: string]: any;
     };
-}, OutputMap extends {
-    [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
-/**
- * @publicApi
- */
-type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
-/**
- * @publicApi
- */
-type ɵɵPipeDeclaration<T, Name extends string, IsStandalone extends boolean = false> = unknown;
-/**
- * @publicApi
- */
-type ɵɵInjectorDeclaration<T> = unknown;
-/**
- * @publicApi
- */
-type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
-/**
- * An object literal of this type is used to represent the metadata of a constructor dependency.
- * The type itself is never referred to from generated code.
- *
- * @publicApi
- */
-type CtorDependency = {
     /**
-     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
-     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
-     * type.
+     *  A map of attribute names to attribute values for an element.
      */
-    attribute?: string | unknown;
+    get attributes(): {
+        [key: string]: string | null;
+    };
     /**
-     * If `@Optional()` is used, this key is set to true.
+     * The inline styles of the DOM element.
      */
-    optional?: true;
+    get styles(): {
+        [key: string]: string | null;
+    };
     /**
-     * If `@Host` is used, this key is set to true.
+     * A map containing the class names on the element as keys.
+     *
+     * This map is derived from the `className` property of the DOM element.
+     *
+     * Note: The values of this object will always be `true`. The class key will not appear in the KV
+     * object if it does not exist on the element.
+     *
+     * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
      */
-    host?: true;
+    get classes(): {
+        [key: string]: boolean;
+    };
     /**
-     * If `@Self` is used, this key is set to true.
+     * The `childNodes` of the DOM element as a `DebugNode` array.
+     *
+     * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
      */
-    self?: true;
+    get childNodes(): DebugNode[];
     /**
-     * If `@SkipSelf` is used, this key is set to true.
+     * The immediate `DebugElement` children. Walk the tree by descending through `children`.
      */
-    skipSelf?: true;
-} | null;
-
-/**
- * A DI token that provides a set of callbacks to
- * be called for every component that is bootstrapped.
- *
- * Each callback must take a `ComponentRef` instance and return nothing.
- *
- * `(componentRef: ComponentRef) => void`
- *
- * @publicApi
- */
-declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
-declare function isBoundToModule<C>(cf: ComponentFactory<C>): boolean;
-/**
- * Provides additional options to the bootstrapping process.
- *
- * @publicApi
- * @deprecated 20.2 Configure `NgZone` in the `providers` array of the application module instead.
- */
-interface BootstrapOptions {
+    get children(): DebugElement[];
     /**
-     * Optionally specify which `NgZone` should be used when not configured in the providers.
-     *
-     * - Provide your own `NgZone` instance.
-     * - `zone.js` - Use default `NgZone` which requires `Zone.js`.
-     * - `noop` - Use `NoopNgZone` which does nothing.
-     *
-     * @deprecated BootstrapOptions is deprecated. Provide `NgZone` in the `providers` array of the module instead.
+     * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
      */
-    ngZone?: NgZone | 'zone.js' | 'noop';
+    query(predicate: Predicate<DebugElement>): DebugElement;
     /**
-     * Optionally specify coalescing event change detections or not.
-     * Consider the following case.
-     *
-     * ```html
-     * <div (click)="doSomething()">
-     *   <button (click)="doSomethingElse()"></button>
-     * </div>
-     * ```
-     *
-     * When button is clicked, because of the event bubbling, both
-     * event handlers will be called and 2 change detections will be
-     * triggered. We can coalesce such kind of events to only trigger
-     * change detection only once.
-     *
-     * By default, this option will be false. So the events will not be
-     * coalesced and the change detection will be triggered multiple times.
-     * And if this option be set to true, the change detection will be
-     * triggered async by scheduling a animation frame. So in the case above,
-     * the change detection will only be triggered once.
-     *
-     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
+     * @returns All `DebugElement` matches for the predicate at any depth in the subtree.
      */
-    ngZoneEventCoalescing?: boolean;
+    queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     /**
-     * Optionally specify if `NgZone#run()` method invocations should be coalesced
-     * into a single change detection.
-     *
-     * Consider the following case.
-     * ```ts
-     * for (let i = 0; i < 10; i ++) {
-     *   ngZone.run(() => {
-     *     // do something
-     *   });
-     * }
-     * ```
-     *
-     * This case triggers the change detection multiple times.
-     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
-     * In addition, the change detection executes in requestAnimation.
-     *
-     * @deprecated BootstrapOptions is deprecated. Use `provideZoneChangeDetection` instead to configure coalescing.
+     * @returns All `DebugNode` matches for the predicate at any depth in the subtree.
      */
-    ngZoneRunCoalescing?: boolean;
+    queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
+    /**
+     * Triggers the event by its name if there is a corresponding listener in the element's
+     * `listeners` collection.
+     *
+     * If the event lacks a listener or there's some other problem, consider
+     * calling `nativeElement.dispatchEvent(eventObject)`.
+     *
+     * @param eventName The name of the event to trigger
+     * @param eventObj The _event object_ expected by the handler
+     *
+     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
+     */
+    triggerEventHandler(eventName: string, eventObj?: any): void;
 }
 /**
- * A reference to an Angular application running on a page.
- *
- * @usageNotes
- * ### isStable examples and caveats
- *
- * Note two important points about `isStable`, demonstrated in the examples below:
- * - the application will never be stable if you start any kind
- * of recurrent asynchronous task when the application starts
- * (for example for a polling process, started with a `setInterval`, a `setTimeout`
- * or using RxJS operators like `interval`);
- * - the `isStable` Observable runs outside of the Angular zone.
- *
- * Let's imagine that you start a recurrent task
- * (here incrementing a counter, using RxJS `interval`),
- * and at the same time subscribe to `isStable`.
- *
- * ```ts
- * constructor(appRef: ApplicationRef) {
- *   appRef.isStable.pipe(
- *      filter(stable => stable)
- *   ).subscribe(() => console.log('App is stable now');
- *   interval(1000).subscribe(counter => console.log(counter));
- * }
- * ```
- * In this example, `isStable` will never emit `true`,
- * and the trace "App is stable now" will never get logged.
- *
- * If you want to execute something when the app is stable,
- * you have to wait for the application to be stable
- * before starting your polling process.
- *
- * ```ts
- * constructor(appRef: ApplicationRef) {
- *   appRef.isStable.pipe(
- *     first(stable => stable),
- *     tap(stable => console.log('App is stable now')),
- *     switchMap(() => interval(1000))
- *   ).subscribe(counter => console.log(counter));
- * }
- * ```
- * In this example, the trace "App is stable now" will be logged
- * and then the counter starts incrementing every second.
- *
- * Note also that this Observable runs outside of the Angular zone,
- * which means that the code in the subscription
- * to this Observable will not trigger the change detection.
- *
- * Let's imagine that instead of logging the counter value,
- * you update a field of your component
- * and display it in its template.
- *
- * ```ts
- * constructor(appRef: ApplicationRef) {
- *   appRef.isStable.pipe(
- *     first(stable => stable),
- *     switchMap(() => interval(1000))
- *   ).subscribe(counter => this.value = counter);
- * }
- * ```
- * As the `isStable` Observable runs outside the zone,
- * the `value` field will be updated properly,
- * but the template will not be refreshed!
- *
- * You'll have to manually trigger the change detection to update the template.
- *
- * ```ts
- * constructor(appRef: ApplicationRef, cd: ChangeDetectorRef) {
- *   appRef.isStable.pipe(
- *     first(stable => stable),
- *     switchMap(() => interval(1000))
- *   ).subscribe(counter => {
- *     this.value = counter;
- *     cd.detectChanges();
- *   });
- * }
- * ```
- *
- * Or make the subscription callback run inside the zone.
- *
- * ```ts
- * constructor(appRef: ApplicationRef, zone: NgZone) {
- *   appRef.isStable.pipe(
- *     first(stable => stable),
- *     switchMap(() => interval(1000))
- *   ).subscribe(counter => zone.run(() => this.value = counter));
- * }
- * ```
+ * @publicApi
+ */
+declare function getDebugNode(nativeNode: any): DebugNode | null;
+/**
+ * A boolean-valued function over a value, possibly including context information
+ * regarding that value's position in an array.
  *
  * @publicApi
  */
-declare class ApplicationRef {
-    private _destroyed;
-    private _destroyListeners;
-    private readonly internalErrorHandler;
-    private readonly afterRenderManager;
-    private readonly zonelessEnabled;
-    private readonly rootEffectScheduler;
-    private allTestViews;
-    private autoDetectTestViews;
-    /**
-     * Indicates whether this instance was destroyed.
-     */
-    get destroyed(): boolean;
-    /**
-     * Get a list of component types registered to this application.
-     * This list is populated even before the component is created.
-     */
-    readonly componentTypes: Type<any>[];
-    /**
-     * Get a list of components registered to this application.
-     */
-    readonly components: ComponentRef<any>[];
-    private internalPendingTask;
-    /**
-     * Returns an Observable that indicates when the application is stable or unstable.
-     */
-    get isStable(): Observable<boolean>;
-    constructor();
-    /**
-     * @returns A promise that resolves when the application becomes stable
-     */
-    whenStable(): Promise<void>;
-    private readonly _injector;
-    private _rendererFactory;
-    /**
-     * The `EnvironmentInjector` used to create this application.
-     */
-    get injector(): EnvironmentInjector;
-    /**
-     * Bootstrap a component onto the element identified by its selector or, optionally, to a
-     * specified element.
-     *
-     * @usageNotes
-     * ### Bootstrap process
-     *
-     * When bootstrapping a component, Angular mounts it onto a target DOM element
-     * and kicks off automatic change detection. The target DOM element can be
-     * provided using the `rootSelectorOrNode` argument.
-     *
-     * If the target DOM element is not provided, Angular tries to find one on a page
-     * using the `selector` of the component that is being bootstrapped
-     * (first matched element is used).
-     *
-     * ### Example
-     *
-     * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
-     * but it requires us to know the component while writing the application code.
-     *
-     * Imagine a situation where we have to wait for an API call to decide about the component to
-     * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
-     * dynamically bootstrap a component.
-     *
-     * {@example core/ts/platform/platform.ts region='componentSelector'}
-     *
-     * Optionally, a component can be mounted onto a DOM element that does not match the
-     * selector of the bootstrapped component.
-     *
-     * In the following example, we are providing a CSS selector to match the target element.
-     *
-     * {@example core/ts/platform/platform.ts region='cssSelector'}
-     *
-     * While in this example, we are providing reference to a DOM node.
-     *
-     * {@example core/ts/platform/platform.ts region='domNode'}
-     */
-    bootstrap<C>(component: Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
-    /**
-     * Bootstrap a component onto the element identified by its selector or, optionally, to a
-     * specified element.
-     *
-     * @usageNotes
-     * ### Bootstrap process
-     *
-     * When bootstrapping a component, Angular mounts it onto a target DOM element
-     * and kicks off automatic change detection. The target DOM element can be
-     * provided using the `rootSelectorOrNode` argument.
-     *
-     * If the target DOM element is not provided, Angular tries to find one on a page
-     * using the `selector` of the component that is being bootstrapped
-     * (first matched element is used).
-     *
-     * ### Example
-     *
-     * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
-     * but it requires us to know the component while writing the application code.
-     *
-     * Imagine a situation where we have to wait for an API call to decide about the component to
-     * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
-     * dynamically bootstrap a component.
-     *
-     * {@example core/ts/platform/platform.ts region='componentSelector'}
-     *
-     * Optionally, a component can be mounted onto a DOM element that does not match the
-     * selector of the bootstrapped component.
-     *
-     * In the following example, we are providing a CSS selector to match the target element.
-     *
-     * {@example core/ts/platform/platform.ts region='cssSelector'}
-     *
-     * While in this example, we are providing reference to a DOM node.
-     *
-     * {@example core/ts/platform/platform.ts region='domNode'}
-     *
-     * @deprecated Passing Component factories as the `Application.bootstrap` function argument is
-     *     deprecated. Pass Component Types instead.
-     */
-    bootstrap<C>(componentFactory: ComponentFactory<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
-    private bootstrapImpl;
-    /**
-     * Invoke this method to explicitly process change detection and its side-effects.
-     *
-     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
-     * further changes are detected. If additional changes are picked up during this second cycle,
-     * bindings in the app have side-effects that cannot be resolved in a single change detection
-     * pass.
-     * In this case, Angular throws an error, since an Angular application can only have one change
-     * detection pass during which all change detection must complete.
-     */
-    tick(): void;
-    private tickImpl;
-    /**
-     * Performs the core work of synchronizing the application state with the UI, resolving any
-     * pending dirtiness (potentially in a loop).
-     */
-    private synchronize;
-    /**
-     * Perform a single synchronization pass.
-     */
-    private synchronizeOnce;
-    /**
-     * Checks `allViews` for views which require refresh/traversal, and updates `dirtyFlags`
-     * accordingly, with two potential behaviors:
-     *
-     * 1. If any of our views require updating, then this adds the `ViewTreeTraversal` dirty flag.
-     *    This _should_ be a no-op, since the scheduler should've added the flag at the same time the
-     *    view was marked as needing updating.
-     *
-     *    TODO(alxhub): figure out if this behavior is still needed for edge cases.
-     *
-     * 2. If none of our views require updating, then clear the view-related `dirtyFlag`s. This
-     *    happens when the scheduler is notified of a view becoming dirty, but the view itself isn't
-     *    reachable through traversal from our roots (e.g. it's detached from the CD tree).
-     */
-    private syncDirtyFlagsWithViews;
-    /**
-     * Attaches a view so that it will be dirty checked.
-     * The view will be automatically detached when it is destroyed.
-     * This will throw if the view is already attached to a ViewContainer.
-     */
-    attachView(viewRef: ViewRef): void;
-    /**
-     * Detaches a view from dirty checking again.
-     */
-    detachView(viewRef: ViewRef): void;
-    private _loadComponent;
-    /**
-     * Registers a listener to be called when an instance is destroyed.
-     *
-     * @param callback A callback function to add as a listener.
-     * @returns A function which unregisters a listener.
-     */
-    onDestroy(callback: () => void): VoidFunction;
-    /**
-     * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
-     * will destroy the associated environment injectors as well as all the bootstrapped components
-     * with their views.
-     */
-    destroy(): void;
-    /**
-     * Returns the number of attached views.
-     */
-    get viewCount(): number;
-    static ɵfac: ɵɵFactoryDeclaration<ApplicationRef, never>;
-    static ɵprov: ɵɵInjectableDeclaration<ApplicationRef>;
-}
+type Predicate<T> = (value: T) => boolean;
 
 /**
  * Type of the NgModule decorator / constructor function.
@@ -7105,455 +7554,6 @@ interface NgModule {
  * @Annotation
  */
 declare const NgModule: NgModuleDecorator;
-
-/**
- * Combination of NgModuleFactory and ComponentFactories.
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- */
-declare class ModuleWithComponentFactories<T> {
-    ngModuleFactory: NgModuleFactory<T>;
-    componentFactories: ComponentFactory<any>[];
-    constructor(ngModuleFactory: NgModuleFactory<T>, componentFactories: ComponentFactory<any>[]);
-}
-/**
- * Low-level service for running the angular compiler during runtime
- * to create {@link ComponentFactory}s, which
- * can later be used to create and render a Component instance.
- *
- * Each `@NgModule` provides an own `Compiler` to its injector,
- * that will use the directives/pipes of the ng module for compilation
- * of components.
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- */
-declare class Compiler {
-    /**
-     * Compiles the given NgModule and all of its components. All templates of the components
-     * have to be inlined.
-     */
-    compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
-    /**
-     * Compiles the given NgModule and all of its components
-     */
-    compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
-    /**
-     * Same as {@link Compiler#compileModuleSync compileModuleSync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
-    /**
-     * Same as {@link Compiler#compileModuleAsync compileModuleAsync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
-    /**
-     * Clears all caches.
-     */
-    clearCache(): void;
-    /**
-     * Clears the cache for the given component/ngModule.
-     */
-    clearCacheFor(type: Type<any>): void;
-    /**
-     * Returns the id for a given NgModule, if one is defined and known to the compiler.
-     */
-    getModuleId(moduleType: Type<any>): string | undefined;
-    static ɵfac: ɵɵFactoryDeclaration<Compiler, never>;
-    static ɵprov: ɵɵInjectableDeclaration<Compiler>;
-}
-/**
- * Options for creating a compiler.
- *
- * @publicApi
- */
-type CompilerOptions = {
-    defaultEncapsulation?: ViewEncapsulation;
-    providers?: StaticProvider[];
-    preserveWhitespaces?: boolean;
-};
-/**
- * Token to provide CompilerOptions in the platform injector.
- *
- * @publicApi
- */
-declare const COMPILER_OPTIONS: InjectionToken<CompilerOptions[]>;
-/**
- * A factory for creating a Compiler
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- */
-declare abstract class CompilerFactory {
-    abstract createCompiler(options?: CompilerOptions[]): Compiler;
-}
-
-/**
- * The Angular platform is the entry point for Angular on a web page.
- * Each page has exactly one platform. Services (such as reflection) which are common
- * to every Angular application running on the page are bound in its scope.
- * A page's platform is initialized implicitly when a platform is created using a platform
- * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
- *
- * @publicApi
- */
-declare class PlatformRef {
-    private _injector;
-    private _modules;
-    private _destroyListeners;
-    private _destroyed;
-    /**
-     * Creates an instance of an `@NgModule` for the given platform.
-     *
-     * @deprecated Passing NgModule factories as the `PlatformRef.bootstrapModuleFactory` function
-     *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
-     */
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, options?: BootstrapOptions & {
-        applicationProviders?: Array<Provider | EnvironmentProviders>;
-    }): Promise<NgModuleRef<M>>;
-    /**
-     * Creates an instance of an `@NgModule` for a given platform.
-     *
-     * @usageNotes
-     * ### Simple Example
-     *
-     * ```ts
-     * @NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
-     * ```
-     *
-     */
-    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions & {
-        applicationProviders?: Array<Provider | EnvironmentProviders>;
-    }) | Array<CompilerOptions & BootstrapOptions & {
-        applicationProviders?: Array<Provider | EnvironmentProviders>;
-    }>): Promise<NgModuleRef<M>>;
-    /**
-     * Registers a listener to be called when the platform is destroyed.
-     */
-    onDestroy(callback: () => void): void;
-    /**
-     * Retrieves the platform {@link Injector}, which is the parent injector for
-     * every Angular application on the page and provides singleton providers.
-     */
-    get injector(): Injector;
-    /**
-     * Destroys the current Angular platform and all Angular applications on the page.
-     * Destroys all modules and listeners registered with the platform.
-     */
-    destroy(): void;
-    /**
-     * Indicates whether this instance was destroyed.
-     */
-    get destroyed(): boolean;
-    static ɵfac: ɵɵFactoryDeclaration<PlatformRef, never>;
-    static ɵprov: ɵɵInjectableDeclaration<PlatformRef>;
-}
-
-/**
- * @publicApi
- */
-declare class DebugEventListener {
-    name: string;
-    callback: Function;
-    constructor(name: string, callback: Function);
-}
-/**
- * @publicApi
- */
-declare function asNativeElements(debugEls: DebugElement[]): any;
-/**
- * @publicApi
- */
-declare class DebugNode {
-    /**
-     * The underlying DOM node.
-     */
-    readonly nativeNode: any;
-    constructor(nativeNode: Node);
-    /**
-     * The `DebugElement` parent. Will be `null` if this is the root element.
-     */
-    get parent(): DebugElement | null;
-    /**
-     * The host dependency injector. For example, the root element's component instance injector.
-     */
-    get injector(): Injector;
-    /**
-     * The element's own component instance, if it has one.
-     */
-    get componentInstance(): any;
-    /**
-     * An object that provides parent context for this element. Often an ancestor component instance
-     * that governs this element.
-     *
-     * When an element is repeated within *ngFor, the context is an `NgForOf` whose `$implicit`
-     * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
-     * of heroes"`.
-     */
-    get context(): any;
-    /**
-     * The callbacks attached to the component's @Output properties and/or the element's event
-     * properties.
-     */
-    get listeners(): DebugEventListener[];
-    /**
-     * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
-     * variable name.
-     */
-    get references(): {
-        [key: string]: any;
-    };
-    /**
-     * This component's injector lookup tokens. Includes the component itself plus the tokens that the
-     * component lists in its providers metadata.
-     */
-    get providerTokens(): any[];
-}
-/**
- * @publicApi
- *
- * @see [Component testing scenarios](guide/testing/components-scenarios)
- * @see [Basics of testing components](guide/testing/components-basics)
- * @see [Testing utility APIs](guide/testing/utility-apis)
- */
-declare class DebugElement extends DebugNode {
-    constructor(nativeNode: Element);
-    /**
-     * The underlying DOM element at the root of the component.
-     */
-    get nativeElement(): any;
-    /**
-     * The element tag name, if it is an element.
-     */
-    get name(): string;
-    /**
-     *  Gets a map of property names to property values for an element.
-     *
-     *  This map includes:
-     *  - Regular property bindings (e.g. `[id]="id"`)
-     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
-     *  - Interpolated property bindings (e.g. `id="{{ value }}")
-     *
-     *  It does not include:
-     *  - input property bindings (e.g. `[myCustomInput]="value"`)
-     *  - attribute bindings (e.g. `[attr.role]="menu"`)
-     */
-    get properties(): {
-        [key: string]: any;
-    };
-    /**
-     *  A map of attribute names to attribute values for an element.
-     */
-    get attributes(): {
-        [key: string]: string | null;
-    };
-    /**
-     * The inline styles of the DOM element.
-     */
-    get styles(): {
-        [key: string]: string | null;
-    };
-    /**
-     * A map containing the class names on the element as keys.
-     *
-     * This map is derived from the `className` property of the DOM element.
-     *
-     * Note: The values of this object will always be `true`. The class key will not appear in the KV
-     * object if it does not exist on the element.
-     *
-     * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
-     */
-    get classes(): {
-        [key: string]: boolean;
-    };
-    /**
-     * The `childNodes` of the DOM element as a `DebugNode` array.
-     *
-     * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
-     */
-    get childNodes(): DebugNode[];
-    /**
-     * The immediate `DebugElement` children. Walk the tree by descending through `children`.
-     */
-    get children(): DebugElement[];
-    /**
-     * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
-     */
-    query(predicate: Predicate<DebugElement>): DebugElement;
-    /**
-     * @returns All `DebugElement` matches for the predicate at any depth in the subtree.
-     */
-    queryAll(predicate: Predicate<DebugElement>): DebugElement[];
-    /**
-     * @returns All `DebugNode` matches for the predicate at any depth in the subtree.
-     */
-    queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    /**
-     * Triggers the event by its name if there is a corresponding listener in the element's
-     * `listeners` collection.
-     *
-     * If the event lacks a listener or there's some other problem, consider
-     * calling `nativeElement.dispatchEvent(eventObject)`.
-     *
-     * @param eventName The name of the event to trigger
-     * @param eventObj The _event object_ expected by the handler
-     *
-     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
-     */
-    triggerEventHandler(eventName: string, eventObj?: any): void;
-}
-/**
- * @publicApi
- */
-declare function getDebugNode(nativeNode: any): DebugNode | null;
-/**
- * A boolean-valued function over a value, possibly including context information
- * regarding that value's position in an array.
- *
- * @publicApi
- */
-type Predicate<T> = (value: T) => boolean;
-
-interface NavigationEventMap {
-    navigate: NavigateEvent;
-    navigatesuccess: Event;
-    navigateerror: ErrorEvent;
-    currententrychange: NavigationCurrentEntryChangeEvent;
-}
-interface NavigationResult {
-    committed: Promise<NavigationHistoryEntry>;
-    finished: Promise<NavigationHistoryEntry>;
-}
-declare class Navigation extends EventTarget {
-    entries(): NavigationHistoryEntry[];
-    readonly currentEntry: NavigationHistoryEntry | null;
-    updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void;
-    readonly transition: NavigationTransition | null;
-    readonly canGoBack: boolean;
-    readonly canGoForward: boolean;
-    navigate(url: string, options?: NavigationNavigateOptions): NavigationResult;
-    reload(options?: NavigationReloadOptions): NavigationResult;
-    traverseTo(key: string, options?: NavigationOptions): NavigationResult;
-    back(options?: NavigationOptions): NavigationResult;
-    forward(options?: NavigationOptions): NavigationResult;
-    onnavigate: ((this: Navigation, ev: NavigateEvent) => any) | null;
-    onnavigatesuccess: ((this: Navigation, ev: Event) => any) | null;
-    onnavigateerror: ((this: Navigation, ev: ErrorEvent) => any) | null;
-    oncurrententrychange: ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
-    addEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: Navigation, ev: NavigationEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
-declare class NavigationTransition {
-    readonly navigationType: NavigationTypeString;
-    readonly from: NavigationHistoryEntry;
-    readonly to: NavigationDestination;
-    readonly finished: Promise<void>;
-    readonly committed: Promise<void>;
-}
-interface NavigationHistoryEntryEventMap {
-    dispose: Event;
-}
-declare class NavigationHistoryEntry extends EventTarget {
-    readonly key: string;
-    readonly id: string;
-    readonly url: string | null;
-    readonly index: number;
-    readonly sameDocument: boolean;
-    getState(): unknown;
-    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
-    addEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
-type NavigationTypeString = 'reload' | 'push' | 'replace' | 'traverse';
-interface NavigationUpdateCurrentEntryOptions {
-    state: unknown;
-}
-interface NavigationOptions {
-    info?: unknown;
-}
-interface NavigationNavigateOptions extends NavigationOptions {
-    state?: unknown;
-    history?: 'auto' | 'push' | 'replace';
-}
-interface NavigationReloadOptions extends NavigationOptions {
-    state?: unknown;
-}
-declare class NavigationCurrentEntryChangeEvent extends Event {
-    constructor(type: string, eventInit?: NavigationCurrentEntryChangeEventInit);
-    readonly navigationType: NavigationTypeString | null;
-    readonly from: NavigationHistoryEntry;
-}
-interface NavigationCurrentEntryChangeEventInit extends EventInit {
-    navigationType?: NavigationTypeString | null;
-    from: NavigationHistoryEntry;
-}
-declare class NavigateEvent extends Event {
-    constructor(type: string, eventInit?: NavigateEventInit);
-    readonly navigationType: NavigationTypeString;
-    readonly canIntercept: boolean;
-    readonly userInitiated: boolean;
-    readonly hashChange: boolean;
-    readonly destination: NavigationDestination;
-    readonly signal: AbortSignal;
-    readonly formData: FormData | null;
-    readonly downloadRequest: string | null;
-    readonly info?: unknown;
-    intercept(options?: NavigationInterceptOptions): void;
-    scroll(): void;
-}
-interface NavigateEventInit extends EventInit {
-    navigationType?: NavigationTypeString;
-    canIntercept?: boolean;
-    userInitiated?: boolean;
-    hashChange?: boolean;
-    destination: NavigationDestination;
-    signal: AbortSignal;
-    formData?: FormData | null;
-    downloadRequest?: string | null;
-    info?: unknown;
-}
-interface NavigationInterceptOptions {
-    handler?: () => Promise<void>;
-    focusReset?: 'after-transition' | 'manual';
-    scroll?: 'after-transition' | 'manual';
-}
-declare class NavigationDestination {
-    readonly url: string;
-    readonly key: string | null;
-    readonly id: string | null;
-    readonly index: number;
-    readonly sameDocument: boolean;
-    getState(): unknown;
-}
-
-/**
- * Defer block instance for testing.
- */
-interface DeferBlockDetails extends DehydratedDeferBlock {
-    tDetails: TDeferBlockDetails;
-}
-/**
- * Retrieves all defer blocks in a given LView.
- *
- * @param lView lView with defer blocks
- * @param deferBlocks defer block aggregator array
- */
-declare function getDeferBlocks(lView: LView, deferBlocks: DeferBlockDetails[]): void;
 
 export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, InputFlags, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryFlags, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
