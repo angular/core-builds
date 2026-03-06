@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-d69c468
+ * @license Angular v22.0.0-next.1+sha-c19066c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL, ReactiveNodeKind } from './_formatter-chunk.js';
 import { Signal, WritableSignal, OutputRef, Provider, EnvironmentProviders, Type as Type$1, ModuleWithProviders, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, Injector, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectionToken, InternalInjectFlags, InjectOptions, StaticProvider, ValueEqualityFn, EventCallback, isSignal, enableProfiling as enableProfiling$1, AbstractType } from './_chrome_dev_tools_performance-chunk.js';
 export { CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
-import { InputSignalNode, TypeDecorator, SchemaMetadata, ComponentDef, DirectiveDef, CssSelectorList, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, TConstantsOrFactory, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, InputFlags, InputTransformFunction, AfterRenderRef, EffectCleanupRegisterFn, EmbeddedViewRef, LView, ApplicationRef, ChangeDetectorRef, ComponentFactory as ComponentFactory$1, NgModuleRef as NgModuleRef$1, EnvironmentInjector, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, ElementRef, ComponentFactoryResolver as ComponentFactoryResolver$1, InternalNgModuleRef, NgModuleFactory as NgModuleFactory$1, ɵɵFactoryDeclaration as __FactoryDeclaration, ɵɵInjectableDeclaration as __InjectableDeclaration, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, NgZone, ViewRef as ViewRef$1, PlatformRef, DeferBlockDependencyInterceptor, DeferBlockConfig, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, RNode, Component, TrustedHTML, DehydratedDeferBlock, CompilerOptions, ComponentType, NgModuleScopeInfoFromDecorator, PipeType, DirectiveType, RawScopeInfoFromDecorator, HostDirectiveConfig, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, ProjectionSlots, QueryFlags, QueryList, RElement, ClassDebugInfo, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_ng_module-chunk.js';
+import { InputSignalNode, TypeDecorator, SchemaMetadata, ComponentDef, DirectiveDef, CssSelectorList, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, TConstantsOrFactory, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, InputFlags, InputTransformFunction, AfterRenderRef, EffectCleanupRegisterFn, EmbeddedViewRef, LView, ApplicationRef, ChangeDetectorRef, ComponentFactory as ComponentFactory$1, NgModuleRef as NgModuleRef$1, EnvironmentInjector, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, ElementRef, ComponentFactoryResolver as ComponentFactoryResolver$1, InternalNgModuleRef, NgModuleFactory as NgModuleFactory$1, ɵɵFactoryDeclaration as __FactoryDeclaration, ɵɵInjectableDeclaration as __InjectableDeclaration, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, NgZone, ViewRef as ViewRef$1, PlatformRef, DeferBlockDependencyInterceptor, DeferBlockConfig, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, RNode, Component, TrustedHTML, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, ProjectionSlots, QueryFlags, QueryList, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, DehydratedDeferBlock, CompilerOptions, PipeType, DirectiveType, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_ng_module-chunk.js';
 export { APP_BOOTSTRAP_LISTENER, AnimationCallbackEvent, BootstrapOptions, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, Compiler, CompilerFactory, ComponentDecorator, CreateEffectOptions, DebugElement, DebugEventListener, DebugNode, DirectiveDecorator, EffectCleanupFn, EffectRef, EventEmitter, HostBinding, HostBindingDecorator, HostListener, HostListenerDecorator, InjectableType, InjectorType, Input, InputDecorator, ListenerOptions, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModuleDecorator, Output, OutputDecorator, PipeDecorator, Predicate, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, Sanitizer, SecurityContext, asNativeElements, effect, getDebugNode, inputBinding, outputBinding, twoWayBinding, ANIMATIONS_DISABLED as ɵANIMATIONS_DISABLED, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ControlDirectiveHost as ɵControlDirectiveHost, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockDetails as ɵDeferBlockDetails, EffectScheduler as ɵEffectScheduler, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, NG_INJ_DEF as ɵNG_INJ_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NavigateEvent as ɵNavigateEvent, Navigation as ɵNavigation, NavigationCurrentEntryChangeEvent as ɵNavigationCurrentEntryChangeEvent, NavigationDestination as ɵNavigationDestination, NavigationHistoryEntry as ɵNavigationHistoryEntry, NavigationInterceptOptions as ɵNavigationInterceptOptions, NavigationNavigateOptions as ɵNavigationNavigateOptions, NavigationOptions as ɵNavigationOptions, NavigationReloadOptions as ɵNavigationReloadOptions, NavigationResult as ɵNavigationResult, NavigationTransition as ɵNavigationTransition, NavigationTypeString as ɵNavigationTypeString, NavigationUpdateCurrentEntryOptions as ɵNavigationUpdateCurrentEntryOptions, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, PipeDef as ɵPipeDef, R3Injector as ɵR3Injector, RenderFlags as ɵRenderFlags, TracingAction as ɵTracingAction, TracingService as ɵTracingService, TracingSnapshot as ɵTracingSnapshot, ZONELESS_ENABLED as ɵZONELESS_ENABLED, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getInjectableDef as ɵgetInjectableDef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isInjectable as ɵisInjectable, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵInjectorDef, ɵɵPipeDeclaration, ɵɵdefineInjectable, ɵɵdefineInjector } from './_ng_module-chunk.js';
 import { ResourceOptions, ResourceRef, ResourceStatus, ResourceParamsContext, ResourceStreamingLoader, ResourceStreamItem, WritableResource, ResourceSnapshot, Resource } from './_api-chunk.js';
 export { BaseResourceOptions, OutputEmitterRef, OutputOptions, PromiseResourceOptions, ResourceDependencyError, ResourceLoader, ResourceLoaderParams, ResourceParamsStatus, StreamingResourceOptions, output, getOutputDestroyRef as ɵgetOutputDestroyRef } from './_api-chunk.js';
@@ -2732,6 +2732,7 @@ declare class ComponentFactory<T> extends ComponentFactory$1<T> {
      */
     constructor(componentDef: ComponentDef<any>, ngModule?: NgModuleRef$1<any> | undefined);
     create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef$1<any> | EnvironmentInjector | undefined, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[]): ComponentRef$1<T>;
+    private createComponentRef;
 }
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
@@ -5016,110 +5017,129 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
 }
 declare function encapsulateResourceError(error: unknown): Error;
 
-/**
- * Gets the class name of the closest component to a node.
- * Warning! this function will return minified names if the name of the component is minified. The
- * consumer of the function is responsible for resolving the minified name to its original name.
- * @param node Node from which to start the search.
- */
-declare function getClosestComponentName(node: Node): string | null;
+declare function ɵɵControlFeature(passThroughInput: string | null): (definition: DirectiveDef<unknown>) => void;
 
 /**
- * The following getter methods retrieve the definition from the type. Currently the retrieval
- * honors inheritance, but in the future we may change the rule to require that definitions are
- * explicit. This would require some sort of migration strategy.
- */
-declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
-/**
- * Checks whether a given Component, Directive or Pipe is marked as standalone.
- * This will return false if passed anything other than a Component, Directive, or Pipe class
+ * This feature adds the host directives behavior to a directive definition by patching a
+ * function onto it. The expectation is that the runtime will invoke the function during
+ * directive matching.
  *
- * @param type A reference to a Component, Directive or Pipe.
- * @publicApi
- */
-declare function isStandalone(type: Type$1<unknown>): boolean;
-
-/**
- * TODO(incremental-hydration): Remove this file entirely once PromiseWithResolvers lands in stable
- * node / TS.
- */
-interface PromiseWithResolvers<T> {
-    promise: Promise<T>;
-    resolve: (value: T | PromiseLike<T>) => void;
-    reject: (reason?: any) => void;
-}
-/**
- * Replace with `Promise.withResolvers()` once it's available.
- * NET September 2026
+ * For example:
+ * ```ts
+ * class ComponentWithHostDirective {
+ *   static ɵcmp = defineComponent({
+ *    type: ComponentWithHostDirective,
+ *    features: [ɵɵHostDirectivesFeature([
+ *      SimpleHostDirective,
+ *      {directive: AdvancedHostDirective, inputs: ['foo: alias'], outputs: ['bar']},
+ *    ])]
+ *  });
+ * }
+ * ```
  *
- * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/withResolvers.
- */
-declare function promiseWithResolvers<T>(): {
-    promise: Promise<T>;
-    resolve: (value: T | PromiseLike<T>) => void;
-    reject: (reason?: any) => void;
-};
-
-/**
- * An internal injection token to reference `DehydratedBlockRegistry` implementation
- * in a tree-shakable way.
- */
-declare const DEHYDRATED_BLOCK_REGISTRY: InjectionToken<DehydratedBlockRegistry>;
-/**
- * The DehydratedBlockRegistry is used for incremental hydration purposes. It keeps
- * track of the Defer Blocks that need hydration so we can effectively
- * navigate up to the top dehydrated defer block and fire appropriate cleanup
- * functions post hydration.
- */
-declare class DehydratedBlockRegistry {
-    private registry;
-    private cleanupFns;
-    private jsActionMap;
-    private contract;
-    add(blockId: string, info: DehydratedDeferBlock): void;
-    get(blockId: string): DehydratedDeferBlock | null;
-    has(blockId: string): boolean;
-    cleanup(hydratedBlocks: string[]): void;
-    get size(): number;
-    addCleanupFn(blockId: string, fn: Function): void;
-    invokeTriggerCleanupFns(blockId: string): void;
-    hydrating: Map<string, PromiseWithResolvers<void>>;
-    private awaitingCallbacks;
-    awaitParentBlock(topmostParentBlock: string, callback: Function): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-
-/**
- * Helper service to schedule `setTimeout`s for batches of defer blocks,
- * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
- * are created inside a for loop).
- */
-declare class TimerScheduler implements OnDestroy {
-    executingCallbacks: boolean;
-    timeoutId: number | null;
-    invokeTimerAt: number | null;
-    current: Array<number | VoidFunction>;
-    deferred: Array<number | VoidFunction>;
-    add(delay: number, callback: VoidFunction, ngZone: NgZone): void;
-    remove(callback: VoidFunction): void;
-    private addToQueue;
-    private removeFromQueue;
-    private scheduleTimer;
-    private clearTimeout;
-    ngOnDestroy(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-
-/**
- * Utility function used during template type checking to assert that a value is of a certain type.
  * @codeGenApi
  */
-declare function ɵassertType<T>(value: unknown): asserts value is T;
+declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveConfig[] | (() => HostDirectiveConfig[])): DirectiveDefFeature;
 
-/** Tracks the IDs of LViews with leaving animations. */
-declare const allLeavingAnimations: Set<number>;
+/**
+ * Merges the definition from a super class to a sub class.
+ * @param definition The definition that is a SubClass of another directive of component
+ *
+ * @codeGenApi
+ */
+declare function ɵɵInheritDefinitionFeature(definition: DirectiveDef<any> | ComponentDef<any>): void;
+
+/**
+ * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+ * lifecycle hook, so it should be included in any component that implements
+ * that hook.
+ *
+ * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+ * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+ * inherited properties will not be propagated to the ngOnChanges lifecycle
+ * hook.
+ *
+ * Example usage:
+ *
+ * ```ts
+ * static ɵcmp = defineComponent({
+ *   ...
+ *   inputs: {name: 'publicName'},
+ *   features: [NgOnChangesFeature]
+ * });
+ * ```
+ *
+ * @codeGenApi
+ */
+declare const ɵɵNgOnChangesFeature: () => DirectiveDefFeature;
+
+/**
+ * This feature resolves the providers of a directive (or component),
+ * and publish them into the DI system, making it visible to others for injection.
+ *
+ * For example:
+ * ```ts
+ * class ComponentWithProviders {
+ *   constructor(private greeter: GreeterDE) {}
+ *
+ *   static ɵcmp = defineComponent({
+ *     type: ComponentWithProviders,
+ *     selectors: [['component-with-providers']],
+ *    factory: () => new ComponentWithProviders(directiveInject(GreeterDE as any)),
+ *    decls: 1,
+ *    vars: 1,
+ *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
+ *      if (fs & RenderFlags.Create) {
+ *        ɵɵtext(0);
+ *      }
+ *      if (fs & RenderFlags.Update) {
+ *        ɵɵtextInterpolate(ctx.greeter.greet());
+ *      }
+ *    },
+ *    features: [ɵɵProvidersFeature([GreeterDE])]
+ *  });
+ * }
+ * ```
+ *
+ * @param definition
+ *
+ * @codeGenApi
+ */
+declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders: Provider[]): (definition: DirectiveDef<T>) => void;
+
+/**
+ * A feature that adds support for external runtime styles for a component.
+ * An external runtime style is a URL to a CSS stylesheet that contains the styles
+ * for a given component. For browsers, this URL will be used in an appended `link` element
+ * when the component is rendered. This feature is typically used for Hot Module Replacement
+ * (HMR) of component stylesheets by leveraging preexisting global stylesheet HMR available
+ * in most development servers.
+ *
+ * @codeGenApi
+ */
+declare function ɵɵExternalStylesFeature(styleUrls: string[]): ComponentDefFeature;
+
+/**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
+ * @codeGenApi
+ */
+declare function ɵɵsetComponentScope(type: ComponentType<any>, directives: Type$1<any>[] | (() => Type$1<any>[]), pipes: Type$1<any>[] | (() => Type$1<any>[])): void;
+/**
+ * Adds the module metadata that is necessary to compute the module's transitive scope to an
+ * existing module definition.
+ *
+ * Scope metadata of modules is not used in production builds, so calls to this function can be
+ * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
+ * to become eligible for tree-shaking as well.
+ *
+ * @codeGenApi
+ */
+declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfoFromDecorator): unknown;
 
 /**
  * Profiler events is an enum used by the profiler to distinguish between different calls of user
@@ -5254,381 +5274,6 @@ declare enum Framework {
     ACX = "acx",
     Wiz = "wiz"
 }
-
-declare function compileNgModuleFactory<M>(injector: Injector, options: CompilerOptions, moduleType: Type$1<M>): Promise<NgModuleFactory$1<M>>;
-
-/**
- * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
- */
-declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: Array<Provider | StaticProvider> | null, name?: string): Injector;
-
-/**
- * Adds the given NgModule type to Angular's NgModule registry.
- *
- * This is generated as a side-effect of NgModule compilation. Note that the `id` is passed in
- * explicitly and not read from the NgModule definition. This is for two reasons: it avoids a
- * megamorphic read, and in JIT there's a chicken-and-egg problem where the NgModule may not be
- * fully resolved when it's registered.
- *
- * @codeGenApi
- */
-declare function registerNgModuleType(ngModuleType: NgModuleType, id: string): void;
-/**
- * Control whether the NgModule registration system enforces that each NgModule type registered has
- * a unique id.
- *
- * This is useful for testing as the NgModule registry cannot be properly reset between tests with
- * Angular's current API.
- */
-declare function setAllowDuplicateNgModuleIdsForTest(allowDuplicates: boolean): void;
-
-/**
- * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LView and element node details)
- * can be present, null or undefined. If undefined then it implies the value has not been
- * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
- *
- * Each value will get filled when the respective value is examined within the getContext
- * function. The component, element and each directive instance will share the same instance
- * of the context.
- */
-declare class LContext {
-    /**
-     * ID of the component's parent view data.
-     */
-    private lViewId;
-    /**
-     * The index instance of the node.
-     */
-    nodeIndex: number;
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     */
-    native: RNode;
-    /**
-     * The instance of the Component node.
-     */
-    component: {} | null | undefined;
-    /**
-     * The list of active directives that exist on this element.
-     */
-    directives: any[] | null | undefined;
-    /**
-     * The map of local references (local reference name => element or directive instance) that
-     * exist on this element.
-     */
-    localRefs: {
-        [key: string]: any;
-    } | null | undefined;
-    /** Component's parent view data. */
-    get lView(): LView | null;
-    constructor(
-    /**
-     * ID of the component's parent view data.
-     */
-    lViewId: number, 
-    /**
-     * The index instance of the node.
-     */
-    nodeIndex: number, 
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     */
-    native: RNode);
-}
-
-/**
- * Returns the matching `LContext` data for a given DOM node, directive or component instance.
- *
- * This function will examine the provided DOM element, component, or directive instance\'s
- * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
- * value will be that of the newly created `LContext`.
- *
- * If the monkey-patched value is the `LView` instance then the context value for that
- * target will be created and the monkey-patch reference will be updated. Therefore when this
- * function is called it may mutate the provided element\'s, component\'s or any of the associated
- * directive\'s monkey-patch values.
- *
- * If the monkey-patch value is not detected then the code will walk up the DOM until an element
- * is found which contains a monkey-patch reference. When that occurs then the provided element
- * will be updated with a new context (which is then returned). If the monkey-patch value is not
- * detected for a component/directive instance then it will throw an error (all components and
- * directives should be automatically monkey-patched by ivy).
- *
- * @param target Component, Directive or DOM Node.
- */
-declare function getLContext(target: any): LContext | null;
-
-/**
- * Represents the set of dependencies of a type in a certain context.
- */
-interface ScopeData {
-    pipes: Set<PipeType<any>>;
-    directives: Set<DirectiveType<any> | ComponentType<any> | Type$1<any>>;
-    /**
-     * If true it indicates that calculating this scope somehow was not successful. The consumers
-     * should interpret this as empty dependencies. The application of this flag is when calculating
-     * scope recursively, the presence of this flag in a scope dependency implies that the scope is
-     * also poisoned and thus we can return immediately without having to continue the recursion. The
-     * reason for this error is displayed as an error message in the console as per JIT behavior
-     * today. In addition to that, in local compilation the other build/compilations run in parallel
-     * with local compilation may or may not reveal some details about the error as well.
-     */
-    isPoisoned?: boolean;
-}
-/**
- * Represents scope data for standalone components as calculated during runtime by the deps
- * tracker.
- */
-interface StandaloneCompScopeData extends ScopeData {
-    ngModules: Set<NgModuleType<any>>;
-}
-/** Represents scope data for NgModule as calculated during runtime by the deps tracker. */
-interface NgModuleScope {
-    compilation: ScopeData;
-    exported: ScopeData;
-}
-/**
- * Represents scope data for standalone component as calculated during runtime by the deps tracker.
- */
-interface StandaloneComponentScope {
-    compilation: StandaloneCompScopeData;
-}
-/** Component dependencies info as calculated during runtime by the deps tracker. */
-interface ComponentDependencies {
-    dependencies: DependencyTypeList;
-}
-/**
- * Public API for runtime deps tracker (RDT).
- *
- * All downstream tools should only use these methods.
- */
-interface DepsTrackerApi {
-    /**
-     * Computes the component dependencies, i.e., a set of components/directive/pipes that could be
-     * present in the component's template (This set might contain directives/components/pipes not
-     * necessarily used in the component's template depending on the implementation).
-     *
-     * Standalone components should specify `rawImports` as this information is not available from
-     * their type. The consumer (e.g., {@link getStandaloneDefFunctions}) is expected to pass this
-     * parameter.
-     *
-     * The implementation is expected to use some caching mechanism in order to optimize the resources
-     * needed to do this computation.
-     */
-    getComponentDependencies(cmp: ComponentType<any>, rawImports?: (Type$1<any> | (() => Type$1<any>))[]): ComponentDependencies;
-    /**
-     * Registers an NgModule into the tracker with the given scope info.
-     *
-     * This method should be called for every NgModule whether it is compiled in local mode or not.
-     * This is needed in order to compute component's dependencies as some dependencies might be in
-     * different compilation units with different compilation mode.
-     */
-    registerNgModule(type: Type$1<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
-    /**
-     * Clears the scope cache for NgModule or standalone component. This will force re-calculation of
-     * the scope, which could be an expensive operation as it involves aggregating transitive closure.
-     *
-     * The main application of this method is for test beds where we want to clear the cache to
-     * enforce scope update after overriding.
-     */
-    clearScopeCacheFor(type: Type$1<any>): void;
-    /**
-     * Returns the scope of NgModule. Mainly to be used by JIT and test bed.
-     *
-     * The scope value here is memoized. To enforce a new calculation bust the cache by using
-     * `clearScopeCacheFor` method.
-     */
-    getNgModuleScope(type: NgModuleType<any>): NgModuleScope;
-    /**
-     * Returns the scope of standalone component. Mainly to be used by JIT. This method should be
-     * called lazily after the initial parsing so that all the forward refs can be resolved.
-     *
-     * @param rawImports the imports statement as appears on the component decorate which consists of
-     *     Type as well as forward refs.
-     *
-     * The scope value here is memoized. To enforce a new calculation bust the cache by using
-     * `clearScopeCacheFor` method.
-     */
-    getStandaloneComponentScope(type: ComponentType<any>, rawImports: (Type$1<any> | (() => Type$1<any>))[]): StandaloneComponentScope;
-    /**
-     * Checks if the NgModule declaring the component is not loaded into the browser yet. Always
-     * returns false for standalone components.
-     */
-    isOrphanComponent(cmp: ComponentType<any>): boolean;
-}
-
-/**
- * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
- */
-declare class DepsTracker implements DepsTrackerApi {
-    private ownerNgModule;
-    private ngModulesWithSomeUnresolvedDecls;
-    private ngModulesScopeCache;
-    private standaloneComponentsScopeCache;
-    /**
-     * Attempts to resolve ng module's forward ref declarations as much as possible and add them to
-     * the `ownerNgModule` map. This method normally should be called after the initial parsing when
-     * all the forward refs are resolved (e.g., when trying to render a component)
-     */
-    private resolveNgModulesDecls;
-    /** @override */
-    getComponentDependencies(type: ComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): ComponentDependencies;
-    /**
-     * @override
-     * This implementation does not make use of param scopeInfo since it assumes the scope info is
-     * already added to the type itself through methods like {@link ɵɵsetNgModuleScope}
-     */
-    registerNgModule(type: Type$1<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
-    /** @override */
-    clearScopeCacheFor(type: Type$1<any>): void;
-    /** @override */
-    getNgModuleScope(type: NgModuleType<any>): NgModuleScope;
-    /** Compute NgModule scope afresh. */
-    private computeNgModuleScope;
-    /** @override */
-    getStandaloneComponentScope(type: ComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): StandaloneComponentScope;
-    private computeStandaloneComponentScope;
-    /** @override */
-    isOrphanComponent(cmp: Type$1<any>): boolean;
-}
-/** The deps tracker to be used in the current Angular app in dev mode. */
-declare const depsTracker: DepsTracker;
-
-declare const NG_COMP_DEF: string;
-declare const NG_DIR_DEF: string;
-declare const NG_PIPE_DEF: string;
-declare const NG_MOD_DEF: string;
-/**
- * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
- * the key and the directive's unique ID as the value. This allows us to map directives to their
- * bloom filter bit for DI.
- */
-declare const NG_ELEMENT_ID: string;
-
-declare function ɵɵControlFeature(passThroughInput: string | null): (definition: DirectiveDef<unknown>) => void;
-
-/**
- * This feature adds the host directives behavior to a directive definition by patching a
- * function onto it. The expectation is that the runtime will invoke the function during
- * directive matching.
- *
- * For example:
- * ```ts
- * class ComponentWithHostDirective {
- *   static ɵcmp = defineComponent({
- *    type: ComponentWithHostDirective,
- *    features: [ɵɵHostDirectivesFeature([
- *      SimpleHostDirective,
- *      {directive: AdvancedHostDirective, inputs: ['foo: alias'], outputs: ['bar']},
- *    ])]
- *  });
- * }
- * ```
- *
- * @codeGenApi
- */
-declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveConfig[] | (() => HostDirectiveConfig[])): DirectiveDefFeature;
-
-/**
- * Merges the definition from a super class to a sub class.
- * @param definition The definition that is a SubClass of another directive of component
- *
- * @codeGenApi
- */
-declare function ɵɵInheritDefinitionFeature(definition: DirectiveDef<any> | ComponentDef<any>): void;
-
-/**
- * The NgOnChangesFeature decorates a component with support for the ngOnChanges
- * lifecycle hook, so it should be included in any component that implements
- * that hook.
- *
- * If the component or directive uses inheritance, the NgOnChangesFeature MUST
- * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
- * inherited properties will not be propagated to the ngOnChanges lifecycle
- * hook.
- *
- * Example usage:
- *
- * ```ts
- * static ɵcmp = defineComponent({
- *   ...
- *   inputs: {name: 'publicName'},
- *   features: [NgOnChangesFeature]
- * });
- * ```
- *
- * @codeGenApi
- */
-declare const ɵɵNgOnChangesFeature: () => DirectiveDefFeature;
-
-/**
- * This feature resolves the providers of a directive (or component),
- * and publish them into the DI system, making it visible to others for injection.
- *
- * For example:
- * ```ts
- * class ComponentWithProviders {
- *   constructor(private greeter: GreeterDE) {}
- *
- *   static ɵcmp = defineComponent({
- *     type: ComponentWithProviders,
- *     selectors: [['component-with-providers']],
- *    factory: () => new ComponentWithProviders(directiveInject(GreeterDE as any)),
- *    decls: 1,
- *    vars: 1,
- *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
- *      if (fs & RenderFlags.Create) {
- *        ɵɵtext(0);
- *      }
- *      if (fs & RenderFlags.Update) {
- *        ɵɵtextInterpolate(ctx.greeter.greet());
- *      }
- *    },
- *    features: [ɵɵProvidersFeature([GreeterDE])]
- *  });
- * }
- * ```
- *
- * @param definition
- *
- * @codeGenApi
- */
-declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders: Provider[]): (definition: DirectiveDef<T>) => void;
-
-/**
- * A feature that adds support for external runtime styles for a component.
- * An external runtime style is a URL to a CSS stylesheet that contains the styles
- * for a given component. For browsers, this URL will be used in an appended `link` element
- * when the component is rendered. This feature is typically used for Hot Module Replacement
- * (HMR) of component stylesheets by leveraging preexisting global stylesheet HMR available
- * in most development servers.
- *
- * @codeGenApi
- */
-declare function ɵɵExternalStylesFeature(styleUrls: string[]): ComponentDefFeature;
-
-/**
- * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
- * definition, when generating a direct reference in the component file would otherwise create an
- * import cycle.
- *
- * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
- *
- * @codeGenApi
- */
-declare function ɵɵsetComponentScope(type: ComponentType<any>, directives: Type$1<any>[] | (() => Type$1<any>[]), pipes: Type$1<any>[] | (() => Type$1<any>[])): void;
-/**
- * Adds the module metadata that is necessary to compute the module's transitive scope to an
- * existing module definition.
- *
- * Scope metadata of modules is not used in production builds, so calls to this function can be
- * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
- * to become eligible for tree-shaking as well.
- *
- * @codeGenApi
- */
-declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfoFromDecorator): unknown;
 
 /**
  * Retrieves the component instance associated with a given DOM element.
@@ -7801,6 +7446,362 @@ declare function ɵɵreplaceMetadata(type: Type$1<unknown>, applyMetadata: (...a
 
 /** Store a value in the `data` at a given `index`. */
 declare function store<T>(tView: TView, lView: LView, index: number, value: T): void;
+
+/**
+ * Gets the class name of the closest component to a node.
+ * Warning! this function will return minified names if the name of the component is minified. The
+ * consumer of the function is responsible for resolving the minified name to its original name.
+ * @param node Node from which to start the search.
+ */
+declare function getClosestComponentName(node: Node): string | null;
+
+/**
+ * The following getter methods retrieve the definition from the type. Currently the retrieval
+ * honors inheritance, but in the future we may change the rule to require that definitions are
+ * explicit. This would require some sort of migration strategy.
+ */
+declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
+/**
+ * Checks whether a given Component, Directive or Pipe is marked as standalone.
+ * This will return false if passed anything other than a Component, Directive, or Pipe class
+ *
+ * @param type A reference to a Component, Directive or Pipe.
+ * @publicApi
+ */
+declare function isStandalone(type: Type$1<unknown>): boolean;
+
+/**
+ * TODO(incremental-hydration): Remove this file entirely once PromiseWithResolvers lands in stable
+ * node / TS.
+ */
+interface PromiseWithResolvers<T> {
+    promise: Promise<T>;
+    resolve: (value: T | PromiseLike<T>) => void;
+    reject: (reason?: any) => void;
+}
+/**
+ * Replace with `Promise.withResolvers()` once it's available.
+ * NET September 2026
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/withResolvers.
+ */
+declare function promiseWithResolvers<T>(): {
+    promise: Promise<T>;
+    resolve: (value: T | PromiseLike<T>) => void;
+    reject: (reason?: any) => void;
+};
+
+/**
+ * An internal injection token to reference `DehydratedBlockRegistry` implementation
+ * in a tree-shakable way.
+ */
+declare const DEHYDRATED_BLOCK_REGISTRY: InjectionToken<DehydratedBlockRegistry>;
+/**
+ * The DehydratedBlockRegistry is used for incremental hydration purposes. It keeps
+ * track of the Defer Blocks that need hydration so we can effectively
+ * navigate up to the top dehydrated defer block and fire appropriate cleanup
+ * functions post hydration.
+ */
+declare class DehydratedBlockRegistry {
+    private registry;
+    private cleanupFns;
+    private jsActionMap;
+    private contract;
+    add(blockId: string, info: DehydratedDeferBlock): void;
+    get(blockId: string): DehydratedDeferBlock | null;
+    has(blockId: string): boolean;
+    cleanup(hydratedBlocks: string[]): void;
+    get size(): number;
+    addCleanupFn(blockId: string, fn: Function): void;
+    invokeTriggerCleanupFns(blockId: string): void;
+    hydrating: Map<string, PromiseWithResolvers<void>>;
+    private awaitingCallbacks;
+    awaitParentBlock(topmostParentBlock: string, callback: Function): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
+/**
+ * Helper service to schedule `setTimeout`s for batches of defer blocks,
+ * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
+ * are created inside a for loop).
+ */
+declare class TimerScheduler implements OnDestroy {
+    executingCallbacks: boolean;
+    timeoutId: number | null;
+    invokeTimerAt: number | null;
+    current: Array<number | VoidFunction>;
+    deferred: Array<number | VoidFunction>;
+    add(delay: number, callback: VoidFunction, ngZone: NgZone): void;
+    remove(callback: VoidFunction): void;
+    private addToQueue;
+    private removeFromQueue;
+    private scheduleTimer;
+    private clearTimeout;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
+/**
+ * Utility function used during template type checking to assert that a value is of a certain type.
+ * @codeGenApi
+ */
+declare function ɵassertType<T>(value: unknown): asserts value is T;
+
+/** Tracks the IDs of LViews with leaving animations. */
+declare const allLeavingAnimations: Set<number>;
+
+declare function compileNgModuleFactory<M>(injector: Injector, options: CompilerOptions, moduleType: Type$1<M>): Promise<NgModuleFactory$1<M>>;
+
+/**
+ * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
+ */
+declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: Array<Provider | StaticProvider> | null, name?: string): Injector;
+
+/**
+ * Adds the given NgModule type to Angular's NgModule registry.
+ *
+ * This is generated as a side-effect of NgModule compilation. Note that the `id` is passed in
+ * explicitly and not read from the NgModule definition. This is for two reasons: it avoids a
+ * megamorphic read, and in JIT there's a chicken-and-egg problem where the NgModule may not be
+ * fully resolved when it's registered.
+ *
+ * @codeGenApi
+ */
+declare function registerNgModuleType(ngModuleType: NgModuleType, id: string): void;
+/**
+ * Control whether the NgModule registration system enforces that each NgModule type registered has
+ * a unique id.
+ *
+ * This is useful for testing as the NgModule registry cannot be properly reset between tests with
+ * Angular's current API.
+ */
+declare function setAllowDuplicateNgModuleIdsForTest(allowDuplicates: boolean): void;
+
+/**
+ * The internal view context which is specific to a given DOM element, directive or
+ * component instance. Each value in here (besides the LView and element node details)
+ * can be present, null or undefined. If undefined then it implies the value has not been
+ * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
+ *
+ * Each value will get filled when the respective value is examined within the getContext
+ * function. The component, element and each directive instance will share the same instance
+ * of the context.
+ */
+declare class LContext {
+    /**
+     * ID of the component's parent view data.
+     */
+    private lViewId;
+    /**
+     * The index instance of the node.
+     */
+    nodeIndex: number;
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
+    native: RNode;
+    /**
+     * The instance of the Component node.
+     */
+    component: {} | null | undefined;
+    /**
+     * The list of active directives that exist on this element.
+     */
+    directives: any[] | null | undefined;
+    /**
+     * The map of local references (local reference name => element or directive instance) that
+     * exist on this element.
+     */
+    localRefs: {
+        [key: string]: any;
+    } | null | undefined;
+    /** Component's parent view data. */
+    get lView(): LView | null;
+    constructor(
+    /**
+     * ID of the component's parent view data.
+     */
+    lViewId: number, 
+    /**
+     * The index instance of the node.
+     */
+    nodeIndex: number, 
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
+    native: RNode);
+}
+
+/**
+ * Returns the matching `LContext` data for a given DOM node, directive or component instance.
+ *
+ * This function will examine the provided DOM element, component, or directive instance\'s
+ * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
+ * value will be that of the newly created `LContext`.
+ *
+ * If the monkey-patched value is the `LView` instance then the context value for that
+ * target will be created and the monkey-patch reference will be updated. Therefore when this
+ * function is called it may mutate the provided element\'s, component\'s or any of the associated
+ * directive\'s monkey-patch values.
+ *
+ * If the monkey-patch value is not detected then the code will walk up the DOM until an element
+ * is found which contains a monkey-patch reference. When that occurs then the provided element
+ * will be updated with a new context (which is then returned). If the monkey-patch value is not
+ * detected for a component/directive instance then it will throw an error (all components and
+ * directives should be automatically monkey-patched by ivy).
+ *
+ * @param target Component, Directive or DOM Node.
+ */
+declare function getLContext(target: any): LContext | null;
+
+/**
+ * Represents the set of dependencies of a type in a certain context.
+ */
+interface ScopeData {
+    pipes: Set<PipeType<any>>;
+    directives: Set<DirectiveType<any> | ComponentType<any> | Type$1<any>>;
+    /**
+     * If true it indicates that calculating this scope somehow was not successful. The consumers
+     * should interpret this as empty dependencies. The application of this flag is when calculating
+     * scope recursively, the presence of this flag in a scope dependency implies that the scope is
+     * also poisoned and thus we can return immediately without having to continue the recursion. The
+     * reason for this error is displayed as an error message in the console as per JIT behavior
+     * today. In addition to that, in local compilation the other build/compilations run in parallel
+     * with local compilation may or may not reveal some details about the error as well.
+     */
+    isPoisoned?: boolean;
+}
+/**
+ * Represents scope data for standalone components as calculated during runtime by the deps
+ * tracker.
+ */
+interface StandaloneCompScopeData extends ScopeData {
+    ngModules: Set<NgModuleType<any>>;
+}
+/** Represents scope data for NgModule as calculated during runtime by the deps tracker. */
+interface NgModuleScope {
+    compilation: ScopeData;
+    exported: ScopeData;
+}
+/**
+ * Represents scope data for standalone component as calculated during runtime by the deps tracker.
+ */
+interface StandaloneComponentScope {
+    compilation: StandaloneCompScopeData;
+}
+/** Component dependencies info as calculated during runtime by the deps tracker. */
+interface ComponentDependencies {
+    dependencies: DependencyTypeList;
+}
+/**
+ * Public API for runtime deps tracker (RDT).
+ *
+ * All downstream tools should only use these methods.
+ */
+interface DepsTrackerApi {
+    /**
+     * Computes the component dependencies, i.e., a set of components/directive/pipes that could be
+     * present in the component's template (This set might contain directives/components/pipes not
+     * necessarily used in the component's template depending on the implementation).
+     *
+     * Standalone components should specify `rawImports` as this information is not available from
+     * their type. The consumer (e.g., {@link getStandaloneDefFunctions}) is expected to pass this
+     * parameter.
+     *
+     * The implementation is expected to use some caching mechanism in order to optimize the resources
+     * needed to do this computation.
+     */
+    getComponentDependencies(cmp: ComponentType<any>, rawImports?: (Type$1<any> | (() => Type$1<any>))[]): ComponentDependencies;
+    /**
+     * Registers an NgModule into the tracker with the given scope info.
+     *
+     * This method should be called for every NgModule whether it is compiled in local mode or not.
+     * This is needed in order to compute component's dependencies as some dependencies might be in
+     * different compilation units with different compilation mode.
+     */
+    registerNgModule(type: Type$1<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
+    /**
+     * Clears the scope cache for NgModule or standalone component. This will force re-calculation of
+     * the scope, which could be an expensive operation as it involves aggregating transitive closure.
+     *
+     * The main application of this method is for test beds where we want to clear the cache to
+     * enforce scope update after overriding.
+     */
+    clearScopeCacheFor(type: Type$1<any>): void;
+    /**
+     * Returns the scope of NgModule. Mainly to be used by JIT and test bed.
+     *
+     * The scope value here is memoized. To enforce a new calculation bust the cache by using
+     * `clearScopeCacheFor` method.
+     */
+    getNgModuleScope(type: NgModuleType<any>): NgModuleScope;
+    /**
+     * Returns the scope of standalone component. Mainly to be used by JIT. This method should be
+     * called lazily after the initial parsing so that all the forward refs can be resolved.
+     *
+     * @param rawImports the imports statement as appears on the component decorate which consists of
+     *     Type as well as forward refs.
+     *
+     * The scope value here is memoized. To enforce a new calculation bust the cache by using
+     * `clearScopeCacheFor` method.
+     */
+    getStandaloneComponentScope(type: ComponentType<any>, rawImports: (Type$1<any> | (() => Type$1<any>))[]): StandaloneComponentScope;
+    /**
+     * Checks if the NgModule declaring the component is not loaded into the browser yet. Always
+     * returns false for standalone components.
+     */
+    isOrphanComponent(cmp: ComponentType<any>): boolean;
+}
+
+/**
+ * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
+ */
+declare class DepsTracker implements DepsTrackerApi {
+    private ownerNgModule;
+    private ngModulesWithSomeUnresolvedDecls;
+    private ngModulesScopeCache;
+    private standaloneComponentsScopeCache;
+    /**
+     * Attempts to resolve ng module's forward ref declarations as much as possible and add them to
+     * the `ownerNgModule` map. This method normally should be called after the initial parsing when
+     * all the forward refs are resolved (e.g., when trying to render a component)
+     */
+    private resolveNgModulesDecls;
+    /** @override */
+    getComponentDependencies(type: ComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): ComponentDependencies;
+    /**
+     * @override
+     * This implementation does not make use of param scopeInfo since it assumes the scope info is
+     * already added to the type itself through methods like {@link ɵɵsetNgModuleScope}
+     */
+    registerNgModule(type: Type$1<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
+    /** @override */
+    clearScopeCacheFor(type: Type$1<any>): void;
+    /** @override */
+    getNgModuleScope(type: NgModuleType<any>): NgModuleScope;
+    /** Compute NgModule scope afresh. */
+    private computeNgModuleScope;
+    /** @override */
+    getStandaloneComponentScope(type: ComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): StandaloneComponentScope;
+    private computeStandaloneComponentScope;
+    /** @override */
+    isOrphanComponent(cmp: Type$1<any>): boolean;
+}
+/** The deps tracker to be used in the current Angular app in dev mode. */
+declare const depsTracker: DepsTracker;
+
+declare const NG_COMP_DEF: string;
+declare const NG_DIR_DEF: string;
+declare const NG_PIPE_DEF: string;
+declare const NG_MOD_DEF: string;
+/**
+ * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
+ * the key and the directive's unique ID as the value. This allows us to map directives to their
+ * bloom filter bit for DI.
+ */
+declare const NG_ELEMENT_ID: string;
 
 type Type = Function;
 type OpaqueValue = unknown;
