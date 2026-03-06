@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.1+sha-c822bf8
+ * @license Angular v21.2.1+sha-e7d1d8d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -93,6 +93,62 @@ interface AnimationLViewData {
  * Function that returns the class or class list binded to the animate instruction
  */
 type AnimationClassBindingFn = () => string | string[];
+
+/** Actions that are supported by the tracing framework. */
+declare enum TracingAction {
+    CHANGE_DETECTION = 0,
+    AFTER_NEXT_RENDER = 1
+}
+/** A single tracing snapshot. */
+interface TracingSnapshot {
+    run<T>(action: TracingAction, fn: () => T): T;
+    /** Disposes of the tracing snapshot. Must be run exactly once per TracingSnapshot. */
+    dispose(): void;
+}
+/**
+ * Injection token for a `TracingService`, optionally provided.
+ */
+declare const TracingService: InjectionToken<TracingService<TracingSnapshot>>;
+/**
+ * Tracing mechanism which can associate causes (snapshots) with runs of
+ * subsequent operations.
+ *
+ * Not defined by Angular directly, but defined in contexts where tracing is
+ * desired.
+ */
+interface TracingService<T extends TracingSnapshot> {
+    /**
+     * Take a snapshot of the current context which will be stored by Angular and
+     * used when additional work is performed that was scheduled in this context.
+     *
+     * @param linkedSnapshot Optional snapshot to use link to the current context.
+     * The caller is no longer responsible for calling dispose on the linkedSnapshot.
+     *
+     * @return The tracing snapshot. The caller is responsible for diposing of the
+     * snapshot.
+     */
+    snapshot(linkedSnapshot: T | null): T;
+    /**
+     * Propagate the current tracing context to the provided function.
+     * @param fn A function.
+     * @return A function that will propagate the current tracing context.
+     */
+    propagate?<T extends Function>(fn: T): T;
+    /**
+     * Wrap an event listener bound by the framework for tracing.
+     * @param element Element on which the event is bound.
+     * @param eventName Name of the event.
+     * @param handler Event handler.
+     * @return A new event handler to be bound instead of the original one.
+     */
+    wrapEventListener?<T extends Function>(element: HTMLElement, eventName: string, handler: T): T;
+    /**
+     * Trace the creation of a component instance.
+     * @param className Name of the component. May be null if the class is anonymous.
+     * @param fn Function that creates the component instance.
+     */
+    componentCreate?<T>(className: string | null, fn: () => T): T;
+}
 
 declare const enum NotificationSource {
     MarkAncestorsForTraversal = 0,
@@ -3058,56 +3114,6 @@ declare abstract class Sanitizer {
     static ɵprov: unknown;
 }
 
-/** Actions that are supported by the tracing framework. */
-declare enum TracingAction {
-    CHANGE_DETECTION = 0,
-    AFTER_NEXT_RENDER = 1
-}
-/** A single tracing snapshot. */
-interface TracingSnapshot {
-    run<T>(action: TracingAction, fn: () => T): T;
-    /** Disposes of the tracing snapshot. Must be run exactly once per TracingSnapshot. */
-    dispose(): void;
-}
-/**
- * Injection token for a `TracingService`, optionally provided.
- */
-declare const TracingService: InjectionToken<TracingService<TracingSnapshot>>;
-/**
- * Tracing mechanism which can associate causes (snapshots) with runs of
- * subsequent operations.
- *
- * Not defined by Angular directly, but defined in contexts where tracing is
- * desired.
- */
-interface TracingService<T extends TracingSnapshot> {
-    /**
-     * Take a snapshot of the current context which will be stored by Angular and
-     * used when additional work is performed that was scheduled in this context.
-     *
-     * @param linkedSnapshot Optional snapshot to use link to the current context.
-     * The caller is no longer responsible for calling dispose on the linkedSnapshot.
-     *
-     * @return The tracing snapshot. The caller is responsible for diposing of the
-     * snapshot.
-     */
-    snapshot(linkedSnapshot: T | null): T;
-    /**
-     * Propagate the current tracing context to the provided function.
-     * @param fn A function.
-     * @return A function that will propagate the current tracing context.
-     */
-    propagate?<T extends Function>(fn: T): T;
-    /**
-     * Wrap an event listener bound by the framework for tracing.
-     * @param element Element on which the event is bound.
-     * @param eventName Name of the event.
-     * @param handler Event handler.
-     * @return A new event handler to be bound instead of the original one.
-     */
-    wrapEventListener?<T extends Function>(element: HTMLElement, eventName: string, handler: T): T;
-}
-
 /**
  * A callback that runs after render.
  *
@@ -4256,6 +4262,8 @@ interface LViewEnvironment {
     sanitizer: Sanitizer | null;
     /** Scheduler for change detection to notify when application state changes. */
     changeDetectionScheduler: ChangeDetectionScheduler | null;
+    /** Service used for tracing different parts of the application. */
+    tracingService: TracingService<TracingSnapshot> | null;
     /**
      * Whether `ng-reflect-*` attributes should be produced in dev mode
      * (always disabled in prod mode).
