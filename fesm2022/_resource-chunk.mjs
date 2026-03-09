@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-82b758e
+ * @license Angular v22.0.0-next.1+sha-b918bed
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -183,6 +183,9 @@ class ResourceImpl extends BaseWritableResource {
   status;
   error;
   constructor(request, loaderFn, defaultValue, equal, debugName, injector, getInitialStream) {
+    if (isInParamsFunction()) {
+      throw invalidResourceCreationInParams();
+    }
     super(computed(() => {
       const streamValue = this.state().stream?.();
       if (!streamValue) {
@@ -204,11 +207,13 @@ class ResourceImpl extends BaseWritableResource {
     this.debugName = debugName;
     this.extRequest = linkedSignal(() => {
       try {
+        setInParamsFunction(true);
         return {
           request: request(paramsContext),
           reload: 0
         };
       } catch (error) {
+        rethrowFatalErrors(error);
         if (error === ResourceParamsStatus.IDLE) {
           return {
             status: 'idle',
@@ -224,6 +229,8 @@ class ResourceImpl extends BaseWritableResource {
           error: error,
           reload: 0
         };
+      } finally {
+        setInParamsFunction(false);
       }
     }, ngDevMode ? createDebugNameObject(debugName, 'extRequest') : undefined);
     this.state = linkedSignal({
@@ -364,6 +371,7 @@ class ResourceImpl extends BaseWritableResource {
         stream
       });
     } catch (err) {
+      rethrowFatalErrors(err);
       if (abortSignal.aborted || untracked(this.extRequest) !== extRequest) {
         return;
       }
@@ -464,6 +472,21 @@ const paramsContext = {
     return resource.value();
   }
 };
+let inParamsFunction = false;
+function isInParamsFunction() {
+  return inParamsFunction;
+}
+function setInParamsFunction(value) {
+  inParamsFunction = value;
+}
+function invalidResourceCreationInParams() {
+  return new RuntimeError(992, ngDevMode && `Cannot create a resource inside the \`params\` of another resource`);
+}
+function rethrowFatalErrors(error) {
+  if (error instanceof RuntimeError && error.code === 992) {
+    throw error;
+  }
+}
 
-export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, linkedSignal, resource, untracked };
+export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, invalidResourceCreationInParams, isInParamsFunction, linkedSignal, resource, rethrowFatalErrors, setInParamsFunction, untracked };
 //# sourceMappingURL=_resource-chunk.mjs.map

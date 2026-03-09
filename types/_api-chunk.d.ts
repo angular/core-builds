@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-82b758e
+ * @license Angular v22.0.0-next.1+sha-b918bed
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -342,6 +342,13 @@ type ResourceSnapshot<T> = {
     readonly status: 'error';
     readonly error: Error;
 };
+/** Options for `debounced`. */
+interface DebouncedOptions<T> {
+    /** The `Injector` to use for the debounced resource. */
+    injector?: Injector;
+    /** The equality function to use for comparing values. */
+    equal?: ValueEqualityFn<T>;
+}
 
 export { OutputEmitterRef, ResourceDependencyError, ResourceParamsStatus, getOutputDestroyRef, output };
-export type { BaseResourceOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
+export type { BaseResourceOptions, DebouncedOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
