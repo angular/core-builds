@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.1+sha-bd72571
+ * @license Angular v21.2.2+sha-0588133
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6527,6 +6527,7 @@ type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends strin
     [key: string]: string | {
         alias: string | null;
         required: boolean;
+        isSignal?: boolean;
     };
 }, OutputMap extends {
     [key: string]: string;
