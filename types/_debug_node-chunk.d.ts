@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-263b819
+ * @license Angular v22.0.0-next.1+sha-82b758e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4806,6 +4806,7 @@ type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends strin
     [key: string]: string | {
         alias: string | null;
         required: boolean;
+        isSignal?: boolean;
     };
 }, OutputMap extends {
     [key: string]: string;
@@ -7214,171 +7215,6 @@ interface HostListener {
 declare const HostListener: HostListenerDecorator;
 
 /**
- * @publicApi
- */
-declare class DebugEventListener {
-    name: string;
-    callback: Function;
-    constructor(name: string, callback: Function);
-}
-/**
- * @publicApi
- */
-declare function asNativeElements(debugEls: DebugElement[]): any;
-/**
- * @publicApi
- */
-declare class DebugNode {
-    /**
-     * The underlying DOM node.
-     */
-    readonly nativeNode: any;
-    constructor(nativeNode: Node);
-    /**
-     * The `DebugElement` parent. Will be `null` if this is the root element.
-     */
-    get parent(): DebugElement | null;
-    /**
-     * The host dependency injector. For example, the root element's component instance injector.
-     */
-    get injector(): Injector;
-    /**
-     * The element's own component instance, if it has one.
-     */
-    get componentInstance(): any;
-    /**
-     * An object that provides parent context for this element. Often an ancestor component instance
-     * that governs this element.
-     *
-     * When an element is repeated within *ngFor, the context is an `NgForOf` whose `$implicit`
-     * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
-     * of heroes"`.
-     */
-    get context(): any;
-    /**
-     * The callbacks attached to the component's @Output properties and/or the element's event
-     * properties.
-     */
-    get listeners(): DebugEventListener[];
-    /**
-     * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
-     * variable name.
-     */
-    get references(): {
-        [key: string]: any;
-    };
-    /**
-     * This component's injector lookup tokens. Includes the component itself plus the tokens that the
-     * component lists in its providers metadata.
-     */
-    get providerTokens(): any[];
-}
-/**
- * @publicApi
- *
- * @see [Component testing scenarios](guide/testing/components-scenarios)
- * @see [Basics of testing components](guide/testing/components-basics)
- * @see [Testing utility APIs](guide/testing/utility-apis)
- */
-declare class DebugElement extends DebugNode {
-    constructor(nativeNode: Element);
-    /**
-     * The underlying DOM element at the root of the component.
-     */
-    get nativeElement(): any;
-    /**
-     * The element tag name, if it is an element.
-     */
-    get name(): string;
-    /**
-     *  Gets a map of property names to property values for an element.
-     *
-     *  This map includes:
-     *  - Regular property bindings (e.g. `[id]="id"`)
-     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
-     *  - Interpolated property bindings (e.g. `id="{{ value }}")
-     *
-     *  It does not include:
-     *  - input property bindings (e.g. `[myCustomInput]="value"`)
-     *  - attribute bindings (e.g. `[attr.role]="menu"`)
-     */
-    get properties(): {
-        [key: string]: any;
-    };
-    /**
-     *  A map of attribute names to attribute values for an element.
-     */
-    get attributes(): {
-        [key: string]: string | null;
-    };
-    /**
-     * The inline styles of the DOM element.
-     */
-    get styles(): {
-        [key: string]: string | null;
-    };
-    /**
-     * A map containing the class names on the element as keys.
-     *
-     * This map is derived from the `className` property of the DOM element.
-     *
-     * Note: The values of this object will always be `true`. The class key will not appear in the KV
-     * object if it does not exist on the element.
-     *
-     * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
-     */
-    get classes(): {
-        [key: string]: boolean;
-    };
-    /**
-     * The `childNodes` of the DOM element as a `DebugNode` array.
-     *
-     * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
-     */
-    get childNodes(): DebugNode[];
-    /**
-     * The immediate `DebugElement` children. Walk the tree by descending through `children`.
-     */
-    get children(): DebugElement[];
-    /**
-     * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
-     */
-    query(predicate: Predicate<DebugElement>): DebugElement;
-    /**
-     * @returns All `DebugElement` matches for the predicate at any depth in the subtree.
-     */
-    queryAll(predicate: Predicate<DebugElement>): DebugElement[];
-    /**
-     * @returns All `DebugNode` matches for the predicate at any depth in the subtree.
-     */
-    queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    /**
-     * Triggers the event by its name if there is a corresponding listener in the element's
-     * `listeners` collection.
-     *
-     * If the event lacks a listener or there's some other problem, consider
-     * calling `nativeElement.dispatchEvent(eventObject)`.
-     *
-     * @param eventName The name of the event to trigger
-     * @param eventObj The _event object_ expected by the handler
-     *
-     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
-     */
-    triggerEventHandler(eventName: string, eventObj?: any): void;
-}
-/**
- * @publicApi
- */
-declare function getDebugNode(nativeNode: any): DebugNode | null;
-/**
- * A boolean-valued function over a value, possibly including context information
- * regarding that value's position in an array.
- *
- * @publicApi
- */
-type Predicate<T> = (value: T) => boolean;
-
-/**
  * Type of the NgModule decorator / constructor function.
  *
  * @publicApi
@@ -7562,6 +7398,171 @@ interface NgModule {
  * @Annotation
  */
 declare const NgModule: NgModuleDecorator;
+
+/**
+ * @publicApi
+ */
+declare class DebugEventListener {
+    name: string;
+    callback: Function;
+    constructor(name: string, callback: Function);
+}
+/**
+ * @publicApi
+ */
+declare function asNativeElements(debugEls: DebugElement[]): any;
+/**
+ * @publicApi
+ */
+declare class DebugNode {
+    /**
+     * The underlying DOM node.
+     */
+    readonly nativeNode: any;
+    constructor(nativeNode: Node);
+    /**
+     * The `DebugElement` parent. Will be `null` if this is the root element.
+     */
+    get parent(): DebugElement | null;
+    /**
+     * The host dependency injector. For example, the root element's component instance injector.
+     */
+    get injector(): Injector;
+    /**
+     * The element's own component instance, if it has one.
+     */
+    get componentInstance(): any;
+    /**
+     * An object that provides parent context for this element. Often an ancestor component instance
+     * that governs this element.
+     *
+     * When an element is repeated within *ngFor, the context is an `NgForOf` whose `$implicit`
+     * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
+     * of heroes"`.
+     */
+    get context(): any;
+    /**
+     * The callbacks attached to the component's @Output properties and/or the element's event
+     * properties.
+     */
+    get listeners(): DebugEventListener[];
+    /**
+     * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
+     * variable name.
+     */
+    get references(): {
+        [key: string]: any;
+    };
+    /**
+     * This component's injector lookup tokens. Includes the component itself plus the tokens that the
+     * component lists in its providers metadata.
+     */
+    get providerTokens(): any[];
+}
+/**
+ * @publicApi
+ *
+ * @see [Component testing scenarios](guide/testing/components-scenarios)
+ * @see [Basics of testing components](guide/testing/components-basics)
+ * @see [Testing utility APIs](guide/testing/utility-apis)
+ */
+declare class DebugElement extends DebugNode {
+    constructor(nativeNode: Element);
+    /**
+     * The underlying DOM element at the root of the component.
+     */
+    get nativeElement(): any;
+    /**
+     * The element tag name, if it is an element.
+     */
+    get name(): string;
+    /**
+     *  Gets a map of property names to property values for an element.
+     *
+     *  This map includes:
+     *  - Regular property bindings (e.g. `[id]="id"`)
+     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
+     *  - Interpolated property bindings (e.g. `id="{{ value }}")
+     *
+     *  It does not include:
+     *  - input property bindings (e.g. `[myCustomInput]="value"`)
+     *  - attribute bindings (e.g. `[attr.role]="menu"`)
+     */
+    get properties(): {
+        [key: string]: any;
+    };
+    /**
+     *  A map of attribute names to attribute values for an element.
+     */
+    get attributes(): {
+        [key: string]: string | null;
+    };
+    /**
+     * The inline styles of the DOM element.
+     */
+    get styles(): {
+        [key: string]: string | null;
+    };
+    /**
+     * A map containing the class names on the element as keys.
+     *
+     * This map is derived from the `className` property of the DOM element.
+     *
+     * Note: The values of this object will always be `true`. The class key will not appear in the KV
+     * object if it does not exist on the element.
+     *
+     * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
+     */
+    get classes(): {
+        [key: string]: boolean;
+    };
+    /**
+     * The `childNodes` of the DOM element as a `DebugNode` array.
+     *
+     * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
+     */
+    get childNodes(): DebugNode[];
+    /**
+     * The immediate `DebugElement` children. Walk the tree by descending through `children`.
+     */
+    get children(): DebugElement[];
+    /**
+     * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
+     */
+    query(predicate: Predicate<DebugElement>): DebugElement;
+    /**
+     * @returns All `DebugElement` matches for the predicate at any depth in the subtree.
+     */
+    queryAll(predicate: Predicate<DebugElement>): DebugElement[];
+    /**
+     * @returns All `DebugNode` matches for the predicate at any depth in the subtree.
+     */
+    queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
+    /**
+     * Triggers the event by its name if there is a corresponding listener in the element's
+     * `listeners` collection.
+     *
+     * If the event lacks a listener or there's some other problem, consider
+     * calling `nativeElement.dispatchEvent(eventObject)`.
+     *
+     * @param eventName The name of the event to trigger
+     * @param eventObj The _event object_ expected by the handler
+     *
+     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
+     */
+    triggerEventHandler(eventName: string, eventObj?: any): void;
+}
+/**
+ * @publicApi
+ */
+declare function getDebugNode(nativeNode: any): DebugNode | null;
+/**
+ * A boolean-valued function over a value, possibly including context information
+ * regarding that value's position in an array.
+ *
+ * @publicApi
+ */
+type Predicate<T> = (value: T) => boolean;
 
 export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, InputFlags, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryFlags, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, ProjectionSlots, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TConstantsOrFactory, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
