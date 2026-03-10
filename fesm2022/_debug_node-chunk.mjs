@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-09638ec
+ * @license Angular v21.2.2+sha-224e60e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8777,7 +8777,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.2+sha-09638ec'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.2+sha-224e60e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -15065,7 +15065,7 @@ function i18nAttributesFirstPass(tView, index, values) {
         if (ICU_REGEXP.test(message)) {
           throw new Error(`ICU expressions are not supported in attributes. Message: "${message}".`);
         }
-        generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), null);
+        generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), URI_ATTRS[attrName.toLowerCase()] ? _sanitizeUrl : null);
       }
     }
     tView.data[index] = updateOpCodes;
@@ -15297,11 +15297,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
             const hasBinding = !!attr.value.match(BINDING_REGEXP);
             if (hasBinding) {
               if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
-                if (URI_ATTRS[lowerAttrName]) {
-                  generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, _sanitizeUrl);
-                } else {
-                  generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, null);
-                }
+                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, URI_ATTRS[lowerAttrName] ? _sanitizeUrl : null);
               } else {
                 ngDevMode && console.warn(`WARNING: ignoring unsafe attribute value ` + `${lowerAttrName} on element ${tagName} ` + `(see ${XSS_SECURITY_URL})`);
               }
