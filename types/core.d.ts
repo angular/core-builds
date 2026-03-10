@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-4a9b715
+ * @license Angular v21.2.2+sha-024e307
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -208,6 +208,8 @@ interface InputFunction {
  *
  * @publicAPI
  * @initializerApiFunction
+ *
+ * @see [Accepting data with input properties](guide/components/inputs)
  */
 declare const input: InputFunction;
 
@@ -468,7 +470,7 @@ interface ViewChildFunction {
  *
  * ```angular-ts
  * @Component({template: '<div #el></div><my-component #cmp />'})
- * export class TestComponent {
+ * export class Card {
  *   divEl = viewChild<ElementRef>('el');                   // Signal<ElementRef|undefined>
  *   divElRequired = viewChild.required<ElementRef>('el');  // Signal<ElementRef>
  *   cmp = viewChild(MyComponent);                          // Signal<MyComponent|undefined>
@@ -541,7 +543,7 @@ interface ContentChildFunction {
  *
  * ```ts
  * @Component({...})
- * export class TestComponent {
+ * export class Card {
  *   headerEl = contentChild<ElementRef>('h');                    // Signal<ElementRef|undefined>
  *   headerElElRequired = contentChild.required<ElementRef>('h'); // Signal<ElementRef>
  *   header = contentChild(MyHeader);                             // Signal<MyHeader|undefined>
@@ -549,10 +551,12 @@ interface ContentChildFunction {
  * }
  * ```
  *
- * Note: By default `descendants` is `true` which means the query will traverse all descendants in the same template.
+ * NOTE: By default `descendants` is `true` which means the query will traverse all descendants in the same template.
  *
  * @initializerApiFunction
  * @publicApi 19.0
+ *
+ * @See [Content queries](guide/components/queries#content-queries)
  */
 declare const contentChild: ContentChildFunction;
 declare function contentChildren<LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
