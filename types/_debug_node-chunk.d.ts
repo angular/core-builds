@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-71b8159
+ * @license Angular v22.0.0-next.1+sha-6073493
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -68,6 +68,8 @@ declare const MAX_ANIMATION_TIMEOUT: InjectionToken<number>;
  * function callbacks.
  *
  * @publicApi 20.2
+ *
+ * @see [Animating your applications with animate.enter and animate.leave](guide/animations)
  */
 type AnimationFunction = (event: AnimationCallbackEvent) => void;
 type RunEnterAnimationFn = VoidFunction;
@@ -3223,6 +3225,8 @@ declare abstract class EffectScheduler {
  * A global reactive effect, which can be manually destroyed.
  *
  * @publicApi 20.0
+ *
+ * @see [Destroying effects](guide/signals/effect#destroying-effects)
  */
 interface EffectRef {
     /**
@@ -4966,12 +4970,16 @@ declare const BINDING: unique symbol;
 /**
  * A dynamically-defined binding targeting.
  * For example, `inputBinding('value', () => 123)` creates an input binding.
+ *
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 interface Binding {
     readonly [BINDING]: unknown;
 }
 /**
  * Represents a dynamically-created directive with bindings targeting it specifically.
+ *
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
 interface DirectiveWithBindings<T> {
     /** Directive type that should be created. */
