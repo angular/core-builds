@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-9794e75
+ * @license Angular v22.0.0-next.1+sha-1969338
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3471,8 +3471,8 @@ declare function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInR
  * Provides `NgZone`-based change detection for the application bootstrapped using
  * `bootstrapApplication`.
  *
- * `NgZone` is already provided in applications by default. This provider allows you to configure
- * options like `eventCoalescing` in the `NgZone`.
+ * Add this provider to use `NgZone`/ZoneJS-based change detection and configure options like
+ * `eventCoalescing` in the `NgZone`.
  *
  * If you need this provider function in an NgModule-based application, pass it as `applicationProviders` to `bootstrapModule()`.
  *
