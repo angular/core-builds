@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-106cf4e
+ * @license Angular v21.2.2+sha-ab35383
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,6 +10,7 @@ import './_event_dispatcher-chunk.js';
 import { ReactiveNode } from './_formatter-chunk.js';
 import { SignalNode, BaseEffectNode } from './_effect-chunk.js';
 import { Injector as Injector$1, InjectionToken as InjectionToken$1, NotFound } from '@angular/core/primitives/di';
+import * as _angular_core from '@angular/core';
 
 /**
  * Reactive node type for an input signal. An input signal extends a signal.
@@ -2115,8 +2116,8 @@ interface InjectorTypeWithProviders<T> {
 declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
-    factory: () => T;
-}): unknown;
+    factory: (parent?: Type<any>) => T;
+}): ɵɵInjectableDeclaration<T>;
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
@@ -3113,7 +3114,7 @@ declare enum SecurityContext {
 declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ɵprov: unknown;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<null>;
 }
 
 /**
@@ -3132,7 +3133,7 @@ declare class AfterRenderManager {
     impl: AfterRenderImpl | null;
     execute(): void;
     /** @nocollapse */
-    static ɵprov: unknown;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<AfterRenderManager>;
 }
 declare class AfterRenderImpl {
     private readonly ngZone;
@@ -3155,7 +3156,7 @@ declare class AfterRenderImpl {
     unregister(sequence: AfterRenderSequence): void;
     protected maybeTrace<T>(fn: () => T, snapshot: TracingSnapshot | null): T;
     /** @nocollapse */
-    static ɵprov: unknown;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<AfterRenderImpl>;
 }
 type AfterRenderHook = (value?: unknown) => unknown;
 type AfterRenderHooks = [
@@ -3218,7 +3219,27 @@ declare abstract class EffectScheduler {
     /** Remove a scheduled effect */
     abstract remove(e: SchedulableEffect): void;
     /** @nocollapse */
-    static ɵprov: unknown;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<ZoneAwareEffectScheduler>;
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+declare class ZoneAwareEffectScheduler implements EffectScheduler {
+    private dirtyEffectCount;
+    private queues;
+    add(handle: SchedulableEffect): void;
+    schedule(handle: SchedulableEffect): void;
+    remove(handle: SchedulableEffect): void;
+    private enqueue;
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush(): void;
+    private flushQueue;
 }
 
 /**
@@ -6555,7 +6576,7 @@ type ɵɵInjectorDeclaration<T> = unknown;
 /**
  * @publicApi
  */
-type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
+type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = (parent?: Type<any>) => T;
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
  * The type itself is never referred to from generated code.
