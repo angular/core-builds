@@ -1,10 +1,11 @@
 /**
- * @license Angular v22.0.0-next.1+sha-2049698
+ * @license Angular v22.0.0-next.1+sha-9794e75
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { SIGNAL } from './_formatter-chunk.js';
+import * as _angular_core from '@angular/core';
 import { EventContract } from './_event_dispatcher-chunk.js';
 
 /** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
@@ -741,7 +742,7 @@ declare abstract class Injector {
         name?: string;
     }): DestroyableInjector;
     /** @nocollapse */
-    static ɵprov: unknown;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<Injector>;
 }
 /**
  * An Injector that the owner can destroy and trigger the DestroyRef.destroy hooks.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-2049698
+ * @license Angular v22.0.0-next.1+sha-9794e75
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, Binding, PlatformRef, NgModule, Component, Directive, Pipe, Navigation, NavigationNavigateOptions, NavigationOptions, NavigateEvent, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions, NavigationResult, NavigationHistoryEntry, NavigationDestination, NavigationInterceptOptions } from './_debug_node-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './_chrome_dev_tools_performance-chunk.js';
-import * as i0 from '@angular/core';
+import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
 import '@angular/core/primitives/di';
@@ -805,8 +805,8 @@ declare class Log<T = string> {
     fn(value: T): () => void;
     clear(): void;
     result(): string;
-    static ɵfac: i0.ɵɵFactoryDeclaration<Log<any>, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<Log<any>>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<Log<any>, never>;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<Log<any>>;
 }
 
 export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-2049698
+ * @license Angular v22.0.0-next.1+sha-9794e75
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9,6 +9,7 @@ import { OutputRef, DestroyRef, Injector, Signal } from './_chrome_dev_tools_per
 import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './_api-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
+import '@angular/core';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
