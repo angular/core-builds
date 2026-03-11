@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-0837d25
+ * @license Angular v22.0.0-next.1+sha-b401c18
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -63,9 +63,10 @@ function getOutputDestroyRef(ref) {
 
 function computed(computation, options) {
   const getter = createComputed(computation, options?.equal);
-  if (ngDevMode) {
-    getter.toString = () => `[Computed: ${getter()}]`;
-    getter[SIGNAL].debugName = options?.debugName;
+  if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+    const debugName = options?.debugName;
+    getter[SIGNAL].debugName = debugName;
+    getter.toString = () => `[Computed${debugName ? ' (' + debugName + ')' : ''}: ${getter()}]`;
   }
   return getter;
 }
@@ -104,9 +105,9 @@ function linkedSignal(optionsOrComputation, options) {
   }
 }
 function upgradeLinkedSignalGetter(getter, debugName) {
-  if (ngDevMode) {
-    getter.toString = () => `[LinkedSignal: ${getter()}]`;
+  if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     getter[SIGNAL].debugName = debugName;
+    getter.toString = () => `[LinkedSignal${debugName ? ' (' + debugName + ')' : ''}: ${getter()}]`;
   }
   const node = getter[SIGNAL];
   const upgradedGetter = getter;
