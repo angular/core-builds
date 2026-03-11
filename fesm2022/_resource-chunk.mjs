@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-4c532bd
+ * @license Angular v22.0.0-next.1+sha-0837d25
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -354,7 +354,6 @@ class ResourceImpl extends BaseWritableResource {
       const stream = await untracked(() => {
         return this.loaderFn({
           params: extRequest.request,
-          request: extRequest.request,
           abortSignal,
           previous: {
             status: previousStatus

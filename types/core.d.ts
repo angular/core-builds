@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.1+sha-4c532bd
+ * @license Angular v22.0.0-next.1+sha-0837d25
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1858,7 +1858,7 @@ declare class KeyValueDiffers {
     static ɵprov: _angular_core.ɵɵInjectableDeclaration<KeyValueDiffers>;
     private readonly factories;
     constructor(factories: KeyValueDifferFactory[]);
-    static create<S>(factories: KeyValueDifferFactory[], parent?: KeyValueDiffers): KeyValueDiffers;
+    static create(factories: KeyValueDifferFactory[], parent?: KeyValueDiffers): KeyValueDiffers;
     /**
      * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
      * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
@@ -1879,7 +1879,7 @@ declare class KeyValueDiffers {
      * })
      * ```
      */
-    static extend<S>(factories: KeyValueDifferFactory[]): StaticProvider;
+    static extend(factories: KeyValueDifferFactory[]): StaticProvider;
     find(kv: any): KeyValueDifferFactory;
 }
 
