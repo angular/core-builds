@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-d45fced
+ * @license Angular v21.2.2+sha-6c73aac
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -228,7 +228,7 @@ function rxResource(opts) {
         resolve?.(stream);
         resolve = undefined;
       }
-      const streamFn = opts.stream ?? opts.loader;
+      const streamFn = opts.stream;
       if (streamFn === undefined) {
         throw new RuntimeError(990, ngDevMode && `Must provide \`stream\` option.`);
       }
