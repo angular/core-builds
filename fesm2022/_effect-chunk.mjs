@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-6c73aac
+ * @license Angular v21.2.2+sha-21b1c3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -277,8 +277,7 @@ function createComputed(computation, equal) {
   };
   computed[SIGNAL] = node;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
-    computed.toString = () => `[Computed${debugName}: ${String(node.value)}]`;
+    computed.toString = () => `[Computed${node.debugName ? ' (' + node.debugName + ')' : ''}: ${String(node.value)}]`;
   }
   runPostProducerCreatedFn(node);
   return computed;
@@ -347,8 +346,7 @@ function createSignal(initialValue, equal) {
   const getter = () => signalGetFn(node);
   getter[SIGNAL] = node;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
-    getter.toString = () => `[Signal${debugName}: ${String(node.value)}]`;
+    getter.toString = () => `[Signal${node.debugName ? ' (' + node.debugName + ')' : ''}: ${String(node.value)}]`;
   }
   runPostProducerCreatedFn(node);
   const set = newValue => signalSetFn(node, newValue);

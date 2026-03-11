@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.2+sha-6c73aac
+ * @license Angular v21.2.2+sha-21b1c3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.2.2+sha-6c73aac');
+const VERSION = /* @__PURE__ */new Version('21.2.2+sha-21b1c3b');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -2685,9 +2685,10 @@ function signal(initialValue, options) {
   signalFn.set = set;
   signalFn.update = update;
   signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
-  if (ngDevMode) {
-    signalFn.toString = () => `[Signal: ${signalFn()}]`;
-    node.debugName = options?.debugName;
+  if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+    const debugName = options?.debugName;
+    node.debugName = debugName;
+    signalFn.toString = () => `[Signal${debugName ? ' (' + debugName + ')' : ''}: ${signalFn()}]`;
   }
   return signalFn;
 }
