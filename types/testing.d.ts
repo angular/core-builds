@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.3+sha-432a3de
+ * @license Angular v22.0.0-next.3+sha-bb628d8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -496,7 +496,7 @@ interface TestBed {
      * Returns the most recently created `ComponentFixture`, or throws an error if one has not
      * yet been created.
      */
-    getFixture<T = unknown>(): ComponentFixture<T>;
+    getLastFixture<T = unknown>(): ComponentFixture<T>;
     /**
      * Execute any pending effects.
      *
