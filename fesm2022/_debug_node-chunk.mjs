@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.3+sha-89c9a4d
+ * @license Angular v22.0.0-next.3+sha-17d8a88
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4245,6 +4245,10 @@ function determineLongestAnimationFromElementAnimations(el, animationsMap, anima
     }
     const animDuration = typeof timing?.duration === 'number' ? timing.duration : 0;
     let duration = (timing?.delay ?? 0) + animDuration;
+    const playbackRate = animation.playbackRate;
+    if (playbackRate !== undefined && playbackRate !== 0 && playbackRate !== 1) {
+      duration /= Math.abs(playbackRate);
+    }
     let propertyName;
     let animationName;
     if (animation.animationName) {
@@ -8685,7 +8689,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-89c9a4d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-17d8a88'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
