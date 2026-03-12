@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.17+sha-043125c
+ * @license Angular v20.3.17+sha-02fbf08
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5622,6 +5622,13 @@ const VALID_ATTRS = merge(URI_ATTRS, HTML_ATTRS, ARIA_ATTRS);
 // `Some content`, but strip `invalid-element` opening/closing tags. For some elements, though, we
 // don't want to preserve the content, if the elements themselves are going to be removed.
 const SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,template');
+/**
+ * Attributes that are potential attach vectors and may need to be sanitized.
+ */
+const SENSITIVE_ATTRS = merge(URI_ATTRS, 
+// Note: we don't include these attributes in `URI_ATTRS`, because `URI_ATTRS` also
+// determines whether an attribute should be dropped when sanitizing an HTML string.
+tagSet('action,formaction,data,codebase'));
 /**
  * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
  * attributes.
@@ -14720,7 +14727,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.17+sha-043125c']
+        ? ['ng-version', '20.3.17+sha-02fbf08']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -24917,7 +24924,7 @@ function i18nAttributesFirstPass(tView, index, values) {
                 // the compiler treats static i18n attributes as regular attribute bindings.
                 // Since this may not be the first i18n attribute on this element we need to pass in how
                 // many previous bindings there have already been.
-                generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), null);
+                generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), SENSITIVE_ATTRS[attrName.toLowerCase()] ? _sanitizeUrl : null);
             }
         }
         tView.data[index] = updateOpCodes;
@@ -25245,12 +25252,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                         const hasBinding = !!attr.value.match(BINDING_REGEXP);
                         if (hasBinding) {
                             if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
-                                if (URI_ATTRS[lowerAttrName]) {
-                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, _sanitizeUrl);
-                                }
-                                else {
-                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, null);
-                                }
+                                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, SENSITIVE_ATTRS[lowerAttrName] ? _sanitizeUrl : null);
                             }
                             else {
                                 ngDevMode &&
@@ -25260,7 +25262,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                             }
                         }
                         else if (VALID_ATTRS[lowerAttrName]) {
-                            if (URI_ATTRS[lowerAttrName]) {
+                            if (SENSITIVE_ATTRS[lowerAttrName]) {
                                 // Don't sanitize, because no value is acceptable in sensitive attributes.
                                 // Translators are not allowed to create URIs.
                                 if (typeof ngDevMode !== 'undefined' && ngDevMode) {

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.17+sha-043125c
+ * @license Angular v20.3.17+sha-02fbf08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21463,7 +21463,7 @@ function extractPlaceholderName(input) {
  * tags use '*'.
  *
  * Extracted from, and should be kept in sync with
- * https://w3c.github.io/webappsec-trusted-types/dist/spec/#integrations
+ * https://www.w3.org/TR/trusted-types/#integrations
  */
 const TRUSTED_TYPES_SINKS = new Set([
     // NOTE: All strings in this set *must* be lowercase!
@@ -21474,6 +21474,7 @@ const TRUSTED_TYPES_SINKS = new Set([
     // NB: no TrustedScript here, as the corresponding tags are stripped by the compiler.
     // TrustedScriptURL
     'embed|src',
+    'iframe|src',
     'object|codebase',
     'object|data',
 ]);
@@ -32830,7 +32831,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.17+sha-043125c');
+const VERSION = new Version('20.3.17+sha-02fbf08');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33892,7 +33893,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-C5dXM8JP.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-MdN5DRlX.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename

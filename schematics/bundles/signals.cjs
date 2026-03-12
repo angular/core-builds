@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.17+sha-043125c
+ * @license Angular v20.3.17+sha-02fbf08
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ var schematics = require('@angular-devkit/schematics');
 var signalQueriesMigration = require('./signal-queries-migration.cjs');
 var signalInputMigration = require('./signal-input-migration.cjs');
 var outputMigration = require('./output-migration.cjs');
-require('./project_tsconfig_paths-C5dXM8JP.cjs');
+require('./project_tsconfig_paths-MdN5DRlX.cjs');
 require('typescript');
 require('os');
 require('fs');
@@ -18,14 +18,14 @@ require('module');
 require('path');
 require('url');
 require('@angular-devkit/core');
-require('./index-CEqacA4Q.cjs');
+require('./index-DUHSh_FI.cjs');
 require('node:path');
-require('./project_paths-qw-vHpyb.cjs');
+require('./project_paths-D9GYMpqK.cjs');
 require('node:path/posix');
-require('./apply_import_manager-C-hIllzM.cjs');
-require('./migrate_ts_type_references-BJnim1Tm.cjs');
+require('./apply_import_manager-CTzEuFJw.cjs');
+require('./migrate_ts_type_references-DLcyIMjy.cjs');
 require('assert');
-require('./index-BdbAclL_.cjs');
+require('./index-B8IUVpRW.cjs');
 require('./leading_space-D9nQ8UQC.cjs');
 require('node:assert');
 
