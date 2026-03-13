@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.4+sha-334ae10
+ * @license Angular v21.2.4+sha-21cab20
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, ErrorHandler, DestroyRef, RuntimeError, formatRuntimeError, signalAsReadonlyFn, assertInInjectionContext, Injector, effect, PendingTasks, signal } from './_effect-chunk2.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, signalAsReadonlyFn, assertInInjectionContext, effect, PendingTasks, signal, Injector } from './_effect-chunk2.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 

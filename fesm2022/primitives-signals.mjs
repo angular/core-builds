@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.4+sha-334ae10
+ * @license Angular v21.2.4+sha-21cab20
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, consumerMarkDirty, REACTIVE_NODE, consumerDestroy, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './_effect-chunk.mjs';
+import { SIGNAL, consumerMarkDirty, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, consumerDestroy, REACTIVE_NODE } from './_effect-chunk.mjs';
 export { BASE_EFFECT_NODE, SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.mjs';
 export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from './_untracked-chunk.mjs';
 export { setAlternateWeakRefImpl } from './_weak_ref-chunk.mjs';

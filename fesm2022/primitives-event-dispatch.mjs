@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.4+sha-334ae10
+ * @license Angular v21.2.4+sha-21cab20
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,11 +31,8 @@ function setParsed(text, parsed) {
 }
 
 const EventType = {
-  AUXCLICK: 'auxclick',
-  CHANGE: 'change',
   CLICK: 'click',
   CLICKMOD: 'clickmod',
-  CLICKONLY: 'clickonly',
   DBLCLICK: 'dblclick',
   FOCUS: 'focus',
   FOCUSIN: 'focusin',
@@ -45,34 +42,20 @@ const EventType = {
   KEYDOWN: 'keydown',
   KEYPRESS: 'keypress',
   KEYUP: 'keyup',
-  MOUSEUP: 'mouseup',
-  MOUSEDOWN: 'mousedown',
   MOUSEOVER: 'mouseover',
   MOUSEOUT: 'mouseout',
   MOUSEENTER: 'mouseenter',
   MOUSELEAVE: 'mouseleave',
-  MOUSEMOVE: 'mousemove',
-  POINTERUP: 'pointerup',
-  POINTERDOWN: 'pointerdown',
   POINTEROVER: 'pointerover',
   POINTEROUT: 'pointerout',
   POINTERENTER: 'pointerenter',
   POINTERLEAVE: 'pointerleave',
-  POINTERMOVE: 'pointermove',
-  POINTERCANCEL: 'pointercancel',
-  GOTPOINTERCAPTURE: 'gotpointercapture',
-  LOSTPOINTERCAPTURE: 'lostpointercapture',
   ERROR: 'error',
   LOAD: 'load',
-  UNLOAD: 'unload',
   TOUCHSTART: 'touchstart',
   TOUCHEND: 'touchend',
   TOUCHMOVE: 'touchmove',
-  INPUT: 'input',
-  SCROLL: 'scroll',
-  TOGGLE: 'toggle',
-  CUSTOM: '_custom'
-};
+  TOGGLE: 'toggle'};
 const MOUSE_SPECIAL_EVENT_TYPES = [EventType.MOUSEENTER, EventType.MOUSELEAVE, 'pointerenter', 'pointerleave'];
 const BUBBLE_EVENT_TYPES = [EventType.CLICK, EventType.DBLCLICK, EventType.FOCUSIN, EventType.FOCUSOUT, EventType.KEYDOWN, EventType.KEYUP, EventType.KEYPRESS, EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.SUBMIT, EventType.TOUCHSTART, EventType.TOUCHEND, EventType.TOUCHMOVE, 'touchcancel', 'auxclick', 'change', 'compositionstart', 'compositionupdate', 'compositionend', 'beforeinput', 'input', 'select', 'copy', 'cut', 'paste', 'mousedown', 'mouseup', 'wheel', 'contextmenu', 'dragover', 'dragenter', 'dragleave', 'drop', 'dragstart', 'dragend', 'pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'pointerover', 'pointerout', 'gotpointercapture', 'lostpointercapture', 'ended', 'loadedmetadata', 'pagehide', 'pageshow', 'visibilitychange', 'beforematch'];
 const CAPTURE_EVENT_TYPES = [EventType.FOCUS, EventType.BLUR, EventType.ERROR, EventType.LOAD, EventType.TOGGLE];
@@ -185,7 +168,6 @@ class EventContractContainer {
 }
 
 const Char = {
-  NAMESPACE_ACTION_SEPARATOR: '.',
   EVENT_ACTION_SEPARATOR: ':'
 };
 
