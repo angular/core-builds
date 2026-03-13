@@ -1,13 +1,13 @@
 /**
- * @license Angular v22.0.0-next.3+sha-412788f
+ * @license Angular v22.0.0-next.3+sha-e127927
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, DOCUMENT as DOCUMENT$1, ENVIRONMENT_INITIALIZER, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, stringify, ANIMATIONS, NgZone, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getTNode, getDirectiveDefOrThrow, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, arrayInsert2, arraySplice, PendingTasks, assertTNodeCreationIndex, decreaseElementDepthCount, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getNamespace, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArraySet, keyValueArrayGet, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, angularZoneInstanceIdProperty, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, NoopNgZone, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
+import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, assertIndexInRange, INJECTOR$1 as INJECTOR, TVIEW, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, CHILD_HEAD, NEXT, isLContainer, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, ENVIRONMENT_INITIALIZER, DOCUMENT as DOCUMENT$1, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR as INJECTOR$1, CONTAINER_HEADER_OFFSET, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, getTNode, getDirectiveDefOrThrow, assertComponentType, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasksInternal, arrayInsert2, arraySplice, PendingTasks, decreaseElementDepthCount, assertTNodeCreationIndex, getNamespace, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
+import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
-import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { map } from 'rxjs/operators';
 import { Attribute as Attribute$1 } from './_attribute-chunk.mjs';
 
@@ -1141,7 +1141,7 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
     if (!parentTNode) {
       const embeddedViewInjector = currentLView[EMBEDDED_VIEW_INJECTOR];
       if (embeddedViewInjector) {
-        const embeddedViewInjectorValue = embeddedViewInjector.get(token, NOT_FOUND, flags & ~4);
+        const embeddedViewInjectorValue = embeddedViewInjector.get(token, NOT_FOUND, flags & -5);
         if (embeddedViewInjectorValue !== NOT_FOUND) {
           return embeddedViewInjectorValue;
         }
@@ -4483,11 +4483,14 @@ const NOOP_AFTER_RENDER_REF = {
 
 const ANIMATION_QUEUE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'AnimationQueue' : '', {
   factory: () => {
+    const injector = inject(EnvironmentInjector);
+    const queue = new Set();
+    injector.onDestroy(() => queue.clear());
     return {
-      queue: new Set(),
+      queue,
       isScheduled: false,
       scheduler: null,
-      injector: inject(EnvironmentInjector)
+      injector
     };
   }
 });
@@ -4503,6 +4506,16 @@ function addToAnimationQueue(injector, animationFns, animationData) {
     animationData?.detachedLeaveAnimationFns?.push(animationFns);
   }
   animationQueue.scheduler && animationQueue.scheduler(injector);
+}
+function removeAnimationsFromQueue(injector, animationFns) {
+  const animationQueue = injector.get(ANIMATION_QUEUE);
+  if (Array.isArray(animationFns)) {
+    for (const animateFn of animationFns) {
+      animationQueue.queue.delete(animateFn);
+    }
+  } else {
+    animationQueue.queue.delete(animationFns);
+  }
 }
 function removeFromAnimationQueue(injector, animationData) {
   const animationQueue = injector.get(ANIMATION_QUEUE);
@@ -4545,6 +4558,137 @@ function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
     queueEnterAnimations(injector, enterAnimations);
   }
 }
+function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
+  try {
+    injector.get(INJECTOR$1);
+  } catch {
+    return callback(false);
+  }
+  const animations = lView?.[ANIMATIONS];
+  if (animations?.enter?.has(tNode.index)) {
+    removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
+  }
+  const nodesWithExitAnimations = aggregateDescendantAnimations(lView, tNode, animations);
+  if (nodesWithExitAnimations.size === 0) {
+    let hasNestedAnimations = false;
+    if (lView) {
+      const nestedPromises = [];
+      collectNestedViewAnimations(lView, tNode, nestedPromises);
+      hasNestedAnimations = nestedPromises.length > 0;
+    }
+    if (!hasNestedAnimations) {
+      return callback(false);
+    }
+  }
+  if (lView) allLeavingAnimations.add(lView[ID]);
+  addToAnimationQueue(injector, () => executeLeaveAnimations(lView, tNode, animations || undefined, nodesWithExitAnimations, callback), animations || undefined);
+}
+function aggregateDescendantAnimations(lView, tNode, animations) {
+  const nodesWithExitAnimations = new Map();
+  const leaveAnimations = animations?.leave;
+  if (leaveAnimations && leaveAnimations.has(tNode.index)) {
+    nodesWithExitAnimations.set(tNode.index, leaveAnimations.get(tNode.index));
+  }
+  if (lView && leaveAnimations) {
+    for (const [index, animationData] of leaveAnimations) {
+      if (nodesWithExitAnimations.has(index)) continue;
+      const nestedTNode = lView[TVIEW].data[index];
+      let parent = nestedTNode.parent;
+      while (parent) {
+        if (parent === tNode) {
+          nodesWithExitAnimations.set(index, animationData);
+          break;
+        }
+        parent = parent.parent;
+      }
+    }
+  }
+  return nodesWithExitAnimations;
+}
+function executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimations, callback) {
+  const runningAnimations = [];
+  if (animations && animations.leave) {
+    for (const [index] of nodesWithExitAnimations) {
+      if (!animations.leave.has(index)) continue;
+      const currentAnimationData = animations.leave.get(index);
+      for (const animationFn of currentAnimationData.animateFns) {
+        const {
+          promise
+        } = animationFn();
+        runningAnimations.push(promise);
+      }
+      animations.detachedLeaveAnimationFns = undefined;
+    }
+  }
+  if (lView) {
+    collectNestedViewAnimations(lView, tNode, runningAnimations);
+  }
+  if (runningAnimations.length > 0) {
+    const currentAnimations = animations || lView?.[ANIMATIONS];
+    if (currentAnimations) {
+      const prevRunning = currentAnimations.running;
+      if (prevRunning) {
+        runningAnimations.push(prevRunning);
+      }
+      currentAnimations.running = Promise.allSettled(runningAnimations);
+      runAfterLeaveAnimations(lView, currentAnimations.running, callback);
+    } else {
+      Promise.allSettled(runningAnimations).then(() => {
+        if (lView) allLeavingAnimations.delete(lView[ID]);
+        callback(true);
+      });
+    }
+  } else {
+    if (lView) allLeavingAnimations.delete(lView[ID]);
+    callback(false);
+  }
+}
+function collectNestedViewAnimations(lView, tNode, collectedPromises) {
+  if (tNode.type & 12) {
+    const lContainer = lView[tNode.index];
+    if (isLContainer(lContainer)) {
+      for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const subView = lContainer[i];
+        if (subView[TVIEW].type === 2) {
+          collectAllViewLeaveAnimations(subView, collectedPromises);
+        }
+      }
+    }
+  }
+  let child = tNode.child;
+  while (child) {
+    collectNestedViewAnimations(lView, child, collectedPromises);
+    child = child.next;
+  }
+}
+function collectAllViewLeaveAnimations(view, collectedPromises) {
+  const animations = view[ANIMATIONS];
+  if (animations && animations.leave) {
+    for (const animationData of animations.leave.values()) {
+      for (const animationFn of animationData.animateFns) {
+        const {
+          promise
+        } = animationFn();
+        collectedPromises.push(promise);
+      }
+    }
+  }
+  let child = view[TVIEW].firstChild;
+  while (child) {
+    collectNestedViewAnimations(view, child, collectedPromises);
+    child = child.next;
+  }
+}
+function runAfterLeaveAnimations(lView, runningAnimations, callback) {
+  runningAnimations.then(() => {
+    if (lView[ANIMATIONS]?.running === runningAnimations) {
+      lView[ANIMATIONS].running = undefined;
+      allLeavingAnimations.delete(lView[ID]);
+    }
+    callback(true);
+  });
+}
+
 function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHandle, tNode, beforeNode, parentLView) {
   if (lNodeToHandle != null) {
     let lContainer;
@@ -4678,45 +4822,6 @@ function cleanUpView(tView, lView) {
   } finally {
     setActiveConsumer(prevConsumer);
   }
-}
-function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
-  const animations = lView?.[ANIMATIONS];
-  if (animations == null || animations.leave == undefined || !animations.leave.has(tNode.index)) return callback(false);
-  if (lView) allLeavingAnimations.add(lView[ID]);
-  addToAnimationQueue(injector, () => {
-    if (animations.leave && animations.leave.has(tNode.index)) {
-      const leaveAnimationMap = animations.leave;
-      const leaveAnimations = leaveAnimationMap.get(tNode.index);
-      const runningAnimations = [];
-      if (leaveAnimations) {
-        for (let index = 0; index < leaveAnimations.animateFns.length; index++) {
-          const animationFn = leaveAnimations.animateFns[index];
-          const {
-            promise
-          } = animationFn();
-          runningAnimations.push(promise);
-        }
-        animations.detachedLeaveAnimationFns = undefined;
-      }
-      animations.running = Promise.allSettled(runningAnimations);
-      runAfterLeaveAnimations(lView, callback);
-    } else {
-      if (lView) allLeavingAnimations.delete(lView[ID]);
-      callback(false);
-    }
-  }, animations);
-}
-function runAfterLeaveAnimations(lView, callback) {
-  const runningAnimations = lView[ANIMATIONS]?.running;
-  if (runningAnimations) {
-    runningAnimations.then(() => {
-      lView[ANIMATIONS].running = undefined;
-      allLeavingAnimations.delete(lView[ID]);
-      callback(true);
-    });
-    return;
-  }
-  callback(false);
 }
 function processCleanups(tView, lView) {
   ngDevMode && assertNotReactive(processCleanups.name);
@@ -5442,7 +5547,7 @@ function renderView(tView, lView, context) {
     }
     throw error;
   } finally {
-    lView[FLAGS] &= ~4;
+    lView[FLAGS] &= -5;
     leaveView();
   }
 }
@@ -5828,7 +5933,7 @@ function detectChangesInView(lView, mode) {
   if (consumer) {
     consumer.dirty = false;
   }
-  lView[FLAGS] &= ~(8192 | 1024);
+  lView[FLAGS] &= -9217;
   if (shouldRefreshView) {
     refreshView(tView, lView, tView.template, lView[CONTEXT]);
   } else if (flags & 8192) {
@@ -5954,7 +6059,7 @@ function detachView(lContainer, removeIndex) {
     }
     viewToDetach[PARENT] = null;
     viewToDetach[NEXT] = null;
-    viewToDetach[FLAGS] &= ~128;
+    viewToDetach[FLAGS] &= -129;
   }
   return viewToDetach;
 }
@@ -6061,7 +6166,7 @@ class ViewRef {
     markViewDirty(this._cdRefInjectingView || this._lView, 4);
   }
   detach() {
-    this._lView[FLAGS] &= ~128;
+    this._lView[FLAGS] &= -129;
   }
   reattach() {
     updateAncestorTraversalFlagsOnAttach(this._lView);
@@ -8689,7 +8794,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-412788f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-e127927'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11959,13 +12064,13 @@ class ApplicationRef {
   }
   synchronizeOnce() {
     if (this.dirtyFlags & 16) {
-      this.dirtyFlags &= ~16;
+      this.dirtyFlags &= -17;
       this.rootEffectScheduler.flush();
     }
     let ranDetectChanges = false;
     if (this.dirtyFlags & 7) {
       const useGlobalCheck = Boolean(this.dirtyFlags & 1);
-      this.dirtyFlags &= ~7;
+      this.dirtyFlags &= -8;
       this.dirtyFlags |= 8;
       for (let {
         _lView
@@ -11977,7 +12082,7 @@ class ApplicationRef {
         detectChangesInternal(_lView, mode);
         ranDetectChanges = true;
       }
-      this.dirtyFlags &= ~4;
+      this.dirtyFlags &= -5;
       this.syncDirtyFlagsWithViews();
       if (this.dirtyFlags & (7 | 16)) {
         return;
@@ -11988,7 +12093,7 @@ class ApplicationRef {
       this._rendererFactory?.end?.();
     }
     if (this.dirtyFlags & 8) {
-      this.dirtyFlags &= ~8;
+      this.dirtyFlags &= -9;
       this.afterRenderManager.execute();
     }
     this.syncDirtyFlagsWithViews();
@@ -12000,7 +12105,7 @@ class ApplicationRef {
       this.dirtyFlags |= 2;
       return;
     } else {
-      this.dirtyFlags &= ~7;
+      this.dirtyFlags &= -8;
     }
   }
   attachView(viewRef) {
@@ -13369,6 +13474,10 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
     enterAnimationEnd(event, nativeElement, renderer);
   };
   if (activeClasses && activeClasses.length > 0) {
+    let isCleanedUp = false;
+    cleanupFns.push(() => {
+      isCleanedUp = true;
+    });
     ngZone.runOutsideAngular(() => {
       cleanupFns.push(renderer.listen(nativeElement, 'animationstart', handleEnterAnimationStart));
       cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleEnterAnimationStart));
@@ -13379,14 +13488,16 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
     }
     ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
-        if (hasCompleted) return;
-        determineLongestAnimation(nativeElement, longestAnimations, areAnimationSupported);
-        if (!longestAnimations.has(nativeElement)) {
-          for (const klass of activeClasses) {
-            renderer.removeClass(nativeElement, klass);
+        setTimeout(() => {
+          if (hasCompleted || isCleanedUp) return;
+          determineLongestAnimation(nativeElement, longestAnimations, areAnimationSupported);
+          if (!longestAnimations.has(nativeElement)) {
+            for (const klass of activeClasses) {
+              renderer.removeClass(nativeElement, klass);
+            }
+            cleanupEnterClassData(nativeElement);
           }
-          cleanupEnterClassData(nativeElement);
-        }
+        });
       });
     });
   }
@@ -13470,6 +13581,13 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
   const componentResolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
   let fallbackTimeoutId;
   let hasCompleted = false;
+  let isCleanedUp = false;
+  cleanupFns.push(() => {
+    isCleanedUp = true;
+    if (fallbackTimeoutId !== undefined) {
+      clearTimeout(fallbackTimeoutId);
+    }
+  });
   const handleOutAnimationEnd = event => {
     const target = getEventTarget(event);
     if (target !== el && event.type !== 'animation-fallback') return;
@@ -13498,19 +13616,20 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
   }
   ngZone.runOutsideAngular(() => {
     requestAnimationFrame(() => {
-      if (hasCompleted) return;
-      determineLongestAnimation(el, longestAnimations, areAnimationSupported);
-      const longest = longestAnimations.get(el);
-      if (!longest) {
-        clearLeavingNodes(tNode, el);
-        cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
-        clearLViewNodeAnimationResolvers(lView, tNode);
-      } else {
-        fallbackTimeoutId = setTimeout(() => {
-          handleOutAnimationEnd(new CustomEvent('animation-fallback'));
-        }, longest.duration + 50);
-        cleanupFns.push(() => clearTimeout(fallbackTimeoutId));
-      }
+      setTimeout(() => {
+        if (hasCompleted || isCleanedUp) return;
+        determineLongestAnimation(el, longestAnimations, areAnimationSupported);
+        const longest = longestAnimations.get(el);
+        if (!longest) {
+          clearLeavingNodes(tNode, el);
+          cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
+          clearLViewNodeAnimationResolvers(lView, tNode);
+        } else {
+          fallbackTimeoutId = setTimeout(() => {
+            handleOutAnimationEnd(new CustomEvent('animation-fallback'));
+          }, longest.duration + 50);
+        }
+      });
     });
   });
 }
@@ -15655,7 +15774,7 @@ function getTStylingRangePrevDuplicate(tStylingRange) {
 function setTStylingRangePrev(tStylingRange, previous) {
   ngDevMode && assertNumber(tStylingRange, 'expected number');
   ngDevMode && assertNumberInRange(previous, 0, 32767);
-  return tStylingRange & ~4294836224 | previous << 17;
+  return tStylingRange & 131071 | previous << 17;
 }
 function setTStylingRangePrevDuplicate(tStylingRange) {
   ngDevMode && assertNumber(tStylingRange, 'expected number');
@@ -15668,7 +15787,7 @@ function getTStylingRangeNext(tStylingRange) {
 function setTStylingRangeNext(tStylingRange, next) {
   ngDevMode && assertNumber(tStylingRange, 'expected number');
   ngDevMode && assertNumberInRange(next, 0, 32767);
-  return tStylingRange & ~131068 | next << 2;
+  return tStylingRange & -131069 | next << 2;
 }
 function getTStylingRangeNextDuplicate(tStylingRange) {
   ngDevMode && assertNumber(tStylingRange, 'expected number');
@@ -17050,7 +17169,7 @@ function resetProjectionState(tNode) {
     for (const current of tNode.projection) {
       if (isTNodeShape(current)) {
         current.projectionNext = null;
-        current.flags &= ~2;
+        current.flags &= -3;
       }
     }
     tNode.projection = null;
@@ -17400,12 +17519,12 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     verifySemanticsOfNgModuleImport(modOrStandaloneCmpt, moduleType);
     verifySemanticsOfNgModuleDef(modOrStandaloneCmpt, false, moduleType);
   });
-  const exports = maybeUnwrapFn(ngModuleDef.exports);
+  const exports$1 = maybeUnwrapFn(ngModuleDef.exports);
   declarations.forEach(verifyDeclarationsHaveDefinitions);
   declarations.forEach(verifyDirectivesHaveSelector);
   declarations.forEach(declarationType => verifyNotStandalone(declarationType, moduleType));
   const combinedDeclarations = [...declarations.map(resolveForwardRef), ...flatten(imports.map(computeCombinedExports)).map(resolveForwardRef)];
-  exports.forEach(verifyExportsAreDeclaredOrReExported);
+  exports$1.forEach(verifyExportsAreDeclaredOrReExported);
   declarations.forEach(decl => verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot));
   const ngModule = getAnnotation(moduleType, 'NgModule');
   if (ngModule) {
@@ -18620,5 +18739,5 @@ function getDebugNode(nativeNode) {
   return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef, ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSignal, isSubscribable, isTNodeShape, isViewDirty, isWritableSignal, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSignal, isSubscribable, isTNodeShape, isViewDirty, isWritableSignal, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=_debug_node-chunk.mjs.map

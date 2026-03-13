@@ -1,20 +1,20 @@
 /**
- * @license Angular v22.0.0-next.3+sha-412788f
+ * @license Angular v22.0.0-next.3+sha-e127927
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import * as i0 from '@angular/core';
-import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, ApplicationRef, getDebugNode, RendererFactory2, Directive, Component, Pipe, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, COMPILER_OPTIONS, generateStandaloneInDeclarationsError, transitiveScopesFor, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
 import { Subscription } from 'rxjs';
-import { inject as inject$1, NgZone, EnvironmentInjector, ErrorHandler, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, Injector, isEnvironmentProviders, INTERNAL_APPLICATION_ERROR_HANDLER, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
+import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
+import * as i0 from '@angular/core';
+import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
+import './_not_found-chunk.mjs';
 import '@angular/core/primitives/signals';
+import '@angular/core/primitives/di';
 import 'rxjs/operators';
 import './_attribute-chunk.mjs';
-import './_not_found-chunk.mjs';
-import '@angular/core/primitives/di';
 
 function waitForAsync(fn) {
   const _Zone = typeof Zone !== 'undefined' ? Zone : null;

@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.3+sha-412788f
+ * @license Angular v22.0.0-next.3+sha-e127927
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { OutputRef, OutputRefSubscription, DestroyRef, Signal, WritableSignal, ValueEqualityFn, Injector } from './_chrome_dev_tools_performance-chunk.js';
+import { OutputRef, OutputRefSubscription, DestroyRef, Signal, ValueEqualityFn, Injector, WritableSignal } from './_chrome_dev_tools_performance-chunk.js';
 
 /**
  * An `OutputEmitterRef` is created by the `output()` function and can be
