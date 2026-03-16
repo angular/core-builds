@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.3+sha-ada150c
+ * @license Angular v22.0.0-next.3+sha-dc04465
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -191,9 +191,11 @@ function areAllEquivalent(base, other) {
     return areAllEquivalentPredicate(base, other, (baseElement, otherElement) => baseElement.isEquivalent(otherElement));
 }
 class Expression {
+    leadingComments;
     type;
     sourceSpan;
-    constructor(type, sourceSpan) {
+    constructor(type, sourceSpan, leadingComments) {
+        this.leadingComments = leadingComments;
         this.type = type || null;
         this.sourceSpan = sourceSpan || null;
     }
@@ -203,13 +205,13 @@ class Expression {
     key(index, type, sourceSpan) {
         return new ReadKeyExpr(this, index, type, sourceSpan);
     }
-    callFn(params, sourceSpan, pure) {
-        return new InvokeFunctionExpr(this, params, null, sourceSpan, pure);
+    callFn(params, sourceSpan, pure, leadingComments) {
+        return new InvokeFunctionExpr(this, params, null, sourceSpan, pure, leadingComments);
     }
-    instantiate(params, type, sourceSpan) {
+    instantiate(params, type, sourceSpan, leadingComments) {
         return new InstantiateExpr(this, params, type, sourceSpan);
     }
-    conditional(trueCase, falseCase = null, sourceSpan) {
+    conditional(trueCase, falseCase = null, sourceSpan, leadingComments) {
         return new ConditionalExpr(this, trueCase, falseCase, null, sourceSpan);
     }
     equals(rhs, sourceSpan) {
@@ -282,8 +284,8 @@ class InvokeFunctionExpr extends Expression {
     fn;
     args;
     pure;
-    constructor(fn, args, type, sourceSpan, pure = false) {
-        super(type, sourceSpan);
+    constructor(fn, args, type, sourceSpan, pure = false, leadingComments) {
+        super(type, sourceSpan, leadingComments);
         this.fn = fn;
         this.args = args;
         this.pure = pure;
@@ -311,8 +313,8 @@ class InvokeFunctionExpr extends Expression {
 class InstantiateExpr extends Expression {
     classExpr;
     args;
-    constructor(classExpr, args, type, sourceSpan) {
-        super(type, sourceSpan);
+    constructor(classExpr, args, type, sourceSpan, leadingComments) {
+        super(type, sourceSpan, leadingComments);
         this.classExpr = classExpr;
         this.args = args;
     }
@@ -333,8 +335,8 @@ class InstantiateExpr extends Expression {
 }
 class LiteralExpr extends Expression {
     value;
-    constructor(value, type, sourceSpan) {
-        super(type, sourceSpan);
+    constructor(value, type, sourceSpan, leadingComments) {
+        super(type, sourceSpan, leadingComments);
         this.value = value;
     }
     isEquivalent(e) {
@@ -354,8 +356,8 @@ class ConditionalExpr extends Expression {
     condition;
     falseCase;
     trueCase;
-    constructor(condition, trueCase, falseCase = null, type, sourceSpan) {
-        super(type || trueCase.type, sourceSpan);
+    constructor(condition, trueCase, falseCase = null, type, sourceSpan, leadingComments) {
+        super(type || trueCase.type, sourceSpan, leadingComments);
         this.condition = condition;
         this.falseCase = falseCase;
         this.trueCase = trueCase;
@@ -380,8 +382,8 @@ class BinaryOperatorExpr extends Expression {
     operator;
     rhs;
     lhs;
-    constructor(operator, lhs, rhs, type, sourceSpan) {
-        super(type || lhs.type, sourceSpan);
+    constructor(operator, lhs, rhs, type, sourceSpan, leadingComments) {
+        super(type || lhs.type, sourceSpan, leadingComments);
         this.operator = operator;
         this.rhs = rhs;
         this.lhs = lhs;
@@ -418,8 +420,8 @@ class BinaryOperatorExpr extends Expression {
 class ReadPropExpr extends Expression {
     receiver;
     name;
-    constructor(receiver, name, type, sourceSpan) {
-        super(type, sourceSpan);
+    constructor(receiver, name, type, sourceSpan, leadingComments) {
+        super(type, sourceSpan, leadingComments);
         this.receiver = receiver;
         this.name = name;
     }
@@ -446,8 +448,8 @@ class ReadPropExpr extends Expression {
 class ReadKeyExpr extends Expression {
     receiver;
     index;
-    constructor(receiver, index, type, sourceSpan) {
-        super(type, sourceSpan);
+    constructor(receiver, index, type, sourceSpan, leadingComments) {
+        super(type, sourceSpan, leadingComments);
         this.receiver = receiver;
         this.index = index;
     }
