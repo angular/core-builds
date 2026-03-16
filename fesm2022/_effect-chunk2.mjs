@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.4+sha-26c43d1
+ * @license Angular v21.2.4+sha-4d78651
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.2.4+sha-26c43d1');
+const VERSION = /* @__PURE__ */new Version('21.2.4+sha-4d78651');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
