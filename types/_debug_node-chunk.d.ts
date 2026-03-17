@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.3+sha-eeba51c
+ * @license Angular v22.0.0-next.3+sha-9769560
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2379,6 +2379,8 @@ interface ControlDirectiveHost<_TPassthroughInput extends string | undefined = u
      * A `FormUiControl` instance that this directive is declared on.
      */
     readonly customControl: unknown | undefined;
+    /** The native DOM element for the host node, if applicable. */
+    readonly nativeElement: HTMLElement;
     /**
      * Registers a listener that will be called when the custom control's value changes.
      *

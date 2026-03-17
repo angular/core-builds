@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.3+sha-eeba51c
+ * @license Angular v22.0.0-next.3+sha-9769560
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8417,6 +8417,9 @@ class ControlDirectiveHostImpl {
   get customControl() {
     return this.tNode.customControlIndex !== -1 ? this.lView[this.tNode.customControlIndex] : undefined;
   }
+  get nativeElement() {
+    return getNativeByTNode(this.tNode, this.lView);
+  }
   get descriptor() {
     if (ngDevMode && isComponentHost(this.tNode)) {
       const componentIndex = this.tNode.directiveStart + this.tNode.componentOffset;
@@ -8444,23 +8447,32 @@ class ControlDirectiveHostImpl {
     if (!directiveIndices && !hostDirectiveInputs) {
       return false;
     }
+    let wasSet = false;
     if (directiveIndices) {
       for (const index of directiveIndices) {
+        if (index === this.tNode.controlDirectiveIndex) {
+          continue;
+        }
         const directiveDef = this.tView.data[index];
         const directive = this.lView[index];
         writeToDirectiveInput(directiveDef, directive, inputName, value);
+        wasSet = true;
       }
     }
     if (hostDirectiveInputs) {
       for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
         const index = hostDirectiveInputs[i];
+        if (index === this.tNode.controlDirectiveIndex) {
+          continue;
+        }
         const internalName = hostDirectiveInputs[i + 1];
         const directiveDef = this.tView.data[index];
         const directive = this.lView[index];
         writeToDirectiveInput(directiveDef, directive, internalName, value);
+        wasSet = true;
       }
     }
-    return true;
+    return wasSet;
   }
   setCustomControlModelInput(value) {
     const directive = this.lView[this.tNode.customControlIndex];
@@ -8794,7 +8806,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-eeba51c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.3+sha-9769560'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -18011,7 +18023,9 @@ function directiveMetadata(type, metadata) {
     lifecycle: {
       usesOnChanges: reflect.hasLifecycleHook(type, 'ngOnChanges')
     },
-    controlCreate: null,
+    controlCreate: reflect.hasLifecycleHook(type, 'ɵngControlCreate') ? {
+      passThroughInput: null
+    } : null,
     typeSourceSpan: null,
     usesInheritance: !extendsDirectlyFromObject(type),
     exportAs: extractExportAs(metadata.exportAs),
