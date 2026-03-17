@@ -1,10 +1,10 @@
 /**
- * @license Angular v21.2.4+sha-67e0ba7
+ * @license Angular v21.2.4+sha-a8f80c1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, ERRORED, signalUpdateFn, producerAccessed, defaultEquals, UNSET, REACTIVE_NODE, COMPUTING, consumerBeforeComputation, consumerAfterComputation, setActiveConsumer } from './_effect-chunk.mjs';
+import { SIGNAL, runPostProducerCreatedFn, producerUpdateValueVersion, signalSetFn, producerMarkClean, ERRORED, signalUpdateFn, producerAccessed, defaultEquals, UNSET, REACTIVE_NODE, COMPUTING, consumerBeforeComputation, setActiveConsumer, consumerAfterComputation } from './_effect-chunk.mjs';
 
 function createLinkedSignal(sourceFn, computationFn, equalityFn) {
   const node = Object.create(LINKED_SIGNAL_NODE);
@@ -61,21 +61,25 @@ const LINKED_SIGNAL_NODE = /* @__PURE__ */(() => {
       node.value = COMPUTING;
       const prevConsumer = consumerBeforeComputation(node);
       let newValue;
+      let wasEqual = false;
       try {
         const newSourceValue = node.source();
-        const prev = oldValue === UNSET || oldValue === ERRORED ? undefined : {
+        const oldValueValid = oldValue !== UNSET && oldValue !== ERRORED;
+        const prev = oldValueValid ? {
           source: node.sourceValue,
           value: oldValue
-        };
+        } : undefined;
         newValue = node.computation(newSourceValue, prev);
         node.sourceValue = newSourceValue;
+        setActiveConsumer(null);
+        wasEqual = oldValueValid && newValue !== ERRORED && node.equal(oldValue, newValue);
       } catch (err) {
         newValue = ERRORED;
         node.error = err;
       } finally {
         consumerAfterComputation(node, prevConsumer);
       }
-      if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
+      if (wasEqual) {
         node.value = oldValue;
         return;
       }
