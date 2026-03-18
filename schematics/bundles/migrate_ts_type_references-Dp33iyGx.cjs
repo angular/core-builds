@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.3+sha-890c973
+ * @license Angular v22.0.0-next.3+sha-f02be58
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -276,8 +276,8 @@ class Expression {
     nullishCoalesce(rhs, sourceSpan) {
         return new BinaryOperatorExpr(BinaryOperator.NullishCoalesce, this, rhs, null, sourceSpan);
     }
-    toStmt() {
-        return new ExpressionStatement(this, null);
+    toStmt(leadingComments) {
+        return new ExpressionStatement(this, null, leadingComments);
     }
 }
 class InvokeFunctionExpr extends Expression {
