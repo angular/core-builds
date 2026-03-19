@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.5+sha-9182b62
+ * @license Angular v21.2.5+sha-831746e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5171,6 +5171,9 @@ interface ComponentDecorator {
      * you can control a component's runtime behavior by implementing
      * life-cycle hooks. For more information, see the
      * [Lifecycle Hooks](guide/components/lifecycle) guide.
+     *
+     * HELPFUL: You may not use this interface to describe a class that is a component. Decorators do not affect the typing of the decorated classes.
+     * Use `Type<unknown>` instead of `Type<Component>`.
      *
      * @usageNotes
      *
