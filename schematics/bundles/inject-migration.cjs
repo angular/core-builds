@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.2.5+sha-3838554
+ * @license Angular v21.2.5+sha-aa3220a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1321,31 +1321,37 @@ function isStringType(node, checker) {
 }
 
 function migrate(options) {
-    return async (tree) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
+    return async (tree, context) => {
         const basePath = process.cwd();
-        const allPaths = [...buildPaths, ...testPaths];
-        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
-        if (!allPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the inject migration.');
+        let pathToMigrate;
+        if (options.path) {
+            if (options.path.startsWith('..')) {
+                throw new schematics.SchematicsException('Cannot run inject migration outside of the current project.');
+            }
+            pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
         }
+        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
+        const allPaths = [...buildPaths, ...testPaths];
+        if (!allPaths.length) {
+            context.logger.warn('Could not find any tsconfig file. Cannot run the inject migration.');
+            return;
+        }
+        let sourceFilesCount = 0;
         for (const tsconfigPath of allPaths) {
-            runInjectMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
+            const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
+            const sourceFiles = program
+                .getSourceFiles()
+                .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
+                compiler_host.canMigrateFile(basePath, sourceFile, program));
+            sourceFilesCount += runInjectMigration(tree, sourceFiles, basePath, options);
+        }
+        if (sourceFilesCount === 0) {
+            context.logger.warn('Inject migration did not find any files to migrate');
         }
     };
 }
-function runInjectMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions) {
-    if (schematicOptions.path.startsWith('..')) {
-        throw new schematics.SchematicsException('Cannot run inject migration outside of the current project.');
-    }
-    const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
-    const sourceFiles = program
-        .getSourceFiles()
-        .filter((sourceFile) => sourceFile.fileName.startsWith(pathToMigrate) &&
-        compiler_host.canMigrateFile(basePath, sourceFile, program));
-    if (sourceFiles.length === 0) {
-        throw new schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the inject migration.`);
-    }
+function runInjectMigration(tree, sourceFiles, basePath, schematicOptions) {
+    let migratedFiles = 0;
     for (const sourceFile of sourceFiles) {
         const changes = migrateFile(sourceFile, schematicOptions);
         if (changes.length > 0) {
@@ -1357,8 +1363,10 @@ function runInjectMigration(tree, tsconfigPath, basePath, pathToMigrate, schemat
                 update.insertRight(change.start, change.text);
             }
             tree.commitUpdate(update);
+            migratedFiles++;
         }
     }
+    return migratedFiles;
 }
 
 exports.migrate = migrate;
