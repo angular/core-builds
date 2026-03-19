@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-41b1410
+ * @license Angular v22.0.0-next.4+sha-836bf20
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4716,6 +4716,7 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
       if (parentLView?.[ANIMATIONS]?.leave?.has(tNode.index)) {
         trackLeavingNodes(tNode, rNode);
       }
+      reusedNodes.delete(rNode);
       runLeaveAnimationsWithCallback(parentLView, tNode, injector, nodeHasLeaveAnimations => {
         if (reusedNodes.has(rNode)) {
           reusedNodes.delete(rNode);
@@ -4724,6 +4725,7 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
         nativeRemoveNode(renderer, rNode, isComponent, nodeHasLeaveAnimations);
       });
     } else if (action === 3) {
+      reusedNodes.delete(rNode);
       runLeaveAnimationsWithCallback(parentLView, tNode, injector, () => {
         renderer.destroyNode(rNode);
       });
@@ -8806,7 +8808,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.4+sha-41b1410'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.4+sha-836bf20'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
