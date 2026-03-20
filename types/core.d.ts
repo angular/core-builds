@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-50e599e
+ * @license Angular v22.0.0-next.4+sha-621c908
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1270,14 +1270,12 @@ interface NgModuleDef<T> {
  *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
  *    inconsistent behavior in that it uses declared names rather than minified or public.
  */
-type DirectiveInputs<T> = {
-    [P in keyof T]?: string | [
-        flags: InputFlags,
-        publicName: string,
-        declaredName?: string,
-        transform?: InputTransformFunction
-    ];
-};
+type DirectiveInputs = Record<string, string | [
+    flags: InputFlags,
+    publicName: string,
+    declaredName?: string,
+    transform?: InputTransformFunction
+] | undefined>;
 interface DirectiveDefinition<T> {
     /**
      * Directive type, needed to configure the injector.
@@ -1288,7 +1286,7 @@ interface DirectiveDefinition<T> {
     /**
      * A map of input names.
      */
-    inputs?: DirectiveInputs<T>;
+    inputs?: DirectiveInputs;
     /**
      * A map of output names.
      *
@@ -1299,9 +1297,7 @@ interface DirectiveDefinition<T> {
      * This allows the render to re-construct the minified and non-minified names
      * of properties.
      */
-    outputs?: {
-        [P in keyof T]?: string;
-    };
+    outputs?: Record<string, string | undefined>;
     /**
      * A list of optional features to apply.
      *
@@ -7386,21 +7382,21 @@ declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => 
  */
 declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
-}): (Window & typeof globalThis) | null;
+}): EventTarget;
 /**
  *
  * @codeGenApi
  */
 declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
-}): Document;
+}): EventTarget;
 /**
  *
  * @codeGenApi
  */
 declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
-}): HTMLElement;
+}): EventTarget;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
