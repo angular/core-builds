@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-293ac66
+ * @license Angular v22.0.0-next.4+sha-2615f35
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6964,7 +6964,7 @@ interface InputDecorator {
      * class BankAccount {
      *   // This property is bound using its original name.
      *   // Defining argument required as true inside the Input Decorator
-     *   // makes this property deceleration as mandatory
+     *   // makes this property declaration as mandatory
      *   @Input({ required: true }) bankName!: string;
      *   // Argument alias makes this property value is bound to a different property name
      *   // when this component is instantiated in a template.
