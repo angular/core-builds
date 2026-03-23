@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-f46e8bd
+ * @license Angular v22.0.0-next.4+sha-36edf48
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3535,6 +3535,8 @@ interface NgZoneOptions {
 /**
  * Provides change detection without ZoneJS for the application bootstrapped using
  * `bootstrapApplication`.
+ *
+ * NOTE: Zoneless is enabled by default in Angular v21+. Ensure `provideZoneChangeDetection` is not used to override this default.
  *
  * This function allows you to configure the application to not use the state/state changes of
  * ZoneJS to schedule change detection in the application. This will work when ZoneJS is not present
