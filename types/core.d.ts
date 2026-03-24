@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-050b14b
+ * @license Angular v22.0.0-next.4+sha-eae8f7e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2517,7 +2517,6 @@ declare class ViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRef {
      * @Component({
      *   selector: 'app-root',
      *   template: `Number of ticks: {{numberOfTicks}}`
-     *   changeDetection: ChangeDetectionStrategy.OnPush,
      * })
      * class AppComponent {
      *   numberOfTicks = 0;
