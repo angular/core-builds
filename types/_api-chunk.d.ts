@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-b5af15a
+ * @license Angular v22.0.0-next.4+sha-24e52d4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -349,6 +349,11 @@ interface DebouncedOptions<T> {
     /** The equality function to use for comparing values. */
     equal?: ValueEqualityFn<T>;
 }
+/**
+ * Represents the wait condition for item debouncing.
+ * Can be a number of milliseconds or a function that returns a Promise.
+ */
+type DebounceTimer<T> = number | ((value: T, lastValue: ResourceSnapshot<T>) => Promise<void> | void);
 
 export { OutputEmitterRef, ResourceDependencyError, ResourceParamsStatus, getOutputDestroyRef, output };
-export type { BaseResourceOptions, DebouncedOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
+export type { BaseResourceOptions, DebounceTimer, DebouncedOptions, OutputOptions, PromiseResourceOptions, Resource, ResourceLoader, ResourceLoaderParams, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, StreamingResourceOptions, WritableResource };
