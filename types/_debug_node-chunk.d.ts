@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-ad57c9d
+ * @license Angular v22.0.0-next.4+sha-eecfa4c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2609,6 +2609,11 @@ interface DirectiveDef<T> {
      */
     hostDirectives: (HostDirectiveDef | (() => HostDirectiveConfig[]))[] | null;
     controlDef: ControlDirectiveDef | null;
+    /**
+     * Cache of inputs that this custom control directive covers,
+     * used by the signal forms system.
+     */
+    signalFormsInputPresence: Record<string, boolean> | null;
     setInput: (<U extends T>(this: DirectiveDef<U>, instance: U, inputSignalNode: null | InputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
 }
 /**

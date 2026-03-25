@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.4+sha-ad57c9d
+ * @license Angular v22.0.0-next.4+sha-eecfa4c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8431,14 +8431,13 @@ class ControlDirectiveHostImpl {
     return `<${this.tNode.value}>`;
   }
   listenToCustomControlOutput(outputName, callback) {
-    if (!hasOutput(this.tView.data[this.tNode.customControlIndex], outputName)) {
-      return;
-    }
-    listenToOutput(this.tNode, this.lView, this.tNode.customControlIndex, outputName, outputName, wrapListener(this.tNode, this.lView, callback));
+    const directiveDef = this.tView.data[this.tNode.customControlIndex];
+    listenToDirectiveOutput(this.tNode, this.lView, directiveDef, outputName, wrapListener(this.tNode, this.lView, callback));
   }
   listenToCustomControlModel(listener) {
     const modelName = this.tNode.flags & 1024 ? 'valueChange' : 'checkedChange';
-    listenToOutput(this.tNode, this.lView, this.tNode.customControlIndex, modelName, modelName, wrapListener(this.tNode, this.lView, listener));
+    const directiveDef = this.tView.data[this.tNode.customControlIndex];
+    listenToDirectiveOutput(this.tNode, this.lView, directiveDef, modelName, wrapListener(this.tNode, this.lView, listener));
   }
   listenToDom(eventName, listener) {
     listenToDomEvent(this.tNode, this.tView, this.lView, undefined, this.lView[RENDERER], eventName, listener, wrapListener(this.tNode, this.lView, listener));
@@ -8477,18 +8476,62 @@ class ControlDirectiveHostImpl {
     return wasSet;
   }
   setCustomControlModelInput(value) {
-    const directive = this.lView[this.tNode.customControlIndex];
     const directiveDef = this.tView.data[this.tNode.customControlIndex];
     const modelName = this.tNode.flags & 1024 ? 'value' : 'checked';
-    writeToDirectiveInput(directiveDef, directive, modelName, value);
+    setDirectiveInput(this.tNode, this.tView, this.lView, directiveDef, modelName, value);
   }
   customControlHasInput(inputName) {
     if (this.tNode.customControlIndex === -1) {
       return false;
     }
     const directiveDef = this.tView.data[this.tNode.customControlIndex];
-    return directiveDef.inputs[inputName] != undefined;
+    const presence = directiveDef.signalFormsInputPresence ??= this._buildCustomControlInputCache(directiveDef);
+    return presence[inputName] === true;
   }
+  _buildCustomControlInputCache(directiveDef) {
+    const cache = {};
+    for (const key in directiveDef.inputs) {
+      cache[key] = true;
+    }
+    if (directiveDef.hostDirectives !== null) {
+      const queue = [...directiveDef.hostDirectives];
+      while (queue.length > 0) {
+        const hostDir = queue.shift();
+        if (typeof hostDir !== 'function') {
+          for (const key in hostDir.inputs) {
+            cache[hostDir.inputs[key]] = true;
+          }
+          const hostDirectives = getHostDirectives(hostDir.directive);
+          if (hostDirectives !== null) {
+            queue.push(...hostDirectives);
+          }
+          continue;
+        }
+        for (const config of hostDir()) {
+          if (typeof config === 'function') {
+            continue;
+          }
+          if (config.inputs) {
+            for (let i = 0; i < config.inputs.length; i += 2) {
+              const exposedName = config.inputs[i + 1] || config.inputs[i];
+              cache[exposedName] = true;
+            }
+          }
+          const hostDirectives = getHostDirectives(config.directive);
+          if (hostDirectives !== null) {
+            queue.push(...hostDirectives);
+          }
+        }
+      }
+    }
+    return cache;
+  }
+}
+function getHostDirectives(directiveType) {
+  if (typeof directiveType === 'function' && 'ɵdir' in directiveType) {
+    return directiveType.ɵdir.hostDirectives ?? null;
+  }
+  return null;
 }
 function initializeControlFirstCreatePass(tView, tNode, lView) {
   ngDevMode && assertFirstCreatePass(tView);
@@ -8514,6 +8557,9 @@ function initializeControlFirstCreatePass(tView, tNode, lView) {
 function initializeCustomControlStatus(tView, tNode) {
   for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
     const directiveDef = tView.data[i];
+    if (tNode.directiveToIndex && !tNode.directiveToIndex.has(directiveDef.type)) {
+      continue;
+    }
     if (hasModelInput(directiveDef, 'value')) {
       tNode.flags |= 1024;
       tNode.customControlIndex = i;
@@ -8522,6 +8568,42 @@ function initializeCustomControlStatus(tView, tNode) {
     if (hasModelInput(directiveDef, 'checked')) {
       tNode.flags |= 2048;
       tNode.customControlIndex = i;
+      return;
+    }
+  }
+  if (tNode.hostDirectiveInputs !== null && tNode.hostDirectiveOutputs !== null && tNode.directiveToIndex !== null) {
+    const checkModel = (modelName, flag) => {
+      const inputs = tNode.hostDirectiveInputs[modelName];
+      const outputs = tNode.hostDirectiveOutputs[modelName + 'Change'];
+      if (!inputs || !outputs) {
+        return false;
+      }
+      for (let i = 0; i < inputs.length; i += 2) {
+        const inputIndex = inputs[i];
+        for (let j = 0; j < outputs.length; j += 2) {
+          const outputIndex = outputs[j];
+          if (inputIndex !== outputIndex) {
+            continue;
+          }
+          for (const data of tNode.directiveToIndex.values()) {
+            if (!Array.isArray(data)) {
+              continue;
+            }
+            const [hostIndex, start, end] = data;
+            if (inputIndex >= start && inputIndex <= end) {
+              tNode.flags |= flag;
+              tNode.customControlIndex = hostIndex;
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
+    if (checkModel('value', 1024)) {
+      return;
+    }
+    if (checkModel('checked', 2048)) {
       return;
     }
   }
@@ -8808,7 +8890,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.4+sha-ad57c9d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.4+sha-eecfa4c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -9855,6 +9937,7 @@ function getNgDirectiveDef(directiveDefinition) {
     resolveHostDirectives: null,
     hostDirectives: null,
     controlDef: null,
+    signalFormsInputPresence: null,
     inputs: parseAndConvertInputsForDefinition(directiveDefinition.inputs, declaredInputs),
     outputs: parseAndConvertOutputsForDefinition(directiveDefinition.outputs),
     debugInfo: null
