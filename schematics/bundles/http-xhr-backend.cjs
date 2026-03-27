@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.5+sha-43ef717
+ * @license Angular v22.0.0-next.5+sha-12b3a1a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,11 @@ const provideHttpClient = 'provideHttpClient';
 const WITH_FETCH = 'withFetch';
 const WITH_XHR = 'withXhr';
 const HTTP_PACKAGE = '@angular/common/http';
-ts.factory.createIdentifier('provideHttpClient');
+/**
+ * Prior to v22, provideHttpClient() had a Xhr backend by default. In v22, the default was switched to a Fetch backend.
+ * This migration adds the withXhr() option to any provideHttpClient() calls that do not already have either withFetch() or withXhr() specified,
+ * to preserve the Xhr backend behavior.
+ */
 class XhrBackendMigration extends project_paths.TsurgeFunnelMigration {
     config;
     constructor(config = {}) {
@@ -75,15 +79,6 @@ class XhrBackendMigration extends project_paths.TsurgeFunnelMigration {
                         exportSymbolName: WITH_XHR,
                         requestedFile: sourceFile,
                     });
-                }
-                else if (withFetchNode) {
-                    const isLastArg = node.arguments[node.arguments.length - 1] === withFetchNode;
-                    replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), new project_paths.TextUpdate({
-                        position: withFetchNode.getStart(),
-                        end: isLastArg ? withFetchNode.getEnd() : withFetchNode.getEnd() + 2, // +2 to remove the comma and space, could be improved
-                        toInsert: '',
-                    })));
-                    importManager.removeImport(sourceFile, 'withFetch', HTTP_PACKAGE);
                 }
             };
             sourceFile.forEachChild(walk);
