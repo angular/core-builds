@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.5+sha-c1261b0
+ * @license Angular v22.0.0-next.5+sha-43ef717
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4787,6 +4787,8 @@ declare enum ChangeDetectionStrategy {
      * until reactivated by setting the strategy to `Default` (`CheckAlways`).
      * Change detection can still be explicitly invoked.
      * This strategy applies to all child directives and cannot be overridden.
+     *
+     * NOTE: OnPush is enabled by default.
      */
     OnPush = 0,
     /**
@@ -6768,7 +6770,9 @@ interface Component extends Directive {
      * which is responsible for propagating the component's bindings.
      * The strategy is one of:
      * - `ChangeDetectionStrategy#OnPush` sets the strategy to `CheckOnce` (on demand).
-     * - `ChangeDetectionStrategy#Default` sets the strategy to `CheckAlways`.
+     * - `ChangeDetectionStrategy#Eager` sets the strategy to `CheckAlways`.
+     *
+     * NOTE: OnPush is enabled by default.
      */
     changeDetection?: ChangeDetectionStrategy;
     /**
