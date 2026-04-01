@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.6+sha-f916531
+ * @license Angular v21.2.6+sha-0960592
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3354,10 +3354,37 @@ function ɵɵtrustConstantResourceUrl(url) {
   }
   return trustedScriptURLFromString(url[0]);
 }
-const SRC_RESOURCE_TAGS = new Set(['embed', 'frame', 'iframe', 'media', 'script']);
-const HREF_RESOURCE_TAGS = new Set(['base', 'link', 'script']);
+const RESOURCE_MAP = {
+  'embed': {
+    'src': true
+  },
+  'frame': {
+    'src': true
+  },
+  'iframe': {
+    'src': true
+  },
+  'media': {
+    'src': true
+  },
+  'script': {
+    'src': true,
+    'href': true,
+    'xlink:href': true
+  },
+  'base': {
+    'href': true
+  },
+  'link': {
+    'href': true
+  },
+  'object': {
+    'data': true,
+    'codebase': true
+  }
+};
 function getUrlSanitizer(tag, prop) {
-  const isResource = prop === 'src' && SRC_RESOURCE_TAGS.has(tag) || prop === 'href' && HREF_RESOURCE_TAGS.has(tag) || prop === 'xlink:href' && tag === 'script';
+  const isResource = RESOURCE_MAP[tag]?.[prop] === true;
   return isResource ? ɵɵsanitizeResourceUrl : ɵɵsanitizeUrl;
 }
 function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
@@ -3379,18 +3406,38 @@ function getSanitizer() {
   const lView = getLView();
   return lView && lView[ENVIRONMENT].sanitizer;
 }
-const attributeName = new Set(['attributename']);
+const SECURITY_SENSITIVE_ATTRIBUTE_NAMES = new Set(['href', 'xlink:href']);
 const SECURITY_SENSITIVE_ELEMENTS = {
-  'iframe': new Set(['sandbox', 'allow', 'allowfullscreen', 'referrerpolicy', 'csp', 'fetchpriority']),
-  'animate': attributeName,
-  'set': attributeName,
-  'animatemotion': attributeName,
-  'animatetransform': attributeName
+  'iframe': {
+    'sandbox': true,
+    'allow': true,
+    'allowfullscreen': true,
+    'referrerpolicy': true,
+    'csp': true,
+    'fetchpriority': true
+  },
+  'animate': {
+    'attributename': true,
+    'to': SECURITY_SENSITIVE_ATTRIBUTE_NAMES,
+    'values': SECURITY_SENSITIVE_ATTRIBUTE_NAMES,
+    'from': SECURITY_SENSITIVE_ATTRIBUTE_NAMES
+  },
+  'set': {
+    'attributename': true,
+    'to': SECURITY_SENSITIVE_ATTRIBUTE_NAMES
+  },
+  'animatemotion': {
+    'attributename': true
+  },
+  'animatetransform': {
+    'attributename': true
+  }
 };
 function ɵɵvalidateAttribute(value, tagName, attributeName) {
   const lowerCaseTagName = tagName.toLowerCase();
   const lowerCaseAttrName = attributeName.toLowerCase();
-  if (!SECURITY_SENSITIVE_ELEMENTS[lowerCaseTagName]?.has(lowerCaseAttrName)) {
+  const validationConfig = SECURITY_SENSITIVE_ELEMENTS[lowerCaseTagName]?.[lowerCaseAttrName];
+  if (!validationConfig) {
     return value;
   }
   const tNode = getSelectedTNode();
@@ -3401,6 +3448,15 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
   if (lowerCaseTagName === 'iframe') {
     const element = getNativeByTNode(tNode, lView);
     enforceIframeSecurity(element);
+  }
+  if (typeof validationConfig !== 'boolean') {
+    const element = getNativeByTNode(tNode, lView);
+    const attributeNameValue = element.getAttribute('attributeName');
+    if (attributeNameValue && validationConfig.has(attributeNameValue.toLowerCase())) {
+      const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${tagName}> element${getTemplateLocationDetails(lView)}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${tagName}> element ` + `as a static attribute only when the "attributeName" is set to \'${attributeNameValue}\'. \n` + `To fix this, switch the \`${attributeNameValue}\` binding to a static attribute ` + `in a template or in host bindings section.`;
+      throw new RuntimeError(-910, errorMessage);
+    }
+    return value;
   }
   const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${tagName}> element${getTemplateLocationDetails(lView)}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${tagName}> element ` + `as a static attribute only. \n` + `To fix this, switch the \`${attributeName}\` binding to a static attribute ` + `in a template or in host bindings section.`;
   throw new RuntimeError(-910, errorMessage);
@@ -8691,7 +8747,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.6+sha-f916531'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.6+sha-0960592'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
