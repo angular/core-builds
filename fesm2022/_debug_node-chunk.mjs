@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.7+sha-05bcc60
+ * @license Angular v21.2.7+sha-2ae0912
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8747,7 +8747,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-05bcc60'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-2ae0912'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12602,9 +12602,11 @@ function triggerResourceLoading(tDetails, lView, tNode) {
   }
   tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
     let failed = false;
+    let failedReason = null;
     const directiveDefs = [];
     const pipeDefs = [];
-    for (const result of results) {
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
       if (result.status === 'fulfilled') {
         const dependency = result.value;
         const directiveDef = getComponentDef(dependency) || getDirectiveDef(dependency);
@@ -12618,6 +12620,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         }
       } else {
         failed = true;
+        failedReason = result.reason instanceof Error ? result.reason : new Error(String(result.reason));
         break;
       }
     }
@@ -12625,7 +12628,19 @@ function triggerResourceLoading(tDetails, lView, tNode) {
       tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
       if (tDetails.errorTmplIndex === null) {
         const templateLocation = ngDevMode ? getTemplateLocationDetails(lView) : '';
-        const error = new RuntimeError(-750, ngDevMode && 'Loading dependencies for `@defer` block failed, ' + `but no \`@error\` block was configured${templateLocation}. ` + 'Consider using the `@error` block to render an error state.');
+        let errorMsg = '';
+        if (ngDevMode) {
+          errorMsg = 'Loading dependencies for `@defer` block failed, ' + `but no \`@error\` block was configured${templateLocation}. ` + 'Consider using the `@error` block to render an error state.';
+          const depsFn = tDetails.dependencyResolverFn;
+          const errorReason = failedReason?.message;
+          if (depsFn) {
+            errorMsg += `\n\nAngular tried to invoke the following dependency function (compiler-generated):\n` + `\`\`\`\n${depsFn.toString()}\n\`\`\``;
+          }
+          if (errorReason) {
+            errorMsg += depsFn ? `\n\nbut it resulted in the following error:\n\n${errorReason}` : `\n\nThe loading resulted in the following error:\n\n${errorReason}`;
+          }
+        }
+        const error = new RuntimeError(-750, errorMsg);
         handleUncaughtError(lView, error);
       }
     } else {
