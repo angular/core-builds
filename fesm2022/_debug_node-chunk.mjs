@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.6+sha-9d76ac8
+ * @license Angular v22.0.0-next.6+sha-9c55fcb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8946,7 +8946,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-9d76ac8'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-9c55fcb'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10298,7 +10298,7 @@ function resolveHostDirectives(matches) {
       const start = allDirectiveDefs.length;
       hostDirectiveDefs ??= new Map();
       hostDirectiveRanges ??= new Map();
-      findHostDirectiveDefs(def, allDirectiveDefs, hostDirectiveDefs);
+      findHostDirectiveDefs(def, allDirectiveDefs, hostDirectiveDefs, matches);
       hostDirectiveRanges.set(def, [start, allDirectiveDefs.length - 1]);
     }
     if (i === 0 && isComponentDef(def)) {
@@ -10309,37 +10309,59 @@ function resolveHostDirectives(matches) {
   for (let i = hasComponent ? 1 : 0; i < matches.length; i++) {
     allDirectiveDefs.push(matches[i]);
   }
+  if (hostDirectiveDefs !== null) {
+    hostDirectiveDefs.forEach((def, hostDirectiveDef) => {
+      patchDeclaredInputs(hostDirectiveDef.declaredInputs, def.inputs);
+    });
+  }
   return [allDirectiveDefs, hostDirectiveDefs, hostDirectiveRanges];
 }
-function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs) {
+function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs, templateMatches) {
   if (currentDef.hostDirectives !== null) {
     for (const configOrFn of currentDef.hostDirectives) {
       if (typeof configOrFn === 'function') {
         const resolved = configOrFn();
         for (const config of resolved) {
-          trackHostDirectiveDef(createHostDirectiveDef(config), matchedDefs, hostDirectiveDefs);
+          trackHostDirectiveDef(createHostDirectiveDef(config), matchedDefs, hostDirectiveDefs, templateMatches);
         }
       } else {
-        trackHostDirectiveDef(configOrFn, matchedDefs, hostDirectiveDefs);
+        trackHostDirectiveDef(configOrFn, matchedDefs, hostDirectiveDefs, templateMatches);
       }
     }
   }
 }
-function trackHostDirectiveDef(def, matchedDefs, hostDirectiveDefs) {
+function trackHostDirectiveDef(def, finalMatches, hostDirectiveDefs, templateMatches) {
   const hostDirectiveDef = getDirectiveDef(def.directive);
   if (typeof ngDevMode === 'undefined' || ngDevMode) {
     validateHostDirective(def, hostDirectiveDef);
   }
-  patchDeclaredInputs(hostDirectiveDef.declaredInputs, def.inputs);
-  findHostDirectiveDefs(hostDirectiveDef, matchedDefs, hostDirectiveDefs);
-  hostDirectiveDefs.set(hostDirectiveDef, def);
-  matchedDefs.push(hostDirectiveDef);
+  findHostDirectiveDefs(hostDirectiveDef, finalMatches, hostDirectiveDefs, templateMatches);
+  if (hostDirectiveDefs.has(hostDirectiveDef)) {
+    const existing = hostDirectiveDefs.get(hostDirectiveDef);
+    mergeBindingMaps(existing, def.inputs, 'input');
+    mergeBindingMaps(existing, def.outputs, 'output');
+  } else if (!templateMatches.includes(hostDirectiveDef)) {
+    hostDirectiveDefs.set(hostDirectiveDef, def);
+    finalMatches.push(hostDirectiveDef);
+  }
+}
+function mergeBindingMaps(existingDef, newMap, kind) {
+  const targetMap = kind === 'input' ? existingDef.inputs : existingDef.outputs;
+  Object.keys(newMap).forEach(publicName => {
+    const alias = newMap[publicName];
+    if (!targetMap.hasOwnProperty(publicName) || targetMap[publicName] === alias) {
+      targetMap[publicName] = alias;
+    } else if (typeof ngDevMode === 'undefined' || ngDevMode) {
+      const message = `${kind === 'input' ? 'Input' : 'Output'} "${publicName}" from ${existingDef.directive.name} ` + `is exposed under the following conflicting names: "${targetMap[publicName]}" and "${alias}". ` + `An ${kind} can only be exposed under a single name.`;
+      throw new RuntimeError(312, message);
+    }
+  });
 }
 function createHostDirectiveDef(config) {
   return typeof config === 'function' ? {
     directive: resolveForwardRef(config),
-    inputs: EMPTY_OBJ,
-    outputs: EMPTY_OBJ
+    inputs: {},
+    outputs: {}
   } : {
     directive: resolveForwardRef(config.directive),
     inputs: bindingArrayToMap(config.inputs),
@@ -10347,12 +10369,11 @@ function createHostDirectiveDef(config) {
   };
 }
 function bindingArrayToMap(bindings) {
-  if (bindings === undefined || bindings.length === 0) {
-    return EMPTY_OBJ;
-  }
   const result = {};
-  for (let i = 0; i < bindings.length; i += 2) {
-    result[bindings[i]] = bindings[i + 1];
+  if (bindings !== undefined && bindings.length > 0) {
+    for (let i = 0; i < bindings.length; i += 2) {
+      result[bindings[i]] = bindings[i + 1];
+    }
   }
   return result;
 }
