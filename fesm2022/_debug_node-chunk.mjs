@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.6+sha-77f1ca0
+ * @license Angular v22.0.0-next.6+sha-a0aa830
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8946,7 +8946,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-77f1ca0'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-a0aa830'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12197,7 +12197,7 @@ class ApplicationRef {
   bootstrap(component, rootSelectorOrNode) {
     return this.bootstrapImpl(component, rootSelectorOrNode);
   }
-  bootstrapImpl(component, rootSelectorOrNode, injector = Injector.NULL) {
+  bootstrapImpl(component, hostElementOrOptions, injector = Injector.NULL) {
     const ngZone = this._injector.get(NgZone);
     return ngZone.run(() => {
       profiler(ProfilerEvent.BootstrapComponentStart);
@@ -12215,8 +12215,13 @@ class ApplicationRef {
       const componentFactory = resolver.resolveComponentFactory(component);
       this.componentTypes.push(componentFactory.componentType);
       const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef$1);
-      const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
-      const compRef = componentFactory.create(injector, [], selectorOrNode, ngModule);
+      const {
+        hostElement,
+        directives,
+        bindings
+      } = normalizeBootstrapOptions(hostElementOrOptions);
+      const selectorOrNode = hostElement || componentFactory.selector;
+      const compRef = componentFactory.create(injector, [], selectorOrNode, ngModule, directives, bindings);
       const nativeElement = compRef.location.nativeElement;
       const testability = compRef.injector.get(TESTABILITY, null);
       testability?.registerApplication(nativeElement);
@@ -12408,6 +12413,14 @@ class ApplicationRef {
     }]
   }], () => [], null);
 })();
+function normalizeBootstrapOptions(hostElementOrOptions) {
+  if (hostElementOrOptions === undefined || typeof hostElementOrOptions === 'string' || hostElementOrOptions instanceof Element) {
+    return {
+      hostElement: hostElementOrOptions
+    };
+  }
+  return hostElementOrOptions;
+}
 function warnIfDestroyed(destroyed) {
   if (destroyed) {
     console.warn(formatRuntimeError(406, 'This instance of the `ApplicationRef` has already been destroyed.'));

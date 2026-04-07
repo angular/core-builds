@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.6+sha-77f1ca0
+ * @license Angular v22.0.0-next.6+sha-a0aa830
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5834,7 +5834,7 @@ declare class ApplicationRef {
      *
      * When bootstrapping a component, Angular mounts it onto a target DOM element
      * and kicks off automatic change detection. The target DOM element can be
-     * provided using the `rootSelectorOrNode` argument.
+     * provided using the `hostElement` argument.
      *
      * If the target DOM element is not provided, Angular tries to find one on a page
      * using the `selector` of the component that is being bootstrapped
@@ -5862,7 +5862,12 @@ declare class ApplicationRef {
      *
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
-    bootstrap<C>(component: Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
+    bootstrap<C>(component: Type<C>, options?: {
+        hostElement?: Element | string;
+        directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[];
+        bindings?: Binding[];
+    }): ComponentRef<C>;
+    bootstrap<C>(component: Type<C>, hostElement?: Element | string): ComponentRef<C>;
     private bootstrapImpl;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
