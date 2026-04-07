@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.7+sha-e40d378-with-local-changes
+ * @license Angular v21.2.7+sha-c9f8f3a-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8747,7 +8747,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-e40d378-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-c9f8f3a-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -9094,7 +9094,10 @@ function populateDehydratedViewsInLContainerImpl(lContainer, tNode, hostLView) {
   }
   const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
   const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
-  ngDevMode && assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' + 'which represents a view container.');
+  if (serializedViews === undefined) {
+    ngDevMode && console.warn('Unexpected state: no hydration info available for a given TNode, ' + 'which represents a view container.');
+    return false;
+  }
   const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
   if (ngDevMode) {
     validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, tNode, true);

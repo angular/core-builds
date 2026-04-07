@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.2.7+sha-e40d378-with-local-changes
+ * @license Angular v21.2.7+sha-c9f8f3a-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -402,13 +402,17 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
             return false;
         }
         const symbol = this.templateTypeChecker.getSymbolOfNode(ast, this.componentClass);
-        if (symbol?.kind !== migrations.SymbolKind.Expression || symbol.tsSymbol === null) {
+        if (symbol?.kind !== migrations.SymbolKind.Expression) {
+            return false;
+        }
+        const tsSymbol = this.templateTypeChecker.getTsSymbolOfSymbol(symbol);
+        if (tsSymbol === null) {
             return false;
         }
         // Dangerous: Type checking symbol retrieval is a totally different `ts.Program`,
         // than the one where we analyzed `knownInputs`.
         // --> Find the input via its input id.
-        const targetInput = this.knownFields.attemptRetrieveDescriptorFromSymbol(symbol.tsSymbol);
+        const targetInput = this.knownFields.attemptRetrieveDescriptorFromSymbol(tsSymbol);
         if (targetInput === null) {
             return false;
         }
