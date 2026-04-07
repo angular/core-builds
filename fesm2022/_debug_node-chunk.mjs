@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.6+sha-2ce0e98
+ * @license Angular v22.0.0-next.6+sha-236d6d4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8946,7 +8946,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-2ce0e98'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.6+sha-236d6d4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -9137,34 +9137,26 @@ class R3ViewContainerRef extends ViewContainerRef {
     this.insertImpl(viewRef, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
     return viewRef;
   }
-  createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector, directives, bindings) {
-    const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
+  createComponent(componentType, opts, injector, projectableNodes, environmentInjector, directives, bindings) {
     let index;
-    if (isComponentFactory) {
-      if (ngDevMode) {
-        assertEqual(typeof indexOrOptions !== 'object', true, 'It looks like Component factory was provided as the first argument ' + 'and an options object as the second argument. This combination of arguments ' + 'is incompatible. You can either change the first argument to provide Component ' + 'type or change the second argument to be a number (representing an index at ' + "which to insert the new component's host view into this container)");
-      }
-      index = indexOrOptions;
-    } else {
-      if (ngDevMode) {
-        assertDefined(getComponentDef(componentFactoryOrType), `Provided Component class doesn't contain Component definition. ` + `Please check whether provided class has @Component decorator.`);
-        assertEqual(typeof indexOrOptions !== 'number', true, 'It looks like Component type was provided as the first argument ' + "and a number (representing an index at which to insert the new component's " + 'host view into this container as the second argument. This combination of arguments ' + 'is incompatible. Please use an object as the second argument instead.');
-      }
-      const options = indexOrOptions || {};
-      if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
-        throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
-      }
-      index = options.index;
-      injector = options.injector;
-      projectableNodes = options.projectableNodes;
-      environmentInjector = options.environmentInjector || options.ngModuleRef;
-      directives = options.directives;
-      bindings = options.bindings;
+    if (ngDevMode) {
+      assertDefined(getComponentDef(componentType), `Provided Component class doesn't contain Component definition. ` + `Please check whether provided class has @Component decorator.`);
+      assertEqual(typeof opts !== 'number', true, 'It looks like Component type was provided as the first argument ' + "and a number (representing an index at which to insert the new component's " + 'host view into this container as the second argument. This combination of arguments ' + 'is incompatible. Please use an object as the second argument instead.');
     }
-    const componentFactory = isComponentFactory ? componentFactoryOrType : new ComponentFactory(getComponentDef(componentFactoryOrType));
+    const options = opts || {};
+    if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
+      throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
+    }
+    index = options.index;
+    injector = options.injector;
+    projectableNodes = options.projectableNodes;
+    environmentInjector = options.environmentInjector || options.ngModuleRef;
+    directives = options.directives;
+    bindings = options.bindings;
+    const componentFactory = new ComponentFactory(getComponentDef(componentType));
     const contextInjector = injector || this.parentInjector;
     if (!environmentInjector && componentFactory.ngModule == null) {
-      const _injector = isComponentFactory ? contextInjector : this.parentInjector;
+      const _injector = this.parentInjector;
       const result = _injector.get(EnvironmentInjector, null);
       if (result) {
         environmentInjector = result;
@@ -12199,31 +12191,25 @@ class ApplicationRef {
   get injector() {
     return this._injector;
   }
-  bootstrap(componentOrFactory, rootSelectorOrNode) {
-    return this.bootstrapImpl(componentOrFactory, rootSelectorOrNode);
+  bootstrap(component, rootSelectorOrNode) {
+    return this.bootstrapImpl(component, rootSelectorOrNode);
   }
-  bootstrapImpl(componentOrFactory, rootSelectorOrNode, injector = Injector.NULL) {
+  bootstrapImpl(component, rootSelectorOrNode, injector = Injector.NULL) {
     const ngZone = this._injector.get(NgZone);
     return ngZone.run(() => {
       profiler(ProfilerEvent.BootstrapComponentStart);
       (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
-      const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
       const initStatus = this._injector.get(ApplicationInitStatus);
       if (!initStatus.done) {
         let errorMessage = '';
         if (typeof ngDevMode === 'undefined' || ngDevMode) {
-          const standalone = !isComponentFactory && isStandalone(componentOrFactory);
+          const standalone = isStandalone(component);
           errorMessage = 'Cannot bootstrap as there are still asynchronous initializers running.' + (standalone ? '' : ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
         throw new RuntimeError(405, errorMessage);
       }
-      let componentFactory;
-      if (isComponentFactory) {
-        componentFactory = componentOrFactory;
-      } else {
-        const resolver = this._injector.get(ComponentFactoryResolver$1);
-        componentFactory = resolver.resolveComponentFactory(componentOrFactory);
-      }
+      const resolver = this._injector.get(ComponentFactoryResolver$1);
+      const componentFactory = resolver.resolveComponentFactory(component);
       this.componentTypes.push(componentFactory.componentType);
       const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef$1);
       const selectorOrNode = rootSelectorOrNode || componentFactory.selector;

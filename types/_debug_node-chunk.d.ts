@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.6+sha-2ce0e98
+ * @license Angular v22.0.0-next.6+sha-236d6d4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5235,11 +5235,6 @@ declare abstract class ComponentRef<C> {
  * Base class for a factory that can create a component dynamically.
  * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
  * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
  */
 declare abstract class ComponentFactory<C> {
     /**
@@ -5285,11 +5280,6 @@ declare abstract class ComponentFactory<C> {
  * Note: since v13, dynamic component creation via
  * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
  * does **not** require resolving component factory: component class can be used directly.
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
  */
 declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
@@ -5873,47 +5863,6 @@ declare class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
     bootstrap<C>(component: Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
-    /**
-     * Bootstrap a component onto the element identified by its selector or, optionally, to a
-     * specified element.
-     *
-     * @usageNotes
-     * ### Bootstrap process
-     *
-     * When bootstrapping a component, Angular mounts it onto a target DOM element
-     * and kicks off automatic change detection. The target DOM element can be
-     * provided using the `rootSelectorOrNode` argument.
-     *
-     * If the target DOM element is not provided, Angular tries to find one on a page
-     * using the `selector` of the component that is being bootstrapped
-     * (first matched element is used).
-     *
-     * ### Example
-     *
-     * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
-     * but it requires us to know the component while writing the application code.
-     *
-     * Imagine a situation where we have to wait for an API call to decide about the component to
-     * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
-     * dynamically bootstrap a component.
-     *
-     * {@example core/ts/platform/platform.ts region='componentSelector'}
-     *
-     * Optionally, a component can be mounted onto a DOM element that does not match the
-     * selector of the bootstrapped component.
-     *
-     * In the following example, we are providing a CSS selector to match the target element.
-     *
-     * {@example core/ts/platform/platform.ts region='cssSelector'}
-     *
-     * While in this example, we are providing reference to a DOM node.
-     *
-     * {@example core/ts/platform/platform.ts region='domNode'}
-     *
-     * @deprecated Passing Component factories as the `Application.bootstrap` function argument is
-     *     deprecated. Pass Component Types instead.
-     */
-    bootstrap<C>(componentFactory: ComponentFactory<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
     private bootstrapImpl;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
