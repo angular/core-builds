@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.7+sha-dea76c7
+ * @license Angular v21.2.7+sha-057cc6d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -146,7 +146,6 @@ function createMouseSpecialEvent(e, target) {
   return copy;
 }
 
-const isIos = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent);
 class EventContractContainer {
   element;
   handlerInfos = [];
@@ -154,9 +153,6 @@ class EventContractContainer {
     this.element = element;
   }
   addEventListener(eventType, getHandler, passive) {
-    if (isIos) {
-      this.element.style.cursor = 'pointer';
-    }
     this.handlerInfos.push(addEventListener(this.element, eventType, getHandler(this.element), passive));
   }
   cleanUp() {
