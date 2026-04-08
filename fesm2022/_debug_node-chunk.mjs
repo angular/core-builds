@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.7+sha-057cc6d
+ * @license Angular v21.2.7+sha-d4c8a9a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8747,7 +8747,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-057cc6d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.7+sha-d4c8a9a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
