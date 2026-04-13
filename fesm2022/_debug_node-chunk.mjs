@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-39e382a
+ * @license Angular v22.0.0-next.7+sha-0454d4c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2496,7 +2496,7 @@ function resetIncrementalHydrationEnabledWarnedForTests() {
 function warnIncrementalHydrationNotConfigured() {
   if (!incrementalHydrationEnabledWarned) {
     incrementalHydrationEnabledWarned = true;
-    console.warn(formatRuntimeError(508, 'Angular has detected that some `@defer` blocks use `hydrate` triggers, ' + 'but incremental hydration was not enabled. Please ensure that the `withIncrementalHydration()` ' + 'call is added as an argument for the `provideClientHydration()` function call ' + 'in your application config.'));
+    console.warn(formatRuntimeError(508, 'Angular has detected that some `@defer` blocks use `hydrate` triggers, ' + 'but incremental hydration was not enabled. Incremental hydration is enabled by default ' + 'with `provideClientHydration()`. Make sure `provideClientHydration()` is included in ' + 'your application config and that you have not opted out using `withNoIncrementalHydration()`.'));
   }
 }
 function assertSsrIdDefined(ssrUniqueId) {
@@ -8937,7 +8937,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.7+sha-39e382a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.7+sha-0454d4c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
