@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-1fa8bb7
+ * @license Angular v22.0.0-next.7+sha-f9b74e9
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5022,94 +5022,6 @@ declare abstract class ChangeDetectorRef {
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 declare function injectChangeDetectorRef(flags: InternalInjectFlags): ChangeDetectorRef;
 
-/** Symbol used to store and retrieve metadata about a binding. */
-declare const BINDING: unique symbol;
-/**
- * A dynamically-defined binding targeting.
- * For example, `inputBinding('value', () => 123)` creates an input binding.
- *
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-interface Binding {
-    readonly [BINDING]: unknown;
-}
-/**
- * Represents a dynamically-created directive with bindings targeting it specifically.
- *
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-interface DirectiveWithBindings<T> {
-    /** Directive type that should be created. */
-    type: Type<T>;
-    /** Bindings that should be applied to the specific directive. */
-    bindings: Binding[];
-}
-/**
- * Creates an input binding.
- * @param publicName Public name of the input to bind to.
- * @param value Callback that returns the current value for the binding. Can be either a signal or
- *   a plain getter function.
- *
- * ### Usage Example
- * In this example we create an instance of the `MyButton` component and bind the value of
- * the `isDisabled` signal to its `disabled` input.
- *
- * ```ts
- * const isDisabled = signal(false);
- *
- * createComponent(MyButton, {
- *   bindings: [inputBinding('disabled', isDisabled)]
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function inputBinding(publicName: string, value: () => unknown): Binding;
-/**
- * Creates an output binding.
- * @param eventName Public name of the output to listen to.
- * @param listener Function to be called when the output emits.
- *
- * ### Usage example
- * In this example we create an instance of the `MyCheckbox` component and listen
- * to its `onChange` event.
- *
- * ```ts
- * interface CheckboxChange {
- *   value: string;
- * }
- *
- * createComponent(MyCheckbox, {
- *   bindings: [
- *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
- *   ],
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
-/**
- * Creates a two-way binding.
- * @param eventName Public name of the two-way compatible input.
- * @param value Writable signal from which to get the current value and to which to write new
- * values.
- *
- * ### Usage example
- * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
- * input using a two-way binding.
- *
- * ```ts
- * const checkboxValue = signal('');
- *
- * createComponent(MyCheckbox, {
- *   bindings: [
- *    twoWayBinding('value', checkboxValue),
- *   ],
- * });
- * ```
- * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
- */
-declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
-
 /**
  * A wrapper around a native element inside of a View.
  *
@@ -5285,45 +5197,94 @@ declare abstract class ComponentRef<C> {
      */
     abstract onDestroy(callback: Function): void;
 }
+
+/** Symbol used to store and retrieve metadata about a binding. */
+declare const BINDING: unique symbol;
 /**
- * Base class for a factory that can create a component dynamically.
- * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
- * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ * A dynamically-defined binding targeting.
+ * For example, `inputBinding('value', () => 123)` creates an input binding.
+ *
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
  */
-declare abstract class ComponentFactory<C> {
-    /**
-     * The component's HTML selector.
-     */
-    abstract get selector(): string;
-    /**
-     * The type of component the factory will create.
-     */
-    abstract get componentType(): Type<any>;
-    /**
-     * Selector for all <ng-content> elements in the component.
-     */
-    abstract get ngContentSelectors(): string[];
-    /**
-     * The inputs of the component.
-     */
-    abstract get inputs(): {
-        propName: string;
-        templateName: string;
-        transform?: (value: any) => any;
-        isSignal: boolean;
-    }[];
-    /**
-     * The outputs of the component.
-     */
-    abstract get outputs(): {
-        propName: string;
-        templateName: string;
-    }[];
-    /**
-     * Creates a new component.
-     */
-    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>, directives?: (Type<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef<C>;
+interface Binding {
+    readonly [BINDING]: unknown;
 }
+/**
+ * Represents a dynamically-created directive with bindings targeting it specifically.
+ *
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+interface DirectiveWithBindings<T> {
+    /** Directive type that should be created. */
+    type: Type<T>;
+    /** Bindings that should be applied to the specific directive. */
+    bindings: Binding[];
+}
+/**
+ * Creates an input binding.
+ * @param publicName Public name of the input to bind to.
+ * @param value Callback that returns the current value for the binding. Can be either a signal or
+ *   a plain getter function.
+ *
+ * ### Usage Example
+ * In this example we create an instance of the `MyButton` component and bind the value of
+ * the `isDisabled` signal to its `disabled` input.
+ *
+ * ```ts
+ * const isDisabled = signal(false);
+ *
+ * createComponent(MyButton, {
+ *   bindings: [inputBinding('disabled', isDisabled)]
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function inputBinding(publicName: string, value: () => unknown): Binding;
+/**
+ * Creates an output binding.
+ * @param eventName Public name of the output to listen to.
+ * @param listener Function to be called when the output emits.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and listen
+ * to its `onChange` event.
+ *
+ * ```ts
+ * interface CheckboxChange {
+ *   value: string;
+ * }
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    outputBinding<CheckboxChange>('onChange', event => console.log(event.value))
+ *   ],
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
+/**
+ * Creates a two-way binding.
+ * @param eventName Public name of the two-way compatible input.
+ * @param value Writable signal from which to get the current value and to which to write new
+ * values.
+ *
+ * ### Usage example
+ * In this example we create an instance of the `MyCheckbox` component and bind to its `value`
+ * input using a two-way binding.
+ *
+ * ```ts
+ * const checkboxValue = signal('');
+ *
+ * createComponent(MyCheckbox, {
+ *   bindings: [
+ *    twoWayBinding('value', checkboxValue),
+ *   ],
+ * });
+ * ```
+ * @see [Binding inputs, outputs and setting host directives at creation](guide/components/programmatic-rendering#binding-inputs-outputs-and-setting-host-directives-at-creation)
+ */
+declare function twoWayBinding(publicName: string, value: WritableSignal<unknown>): Binding;
 
 /**
  * Use in components with the `@Output` directive to emit custom events
@@ -6034,21 +5995,8 @@ declare class NavigationDestination {
 }
 
 /**
- * Combination of NgModuleFactory and ComponentFactories.
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- */
-declare class ModuleWithComponentFactories<T> {
-    ngModuleFactory: NgModuleFactory<T>;
-    componentFactories: ComponentFactory<any>[];
-    constructor(ngModuleFactory: NgModuleFactory<T>, componentFactories: ComponentFactory<any>[]);
-}
-/**
  * Low-level service for running the angular compiler during runtime
- * to create {@link ComponentFactory}s, which
+ * to create {@link AbstractComponentFactory}s, which
  * can later be used to create and render a Component instance.
  *
  * Each `@NgModule` provides an own `Compiler` to its injector,
@@ -6070,14 +6018,6 @@ declare class Compiler {
      * Compiles the given NgModule and all of its components
      */
     compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
-    /**
-     * Same as {@link Compiler#compileModuleSync compileModuleSync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
-    /**
-     * Same as {@link Compiler#compileModuleAsync compileModuleAsync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
     /**
      * Clears all caches.
      */
@@ -7514,5 +7454,5 @@ declare function getDebugNode(nativeNode: any): DebugNode | null;
  */
 type Predicate<T> = (value: T) => boolean;
 
-export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
+export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
