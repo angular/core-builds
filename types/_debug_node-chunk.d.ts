@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-43ba6b6
+ * @license Angular v22.0.0-next.7+sha-39e382a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4888,6 +4888,49 @@ type CtorDependency = {
 } | null;
 
 /**
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
+ *
+ * @publicApi
+ */
+declare abstract class NgModuleRef<T> {
+    /**
+     * The injector that contains all of the providers of the `NgModule`.
+     */
+    abstract get injector(): EnvironmentInjector;
+    /**
+     * The `NgModule` instance.
+     */
+    abstract get instance(): T;
+    /**
+     * Destroys the module instance and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
+    /**
+     * Registers a callback to be executed when the module is destroyed.
+     */
+    abstract onDestroy(callback: () => void): void;
+}
+interface InternalNgModuleRef<T> extends NgModuleRef<T> {
+    _bootstrapComponents: Type<any>[];
+    resolveInjectorInitializers(): void;
+}
+/**
+ * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
+ * using factory-based ones.
+ */
+declare abstract class NgModuleFactory<T> {
+    abstract get moduleType(): Type<T>;
+    abstract create(parentInjector: Injector | null): NgModuleRef<T>;
+}
+
+/**
  * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
  * Use the methods to add and remove views from the tree, initiate change-detection,
@@ -5283,79 +5326,6 @@ declare abstract class ComponentFactory<C> {
 }
 
 /**
- * A simple registry that maps `Components` to generated `ComponentFactory` classes
- * that can be used to create instances of components.
- * Use to obtain the factory for a given component type,
- * then use the factory's `create()` method to create a component of that type.
- *
- * Note: since v13, dynamic component creation via
- * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
- * does **not** require resolving component factory: component class can be used directly.
- */
-declare abstract class ComponentFactoryResolver {
-    static NULL: ComponentFactoryResolver;
-    /**
-     * Retrieves the factory object that creates a component of the given type.
-     * @param component The component type.
-     */
-    abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
-}
-
-/**
- * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
- * Provides access to the `NgModule` instance and related objects.
- *
- * @publicApi
- */
-declare abstract class NgModuleRef<T> {
-    /**
-     * The injector that contains all of the providers of the `NgModule`.
-     */
-    abstract get injector(): EnvironmentInjector;
-    /**
-     * The resolver that can retrieve component factories in a context of this module.
-     *
-     * Note: since v13, dynamic component creation via
-     * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
-     * does **not** require resolving component factory: component class can be used directly.
-     *
-     * @deprecated Angular no longer requires Component factories. Please use other APIs where
-     *     Component class can be used directly.
-     */
-    abstract get componentFactoryResolver(): ComponentFactoryResolver;
-    /**
-     * The `NgModule` instance.
-     */
-    abstract get instance(): T;
-    /**
-     * Destroys the module instance and all of the data structures associated with it.
-     */
-    abstract destroy(): void;
-    /**
-     * Registers a callback to be executed when the module is destroyed.
-     */
-    abstract onDestroy(callback: () => void): void;
-}
-interface InternalNgModuleRef<T> extends NgModuleRef<T> {
-    _bootstrapComponents: Type<any>[];
-    resolveInjectorInitializers(): void;
-}
-/**
- * @publicApi
- *
- * @deprecated
- * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
- * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
- * using factory-based ones.
- */
-declare abstract class NgModuleFactory<T> {
-    abstract get moduleType(): Type<T>;
-    abstract create(parentInjector: Injector | null): NgModuleRef<T>;
-}
-
-/**
  * Use in components with the `@Output` directive to emit custom events
  * synchronously or asynchronously, and register handlers for those events
  * by subscribing to an instance.
@@ -5644,7 +5614,6 @@ declare class NoopNgZone implements NgZone {
  * @publicApi
  */
 declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
-declare function isBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 /**
  * Provides additional options to the bootstrapping process.
  *
@@ -7545,5 +7514,5 @@ declare function getDebugNode(nativeNode: any): DebugNode | null;
  */
 type Predicate<T> = (value: T) => boolean;
 
-export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isBoundToModule, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
+export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
 export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
