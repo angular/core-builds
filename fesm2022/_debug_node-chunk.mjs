@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.8+sha-b72b6b4
+ * @license Angular v21.2.8+sha-f603d47
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1997,7 +1997,7 @@ class TransferState {
         }
       }
     }
-    return JSON.stringify(this.store).replace(/</g, '\\u003C');
+    return JSON.stringify(this.store).replace(/</g, '\\u003C').replace(/\//g, '\\u002F');
   }
 }
 function retrieveTransferredState(doc, appId) {
@@ -8747,7 +8747,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.8+sha-b72b6b4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.8+sha-f603d47'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
