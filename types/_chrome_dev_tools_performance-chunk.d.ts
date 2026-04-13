@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-f9b74e9
+ * @license Angular v22.0.0-next.7+sha-2f5ab54
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -844,7 +844,7 @@ type TimeStampName = string;
 type DevToolsColor = 'primary' | 'primary-light' | 'primary-dark' | 'secondary' | 'secondary-light' | 'secondary-dark' | 'tertiary' | 'tertiary-light' | 'tertiary-dark' | 'error';
 declare global {
     interface Console {
-        timeStamp(label: string, start: TimeStampName, end?: TimeStampName, trackName?: string, trackGroup?: string, color?: DevToolsColor): void;
+        timeStamp(label: string, start: TimeStampName, end?: TimeStampName, trackName?: string, trackGroup?: string, color?: DevToolsColor, detail?: object): void;
     }
 }
 /**
