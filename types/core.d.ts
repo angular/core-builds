@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.8+sha-4f65bb3
+ * @license Angular v21.2.8+sha-32a8302
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3465,7 +3465,7 @@ declare function noSideEffects<T>(fn: () => T): T;
  *
  * Reference to the current application is provided as a parameter.
  *
- * See ["Bootstrapping"](guide/ngmodules/bootstrapping).
+ * See ["Bootstrapping"](/guide/ngmodules/overview#bootstrapping-an-application).
  *
  * @usageNotes
  * The example below uses `ApplicationRef.bootstrap()` to render the
