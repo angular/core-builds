@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-8b4581d
+ * @license Angular v22.0.0-next.7+sha-281a2db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9114,7 +9114,7 @@ declare const Attribute: AttributeDecorator;
  *
  * Reference to the current application is provided as a parameter.
  *
- * See ["Bootstrapping"](guide/ngmodules/bootstrapping).
+ * See ["Bootstrapping"](/guide/ngmodules/overview#bootstrapping-an-application).
  *
  * @usageNotes
  * The example below uses `ApplicationRef.bootstrap()` to render the
@@ -9436,6 +9436,8 @@ declare function reflectComponentType<C>(component: Type$1<C>): ComponentMirror<
  * @param options The options to use for the debounced signal.
  * @returns A resource representing the debounced signal.
  * @experimental 22.0
+ *
+ * @see [Debouncing signals with `debounced`](guide/signals/debounced)
  */
 declare function debounced<T>(source: () => T, wait: NoInfer<DebounceTimer<T>>, options?: NoInfer<DebouncedOptions<T>>): Resource<T>;
 

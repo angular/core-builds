@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-8b4581d
+ * @license Angular v22.0.0-next.7+sha-281a2db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -342,7 +342,11 @@ type ResourceSnapshot<T> = {
     readonly status: 'error';
     readonly error: Error;
 };
-/** Options for `debounced`. */
+/**
+ * Options for `debounced`.
+ *
+ * @see [Debouncing signals with `debounced`](guide/signals/debounced)
+ */
 interface DebouncedOptions<T> {
     /** The `Injector` to use for the debounced resource. */
     injector?: Injector;
@@ -352,6 +356,8 @@ interface DebouncedOptions<T> {
 /**
  * Represents the wait condition for item debouncing.
  * Can be a number of milliseconds or a function that returns a Promise.
+ *
+ * @see [Debouncing signals with `debounced`](guide/signals/debounced)
  */
 type DebounceTimer<T> = number | ((value: T, lastValue: ResourceSnapshot<T>) => Promise<void> | void);
 
