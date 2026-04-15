@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.7+sha-79c9818
+ * @license Angular v22.0.0-next.7+sha-4e33106
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, signalAsReadonlyFn, assertInInjectionContext, effect, PendingTasks, signal, Injector } from './_pending_tasks-chunk.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, signalAsReadonlyFn, assertInInjectionContext, effect, PendingTasks, signal, isSignal, Injector } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -352,7 +352,7 @@ class ResourceImpl extends BaseWritableResource {
       signal: abortSignal
     } = this.pendingController = new AbortController();
     try {
-      const stream = await untracked(() => {
+      const stream = untracked(() => {
         return this.loaderFn({
           params: extRequest.request,
           abortSignal,
@@ -361,15 +361,29 @@ class ResourceImpl extends BaseWritableResource {
           }
         });
       });
-      if (abortSignal.aborted || untracked(this.extRequest) !== extRequest) {
-        return;
+      const shouldDiscard = () => abortSignal.aborted || untracked(this.extRequest) !== extRequest;
+      if (isSignal(stream)) {
+        if (shouldDiscard()) {
+          return;
+        }
+        this.state.set({
+          extRequest,
+          status: 'resolved',
+          previousStatus: 'resolved',
+          stream
+        });
+      } else {
+        const resolvedStream = await stream;
+        if (shouldDiscard()) {
+          return;
+        }
+        this.state.set({
+          extRequest,
+          status: 'resolved',
+          previousStatus: 'resolved',
+          stream: resolvedStream
+        });
       }
-      this.state.set({
-        extRequest,
-        status: 'resolved',
-        previousStatus: 'resolved',
-        stream
-      });
     } catch (err) {
       rethrowFatalErrors(err);
       if (abortSignal.aborted || untracked(this.extRequest) !== extRequest) {

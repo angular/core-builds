@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.7+sha-79c9818
+ * @license Angular v22.0.0-next.7+sha-4e33106
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -247,7 +247,7 @@ type ResourceLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<T>;
  *
  * @experimental
  */
-type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<Signal<ResourceStreamItem<T>>>;
+type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => Signal<ResourceStreamItem<T>> | PromiseLike<Signal<ResourceStreamItem<T>>> | undefined;
 /**
  * Options to the `resource` function, for creating a resource.
  *
