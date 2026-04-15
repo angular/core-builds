@@ -1,13 +1,13 @@
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
+import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_effect-chunk2.mjs';
 import * as i0 from '@angular/core';
-import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
+import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, ModuleWithComponentFactories, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -1220,6 +1220,16 @@ class R3TestCompiler {
     await this.testBed._compileNgModuleAsync(moduleType);
     return new NgModuleFactory(moduleType);
   }
+  compileModuleAndAllComponentsSync(moduleType) {
+    const ngModuleFactory = this.compileModuleSync(moduleType);
+    const componentFactories = this.testBed._getComponentFactories(moduleType);
+    return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
+  }
+  async compileModuleAndAllComponentsAsync(moduleType) {
+    const ngModuleFactory = await this.compileModuleAsync(moduleType);
+    const componentFactories = this.testBed._getComponentFactories(moduleType);
+    return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
+  }
   clearCache() {}
   clearCacheFor(type) {}
   getModuleId(moduleType) {
@@ -1294,9 +1304,6 @@ class TestBedImpl {
   }
   static createComponent(component, options) {
     return TestBedImpl.INSTANCE.createComponent(component, options);
-  }
-  static getLastFixture() {
-    return TestBedImpl.INSTANCE.getLastFixture();
   }
   static resetTestingModule() {
     return TestBedImpl.INSTANCE.resetTestingModule();
@@ -1473,12 +1480,6 @@ class TestBedImpl {
     const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
     this._activeFixtures.push(fixture);
     return fixture;
-  }
-  getLastFixture() {
-    if (this._activeFixtures.length === 0) {
-      throw new Error('No fixture has been created yet.');
-    }
-    return this._activeFixtures[this._activeFixtures.length - 1];
   }
   get compiler() {
     if (this._compiler === null) {

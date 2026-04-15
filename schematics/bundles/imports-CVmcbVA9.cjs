@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -86,9 +86,8 @@ function getImportSpecifiers(sourceFile, moduleName, specifierOrSpecifiers) {
 function getNamedImports(sourceFile, moduleName) {
     for (const node of sourceFile.statements) {
         if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-            const isMatch = typeof moduleName === 'string'
-                ? node.moduleSpecifier.text === moduleName
-                : moduleName.test(node.moduleSpecifier.text);
+            const isMatch = node.moduleSpecifier.text === moduleName
+                ;
             const namedBindings = node.importClause?.namedBindings;
             if (isMatch && namedBindings && ts.isNamedImports(namedBindings)) {
                 return namedBindings;

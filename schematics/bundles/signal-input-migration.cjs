@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-B9LlDDUg.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-CJvpTtkh.cjs');
 var ts = require('typescript');
 require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');

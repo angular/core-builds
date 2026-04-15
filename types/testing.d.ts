@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './_chrome_dev_tools_performance-chunk.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Binding, Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationInterceptOptions, NavigationDestination, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from './_debug_node-chunk.js';
+import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Binding, Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationInterceptOptions, NavigationDestination, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from './_discovery-chunk.js';
 import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
@@ -492,11 +492,6 @@ interface TestBed {
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>, options?: TestComponentOptions): ComponentFixture<T>;
-    /**
-     * Returns the most recently created `ComponentFixture`, or throws an error if one has not
-     * yet been created.
-     */
-    getLastFixture<T = unknown>(): ComponentFixture<T>;
     /**
      * Execute any pending effects.
      *

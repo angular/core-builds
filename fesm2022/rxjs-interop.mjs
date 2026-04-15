@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, effect, Injector, assertNotInReactiveContext, signal, PendingTasks } from './_pending_tasks-chunk.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, effect, Injector, assertNotInReactiveContext, signal, PendingTasks } from './_effect-chunk2.mjs';
 import { getOutputDestroyRef, untracked, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -251,9 +251,6 @@ function rxResource(opts) {
           params.abortSignal.removeEventListener('abort', onAbort);
         }
       });
-      if (resolve === undefined) {
-        return stream;
-      }
       return promise;
     }
   });

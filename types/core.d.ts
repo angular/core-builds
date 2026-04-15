@@ -1,19 +1,19 @@
 /**
- * @license Angular v22.0.0-next.8+sha-c326548
+ * @license Angular v21.3.0-next.0+sha-4835277
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { SIGNAL, ReactiveNodeKind } from './_formatter-chunk.js';
-import { Signal, WritableSignal, OutputRef, Type as Type$1, ModuleWithProviders, EnvironmentProviders, Provider, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, Injector, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectionToken, InjectOptions, InternalInjectFlags, StaticProvider, ValueEqualityFn, EventCallback, isSignal, enableProfiling as enableProfiling$1, AbstractType } from './_chrome_dev_tools_performance-chunk.js';
-export { CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
-import { InputSignalNode, TypeDecorator, SchemaMetadata, InputTransformFunction, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, ComponentDef, DirectiveDef, PipeDef, EnvironmentInjector, NgModuleRef as NgModuleRef$1, NgModuleFactory as NgModuleFactory$1, InternalNgModuleRef, ɵɵFactoryDeclaration as __FactoryDeclaration, ɵɵInjectableDeclaration as __InjectableDeclaration, AfterRenderRef, EffectCleanupRegisterFn, ApplicationRef, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, NgZone, ElementRef, EmbeddedViewRef, ViewRef as ViewRef$1, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, PlatformRef, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, LView, RNode, Component, TrustedHTML, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, ChangeDetectorRef, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, QueryList, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, DehydratedDeferBlock, CompilerOptions, PipeType, DirectiveType, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_debug_node-chunk.js';
-export { APP_BOOTSTRAP_LISTENER, AnimationCallbackEvent, BootstrapOptions, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, Compiler, CompilerFactory, ComponentDecorator, CreateEffectOptions, DebugElement, DebugEventListener, DebugNode, DirectiveDecorator, EffectCleanupFn, EffectRef, EventEmitter, HostBinding, HostBindingDecorator, HostListener, HostListenerDecorator, InjectableType, InjectorType, Input, InputDecorator, ListenerOptions, MAX_ANIMATION_TIMEOUT, NO_ERRORS_SCHEMA, NgModuleDecorator, Output, OutputDecorator, PipeDecorator, Predicate, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, Sanitizer, SecurityContext, asNativeElements, effect, getDebugNode, inputBinding, outputBinding, twoWayBinding, ANIMATIONS_DISABLED as ɵANIMATIONS_DISABLED, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ControlDirectiveHost as ɵControlDirectiveHost, CssSelectorList as ɵCssSelectorList, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockDetails as ɵDeferBlockDetails, EffectScheduler as ɵEffectScheduler, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, NG_INJ_DEF as ɵNG_INJ_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NavigateEvent as ɵNavigateEvent, Navigation as ɵNavigation, NavigationCurrentEntryChangeEvent as ɵNavigationCurrentEntryChangeEvent, NavigationDestination as ɵNavigationDestination, NavigationHistoryEntry as ɵNavigationHistoryEntry, NavigationInterceptOptions as ɵNavigationInterceptOptions, NavigationNavigateOptions as ɵNavigationNavigateOptions, NavigationOptions as ɵNavigationOptions, NavigationReloadOptions as ɵNavigationReloadOptions, NavigationResult as ɵNavigationResult, NavigationTransition as ɵNavigationTransition, NavigationTypeString as ɵNavigationTypeString, NavigationUpdateCurrentEntryOptions as ɵNavigationUpdateCurrentEntryOptions, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, R3Injector as ɵR3Injector, RenderFlags as ɵRenderFlags, TracingAction as ɵTracingAction, TracingService as ɵTracingService, TracingSnapshot as ɵTracingSnapshot, ZONELESS_ENABLED as ɵZONELESS_ENABLED, getDeferBlocks as ɵgetDeferBlocks, getInjectableDef as ɵgetInjectableDef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isInjectable as ɵisInjectable, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵInjectorDef, ɵɵPipeDeclaration, ɵɵdefineInjectable, ɵɵdefineInjector } from './_debug_node-chunk.js';
-import { ResourceOptions, ResourceRef, WritableResource, ResourceStatus, ResourceSnapshot, Resource, ResourceParamsContext, ResourceStreamingLoader, ResourceStreamItem, DebounceTimer, DebouncedOptions } from './_api-chunk.js';
-export { BaseResourceOptions, OutputEmitterRef, OutputOptions, PromiseResourceOptions, ResourceDependencyError, ResourceLoader, ResourceLoaderParams, ResourceParamsStatus, StreamingResourceOptions, output, getOutputDestroyRef as ɵgetOutputDestroyRef } from './_api-chunk.js';
+import { Signal, WritableSignal, OutputRef, Type as Type$1, ModuleWithProviders, EnvironmentProviders, Provider, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, StaticProvider, Injector, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectionToken, InjectOptions, InternalInjectFlags, ValueEqualityFn, EventCallback, isSignal, enableProfiling as enableProfiling$1 } from './_chrome_dev_tools_performance-chunk.js';
+export { AbstractType, CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
+import { InputSignalNode, TypeDecorator, AfterRenderRef, EffectCleanupRegisterFn, SchemaMetadata, CssSelectorList, InputFlags, InputTransformFunction, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, TConstantsOrFactory, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, ComponentDef, DirectiveDef, PipeDef, EmbeddedViewRef, ChangeDetectorRef, LView, ApplicationRef, ComponentFactory as ComponentFactory$1, NgModuleRef as NgModuleRef$1, EnvironmentInjector, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, ElementRef, ComponentFactoryResolver as ComponentFactoryResolver$1, NgModuleFactory as NgModuleFactory$1, InternalNgModuleRef, ViewRef as ViewRef$1, PlatformRef, NgZone, ɵɵFactoryDeclaration as __FactoryDeclaration, ɵɵInjectableDeclaration as __InjectableDeclaration, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, RNode, Component, TrustedHTML, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, ProjectionSlots, QueryList, QueryFlags, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, DehydratedDeferBlock, CompilerOptions, PipeType, DirectiveType, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_discovery-chunk.js';
+export { APP_BOOTSTRAP_LISTENER, AnimationCallbackEvent, BootstrapOptions, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, Compiler, CompilerFactory, ComponentDecorator, CreateEffectOptions, DebugElement, DebugEventListener, DebugNode, DirectiveDecorator, EffectCleanupFn, EffectRef, EventEmitter, HostBinding, HostBindingDecorator, HostListener, HostListenerDecorator, InjectableType, InjectorType, Input, InputDecorator, ListenerOptions, MAX_ANIMATION_TIMEOUT, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModuleDecorator, Output, OutputDecorator, PipeDecorator, Predicate, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, Sanitizer, SecurityContext, asNativeElements, effect, getDebugNode, inputBinding, outputBinding, twoWayBinding, ANIMATIONS_DISABLED as ɵANIMATIONS_DISABLED, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ControlDirectiveHost as ɵControlDirectiveHost, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockDetails as ɵDeferBlockDetails, EffectScheduler as ɵEffectScheduler, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, NG_INJ_DEF as ɵNG_INJ_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NavigateEvent as ɵNavigateEvent, Navigation as ɵNavigation, NavigationCurrentEntryChangeEvent as ɵNavigationCurrentEntryChangeEvent, NavigationDestination as ɵNavigationDestination, NavigationHistoryEntry as ɵNavigationHistoryEntry, NavigationInterceptOptions as ɵNavigationInterceptOptions, NavigationNavigateOptions as ɵNavigationNavigateOptions, NavigationOptions as ɵNavigationOptions, NavigationReloadOptions as ɵNavigationReloadOptions, NavigationResult as ɵNavigationResult, NavigationTransition as ɵNavigationTransition, NavigationTypeString as ɵNavigationTypeString, NavigationUpdateCurrentEntryOptions as ɵNavigationUpdateCurrentEntryOptions, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, R3Injector as ɵR3Injector, RenderFlags as ɵRenderFlags, TracingAction as ɵTracingAction, TracingService as ɵTracingService, TracingSnapshot as ɵTracingSnapshot, ZONELESS_ENABLED as ɵZONELESS_ENABLED, getDeferBlocks as ɵgetDeferBlocks, getInjectableDef as ɵgetInjectableDef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isInjectable as ɵisInjectable, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵInjectorDef, ɵɵPipeDeclaration, ɵɵdefineInjectable, ɵɵdefineInjector } from './_discovery-chunk.js';
+import { ResourceOptions, ResourceRef, WritableResource, ResourceStatus, ResourceSnapshot, Resource, ResourceStreamingLoader, ResourceStreamItem } from './_api-chunk.js';
+export { BaseResourceOptions, OutputEmitterRef, OutputOptions, PromiseResourceOptions, ResourceLoader, ResourceLoaderParams, StreamingResourceOptions, output, getOutputDestroyRef as ɵgetOutputDestroyRef } from './_api-chunk.js';
 import './_event_dispatcher-chunk.js';
-import { Observable, Subscribable } from 'rxjs';
 import * as _angular_core from '@angular/core';
+import { Observable, Subscribable } from 'rxjs';
 export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './_weak_ref-chunk.js';
 export { setCurrentInjector as ɵsetCurrentInjector } from './primitives-di.js';
 import './_effect-chunk.js';
@@ -570,6 +570,880 @@ declare function contentChildren<LocatorT, ReadT>(locator: ProviderToken<Locator
     read: ProviderToken<ReadT>;
     debugName?: string;
 }): Signal<ReadonlyArray<ReadT>>;
+
+/**
+ * Type of the Attribute decorator / constructor function.
+ *
+ * @publicApi
+ */
+interface AttributeDecorator {
+    /**
+     * Parameter decorator for a directive constructor that designates
+     * a host-element attribute whose value is injected as a constant string literal.
+     *
+     * @usageNotes
+     *
+     * Suppose we have an `<input>` element and want to know its `type`.
+     *
+     * ```html
+     * <input type="text">
+     * ```
+     *
+     * The following example uses the decorator to inject the string literal `text` in a directive.
+     *
+     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
+     *
+     * The following example uses the decorator in a component constructor.
+     *
+     * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
+     *
+     */
+    (name: string): any;
+    new (name: string): Attribute;
+}
+/**
+ * Type of the Attribute metadata.
+ *
+ * @publicApi
+ */
+interface Attribute {
+    /**
+     * The name of the attribute whose value can be injected.
+     */
+    attributeName: string;
+}
+/**
+ * Attribute decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
+declare const Attribute: AttributeDecorator;
+
+/**
+ * Represents a basic change from a previous to a new value for a single
+ * property on a directive instance. Passed as a value in a
+ * {@link SimpleChanges} object to the `ngOnChanges` hook.
+ *
+ * @see {@link OnChanges}
+ *
+ * @publicApi
+ */
+declare class SimpleChange<T = any> {
+    previousValue: T;
+    currentValue: T;
+    firstChange: boolean;
+    constructor(previousValue: T, currentValue: T, firstChange: boolean);
+    /**
+     * Check whether the new value is the first value assigned.
+     */
+    isFirstChange(): boolean;
+}
+/**
+ * A hashtable of changes represented by {@link SimpleChange} objects stored
+ * at the declared property name they belong to on a Directive or Component. This is
+ * the type passed to the `ngOnChanges` hook. Pass the current class or `this` as the
+ * first generic argument for stronger type checking (e.g. `SimpleChanges<YourComponent>`).
+ *
+ * @see {@link OnChanges}
+ *
+ * @see [Inspecting changes](guide/components/lifecycle#inspecting-changes)
+ *
+ * @publicApi
+ */
+type SimpleChanges<T = unknown> = T extends object ? {
+    [Key in keyof T]?: SimpleChange<T[Key] extends {
+        [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: infer V;
+    } ? V : T[Key]>;
+} : {
+    [propName: string]: SimpleChange;
+};
+
+/**
+ * @description
+ * A lifecycle hook that is called when the value of one or more component or directive inputs
+ * change. This includes both signal-based and decorator-based inputs.
+ * Define an `ngOnChanges()` method to handle the changes.
+ *
+ * @see {@link DoCheck}
+ * @see {@link OnInit}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define an on-changes handler for an input property. While you should prefer
+ * `computed` and `effect` when working with signal-based inputs, the `ngOnChanges`
+ * method does include value changes for signal-based inputs.
+ *
+ * ```ts
+ * @Component({ ... })
+ * export class UserProfile implements OnChanges {
+ *   userId = input<number>(0);
+ *   ngOnChanges(changes: SimpleChanges<UserProfile>) {
+ *     // changes.userId contains the old and new value.
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+interface OnChanges {
+    /**
+     * A callback method that is invoked immediately after the
+     * default change detector has checked data-bound properties
+     * if at least one has changed, and before the view and content
+     * children are checked.
+     * @param changes The changed properties.
+     */
+    ngOnChanges(changes: SimpleChanges): void;
+}
+/**
+ * @description
+ * A lifecycle hook that is called after Angular has initialized
+ * all data-bound properties of a directive.
+ * Define an `ngOnInit()` method to handle any additional initialization tasks.
+ *
+ * @see {@link AfterContentInit}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own initialization method.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
+ *
+ * @publicApi
+ */
+interface OnInit {
+    /**
+     * A callback method that is invoked immediately after the
+     * default change detector has checked the directive's
+     * data-bound properties for the first time,
+     * and before any of the view or content children have been checked.
+     * It is invoked only once when the directive is instantiated.
+     */
+    ngOnInit(): void;
+}
+/**
+ * A lifecycle hook that invokes a custom change-detection function for a directive,
+ * in addition to the check performed by the default change-detector.
+ *
+ * The default change-detection algorithm looks for differences by comparing
+ * bound-property values by reference across change detection runs. You can use this
+ * hook to check for and respond to changes by some other means.
+ *
+ * When the default change detector detects changes, it invokes `ngOnChanges()` if supplied,
+ * regardless of whether you perform additional change detection.
+ * Typically, you should not use both `DoCheck` and `OnChanges` to respond to
+ * changes on the same input.
+ *
+ * @see {@link OnChanges}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface
+ * to invoke it own change-detection cycle.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
+ *
+ * For a more complete example and discussion, see
+ * [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection).
+ *
+ * @publicApi
+ */
+interface DoCheck {
+    /**
+     * A callback method that performs change-detection, invoked
+     * after the default change-detector runs.
+     * See `KeyValueDiffers` and `IterableDiffers` for implementing
+     * custom change checking for collections.
+     *
+     */
+    ngDoCheck(): void;
+}
+/**
+ * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
+ * Use for any custom cleanup that needs to occur when the
+ * instance is destroyed.
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface
+ * to define its own custom clean-up method.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
+ *
+ * @publicApi
+ */
+interface OnDestroy {
+    /**
+     * A callback method that performs custom clean-up, invoked immediately
+     * before a directive, pipe, or service instance is destroyed.
+     */
+    ngOnDestroy(): void;
+}
+/**
+ * @description
+ * A lifecycle hook that is called after Angular has fully initialized
+ * all content of a directive. It will run only once when the projected content is initialized.
+ * Define an `ngAfterContentInit()` method to handle any additional initialization tasks.
+ *
+ * @see {@link OnInit}
+ * @see {@link AfterViewInit}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own content initialization method.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
+ *
+ * @publicApi
+ */
+interface AfterContentInit {
+    /**
+     * A callback method that is invoked immediately after
+     * Angular has completed initialization of all of the directive's
+     * content.
+     * It is invoked only once when the directive is instantiated.
+     */
+    ngAfterContentInit(): void;
+}
+/**
+ * @description
+ * A lifecycle hook that is called after the default change detector has
+ * completed checking all content of a directive. It will run after the content
+ * has been checked and most of the time it's during a change detection cycle.
+ *
+ * @see {@link AfterViewChecked}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own after-check functionality.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
+ *
+ * @publicApi
+ */
+interface AfterContentChecked {
+    /**
+     * A callback method that is invoked immediately after the
+     * default change detector has completed checking all of the directive's
+     * content.
+     */
+    ngAfterContentChecked(): void;
+}
+/**
+ * @description
+ * A lifecycle hook that is called after Angular has fully initialized
+ * a component's view.
+ * Define an `ngAfterViewInit()` method to handle any additional initialization tasks.
+ *
+ * @see {@link OnInit}
+ * @see {@link AfterContentInit}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own view initialization method.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
+ *
+ * @publicApi
+ */
+interface AfterViewInit {
+    /**
+     * A callback method that is invoked immediately after
+     * Angular has completed initialization of a component's view.
+     * It is invoked only once when the view is instantiated.
+     *
+     */
+    ngAfterViewInit(): void;
+}
+/**
+ * @description
+ * A lifecycle hook that is called after the default change detector has
+ * completed checking a component's view for changes.
+ *
+ * @see {@link AfterContentChecked}
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
+ *
+ * @usageNotes
+ * The following snippet shows how a component can implement this interface to
+ * define its own after-check functionality.
+ *
+ * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
+ *
+ * @publicApi
+ */
+interface AfterViewChecked {
+    /**
+     * A callback method that is invoked immediately after the
+     * default change detector has completed one change-check cycle
+     * for a component's view.
+     */
+    ngAfterViewChecked(): void;
+}
+
+/**
+ * Type of the Query metadata.
+ *
+ * @publicApi
+ */
+interface Query {
+    descendants: boolean;
+    emitDistinctChangesOnly: boolean;
+    first: boolean;
+    read: any;
+    isViewQuery: boolean;
+    selector: any;
+    static?: boolean;
+}
+/**
+ * Base class for query metadata.
+ *
+ * @see {@link ContentChildren}
+ * @see {@link ContentChild}
+ * @see {@link ViewChildren}
+ * @see {@link ViewChild}
+ *
+ * @publicApi
+ */
+declare abstract class Query {
+}
+/**
+ * Type of the ContentChildren decorator / constructor function.
+ *
+ * @see {@link ContentChildren}
+ * @publicApi
+ */
+interface ContentChildrenDecorator {
+    /**
+     * @description
+     * Property decorator that configures a content query.
+     *
+     * Use to get the `QueryList` of elements or directives from the content DOM.
+     * Any time a child element is added, removed, or moved, the query list will be
+     * updated, and the changes observable of the query list will emit a new value.
+     *
+     * Content queries are set before the `ngAfterContentInit` callback is called.
+     *
+     * Does not retrieve elements or directives that are in other components' templates,
+     * since a component's template is always a black box to its ancestors.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - The directive type or the name used for querying.
+     * * **descendants** - If `true` include all descendants of the element. If `false` then only
+     * query direct children of the element.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   removed in future versions of Angular.
+     * * **read** - Used to read a different token from the queried elements.
+     *
+     * The following selectors are supported.
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
+     * with `@ContentChildren('cmp')`)
+     *   * Any provider defined in the child component tree of the current component (e.g.
+     * `@ContentChildren(SomeService) someService: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ContentChildren('someToken')
+     * someTokenVal: any`)
+     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with
+     * `@ContentChildren(TemplateRef) template;`)
+     *
+     * In addition, multiple string selectors can be separated with a comma (e.g.
+     * `@ContentChildren('cmp1,cmp2')`)
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * @usageNotes
+     *
+     * Here is a simple demonstration of how the `ContentChildren` decorator can be used.
+     *
+     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
+     *
+     * ### Tab-pane example
+     *
+     * Here is a slightly more realistic example that shows how `ContentChildren` decorators
+     * can be used to implement a tab pane component.
+     *
+     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
+     *
+     * @Annotation
+     * @see [Content queries](guide/components/queries#decorator-content-queries)
+     */
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
+        read?: any;
+    }): any;
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
+        read?: any;
+    }): Query;
+}
+/**
+ * Type of the ContentChildren metadata.
+ *
+ *
+ * @Annotation
+ * @publicApi
+ */
+type ContentChildren = Query;
+/**
+ * ContentChildren decorator and metadata.
+ *
+ *
+ * @Annotation
+ * @publicApi
+ */
+declare const ContentChildren: ContentChildrenDecorator;
+/**
+ * Type of the ContentChild decorator / constructor function.
+ *
+ * @publicApi
+ */
+interface ContentChildDecorator {
+    /**
+     * @description
+     * Property decorator that configures a content query.
+     *
+     * Use to get the first element or the directive matching the selector from the content DOM.
+     * If the content DOM changes, and a new child matches the selector,
+     * the property will be updated.
+     *
+     * Does not retrieve elements or directives that are in other components' templates,
+     * since a component's template is always a black box to its ancestors.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - The directive type or the name used for querying.
+     * * **descendants** - If `true` (default) include all descendants of the element. If `false` then
+     * only query direct children of the element.
+     * * **read** - Used to read a different token from the queried element.
+     * * **static** - True to resolve query results before change detection runs,
+     * false to resolve after change detection. Defaults to false.
+     *
+     * The following selectors are supported.
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
+     * with `@ContentChild('cmp')`)
+     *   * Any provider defined in the child component tree of the current component (e.g.
+     * `@ContentChild(SomeService) someService: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ContentChild('someToken') someTokenVal:
+     * any`)
+     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ContentChild(TemplateRef)
+     * template;`)
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * Difference between dynamic and static queries:
+     *
+     * | Queries                             | Details |
+     * |:---                                 |:---     |
+     * | Dynamic queries \(`static: false`\) | The query resolves before the `ngAfterContentInit()`
+     * callback is called. The result will be updated for changes to your view, such as changes to
+     * `ngIf` and `ngFor` blocks. | | Static queries \(`static: true`\)   | The query resolves once
+     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
+     * is called). The result, though, will never be updated to reflect changes to your view, such as
+     * changes to `ngIf` and `ngFor` blocks.  |
+     *
+     * @usageNotes
+     *
+     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
+     *
+     * ### Example
+     *
+     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
+     *
+     * @Annotation
+     * @see [Content queries](guide/components/queries#decorator-content-queries)
+     */
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
+        read?: any;
+        static?: boolean;
+    }): any;
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
+        read?: any;
+        static?: boolean;
+    }): ContentChild;
+}
+/**
+ * Type of the ContentChild metadata.
+ *
+ * @publicApi
+ */
+type ContentChild = Query;
+/**
+ * ContentChild decorator and metadata.
+ *
+ *
+ * @Annotation
+ *
+ * @publicApi
+ */
+declare const ContentChild: ContentChildDecorator;
+/**
+ * Type of the ViewChildren decorator / constructor function.
+ *
+ * @see {@link ViewChildren}
+ *
+ * @publicApi
+ */
+interface ViewChildrenDecorator {
+    /**
+     * @description
+     * Property decorator that configures a view query.
+     *
+     * Use to get the `QueryList` of elements or directives from the view DOM.
+     * Any time a child element is added, removed, or moved, the query list will be updated,
+     * and the changes observable of the query list will emit a new value.
+     *
+     * View queries are set before the `ngAfterViewInit` callback is called.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - The directive type or the name used for querying.
+     * * **read** - Used to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     * removed in future versions of Angular.
+     *
+     * The following selectors are supported.
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
+     * with `@ViewChildren('cmp')`)
+     *   * Any provider defined in the child component tree of the current component (e.g.
+     * `@ViewChildren(SomeService) someService!: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken')
+     * someTokenVal!: any`)
+     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChildren(TemplateRef)
+     * template;`)
+     *
+     * In addition, multiple string selectors can be separated with a comma (e.g.
+     * `@ViewChildren('cmp1,cmp2')`)
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * @usageNotes
+     *
+     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
+     *
+     * ### Another example
+     *
+     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
+     *
+     * @Annotation
+     * @see [View queries](guide/components/queries#decorator-view-queries)
+     */
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
+        read?: any;
+        emitDistinctChangesOnly?: boolean;
+    }): any;
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        read?: any;
+        emitDistinctChangesOnly?: boolean;
+    }): ViewChildren;
+}
+/**
+ * Type of the ViewChildren metadata.
+ *
+ * @publicApi
+ */
+type ViewChildren = Query;
+/**
+ * ViewChildren decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
+declare const ViewChildren: ViewChildrenDecorator;
+/**
+ * Type of the ViewChild decorator / constructor function.
+ *
+ * @see {@link ViewChild}
+ * @publicApi
+ */
+interface ViewChildDecorator {
+    /**
+     * @description
+     * Property decorator that configures a view query.
+     * The change detector looks for the first element or the directive matching the selector
+     * in the view DOM. If the view DOM changes, and a new child matches the selector,
+     * the property is updated.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - The directive type or the name used for querying.
+     * * **read** - Used to read a different token from the queried elements.
+     * * **static** - `true` to resolve query results before change detection runs,
+     * `false` to resolve after change detection. Defaults to `false`.
+     *
+     *
+     * The following selectors are supported.
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
+     * with `@ViewChild('cmp')`)
+     *   * Any provider defined in the child component tree of the current component (e.g.
+     * `@ViewChild(SomeService) someService: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ViewChild('someToken') someTokenVal:
+     * any`)
+     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
+     * template;`)
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * Difference between dynamic and static queries:
+     *   * Dynamic queries \(`static: false`\) - The query resolves before the `ngAfterViewInit()`
+     * callback is called. The result will be updated for changes to your view, such as changes to
+     * `ngIf` and `ngFor` blocks.
+     *   * Static queries \(`static: true`\) - The query resolves once
+     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
+     * is called). The result, though, will never be updated to reflect changes to your view, such as
+     * changes to `ngIf` and `ngFor` blocks.
+     *
+     * @usageNotes
+     *
+     * ### Example 1
+     *
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
+     *
+     * ### Example 2
+     *
+     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
+     *
+     * @Annotation
+     * @see [View queries](guide/components/queries#decorator-view-queries)
+     */
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
+        read?: any;
+        static?: boolean;
+    }): any;
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        read?: any;
+        static?: boolean;
+    }): ViewChild;
+}
+/**
+ * Type of the ViewChild metadata.
+ *
+ * @publicApi
+ */
+type ViewChild = Query;
+/**
+ * ViewChild decorator and metadata.
+ *
+ * @Annotation
+ * @publicApi
+ */
+declare const ViewChild: ViewChildDecorator;
+
+/**
+ * A type describing supported iterable types.
+ *
+ * @publicApi
+ */
+type NgIterable<T> = Array<T> | Iterable<T>;
+/**
+ * A strategy for tracking changes over time to an iterable. Used by {@link /api/common/NgForOf NgForOf} to
+ * respond to changes in an iterable by effecting equivalent changes in the DOM.
+ *
+ * @publicApi
+ */
+interface IterableDiffer<V> {
+    /**
+     * Compute a difference between the previous state and the new `object` state.
+     *
+     * @param object containing the new value.
+     * @returns an object describing the difference. The return value is only valid until the next
+     * `diff()` invocation.
+     */
+    diff(object: NgIterable<V> | undefined | null): IterableChanges<V> | null;
+}
+/**
+ * An object describing the changes in the `Iterable` collection since last time
+ * `IterableDiffer#diff()` was invoked.
+ *
+ * @publicApi
+ */
+interface IterableChanges<V> {
+    /**
+     * Iterate over all changes. `IterableChangeRecord` will contain information about changes
+     * to each item.
+     */
+    forEachItem(fn: (record: IterableChangeRecord<V>) => void): void;
+    /**
+     * Iterate over a set of operations which when applied to the original `Iterable` will produce the
+     * new `Iterable`.
+     *
+     * NOTE: These are not necessarily the actual operations which were applied to the original
+     * `Iterable`, rather these are a set of computed operations which may not be the same as the
+     * ones applied.
+     *
+     * @param record A change which needs to be applied
+     * @param previousIndex The `IterableChangeRecord#previousIndex` of the `record` refers to the
+     *        original `Iterable` location, where as `previousIndex` refers to the transient location
+     *        of the item, after applying the operations up to this point.
+     * @param currentIndex The `IterableChangeRecord#currentIndex` of the `record` refers to the
+     *        original `Iterable` location, where as `currentIndex` refers to the transient location
+     *        of the item, after applying the operations up to this point.
+     */
+    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number | null, currentIndex: number | null) => void): void;
+    /**
+     * Iterate over changes in the order of original `Iterable` showing where the original items
+     * have moved.
+     */
+    forEachPreviousItem(fn: (record: IterableChangeRecord<V>) => void): void;
+    /** Iterate over all added items. */
+    forEachAddedItem(fn: (record: IterableChangeRecord<V>) => void): void;
+    /** Iterate over all moved items. */
+    forEachMovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
+    /** Iterate over all removed items. */
+    forEachRemovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
+    /**
+     * Iterate over all items which had their identity (as computed by the `TrackByFunction`)
+     * changed.
+     */
+    forEachIdentityChange(fn: (record: IterableChangeRecord<V>) => void): void;
+}
+/**
+ * Record representing the item change information.
+ *
+ * @publicApi
+ */
+interface IterableChangeRecord<V> {
+    /** Current index of the item in `Iterable` or null if removed. */
+    readonly currentIndex: number | null;
+    /** Previous index of the item in `Iterable` or null if added. */
+    readonly previousIndex: number | null;
+    /** The item. */
+    readonly item: V;
+    /** Track by identity as computed by the `TrackByFunction`. */
+    readonly trackById: any;
+}
+/**
+ * A function optionally passed into the `NgForOf` directive to customize how `NgForOf` uniquely
+ * identifies items in an iterable.
+ *
+ * `NgForOf` needs to uniquely identify items in the iterable to correctly perform DOM updates
+ * when items in the iterable are reordered, new items are added, or existing items are removed.
+ *
+ *
+ * In all of these scenarios it is usually desirable to only update the DOM elements associated
+ * with the items affected by the change. This behavior is important to:
+ *
+ * - preserve any DOM-specific UI state (like cursor position, focus, text selection) when the
+ *   iterable is modified
+ * - enable animation of item addition, removal, and iterable reordering
+ * - preserve the value of the `<select>` element when nested `<option>` elements are dynamically
+ *   populated using `NgForOf` and the bound iterable is updated
+ *
+ * A common use for custom `trackBy` functions is when the model that `NgForOf` iterates over
+ * contains a property with a unique identifier. For example, given a model:
+ *
+ * ```ts
+ * class User {
+ *   id: number;
+ *   name: string;
+ *   ...
+ * }
+ * ```
+ * a custom `trackBy` function could look like the following:
+ * ```ts
+ * function userTrackBy(index, user) {
+ *   return user.id;
+ * }
+ * ```
+ *
+ * A custom `trackBy` function must have several properties:
+ *
+ * - be [idempotent](https://en.wikipedia.org/wiki/Idempotence) (be without side effects, and always
+ * return the same value for a given input)
+ * - return unique value for all unique inputs
+ * - be fast
+ *
+ * @see [`NgForOf#ngForTrackBy`](api/common/NgForOf#ngForTrackBy)
+ * @publicApi
+ */
+interface TrackByFunction<T> {
+    /**
+     * @param index The index of the item within the iterable.
+     * @param item The item in the iterable.
+     */
+    <U extends T>(index: number, item: T & U): any;
+}
+/**
+ * Provides a factory for {@link IterableDiffer}.
+ *
+ * @publicApi
+ */
+interface IterableDifferFactory {
+    supports(objects: any): boolean;
+    create<V>(trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
+}
+/**
+ * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ *
+ * @publicApi
+ */
+declare class IterableDiffers {
+    private factories;
+    /** @nocollapse */
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<IterableDiffers>;
+    constructor(factories: IterableDifferFactory[]);
+    static create(factories: IterableDifferFactory[], parent?: IterableDiffers): IterableDiffers;
+    /**
+     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {@link IterableDiffers} instance with the provided factories and return a new
+     * {@link IterableDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link IterableDiffer} available.
+     *
+     * ```ts
+     * @Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories: IterableDifferFactory[]): StaticProvider;
+    find(iterable: any): IterableDifferFactory;
+}
 
 /**
  * Type of the Inject decorator / constructor function.
@@ -1129,865 +2003,6 @@ declare const INJECTOR: InjectionToken<Injector>;
 declare const HOST_TAG_NAME: InjectionToken<string>;
 
 /**
- * Set of config options available during the application bootstrap operation.
- *
- * @publicApi
- */
-interface ApplicationConfig {
-    /**
-     * List of providers that should be available to the root component and all its children.
-     */
-    providers: Array<Provider | EnvironmentProviders>;
-}
-/**
- * Merge multiple application configurations from left to right.
- *
- * @param configs Two or more configurations to be merged.
- * @returns A merged [ApplicationConfig](api/core/ApplicationConfig).
- *
- * @publicApi
- */
-declare function mergeApplicationConfig(...configs: ApplicationConfig[]): ApplicationConfig;
-
-interface NgModuleType<T = any> extends Type$1<T> {
-    ɵmod: NgModuleDef<T>;
-}
-/**
- * Represents the expansion of an `NgModule` into its scopes.
- *
- * A scope is a set of directives and pipes that are visible in a particular context. Each
- * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
- * be recognized in the templates of components declared by the module. The `exported` scope is the
- * set of directives and pipes exported by a module (that is, module B's exported scope gets added
- * to module A's compilation scope when module A imports B).
- */
-interface NgModuleTransitiveScopes {
-    compilation: {
-        directives: Set<any>;
-        pipes: Set<any>;
-    };
-    exported: {
-        directives: Set<any>;
-        pipes: Set<any>;
-    };
-    schemas: SchemaMetadata[] | null;
-}
-/**
- * Runtime link information for NgModules.
- *
- * This is the internal data structure used by the runtime to assemble components, directives,
- * pipes, and injectors.
- *
- * NOTE: Always use `ɵɵdefineNgModule` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- */
-interface NgModuleDef<T> {
-    /** Token representing the module. Used by DI. */
-    type: T;
-    /**
-     * List of components to bootstrap.
-     *
-     * @see {NgModuleScopeInfoFromDecorator} This field is only used in global compilation mode. In local compilation mode the bootstrap info is computed and added in runtime.
-     */
-    bootstrap: Type$1<any>[] | (() => Type$1<any>[]);
-    /** List of components, directives, and pipes declared by this module. */
-    declarations: Type$1<any>[] | (() => Type$1<any>[]);
-    /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports: Type$1<any>[] | (() => Type$1<any>[]);
-    /**
-     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
-     * module.
-     */
-    exports: Type$1<any>[] | (() => Type$1<any>[]);
-    /**
-     * Cached value of computed `transitiveCompileScopes` for this module.
-     *
-     * This should never be read directly, but accessed via `transitiveScopesFor`.
-     */
-    transitiveCompileScopes: NgModuleTransitiveScopes | null;
-    /** The set of schemas that declare elements to be allowed in the NgModule. */
-    schemas: SchemaMetadata[] | null;
-    /** Unique ID for the module with which it should be registered.  */
-    id: string | null;
-}
-
-/**
- * Map of inputs for a given directive/component.
- *
- * Given:
- * ```ts
- * class MyComponent {
- *   @Input()
- *   publicInput1: string;
- *
- *   @Input('publicInput2')
- *   declaredInput2: string;
- *
- *   @Input({transform: (value: boolean) => value ? 1 : 0})
- *   transformedInput3: number;
- *
- *   signalInput = input(3);
- * }
- * ```
- *
- * is described as:
- * ```ts
- * {
- *   publicInput1: 'publicInput1',
- *   declaredInput2: [InputFlags.None, 'declaredInput2', 'publicInput2'],
- *   transformedInput3: [
- *     InputFlags.None,
- *     'transformedInput3',
- *     'transformedInput3',
- *     (value: boolean) => value ? 1 : 0
- *   ],
- *   signalInput: [InputFlags.SignalBased, "signalInput"],
- * }
- * ```
- *
- * Which the minifier may translate to:
- * ```ts
- * {
- *   minifiedPublicInput1: 'publicInput1',
- *   minifiedDeclaredInput2: [InputFlags.None, 'publicInput2', 'declaredInput2'],
- *   minifiedTransformedInput3: [
- *     InputFlags.None,
- *     'transformedInput3',
- *     'transformedInput3',
- *     (value: boolean) => value ? 1 : 0
- *   ],
- *   minifiedSignalInput: [InputFlags.SignalBased, "signalInput"],
- * }
- * ```
- *
- * This allows the render to re-construct the minified, public, and declared names
- * of properties.
- *
- * NOTE:
- *  - Because declared and public name are usually same we only generate the array
- *    `['declared', 'public']` format when they differ, or there is a transform.
- *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
- *    inconsistent behavior in that it uses declared names rather than minified or public.
- */
-type DirectiveInputs = Record<string, string | [flags: number, publicName: string, declaredName?: string, transform?: InputTransformFunction] | undefined>;
-interface DirectiveDefinition<T> {
-    /**
-     * Directive type, needed to configure the injector.
-     */
-    type: Type$1<T>;
-    /** The selectors that will be used to match nodes to this directive. */
-    selectors?: (string | number)[][];
-    /**
-     * A map of input names.
-     */
-    inputs?: DirectiveInputs;
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    outputs?: Record<string, string | undefined>;
-    /**
-     * A list of optional features to apply.
-     *
-     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}, {@link InheritDefinitionFeature}
-     */
-    features?: DirectiveDefFeature[];
-    /**
-     * Function executed by the parent template to allow child directive to apply host bindings.
-     */
-    hostBindings?: HostBindingsFunction<T>;
-    /**
-     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
-     *
-     * Used to calculate the length of the component's LView array, so we
-     * can pre-fill the array and set the host binding start index.
-     */
-    hostVars?: number;
-    /**
-     * Assign static attribute values to a host element.
-     *
-     * This property will assign static attribute values as well as class and style
-     * values to a host element. Since attribute values can consist of different types of values,
-     * the `hostAttrs` array must include the values in the following format:
-     *
-     * attrs = [
-     *   // static attributes (like `title`, `name`, `id`...)
-     *   attr1, value1, attr2, value,
-     *
-     *   // a single namespace value (like `x:id`)
-     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
-     *
-     *   // another single namespace value (like `x:name`)
-     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
-     *
-     *   // a series of CSS classes that will be applied to the element (no spaces)
-     *   CLASSES_MARKER, class1, class2, class3,
-     *
-     *   // a series of CSS styles (property + value) that will be applied to the element
-     *   STYLES_MARKER, prop1, value1, prop2, value2
-     * ]
-     *
-     * All non-class and non-style attributes must be defined at the start of the list
-     * first before all class and style values are set. When there is a change in value
-     * type (like when classes and styles are introduced) a marker must be used to separate
-     * the entries. The marker values themselves are set via entries found in the
-     * [AttributeMarker] enum.
-     */
-    hostAttrs?: TAttributes;
-    /**
-     * Function to create instances of content queries associated with a given directive.
-     */
-    contentQueries?: ContentQueriesFunction<T>;
-    /**
-     * Additional set of instructions specific to view query processing. This could be seen as a
-     * set of instructions to be inserted into the template function.
-     */
-    viewQuery?: ViewQueriesFunction<T> | null;
-    /**
-     * Defines the name that can be used in the template to assign this directive to a variable.
-     *
-     * See: {@link Directive.exportAs}
-     */
-    exportAs?: string[];
-    /**
-     * Whether this directive/component is standalone.
-     */
-    standalone?: boolean;
-    /**
-     * Whether this directive/component is signal-based.
-     */
-    signals?: boolean;
-}
-interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'features'> {
-    /**
-     * The number of nodes, local refs, and pipes in this component template.
-     *
-     * Used to calculate the length of this component's LView array, so we
-     * can pre-fill the array and set the binding start index.
-     */
-    decls: number;
-    /**
-     * The number of bindings in this component template (including pure fn bindings).
-     *
-     * Used to calculate the length of this component's LView array, so we
-     * can pre-fill the array and set the host binding start index.
-     */
-    vars: number;
-    /**
-     * Template function use for rendering DOM.
-     *
-     * This function has following structure.
-     *
-     * ```ts
-     * function Template<T>(ctx:T, creationMode: boolean) {
-     *   if (creationMode) {
-     *     // Contains creation mode instructions.
-     *   }
-     *   // Contains binding update instructions
-     * }
-     * ```
-     *
-     * Common instructions are:
-     * Creation mode instructions:
-     *  - `elementStart`, `elementEnd`
-     *  - `text`
-     *  - `container`
-     *  - `listener`
-     *
-     * Binding update instructions:
-     * - `bind`
-     * - `elementAttribute`
-     * - `elementProperty`
-     * - `elementClass`
-     * - `elementStyle`
-     *
-     */
-    template: ComponentTemplate<T>;
-    /**
-     * Constants for the nodes in the component's view.
-     * Includes attribute arrays, local definition arrays etc.
-     */
-    consts?: any[] | (() => any[]);
-    /**
-     * An array of `ngContent[selector]` values that were found in the template.
-     */
-    ngContentSelectors?: string[];
-    /**
-     * A list of optional features to apply.
-     *
-     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}
-     */
-    features?: ComponentDefFeature[];
-    /**
-     * Defines template and style encapsulation options available for Component's {@link /api/core/Component Component}.
-     */
-    encapsulation?: ViewEncapsulation$1;
-    /**
-     * Defines arbitrary developer-defined data to be stored on a renderer instance.
-     * This is useful for renderers that delegate to other renderers.
-     *
-     * see: animation
-     */
-    data?: {
-        [kind: string]: any;
-    };
-    /**
-     * A set of styles that the component needs to be present for component to render correctly.
-     */
-    styles?: string[];
-    /**
-     * The strategy that the default change detector uses to detect changes.
-     * When set, takes effect the next time change detection is triggered.
-     */
-    changeDetection?: ChangeDetectionStrategy$1;
-    /**
-     * Registry of directives, components, and pipes that may be found in this component's view.
-     *
-     * This property is either an array of types or a function that returns the array of types. This
-     * function may be necessary to support forward declarations.
-     */
-    dependencies?: TypeOrFactory<DependencyTypeList>;
-    /**
-     * The set of schemas that declare elements to be allowed in the component's template.
-     */
-    schemas?: SchemaMetadata[] | null;
-}
-/**
- * Create a component definition object.
- *
- *
- * # Example
- * ```ts
- * class MyComponent {
- *   // Generated by Angular Template Compiler
- *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ɵcmp = defineComponent({
- *     ...
- *   });
- * }
- * ```
- * @codeGenApi
- */
-declare function ɵɵdefineComponent<T>(componentDefinition: ComponentDefinition<T>): ComponentDef<any>;
-/**
- * @codeGenApi
- */
-declare function ɵɵdefineNgModule<T>(def: {
-    /** Token representing the module. Used by DI. */
-    type: T;
-    /** List of components to bootstrap. */
-    bootstrap?: Type$1<any>[] | (() => Type$1<any>[]);
-    /** List of components, directives, and pipes declared by this module. */
-    declarations?: Type$1<any>[] | (() => Type$1<any>[]);
-    /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports?: Type$1<any>[] | (() => Type$1<any>[]);
-    /**
-     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
-     * module.
-     */
-    exports?: Type$1<any>[] | (() => Type$1<any>[]);
-    /** The set of schemas that declare elements to be allowed in the NgModule. */
-    schemas?: SchemaMetadata[] | null;
-    /** Unique ID for the module that is used with `getModuleFactory`. */
-    id?: string | null;
-}): NgModuleDef<T>;
-/**
- * Create a directive definition object.
- *
- * # Example
- * ```ts
- * class MyDirective {
- *   // Generated by Angular Template Compiler
- *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ɵdir = ɵɵdefineDirective({
- *     ...
- *   });
- * }
- * ```
- *
- * @codeGenApi
- */
-declare function ɵɵdefineDirective<T>(directiveDefinition: DirectiveDefinition<T>): DirectiveDef<any>;
-/**
- * Create a pipe definition object.
- *
- * # Example
- * ```ts
- * class MyPipe implements PipeTransform {
- *   // Generated by Angular Template Compiler
- *   static ɵpipe = definePipe({
- *     ...
- *   });
- * }
- * ```
- * @param pipeDef Pipe definition generated by the compiler
- *
- * @codeGenApi
- */
-declare function ɵɵdefinePipe<T>(pipeDef: {
-    /** Name of the pipe. Used for matching pipes in template to pipe defs. */
-    name: string;
-    /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
-    type: Type$1<T>;
-    /** Whether the pipe is pure. */
-    pure?: boolean;
-    /**
-     * Whether the pipe is standalone.
-     */
-    standalone?: boolean;
-}): PipeDef<T>;
-
-/**
- * If a given component has unresolved async metadata - returns a reference
- * to a function that applies component metadata after resolving defer-loadable
- * dependencies. Otherwise - this function returns `null`.
- */
-declare function getAsyncClassMetadataFn(type: Type$1<unknown>): (() => Promise<Array<Type$1<unknown>>>) | null;
-/**
- * Handles the process of applying metadata info to a component class in case
- * component template has defer blocks (thus some dependencies became deferrable).
- *
- * @param type Component class where metadata should be added
- * @param dependencyLoaderFn Function that loads dependencies
- * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
- */
-declare function setClassMetadataAsync(type: Type$1<any>, dependencyLoaderFn: () => Array<Promise<Type$1<unknown>>>, metadataSetterFn: (...types: Type$1<unknown>[]) => void): () => Promise<Array<Type$1<unknown>>>;
-/**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-declare function setClassMetadata(type: any, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
-    [field: string]: any;
-} | null): void;
-
-/**
- * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
- *
- * @param ngModule NgModule class.
- * @param parentInjector Optional injector instance to use as a parent for the module injector. If
- *     not provided, `NullInjector` will be used instead.
- * @returns NgModuleRef that represents an NgModule instance.
- *
- * @publicApi
- */
-declare function createNgModule<T>(ngModule: Type$1<T>, parentInjector?: Injector): NgModuleRef$1<T>;
-declare class NgModuleRef<T> extends NgModuleRef$1<T> implements InternalNgModuleRef<T> {
-    private readonly ngModuleType;
-    _parent: Injector | null;
-    _bootstrapComponents: Type$1<any>[];
-    private readonly _r3Injector;
-    instance: T;
-    destroyCbs: (() => void)[] | null;
-    constructor(ngModuleType: Type$1<T>, _parent: Injector | null, additionalProviders: Array<Provider | EnvironmentProviders>, runInjectorInitializers?: boolean);
-    resolveInjectorInitializers(): void;
-    get injector(): EnvironmentInjector;
-    destroy(): void;
-    onDestroy(callback: () => void): void;
-}
-declare class NgModuleFactory<T> extends NgModuleFactory$1<T> {
-    moduleType: Type$1<T>;
-    constructor(moduleType: Type$1<T>);
-    create(parentInjector: Injector | null): NgModuleRef$1<T>;
-}
-/**
- * Create a new environment injector.
- *
- * @param providers An array of providers.
- * @param parent A parent environment injector.
- * @param debugName An optional name for this injector instance, which will be used in error
- *     messages.
- *
- * @publicApi
- */
-declare function createEnvironmentInjector(providers: Array<Provider | EnvironmentProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
-
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- */
-declare function noSideEffects<T>(fn: () => T): T;
-
-/**
- * A DI token that you can use to provide
- * one or more initialization functions.
- *
- * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise or an Observable, initialization
- * does not complete until the Promise is resolved or the Observable is completed.
- *
- * You can, for example, create a factory function that loads language data
- * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
- * The function is executed during the application bootstrap process,
- * and the needed data is available on startup.
- *
- * Note that the provided initializer is run in the injection context.
- *
- * @deprecated from v19.0.0, use provideAppInitializer instead
- *
- * @see {@link ApplicationInitStatus}
- * @see {@link provideAppInitializer}
- *
- * @usageNotes
- *
- * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
- * and a function returning a promise.
- * ### Example with NgModule-based application
- * ```ts
- *  function initializeApp(): Promise<any> {
- *    const http = inject(HttpClient);
- *    return firstValueFrom(
- *      http
- *        .get("https://someUrl.com/api/user")
- *        .pipe(tap(user => { ... }))
- *    );
- *  }
- *
- *  @NgModule({
- *   imports: [BrowserModule],
- *   declarations: [AppComponent],
- *   bootstrap: [AppComponent],
- *   providers: [{
- *     provide: APP_INITIALIZER,
- *     useValue: initializeApp,
- *     multi: true,
- *    }]
- *   })
- *  export class AppModule {}
- * ```
- *
- * ### Example with standalone application
- * ```ts
- * function initializeApp() {
- *   const http = inject(HttpClient);
- *   return firstValueFrom(
- *     http
- *       .get("https://someUrl.com/api/user")
- *       .pipe(tap(user => { ... }))
- *   );
- * }
- *
- * bootstrapApplication(App, {
- *   providers: [
- *     provideHttpClient(),
- *     {
- *       provide: APP_INITIALIZER,
- *       useValue: initializeApp,
- *       multi: true,
- *     },
- *   ],
- * });
-
- * ```
- *
- *
- * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
- * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
- * demo purposes to illustrate how the factory function can work with other providers available
- * through DI.
- *
- * ### Example with NgModule-based application
- * ```ts
- * function initializeApp() {
- *   const http = inject(HttpClient);
- *   return firstValueFrom(
- *     http
- *       .get("https://someUrl.com/api/user")
- *       .pipe(tap(user => { ... }))
- *   );
- * }
- *
- * @NgModule({
- *   imports: [BrowserModule, HttpClientModule],
- *   declarations: [AppComponent],
- *   bootstrap: [AppComponent],
- *   providers: [{
- *     provide: APP_INITIALIZER,
- *     useValue: initializeApp,
- *     multi: true,
- *   }]
- * })
- * export class AppModule {}
- * ```
- *
- * ### Example with standalone application
- * ```ts
- * function initializeApp() {
- *   const http = inject(HttpClient);
- *   return firstValueFrom(
- *     http
- *       .get("https://someUrl.com/api/user")
- *       .pipe(tap(user => { ... }))
- *   );
- * }
- *
- * bootstrapApplication(App, {
- *   providers: [
- *     provideHttpClient(),
- *     {
- *       provide: APP_INITIALIZER,
- *       useValue: initializeApp,
- *       multi: true,
- *     },
- *   ],
- * });
- * ```
- *
- * @publicApi
- */
-declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
-/**
- * @description
- * The provided function is injected at application startup and executed during
- * app initialization. If the function returns a Promise or an Observable, initialization
- * does not complete until the Promise is resolved or the Observable is completed.
- *
- * You can, for example, create a function that loads language data
- * or an external configuration, and provide that function using `provideAppInitializer()`.
- * The function is executed during the application bootstrap process,
- * and the needed data is available on startup.
- *
- * Note that the provided initializer is run in the injection context.
- *
- * Previously, this was achieved using the `APP_INITIALIZER` token which is now deprecated.
- *
- * @see {@link APP_INITIALIZER}
- *
- * @usageNotes
- * The following example illustrates how to configure an initialization function using
- * `provideAppInitializer()`
- * ```ts
- * bootstrapApplication(App, {
- *   providers: [
- *     provideAppInitializer(() => {
- *       const http = inject(HttpClient);
- *       return firstValueFrom(
- *         http
- *           .get("https://someUrl.com/api/user")
- *           .pipe(tap(user => { ... }))
- *       );
- *     }),
- *     provideHttpClient(),
- *   ],
- * });
- * ```
- *
- * @publicApi
- */
-declare function provideAppInitializer(initializerFn: () => Observable<unknown> | Promise<unknown> | void): EnvironmentProviders;
-/**
- * A class that reflects the state of running {@link APP_INITIALIZER} functions.
- *
- * @publicApi
- */
-declare class ApplicationInitStatus {
-    private resolve;
-    private reject;
-    private initialized;
-    readonly done = false;
-    readonly donePromise: Promise<any>;
-    private readonly appInits;
-    private readonly injector;
-    constructor();
-    static ɵfac: __FactoryDeclaration<ApplicationInitStatus, never>;
-    static ɵprov: __InjectableDeclaration<ApplicationInitStatus>;
-}
-
-/**
- * A type describing supported iterable types.
- *
- * @publicApi
- */
-type NgIterable<T> = Array<T> | Iterable<T>;
-/**
- * A strategy for tracking changes over time to an iterable. Used by {@link /api/common/NgForOf NgForOf} to
- * respond to changes in an iterable by effecting equivalent changes in the DOM.
- *
- * @publicApi
- */
-interface IterableDiffer<V> {
-    /**
-     * Compute a difference between the previous state and the new `object` state.
-     *
-     * @param object containing the new value.
-     * @returns an object describing the difference. The return value is only valid until the next
-     * `diff()` invocation.
-     */
-    diff(object: NgIterable<V> | undefined | null): IterableChanges<V> | null;
-}
-/**
- * An object describing the changes in the `Iterable` collection since last time
- * `IterableDiffer#diff()` was invoked.
- *
- * @publicApi
- */
-interface IterableChanges<V> {
-    /**
-     * Iterate over all changes. `IterableChangeRecord` will contain information about changes
-     * to each item.
-     */
-    forEachItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /**
-     * Iterate over a set of operations which when applied to the original `Iterable` will produce the
-     * new `Iterable`.
-     *
-     * NOTE: These are not necessarily the actual operations which were applied to the original
-     * `Iterable`, rather these are a set of computed operations which may not be the same as the
-     * ones applied.
-     *
-     * @param record A change which needs to be applied
-     * @param previousIndex The `IterableChangeRecord#previousIndex` of the `record` refers to the
-     *        original `Iterable` location, where as `previousIndex` refers to the transient location
-     *        of the item, after applying the operations up to this point.
-     * @param currentIndex The `IterableChangeRecord#currentIndex` of the `record` refers to the
-     *        original `Iterable` location, where as `currentIndex` refers to the transient location
-     *        of the item, after applying the operations up to this point.
-     */
-    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number | null, currentIndex: number | null) => void): void;
-    /**
-     * Iterate over changes in the order of original `Iterable` showing where the original items
-     * have moved.
-     */
-    forEachPreviousItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all added items. */
-    forEachAddedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all moved items. */
-    forEachMovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all removed items. */
-    forEachRemovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /**
-     * Iterate over all items which had their identity (as computed by the `TrackByFunction`)
-     * changed.
-     */
-    forEachIdentityChange(fn: (record: IterableChangeRecord<V>) => void): void;
-}
-/**
- * Record representing the item change information.
- *
- * @publicApi
- */
-interface IterableChangeRecord<V> {
-    /** Current index of the item in `Iterable` or null if removed. */
-    readonly currentIndex: number | null;
-    /** Previous index of the item in `Iterable` or null if added. */
-    readonly previousIndex: number | null;
-    /** The item. */
-    readonly item: V;
-    /** Track by identity as computed by the `TrackByFunction`. */
-    readonly trackById: any;
-}
-/**
- * A function optionally passed into the `NgForOf` directive to customize how `NgForOf` uniquely
- * identifies items in an iterable.
- *
- * `NgForOf` needs to uniquely identify items in the iterable to correctly perform DOM updates
- * when items in the iterable are reordered, new items are added, or existing items are removed.
- *
- *
- * In all of these scenarios it is usually desirable to only update the DOM elements associated
- * with the items affected by the change. This behavior is important to:
- *
- * - preserve any DOM-specific UI state (like cursor position, focus, text selection) when the
- *   iterable is modified
- * - enable animation of item addition, removal, and iterable reordering
- * - preserve the value of the `<select>` element when nested `<option>` elements are dynamically
- *   populated using `NgForOf` and the bound iterable is updated
- *
- * A common use for custom `trackBy` functions is when the model that `NgForOf` iterates over
- * contains a property with a unique identifier. For example, given a model:
- *
- * ```ts
- * class User {
- *   id: number;
- *   name: string;
- *   ...
- * }
- * ```
- * a custom `trackBy` function could look like the following:
- * ```ts
- * function userTrackBy(index, user) {
- *   return user.id;
- * }
- * ```
- *
- * A custom `trackBy` function must have several properties:
- *
- * - be [idempotent](https://en.wikipedia.org/wiki/Idempotence) (be without side effects, and always
- * return the same value for a given input)
- * - return unique value for all unique inputs
- * - be fast
- *
- * @see [`NgForOf#ngForTrackBy`](api/common/NgForOf#ngForTrackBy)
- * @publicApi
- */
-interface TrackByFunction<T> {
-    /**
-     * @param index The index of the item within the iterable.
-     * @param item The item in the iterable.
-     */
-    <U extends T>(index: number, item: T & U): any;
-}
-/**
- * Provides a factory for {@link IterableDiffer}.
- *
- * @publicApi
- */
-interface IterableDifferFactory {
-    supports(objects: any): boolean;
-    create<V>(trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
-}
-/**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- * @publicApi
- */
-declare class IterableDiffers {
-    private factories;
-    /** @nocollapse */
-    static ɵprov: _angular_core.ɵɵInjectableDeclaration<IterableDiffers>;
-    constructor(factories: IterableDifferFactory[]);
-    static create(factories: IterableDifferFactory[], parent?: IterableDiffers): IterableDiffers;
-    /**
-     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
-     * inherited {@link IterableDiffers} instance with the provided factories and return a new
-     * {@link IterableDiffers} instance.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {@link IterableDiffer} available.
-     *
-     * ```ts
-     * @Component({
-     *   viewProviders: [
-     *     IterableDiffers.extend([new ImmutableListDiffer()])
-     *   ]
-     * })
-     * ```
-     */
-    static extend(factories: IterableDifferFactory[]): StaticProvider;
-    find(iterable: any): IterableDifferFactory;
-}
-
-/**
  * A differ that tracks changes made to an object over time.
  *
  * @publicApi
@@ -2110,45 +2125,6 @@ declare class KeyValueDiffers {
     static extend(factories: KeyValueDifferFactory[]): StaticProvider;
     find(kv: any): KeyValueDifferFactory;
 }
-
-/**
- * Represents a basic change from a previous to a new value for a single
- * property on a directive instance. Passed as a value in a
- * {@link SimpleChanges} object to the `ngOnChanges` hook.
- *
- * @see {@link OnChanges}
- *
- * @publicApi
- */
-declare class SimpleChange<T = any> {
-    previousValue: T;
-    currentValue: T;
-    firstChange: boolean;
-    constructor(previousValue: T, currentValue: T, firstChange: boolean);
-    /**
-     * Check whether the new value is the first value assigned.
-     */
-    isFirstChange(): boolean;
-}
-/**
- * A hashtable of changes represented by {@link SimpleChange} objects stored
- * at the declared property name they belong to on a Directive or Component. This is
- * the type passed to the `ngOnChanges` hook. Pass the current class or `this` as the
- * first generic argument for stronger type checking (e.g. `SimpleChanges<YourComponent>`).
- *
- * @see {@link OnChanges}
- *
- * @see [Inspecting changes](guide/components/lifecycle#inspecting-changes)
- *
- * @publicApi
- */
-type SimpleChanges<T = unknown> = T extends object ? {
-    [Key in keyof T]?: SimpleChange<T[Key] extends {
-        [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: infer V;
-    } ? V : T[Key]>;
-} : {
-    [propName: string]: SimpleChange;
-};
 
 declare function devModeEqual(a: any, b: any): boolean;
 
@@ -2696,634 +2672,835 @@ declare function afterRenderEffect<E = never, W = never, M = never>(spec: {
  */
 declare function assertNotInReactiveContext(debugFn: Function, extraContext?: string): void;
 
+interface NgModuleType<T = any> extends Type$1<T> {
+    ɵmod: NgModuleDef<T>;
+}
 /**
- * Re-exported by `BrowserModule`, which is included automatically in the root
- * `AppModule` when you create a new app with the CLI `new` command. Eagerly injects
- * `ApplicationRef` to instantiate it.
+ * Represents the expansion of an `NgModule` into its scopes.
  *
- * @publicApi
+ * A scope is a set of directives and pipes that are visible in a particular context. Each
+ * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
+ * be recognized in the templates of components declared by the module. The `exported` scope is the
+ * set of directives and pipes exported by a module (that is, module B's exported scope gets added
+ * to module A's compilation scope when module A imports B).
  */
-declare class ApplicationModule {
-    constructor(appRef: ApplicationRef);
-    static ɵfac: __FactoryDeclaration<ApplicationModule, never>;
-    static ɵmod: __NgModuleDeclaration<ApplicationModule, never, never, never>;
-    static ɵinj: __InjectorDeclaration<ApplicationModule>;
+interface NgModuleTransitiveScopes {
+    compilation: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+    exported: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+    schemas: SchemaMetadata[] | null;
+}
+/**
+ * Runtime link information for NgModules.
+ *
+ * This is the internal data structure used by the runtime to assemble components, directives,
+ * pipes, and injectors.
+ *
+ * NOTE: Always use `ɵɵdefineNgModule` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ */
+interface NgModuleDef<T> {
+    /** Token representing the module. Used by DI. */
+    type: T;
+    /**
+     * List of components to bootstrap.
+     *
+     * @see {NgModuleScopeInfoFromDecorator} This field is only used in global compilation mode. In local compilation mode the bootstrap info is computed and added in runtime.
+     */
+    bootstrap: Type$1<any>[] | (() => Type$1<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations: Type$1<any>[] | (() => Type$1<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports: Type$1<any>[] | (() => Type$1<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports: Type$1<any>[] | (() => Type$1<any>[]);
+    /**
+     * Cached value of computed `transitiveCompileScopes` for this module.
+     *
+     * This should never be read directly, but accessed via `transitiveScopesFor`.
+     */
+    transitiveCompileScopes: NgModuleTransitiveScopes | null;
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas: SchemaMetadata[] | null;
+    /** Unique ID for the module with which it should be registered.  */
+    id: string | null;
 }
 
 /**
- * A DI token representing a string ID, used
- * primarily for prefixing application attributes and CSS styles when
- * {@link ViewEncapsulation#Emulated} is being used.
+ * Map of inputs for a given directive/component.
  *
- * The token is needed in cases when multiple applications are bootstrapped on a page
- * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
- * have different `APP_ID` value setup. For example:
- *
+ * Given:
  * ```ts
- * bootstrapApplication(ComponentA, {
- *   providers: [
- *     { provide: APP_ID, useValue: 'app-a' },
- *     // ... other providers ...
- *   ]
- * });
+ * class MyComponent {
+ *   @Input()
+ *   publicInput1: string;
  *
- * bootstrapApplication(ComponentB, {
- *   providers: [
- *     { provide: APP_ID, useValue: 'app-b' },
- *     // ... other providers ...
- *   ]
- * });
- * ```
+ *   @Input('publicInput2')
+ *   declaredInput2: string;
  *
- * By default, when there is only one application bootstrapped, you don't need to provide the
- * `APP_ID` token (the `ng` will be used as an app ID).
+ *   @Input({transform: (value: boolean) => value ? 1 : 0})
+ *   transformedInput3: number;
  *
- * @publicApi
- */
-declare const APP_ID: InjectionToken<string>;
-/**
- * A function that is executed when a platform is initialized.
- *
- * @deprecated from v19.0.0, use providePlatformInitializer instead
- *
- * @see {@link providePlatformInitializer}
- *
- * @publicApi
- */
-declare const PLATFORM_INITIALIZER: InjectionToken<readonly (() => void)[]>;
-/**
- * A token that indicates an opaque platform ID.
- * @publicApi
- */
-declare const PLATFORM_ID: InjectionToken<Object>;
-/**
- * A [DI token](api/core/InjectionToken) that indicates which animations
- * module has been loaded.
- * @publicApi
- */
-declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserAnimations">;
-/**
- * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
- * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
- * from the `ngCspNonce` attribute of the application root node.
- *
- * @see [Content security policy](best-practices/security#content-security-policy)
- *
- * @publicApi
- */
-declare const CSP_NONCE: InjectionToken<string | null>;
-/**
- * A configuration object for the image-related options. Contains:
- * - breakpoints: An array of integer breakpoints used to generate
- *      srcsets for responsive images.
- * - disableImageSizeWarning: A boolean value. Setting this to true will
- *      disable console warnings about oversized images.
- * - disableImageLazyLoadWarning: A boolean value. Setting this to true will
- *      disable console warnings about LCP images configured with `loading="lazy"`.
- * Learn more about the responsive image configuration in [the NgOptimizedImage
- * guide](guide/image-optimization).
- * Learn more about image warning options in [the related error page](errors/NG0913).
- * @publicApi
- */
-type ImageConfig = {
-    breakpoints?: number[];
-    placeholderResolution?: number;
-    disableImageSizeWarning?: boolean;
-    disableImageLazyLoadWarning?: boolean;
-};
-declare const IMAGE_CONFIG_DEFAULTS: ImageConfig;
-/**
- * Injection token that configures the image optimized image functionality.
- * See {@link ImageConfig} for additional information about parameters that
- * can be used.
- *
- * @see {@link NgOptimizedImage}
- * @see {@link ImageConfig}
- * @see [Responsive images](guide/image-optimization#responsive-images)
- * @see [Using placeholders](guide/image-optimization#using-placeholders)
- * @publicApi
- */
-declare const IMAGE_CONFIG: InjectionToken<ImageConfig>;
-
-/**
- * Injection token representing the current HTTP request object.
- *
- * Use this token to access the current request when handling server-side
- * rendering (SSR).
- *
- * @remarks
- * This token may be `null` in the following scenarios:
- *
- * * During the build processes.
- * * When the application is rendered in the browser (client-side rendering).
- * * When performing static site generation (SSG).
- * * During route extraction in development (at the time of the request).
- *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
- *
- * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
- *
- * @publicApi
- */
-declare const REQUEST: InjectionToken<Request | null>;
-/**
- * Type that represents the initialization options for a response.
- *
- * @publicApi
- */
-type ResponseInit = {
-    -readonly [P in keyof globalThis.ResponseInit]: globalThis.ResponseInit[P];
-};
-/**
- * Injection token for response initialization options.
- *
- * Use this token to provide response options for configuring or initializing
- * HTTP responses in server-side rendering or API endpoints.
- *
- * @remarks
- * This token may be `null` in the following scenarios:
- *
- * * During the build processes.
- * * When the application is rendered in the browser (client-side rendering).
- * * When performing static site generation (SSG).
- * * During route extraction in development (at the time of the request).
- *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
- *
- * @publicApi
- * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
- */
-declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
-/**
- * Injection token for additional request context.
- *
- * Use this token to pass custom metadata or context related to the current request in server-side rendering.
- *
- * @remarks
- * This token is only available during server-side rendering and will be `null` in other contexts.
- *
- * @publicApi
- * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
- */
-declare const REQUEST_CONTEXT: InjectionToken<unknown>;
-
-/**
- * Provides an application initializer that will log information about what tasks are keeping
- * the application from stabilizing if the application does not stabilize within 9 seconds.
- *
- * The logged information includes the stack of the tasks preventing stability. This stack can be traced
- * back to the source in the application code.
- *
- * If you are using Zone.js, it is recommended that you also temporarily import "zone.js/plugins/task-tracking".
- * This Zone.js plugin provides additional information about which macrotasks are scheduled in the Angular Zone
- * and keeping the Zone from stabilizing.
- *
- * @usageNotes
- *
- * ```ts
- * import 'zone.js/plugins/task-tracking';
- *
- * bootstrapApplication(AppComponent, {providers: [provideStabilityDebugging()]});
- * ```
- *
- * IMPORTANT: Neither the zone.js task tracking plugin nor this utility are removed from production bundles.
- * They are intended for temporary use while debugging stability issues during development, including for
- * optimized production builds.
- *
- * @publicApi 21.1
- */
-declare function provideStabilityDebugging(): EnvironmentProviders;
-
-/**
- * Used to disable exhaustive checks when verifying no expressions changed after they were checked.
- *
- * This means that `OnPush` components that are not marked for check will not be checked.
- * This behavior is the current default behavior in Angular. When running change detection
- * on a view tree, views marked for check are refreshed and the flag to check it is removed.
- * When Angular checks views a second time to ensure nothing has changed, `OnPush` components
- * will no longer be marked and not be checked.
- *
- * @developerPreview 20.0
- */
-declare function provideCheckNoChangesConfig(options: {
-    exhaustive: false;
-}): EnvironmentProviders;
-/**
- * - `interval` will periodically run `checkNoChanges` on application views. This can be useful
- *   in zoneless applications to periodically ensure no changes have been made without notifying
- *   Angular that templates need to be refreshed.
- * - The exhaustive option will treat all application views as if they were `ChangeDetectionStrategy.Eager`/`Default` when verifying
- *   no expressions have changed. All views attached to `ApplicationRef` and all the descendants of
- *   those views will be checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
- *   This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.
- *   This check is will surface any existing errors hidden by `OnPush` components.
- *
- * @developerPreview 20.0
- */
-declare function provideCheckNoChangesConfig(options: {
-    interval?: number;
-    exhaustive: true;
-}): EnvironmentProviders;
-
-/**
- * @description
- * A lifecycle hook that is called when the value of one or more component or directive inputs
- * change. This includes both signal-based and decorator-based inputs.
- * Define an `ngOnChanges()` method to handle the changes.
- *
- * @see {@link DoCheck}
- * @see {@link OnInit}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define an on-changes handler for an input property. While you should prefer
- * `computed` and `effect` when working with signal-based inputs, the `ngOnChanges`
- * method does include value changes for signal-based inputs.
- *
- * ```ts
- * @Component({ ... })
- * export class UserProfile implements OnChanges {
- *   userId = input<number>(0);
- *   ngOnChanges(changes: SimpleChanges<UserProfile>) {
- *     // changes.userId contains the old and new value.
- *   }
+ *   signalInput = input(3);
  * }
  * ```
  *
- * @publicApi
- */
-interface OnChanges {
-    /**
-     * A callback method that is invoked immediately after the
-     * default change detector has checked data-bound properties
-     * if at least one has changed, and before the view and content
-     * children are checked.
-     * @param changes The changed properties.
-     */
-    ngOnChanges(changes: SimpleChanges): void;
-}
-/**
- * @description
- * A lifecycle hook that is called after Angular has initialized
- * all data-bound properties of a directive.
- * Define an `ngOnInit()` method to handle any additional initialization tasks.
- *
- * @see {@link AfterContentInit}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define its own initialization method.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
- *
- * @publicApi
- */
-interface OnInit {
-    /**
-     * A callback method that is invoked immediately after the
-     * default change detector has checked the directive's
-     * data-bound properties for the first time,
-     * and before any of the view or content children have been checked.
-     * It is invoked only once when the directive is instantiated.
-     */
-    ngOnInit(): void;
-}
-/**
- * A lifecycle hook that invokes a custom change-detection function for a directive,
- * in addition to the check performed by the default change-detector.
- *
- * The default change-detection algorithm looks for differences by comparing
- * bound-property values by reference across change detection runs. You can use this
- * hook to check for and respond to changes by some other means.
- *
- * When the default change detector detects changes, it invokes `ngOnChanges()` if supplied,
- * regardless of whether you perform additional change detection.
- * Typically, you should not use both `DoCheck` and `OnChanges` to respond to
- * changes on the same input.
- *
- * @see {@link OnChanges}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface
- * to invoke it own change-detection cycle.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
- *
- * For a more complete example and discussion, see
- * [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection).
- *
- * @publicApi
- */
-interface DoCheck {
-    /**
-     * A callback method that performs change-detection, invoked
-     * after the default change-detector runs.
-     * See `KeyValueDiffers` and `IterableDiffers` for implementing
-     * custom change checking for collections.
-     *
-     */
-    ngDoCheck(): void;
-}
-/**
- * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
- * Use for any custom cleanup that needs to occur when the
- * instance is destroyed.
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface
- * to define its own custom clean-up method.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
- *
- * @publicApi
- */
-interface OnDestroy {
-    /**
-     * A callback method that performs custom clean-up, invoked immediately
-     * before a directive, pipe, or service instance is destroyed.
-     */
-    ngOnDestroy(): void;
-}
-/**
- * @description
- * A lifecycle hook that is called after Angular has fully initialized
- * all content of a directive. It will run only once when the projected content is initialized.
- * Define an `ngAfterContentInit()` method to handle any additional initialization tasks.
- *
- * @see {@link OnInit}
- * @see {@link AfterViewInit}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define its own content initialization method.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
- *
- * @publicApi
- */
-interface AfterContentInit {
-    /**
-     * A callback method that is invoked immediately after
-     * Angular has completed initialization of all of the directive's
-     * content.
-     * It is invoked only once when the directive is instantiated.
-     */
-    ngAfterContentInit(): void;
-}
-/**
- * @description
- * A lifecycle hook that is called after the default change detector has
- * completed checking all content of a directive. It will run after the content
- * has been checked and most of the time it's during a change detection cycle.
- *
- * @see {@link AfterViewChecked}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define its own after-check functionality.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
- *
- * @publicApi
- */
-interface AfterContentChecked {
-    /**
-     * A callback method that is invoked immediately after the
-     * default change detector has completed checking all of the directive's
-     * content.
-     */
-    ngAfterContentChecked(): void;
-}
-/**
- * @description
- * A lifecycle hook that is called after Angular has fully initialized
- * a component's view.
- * Define an `ngAfterViewInit()` method to handle any additional initialization tasks.
- *
- * @see {@link OnInit}
- * @see {@link AfterContentInit}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define its own view initialization method.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
- *
- * @publicApi
- */
-interface AfterViewInit {
-    /**
-     * A callback method that is invoked immediately after
-     * Angular has completed initialization of a component's view.
-     * It is invoked only once when the view is instantiated.
-     *
-     */
-    ngAfterViewInit(): void;
-}
-/**
- * @description
- * A lifecycle hook that is called after the default change detector has
- * completed checking a component's view for changes.
- *
- * @see {@link AfterContentChecked}
- * @see [Lifecycle hooks guide](guide/components/lifecycle)
- *
- * @usageNotes
- * The following snippet shows how a component can implement this interface to
- * define its own after-check functionality.
- *
- * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
- *
- * @publicApi
- */
-interface AfterViewChecked {
-    /**
-     * A callback method that is invoked immediately after the
-     * default change detector has completed one change-check cycle
-     * for a component's view.
-     */
-    ngAfterViewChecked(): void;
-}
-
-/**
- * Internal token used to verify that `provideZoneChangeDetection` is not used
- * with the bootstrapModule API.
- */
-declare const PROVIDED_NG_ZONE: InjectionToken<boolean>;
-declare function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone, }: {
-    ngZoneFactory?: () => NgZone;
-    scheduleInRootZone?: boolean;
-}): StaticProvider[];
-/**
- * Provides `NgZone`-based change detection for the application bootstrapped using
- * `bootstrapApplication`.
- *
- * Add this provider to use `NgZone`/ZoneJS-based change detection and configure options like
- * `eventCoalescing` in the `NgZone`.
- *
- * If you need this provider function in an NgModule-based application, pass it as `applicationProviders` to `bootstrapModule()`.
- *
- * @usageNotes
+ * is described as:
  * ```ts
- * bootstrapApplication(MyApp, {providers: [
- *   provideZoneChangeDetection({eventCoalescing: true}),
- * ]});
+ * {
+ *   publicInput1: 'publicInput1',
+ *   declaredInput2: [InputFlags.None, 'declaredInput2', 'publicInput2'],
+ *   transformedInput3: [
+ *     InputFlags.None,
+ *     'transformedInput3',
+ *     'transformedInput3',
+ *     (value: boolean) => value ? 1 : 0
+ *   ],
+ *   signalInput: [InputFlags.SignalBased, "signalInput"],
+ * }
  * ```
  *
- * @publicApi
- * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
- * @see {@link NgZoneOptions}
- */
-declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
-/**
- * Used to configure event and run coalescing with `provideZoneChangeDetection`.
+ * Which the minifier may translate to:
+ * ```ts
+ * {
+ *   minifiedPublicInput1: 'publicInput1',
+ *   minifiedDeclaredInput2: [InputFlags.None, 'publicInput2', 'declaredInput2'],
+ *   minifiedTransformedInput3: [
+ *     InputFlags.None,
+ *     'transformedInput3',
+ *     'transformedInput3',
+ *     (value: boolean) => value ? 1 : 0
+ *   ],
+ *   minifiedSignalInput: [InputFlags.SignalBased, "signalInput"],
+ * }
+ * ```
  *
- * @publicApi
+ * This allows the render to re-construct the minified, public, and declared names
+ * of properties.
  *
- * @see {@link provideZoneChangeDetection}
+ * NOTE:
+ *  - Because declared and public name are usually same we only generate the array
+ *    `['declared', 'public']` format when they differ, or there is a transform.
+ *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
+ *    inconsistent behavior in that it uses declared names rather than minified or public.
  */
-interface NgZoneOptions {
+type DirectiveInputs<T> = {
+    [P in keyof T]?: string | [
+        flags: InputFlags,
+        publicName: string,
+        declaredName?: string,
+        transform?: InputTransformFunction
+    ];
+};
+interface DirectiveDefinition<T> {
     /**
-     * Optionally specify coalescing event change detections or not.
-     * Consider the following case.
-     *
-     * ```html
-     * <div (click)="doSomething()">
-     *   <button (click)="doSomethingElse()"></button>
-     * </div>
-     * ```
-     *
-     * When button is clicked, because of the event bubbling, both
-     * event handlers will be called and 2 change detections will be
-     * triggered. We can coalesce such kind of events to trigger
-     * change detection only once.
-     *
-     * By default, this option is set to false, meaning events will
-     * not be coalesced, and change detection will be triggered multiple times.
-     * If this option is set to true, change detection will be triggered
-     * once in the scenario described above.
+     * Directive type, needed to configure the injector.
      */
-    eventCoalescing?: boolean;
+    type: Type$1<T>;
+    /** The selectors that will be used to match nodes to this directive. */
+    selectors?: CssSelectorList;
     /**
-     * Optionally specify if `NgZone#run()` method invocations should be coalesced
-     * into a single change detection.
+     * A map of input names.
+     */
+    inputs?: DirectiveInputs<T>;
+    /**
+     * A map of output names.
      *
-     * Consider the following case.
+     * The format is in: `{[actualPropertyName: string]:string}`.
+     *
+     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     *
+     * This allows the render to re-construct the minified and non-minified names
+     * of properties.
+     */
+    outputs?: {
+        [P in keyof T]?: string;
+    };
+    /**
+     * A list of optional features to apply.
+     *
+     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}, {@link InheritDefinitionFeature}
+     */
+    features?: DirectiveDefFeature[];
+    /**
+     * Function executed by the parent template to allow child directive to apply host bindings.
+     */
+    hostBindings?: HostBindingsFunction<T>;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values,
+     * the `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes;
+    /**
+     * Function to create instances of content queries associated with a given directive.
+     */
+    contentQueries?: ContentQueriesFunction<T>;
+    /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instructions to be inserted into the template function.
+     */
+    viewQuery?: ViewQueriesFunction<T> | null;
+    /**
+     * Defines the name that can be used in the template to assign this directive to a variable.
+     *
+     * See: {@link Directive.exportAs}
+     */
+    exportAs?: string[];
+    /**
+     * Whether this directive/component is standalone.
+     */
+    standalone?: boolean;
+    /**
+     * Whether this directive/component is signal-based.
+     */
+    signals?: boolean;
+}
+interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'features'> {
+    /**
+     * The number of nodes, local refs, and pipes in this component template.
+     *
+     * Used to calculate the length of this component's LView array, so we
+     * can pre-fill the array and set the binding start index.
+     */
+    decls: number;
+    /**
+     * The number of bindings in this component template (including pure fn bindings).
+     *
+     * Used to calculate the length of this component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    vars: number;
+    /**
+     * Template function use for rendering DOM.
+     *
+     * This function has following structure.
+     *
      * ```ts
-     * for (let i = 0; i < 10; i ++) {
-     *   ngZone.run(() => {
-     *     // do something
-     *   });
+     * function Template<T>(ctx:T, creationMode: boolean) {
+     *   if (creationMode) {
+     *     // Contains creation mode instructions.
+     *   }
+     *   // Contains binding update instructions
      * }
      * ```
      *
-     * This case triggers the change detection multiple times.
-     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
-     * In addition, the change detection executes in requestAnimation.
+     * Common instructions are:
+     * Creation mode instructions:
+     *  - `elementStart`, `elementEnd`
+     *  - `text`
+     *  - `container`
+     *  - `listener`
+     *
+     * Binding update instructions:
+     * - `bind`
+     * - `elementAttribute`
+     * - `elementProperty`
+     * - `elementClass`
+     * - `elementStyle`
      *
      */
-    runCoalescing?: boolean;
+    template: ComponentTemplate<T>;
+    /**
+     * Constants for the nodes in the component's view.
+     * Includes attribute arrays, local definition arrays etc.
+     */
+    consts?: TConstantsOrFactory;
+    /**
+     * An array of `ngContent[selector]` values that were found in the template.
+     */
+    ngContentSelectors?: string[];
+    /**
+     * A list of optional features to apply.
+     *
+     * See: {@link NgOnChangesFeature}, {@link ProvidersFeature}
+     */
+    features?: ComponentDefFeature[];
+    /**
+     * Defines template and style encapsulation options available for Component's {@link /api/core/Component Component}.
+     */
+    encapsulation?: ViewEncapsulation$1;
+    /**
+     * Defines arbitrary developer-defined data to be stored on a renderer instance.
+     * This is useful for renderers that delegate to other renderers.
+     *
+     * see: animation
+     */
+    data?: {
+        [kind: string]: any;
+    };
+    /**
+     * A set of styles that the component needs to be present for component to render correctly.
+     */
+    styles?: string[];
+    /**
+     * The strategy that the default change detector uses to detect changes.
+     * When set, takes effect the next time change detection is triggered.
+     */
+    changeDetection?: ChangeDetectionStrategy$1;
+    /**
+     * Registry of directives, components, and pipes that may be found in this component's view.
+     *
+     * This property is either an array of types or a function that returns the array of types. This
+     * function may be necessary to support forward declarations.
+     */
+    dependencies?: TypeOrFactory<DependencyTypeList>;
+    /**
+     * The set of schemas that declare elements to be allowed in the component's template.
+     */
+    schemas?: SchemaMetadata[] | null;
+}
+/**
+ * Create a component definition object.
+ *
+ *
+ * # Example
+ * ```ts
+ * class MyComponent {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static ɵcmp = defineComponent({
+ *     ...
+ *   });
+ * }
+ * ```
+ * @codeGenApi
+ */
+declare function ɵɵdefineComponent<T>(componentDefinition: ComponentDefinition<T>): ComponentDef<any>;
+/**
+ * @codeGenApi
+ */
+declare function ɵɵdefineNgModule<T>(def: {
+    /** Token representing the module. Used by DI. */
+    type: T;
+    /** List of components to bootstrap. */
+    bootstrap?: Type$1<any>[] | (() => Type$1<any>[]);
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type$1<any>[] | (() => Type$1<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type$1<any>[] | (() => Type$1<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type$1<any>[] | (() => Type$1<any>[]);
+    /** The set of schemas that declare elements to be allowed in the NgModule. */
+    schemas?: SchemaMetadata[] | null;
+    /** Unique ID for the module that is used with `getModuleFactory`. */
+    id?: string | null;
+}): NgModuleDef<T>;
+/**
+ * Create a directive definition object.
+ *
+ * # Example
+ * ```ts
+ * class MyDirective {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static ɵdir = ɵɵdefineDirective({
+ *     ...
+ *   });
+ * }
+ * ```
+ *
+ * @codeGenApi
+ */
+declare function ɵɵdefineDirective<T>(directiveDefinition: DirectiveDefinition<T>): DirectiveDef<any>;
+/**
+ * Create a pipe definition object.
+ *
+ * # Example
+ * ```ts
+ * class MyPipe implements PipeTransform {
+ *   // Generated by Angular Template Compiler
+ *   static ɵpipe = definePipe({
+ *     ...
+ *   });
+ * }
+ * ```
+ * @param pipeDef Pipe definition generated by the compiler
+ *
+ * @codeGenApi
+ */
+declare function ɵɵdefinePipe<T>(pipeDef: {
+    /** Name of the pipe. Used for matching pipes in template to pipe defs. */
+    name: string;
+    /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
+    type: Type$1<T>;
+    /** Whether the pipe is pure. */
+    pure?: boolean;
+    /**
+     * Whether the pipe is standalone.
+     */
+    standalone?: boolean;
+}): PipeDef<T>;
+
+/**
+ * If a given component has unresolved async metadata - returns a reference
+ * to a function that applies component metadata after resolving defer-loadable
+ * dependencies. Otherwise - this function returns `null`.
+ */
+declare function getAsyncClassMetadataFn(type: Type$1<unknown>): (() => Promise<Array<Type$1<unknown>>>) | null;
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template has defer blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+declare function setClassMetadataAsync(type: Type$1<any>, dependencyLoaderFn: () => Array<Promise<Type$1<unknown>>>, metadataSetterFn: (...types: Type$1<unknown>[]) => void): () => Promise<Array<Type$1<unknown>>>;
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+declare function setClassMetadata(type: Type$1<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
+    [field: string]: any;
+} | null): void;
+
+declare class ViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRef {
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    private _cdRefInjectingView?;
+    private _appRef;
+    private _attachedToViewContainer;
+    private exhaustive?;
+    get rootNodes(): any[];
+    constructor(
+    /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
+     * @internal
+     */
+    _lView: LView, 
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    _cdRefInjectingView?: LView | undefined);
+    get context(): T;
+    /**
+     * @deprecated Replacing the full context object is not supported. Modify the context
+     *   directly, or consider using a `Proxy` if you need to replace the full object.
+     * // TODO(devversion): Remove this.
+     */
+    set context(value: T);
+    get destroyed(): boolean;
+    destroy(): void;
+    onDestroy(callback: Function): void;
+    /**
+     * Marks a view and all of its ancestors dirty.
+     *
+     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush} component is
+     * checked when it needs to be re-rendered but the two normal triggers haven't marked it
+     * dirty (i.e. inputs haven't changed and events haven't fired in the view).
+     *
+     * <!-- TODO: Add a link to a chapter on OnPush components -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```ts
+     * @Component({
+     *   selector: 'app-root',
+     *   template: `Number of ticks: {{numberOfTicks}}`
+     *   changeDetection: ChangeDetectionStrategy.OnPush,
+     * })
+     * class AppComponent {
+     *   numberOfTicks = 0;
+     *
+     *   constructor(private ref: ChangeDetectorRef) {
+     *     setInterval(() => {
+     *       this.numberOfTicks++;
+     *       // the following is required, otherwise the view will not be updated
+     *       this.ref.markForCheck();
+     *     }, 1000);
+     *   }
+     * }
+     * ```
+     */
+    markForCheck(): void;
+    /**
+     * Detaches the view from the change detection tree.
+     *
+     * Detached views will not be checked during change detection runs until they are
+     * re-attached, even if they are dirty. `detach` can be used in combination with
+     * {@link ChangeDetectorRef#detectChanges} to implement local change
+     * detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds. We can do that by detaching
+     * the component's change detector and doing a local check every five seconds.
+     *
+     * ```ts
+     * class DataProvider {
+     *   // in a real application the returned data will be different every time
+     *   get data() {
+     *     return [1,2,3,4,5];
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'giant-list',
+     *   template: `
+     *     @for(d of dataProvider.data; track $index) {
+     *        <li>Data {{d}}</li>
+     *     }
+     *   `,
+     * })
+     * class GiantList {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {
+     *     ref.detach();
+     *     setInterval(() => {
+     *       this.ref.detectChanges();
+     *     }, 5000);
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'app',
+     *   providers: [DataProvider],
+     *   template: `
+     *     <giant-list><giant-list>
+     *   `,
+     * })
+     * class App {
+     * }
+     * ```
+     */
+    detach(): void;
+    /**
+     * Re-attaches a view to the change detection tree.
+     *
+     * This can be used to re-attach views that were previously detached from the tree
+     * using {@link ChangeDetectorRef#detach}. Views are attached to the tree by default.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example creates a component displaying `live` data. The component will detach
+     * its change detector from the main change detector tree when the component's live property
+     * is set to false.
+     *
+     * ```ts
+     * class DataProvider {
+     *   data = 1;
+     *
+     *   constructor() {
+     *     setInterval(() => {
+     *       this.data = this.data * 2;
+     *     }, 500);
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'live-data',
+     *   inputs: ['live'],
+     *   template: 'Data: {{dataProvider.data}}'
+     * })
+     * class LiveData {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {}
+     *
+     *   set live(value) {
+     *     if (value) {
+     *       this.ref.reattach();
+     *     } else {
+     *       this.ref.detach();
+     *     }
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'app-root',
+     *   providers: [DataProvider],
+     *   template: `
+     *     Live Update: <input type="checkbox" [(ngModel)]="live">
+     *     <live-data [live]="live"><live-data>
+     *   `,
+     * })
+     * class AppComponent {
+     *   live = true;
+     * }
+     * ```
+     */
+    reattach(): void;
+    /**
+     * Checks the view and its children.
+     *
+     * This can also be used in combination with {@link ChangeDetectorRef#detach} to implement
+     * local change detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine, the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds.
+     *
+     * We can do that by detaching the component's change detector and doing a local change detection
+     * check every five seconds.
+     *
+     * See {@link ChangeDetectorRef#detach} for more information.
+     */
+    detectChanges(): void;
+    /**
+     * Checks the change detector and its children, and throws if any changes are detected.
+     *
+     * This is used in development mode to verify that running change detection doesn't
+     * introduce other changes.
+     */
+    checkNoChanges(): void;
+    attachToViewContainerRef(): void;
+    detachFromAppRef(): void;
+    attachToAppRef(appRef: ApplicationRef): void;
+}
+/**
+ * Reports whether the given view is considered dirty according to the different marking mechanisms.
+ */
+declare function isViewDirty(view: ViewRef<unknown>): boolean;
+declare function markForRefresh(view: ViewRef<unknown>): void;
+
+declare class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
+    private ngModule?;
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule?: NgModuleRef$1<any> | undefined);
+    resolveComponentFactory<T>(component: Type$1<T>): ComponentFactory$1<T>;
+}
+/**
+ * Infers the tag name that should be used for a component based on its definition.
+ * @param componentDef Definition for which to resolve the tag name.
+ */
+declare function inferTagNameFromDefinition(componentDef: ComponentDef<unknown>): string;
+/**
+ * ComponentFactory interface implementation.
+ */
+declare class ComponentFactory<T> extends ComponentFactory$1<T> {
+    private componentDef;
+    private ngModule?;
+    selector: string;
+    componentType: Type$1<any>;
+    ngContentSelectors: string[];
+    isBoundToModule: boolean;
+    private cachedInputs;
+    private cachedOutputs;
+    get inputs(): {
+        propName: string;
+        templateName: string;
+        isSignal: boolean;
+        transform?: (value: any) => any;
+    }[];
+    get outputs(): {
+        propName: string;
+        templateName: string;
+    }[];
+    /**
+     * @param componentDef The component definition.
+     * @param ngModule The NgModuleRef to which the factory is bound.
+     */
+    constructor(componentDef: ComponentDef<any>, ngModule?: NgModuleRef$1<any> | undefined);
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef$1<any> | EnvironmentInjector | undefined, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[]): ComponentRef$1<T>;
+    private createComponentRef;
+}
+/**
+ * Represents an instance of a Component created via a {@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+ * method.
+ *
+ */
+declare class ComponentRef<T> extends ComponentRef$1<T> {
+    private readonly _rootLView;
+    private readonly _hasInputBindings;
+    instance: T;
+    hostView: ViewRef<T>;
+    changeDetectorRef: ChangeDetectorRef;
+    componentType: Type$1<T>;
+    location: ElementRef;
+    private previousInputValues;
+    private _tNode;
+    constructor(componentType: Type$1<T>, _rootLView: LView, _hasInputBindings: boolean);
+    setInput(name: string, value: unknown): void;
+    get injector(): Injector;
+    destroy(): void;
+    onDestroy(callback: () => void): void;
 }
 
 /**
- * Provides change detection without ZoneJS for the application bootstrapped using
- * `bootstrapApplication`.
+ * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
  *
- * NOTE: Zoneless is enabled by default in Angular v21+. Ensure `provideZoneChangeDetection` is not used to override this default.
+ * @param ngModule NgModule class.
+ * @param parentInjector Optional injector instance to use as a parent for the module injector. If
+ *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
  *
- * This function allows you to configure the application to not use the state/state changes of
- * ZoneJS to schedule change detection in the application. This will work when ZoneJS is not present
- * on the page at all or if it exists because something else is using it (either another Angular
- * application which uses ZoneJS for scheduling or some other library that relies on ZoneJS).
- *
- * This can also be added to the `TestBed` providers to configure the test environment to more
- * closely match production behavior. This will help give higher confidence that components are
- * compatible with zoneless change detection.
- *
- * ZoneJS uses browser events to trigger change detection. When using this provider, Angular will
- * instead use Angular APIs to schedule change detection. These APIs include:
- *
- * - `ChangeDetectorRef.markForCheck`
- * - `ComponentRef.setInput`
- * - updating a signal that is read in a template
- * - when bound host or template listeners are triggered
- * - attaching a view that was marked dirty by one of the above
- * - removing a view
- * - registering a render hook (templates are only refreshed if render hooks do one of the above)
- *
- * @usageNotes
- * ```ts
- * bootstrapApplication(MyApp, {providers: [
- *   provideZonelessChangeDetection(),
- * ]});
- * ```
- *
- * @publicApi 20.2
- *
- * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
- * @see [Angular without ZoneJS (Zoneless)](guide/zoneless)
+ * @publicApi
  */
-declare function provideZonelessChangeDetection(): EnvironmentProviders;
-declare function provideZonelessChangeDetectionInternal(): Provider[];
+declare function createNgModule<T>(ngModule: Type$1<T>, parentInjector?: Injector): NgModuleRef$1<T>;
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+declare const createNgModuleRef: typeof createNgModule;
+declare class NgModuleRef<T> extends NgModuleRef$1<T> implements InternalNgModuleRef<T> {
+    private readonly ngModuleType;
+    _parent: Injector | null;
+    _bootstrapComponents: Type$1<any>[];
+    private readonly _r3Injector;
+    instance: T;
+    destroyCbs: (() => void)[] | null;
+    readonly componentFactoryResolver: ComponentFactoryResolver;
+    constructor(ngModuleType: Type$1<T>, _parent: Injector | null, additionalProviders: Array<Provider | EnvironmentProviders>, runInjectorInitializers?: boolean);
+    resolveInjectorInitializers(): void;
+    get injector(): EnvironmentInjector;
+    destroy(): void;
+    onDestroy(callback: () => void): void;
+}
+declare class NgModuleFactory<T> extends NgModuleFactory$1<T> {
+    moduleType: Type$1<T>;
+    constructor(moduleType: Type$1<T>);
+    create(parentInjector: Injector | null): NgModuleRef$1<T>;
+}
+/**
+ * Create a new environment injector.
+ *
+ * @param providers An array of providers.
+ * @param parent A parent environment injector.
+ * @param debugName An optional name for this injector instance, which will be used in error
+ *     messages.
+ *
+ * @publicApi
+ */
+declare function createEnvironmentInjector(providers: Array<Provider | EnvironmentProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
 
 /**
- * Provides a hook for centralized exception handling.
+ * Convince closure compiler that the wrapped function has no side-effects.
  *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+declare function noSideEffects<T>(fn: () => T): T;
+
+/**
+ * @description
+ * Hook for manual bootstrapping of the application instead of using `bootstrap` array in @NgModule
+ * annotation. This hook is invoked only when the `bootstrap` array is empty or not provided.
+ *
+ * Reference to the current application is provided as a parameter.
+ *
+ * See ["Bootstrapping"](/guide/ngmodules/overview#bootstrapping-an-application).
  *
  * @usageNotes
- * ### Example
+ * The example below uses `ApplicationRef.bootstrap()` to render the
+ * `AppComponent` on the page.
  *
  * ```ts
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
+ * class AppModule implements DoBootstrap {
+ *   ngDoBootstrap(appRef: ApplicationRef) {
+ *     appRef.bootstrap(AppComponent); // Or some other component
  *   }
  * }
- *
- * // Provide in standalone apps
- * bootstrapApplication(AppComponent, {
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- *
- * // Provide in module-based apps
- * @NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
  * ```
  *
  * @publicApi
- *
- * @see [Unhandled errors in Angular](best-practices/error-handling)
- *
  */
-declare class ErrorHandler {
-    handleError(error: any): void;
+interface DoBootstrap {
+    ngDoBootstrap(appRef: ApplicationRef): void;
 }
+
 /**
- * `InjectionToken` used to configure how to call the `ErrorHandler`.
- */
-declare const INTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
-/**
- * Provides an environment initializer which forwards unhandled errors to the ErrorHandler.
- *
- * The listeners added are for the window's 'unhandledrejection' and 'error' events.
- *
- * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
+ * @description Represents the version of Angular
  *
  * @publicApi
  */
-declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
+declare class Version {
+    full: string;
+    readonly major: string;
+    readonly minor: string;
+    readonly patch: string;
+    constructor(full: string);
+}
+/**
+ * @publicApi
+ */
+declare const VERSION: Version;
 
 /**
  * Returns the NgModuleFactory with the given id (specified using [@NgModule.id
@@ -3530,6 +3707,27 @@ declare abstract class ViewContainerRef {
         bindings?: Binding[];
     }): ComponentRef$1<C>;
     /**
+     * Instantiates a single component and inserts its host view into this container.
+     *
+     * @param componentFactory Component factory to use.
+     * @param index The index at which to insert the new component's host view into this container.
+     * If not specified, appends the new view as the last entry.
+     * @param injector The injector to use as the parent for the new component.
+     * @param projectableNodes List of DOM nodes that should be projected through
+     *     [`<ng-content>`](api/core/ng-content) of the new component instance.
+     * @param ngModuleRef An instance of the NgModuleRef that represent an NgModule.
+     * This information is used to retrieve corresponding NgModule injector.
+     * @param directives Directives that should be applied to the component.
+     * @param bindings Bindings that should be applied to the component.
+     *
+     * @returns The new `ComponentRef` which contains the component instance and the host view.
+     *
+     * @deprecated Angular no longer requires component factories to dynamically create components.
+     *     Use different signature of the `createComponent` method, which allows passing
+     *     Component class directly.
+     */
+    abstract createComponent<C>(componentFactory: ComponentFactory$1<C>, index?: number, injector?: Injector, projectableNodes?: any[][], environmentInjector?: EnvironmentInjector | NgModuleRef$1<any>, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], bindings?: Binding[]): ComponentRef$1<C>;
+    /**
      * Inserts a view into this container.
      * @param viewRef The view to insert.
      * @param index The 0-based index at which to insert the view.
@@ -3566,6 +3764,995 @@ declare abstract class ViewContainerRef {
      */
     abstract detach(index?: number): ViewRef$1 | null;
 }
+
+/**
+ * Creates a platform.
+ * Platforms must be created on launch using this function.
+ *
+ * @publicApi
+ */
+declare function createPlatform(injector: Injector): PlatformRef;
+/**
+ * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
+ * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
+ * to build up configurations that might be required by different libraries or parts of the
+ * application.
+ * @param name Identifies the new platform factory.
+ * @param providers A set of dependency providers for platforms created with the new factory.
+ *
+ * @publicApi
+ */
+declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
+/**
+ * Checks that there is currently a platform that contains the given token as a provider.
+ *
+ * @publicApi
+ */
+declare function assertPlatform(requiredToken: any): PlatformRef;
+/**
+ * Returns the current platform in the browser environment. In the server environment,
+ * returns `null`. If you need access to the platform information, inject `PlatformRef` in your application.
+ *
+ * @publicApi
+ */
+declare function getPlatform(): PlatformRef | null;
+/**
+ * Destroys the current Angular platform and all Angular applications on the page.
+ * Destroys all modules and listeners registered with the platform.
+ *
+ * This function should not be used in a server environment, as it will be a no-op.
+ *
+ * @publicApi
+ */
+declare function destroyPlatform(): void;
+/**
+ * The goal of this function is to bootstrap a platform injector,
+ * but avoid referencing `PlatformRef` class.
+ * This function is needed for bootstrapping a Standalone Component.
+ */
+declare function createOrReusePlatformInjector(providers?: StaticProvider[]): Injector;
+/**
+ * @description
+ * This function is used to provide initialization functions that will be executed upon
+ * initialization of the platform injector.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * @usageNotes
+ * The platform initializer should be provided during platform creation:
+ *
+ * ```ts
+ * const platformRef = platformBrowser([ providePlatformInitializer(() =>  ...) ]);
+ *
+ * bootstrapApplication(App, appConfig, { platformRef })
+ * ```
+ *
+ * @publicApi
+ */
+declare function providePlatformInitializer(initializerFn: () => void): StaticProvider;
+
+/**
+ * Internal token used to verify that `provideZoneChangeDetection` is not used
+ * with the bootstrapModule API.
+ */
+declare const PROVIDED_NG_ZONE: InjectionToken<boolean>;
+declare function internalProvideZoneChangeDetection({ ngZoneFactory, scheduleInRootZone, }: {
+    ngZoneFactory?: () => NgZone;
+    scheduleInRootZone?: boolean;
+}): StaticProvider[];
+/**
+ * Provides `NgZone`-based change detection for the application bootstrapped using
+ * `bootstrapApplication`.
+ *
+ * Add this provider to use `NgZone`/ZoneJS-based change detection and configure options like
+ * `eventCoalescing` in the `NgZone`.
+ *
+ * If you need this provider function in an NgModule-based application, pass it as `applicationProviders` to `bootstrapModule()`.
+ *
+ * @usageNotes
+ * ```ts
+ * bootstrapApplication(MyApp, {providers: [
+ *   provideZoneChangeDetection({eventCoalescing: true}),
+ * ]});
+ * ```
+ *
+ * @publicApi
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
+ * @see {@link NgZoneOptions}
+ */
+declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
+/**
+ * Used to configure event and run coalescing with `provideZoneChangeDetection`.
+ *
+ * @publicApi
+ *
+ * @see {@link provideZoneChangeDetection}
+ */
+interface NgZoneOptions {
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * ```html
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     * ```
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can coalesce such kind of events to trigger
+     * change detection only once.
+     *
+     * By default, this option is set to false, meaning events will
+     * not be coalesced, and change detection will be triggered multiple times.
+     * If this option is set to true, change detection will be triggered
+     * once in the scenario described above.
+     */
+    eventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     * ```ts
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     * ```
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     */
+    runCoalescing?: boolean;
+}
+
+/**
+ * Provides change detection without ZoneJS for the application bootstrapped using
+ * `bootstrapApplication`.
+ *
+ * This function allows you to configure the application to not use the state/state changes of
+ * ZoneJS to schedule change detection in the application. This will work when ZoneJS is not present
+ * on the page at all or if it exists because something else is using it (either another Angular
+ * application which uses ZoneJS for scheduling or some other library that relies on ZoneJS).
+ *
+ * This can also be added to the `TestBed` providers to configure the test environment to more
+ * closely match production behavior. This will help give higher confidence that components are
+ * compatible with zoneless change detection.
+ *
+ * ZoneJS uses browser events to trigger change detection. When using this provider, Angular will
+ * instead use Angular APIs to schedule change detection. These APIs include:
+ *
+ * - `ChangeDetectorRef.markForCheck`
+ * - `ComponentRef.setInput`
+ * - updating a signal that is read in a template
+ * - when bound host or template listeners are triggered
+ * - attaching a view that was marked dirty by one of the above
+ * - removing a view
+ * - registering a render hook (templates are only refreshed if render hooks do one of the above)
+ *
+ * @usageNotes
+ * ```ts
+ * bootstrapApplication(MyApp, {providers: [
+ *   provideZonelessChangeDetection(),
+ * ]});
+ * ```
+ *
+ * @publicApi 20.2
+ *
+ * @see {@link /api/platform-browser/bootstrapApplication bootstrapApplication}
+ * @see [Angular without ZoneJS (Zoneless)](guide/zoneless)
+ */
+declare function provideZonelessChangeDetection(): EnvironmentProviders;
+declare function provideZonelessChangeDetectionInternal(): Provider[];
+
+/**
+ * Service that keeps track of pending tasks contributing to the stableness of Angular
+ * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
+ * tasks influencing stability, this API gives control over stability to library and application
+ * developers for specific cases not covered by Angular internals.
+ *
+ * The concept of stability comes into play in several important scenarios:
+ * - SSR process needs to wait for the application stability before serializing and sending rendered
+ * HTML;
+ * - tests might want to delay assertions until the application becomes stable;
+ *
+ * @usageNotes
+ * ```ts
+ * const pendingTasks = inject(PendingTasks);
+ * const taskCleanup = pendingTasks.add();
+ * // do work that should block application's stability and then:
+ * taskCleanup();
+ * ```
+ *
+ *
+ * @see [PendingTasks for Server Side Rendering (SSR)](guide/zoneless#pendingtasks-for-server-side-rendering-ssr)
+ *
+ * @publicApi 20.0
+ */
+declare class PendingTasks {
+    private readonly internalPendingTasks;
+    private readonly scheduler;
+    private readonly errorHandler;
+    /**
+     * Adds a new task that should block application's stability.
+     * @returns A cleanup function that removes a task when called.
+     */
+    add(): () => void;
+    /**
+     * Runs an asynchronous function and blocks the application's stability until the function completes.
+     *
+     * ```ts
+     * pendingTasks.run(async () => {
+     *   const userData = await fetch('/api/user');
+     *   this.userData.set(userData);
+     * });
+     * ```
+     *
+     * @param fn The asynchronous function to execute
+     * @developerPreview 19.0
+     */
+    run(fn: () => Promise<unknown>): void;
+    /** @nocollapse */
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<PendingTasks>;
+}
+
+/**
+ * Used to disable exhaustive checks when verifying no expressions changed after they were checked.
+ *
+ * This means that `OnPush` components that are not marked for check will not be checked.
+ * This behavior is the current default behavior in Angular. When running change detection
+ * on a view tree, views marked for check are refreshed and the flag to check it is removed.
+ * When Angular checks views a second time to ensure nothing has changed, `OnPush` components
+ * will no longer be marked and not be checked.
+ *
+ * @developerPreview 20.0
+ */
+declare function provideCheckNoChangesConfig(options: {
+    exhaustive: false;
+}): EnvironmentProviders;
+/**
+ * - `interval` will periodically run `checkNoChanges` on application views. This can be useful
+ *   in zoneless applications to periodically ensure no changes have been made without notifying
+ *   Angular that templates need to be refreshed.
+ * - The exhaustive option will treat all application views as if they were `ChangeDetectionStrategy.Eager`/`Default` when verifying
+ *   no expressions have changed. All views attached to `ApplicationRef` and all the descendants of
+ *   those views will be checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
+ *   This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.
+ *   This check is will surface any existing errors hidden by `OnPush` components.
+ *
+ * @developerPreview 20.0
+ */
+declare function provideCheckNoChangesConfig(options: {
+    interval?: number;
+    exhaustive: true;
+}): EnvironmentProviders;
+
+/**
+ * Returns whether Angular is in development mode.
+ *
+ * By default, this is true, unless `enableProdMode` is invoked prior to calling this method or the
+ * application is built using the Angular CLI with the `optimization` option.
+ * @see {@link /cli/build ng build}
+ *
+ * @publicApi
+ */
+declare function isDevMode(): boolean;
+/**
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ *
+ * Using this method is discouraged as the Angular CLI will set production mode when using the
+ * `optimization` option.
+ * @see {@link /cli/build ng build}
+ *
+ * @publicApi
+ */
+declare function enableProdMode(): void;
+
+/**
+ * A DI token representing a string ID, used
+ * primarily for prefixing application attributes and CSS styles when
+ * {@link ViewEncapsulation#Emulated} is being used.
+ *
+ * The token is needed in cases when multiple applications are bootstrapped on a page
+ * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
+ * have different `APP_ID` value setup. For example:
+ *
+ * ```ts
+ * bootstrapApplication(ComponentA, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-a' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ *
+ * bootstrapApplication(ComponentB, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-b' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ * ```
+ *
+ * By default, when there is only one application bootstrapped, you don't need to provide the
+ * `APP_ID` token (the `ng` will be used as an app ID).
+ *
+ * @publicApi
+ */
+declare const APP_ID: InjectionToken<string>;
+/**
+ * A function that is executed when a platform is initialized.
+ *
+ * @deprecated from v19.0.0, use providePlatformInitializer instead
+ *
+ * @see {@link providePlatformInitializer}
+ *
+ * @publicApi
+ */
+declare const PLATFORM_INITIALIZER: InjectionToken<readonly (() => void)[]>;
+/**
+ * A token that indicates an opaque platform ID.
+ * @publicApi
+ */
+declare const PLATFORM_ID: InjectionToken<Object>;
+/**
+ * A [DI token](api/core/InjectionToken) that indicates which animations
+ * module has been loaded.
+ * @publicApi
+ */
+declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserAnimations">;
+/**
+ * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
+ * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
+ * from the `ngCspNonce` attribute of the application root node.
+ *
+ * @see [Content security policy](best-practices/security#content-security-policy)
+ *
+ * @publicApi
+ */
+declare const CSP_NONCE: InjectionToken<string | null>;
+/**
+ * A configuration object for the image-related options. Contains:
+ * - breakpoints: An array of integer breakpoints used to generate
+ *      srcsets for responsive images.
+ * - disableImageSizeWarning: A boolean value. Setting this to true will
+ *      disable console warnings about oversized images.
+ * - disableImageLazyLoadWarning: A boolean value. Setting this to true will
+ *      disable console warnings about LCP images configured with `loading="lazy"`.
+ * Learn more about the responsive image configuration in [the NgOptimizedImage
+ * guide](guide/image-optimization).
+ * Learn more about image warning options in [the related error page](errors/NG0913).
+ * @publicApi
+ */
+type ImageConfig = {
+    breakpoints?: number[];
+    placeholderResolution?: number;
+    disableImageSizeWarning?: boolean;
+    disableImageLazyLoadWarning?: boolean;
+};
+declare const IMAGE_CONFIG_DEFAULTS: ImageConfig;
+/**
+ * Injection token that configures the image optimized image functionality.
+ * See {@link ImageConfig} for additional information about parameters that
+ * can be used.
+ *
+ * @see {@link NgOptimizedImage}
+ * @see {@link ImageConfig}
+ * @see [Responsive images](guide/image-optimization#responsive-images)
+ * @see [Using placeholders](guide/image-optimization#using-placeholders)
+ * @publicApi
+ */
+declare const IMAGE_CONFIG: InjectionToken<ImageConfig>;
+
+/**
+ * Provides an application initializer that will log information about what tasks are keeping
+ * the application from stabilizing if the application does not stabilize within 9 seconds.
+ *
+ * The logged information includes the stack of the tasks preventing stability. This stack can be traced
+ * back to the source in the application code.
+ *
+ * If you are using Zone.js, it is recommended that you also temporarily import "zone.js/plugins/task-tracking".
+ * This Zone.js plugin provides additional information about which macrotasks are scheduled in the Angular Zone
+ * and keeping the Zone from stabilizing.
+ *
+ * @usageNotes
+ *
+ * ```ts
+ * import 'zone.js/plugins/task-tracking';
+ *
+ * bootstrapApplication(AppComponent, {providers: [provideStabilityDebugging()]});
+ * ```
+ *
+ * IMPORTANT: Neither the zone.js task tracking plugin nor this utility are removed from production bundles.
+ * They are intended for temporary use while debugging stability issues during development, including for
+ * optimized production builds.
+ *
+ * @publicApi 21.1
+ */
+declare function provideStabilityDebugging(): EnvironmentProviders;
+
+/**
+ * A DI token that you can use to provide
+ * one or more initialization functions.
+ *
+ * The provided functions are injected at application startup and executed during
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
+ *
+ * You can, for example, create a factory function that loads language data
+ * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
+ * The function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * @deprecated from v19.0.0, use provideAppInitializer instead
+ *
+ * @see {@link ApplicationInitStatus}
+ * @see {@link provideAppInitializer}
+ *
+ * @usageNotes
+ *
+ * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+ * and a function returning a promise.
+ * ### Example with NgModule-based application
+ * ```ts
+ *  function initializeApp(): Promise<any> {
+ *    const http = inject(HttpClient);
+ *    return firstValueFrom(
+ *      http
+ *        .get("https://someUrl.com/api/user")
+ *        .pipe(tap(user => { ... }))
+ *    );
+ *  }
+ *
+ *  @NgModule({
+ *   imports: [BrowserModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useValue: initializeApp,
+ *     multi: true,
+ *    }]
+ *   })
+ *  export class AppModule {}
+ * ```
+ *
+ * ### Example with standalone application
+ * ```ts
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
+ * }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useValue: initializeApp,
+ *       multi: true,
+ *     },
+ *   ],
+ * });
+
+ * ```
+ *
+ *
+ * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+ * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+ * demo purposes to illustrate how the factory function can work with other providers available
+ * through DI.
+ *
+ * ### Example with NgModule-based application
+ * ```ts
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
+ * }
+ *
+ * @NgModule({
+ *   imports: [BrowserModule, HttpClientModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useValue: initializeApp,
+ *     multi: true,
+ *   }]
+ * })
+ * export class AppModule {}
+ * ```
+ *
+ * ### Example with standalone application
+ * ```ts
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
+ * }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useValue: initializeApp,
+ *       multi: true,
+ *     },
+ *   ],
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
+/**
+ * @description
+ * The provided function is injected at application startup and executed during
+ * app initialization. If the function returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
+ *
+ * You can, for example, create a function that loads language data
+ * or an external configuration, and provide that function using `provideAppInitializer()`.
+ * The function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * Previously, this was achieved using the `APP_INITIALIZER` token which is now deprecated.
+ *
+ * @see {@link APP_INITIALIZER}
+ *
+ * @usageNotes
+ * The following example illustrates how to configure an initialization function using
+ * `provideAppInitializer()`
+ * ```ts
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideAppInitializer(() => {
+ *       const http = inject(HttpClient);
+ *       return firstValueFrom(
+ *         http
+ *           .get("https://someUrl.com/api/user")
+ *           .pipe(tap(user => { ... }))
+ *       );
+ *     }),
+ *     provideHttpClient(),
+ *   ],
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare function provideAppInitializer(initializerFn: () => Observable<unknown> | Promise<unknown> | void): EnvironmentProviders;
+/**
+ * A class that reflects the state of running {@link APP_INITIALIZER} functions.
+ *
+ * @publicApi
+ */
+declare class ApplicationInitStatus {
+    private resolve;
+    private reject;
+    private initialized;
+    readonly done = false;
+    readonly donePromise: Promise<any>;
+    private readonly appInits;
+    private readonly injector;
+    constructor();
+    static ɵfac: __FactoryDeclaration<ApplicationInitStatus, never>;
+    static ɵprov: __InjectableDeclaration<ApplicationInitStatus>;
+}
+
+/**
+ * Testability API.
+ * `declare` keyword causes tsickle to generate externs, so these methods are
+ * not renamed by Closure Compiler.
+ * @publicApi
+ */
+declare interface PublicTestability {
+    isStable(): boolean;
+    whenStable(callback: Function, timeout?: number, updateCallback?: Function): void;
+    findProviders(using: any, provider: string, exactMatch: boolean): any[];
+}
+/**
+ * Internal injection token that can used to access an instance of a Testability class.
+ *
+ * This token acts as a bridge between the core bootstrap code and the `Testability` class. This is
+ * needed to ensure that there are no direct references to the `Testability` class, so it can be
+ * tree-shaken away (if not referenced). For the environments/setups when the `Testability` class
+ * should be available, this token is used to add a provider that references the `Testability`
+ * class. Otherwise, only this token is retained in a bundle, but the `Testability` class is not.
+ */
+declare const TESTABILITY: InjectionToken<Testability>;
+/**
+ * Internal injection token to retrieve Testability getter class instance.
+ */
+declare const TESTABILITY_GETTER: InjectionToken<GetTestability>;
+/**
+ * The Testability service provides testing hooks that can be accessed from
+ * the browser.
+ *
+ * Angular applications bootstrapped using an NgModule (via `@NgModule.bootstrap` field) will also
+ * instantiate Testability by default (in both development and production modes).
+ *
+ * For applications bootstrapped using the `bootstrapApplication` function, Testability is not
+ * included by default. You can include it into your applications by getting the list of necessary
+ * providers using the `provideProtractorTestingSupport()` function and adding them into the
+ * `options.providers` array. Example:
+ *
+ * ```ts
+ * import {provideProtractorTestingSupport} from '@angular/platform-browser';
+ *
+ * await bootstrapApplication(RootComponent, providers: [provideProtractorTestingSupport()]);
+ * ```
+ *
+ * @publicApi
+ */
+declare class Testability implements PublicTestability {
+    private _ngZone;
+    private registry;
+    private _isZoneStable;
+    private _callbacks;
+    private _taskTrackingZone;
+    private _destroyRef?;
+    constructor(_ngZone: NgZone, registry: TestabilityRegistry, testabilityGetter: GetTestability);
+    private _watchAngularEvents;
+    /**
+     * Whether an associated application is stable
+     */
+    isStable(): boolean;
+    private _runCallbacksIfReady;
+    private getPendingTasks;
+    private addCallback;
+    /**
+     * Wait for the application to be stable with a timeout. If the timeout is reached before that
+     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+     *
+     * @param doneCb The callback to invoke when Angular is stable or the timeout expires
+     *    whichever comes first.
+     * @param timeout Optional. The maximum time to wait for Angular to become stable. If not
+     *    specified, whenStable() will wait forever.
+     * @param updateCb Optional. If specified, this callback will be invoked whenever the set of
+     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+     *    and no further updates will be issued.
+     */
+    whenStable(doneCb: Function, timeout?: number, updateCb?: Function): void;
+    /**
+     * Find providers by name
+     * @param using The root element to search from
+     * @param provider The name of binding variable
+     * @param exactMatch Whether using exactMatch
+     */
+    findProviders(using: any, provider: string, exactMatch: boolean): any[];
+    static ɵfac: __FactoryDeclaration<Testability, never>;
+    static ɵprov: __InjectableDeclaration<Testability>;
+}
+/**
+ * A global registry of {@link Testability} instances for specific elements.
+ * @publicApi
+ */
+declare class TestabilityRegistry {
+    /**
+     * Registers an application with a testability hook so that it can be tracked
+     * @param token token of application, root element
+     * @param testability Testability hook
+     */
+    registerApplication(token: any, testability: Testability): void;
+    /**
+     * Unregisters an application.
+     * @param token token of application, root element
+     */
+    unregisterApplication(token: any): void;
+    /**
+     * Unregisters all applications
+     */
+    unregisterAllApplications(): void;
+    /**
+     * Get a testability hook associated with the application
+     * @param elem root element
+     */
+    getTestability(elem: any): Testability | null;
+    /**
+     * Get all registered testabilities
+     */
+    getAllTestabilities(): Testability[];
+    /**
+     * Get all registered applications(root elements)
+     */
+    getAllRootElements(): any[];
+    /**
+     * Find testability of a node in the Tree
+     * @param elem node
+     * @param findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
+     */
+    findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
+    static ɵfac: __FactoryDeclaration<TestabilityRegistry, never>;
+    static ɵprov: __InjectableDeclaration<TestabilityRegistry>;
+}
+/**
+ * Adapter interface for retrieving the `Testability` service associated for a
+ * particular context.
+ *
+ * @publicApi
+ */
+interface GetTestability {
+    addToWindow(registry: TestabilityRegistry): void;
+    findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability | null;
+}
+/**
+ * Set the {@link GetTestability} implementation used by the Angular testing framework.
+ * @publicApi
+ */
+declare function setTestabilityGetter(getter: GetTestability): void;
+
+/**
+ * This platform has to be included in any other platform
+ *
+ * @publicApi
+ */
+declare const platformCore: (extraProviders?: StaticProvider[] | undefined) => PlatformRef;
+
+/**
+ * Provide this token to set the locale of your application.
+ * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
+ * DecimalPipe and PercentPipe) and by ICU expressions.
+ *
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * In standalone apps:
+ * ```ts
+ * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
+ * import { AppModule } from './app/app.module';
+ *
+ * const appConfig: ApplicationConfig = {
+ *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+ * };
+ * ```
+ *
+ * In module based apps:
+ * ```ts
+ * import { LOCALE_ID } from '@angular/core';
+ * import { platformBrowser } from '@angular/platform-browser';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowser().bootstrapModule(AppModule, {
+ *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ * @see [Import global variants of the locale data](guide/i18n/import-global-variants)
+ */
+declare const LOCALE_ID: InjectionToken<string>;
+/**
+ * Provide this token to set the default currency code your application uses for
+ * CurrencyPipe when there is no currency code passed into it. This is only used by
+ * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
+ *
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
+ *
+ * <div class="docs-alert docs-alert-helpful">
+ *
+ * The default currency code is currently always `USD`.
+ *
+ * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
+ * your application `NgModule`:
+ *
+ * ```ts
+ * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
+ * ```
+ *
+ * </div>
+ *
+ * @usageNotes
+ * ### Example
+ * In standalone apps:
+ * ```ts
+ * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
+ *
+ * const appConfig: ApplicationConfig = {
+ *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
+ * };
+ * ```
+ *
+ * In module based apps:
+ * ```ts
+ * import { platformBrowser } from '@angular/platform-browser';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowser().bootstrapModule(AppModule, {
+ *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare const DEFAULT_CURRENCY_CODE: InjectionToken<string>;
+/**
+ * Use this token at bootstrap to provide the content of your translation file (`xtb`,
+ * `xlf` or `xlf2`) when you want to translate your application in another language.
+ *
+ * See the [i18n guide](guide/i18n/merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * In standalone apps:
+ * ```ts
+ * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
+ *
+ * const appConfig: ApplicationConfig = {
+ *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+ * };
+ * ```
+ *
+ * In module based apps:
+ * ```ts
+ * import { TRANSLATIONS } from '@angular/core';
+ * import { platformBrowser } from '@angular/platform-browser';
+ * import { AppModule } from './app/app.module';
+ *
+ * // content of your translation file
+ * const translations = '....';
+ *
+ * platformBrowser().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare const TRANSLATIONS: InjectionToken<string>;
+/**
+ * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
+ * `xlf` or `xlf2`.
+ *
+ * See the [i18n guide](guide/i18n/merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * In standalone apps:
+ * ```ts
+ * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
+ *
+ * const appConfig: ApplicationConfig = {
+ *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+ * };
+ * ```
+ *
+ * In module based apps: *
+ * ```ts
+ * import { TRANSLATIONS_FORMAT } from '@angular/core';
+ * import { platformBrowser } from '@angular/platform-browser';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowser().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
+/**
+ * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
+ * that the compiler should use in case of missing translations:
+ * - Error: throw if you have missing translations.
+ * - Warning (default): show a warning in the console and/or shell.
+ * - Ignore: do nothing.
+ *
+ * See the [i18n guide](guide/i18n/merge#report-missing-translations) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * ```ts
+ * import { MissingTranslationStrategy } from '@angular/core';
+ * import { platformBrowser } from '@angular/platform-browser';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowser().bootstrapModule(AppModule, {
+ *   missingTranslation: MissingTranslationStrategy.Error
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+declare enum MissingTranslationStrategy {
+    Error = 0,
+    Warning = 1,
+    Ignore = 2
+}
+
+/**
+ * Re-exported by `BrowserModule`, which is included automatically in the root
+ * `AppModule` when you create a new app with the CLI `new` command. Eagerly injects
+ * `ApplicationRef` to instantiate it.
+ *
+ * @publicApi
+ */
+declare class ApplicationModule {
+    constructor(appRef: ApplicationRef);
+    static ɵfac: __FactoryDeclaration<ApplicationModule, never>;
+    static ɵmod: __NgModuleDeclaration<ApplicationModule, never, never, never>;
+    static ɵinj: __InjectorDeclaration<ApplicationModule>;
+}
+
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```ts
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * // Provide in standalone apps
+ * bootstrapApplication(AppComponent, {
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ *
+ * // Provide in module-based apps
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ *
+ * @see [Unhandled errors in Angular](best-practices/error-handling)
+ *
+ */
+declare class ErrorHandler {
+    handleError(error: any): void;
+}
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ */
+declare const INTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
+/**
+ * Provides an environment initializer which forwards unhandled errors to the ErrorHandler.
+ *
+ * The listeners added are for the window's 'unhandledrejection' and 'error' events.
+ *
+ * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
+ *
+ * @publicApi
+ */
+declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
 
 /**
  * Internal create application API that implements the core application creation logic and optional
@@ -3648,38 +4835,6 @@ declare function setDocument(document: Document | undefined): void;
  * For example to create the renderer or to do sanitization.
  */
 declare function getDocument(): Document;
-
-/** Token used to retrieve the `SharedStylesHost`. */
-declare const SHARED_STYLES_HOST: InjectionToken<SharedStylesHost>;
-/** Manages stylesheets for components in the application. */
-interface SharedStylesHost {
-    /**
-     * Adds embedded styles to the DOM via HTML `style` elements.
-     * @param styles An array of style content strings.
-     * @param urls An array of URLs to be added as link tags.
-     */
-    addStyles(styles: string[], urls?: string[]): void;
-    /**
-     * Removes embedded styles from the DOM that were added as HTML `style` elements.
-     * @param styles An array of style content strings.
-     * @param urls An array of URLs to be removed as link tags.
-     */
-    removeStyles(styles: string[], urls?: string[]): void;
-    /**
-     * Adds a host node to contain styles added to the DOM and adds all existing style usage to
-     * the newly added host node.
-     *
-     * @param hostNode The node to contain styles added to the DOM.
-     */
-    addHost(hostNode: Node): void;
-    /**
-     * Removes a host node from the set of style hosts and removes all existing style usage from
-     * the removed host node.
-     *
-     * @param hostNode The node to remove from the set of style hosts.
-     */
-    removeHost(hostNode: Node): void;
-}
 
 /**
  * URL for the XSS security documentation.
@@ -3785,6 +4940,7 @@ declare const enum RuntimeErrorCode {
     UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     MISSING_NG_MODULE_DEFINITION = 915,
     MISSING_DIRECTIVE_DEFINITION = 916,
+    NO_COMPONENT_FACTORY_FOUND = 917,
     EXTERNAL_RESOURCE_LOADING_FAILED = 918,
     DEF_TYPE_UNDEFINED = -919,
     NG_MODULE_ID_NOT_FOUND = 920,
@@ -3800,8 +4956,7 @@ declare const enum RuntimeErrorCode {
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
     MUST_PROVIDE_STREAM_OPTION = 990,
-    RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = 991,
-    INVALID_RESOURCE_CREATION_IN_PARAMS = 992
+    RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = 991
 }
 /**
  * Class that represents a runtime error.
@@ -3979,9 +5134,6 @@ declare function withI18nSupport(): Provider[];
  * Requires hydration to be enabled separately.
  * Enabling incremental hydration also enables event replay for the entire app.
  * @see [Incremental Hydration](guide/incremental-hydration#how-do-you-enable-incremental-hydration-in-angular)
- *
- * @deprecated Since v22.0.0, incremental hydration is enabled by default with `provideClientHydration`.
- * Intent to remove in v24.
  */
 declare function withIncrementalHydration(): Provider[];
 
@@ -4419,149 +5571,6 @@ declare function _sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): Truste
 declare function _sanitizeUrl(url: string): string;
 
 /**
- * Testability API.
- * `declare` keyword causes tsickle to generate externs, so these methods are
- * not renamed by Closure Compiler.
- * @publicApi
- */
-declare interface PublicTestability {
-    isStable(): boolean;
-    whenStable(callback: Function, timeout?: number, updateCallback?: Function): void;
-    findProviders(using: any, provider: string, exactMatch: boolean): any[];
-}
-/**
- * Internal injection token that can used to access an instance of a Testability class.
- *
- * This token acts as a bridge between the core bootstrap code and the `Testability` class. This is
- * needed to ensure that there are no direct references to the `Testability` class, so it can be
- * tree-shaken away (if not referenced). For the environments/setups when the `Testability` class
- * should be available, this token is used to add a provider that references the `Testability`
- * class. Otherwise, only this token is retained in a bundle, but the `Testability` class is not.
- */
-declare const TESTABILITY: InjectionToken<Testability>;
-/**
- * Internal injection token to retrieve Testability getter class instance.
- */
-declare const TESTABILITY_GETTER: InjectionToken<GetTestability>;
-/**
- * The Testability service provides testing hooks that can be accessed from
- * the browser.
- *
- * Angular applications bootstrapped using an NgModule (via `@NgModule.bootstrap` field) will also
- * instantiate Testability by default (in both development and production modes).
- *
- * For applications bootstrapped using the `bootstrapApplication` function, Testability is not
- * included by default. You can include it into your applications by getting the list of necessary
- * providers using the `provideProtractorTestingSupport()` function and adding them into the
- * `options.providers` array. Example:
- *
- * ```ts
- * import {provideProtractorTestingSupport} from '@angular/platform-browser';
- *
- * await bootstrapApplication(RootComponent, providers: [provideProtractorTestingSupport()]);
- * ```
- *
- * @publicApi
- */
-declare class Testability implements PublicTestability {
-    private _ngZone;
-    private registry;
-    private _isZoneStable;
-    private _callbacks;
-    private _taskTrackingZone;
-    private _destroyRef?;
-    constructor(_ngZone: NgZone, registry: TestabilityRegistry, testabilityGetter: GetTestability);
-    private _watchAngularEvents;
-    /**
-     * Whether an associated application is stable
-     */
-    isStable(): boolean;
-    private _runCallbacksIfReady;
-    private getPendingTasks;
-    private addCallback;
-    /**
-     * Wait for the application to be stable with a timeout. If the timeout is reached before that
-     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
-     *
-     * @param doneCb The callback to invoke when Angular is stable or the timeout expires
-     *    whichever comes first.
-     * @param timeout Optional. The maximum time to wait for Angular to become stable. If not
-     *    specified, whenStable() will wait forever.
-     * @param updateCb Optional. If specified, this callback will be invoked whenever the set of
-     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
-     *    and no further updates will be issued.
-     */
-    whenStable(doneCb: Function, timeout?: number, updateCb?: Function): void;
-    /**
-     * Find providers by name
-     * @param using The root element to search from
-     * @param provider The name of binding variable
-     * @param exactMatch Whether using exactMatch
-     */
-    findProviders(using: any, provider: string, exactMatch: boolean): any[];
-    static ɵfac: __FactoryDeclaration<Testability, never>;
-    static ɵprov: __InjectableDeclaration<Testability>;
-}
-/**
- * A global registry of {@link Testability} instances for specific elements.
- * @publicApi
- */
-declare class TestabilityRegistry {
-    /**
-     * Registers an application with a testability hook so that it can be tracked
-     * @param token token of application, root element
-     * @param testability Testability hook
-     */
-    registerApplication(token: any, testability: Testability): void;
-    /**
-     * Unregisters an application.
-     * @param token token of application, root element
-     */
-    unregisterApplication(token: any): void;
-    /**
-     * Unregisters all applications
-     */
-    unregisterAllApplications(): void;
-    /**
-     * Get a testability hook associated with the application
-     * @param elem root element
-     */
-    getTestability(elem: any): Testability | null;
-    /**
-     * Get all registered testabilities
-     */
-    getAllTestabilities(): Testability[];
-    /**
-     * Get all registered applications(root elements)
-     */
-    getAllRootElements(): any[];
-    /**
-     * Find testability of a node in the Tree
-     * @param elem node
-     * @param findInAncestors whether finding testability in ancestors if testability was not found in
-     * current node
-     */
-    findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
-    static ɵfac: __FactoryDeclaration<TestabilityRegistry, never>;
-    static ɵprov: __InjectableDeclaration<TestabilityRegistry>;
-}
-/**
- * Adapter interface for retrieving the `Testability` service associated for a
- * particular context.
- *
- * @publicApi
- */
-interface GetTestability {
-    addToWindow(registry: TestabilityRegistry): void;
-    findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability | null;
-}
-/**
- * Set the {@link GetTestability} implementation used by the Angular testing framework.
- * @publicApi
- */
-declare function setTestabilityGetter(getter: GetTestability): void;
-
-/**
  * Transforms a value (typically a string) to a boolean.
  * Intended to be used as a transform function of an input.
  *
@@ -4670,12 +5679,9 @@ declare function resource<T, R>(options: ResourceOptions<T, R> & {
  * @see [Async reactivity with resources](guide/signals/resource)
  */
 declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
-type ResourceInternalStatus = 'idle' | 'loading' | 'resolved' | 'local';
 type WrappedRequest = {
-    request?: unknown;
+    request: unknown;
     reload: number;
-    status?: ResourceInternalStatus;
-    error?: Error;
 };
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -4720,7 +5726,7 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
     private unregisterOnDestroy;
     readonly status: Signal<ResourceStatus>;
     readonly error: Signal<Error | undefined>;
-    constructor(request: (ctx: ResourceParamsContext) => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, debugName: string | undefined, injector: Injector, getInitialStream?: (request: R) => Signal<ResourceStreamItem<T>> | undefined);
+    constructor(request: () => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, debugName: string | undefined, injector: Injector, getInitialStream?: (request: R) => Signal<ResourceStreamItem<T>> | undefined);
     /**
      * Called either directly via `WritableResource.set` or via `.value.set()`.
      */
@@ -4820,7 +5826,7 @@ declare const ɵɵNgOnChangesFeature: () => DirectiveDefFeature;
  *
  * @codeGenApi
  */
-declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: DirectiveDef<T>) => void;
+declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders: Provider[]): (definition: DirectiveDef<T>) => void;
 
 /**
  * A feature that adds support for external runtime styles for a component.
@@ -5214,291 +6220,6 @@ interface Listener {
  */
 declare function getListeners(element: Element): Listener[];
 
-declare class ViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRef {
-    /**
-     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
-     * requested.
-     *
-     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
-     */
-    private _cdRefInjectingView?;
-    private _appRef;
-    private _attachedToViewContainer;
-    private exhaustive?;
-    get rootNodes(): any[];
-    constructor(
-    /**
-     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
-     *
-     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
-     * component.
-     *
-     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
-     * view.
-     *
-     * @internal
-     */
-    _lView: LView, 
-    /**
-     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
-     * requested.
-     *
-     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
-     */
-    _cdRefInjectingView?: LView | undefined);
-    get context(): T;
-    /**
-     * @deprecated Replacing the full context object is not supported. Modify the context
-     *   directly, or consider using a `Proxy` if you need to replace the full object.
-     * // TODO(devversion): Remove this.
-     */
-    set context(value: T);
-    get destroyed(): boolean;
-    destroy(): void;
-    onDestroy(callback: Function): void;
-    /**
-     * Marks a view and all of its ancestors dirty.
-     *
-     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush} component is
-     * checked when it needs to be re-rendered but the two normal triggers haven't marked it
-     * dirty (i.e. inputs haven't changed and events haven't fired in the view).
-     *
-     * <!-- TODO: Add a link to a chapter on OnPush components -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```ts
-     * @Component({
-     *   selector: 'app-root',
-     *   template: `Number of ticks: {{numberOfTicks}}`
-     * })
-     * class AppComponent {
-     *   numberOfTicks = 0;
-     *
-     *   constructor(private ref: ChangeDetectorRef) {
-     *     setInterval(() => {
-     *       this.numberOfTicks++;
-     *       // the following is required, otherwise the view will not be updated
-     *       this.ref.markForCheck();
-     *     }, 1000);
-     *   }
-     * }
-     * ```
-     */
-    markForCheck(): void;
-    /**
-     * Detaches the view from the change detection tree.
-     *
-     * Detached views will not be checked during change detection runs until they are
-     * re-attached, even if they are dirty. `detach` can be used in combination with
-     * {@link ChangeDetectorRef#detectChanges} to implement local change
-     * detection checks.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds. We can do that by detaching
-     * the component's change detector and doing a local check every five seconds.
-     *
-     * ```ts
-     * class DataProvider {
-     *   // in a real application the returned data will be different every time
-     *   get data() {
-     *     return [1,2,3,4,5];
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'giant-list',
-     *   template: `
-     *     @for(d of dataProvider.data; track $index) {
-     *        <li>Data {{d}}</li>
-     *     }
-     *   `,
-     * })
-     * class GiantList {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {
-     *     ref.detach();
-     *     setInterval(() => {
-     *       this.ref.detectChanges();
-     *     }, 5000);
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'app',
-     *   providers: [DataProvider],
-     *   template: `
-     *     <giant-list><giant-list>
-     *   `,
-     * })
-     * class App {
-     * }
-     * ```
-     */
-    detach(): void;
-    /**
-     * Re-attaches a view to the change detection tree.
-     *
-     * This can be used to re-attach views that were previously detached from the tree
-     * using {@link ChangeDetectorRef#detach}. Views are attached to the tree by default.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example creates a component displaying `live` data. The component will detach
-     * its change detector from the main change detector tree when the component's live property
-     * is set to false.
-     *
-     * ```ts
-     * class DataProvider {
-     *   data = 1;
-     *
-     *   constructor() {
-     *     setInterval(() => {
-     *       this.data = this.data * 2;
-     *     }, 500);
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'live-data',
-     *   inputs: ['live'],
-     *   template: 'Data: {{dataProvider.data}}'
-     * })
-     * class LiveData {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {}
-     *
-     *   set live(value) {
-     *     if (value) {
-     *       this.ref.reattach();
-     *     } else {
-     *       this.ref.detach();
-     *     }
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'app-root',
-     *   providers: [DataProvider],
-     *   template: `
-     *     Live Update: <input type="checkbox" [(ngModel)]="live">
-     *     <live-data [live]="live"><live-data>
-     *   `,
-     * })
-     * class AppComponent {
-     *   live = true;
-     * }
-     * ```
-     */
-    reattach(): void;
-    /**
-     * Checks the view and its children.
-     *
-     * This can also be used in combination with {@link ChangeDetectorRef#detach} to implement
-     * local change detection checks.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine, the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds.
-     *
-     * We can do that by detaching the component's change detector and doing a local change detection
-     * check every five seconds.
-     *
-     * See {@link ChangeDetectorRef#detach} for more information.
-     */
-    detectChanges(): void;
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
-     */
-    checkNoChanges(): void;
-    attachToViewContainerRef(): void;
-    detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
-}
-/**
- * Reports whether the given view is considered dirty according to the different marking mechanisms.
- */
-declare function isViewDirty(view: ViewRef<unknown>): boolean;
-declare function markForRefresh(view: ViewRef<unknown>): void;
-
-/**
- * Infers the tag name that should be used for a component based on its definition.
- * @param componentDef Definition for which to resolve the tag name.
- */
-declare function inferTagNameFromDefinition(componentDef: ComponentDef<unknown>): string;
-/**
- * ComponentFactory interface implementation.
- */
-declare class ComponentFactory<T> {
-    private componentDef;
-    private ngModule?;
-    selector: string;
-    componentType: Type$1<any>;
-    ngContentSelectors: string[];
-    isBoundToModule: boolean;
-    private cachedInputs;
-    private cachedOutputs;
-    get inputs(): {
-        propName: string;
-        templateName: string;
-        isSignal: boolean;
-        transform?: (value: any) => any;
-    }[];
-    get outputs(): {
-        propName: string;
-        templateName: string;
-    }[];
-    /**
-     * @param componentDef The component definition.
-     * @param ngModule The NgModuleRef to which the factory is bound.
-     */
-    constructor(componentDef: ComponentDef<any>, ngModule?: NgModuleRef$1<any> | undefined);
-    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef$1<any> | EnvironmentInjector | undefined, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[]): ComponentRef$1<T>;
-    private createComponentRef;
-}
-/**
- * Represents an instance of a Component created via a {@link ComponentFactory}.
- *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
- * method.
- *
- */
-declare class ComponentRef<T> extends ComponentRef$1<T> {
-    private readonly _rootLView;
-    private readonly _hasInputBindings;
-    instance: T;
-    hostView: ViewRef<T>;
-    changeDetectorRef: ChangeDetectorRef;
-    componentType: Type$1<T>;
-    location: ElementRef;
-    private previousInputValues;
-    private _tNode;
-    constructor(componentType: Type$1<T>, _rootLView: LView, _hasInputBindings: boolean);
-    setInput(name: string, value: unknown): void;
-    get injector(): Injector;
-    destroy(): void;
-    onDestroy(callback: () => void): void;
-}
-
 /**
  * @codeGenApi
  */
@@ -5534,7 +6255,7 @@ declare function setLocaleId(localeId: string): void;
  *
  * @codeGenApi
  */
-declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null, enableTimerScheduling?: typeof ɵɵdeferEnableTimerScheduling | null, flags?: TDeferDetailsFlags | null): void;
+declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null, enableTimerScheduling?: typeof ɵɵdeferEnableTimerScheduling, flags?: TDeferDetailsFlags | null): void;
 /**
  * Loads defer block dependencies when a trigger value becomes truthy.
  * @codeGenApi
@@ -5559,17 +6280,17 @@ declare function ɵɵdeferHydrateNever(): void;
  * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnIdle(timeout?: number): void;
+declare function ɵɵdeferOnIdle(): void;
 /**
  * Sets up logic to handle the `prefetch on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnIdle(timeout?: number): void;
+declare function ɵɵdeferPrefetchOnIdle(): void;
 /**
  * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferHydrateOnIdle(timeout?: number): void;
+declare function ɵɵdeferHydrateOnIdle(): void;
 /**
  * Sets up logic to handle the `on immediate` deferred trigger.
  * @codeGenApi
@@ -5765,7 +6486,7 @@ declare function ɵɵanimateLeaveListener(value: AnimationFunction): typeof ɵɵ
  *
  * @codeGenApi
  */
-declare function ɵɵcomponentInstance(): any;
+declare function ɵɵcomponentInstance(): unknown;
 
 /**
  * Possibly sets up a {@link ɵFormFieldDirective} to manage a native or custom form control.
@@ -5911,7 +6632,7 @@ declare function ɵɵrepeater(collection: Iterable<unknown> | undefined | null):
  * @codeGenApi
  */
 declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>): T;
-declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: number): T;
+declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: InternalInjectFlags): T;
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a
  * particular class.
@@ -6420,7 +7141,7 @@ declare function ɵɵnextContext<T = any>(level?: number): T;
  *
  * @codeGenApi
  */
-declare function ɵɵprojectionDef(projectionSlots?: (string | (string | number)[][])[]): void;
+declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -6437,7 +7158,7 @@ declare function ɵɵprojectionDef(projectionSlots?: (string | (string | number)
  *
  * @codeGenApi
  */
-declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes | null, fallbackTemplateFn?: ComponentTemplate<unknown>, fallbackDecls?: number, fallbackVars?: number): void;
+declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes, fallbackTemplateFn?: ComponentTemplate<unknown>, fallbackDecls?: number, fallbackVars?: number): void;
 
 /**
  * Update a property on a selected element.
@@ -6510,7 +7231,7 @@ declare function ɵɵloadQuery<T>(): QueryList<T>;
  *
  * @codeGenApi
  */
-declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signal<T>, predicate: ProviderToken<unknown> | string[] | string, flags: number, read?: any): typeof ɵɵcontentQuerySignal;
+declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signal<T>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): typeof ɵɵcontentQuerySignal;
 /**
  * Creates a new view query by initializing internal data structures and binding a new query to the
  * target signal.
@@ -6522,7 +7243,7 @@ declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signa
  *
  * @codeGenApi
  */
-declare function ɵɵviewQuerySignal(target: Signal<unknown>, predicate: ProviderToken<unknown> | string[] | string, flags: number, read?: ProviderToken<unknown>): typeof ɵɵviewQuerySignal;
+declare function ɵɵviewQuerySignal(target: Signal<unknown>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: ProviderToken<unknown>): typeof ɵɵviewQuerySignal;
 /**
  * Advances the current query index by a specified offset.
  *
@@ -6606,7 +7327,7 @@ declare function ɵɵclassProp(className: string, value: boolean | undefined | n
  */
 declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | string | undefined | null | NO_CHANGE): void;
+} | string | undefined | null): void;
 /**
  * Update class bindings using an object literal or class-string on an element.
  *
@@ -6627,7 +7348,7 @@ declare function ɵɵstyleMap(styles: {
  */
 declare function ɵɵclassMap(classes: {
     [className: string]: boolean | undefined | null;
-} | string | string[] | Set<string> | undefined | null | NO_CHANGE): void;
+} | string | string[] | Set<string> | undefined | null): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
@@ -7382,21 +8103,21 @@ declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => 
  */
 declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
-}): EventTarget;
+}): (Window & typeof globalThis) | null;
 /**
  *
  * @codeGenApi
  */
 declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
-}): EventTarget;
+}): Document;
 /**
  *
  * @codeGenApi
  */
 declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
-}): EventTarget;
+}): HTMLElement;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
@@ -7959,387 +8680,6 @@ interface R3DeclarePipeFacade {
 }
 
 /**
- * Type of the Query metadata.
- *
- * @publicApi
- */
-interface Query {
-    descendants: boolean;
-    emitDistinctChangesOnly: boolean;
-    first: boolean;
-    read: any;
-    isViewQuery: boolean;
-    selector: any;
-    static?: boolean;
-}
-/**
- * Base class for query metadata.
- *
- * @see {@link ContentChildren}
- * @see {@link ContentChild}
- * @see {@link ViewChildren}
- * @see {@link ViewChild}
- *
- * @publicApi
- */
-declare abstract class Query {
-}
-/**
- * Type of the ContentChildren decorator / constructor function.
- *
- * @see {@link ContentChildren}
- * @publicApi
- */
-interface ContentChildrenDecorator {
-    /**
-     * @description
-     * Property decorator that configures a content query.
-     *
-     * Use to get the `QueryList` of elements or directives from the content DOM.
-     * Any time a child element is added, removed, or moved, the query list will be
-     * updated, and the changes observable of the query list will emit a new value.
-     *
-     * Content queries are set before the `ngAfterContentInit` callback is called.
-     *
-     * Does not retrieve elements or directives that are in other components' templates,
-     * since a component's template is always a black box to its ancestors.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - The directive type or the name used for querying.
-     * * **descendants** - If `true` include all descendants of the element. If `false` then only
-     * query direct children of the element.
-     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
-     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
-     *   if the QueryList has not changed.
-     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
-     *   removed in future versions of Angular.
-     * * **read** - Used to read a different token from the queried elements.
-     *
-     * The following selectors are supported.
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
-     * with `@ContentChildren('cmp')`)
-     *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ContentChildren(SomeService) someService: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ContentChildren('someToken')
-     * someTokenVal: any`)
-     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with
-     * `@ContentChildren(TemplateRef) template;`)
-     *
-     * In addition, multiple string selectors can be separated with a comma (e.g.
-     * `@ContentChildren('cmp1,cmp2')`)
-     *
-     * The following values are supported by `read`:
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * Any provider defined on the injector of the component that is matched by the `selector` of
-     * this query
-     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
-     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
-     *
-     * @usageNotes
-     *
-     * Here is a simple demonstration of how the `ContentChildren` decorator can be used.
-     *
-     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
-     *
-     * ### Tab-pane example
-     *
-     * Here is a slightly more realistic example that shows how `ContentChildren` decorators
-     * can be used to implement a tab pane component.
-     *
-     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
-     *
-     * @Annotation
-     * @see [Content queries](guide/components/queries#decorator-content-queries)
-     */
-    (selector: ProviderToken<unknown> | Function | string, opts?: {
-        descendants?: boolean;
-        emitDistinctChangesOnly?: boolean;
-        read?: any;
-    }): any;
-    new (selector: ProviderToken<unknown> | Function | string, opts?: {
-        descendants?: boolean;
-        emitDistinctChangesOnly?: boolean;
-        read?: any;
-    }): Query;
-}
-/**
- * Type of the ContentChildren metadata.
- *
- *
- * @Annotation
- * @publicApi
- */
-type ContentChildren = Query;
-/**
- * ContentChildren decorator and metadata.
- *
- *
- * @Annotation
- * @publicApi
- */
-declare const ContentChildren: ContentChildrenDecorator;
-/**
- * Type of the ContentChild decorator / constructor function.
- *
- * @publicApi
- */
-interface ContentChildDecorator {
-    /**
-     * @description
-     * Property decorator that configures a content query.
-     *
-     * Use to get the first element or the directive matching the selector from the content DOM.
-     * If the content DOM changes, and a new child matches the selector,
-     * the property will be updated.
-     *
-     * Does not retrieve elements or directives that are in other components' templates,
-     * since a component's template is always a black box to its ancestors.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - The directive type or the name used for querying.
-     * * **descendants** - If `true` (default) include all descendants of the element. If `false` then
-     * only query direct children of the element.
-     * * **read** - Used to read a different token from the queried element.
-     * * **static** - True to resolve query results before change detection runs,
-     * false to resolve after change detection. Defaults to false.
-     *
-     * The following selectors are supported.
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
-     * with `@ContentChild('cmp')`)
-     *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ContentChild(SomeService) someService: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ContentChild('someToken') someTokenVal:
-     * any`)
-     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ContentChild(TemplateRef)
-     * template;`)
-     *
-     * The following values are supported by `read`:
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * Any provider defined on the injector of the component that is matched by the `selector` of
-     * this query
-     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
-     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
-     *
-     * Difference between dynamic and static queries:
-     *
-     * | Queries                             | Details |
-     * |:---                                 |:---     |
-     * | Dynamic queries \(`static: false`\) | The query resolves before the `ngAfterContentInit()`
-     * callback is called. The result will be updated for changes to your view, such as changes to
-     * `ngIf` and `ngFor` blocks. | | Static queries \(`static: true`\)   | The query resolves once
-     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
-     * is called). The result, though, will never be updated to reflect changes to your view, such as
-     * changes to `ngIf` and `ngFor` blocks.  |
-     *
-     * @usageNotes
-     *
-     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
-     *
-     * ### Example
-     *
-     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
-     *
-     * @Annotation
-     * @see [Content queries](guide/components/queries#decorator-content-queries)
-     */
-    (selector: ProviderToken<unknown> | Function | string, opts?: {
-        descendants?: boolean;
-        read?: any;
-        static?: boolean;
-    }): any;
-    new (selector: ProviderToken<unknown> | Function | string, opts?: {
-        descendants?: boolean;
-        read?: any;
-        static?: boolean;
-    }): ContentChild;
-}
-/**
- * Type of the ContentChild metadata.
- *
- * @publicApi
- */
-type ContentChild = Query;
-/**
- * ContentChild decorator and metadata.
- *
- *
- * @Annotation
- *
- * @publicApi
- */
-declare const ContentChild: ContentChildDecorator;
-/**
- * Type of the ViewChildren decorator / constructor function.
- *
- * @see {@link ViewChildren}
- *
- * @publicApi
- */
-interface ViewChildrenDecorator {
-    /**
-     * @description
-     * Property decorator that configures a view query.
-     *
-     * Use to get the `QueryList` of elements or directives from the view DOM.
-     * Any time a child element is added, removed, or moved, the query list will be updated,
-     * and the changes observable of the query list will emit a new value.
-     *
-     * View queries are set before the `ngAfterViewInit` callback is called.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - The directive type or the name used for querying.
-     * * **read** - Used to read a different token from the queried elements.
-     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
-     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
-     *   if the QueryList has not changed.
-     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
-     * removed in future versions of Angular.
-     *
-     * The following selectors are supported.
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
-     * with `@ViewChildren('cmp')`)
-     *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ViewChildren(SomeService) someService!: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken')
-     * someTokenVal!: any`)
-     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChildren(TemplateRef)
-     * template;`)
-     *
-     * In addition, multiple string selectors can be separated with a comma (e.g.
-     * `@ViewChildren('cmp1,cmp2')`)
-     *
-     * The following values are supported by `read`:
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * Any provider defined on the injector of the component that is matched by the `selector` of
-     * this query
-     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
-     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
-     *
-     * @usageNotes
-     *
-     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
-     *
-     * ### Another example
-     *
-     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
-     *
-     * @Annotation
-     * @see [View queries](guide/components/queries#decorator-view-queries)
-     */
-    (selector: ProviderToken<unknown> | Function | string, opts?: {
-        read?: any;
-        emitDistinctChangesOnly?: boolean;
-    }): any;
-    new (selector: ProviderToken<unknown> | Function | string, opts?: {
-        read?: any;
-        emitDistinctChangesOnly?: boolean;
-    }): ViewChildren;
-}
-/**
- * Type of the ViewChildren metadata.
- *
- * @publicApi
- */
-type ViewChildren = Query;
-/**
- * ViewChildren decorator and metadata.
- *
- * @Annotation
- * @publicApi
- */
-declare const ViewChildren: ViewChildrenDecorator;
-/**
- * Type of the ViewChild decorator / constructor function.
- *
- * @see {@link ViewChild}
- * @publicApi
- */
-interface ViewChildDecorator {
-    /**
-     * @description
-     * Property decorator that configures a view query.
-     * The change detector looks for the first element or the directive matching the selector
-     * in the view DOM. If the view DOM changes, and a new child matches the selector,
-     * the property is updated.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - The directive type or the name used for querying.
-     * * **read** - Used to read a different token from the queried elements.
-     * * **static** - `true` to resolve query results before change detection runs,
-     * `false` to resolve after change detection. Defaults to `false`.
-     *
-     *
-     * The following selectors are supported.
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
-     * with `@ViewChild('cmp')`)
-     *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ViewChild(SomeService) someService: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ViewChild('someToken') someTokenVal:
-     * any`)
-     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
-     * template;`)
-     *
-     * The following values are supported by `read`:
-     *   * Any class with the `@Component` or `@Directive` decorator
-     *   * Any provider defined on the injector of the component that is matched by the `selector` of
-     * this query
-     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
-     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
-     *
-     * Difference between dynamic and static queries:
-     *   * Dynamic queries \(`static: false`\) - The query resolves before the `ngAfterViewInit()`
-     * callback is called. The result will be updated for changes to your view, such as changes to
-     * `ngIf` and `ngFor` blocks.
-     *   * Static queries \(`static: true`\) - The query resolves once
-     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
-     * is called). The result, though, will never be updated to reflect changes to your view, such as
-     * changes to `ngIf` and `ngFor` blocks.
-     *
-     * @usageNotes
-     *
-     * ### Example 1
-     *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
-     *
-     * ### Example 2
-     *
-     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
-     *
-     * @Annotation
-     * @see [View queries](guide/components/queries#decorator-view-queries)
-     */
-    (selector: ProviderToken<unknown> | Function | string, opts?: {
-        read?: any;
-        static?: boolean;
-    }): any;
-    new (selector: ProviderToken<unknown> | Function | string, opts?: {
-        read?: any;
-        static?: boolean;
-    }): ViewChild;
-}
-/**
- * Type of the ViewChild metadata.
- *
- * @publicApi
- */
-type ViewChild = Query;
-/**
- * ViewChild decorator and metadata.
- *
- * @Annotation
- * @publicApi
- */
-declare const ViewChild: ViewChildDecorator;
-
-/**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
  * component def (ɵcmp) onto the component type.
  *
@@ -8471,19 +8811,8 @@ declare function isNgModule<T>(value: Type$1<T>): value is Type$1<T> & {
     ɵmod: NgModuleDef<T>;
 };
 
-declare enum ControlFlowBlockType {
-    Defer = 0,
-    For = 1
-}
-interface ControlFlowBlockDataBase {
-    /** The comment host/container node next to which all of the root nodes are rendered. */
-    hostNode: Node;
-    /** Element root nodes that are currently being shown in the block. */
-    rootNodes: Node[];
-}
 /** Retrieved information about a `@defer` block. */
-interface DeferBlockData extends ControlFlowBlockDataBase {
-    type: ControlFlowBlockType.Defer;
+interface DeferBlockData {
     /** Current state of the block. */
     state: 'placeholder' | 'loading' | 'complete' | 'error' | 'initial';
     /** Hydration state of the block. */
@@ -8508,21 +8837,18 @@ interface DeferBlockData extends ControlFlowBlockDataBase {
     };
     /** Stringified version of the block's triggers. */
     triggers: string[];
-}
-/** Retrieved information about a `@for` block. */
-interface ForLoopBlockData extends ControlFlowBlockDataBase {
-    type: ControlFlowBlockType.For;
-    /** A list of items managed by the for loop. */
-    items: unknown[];
-    /** Whether the block has an `@empty` block. */
-    hasEmptyBlock: boolean;
-    /** String representation of the trackBy expression. */
-    trackExpression: string;
+    /** The comment host/container node next to which all of the root nodes are rendered. */
+    hostNode: Node;
+    /** Element root nodes that are currently being shown in the block. */
+    rootNodes: Node[];
 }
 /**
- * A control flow block information object.
+ * Gets all of the `@defer` blocks that are present inside the specified DOM node.
+ * @param node Node in which to look for `@defer` blocks.
+ *
+ * @publicApi
  */
-type ControlFlowBlock = DeferBlockData | ForLoopBlockData;
+declare function getDeferBlocks(node: Node): DeferBlockData[];
 
 /**
  * Adds a callback function which will be invoked before and after performing certain actions at
@@ -8547,12 +8873,6 @@ declare function setProfiler(profiler: Profiler | null): () => void;
  * @publicApi
  */
 declare function applyChanges(component: {}): void;
-
-/**
- * Gets all of the control flow blocks that are present inside the specified DOM node.
- * @param node Node in which to look for control flow blocks.
- */
-declare function getControlFlowBlocks(node: Node): ControlFlowBlock[];
 
 /**
  * Discovers the dependencies of an injectable instance. Provides DI information about each
@@ -8682,7 +9002,7 @@ declare const globalUtilsFunctions: {
     ɵgetInjectorMetadata: typeof getInjectorMetadata;
     ɵsetProfiler: typeof setProfiler;
     ɵgetSignalGraph: typeof getSignalGraph;
-    ɵgetControlFlowBlocks: typeof getControlFlowBlocks;
+    ɵgetDeferBlocks: typeof getDeferBlocks;
     ɵgetTransferState: typeof getTransferState;
     getDirectiveMetadata: typeof getDirectiveMetadata;
     getComponent: typeof getComponent;
@@ -8841,437 +9161,16 @@ declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop:
  * @param tagName The name of the tag.
  * @param attributeName The name of the attribute.
  */
-declare function ɵɵvalidateAttribute<T = any>(value: T, tagName: string, attributeName: string): T;
+declare function ɵɵvalidateAttribute(value: unknown, tagName: string, attributeName: string): unknown;
 
 /**
- * Service which configures custom 'on idle' behavior for Angular features like `@defer`.
+ * Creates a `Resource` driven by a source of `ResourceSnapshot`s.
  *
- * @publicApi
+ * @see [Resource composition with snapshots](guide/signals/resource#resource-composition-with-snapshots)
  *
- * @see [Customizing `idle` behavior](guide/templates/defer#customizing-idle-behavior)
- *
+ * @experimental
  */
-interface IdleService {
-    /**
-     * Schedule `callback` to be executed when the current application or browser is considered idle.
-     *
-     * @returns an id which allows the scheduled callback to be cancelled before it executes.
-     */
-    requestOnIdle(callback: (deadline?: IdleDeadline) => void, options?: IdleRequestOptions): number;
-    /**
-     * Cancel a previously scheduled callback using the id associated with it.
-     */
-    cancelOnIdle(id: number): void;
-}
-/**
- * Configures Angular to use the given DI token as its `IdleService`.
- *
- * The given token must be available for injection from the root injector, and the injected value
- * must implement the `IdleService` interface.
- *
- * @publicApi
- *
- * @see [Customizing `idle` behavior](guide/templates/defer#customizing-idle-behavior)
- */
-declare function provideIdleServiceWith(useExisting: AbstractType<IdleService> | InjectionToken<IdleService>): EnvironmentProviders;
-
-/**
- * A DI Token representing the main rendering context.
- * In a browser and SSR this is the DOM Document.
- * When using SSR, that document is created by [Domino](https://github.com/angular/domino).
- *
- * @see [Accessing Document via DI](guide/ssr#accessing-document-via-di)
- *
- * @publicApi
- */
-declare const DOCUMENT: InjectionToken<Document>;
-
-/**
- * Provide this token to set the locale of your application.
- * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
- * DecimalPipe and PercentPipe) and by ICU expressions.
- *
- * See the [i18n guide](guide/i18n/locale-id) for more information.
- *
- * @usageNotes
- * ### Example
- * In standalone apps:
- * ```ts
- * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- * import { AppModule } from './app/app.module';
- *
- * const appConfig: ApplicationConfig = {
- *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
- * };
- * ```
- *
- * In module based apps:
- * ```ts
- * import { LOCALE_ID } from '@angular/core';
- * import { platformBrowser } from '@angular/platform-browser';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowser().bootstrapModule(AppModule, {
- *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
- * });
- * ```
- *
- * @publicApi
- * @see [Import global variants of the locale data](guide/i18n/import-global-variants)
- */
-declare const LOCALE_ID: InjectionToken<string>;
-/**
- * Provide this token to set the default currency code your application uses for
- * CurrencyPipe when there is no currency code passed into it. This is only used by
- * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
- *
- * See the [i18n guide](guide/i18n/locale-id) for more information.
- *
- * <div class="docs-alert docs-alert-helpful">
- *
- * The default currency code is currently always `USD`.
- *
- * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
- * your application `NgModule`:
- *
- * ```ts
- * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
- * ```
- *
- * </div>
- *
- * @usageNotes
- * ### Example
- * In standalone apps:
- * ```ts
- * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- *
- * const appConfig: ApplicationConfig = {
- *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
- * };
- * ```
- *
- * In module based apps:
- * ```ts
- * import { platformBrowser } from '@angular/platform-browser';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowser().bootstrapModule(AppModule, {
- *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
- * });
- * ```
- *
- * @publicApi
- */
-declare const DEFAULT_CURRENCY_CODE: InjectionToken<string>;
-/**
- * Use this token at bootstrap to provide the content of your translation file (`xtb`,
- * `xlf` or `xlf2`) when you want to translate your application in another language.
- *
- * See the [i18n guide](guide/i18n/merge) for more information.
- *
- * @usageNotes
- * ### Example
- * In standalone apps:
- * ```ts
- * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- *
- * const appConfig: ApplicationConfig = {
- *   providers: [{provide: TRANSLATIONS, useValue: translations }]
- * };
- * ```
- *
- * In module based apps:
- * ```ts
- * import { TRANSLATIONS } from '@angular/core';
- * import { platformBrowser } from '@angular/platform-browser';
- * import { AppModule } from './app/app.module';
- *
- * // content of your translation file
- * const translations = '....';
- *
- * platformBrowser().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS, useValue: translations }]
- * });
- * ```
- *
- * @publicApi
- */
-declare const TRANSLATIONS: InjectionToken<string>;
-/**
- * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
- * `xlf` or `xlf2`.
- *
- * See the [i18n guide](guide/i18n/merge) for more information.
- *
- * @usageNotes
- * ### Example
- * In standalone apps:
- * ```ts
- * import { LOCALE_ID, ApplicationConfig } from '@angular/core';
- *
- * const appConfig: ApplicationConfig = {
- *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
- * };
- * ```
- *
- * In module based apps: *
- * ```ts
- * import { TRANSLATIONS_FORMAT } from '@angular/core';
- * import { platformBrowser } from '@angular/platform-browser';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowser().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
- * });
- * ```
- *
- * @publicApi
- */
-declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
-/**
- * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
- * that the compiler should use in case of missing translations:
- * - Error: throw if you have missing translations.
- * - Warning (default): show a warning in the console and/or shell.
- * - Ignore: do nothing.
- *
- * See the [i18n guide](guide/i18n/merge#report-missing-translations) for more information.
- *
- * @usageNotes
- * ### Example
- * ```ts
- * import { MissingTranslationStrategy } from '@angular/core';
- * import { platformBrowser } from '@angular/platform-browser';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowser().bootstrapModule(AppModule, {
- *   missingTranslation: MissingTranslationStrategy.Error
- * });
- * ```
- *
- * @publicApi
- */
-declare enum MissingTranslationStrategy {
-    Error = 0,
-    Warning = 1,
-    Ignore = 2
-}
-
-/**
- * Type of the Attribute decorator / constructor function.
- *
- * @publicApi
- */
-interface AttributeDecorator {
-    /**
-     * Parameter decorator for a directive constructor that designates
-     * a host-element attribute whose value is injected as a constant string literal.
-     *
-     * @usageNotes
-     *
-     * Suppose we have an `<input>` element and want to know its `type`.
-     *
-     * ```html
-     * <input type="text">
-     * ```
-     *
-     * The following example uses the decorator to inject the string literal `text` in a directive.
-     *
-     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
-     *
-     * The following example uses the decorator in a component constructor.
-     *
-     * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
-     *
-     */
-    (name: string): any;
-    new (name: string): Attribute;
-}
-/**
- * Type of the Attribute metadata.
- *
- * @publicApi
- */
-interface Attribute {
-    /**
-     * The name of the attribute whose value can be injected.
-     */
-    attributeName: string;
-}
-/**
- * Attribute decorator and metadata.
- *
- * @Annotation
- * @publicApi
- */
-declare const Attribute: AttributeDecorator;
-
-/**
- * @description
- * Hook for manual bootstrapping of the application instead of using `bootstrap` array in @NgModule
- * annotation. This hook is invoked only when the `bootstrap` array is empty or not provided.
- *
- * Reference to the current application is provided as a parameter.
- *
- * See ["Bootstrapping"](/guide/ngmodules/overview#bootstrapping-an-application).
- *
- * @usageNotes
- * The example below uses `ApplicationRef.bootstrap()` to render the
- * `AppComponent` on the page.
- *
- * ```ts
- * class AppModule implements DoBootstrap {
- *   ngDoBootstrap(appRef: ApplicationRef) {
- *     appRef.bootstrap(AppComponent); // Or some other component
- *   }
- * }
- * ```
- *
- * @publicApi
- */
-interface DoBootstrap {
-    ngDoBootstrap(appRef: ApplicationRef): void;
-}
-
-/**
- * Enables the logic to produce `ng-reflect-*` attributes on elements with bindings.
- *
- * Note: this is a dev-mode only setting and it will have no effect in production mode.
- * In production mode, the `ng-reflect-*` attributes are *never* produced by Angular.
- *
- * Important: using and relying on the `ng-reflect-*` attributes is not recommended,
- * they are deprecated and only present for backwards compatibility. Angular will stop
- * producing them in one of the future versions.
- *
- * @publicApi
- */
-declare function provideNgReflectAttributes(): EnvironmentProviders;
-
-/**
- * Service that keeps track of pending tasks contributing to the stableness of Angular
- * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
- * tasks influencing stability, this API gives control over stability to library and application
- * developers for specific cases not covered by Angular internals.
- *
- * The concept of stability comes into play in several important scenarios:
- * - SSR process needs to wait for the application stability before serializing and sending rendered
- * HTML;
- * - tests might want to delay assertions until the application becomes stable;
- *
- * @usageNotes
- * ```ts
- * const pendingTasks = inject(PendingTasks);
- * const taskCleanup = pendingTasks.add();
- * // do work that should block application's stability and then:
- * taskCleanup();
- * ```
- *
- *
- * @see [PendingTasks for Server Side Rendering (SSR)](guide/zoneless#pendingtasks-for-server-side-rendering-ssr)
- *
- * @publicApi 20.0
- */
-declare class PendingTasks {
-    private readonly internalPendingTasks;
-    private readonly scheduler;
-    private readonly errorHandler;
-    /**
-     * Adds a new task that should block application's stability.
-     * @returns A cleanup function that removes a task when called.
-     */
-    add(): () => void;
-    /**
-     * Runs an asynchronous function and blocks the application's stability until the function completes.
-     *
-     * ```ts
-     * pendingTasks.run(async () => {
-     *   const userData = await fetch('/api/user');
-     *   this.userData.set(userData);
-     * });
-     * ```
-     *
-     * @param fn The asynchronous function to execute
-     * @developerPreview 19.0
-     */
-    run(fn: () => Promise<unknown>): void;
-    /** @nocollapse */
-    static ɵprov: _angular_core.ɵɵInjectableDeclaration<PendingTasks>;
-}
-
-/**
- * Creates a platform.
- * Platforms must be created on launch using this function.
- *
- * @publicApi
- */
-declare function createPlatform(injector: Injector): PlatformRef;
-/**
- * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
- * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
- * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
- * to build up configurations that might be required by different libraries or parts of the
- * application.
- * @param name Identifies the new platform factory.
- * @param providers A set of dependency providers for platforms created with the new factory.
- *
- * @publicApi
- */
-declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
-/**
- * Checks that there is currently a platform that contains the given token as a provider.
- *
- * @publicApi
- */
-declare function assertPlatform(requiredToken: any): PlatformRef;
-/**
- * Returns the current platform in the browser environment. In the server environment,
- * returns `null`. If you need access to the platform information, inject `PlatformRef` in your application.
- *
- * @publicApi
- */
-declare function getPlatform(): PlatformRef | null;
-/**
- * Destroys the current Angular platform and all Angular applications on the page.
- * Destroys all modules and listeners registered with the platform.
- *
- * This function should not be used in a server environment, as it will be a no-op.
- *
- * @publicApi
- */
-declare function destroyPlatform(): void;
-/**
- * The goal of this function is to bootstrap a platform injector,
- * but avoid referencing `PlatformRef` class.
- * This function is needed for bootstrapping a Standalone Component.
- */
-declare function createOrReusePlatformInjector(providers?: StaticProvider[]): Injector;
-/**
- * @description
- * This function is used to provide initialization functions that will be executed upon
- * initialization of the platform injector.
- *
- * Note that the provided initializer is run in the injection context.
- *
- * @usageNotes
- * The platform initializer should be provided during platform creation:
- *
- * ```ts
- * const platformRef = platformBrowser([ providePlatformInitializer(() =>  ...) ]);
- *
- * bootstrapApplication(App, appConfig, { platformRef })
- * ```
- *
- * @publicApi
- */
-declare function providePlatformInitializer(initializerFn: () => void): StaticProvider;
-
-/**
- * This platform has to be included in any other platform
- *
- * @publicApi
- */
-declare const platformCore: (extraProviders?: StaticProvider[] | undefined) => PlatformRef;
+declare function resourceFromSnapshots<T>(source: () => ResourceSnapshot<T>): Resource<T>;
 
 /**
  * Creates a `ComponentRef` instance based on provided component type and a set of options.
@@ -9428,70 +9327,112 @@ interface ComponentMirror<C> {
 declare function reflectComponentType<C>(component: Type$1<C>): ComponentMirror<C> | null;
 
 /**
- * Creates a resource representing a debounced version of the source signal.
- *
- * @param source The source signal to debounce.
- * @param wait The amount of time to wait before calling the source signal, or a function that
- *   returns a promise that resolves when the debounced value should be updated.
- * @param options The options to use for the debounced signal.
- * @returns A resource representing the debounced signal.
- * @experimental 22.0
- *
- * @see [Debouncing signals with `debounced`](guide/signals/debounced)
- */
-declare function debounced<T>(source: () => T, wait: NoInfer<DebounceTimer<T>>, options?: NoInfer<DebouncedOptions<T>>): Resource<T>;
-
-/**
- * Creates a `Resource` driven by a source of `ResourceSnapshot`s.
- *
- * @see [Resource composition with snapshots](guide/signals/resource#resource-composition-with-snapshots)
- *
- * @experimental
- */
-declare function resourceFromSnapshots<T>(source: () => ResourceSnapshot<T>): Resource<T>;
-
-/**
- * Returns whether Angular is in development mode.
- *
- * By default, this is true, unless `enableProdMode` is invoked prior to calling this method or the
- * application is built using the Angular CLI with the `optimization` option.
- * @see {@link /cli/build ng build}
+ * Set of config options available during the application bootstrap operation.
  *
  * @publicApi
  */
-declare function isDevMode(): boolean;
-/**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- * Using this method is discouraged as the Angular CLI will set production mode when using the
- * `optimization` option.
- * @see {@link /cli/build ng build}
- *
- * @publicApi
- */
-declare function enableProdMode(): void;
-
-/**
- * @description Represents the version of Angular
- *
- * @publicApi
- */
-declare class Version {
-    full: string;
-    readonly major: string;
-    readonly minor: string;
-    readonly patch: string;
-    constructor(full: string);
+interface ApplicationConfig {
+    /**
+     * List of providers that should be available to the root component and all its children.
+     */
+    providers: Array<Provider | EnvironmentProviders>;
 }
 /**
+ * Merge multiple application configurations from left to right.
+ *
+ * @param configs Two or more configurations to be merged.
+ * @returns A merged [ApplicationConfig](api/core/ApplicationConfig).
+ *
  * @publicApi
  */
-declare const VERSION: Version;
+declare function mergeApplicationConfig(...configs: ApplicationConfig[]): ApplicationConfig;
 
-export { ANIMATION_MODULE_TYPE, APP_ID, APP_INITIALIZER, AbstractType, AfterRenderRef, AnimationFunction, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, Binding, CSP_NONCE, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, ClassProvider, ClassSansProvider, CompilerOptions, Component, ComponentRef$1 as ComponentRef, ConstructorProvider, ConstructorSansProvider, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebounceTimer, DebouncedOptions, DefaultIterableDiffer, Directive, DirectiveWithBindings, ENVIRONMENT_INITIALIZER, EffectCleanupRegisterFn, ElementRef, EmbeddedViewRef, EnvironmentInjector, EnvironmentProviders, ErrorHandler, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, HOST_TAG_NAME, Host, HostAttributeToken, INJECTOR, Inject, InjectOptions, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithProviders, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgZone, Optional, OutputRef, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Provider, ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Resource, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, SchemaMetadata, Self, Signal, SimpleChange, SkipSelf, StaticClassProvider, StaticClassSansProvider, StaticProvider, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type$1 as Type, TypeDecorator, TypeProvider, VERSION, ValueEqualityFn, ValueProvider, ValueSansProvider, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WritableResource, WritableSignal, afterEveryRender, afterNextRender, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createPlatform, createPlatformFactory, debounced, destroyPlatform, enableProdMode, enableProfiling$1 as enableProfiling, forwardRef, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideIdleServiceWith, provideNgReflectAttributes, providePlatformInitializer, provideStabilityDebugging, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, resourceFromSnapshots, runInInjectionContext, setTestabilityGetter, untracked, viewChild, viewChildren, AcxChangeDetectionStrategy as ɵAcxChangeDetectionStrategy, AcxViewEncapsulation as ɵAcxViewEncapsulation, BypassType as ɵBypassType, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, ComponentDef as ɵComponentDef, ComponentType as ɵComponentType, Console as ɵConsole, ControlFlowBlockType as ɵControlFlowBlockType, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, DeferBlockConfig as ɵDeferBlockConfig, DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, DeferBlockState as ɵDeferBlockState, DirectiveDef as ɵDirectiveDef, DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EVENT_REPLAY_QUEUE as ɵEVENT_REPLAY_QUEUE, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, Framework as ɵFramework, HydrationStatus as ɵHydrationStatus, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION as ɵIS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, InputSignalNode as ɵInputSignalNode, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, PipeDef as ɵPipeDef, ProfilerEvent as ɵProfilerEvent, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SHARED_STYLES_HOST as ɵSHARED_STYLES_HOST, SIGNAL as ɵSIGNAL, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TimerScheduler as ɵTimerScheduler, ViewRef as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allLeavingAnimations as ɵallLeavingAnimations, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, ɵassertType, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, encapsulateResourceError as ɵencapsulateResourceError, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDirectives as ɵgetDirectives, getDocument as ɵgetDocument, getHostElement as ɵgetHostElement, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, getTransferState as ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, inferTagNameFromDefinition as ɵinferTagNameFromDefinition, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, promiseWithResolvers as ɵpromiseWithResolvers, provideZonelessChangeDetectionInternal as ɵprovideZonelessChangeDetectionInternal, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests as ɵresetIncrementalHydrationEnabledWarnedForTests, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵControlFeature, ɵɵExternalStylesFeature, __FactoryDeclaration as ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, __InjectableDeclaration as ɵɵInjectableDeclaration, __InjectorDeclaration as ɵɵInjectorDeclaration, __NgModuleDeclaration as ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
-export type { AfterContentChecked, AfterContentInit, AfterRenderOptions, AfterViewChecked, AfterViewInit, ApplicationConfig, AttributeDecorator, ComponentMirror, ContentChildDecorator, ContentChildFunction, ContentChildrenDecorator, CreateComputedOptions, DoBootstrap, DoCheck, ForwardRefFn, GetTestability, HostDecorator, IdleService, ImportProvidersSource, InjectDecorator, InjectableDecorator, InjectableProvider, InputFunction, InputOptions, InputOptionsWithTransform, InputOptionsWithoutTransform, InputSignal, InputSignalWithTransform, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, ModelFunction, ModelOptions, ModelSignal, NgIterable, NgZoneOptions, OnChanges, OnDestroy, OnInit, OptionalDecorator, PipeTransform, ResponseInit, SelfDecorator, SimpleChanges, SkipSelfDecorator, StateKey, TrackByFunction, ViewChildDecorator, ViewChildFunction, ViewChildrenDecorator, AcxComponentDebugMetadata as ɵAcxComponentDebugMetadata, AcxDirectiveDebugMetadata as ɵAcxDirectiveDebugMetadata, AngularComponentDebugMetadata as ɵAngularComponentDebugMetadata, AngularDirectiveDebugMetadata as ɵAngularDirectiveDebugMetadata, BaseDirectiveDebugMetadata as ɵBaseDirectiveDebugMetadata, ControlFlowBlock as ɵControlFlowBlock, DeferBlockData as ɵDeferBlockData, DirectiveDebugMetadata as ɵDirectiveDebugMetadata, ɵFirstAvailable, ɵFirstAvailableSignal, ForLoopBlockData as ɵForLoopBlockData, FrameworkAgnosticGlobalUtils as ɵFrameworkAgnosticGlobalUtils, GlobalDevModeUtils as ɵGlobalDevModeUtils, HydratedNode as ɵHydratedNode, HydrationInfo as ɵHydrationInfo, ImageConfig as ɵImageConfig, InjectorProfilerContext as ɵInjectorProfilerContext, NgModuleDef as ɵNgModuleDef, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, NgModuleType as ɵNgModuleType, Profiler as ɵProfiler, ProviderRecord as ɵProviderRecord, SafeHtml as ɵSafeHtml, SafeResourceUrl as ɵSafeResourceUrl, SafeScript as ɵSafeScript, SafeStyle as ɵSafeStyle, SafeUrl as ɵSafeUrl, SafeValue as ɵSafeValue, SharedStylesHost as ɵSharedStylesHost, ɵUnwrapDirectiveSignalInputs, WizComponentDebugMetadata as ɵWizComponentDebugMetadata };
+/**
+ * Injection token representing the current HTTP request object.
+ *
+ * Use this token to access the current request when handling server-side
+ * rendering (SSR).
+ *
+ * @remarks
+ * This token may be `null` in the following scenarios:
+ *
+ * * During the build processes.
+ * * When the application is rendered in the browser (client-side rendering).
+ * * When performing static site generation (SSG).
+ * * During route extraction in development (at the time of the request).
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Request `Request` on MDN}
+ *
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
+ *
+ * @publicApi
+ */
+declare const REQUEST: InjectionToken<Request | null>;
+/**
+ * Type that represents the initialization options for a response.
+ *
+ * @publicApi
+ */
+type ResponseInit = {
+    -readonly [P in keyof globalThis.ResponseInit]: globalThis.ResponseInit[P];
+};
+/**
+ * Injection token for response initialization options.
+ *
+ * Use this token to provide response options for configuring or initializing
+ * HTTP responses in server-side rendering or API endpoints.
+ *
+ * @remarks
+ * This token may be `null` in the following scenarios:
+ *
+ * * During the build processes.
+ * * When the application is rendered in the browser (client-side rendering).
+ * * When performing static site generation (SSG).
+ * * During route extraction in development (at the time of the request).
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/Response `ResponseInit` on MDN}
+ *
+ * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
+ */
+declare const RESPONSE_INIT: InjectionToken<ResponseInit | null>;
+/**
+ * Injection token for additional request context.
+ *
+ * Use this token to pass custom metadata or context related to the current request in server-side rendering.
+ *
+ * @remarks
+ * This token is only available during server-side rendering and will be `null` in other contexts.
+ *
+ * @publicApi
+ * @see [Accessing Request and Response via DI](guide/ssr#accessing-request-and-response-via-di)
+ */
+declare const REQUEST_CONTEXT: InjectionToken<unknown>;
+
+/**
+ * A DI Token representing the main rendering context.
+ * In a browser and SSR this is the DOM Document.
+ * When using SSR, that document is created by [Domino](https://github.com/angular/domino).
+ *
+ * @see [Accessing Document via DI](guide/ssr#accessing-document-via-di)
+ *
+ * @publicApi
+ */
+declare const DOCUMENT: InjectionToken<Document>;
+
+/**
+ * Enables the logic to produce `ng-reflect-*` attributes on elements with bindings.
+ *
+ * Note: this is a dev-mode only setting and it will have no effect in production mode.
+ * In production mode, the `ng-reflect-*` attributes are *never* produced by Angular.
+ *
+ * Important: using and relying on the `ng-reflect-*` attributes is not recommended,
+ * they are deprecated and only present for backwards compatibility. Angular will stop
+ * producing them in one of the future versions.
+ *
+ * @publicApi
+ */
+declare function provideNgReflectAttributes(): EnvironmentProviders;
+
+export { ANIMATION_MODULE_TYPE, APP_ID, APP_INITIALIZER, AfterRenderRef, AnimationFunction, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, Binding, CSP_NONCE, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, ClassProvider, ClassSansProvider, CompilerOptions, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ConstructorProvider, ConstructorSansProvider, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DefaultIterableDiffer, Directive, DirectiveWithBindings, ENVIRONMENT_INITIALIZER, EffectCleanupRegisterFn, ElementRef, EmbeddedViewRef, EnvironmentInjector, EnvironmentProviders, ErrorHandler, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, HOST_TAG_NAME, Host, HostAttributeToken, INJECTOR, Inject, InjectOptions, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithProviders, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgZone, Optional, OutputRef, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Provider, ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Resource, ResourceOptions, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, SchemaMetadata, Self, Signal, SimpleChange, SkipSelf, StaticClassProvider, StaticClassSansProvider, StaticProvider, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type$1 as Type, TypeDecorator, TypeProvider, VERSION, ValueEqualityFn, ValueProvider, ValueSansProvider, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WritableResource, WritableSignal, afterEveryRender, afterNextRender, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, destroyPlatform, enableProdMode, enableProfiling$1 as enableProfiling, forwardRef, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideNgReflectAttributes, providePlatformInitializer, provideStabilityDebugging, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, resourceFromSnapshots, runInInjectionContext, setTestabilityGetter, untracked, viewChild, viewChildren, AcxChangeDetectionStrategy as ɵAcxChangeDetectionStrategy, AcxViewEncapsulation as ɵAcxViewEncapsulation, BypassType as ɵBypassType, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, ComponentDef as ɵComponentDef, ComponentFactory$1 as ɵComponentFactory, ComponentType as ɵComponentType, Console as ɵConsole, CssSelectorList as ɵCssSelectorList, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, DeferBlockConfig as ɵDeferBlockConfig, DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, DeferBlockState as ɵDeferBlockState, DirectiveDef as ɵDirectiveDef, DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EVENT_REPLAY_QUEUE as ɵEVENT_REPLAY_QUEUE, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, Framework as ɵFramework, HydrationStatus as ɵHydrationStatus, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION as ɵIS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, InputSignalNode as ɵInputSignalNode, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, PipeDef as ɵPipeDef, ProfilerEvent as ɵProfilerEvent, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SIGNAL as ɵSIGNAL, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TimerScheduler as ɵTimerScheduler, ViewRef as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allLeavingAnimations as ɵallLeavingAnimations, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, ɵassertType, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, encapsulateResourceError as ɵencapsulateResourceError, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDirectives as ɵgetDirectives, getDocument as ɵgetDocument, getHostElement as ɵgetHostElement, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, getTransferState as ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, inferTagNameFromDefinition as ɵinferTagNameFromDefinition, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, promiseWithResolvers as ɵpromiseWithResolvers, provideZonelessChangeDetectionInternal as ɵprovideZonelessChangeDetectionInternal, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests as ɵresetIncrementalHydrationEnabledWarnedForTests, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵControlFeature, ɵɵExternalStylesFeature, __FactoryDeclaration as ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, __InjectableDeclaration as ɵɵInjectableDeclaration, __InjectorDeclaration as ɵɵInjectorDeclaration, __NgModuleDeclaration as ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export type { AfterContentChecked, AfterContentInit, AfterRenderOptions, AfterViewChecked, AfterViewInit, ApplicationConfig, AttributeDecorator, ComponentMirror, ContentChildDecorator, ContentChildFunction, ContentChildrenDecorator, CreateComputedOptions, DoBootstrap, DoCheck, ForwardRefFn, GetTestability, HostDecorator, ImportProvidersSource, InjectDecorator, InjectableDecorator, InjectableProvider, InputFunction, InputOptions, InputOptionsWithTransform, InputOptionsWithoutTransform, InputSignal, InputSignalWithTransform, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, ModelFunction, ModelOptions, ModelSignal, NgIterable, NgZoneOptions, OnChanges, OnDestroy, OnInit, OptionalDecorator, PipeTransform, ResponseInit, SelfDecorator, SimpleChanges, SkipSelfDecorator, StateKey, TrackByFunction, ViewChildDecorator, ViewChildFunction, ViewChildrenDecorator, AcxComponentDebugMetadata as ɵAcxComponentDebugMetadata, AcxDirectiveDebugMetadata as ɵAcxDirectiveDebugMetadata, AngularComponentDebugMetadata as ɵAngularComponentDebugMetadata, AngularDirectiveDebugMetadata as ɵAngularDirectiveDebugMetadata, BaseDirectiveDebugMetadata as ɵBaseDirectiveDebugMetadata, DeferBlockData as ɵDeferBlockData, DirectiveDebugMetadata as ɵDirectiveDebugMetadata, ɵFirstAvailable, ɵFirstAvailableSignal, FrameworkAgnosticGlobalUtils as ɵFrameworkAgnosticGlobalUtils, GlobalDevModeUtils as ɵGlobalDevModeUtils, HydratedNode as ɵHydratedNode, HydrationInfo as ɵHydrationInfo, ImageConfig as ɵImageConfig, InjectorProfilerContext as ɵInjectorProfilerContext, NgModuleDef as ɵNgModuleDef, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, NgModuleType as ɵNgModuleType, Profiler as ɵProfiler, ProviderRecord as ɵProviderRecord, SafeHtml as ɵSafeHtml, SafeResourceUrl as ɵSafeResourceUrl, SafeScript as ɵSafeScript, SafeStyle as ɵSafeStyle, SafeUrl as ɵSafeUrl, SafeValue as ɵSafeValue, ɵUnwrapDirectiveSignalInputs, WizComponentDebugMetadata as ɵWizComponentDebugMetadata };
