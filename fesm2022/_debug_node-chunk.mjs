@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.8+sha-2c141c0
+ * @license Angular v22.0.0-next.8+sha-7f3f3d7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9010,7 +9010,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.8+sha-2c141c0'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.8+sha-7f3f3d7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11799,7 +11799,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.8+sha-2c141c0';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.8+sha-7f3f3d7';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
