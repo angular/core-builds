@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.9+sha-ef38017
+ * @license Angular v22.0.0-next.9+sha-2896c93
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -284,11 +284,13 @@ class InvokeFunctionExpr extends Expression {
     fn;
     args;
     pure;
-    constructor(fn, args, type, sourceSpan, pure = false, leadingComments) {
+    isOptional;
+    constructor(fn, args, type, sourceSpan, pure = false, leadingComments, isOptional = false) {
         super(type, sourceSpan, leadingComments);
         this.fn = fn;
         this.args = args;
         this.pure = pure;
+        this.isOptional = isOptional;
     }
     // An alias for fn, which allows other logic to handle calls and property reads together.
     get receiver() {
@@ -307,7 +309,7 @@ class InvokeFunctionExpr extends Expression {
         return visitor.visitInvokeFunctionExpr(this, context);
     }
     clone() {
-        return new InvokeFunctionExpr(this.fn.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan, this.pure);
+        return new InvokeFunctionExpr(this.fn.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan, this.pure, [], this.isOptional);
     }
 }
 class InstantiateExpr extends Expression {
@@ -420,17 +422,26 @@ class BinaryOperatorExpr extends Expression {
 class ReadPropExpr extends Expression {
     receiver;
     name;
-    constructor(receiver, name, type, sourceSpan, leadingComments) {
+    isOptional;
+    constructor(receiver, name, type, sourceSpan, leadingComments, 
+    /**
+     * Whether the property access uses the optional-chaining operator (`?.`).
+     */
+    isOptional = false) {
         super(type, sourceSpan, leadingComments);
         this.receiver = receiver;
         this.name = name;
+        this.isOptional = isOptional;
     }
     // An alias for name, which allows other logic to handle property reads and keyed reads together.
     get index() {
         return this.name;
     }
     isEquivalent(e) {
-        return (e instanceof ReadPropExpr && this.receiver.isEquivalent(e.receiver) && this.name === e.name);
+        return (e instanceof ReadPropExpr &&
+            this.receiver.isEquivalent(e.receiver) &&
+            this.name === e.name &&
+            this.isOptional === e.isOptional);
     }
     isConstant() {
         return false;
@@ -442,21 +453,28 @@ class ReadPropExpr extends Expression {
         return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.prop(this.name), value, null, this.sourceSpan);
     }
     clone() {
-        return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan);
+        return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan, [], this.isOptional);
     }
 }
 class ReadKeyExpr extends Expression {
     receiver;
     index;
-    constructor(receiver, index, type, sourceSpan, leadingComments) {
+    isOptional;
+    constructor(receiver, index, type, sourceSpan, leadingComments, 
+    /**
+     * Whether the property access uses the optional-chaining operator (`?.[`).
+     */
+    isOptional = false) {
         super(type, sourceSpan, leadingComments);
         this.receiver = receiver;
         this.index = index;
+        this.isOptional = isOptional;
     }
     isEquivalent(e) {
         return (e instanceof ReadKeyExpr &&
             this.receiver.isEquivalent(e.receiver) &&
-            this.index.isEquivalent(e.index));
+            this.index.isEquivalent(e.index) &&
+            this.isOptional === e.isOptional);
     }
     isConstant() {
         return false;
@@ -468,7 +486,7 @@ class ReadKeyExpr extends Expression {
         return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.key(this.index), value, null, this.sourceSpan);
     }
     clone() {
-        return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan);
+        return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan, [], this.isOptional);
     }
 }
 const NULL_EXPR = new LiteralExpr(null, null, null);
