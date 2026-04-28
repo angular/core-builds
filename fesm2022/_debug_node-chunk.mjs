@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.9+sha-52bcec1
+ * @license Angular v22.0.0-next.9+sha-5dfe37d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, resolveForwardRef, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, assertIndexInRange, INJECTOR, TVIEW, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, ENVIRONMENT_INITIALIZER, DOCUMENT as DOCUMENT$1, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, VERSION, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, arrayInsert2, arraySplice, PendingTasks, decreaseElementDepthCount, assertTNodeCreationIndex, getNamespace, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
+import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, assertIndexInRange, INJECTOR, TVIEW, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, inject, ENVIRONMENT_INITIALIZER, DOCUMENT as DOCUMENT$1, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getSelectedIndex, getTView, assertIndexInDeclRange, setSelectedIndex, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, SVG_NAMESPACE, MATH_ML_NAMESPACE, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, VERSION, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, arrayInsert2, arraySplice, PendingTasks, decreaseElementDepthCount, assertTNodeCreationIndex, getNamespace, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, NG_COMP_DEF, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
@@ -15,325 +15,6 @@ function noSideEffects(fn) {
   return {
     toString: fn
   }.toString();
-}
-
-const ANNOTATIONS = '__annotations__';
-const PARAMETERS = '__parameters__';
-const PROP_METADATA = '__prop__metadata__';
-function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
-  return noSideEffects(() => {
-    const metaCtor = makeMetadataCtor(props);
-    function DecoratorFactory(...args) {
-      if (this instanceof DecoratorFactory) {
-        metaCtor.call(this, ...args);
-        return this;
-      }
-      const annotationInstance = new DecoratorFactory(...args);
-      return function TypeDecorator(cls) {
-        if (typeFn) typeFn(cls, ...args);
-        const annotations = cls.hasOwnProperty(ANNOTATIONS) ? cls[ANNOTATIONS] : Object.defineProperty(cls, ANNOTATIONS, {
-          value: []
-        })[ANNOTATIONS];
-        annotations.push(annotationInstance);
-        return cls;
-      };
-    }
-    if (parentClass) {
-      DecoratorFactory.prototype = Object.create(parentClass.prototype);
-    }
-    DecoratorFactory.prototype.ngMetadataName = name;
-    DecoratorFactory.annotationCls = DecoratorFactory;
-    return DecoratorFactory;
-  });
-}
-function makeMetadataCtor(props) {
-  return function ctor(...args) {
-    if (props) {
-      const values = props(...args);
-      for (const propName in values) {
-        this[propName] = values[propName];
-      }
-    }
-  };
-}
-function makeParamDecorator(name, props, parentClass) {
-  return noSideEffects(() => {
-    const metaCtor = makeMetadataCtor(props);
-    function ParamDecoratorFactory(...args) {
-      if (this instanceof ParamDecoratorFactory) {
-        metaCtor.apply(this, args);
-        return this;
-      }
-      const annotationInstance = new ParamDecoratorFactory(...args);
-      ParamDecorator.annotation = annotationInstance;
-      return ParamDecorator;
-      function ParamDecorator(cls, unusedKey, index) {
-        const parameters = cls.hasOwnProperty(PARAMETERS) ? cls[PARAMETERS] : Object.defineProperty(cls, PARAMETERS, {
-          value: []
-        })[PARAMETERS];
-        while (parameters.length <= index) {
-          parameters.push(null);
-        }
-        (parameters[index] = parameters[index] || []).push(annotationInstance);
-        return cls;
-      }
-    }
-    ParamDecoratorFactory.prototype.ngMetadataName = name;
-    ParamDecoratorFactory.annotationCls = ParamDecoratorFactory;
-    return ParamDecoratorFactory;
-  });
-}
-function makePropDecorator(name, props, parentClass, additionalProcessing) {
-  return noSideEffects(() => {
-    const metaCtor = makeMetadataCtor(props);
-    function PropDecoratorFactory(...args) {
-      if (this instanceof PropDecoratorFactory) {
-        metaCtor.apply(this, args);
-        return this;
-      }
-      const decoratorInstance = new PropDecoratorFactory(...args);
-      function PropDecorator(target, name) {
-        if (target === undefined) {
-          throw new Error('Standard Angular field decorators are not supported in JIT mode.');
-        }
-        const constructor = target.constructor;
-        const meta = constructor.hasOwnProperty(PROP_METADATA) ? constructor[PROP_METADATA] : Object.defineProperty(constructor, PROP_METADATA, {
-          value: {}
-        })[PROP_METADATA];
-        meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
-        meta[name].unshift(decoratorInstance);
-      }
-      return PropDecorator;
-    }
-    if (parentClass) {
-      PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
-    }
-    PropDecoratorFactory.prototype.ngMetadataName = name;
-    PropDecoratorFactory.annotationCls = PropDecoratorFactory;
-    return PropDecoratorFactory;
-  });
-}
-
-const Inject = attachInjectFlag(makeParamDecorator('Inject', token => ({
-  token
-})), -1);
-const Optional = attachInjectFlag(makeParamDecorator('Optional'), 8);
-const Self = attachInjectFlag(makeParamDecorator('Self'), 2);
-const SkipSelf = attachInjectFlag(makeParamDecorator('SkipSelf'), 4);
-const Host = attachInjectFlag(makeParamDecorator('Host'), 1);
-
-function getCompilerFacade(request) {
-  const globalNg = _global['ng'];
-  if (globalNg && globalNg.ɵcompilerFacade) {
-    return globalNg.ɵcompilerFacade;
-  }
-  if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    console.error(`JIT compilation failed for ${request.kind}`, request.type);
-    let message = `The ${request.kind} '${request.type.name}' needs to be compiled using the JIT compiler, but '@angular/compiler' is not available.\n\n`;
-    if (request.usage === 1) {
-      message += `The ${request.kind} is part of a library that has been partially compiled.\n`;
-      message += `However, the Angular Linker has not processed the library such that JIT compilation is used as fallback.\n`;
-      message += '\n';
-      message += `Ideally, the library is processed using the Angular Linker to become fully AOT compiled.\n`;
-    } else {
-      message += `JIT compilation is discouraged for production use-cases! Consider using AOT mode instead.\n`;
-    }
-    message += `Alternatively, the JIT compiler should be loaded by bootstrapping using '@angular/platform-browser-dynamic' or '@angular/platform-server',\n`;
-    message += `or manually provide the compiler with 'import "@angular/compiler";' before bootstrapping.`;
-    throw new Error(message);
-  } else {
-    throw new Error('JIT compiler unavailable');
-  }
-}
-
-function ɵɵdefineService(opts) {
-  return {
-    token: opts.token,
-    providedIn: opts.autoProvided === false ? null : 'root',
-    factory: opts.factory,
-    value: undefined
-  };
-}
-
-const angularCoreDiEnv = {
-  'ɵɵdefineInjectable': __defineInjectable,
-  'ɵɵdefineInjector': __defineInjector,
-  'ɵɵdefineService': ɵɵdefineService,
-  'ɵɵinject': __inject,
-  'ɵɵinvalidFactoryDep': __invalidFactoryDep,
-  'resolveForwardRef': resolveForwardRef
-};
-
-const Type = Function;
-function isType(v) {
-  return typeof v === 'function';
-}
-
-const ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|(?:[^()]+\(\[\],)?[^()]+\(arguments\).*)\)/;
-const ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
-const ES2015_INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
-const ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{[^}]*super\(\.\.\.arguments\)/;
-function isDelegateCtor(typeStr) {
-  return ES5_DELEGATE_CTOR.test(typeStr) || ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR.test(typeStr) || ES2015_INHERITED_CLASS.test(typeStr) && !ES2015_INHERITED_CLASS_WITH_CTOR.test(typeStr);
-}
-class ReflectionCapabilities {
-  _reflect;
-  constructor(reflect) {
-    this._reflect = reflect || _global['Reflect'];
-  }
-  factory(t) {
-    return (...args) => new t(...args);
-  }
-  _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
-    let result;
-    if (typeof paramTypes === 'undefined') {
-      result = newArray(paramAnnotations.length);
-    } else {
-      result = newArray(paramTypes.length);
-    }
-    for (let i = 0; i < result.length; i++) {
-      if (typeof paramTypes === 'undefined') {
-        result[i] = [];
-      } else if (paramTypes[i] && paramTypes[i] != Object) {
-        result[i] = [paramTypes[i]];
-      } else {
-        result[i] = [];
-      }
-      if (paramAnnotations && paramAnnotations[i] != null) {
-        result[i] = result[i].concat(paramAnnotations[i]);
-      }
-    }
-    return result;
-  }
-  _ownParameters(type, parentCtor) {
-    const typeStr = type.toString();
-    if (isDelegateCtor(typeStr)) {
-      return null;
-    }
-    if (type.parameters && type.parameters !== parentCtor.parameters) {
-      return type.parameters;
-    }
-    const tsickleCtorParams = type.ctorParameters;
-    if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
-      const ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
-      const paramTypes = ctorParameters.map(ctorParam => ctorParam && ctorParam.type);
-      const paramAnnotations = ctorParameters.map(ctorParam => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
-      return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-    }
-    const paramAnnotations = type.hasOwnProperty(PARAMETERS) && type[PARAMETERS];
-    const paramTypes = this._reflect && this._reflect.getOwnMetadata && this._reflect.getOwnMetadata('design:paramtypes', type);
-    if (paramTypes || paramAnnotations) {
-      return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-    }
-    return newArray(type.length);
-  }
-  parameters(type) {
-    if (!isType(type)) {
-      return [];
-    }
-    const parentCtor = getParentCtor(type);
-    let parameters = this._ownParameters(type, parentCtor);
-    if (!parameters && parentCtor !== Object) {
-      parameters = this.parameters(parentCtor);
-    }
-    return parameters || [];
-  }
-  _ownAnnotations(typeOrFunc, parentCtor) {
-    if (typeOrFunc.annotations && typeOrFunc.annotations !== parentCtor.annotations) {
-      let annotations = typeOrFunc.annotations;
-      if (typeof annotations === 'function' && annotations.annotations) {
-        annotations = annotations.annotations;
-      }
-      return annotations;
-    }
-    if (typeOrFunc.decorators && typeOrFunc.decorators !== parentCtor.decorators) {
-      return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
-    }
-    if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
-      return typeOrFunc[ANNOTATIONS];
-    }
-    return null;
-  }
-  annotations(typeOrFunc) {
-    if (!isType(typeOrFunc)) {
-      return [];
-    }
-    const parentCtor = getParentCtor(typeOrFunc);
-    const ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
-    const parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
-    return parentAnnotations.concat(ownAnnotations);
-  }
-  _ownPropMetadata(typeOrFunc, parentCtor) {
-    if (typeOrFunc.propMetadata && typeOrFunc.propMetadata !== parentCtor.propMetadata) {
-      let propMetadata = typeOrFunc.propMetadata;
-      if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
-        propMetadata = propMetadata.propMetadata;
-      }
-      return propMetadata;
-    }
-    if (typeOrFunc.propDecorators && typeOrFunc.propDecorators !== parentCtor.propDecorators) {
-      const propDecorators = typeOrFunc.propDecorators;
-      const propMetadata = {};
-      Object.keys(propDecorators).forEach(prop => {
-        propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
-      });
-      return propMetadata;
-    }
-    if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
-      return typeOrFunc[PROP_METADATA];
-    }
-    return null;
-  }
-  propMetadata(typeOrFunc) {
-    if (!isType(typeOrFunc)) {
-      return {};
-    }
-    const parentCtor = getParentCtor(typeOrFunc);
-    const propMetadata = {};
-    if (parentCtor !== Object) {
-      const parentPropMetadata = this.propMetadata(parentCtor);
-      Object.keys(parentPropMetadata).forEach(propName => {
-        propMetadata[propName] = parentPropMetadata[propName];
-      });
-    }
-    const ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
-    if (ownPropMetadata) {
-      Object.keys(ownPropMetadata).forEach(propName => {
-        const decorators = [];
-        if (propMetadata.hasOwnProperty(propName)) {
-          decorators.push(...propMetadata[propName]);
-        }
-        decorators.push(...ownPropMetadata[propName]);
-        propMetadata[propName] = decorators;
-      });
-    }
-    return propMetadata;
-  }
-  ownPropMetadata(typeOrFunc) {
-    if (!isType(typeOrFunc)) {
-      return {};
-    }
-    return this._ownPropMetadata(typeOrFunc, getParentCtor(typeOrFunc)) || {};
-  }
-  hasLifecycleHook(type, lcProperty) {
-    return type instanceof Type && lcProperty in type.prototype;
-  }
-}
-function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
-  if (!decoratorInvocations) {
-    return [];
-  }
-  return decoratorInvocations.map(decoratorInvocation => {
-    const decoratorType = decoratorInvocation.type;
-    const annotationCls = decoratorType.annotationCls;
-    const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-    return new annotationCls(...annotationArgs);
-  });
-}
-function getParentCtor(ctor) {
-  const parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
-  const parentCtor = parentProto ? parentProto.constructor : null;
-  return parentCtor || Object;
 }
 
 function applyValueToInputField(instance, inputSignalNode, privateName, value) {
@@ -1178,6 +859,361 @@ function getTNodeFromLView(lView) {
 function ɵɵinjectAttribute(attrNameToInject) {
   return injectAttributeImpl(getCurrentTNode(), attrNameToInject);
 }
+
+const _requestIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : cb => setTimeout(cb)).bind(globalThis);
+const _cancelIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout).bind(globalThis);
+const IDLE_SERVICE = new InjectionToken(ngDevMode ? 'IDLE_SERVICE' : '', {
+  factory: () => new RequestIdleCallbackService()
+});
+function provideIdleServiceWith(useExisting) {
+  return makeEnvironmentProviders([{
+    provide: IDLE_SERVICE,
+    useExisting
+  }]);
+}
+class RequestIdleCallbackService {
+  requestIdleCallback = _requestIdleCallback();
+  cancelIdleCallback = _cancelIdleCallback();
+  requestOnIdle(callback, options) {
+    return this.requestIdleCallback(callback, options);
+  }
+  cancelOnIdle(id) {
+    return this.cancelIdleCallback(id);
+  }
+}
+
+function promiseWithResolvers() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return {
+    promise,
+    resolve,
+    reject
+  };
+}
+
+const ANNOTATIONS = '__annotations__';
+const PARAMETERS = '__parameters__';
+const PROP_METADATA = '__prop__metadata__';
+function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
+  return noSideEffects(() => {
+    const metaCtor = makeMetadataCtor(props);
+    function DecoratorFactory(...args) {
+      if (this instanceof DecoratorFactory) {
+        metaCtor.call(this, ...args);
+        return this;
+      }
+      const annotationInstance = new DecoratorFactory(...args);
+      return function TypeDecorator(cls) {
+        if (typeFn) typeFn(cls, ...args);
+        const annotations = cls.hasOwnProperty(ANNOTATIONS) ? cls[ANNOTATIONS] : Object.defineProperty(cls, ANNOTATIONS, {
+          value: []
+        })[ANNOTATIONS];
+        annotations.push(annotationInstance);
+        return cls;
+      };
+    }
+    if (parentClass) {
+      DecoratorFactory.prototype = Object.create(parentClass.prototype);
+    }
+    DecoratorFactory.prototype.ngMetadataName = name;
+    DecoratorFactory.annotationCls = DecoratorFactory;
+    return DecoratorFactory;
+  });
+}
+function makeMetadataCtor(props) {
+  return function ctor(...args) {
+    if (props) {
+      const values = props(...args);
+      for (const propName in values) {
+        this[propName] = values[propName];
+      }
+    }
+  };
+}
+function makeParamDecorator(name, props, parentClass) {
+  return noSideEffects(() => {
+    const metaCtor = makeMetadataCtor(props);
+    function ParamDecoratorFactory(...args) {
+      if (this instanceof ParamDecoratorFactory) {
+        metaCtor.apply(this, args);
+        return this;
+      }
+      const annotationInstance = new ParamDecoratorFactory(...args);
+      ParamDecorator.annotation = annotationInstance;
+      return ParamDecorator;
+      function ParamDecorator(cls, unusedKey, index) {
+        const parameters = cls.hasOwnProperty(PARAMETERS) ? cls[PARAMETERS] : Object.defineProperty(cls, PARAMETERS, {
+          value: []
+        })[PARAMETERS];
+        while (parameters.length <= index) {
+          parameters.push(null);
+        }
+        (parameters[index] = parameters[index] || []).push(annotationInstance);
+        return cls;
+      }
+    }
+    ParamDecoratorFactory.prototype.ngMetadataName = name;
+    ParamDecoratorFactory.annotationCls = ParamDecoratorFactory;
+    return ParamDecoratorFactory;
+  });
+}
+function makePropDecorator(name, props, parentClass, additionalProcessing) {
+  return noSideEffects(() => {
+    const metaCtor = makeMetadataCtor(props);
+    function PropDecoratorFactory(...args) {
+      if (this instanceof PropDecoratorFactory) {
+        metaCtor.apply(this, args);
+        return this;
+      }
+      const decoratorInstance = new PropDecoratorFactory(...args);
+      function PropDecorator(target, name) {
+        if (target === undefined) {
+          throw new Error('Standard Angular field decorators are not supported in JIT mode.');
+        }
+        const constructor = target.constructor;
+        const meta = constructor.hasOwnProperty(PROP_METADATA) ? constructor[PROP_METADATA] : Object.defineProperty(constructor, PROP_METADATA, {
+          value: {}
+        })[PROP_METADATA];
+        meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
+        meta[name].unshift(decoratorInstance);
+      }
+      return PropDecorator;
+    }
+    if (parentClass) {
+      PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
+    }
+    PropDecoratorFactory.prototype.ngMetadataName = name;
+    PropDecoratorFactory.annotationCls = PropDecoratorFactory;
+    return PropDecoratorFactory;
+  });
+}
+
+function getCompilerFacade(request) {
+  const globalNg = _global['ng'];
+  if (globalNg && globalNg.ɵcompilerFacade) {
+    return globalNg.ɵcompilerFacade;
+  }
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    console.error(`JIT compilation failed for ${request.kind}`, request.type);
+    let message = `The ${request.kind} '${request.type.name}' needs to be compiled using the JIT compiler, but '@angular/compiler' is not available.\n\n`;
+    if (request.usage === 1) {
+      message += `The ${request.kind} is part of a library that has been partially compiled.\n`;
+      message += `However, the Angular Linker has not processed the library such that JIT compilation is used as fallback.\n`;
+      message += '\n';
+      message += `Ideally, the library is processed using the Angular Linker to become fully AOT compiled.\n`;
+    } else {
+      message += `JIT compilation is discouraged for production use-cases! Consider using AOT mode instead.\n`;
+    }
+    message += `Alternatively, the JIT compiler should be loaded by bootstrapping using '@angular/platform-browser-dynamic' or '@angular/platform-server',\n`;
+    message += `or manually provide the compiler with 'import "@angular/compiler";' before bootstrapping.`;
+    throw new Error(message);
+  } else {
+    throw new Error('JIT compiler unavailable');
+  }
+}
+
+function ɵɵdefineService(opts) {
+  return {
+    token: opts.token,
+    providedIn: opts.autoProvided === false ? null : 'root',
+    factory: opts.factory,
+    value: undefined
+  };
+}
+
+const angularCoreDiEnv = {
+  'ɵɵdefineInjectable': __defineInjectable,
+  'ɵɵdefineInjector': __defineInjector,
+  'ɵɵdefineService': ɵɵdefineService,
+  'ɵɵinject': __inject,
+  'ɵɵinvalidFactoryDep': __invalidFactoryDep,
+  'resolveForwardRef': resolveForwardRef
+};
+
+const Type = Function;
+function isType(v) {
+  return typeof v === 'function';
+}
+
+const ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|(?:[^()]+\(\[\],)?[^()]+\(arguments\).*)\)/;
+const ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
+const ES2015_INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
+const ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{[^}]*super\(\.\.\.arguments\)/;
+function isDelegateCtor(typeStr) {
+  return ES5_DELEGATE_CTOR.test(typeStr) || ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR.test(typeStr) || ES2015_INHERITED_CLASS.test(typeStr) && !ES2015_INHERITED_CLASS_WITH_CTOR.test(typeStr);
+}
+class ReflectionCapabilities {
+  _reflect;
+  constructor(reflect) {
+    this._reflect = reflect || _global['Reflect'];
+  }
+  factory(t) {
+    return (...args) => new t(...args);
+  }
+  _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
+    let result;
+    if (typeof paramTypes === 'undefined') {
+      result = newArray(paramAnnotations.length);
+    } else {
+      result = newArray(paramTypes.length);
+    }
+    for (let i = 0; i < result.length; i++) {
+      if (typeof paramTypes === 'undefined') {
+        result[i] = [];
+      } else if (paramTypes[i] && paramTypes[i] != Object) {
+        result[i] = [paramTypes[i]];
+      } else {
+        result[i] = [];
+      }
+      if (paramAnnotations && paramAnnotations[i] != null) {
+        result[i] = result[i].concat(paramAnnotations[i]);
+      }
+    }
+    return result;
+  }
+  _ownParameters(type, parentCtor) {
+    const typeStr = type.toString();
+    if (isDelegateCtor(typeStr)) {
+      return null;
+    }
+    if (type.parameters && type.parameters !== parentCtor.parameters) {
+      return type.parameters;
+    }
+    const tsickleCtorParams = type.ctorParameters;
+    if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
+      const ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
+      const paramTypes = ctorParameters.map(ctorParam => ctorParam && ctorParam.type);
+      const paramAnnotations = ctorParameters.map(ctorParam => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
+      return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+    }
+    const paramAnnotations = type.hasOwnProperty(PARAMETERS) && type[PARAMETERS];
+    const paramTypes = this._reflect && this._reflect.getOwnMetadata && this._reflect.getOwnMetadata('design:paramtypes', type);
+    if (paramTypes || paramAnnotations) {
+      return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+    }
+    return newArray(type.length);
+  }
+  parameters(type) {
+    if (!isType(type)) {
+      return [];
+    }
+    const parentCtor = getParentCtor(type);
+    let parameters = this._ownParameters(type, parentCtor);
+    if (!parameters && parentCtor !== Object) {
+      parameters = this.parameters(parentCtor);
+    }
+    return parameters || [];
+  }
+  _ownAnnotations(typeOrFunc, parentCtor) {
+    if (typeOrFunc.annotations && typeOrFunc.annotations !== parentCtor.annotations) {
+      let annotations = typeOrFunc.annotations;
+      if (typeof annotations === 'function' && annotations.annotations) {
+        annotations = annotations.annotations;
+      }
+      return annotations;
+    }
+    if (typeOrFunc.decorators && typeOrFunc.decorators !== parentCtor.decorators) {
+      return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
+    }
+    if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
+      return typeOrFunc[ANNOTATIONS];
+    }
+    return null;
+  }
+  annotations(typeOrFunc) {
+    if (!isType(typeOrFunc)) {
+      return [];
+    }
+    const parentCtor = getParentCtor(typeOrFunc);
+    const ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
+    const parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
+    return parentAnnotations.concat(ownAnnotations);
+  }
+  _ownPropMetadata(typeOrFunc, parentCtor) {
+    if (typeOrFunc.propMetadata && typeOrFunc.propMetadata !== parentCtor.propMetadata) {
+      let propMetadata = typeOrFunc.propMetadata;
+      if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
+        propMetadata = propMetadata.propMetadata;
+      }
+      return propMetadata;
+    }
+    if (typeOrFunc.propDecorators && typeOrFunc.propDecorators !== parentCtor.propDecorators) {
+      const propDecorators = typeOrFunc.propDecorators;
+      const propMetadata = {};
+      Object.keys(propDecorators).forEach(prop => {
+        propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
+      });
+      return propMetadata;
+    }
+    if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+      return typeOrFunc[PROP_METADATA];
+    }
+    return null;
+  }
+  propMetadata(typeOrFunc) {
+    if (!isType(typeOrFunc)) {
+      return {};
+    }
+    const parentCtor = getParentCtor(typeOrFunc);
+    const propMetadata = {};
+    if (parentCtor !== Object) {
+      const parentPropMetadata = this.propMetadata(parentCtor);
+      Object.keys(parentPropMetadata).forEach(propName => {
+        propMetadata[propName] = parentPropMetadata[propName];
+      });
+    }
+    const ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
+    if (ownPropMetadata) {
+      Object.keys(ownPropMetadata).forEach(propName => {
+        const decorators = [];
+        if (propMetadata.hasOwnProperty(propName)) {
+          decorators.push(...propMetadata[propName]);
+        }
+        decorators.push(...ownPropMetadata[propName]);
+        propMetadata[propName] = decorators;
+      });
+    }
+    return propMetadata;
+  }
+  ownPropMetadata(typeOrFunc) {
+    if (!isType(typeOrFunc)) {
+      return {};
+    }
+    return this._ownPropMetadata(typeOrFunc, getParentCtor(typeOrFunc)) || {};
+  }
+  hasLifecycleHook(type, lcProperty) {
+    return type instanceof Type && lcProperty in type.prototype;
+  }
+}
+function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
+  if (!decoratorInvocations) {
+    return [];
+  }
+  return decoratorInvocations.map(decoratorInvocation => {
+    const decoratorType = decoratorInvocation.type;
+    const annotationCls = decoratorType.annotationCls;
+    const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
+    return new annotationCls(...annotationArgs);
+  });
+}
+function getParentCtor(ctor) {
+  const parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
+  const parentCtor = parentProto ? parentProto.constructor : null;
+  return parentCtor || Object;
+}
+
+const Inject = attachInjectFlag(makeParamDecorator('Inject', token => ({
+  token
+})), -1);
+const Optional = attachInjectFlag(makeParamDecorator('Optional'), 8);
+const Self = attachInjectFlag(makeParamDecorator('Self'), 2);
+const SkipSelf = attachInjectFlag(makeParamDecorator('SkipSelf'), 4);
+const Host = attachInjectFlag(makeParamDecorator('Host'), 1);
 
 const Attribute = makeParamDecorator('Attribute', attributeName => ({
   attributeName,
@@ -9030,7 +9066,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-52bcec1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-5dfe37d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10976,28 +11012,6 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
   });
 }
 
-const _requestIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : cb => setTimeout(cb)).bind(globalThis);
-const _cancelIdleCallback = () => (typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout).bind(globalThis);
-const IDLE_SERVICE = new InjectionToken(ngDevMode ? 'IDLE_SERVICE' : '', {
-  factory: () => new RequestIdleCallbackService()
-});
-function provideIdleServiceWith(useExisting) {
-  return makeEnvironmentProviders([{
-    provide: IDLE_SERVICE,
-    useExisting
-  }]);
-}
-class RequestIdleCallbackService {
-  requestIdleCallback = _requestIdleCallback();
-  cancelIdleCallback = _cancelIdleCallback();
-  requestOnIdle(callback, options) {
-    return this.requestIdleCallback(callback, options);
-  }
-  cancelOnIdle(id) {
-    return this.cancelIdleCallback(id);
-  }
-}
-
 class Console {
   log(message) {
     console.log(message);
@@ -11823,7 +11837,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-52bcec1';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-5dfe37d';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -12989,20 +13003,6 @@ function ɵɵdeferEnableTimerScheduling(tView, tDetails, placeholderConfigIndex,
   if (applyDeferBlockStateWithSchedulingImpl === null) {
     applyDeferBlockStateWithSchedulingImpl = applyDeferBlockStateWithScheduling;
   }
-}
-
-function promiseWithResolvers() {
-  let resolve;
-  let reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return {
-    promise,
-    resolve,
-    reject
-  };
 }
 
 function scheduleDelayedTrigger(scheduleFn) {
@@ -18369,7 +18369,8 @@ function convertToR3QueryMetadata(propertyName, ann) {
   };
 }
 function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
-  const queriesMeta = [];
+  const signalQueriesMeta = [];
+  const decoratorQueriesMeta = [];
   for (const field in propMetadata) {
     if (propMetadata.hasOwnProperty(field)) {
       const annotations = propMetadata[field];
@@ -18381,12 +18382,17 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
           if (annotations.some(isInputAnnotation)) {
             throw new Error(`Cannot combine @Input decorators with query decorators`);
           }
-          queriesMeta.push(convertToR3QueryMetadata(field, ann));
+          const queryMeta = convertToR3QueryMetadata(field, ann);
+          if (queryMeta.isSignal) {
+            signalQueriesMeta.push(queryMeta);
+          } else {
+            decoratorQueriesMeta.push(queryMeta);
+          }
         }
       });
     }
   }
-  return queriesMeta;
+  return [...signalQueriesMeta, ...decoratorQueriesMeta];
 }
 function extractExportAs(exportAs) {
   return exportAs === undefined ? null : splitByComma(exportAs);
@@ -19135,5 +19141,5 @@ function getDebugNode(nativeNode) {
   return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChainedInjector, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, ControlFlowBlockType, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NodeInjector, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SHARED_STYLES_HOST, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, USE_PENDING_TASKS, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreDiEnv, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getDebugNode, getDeferBlocks, getDirectives, getDocument, getHostElement, getInjector, getInjectorMetadata, getInjectorProviders, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNodeInjectorTNode, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getSignalGraph, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makeDecorator, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, reflectDependencies, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, walkLViewDirectives, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChainedInjector, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, ControlFlowBlockType, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IDLE_SERVICE, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NodeInjector, Optional, Output, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SHARED_STYLES_HOST, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, USE_PENDING_TASKS, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreDiEnv, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getDebugNode, getDeferBlocks, getDirectives, getDocument, getHostElement, getInjector, getInjectorMetadata, getInjectorProviders, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNodeInjectorTNode, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getSignalGraph, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makeDecorator, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, promiseWithResolvers, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, reflectDependencies, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validAppIdInitializer, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, walkLViewDirectives, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=_debug_node-chunk.mjs.map

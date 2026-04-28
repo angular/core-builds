@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.9+sha-52bcec1
+ * @license Angular v22.0.0-next.9+sha-5dfe37d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.0.0-next.9+sha-52bcec1');
+const VERSION = /* @__PURE__ */new Version('22.0.0-next.9+sha-5dfe37d');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -55,39 +55,6 @@ function formatRuntimeError(code, message) {
     errorMessage = `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
   }
   return errorMessage;
-}
-
-const _global = globalThis;
-
-function ngDevModeResetPerfCounters() {
-  const locationString = typeof location !== 'undefined' ? location.toString() : '';
-  const newCounters = {
-    hydratedNodes: 0,
-    hydratedComponents: 0,
-    dehydratedViewsRemoved: 0,
-    dehydratedViewsCleanupRuns: 0,
-    componentsSkippedHydration: 0,
-    deferBlocksWithIncrementalHydration: 0
-  };
-  const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-  if (!allowNgDevModeTrue) {
-    _global['ngDevMode'] = false;
-  } else {
-    if (typeof _global['ngDevMode'] !== 'object') {
-      _global['ngDevMode'] = {};
-    }
-    Object.assign(_global['ngDevMode'], newCounters);
-  }
-  return newCounters;
-}
-function initNgDevMode() {
-  if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    if (typeof ngDevMode !== 'object' || Object.keys(ngDevMode).length === 0) {
-      ngDevModeResetPerfCounters();
-    }
-    return typeof ngDevMode !== 'undefined' && !!ngDevMode;
-  }
-  return false;
 }
 
 function getClosureSafeProperty(objWithPropertyToExtract) {
@@ -639,6 +606,39 @@ function injectRootLimpMode(token, notFoundValue, flags) {
 }
 function assertInjectImplementationNotEqual(fn) {
   ngDevMode && assertNotEqual(_injectImplementation, fn, 'Calling ɵɵinject would cause infinite recursion');
+}
+
+const _global = globalThis;
+
+function ngDevModeResetPerfCounters() {
+  const locationString = typeof location !== 'undefined' ? location.toString() : '';
+  const newCounters = {
+    hydratedNodes: 0,
+    hydratedComponents: 0,
+    dehydratedViewsRemoved: 0,
+    dehydratedViewsCleanupRuns: 0,
+    componentsSkippedHydration: 0,
+    deferBlocksWithIncrementalHydration: 0
+  };
+  const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
+  if (!allowNgDevModeTrue) {
+    _global['ngDevMode'] = false;
+  } else {
+    if (typeof _global['ngDevMode'] !== 'object') {
+      _global['ngDevMode'] = {};
+    }
+    Object.assign(_global['ngDevMode'], newCounters);
+  }
+  return newCounters;
+}
+function initNgDevMode() {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    if (typeof ngDevMode !== 'object' || Object.keys(ngDevMode).length === 0) {
+      ngDevModeResetPerfCounters();
+    }
+    return typeof ngDevMode !== 'undefined' && !!ngDevMode;
+  }
+  return false;
 }
 
 const _THROW_IF_NOT_FOUND = {};
