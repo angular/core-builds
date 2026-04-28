@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.9+sha-357cb15
+ * @license Angular v22.0.0-next.9+sha-c8aad6a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2289,9 +2289,22 @@ const removeListeners = el => {
 const JSACTION_EVENT_CONTRACT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
   factory: () => ({})
 });
+const handledEventElements = new WeakMap();
+function markEventHandledForElement(event, element) {
+  if (event == null || typeof event !== 'object') return;
+  let elements = handledEventElements.get(event);
+  if (!elements) {
+    elements = new WeakSet();
+    handledEventElements.set(event, elements);
+  }
+  elements.add(element);
+}
 function invokeListeners(event, currentTarget) {
   const handlerFns = currentTarget?.__jsaction_fns?.get(event.type);
   if (!handlerFns || !currentTarget?.isConnected) {
+    return;
+  }
+  if (currentTarget && handledEventElements.get(event)?.has(currentTarget)) {
     return;
   }
   for (const handler of handlerFns) {
@@ -8034,6 +8047,10 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 
 function wrapListener(tNode, lView, listenerFn) {
   return function wrapListenerIn_markDirtyAndPreventDefault(event) {
+    const nativeEl = wrapListenerIn_markDirtyAndPreventDefault.__ngNativeEl__;
+    if (nativeEl !== undefined) {
+      markEventHandledForElement(event, nativeEl);
+    }
     const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
     markViewDirty(startView, 5);
     const context = lView[CONTEXT];
@@ -8076,6 +8093,9 @@ function listenToDomEvent(tNode, tView, lView, eventTargetResolver, renderer, ev
     const native = getNativeByTNode(tNode, lView);
     const target = eventTargetResolver ? eventTargetResolver(native) : native;
     stashEventListenerImpl(lView, target, eventName, wrappedListener);
+    if (!eventTargetResolver) {
+      wrappedListener.__ngNativeEl__ = native;
+    }
     const cleanupFn = renderer.listen(target, eventName, wrappedListener);
     if (!isAnimationEventType(eventName)) {
       const idxOrTargetGetter = eventTargetResolver ? _lView => eventTargetResolver(unwrapRNode(_lView[tNode.index])) : tNode.index;
@@ -9010,7 +9030,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-357cb15'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-c8aad6a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10110,15 +10130,19 @@ function getComponentId(componentDef) {
 }
 
 const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
+const ASYNC_METADATA_LOADED = '__ngAsyncMetadataLoaded__';
 function getAsyncClassMetadataFn(type) {
   const componentClass = type;
+  if (componentClass[ASYNC_COMPONENT_METADATA_FN] === ASYNC_METADATA_LOADED) {
+    return null;
+  }
   return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
 }
 function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
   const componentClass = type;
   componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then(dependencies => {
     metadataSetterFn(...dependencies);
-    componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
+    componentClass[ASYNC_COMPONENT_METADATA_FN] = ASYNC_METADATA_LOADED;
     return dependencies;
   });
   return componentClass[ASYNC_COMPONENT_METADATA_FN];
@@ -11799,7 +11823,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-357cb15';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-c8aad6a';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }

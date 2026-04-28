@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.9+sha-357cb15
+ * @license Angular v22.0.0-next.9+sha-c8aad6a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -447,6 +447,12 @@ class OverrideResolver {
       this.addOverride(type, override);
     });
   }
+  getOverrides(type) {
+    return this.overrides.get(type) || null;
+  }
+  hasOverrides(type) {
+    return this.overrides.has(type);
+  }
   getAnnotation(type) {
     const annotations = reflection.annotations(type);
     for (let i = annotations.length - 1; i >= 0; i--) {
@@ -604,6 +610,9 @@ class TestBedCompiler {
     this.resolvers.pipe.addOverride(pipe, override);
     this.pendingPipes.add(pipe);
   }
+  hasComponentOverrides(type) {
+    return this.resolvers.component.hasOverrides(type);
+  }
   verifyNoStandaloneFlagOverrides(type, override) {
     if (override.add?.hasOwnProperty('standalone') || override.set?.hasOwnProperty('standalone') || override.remove?.hasOwnProperty('standalone')) {
       throw new Error(`An override for the ${type.name} class has the \`standalone\` flag. ` + `Changing the \`standalone\` flag via TestBed overrides is not supported.`);
@@ -744,8 +753,40 @@ class TestBedCompiler {
         throw new Error(`Component '${declaration.name}' has unresolved metadata. ` + `Please call \`await TestBed.compileComponents()\` before running this test.`);
       }
       needsAsyncResources = needsAsyncResources || isComponentDefPendingResolution(declaration);
-      const metadata = this.resolvers.component.resolve(declaration);
+      let metadata = this.resolvers.component.resolve(declaration);
       if (metadata === null) {
+        if (this.resolvers.component.hasOverrides(declaration)) {
+          const componentDef = getComponentDef(declaration);
+          if (componentDef) {
+            const overrider = new MetadataOverrider();
+            metadata = new Component({
+              selector: componentDef.selectors[0][0],
+              template: componentDef.template,
+              standalone: componentDef.standalone
+            });
+            const overrides = this.resolvers.component.getOverrides(declaration);
+            if (overrides) {
+              overrides.forEach(override => {
+                metadata = overrider.overrideMetadata(Component, metadata, override);
+              });
+            }
+            if (metadata.providers) {
+              const providers = metadata.providers;
+              const providersResolver = (ndef, processProvidersFn) => {
+                return processProvidersFn ? processProvidersFn(providers) : providers;
+              };
+              componentDef.providersResolver = providersResolver;
+            }
+            if (metadata.viewProviders) {
+              const viewProviders = metadata.viewProviders;
+              const viewProvidersResolver = (ndef, processProvidersFn) => {
+                return processProvidersFn ? processProvidersFn(viewProviders) : viewProviders;
+              };
+              componentDef.viewProvidersResolver = viewProvidersResolver;
+            }
+            return;
+          }
+        }
         throw invalidTypeError(declaration.name, 'Component');
       }
       this.maybeStoreNgDef(NG_COMP_DEF, declaration);
@@ -1453,7 +1494,10 @@ class TestBedImpl {
   }
   createComponent(type, options) {
     if (getAsyncClassMetadataFn(type)) {
-      throw new Error(`Component '${type.name}' has unresolved metadata. ` + `Please call \`await TestBed.compileComponents()\` before running this test.`);
+      const isCompiled = !!getComponentDef$1(type);
+      if (!isCompiled) {
+        throw new Error(`Component '${type.name}' has unresolved metadata. ` + `Please call \`await TestBed.compileComponents()\` before running this test.`);
+      }
     }
     const testComponentRenderer = this.inject(TestComponentRenderer);
     const shouldInferTagName = options?.inferTagName ?? this._instanceInferTagName ?? false;
