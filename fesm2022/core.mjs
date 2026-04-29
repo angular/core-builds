@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.11+sha-ef9669c
+ * @license Angular v21.2.11+sha-1aeebbe
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2334,7 +2334,10 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
         serializedView[DEFER_BLOCK_STATE] = lDetails[DEFER_BLOCK_STATE$1];
       }
       if (!isHydrateNeverBlock) {
-        Object.assign(serializedView, serializeLView(lContainer[i], parentDeferBlockId, context));
+        const childHostElement = unwrapRNode(childLView[HOST]);
+        if (childLView[TVIEW].type !== 1 || childHostElement === null || !childHostElement.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
+          Object.assign(serializedView, serializeLView(lContainer[i], parentDeferBlockId, context));
+        }
       }
     }
     const currentViewAsString = JSON.stringify(serializedView);

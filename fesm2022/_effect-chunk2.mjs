@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.11+sha-ef9669c
+ * @license Angular v21.2.11+sha-1aeebbe
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('21.2.11+sha-ef9669c');
+const VERSION = /* @__PURE__ */new Version('21.2.11+sha-1aeebbe');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
