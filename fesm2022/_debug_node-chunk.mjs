@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.9+sha-2896c93
+ * @license Angular v22.0.0-next.9+sha-37ec63e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9066,7 +9066,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-2896c93'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.9+sha-37ec63e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11837,7 +11837,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-2896c93';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.9+sha-37ec63e';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -18170,8 +18170,7 @@ function compileComponent(type, metadata) {
           changeDetection: metadata.changeDetection,
           encapsulation,
           viewProviders: metadata.viewProviders || null,
-          hasDirectiveDependencies: !baseMeta.isStandalone || metadata.imports != null && metadata.imports.length > 0,
-          legacyOptionalChaining: false
+          hasDirectiveDependencies: !baseMeta.isStandalone || metadata.imports != null && metadata.imports.length > 0
         };
         compilationDepth++;
         try {
