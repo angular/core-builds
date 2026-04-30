@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-4c9afb6
+ * @license Angular v22.0.0-next.10+sha-ebffd80
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9066,7 +9066,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.10+sha-4c9afb6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0-next.10+sha-ebffd80'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11837,7 +11837,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.10+sha-4c9afb6';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0-next.10+sha-ebffd80';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15527,7 +15527,7 @@ function i18nAttributesFirstPass(tView, index, values) {
         if (ICU_REGEXP.test(message)) {
           throw new Error(`ICU expressions are not supported in attributes. Message: "${message}".`);
         }
-        generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), SENSITIVE_ATTRS[attrName.toLowerCase()] ? _sanitizeUrl : null);
+        generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), i18nSanitizeAttribute(attrName));
       }
     }
     tView.data[index] = updateOpCodes;
@@ -15759,7 +15759,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
             const hasBinding = !!attr.value.match(BINDING_REGEXP);
             if (hasBinding) {
               if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
-                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, SENSITIVE_ATTRS[lowerAttrName] ? _sanitizeUrl : null);
+                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, i18nSanitizeAttribute(lowerAttrName));
               } else {
                 ngDevMode && console.warn(`WARNING: ignoring unsafe attribute value ` + `${lowerAttrName} on element ${tagName} ` + `(see ${XSS_SECURITY_URL})`);
               }
@@ -15841,6 +15841,17 @@ function addCreateNodeAndAppend(create, marker, text, appendToParentIdx, createA
 }
 function addCreateAttribute(create, newIndex, attrName, attrValue) {
   create.push(newIndex << 1 | 1, attrName, attrValue);
+}
+const SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */(() => new Set(Object.values(SECURITY_SENSITIVE_ELEMENTS).flatMap(attrs => attrs ? Object.keys(attrs) : [])))();
+function i18nSanitizeAttribute(attrName) {
+  const lowerAttrName = attrName.toLowerCase();
+  if (SENSITIVE_ATTRS[lowerAttrName]) {
+    return _sanitizeUrl;
+  }
+  if (SECURITY_SENSITIVE_ATTRS.has(lowerAttrName)) {
+    return ɵɵvalidateAttribute;
+  }
+  return null;
 }
 
 const ROOT_TEMPLATE_ID = 0;
