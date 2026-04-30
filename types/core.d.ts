@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-ebffd80
+ * @license Angular v22.0.0-next.10+sha-2b62458
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1248,15 +1248,11 @@ interface ServiceDecorator {
      * @see [Introduction to Services and DI](guide/di)
      * @see [Creating and using services](guide/di/creating-and-using-services)
      * @see [Defining dependency providers](guide/di/defining-dependency-providers)
-     *
-     * @developerPreview 22.0
      */
     (): TypeDecorator;
     /**
      * When `autoProvided` is set to `false`, the service won't be exposed to the dependency
      * injection system automatically. It is up to the user to expose it in a providers list.
-     *
-     * @developerPreview 22.0
      */
     (options?: {
         autoProvided: false;
@@ -1264,8 +1260,6 @@ interface ServiceDecorator {
     /**
      * Creates a service that is automatically provided. Passing an optional
      * `factory` allows for the runtime value to be replaced.
-     *
-     * @developerPreview 22.0
      */
     (options?: {
         autoProvided?: true;
@@ -1276,7 +1270,6 @@ interface ServiceDecorator {
  * Type of the Service metadata.
  *
  * @publicApi
- * @developerPreview 22.0
  */
 interface Service {
     /**
@@ -1294,7 +1287,6 @@ interface Service {
  *
  * @Annotation
  * @publicApi
- * @developerPreview 22.0
  */
 declare const Service: ServiceDecorator;
 
