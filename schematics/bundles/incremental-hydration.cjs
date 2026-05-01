@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.10+sha-a4145de
+ * @license Angular v22.0.0-next.10+sha-c84642a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -30,15 +30,18 @@ class IncrementalHydrationMigration extends project_paths.TsurgeFunnelMigration 
                     ts.isIdentifier(node.expression) &&
                     node.expression.text === 'provideClientHydration') {
                     let hasIncremental = false;
+                    let hasNoIncremental = false;
                     for (const arg of node.arguments) {
-                        if (ts.isCallExpression(arg) &&
-                            ts.isIdentifier(arg.expression) &&
-                            arg.expression.text === 'withIncrementalHydration') {
-                            hasIncremental = true;
-                            break;
+                        if (ts.isCallExpression(arg) && ts.isIdentifier(arg.expression)) {
+                            if (arg.expression.text === 'withIncrementalHydration') {
+                                hasIncremental = true;
+                            }
+                            else if (arg.expression.text === 'withNoIncrementalHydration') {
+                                hasNoIncremental = true;
+                            }
                         }
                     }
-                    if (!hasIncremental) {
+                    if (!hasIncremental && !hasNoIncremental) {
                         // Add withNoIncrementalHydration()
                         const withNoIncrementalExpr = importManager.addImport({
                             exportModuleSpecifier: '@angular/platform-browser',
