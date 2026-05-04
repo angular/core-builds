@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-c84642a
+ * @license Angular v22.0.0-next.10+sha-4f048e7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -472,19 +472,20 @@ class ResourceWrappedError extends Error {
     });
   }
 }
-const paramsContext = {
-  chain(resource) {
-    switch (resource.status()) {
-      case 'idle':
-        throw ResourceParamsStatus.IDLE;
-      case 'error':
-        throw new ResourceDependencyError(resource);
-      case 'loading':
-      case 'reloading':
-        throw ResourceParamsStatus.LOADING;
-    }
-    return resource.value();
+function chain(resource) {
+  switch (resource.status()) {
+    case 'idle':
+      throw ResourceParamsStatus.IDLE;
+    case 'error':
+      throw new ResourceDependencyError(resource);
+    case 'loading':
+    case 'reloading':
+      throw ResourceParamsStatus.LOADING;
   }
+  return resource.value();
+}
+const paramsContext = {
+  chain
 };
 let inParamsFunction = false;
 function isInParamsFunction() {
@@ -502,5 +503,5 @@ function rethrowFatalErrors(error) {
   }
 }
 
-export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, computed, encapsulateResourceError, getOutputDestroyRef, invalidResourceCreationInParams, isInParamsFunction, linkedSignal, resource, rethrowFatalErrors, setInParamsFunction, untracked };
+export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, chain, computed, encapsulateResourceError, getOutputDestroyRef, invalidResourceCreationInParams, isInParamsFunction, linkedSignal, resource, rethrowFatalErrors, setInParamsFunction, untracked };
 //# sourceMappingURL=_resource-chunk.mjs.map
