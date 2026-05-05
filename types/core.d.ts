@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-8a7f955
+ * @license Angular v22.0.0-next.10+sha-f81fa6e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -792,12 +792,17 @@ declare function maybeUnwrapDefaultExport<T>(input: T | DefaultExport<T>): T;
  * injectAsync(.., {prefetch: onIdle})
  * ```
  *
+ * @see [Lazy loading services](guide/di/lazy-loading-services)
+ * @see [Injection context](guide/di/dependency-injection-context)
+ *
  * @publicApi 22.0
  */
 declare function injectAsync<T>(loader: () => Promise<ProviderToken<T>>, options?: InjectAsyncOptions): () => Promise<T>;
 declare function injectAsync<T>(loader: () => Promise<DefaultExport<ProviderToken<T>>>, options?: InjectAsyncOptions): () => Promise<T>;
 /**
  * Interface for `options` argument used within `injectAsync` call.
+ *
+ * @see [Prefetching the dependency](guide/di/lazy-loading-services#prefetching-the-dependency)
  *
  * @publicApi 22.0
  */
@@ -813,6 +818,7 @@ interface InjectAsyncOptions {
  * the lazy-loaded dependency.
  *
  * @see {@link onIdle}
+ * @see [Prefetching the dependency](guide/di/lazy-loading-services#prefetching-the-dependency)
  *
  * @publicApi 22.0
  */
@@ -820,6 +826,11 @@ type PrefetchTrigger = () => Promise<void>;
 /**
  * A `PrefetchTrigger` helper function to provide the logic of triggering dependency loading
  * when the browser becomes idle.
+ *
+ * Internally delegates to the configured {@link IdleService}, whose default implementation uses
+ * [`requestIdleCallback`](https://developer.mozilla.org/docs/Web/API/Window/requestIdleCallback)
+ * when available and falls back to `setTimeout` otherwise. The default behavior can be replaced
+ * with `provideIdleServiceWith`.
  *
  * @usageNotes
  *
@@ -829,6 +840,8 @@ type PrefetchTrigger = () => Promise<void>;
  * // or with custom idle options:
  * injectAsync(import(...), {prefetch: () => onIdle({timeout: 100})})
  * ```
+ *
+ * @see [Prefetching the dependency](guide/di/lazy-loading-services#prefetching-the-dependency)
  *
  * @publicApi 22.0
  */

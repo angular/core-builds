@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-8a7f955
+ * @license Angular v22.0.0-next.10+sha-f81fa6e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -138,7 +138,7 @@ interface ResourceParamsContext {
  *
  * `local` - The resource's value was set locally via `.set()` or `.update()`.
  *
- * @experimental
+ * @publicApi 22.0
  */
 type ResourceStatus = 'idle' | 'error' | 'loading' | 'reloading' | 'resolved' | 'local';
 /**
@@ -148,7 +148,7 @@ type ResourceStatus = 'idle' | 'error' | 'loading' | 'reloading' | 'resolved' | 
  * The usual way of creating a `Resource` is through the `resource` function, but various other APIs
  * may present `Resource` instances to describe their own concepts.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface Resource<T> {
     /**
@@ -185,7 +185,7 @@ interface Resource<T> {
  *
  * Overwriting the value of a resource sets it to the 'local' state.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface WritableResource<T> extends Resource<T> {
     readonly value: WritableSignal<T>;
@@ -213,7 +213,7 @@ interface WritableResource<T> extends Resource<T> {
 /**
  * A `WritableResource` created through the `resource` function.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface ResourceRef<T> extends WritableResource<T> {
     hasValue(this: T extends undefined ? this : never): this is ResourceRef<Exclude<T, undefined>>;
@@ -227,7 +227,7 @@ interface ResourceRef<T> extends WritableResource<T> {
  * Parameter to a `ResourceLoader` which gives the request and other options for the current loading
  * operation.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface ResourceLoaderParams<R> {
     params: NoInfer<Exclude<R, undefined>>;
@@ -239,19 +239,19 @@ interface ResourceLoaderParams<R> {
 /**
  * Loading function for a `Resource`.
  *
- * @experimental
+ * @publicApi 22.0
  */
 type ResourceLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<T>;
 /**
  * Streaming loader for a `Resource`.
  *
- * @experimental
+ * @publicApi 22.0
  */
 type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => Signal<ResourceStreamItem<T>> | PromiseLike<Signal<ResourceStreamItem<T>>> | undefined;
 /**
  * Options to the `resource` function, for creating a resource.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface BaseResourceOptions<T, R> {
     /**
@@ -278,7 +278,7 @@ interface BaseResourceOptions<T, R> {
 /**
  * Options to the `resource` function, for creating a resource.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface PromiseResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     /**
@@ -293,7 +293,7 @@ interface PromiseResourceOptions<T, R> extends BaseResourceOptions<T, R> {
 /**
  * Options to the `resource` function, for creating a resource.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface StreamingResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     /**
@@ -307,7 +307,7 @@ interface StreamingResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     loader?: never;
 }
 /**
- * @experimental
+ * @publicApi 22.0
  */
 type ResourceOptions<T, R> = (PromiseResourceOptions<T, R> | StreamingResourceOptions<T, R>) & {
     /**
@@ -316,7 +316,7 @@ type ResourceOptions<T, R> = (PromiseResourceOptions<T, R> | StreamingResourceOp
     debugName?: string;
 };
 /**
- * @experimental
+ * @publicApi 22.0
  */
 type ResourceStreamItem<T> = {
     value: T;
@@ -326,7 +326,7 @@ type ResourceStreamItem<T> = {
 /**
  * An explicit representation of a resource's state.
  *
- * @experimental
+ * @publicApi 22.0
  * @see [Resource composition with snapshots](guide/signals/resource#resource-composition-with-snapshots)
  */
 type ResourceSnapshot<T> = {
@@ -346,6 +346,8 @@ type ResourceSnapshot<T> = {
  * Options for `debounced`.
  *
  * @see [Debouncing signals with `debounced`](guide/signals/debounced)
+ *
+ * @experimental 22.0
  */
 interface DebouncedOptions<T> {
     /** The `Injector` to use for the debounced resource. */
@@ -358,6 +360,8 @@ interface DebouncedOptions<T> {
  * Can be a number of milliseconds or a function that returns a Promise.
  *
  * @see [Debouncing signals with `debounced`](guide/signals/debounced)
+ *
+ * @experimental 22.0
  */
 type DebounceTimer<T> = number | ((value: T, lastValue: ResourceSnapshot<T>) => Promise<void> | void);
 

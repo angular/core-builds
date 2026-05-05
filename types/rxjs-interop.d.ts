@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-8a7f955
+ * @license Angular v22.0.0-next.10+sha-f81fa6e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -173,7 +173,7 @@ declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunc
 /**
  * Like `ResourceOptions` but uses an RxJS-based `loader`.
  *
- * @experimental
+ * @publicApi 22.0
  */
 interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     stream: (params: ResourceLoaderParams<R>) => Observable<T>;
@@ -184,7 +184,7 @@ interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
  *
  * @see [Using rxResource for async data](ecosystem/rxjs-interop#using-rxresource-for-async-data)
  *
- * @experimental
+ * @publicApi 22.0
  */
 declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
     defaultValue: NoInfer<T>;
@@ -193,7 +193,7 @@ declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
  * resource's value.
  *
- * @experimental
+ * @publicApi 22.0
  */
 declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T | undefined>;
 
