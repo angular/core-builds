@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.10+sha-4f048e7
+ * @license Angular v22.0.0-next.10+sha-fc52633
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1264,16 +1264,22 @@ interface ServiceDecorator {
      * When `autoProvided` is set to `false`, the service won't be exposed to the dependency
      * injection system automatically. It is up to the user to expose it in a providers list.
      */
-    (options?: {
+    (options: {
         autoProvided: false;
     }): TypeDecorator;
     /**
-     * Creates a service that is automatically provided. Passing an optional
-     * `factory` allows for the runtime value to be replaced.
+     * Creates a service that is automatically provided and uses
+     * the value returned from the `factory` function.
+     */
+    <T>(options: {
+        autoProvided?: true;
+        factory: () => T;
+    }): <C extends Type$1<unknown>>(target: C) => Type$1<T>;
+    /**
+     * Creates a service that is automatically provided.
      */
     (options?: {
         autoProvided?: true;
-        factory?: () => unknown;
     }): TypeDecorator;
 }
 /**
