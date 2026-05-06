@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0-next.10+sha-188b0d5
+ * @license Angular v22.0.0-next.10+sha-5a7c1e6
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, signalAsReadonlyFn, assertInInjectionContext, effect, PendingTasks, signal, isSignal, Injector } from './_pending_tasks-chunk.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, InjectionToken, signalAsReadonlyFn, assertInInjectionContext, TransferState, effect, PendingTasks, signal, isSignal, Injector } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -60,6 +60,8 @@ class OutputEmitterRef {
 function getOutputDestroyRef(ref) {
   return ref.destroyRef;
 }
+
+const CACHE_ACTIVE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'STATE_CACHE_ACTIVE' : '');
 
 function computed(computation, options) {
   const getter = createComputed(computation, options?.equal);
@@ -123,7 +125,7 @@ function resource(options) {
   }
   const oldNameForParams = options.request;
   const params = options.params ?? oldNameForParams ?? (() => null);
-  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector));
+  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector), options.id);
 }
 class BaseWritableResource {
   value;
@@ -173,6 +175,7 @@ class ResourceImpl extends BaseWritableResource {
   loaderFn;
   equal;
   debugName;
+  transferCacheKey;
   pendingTasks;
   state;
   extRequest;
@@ -183,7 +186,8 @@ class ResourceImpl extends BaseWritableResource {
   unregisterOnDestroy;
   status;
   error;
-  constructor(request, loaderFn, defaultValue, equal, debugName, injector, getInitialStream) {
+  transferState;
+  constructor(request, loaderFn, defaultValue, equal, debugName, injector, transferCacheKey, getInitialStream) {
     if (isInParamsFunction()) {
       throw invalidResourceCreationInParams();
     }
@@ -206,6 +210,15 @@ class ResourceImpl extends BaseWritableResource {
     this.loaderFn = loaderFn;
     this.equal = equal;
     this.debugName = debugName;
+    this.transferCacheKey = transferCacheKey;
+    const cacheState = injector.get(CACHE_ACTIVE, undefined, {
+      optional: true
+    }) ?? {
+      isActive: false
+    };
+    this.transferState = injector.get(TransferState, undefined, {
+      optional: true
+    }) ?? undefined;
     this.extRequest = linkedSignal(() => {
       try {
         setInParamsFunction(true);
@@ -250,7 +263,18 @@ class ResourceImpl extends BaseWritableResource {
           }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined);
         } else if (!status) {
           if (!previous) {
-            stream = getInitialStream?.(extRequest.request);
+            const transferState = this.transferState;
+            const cacheKey = this.transferCacheKey;
+            if (cacheState.isActive && cacheKey && transferState && request !== undefined) {
+              if (transferState.hasKey(cacheKey)) {
+                stream = signal({
+                  value: transferState.get(cacheKey, defaultValue)
+                }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined);
+              }
+            }
+            if (!stream) {
+              stream = getInitialStream?.(extRequest.request);
+            }
             getInitialStream = undefined;
             status = request === undefined ? 'idle' : stream ? 'resolved' : 'loading';
           } else {
@@ -372,6 +396,10 @@ class ResourceImpl extends BaseWritableResource {
           previousStatus: 'resolved',
           stream
         });
+        const result = untracked(stream);
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+          saveToTransferState(result, this.transferCacheKey, this.transferState);
+        }
       } else {
         const resolvedStream = await stream;
         if (shouldDiscard()) {
@@ -383,6 +411,10 @@ class ResourceImpl extends BaseWritableResource {
           previousStatus: 'resolved',
           stream: resolvedStream
         });
+        const result = resolvedStream ? untracked(resolvedStream) : undefined;
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+          saveToTransferState(result, this.transferCacheKey, this.transferState);
+        }
       }
     } catch (err) {
       rethrowFatalErrors(err);
@@ -407,6 +439,11 @@ class ResourceImpl extends BaseWritableResource {
     this.pendingController = undefined;
     this.resolvePendingTask?.();
     this.resolvePendingTask = undefined;
+  }
+}
+function saveToTransferState(result, transferCacheKey, transferState) {
+  if (transferCacheKey && transferState && result && isResolved(result)) {
+    transferState.set(transferCacheKey, result.value);
   }
 }
 function wrapEqualityFn(equal) {
@@ -503,5 +540,5 @@ function rethrowFatalErrors(error) {
   }
 }
 
-export { OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, chain, computed, encapsulateResourceError, getOutputDestroyRef, invalidResourceCreationInParams, isInParamsFunction, linkedSignal, resource, rethrowFatalErrors, setInParamsFunction, untracked };
+export { CACHE_ACTIVE, OutputEmitterRef, ResourceDependencyError, ResourceImpl, ResourceParamsStatus, ResourceValueError, chain, computed, encapsulateResourceError, getOutputDestroyRef, invalidResourceCreationInParams, isInParamsFunction, linkedSignal, resource, rethrowFatalErrors, setInParamsFunction, untracked };
 //# sourceMappingURL=_resource-chunk.mjs.map
