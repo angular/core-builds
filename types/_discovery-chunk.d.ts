@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.11+sha-1aeebbe
+ * @license Angular v21.2.11+sha-9e38ed7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -212,7 +212,7 @@ type TrustedScriptURL = string & {
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
+type SanitizerFn = (value: any, tagName: string, propName: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
 /**
  * Stores a list of nodes which need to be removed.

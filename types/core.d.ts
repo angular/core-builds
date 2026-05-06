@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.11+sha-1aeebbe
+ * @license Angular v21.2.11+sha-9e38ed7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -142,6 +142,16 @@ interface InputFunction {
      * The input accepts values of type `TransformT` and the given
      * transform function will transform the value to type `T|undefined`.
      */ <T, TransformT>(initialValue: undefined, opts: InputOptionsWithTransform<T | undefined, TransformT>): InputSignalWithTransform<T | undefined, TransformT>;
+    /**
+     * Declares an input of type `T` with an initial value and a transform function
+     * that accepts values of the same type.
+     */
+    <T>(initialValue: T, opts: InputOptionsWithTransform<T, unknown>): InputSignalWithTransform<T, T>;
+    /**
+     * Declares an input of type `T|undefined` without an initial value and with a transform
+     * function that accepts values of the same type.
+     */
+    <T>(initialValue: undefined, opts: InputOptionsWithTransform<T | undefined, unknown>): InputSignalWithTransform<T | undefined, T | undefined>;
     /**
      * Initializes a required input.
      *
@@ -9161,7 +9171,7 @@ declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop:
  * @param tagName The name of the tag.
  * @param attributeName The name of the attribute.
  */
-declare function ɵɵvalidateAttribute(value: unknown, tagName: string, attributeName: string): unknown;
+declare function ɵɵvalidateAttribute<T = any>(value: T, tagName: string, attributeName: string): T;
 
 /**
  * Creates a `Resource` driven by a source of `ResourceSnapshot`s.
