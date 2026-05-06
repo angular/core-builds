@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.19+sha-b9ec542
+ * @license Angular v20.3.19+sha-25e4e07
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6242,13 +6242,6 @@ function validateAgainstEventProperties(name) {
         throw new RuntimeError(306 /* RuntimeErrorCode.INVALID_EVENT_BINDING */, errorMessage);
     }
 }
-function validateAgainstEventAttributes(name) {
-    if (name.toLowerCase().startsWith('on')) {
-        const errorMessage = `Binding to event attribute '${name}' is disallowed for security reasons, ` +
-            `please use (${name.slice(2)})=...`;
-        throw new RuntimeError(306 /* RuntimeErrorCode.INVALID_EVENT_BINDING */, errorMessage);
-    }
-}
 function getSanitizer() {
     const lView = getLView();
     return lView && lView[ENVIRONMENT].sanitizer;
@@ -9281,7 +9274,9 @@ function setDomProperty(tNode, lView, propName, value, renderer, sanitizer) {
     if (tNode.type & 3 /* TNodeType.AnyRNode */) {
         const element = getNativeByTNode(tNode, lView);
         if (ngDevMode) {
-            validateAgainstEventProperties(propName);
+            if (lView[TVIEW].firstUpdatePass) {
+                validateAgainstEventProperties(propName);
+            }
             if (!isPropertyValid(element, propName, tNode.value, lView[TVIEW].schemas)) {
                 handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
             }
@@ -9448,7 +9443,6 @@ function findDirectiveDefMatches(tView, tNode) {
 function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
     if (ngDevMode) {
         assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-        validateAgainstEventAttributes(name);
         assertTNodeType(tNode, 2 /* TNodeType.Element */, `Attempted to set attribute \`${name}\` on a container node. ` +
             `Host bindings are not valid on ng-container or ng-template.`);
     }
@@ -14727,7 +14721,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.19+sha-b9ec542']
+        ? ['ng-version', '20.3.19+sha-25e4e07']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -24924,7 +24918,7 @@ function i18nAttributesFirstPass(tView, index, values) {
                 // the compiler treats static i18n attributes as regular attribute bindings.
                 // Since this may not be the first i18n attribute on this element we need to pass in how
                 // many previous bindings there have already been.
-                generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), SENSITIVE_ATTRS[attrName.toLowerCase()] ? _sanitizeUrl : null);
+                generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), i18nSanitizeAttribute(attrName));
             }
         }
         tView.data[index] = updateOpCodes;
@@ -25252,7 +25246,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                         const hasBinding = !!attr.value.match(BINDING_REGEXP);
                         if (hasBinding) {
                             if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
-                                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, SENSITIVE_ATTRS[lowerAttrName] ? _sanitizeUrl : null);
+                                generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, i18nSanitizeAttribute(lowerAttrName));
                             }
                             else {
                                 ngDevMode &&
@@ -25352,6 +25346,27 @@ function addCreateNodeAndAppend(create, marker, text, appendToParentIdx, createA
 }
 function addCreateAttribute(create, newIndex, attrName, attrValue) {
     create.push((newIndex << 1 /* IcuCreateOpCode.SHIFT_REF */) | 1 /* IcuCreateOpCode.Attr */, attrName, attrValue);
+}
+/**
+ * Caches all keys of `SECURITY_SENSITIVE_ELEMENTS` in a Set to avoid recomputing
+ * or scanning them on every invocation.
+ */
+const SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */ (() => new Set(Object.values(SECURITY_SENSITIVE_ELEMENTS).flatMap((attrs) => (attrs ? [...attrs.keys()] : []))))();
+/**
+ * Returns a sanitizer for the given attribute name or null if the attribute is not security sensitive.
+ *
+ * @param attrName The name of the attribute to sanitize.
+ * @returns The sanitizer for the given attribute name.
+ */
+function i18nSanitizeAttribute(attrName) {
+    const lowerAttrName = attrName.toLowerCase();
+    if (SENSITIVE_ATTRS[lowerAttrName]) {
+        return _sanitizeUrl;
+    }
+    if (SECURITY_SENSITIVE_ATTRS.has(lowerAttrName)) {
+        return ɵɵvalidateAttribute;
+    }
+    return null;
 }
 
 // i18nPostprocess consts

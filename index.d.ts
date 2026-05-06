@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.19+sha-b9ec542
+ * @license Angular v20.3.19+sha-25e4e07
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9056,7 +9056,7 @@ declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop:
  * @param tagName The name of the tag.
  * @param attributeName The name of the attribute.
  */
-declare function ɵɵvalidateAttribute(value: unknown, tagName: string, attributeName: string): unknown;
+declare function ɵɵvalidateAttribute<T = any>(value: T, tagName: string, attributeName: string): T;
 
 /**
  * Represents the set of dependencies of a type in a certain context.

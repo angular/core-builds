@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.19+sha-b9ec542
+ * @license Angular v20.3.19+sha-25e4e07
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29656,8 +29656,9 @@ class HtmlAstToIvyAst {
                 // Note that validation is skipped and property mapping is disabled
                 // due to the fact that we need to make sure a given prop is not an
                 // input of a directive and directive matching happens at runtime.
+                const isAttrOn = prop.name.toLowerCase().startsWith('attr.on');
                 const bep = this.bindingParser.createBoundElementProperty(elementName, prop, 
-                /* skipValidation */ true, 
+                /* skipValidation */ !isAttrOn, 
                 /* mapPropertyName */ false);
                 bound.push(BoundAttribute.fromBoundElementProperty(bep, i18n));
             }
@@ -30553,7 +30554,29 @@ function verifyHostBindings(bindings, sourceSpan) {
     const bindingParser = makeBindingParser();
     bindingParser.createDirectiveHostEventAsts(bindings.listeners, sourceSpan);
     bindingParser.createBoundHostProperties(bindings.properties, sourceSpan);
+    validateNoEventBindings(bindings, bindingParser, sourceSpan);
     return bindingParser.errors;
+}
+/**
+ * Validates that there are no event attribute bindings in the host bindings.
+ * @param bindings - Map of host bindings for the component.
+ * @param bindingParser - Binding parser used to create the binding expression.
+ * @param sourceSpan - Source span where the host bindings were defined.
+ */
+function validateNoEventBindings(bindings, bindingParser, sourceSpan) {
+    for (const prop in bindings.properties) {
+        const isAttr = prop.startsWith('attr.');
+        const boundName = isAttr ? prop.slice(5) : prop;
+        if (boundName.toLowerCase().startsWith('on')) {
+            const errorType = isAttr ? 'attribute' : 'property';
+            const suggestion = `(${boundName.slice(2)})=...`;
+            let msg = `Binding to event ${errorType} '${boundName}' is disallowed for security reasons, please use ${suggestion}`;
+            if (!isAttr) {
+                msg += `\nIf '${prop}' is a directive input, make sure the directive is imported by the current module.`;
+            }
+            bindingParser.errors.push(new ParseError(sourceSpan, msg));
+        }
+    }
 }
 function compileStyles(styles, selector, hostSelector) {
     const shadowCss = new ShadowCss();
@@ -32196,11 +32219,6 @@ function createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies) {
 function extractHostBindings$1(propMetadata, sourceSpan, host) {
     // First parse the declarations from the metadata.
     const bindings = parseHostBindings(host || {});
-    // After that check host bindings for errors
-    const errors = verifyHostBindings(bindings, sourceSpan);
-    if (errors.length) {
-        throw new Error(errors.map((error) => error.msg).join('\n'));
-    }
     // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
     for (const field in propMetadata) {
         if (propMetadata.hasOwnProperty(field)) {
@@ -32216,6 +32234,11 @@ function extractHostBindings$1(propMetadata, sourceSpan, host) {
                 }
             });
         }
+    }
+    // After that check host bindings for errors
+    const errors = verifyHostBindings(bindings, sourceSpan);
+    if (errors.length) {
+        throw new Error(errors.map((error) => error.msg).join('\n'));
     }
     return bindings;
 }
@@ -32831,7 +32854,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.19+sha-b9ec542');
+const VERSION = new Version('20.3.19+sha-25e4e07');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33893,7 +33916,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-MdN5DRlX.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D2eb40pS.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
@@ -43366,6 +43389,13 @@ class RegistryDomSchemaChecker {
         }
     }
     checkTemplateElementProperty(id, tagName, name, span, schemas, hostIsStandalone) {
+        const report = REGISTRY$1.validateProperty(name);
+        if (report.error) {
+            const mapping = this.resolver.getTemplateSourceMapping(id);
+            const diag = makeTemplateDiagnostic(id, mapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), report.msg);
+            this._diagnostics.push(diag);
+            return;
+        }
         if (!REGISTRY$1.hasProperty(tagName, name, schemas)) {
             const mapping = this.resolver.getTemplateSourceMapping(id);
             const decorator = hostIsStandalone ? '@Component' : '@NgModule';
@@ -43389,6 +43419,13 @@ class RegistryDomSchemaChecker {
         }
     }
     checkHostElementProperty(id, element, name, span, schemas) {
+        const report = REGISTRY$1.validateProperty(name);
+        if (report.error) {
+            const mapping = this.resolver.getHostBindingsMapping(id);
+            const diag = makeTemplateDiagnostic(id, mapping, span, ts.DiagnosticCategory.Error, ngErrorCode(exports.ErrorCode.SCHEMA_INVALID_ATTRIBUTE), report.msg);
+            this._diagnostics.push(diag);
+            return;
+        }
         for (const tagName of element.tagNames) {
             if (REGISTRY$1.hasProperty(tagName, name, schemas)) {
                 continue;
