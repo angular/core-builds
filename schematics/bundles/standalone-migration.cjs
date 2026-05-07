@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-60552a7
+ * @license Angular v22.1.0-next.0+sha-932a163
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1151,9 +1151,9 @@ function replaceInTestImportsArray(testImportArrays, removalLocations, classesTo
                 if (moduleMeta) {
                     // Since we don't have access to the template type checker in tests,
                     // we copy over all the `exports` that aren't flagged for removal.
-                    const exports$1 = moduleMeta.exports.filter((exp) => !classesToRemove.has(exp.node));
-                    if (exports$1.length > 0) {
-                        exports$1.forEach((exp) => replacements.track(node, exp));
+                    const exports = moduleMeta.exports.filter((exp) => !classesToRemove.has(exp.node));
+                    if (exports.length > 0) {
+                        exports.forEach((exp) => replacements.track(node, exp));
                         // Track the import statement for removal when replacing with exports
                         if (ts.isIdentifier(node)) {
                             const symbol = typeChecker.getSymbolAtLocation(node);
