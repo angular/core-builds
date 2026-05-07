@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.11+sha-5743101
+ * @license Angular v22.0.0-next.11+sha-0f2160c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -21,7 +21,6 @@ require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
 require('./imports-CKV-ITqD.cjs');
 
-import('@angular/compiler');
 /**
  * This migration wraps optional chaining expressions in Angular templates with a call to the
  * `$safeNavigationMigration()` magic function. This function doesn't exist at runtime, but is
