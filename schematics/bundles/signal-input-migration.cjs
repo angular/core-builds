@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-739bd37
+ * @license Angular v22.1.0-next.0+sha-06f6dec
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
-var migrate_ts_type_references = require('./migrate_ts_type_references-xRTTASnu.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-DMv-GSuu.cjs');
 var ts = require('typescript');
 require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
-var index = require('./index-DcezkXLN.cjs');
+var index = require('./index-DxFMpcXS.cjs');
 var assert = require('assert');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
 require('@angular-devkit/core');

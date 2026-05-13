@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-739bd37
+ * @license Angular v22.1.0-next.0+sha-06f6dec
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -265,7 +265,9 @@ class TemplateReferenceVisitor extends compiler.TmplAstRecursiveVisitor {
     }
     visitForLoopBlock(block) {
         this.checkExpressionForReferencedFields(block, block.expression);
-        this.checkExpressionForReferencedFields(block, block.trackBy);
+        if (block.trackBy !== null) {
+            this.checkExpressionForReferencedFields(block, block.trackBy);
+        }
         super.visitForLoopBlock(block);
     }
     visitSwitchBlock(block) {
