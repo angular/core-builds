@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-next.12+sha-7017557
+ * @license Angular v22.0.0-next.12+sha-ccb7d42
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -519,7 +519,7 @@ class TmplVisitor extends compiler.TmplAstRecursiveVisitor {
     }
     visitForLoopBlock(block) {
         block.expression.visit(this.exprMigrator, false);
-        block.trackBy.visit(this.exprMigrator, false);
+        block.trackBy?.visit(this.exprMigrator, false);
         super.visitForLoopBlock(block);
     }
     visitLetDeclaration(decl) {
