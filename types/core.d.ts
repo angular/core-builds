@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-next.12+sha-639a785
+ * @license Angular v22.0.0-rc.0+sha-5ca0c5a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7463,7 +7463,7 @@ interface SharedStylesHost {
  *
  * @see [Async reactivity with resources](guide/signals/resource)
  *
- * @experimental 19.0
+ * @publicApi 22.0
  */
 declare function resource<T, R>(options: ResourceOptions<T, R> & {
     defaultValue: NoInfer<T>;
@@ -7476,7 +7476,7 @@ declare function resource<T, R>(options: ResourceOptions<T, R> & {
  * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
  * request object becomes available, which could prematurely abort mutations.
  *
- * @experimental 19.0
+ * @publicApi 22.0
  * @see [Async reactivity with resources](guide/signals/resource)
  */
 declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
