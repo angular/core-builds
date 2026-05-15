@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-71f8d48
+ * @license Angular v22.1.0-next.0+sha-358d2e6
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5174,7 +5174,45 @@ function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, 
   }
 }
 function applyView(tView, lView, renderer, action, parentRElement, beforeNode) {
-  applyNodes(renderer, action, tView.firstChild, lView, parentRElement, beforeNode, false);
+  if (tView.type === 3) {
+    applyForeignNodes(renderer, action, lView, parentRElement, beforeNode);
+  } else {
+    applyNodes(renderer, action, tView.firstChild, lView, parentRElement, beforeNode, false);
+  }
+}
+function applyForeignNodes(renderer, action, lView, parent, beforeNode) {
+  const tView = lView[TVIEW];
+  const headTNode = tView.firstChild;
+  const tailTNode = headTNode.next;
+  const head = unwrapRNode(lView[headTNode.index]);
+  const tail = unwrapRNode(lView[tailTNode.index]);
+  const fragmentSlotIndex = tailTNode.index + 1;
+  let fragment = lView[fragmentSlotIndex];
+  if (action === 1 || action === 0) {
+    if (parent !== null) {
+      if (fragment && fragment.hasChildNodes()) {
+        nativeInsertBefore(renderer, parent, fragment, beforeNode, true);
+      } else {
+        nativeInsertBefore(renderer, parent, head, beforeNode, true);
+        nativeInsertBefore(renderer, parent, tail, beforeNode, true);
+      }
+    }
+  } else if (action === 2) {
+    if (!fragment) {
+      fragment = document.createDocumentFragment();
+      lView[fragmentSlotIndex] = fragment;
+    }
+    if (head && head.parentNode === fragment) {
+      return;
+    }
+    let current = head;
+    while (current !== null) {
+      const next = current.nextSibling;
+      fragment.appendChild(current);
+      if (current === tail) break;
+      current = next;
+    }
+  }
 }
 function applyProjection(tView, lView, tProjectionNode) {
   const renderer = lView[RENDERER];
@@ -5709,6 +5747,19 @@ const USE_EXHAUSTIVE_CHECK_NO_CHANGES_DEFAULT = false;
 const UseExhaustiveCheckNoChanges = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'exhaustive checkNoChanges' : '');
 
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
+  if (tView.type === 3) {
+    const headTNode = tView.firstChild;
+    const tailTNode = headTNode.next;
+    const head = unwrapRNode(lView[headTNode.index]);
+    const tail = unwrapRNode(lView[tailTNode.index]);
+    let current = head;
+    while (current !== null) {
+      result.push(current);
+      if (current === tail) break;
+      current = current.nextSibling;
+    }
+    return result;
+  }
   while (tNode !== null) {
     if (tNode.type === 128) {
       tNode = isProjection ? tNode.projectionNext : tNode.next;
@@ -9023,7 +9074,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-71f8d48'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-358d2e6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11799,7 +11850,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-71f8d48';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-358d2e6';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-71f8d48
+ * @license Angular v22.1.0-next.0+sha-358d2e6
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4460,7 +4460,11 @@ declare const enum TViewType {
      * `TView` associated with a template. Such as `*ngIf`, `<ng-template>` etc... A `Component`
      * can have zero or more `Embedded` `TView`s.
      */
-    Embedded = 2
+    Embedded = 2,
+    /**
+     * Foreign `TView` associated with a range of nodes between `head` and `tail` comment nodes.
+     */
+    Foreign = 3
 }
 /**
  * The static data for an LView (shared between all templates of a
