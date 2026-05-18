@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-9a7dedc
+ * @license Angular v22.1.0-next.0+sha-16fe27b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3995,10 +3995,6 @@ declare const enum RuntimeErrorCode {
     MISSING_ZONEJS = 908,
     UNEXPECTED_ZONE_STATE = 909,
     UNSAFE_ATTRIBUTE_BINDING = -910,
-    /**
-     * @deprecated use `UNSAFE_ATTRIBUTE_BINDING` instead.
-     */
-    UNSAFE_IFRAME_ATTRS = -910,
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
@@ -7176,8 +7172,10 @@ declare function store<T>(tView: TView, lView: LView, index: number, value: T): 
  * Warning! this function will return minified names if the name of the component is minified. The
  * consumer of the function is responsible for resolving the minified name to its original name.
  * @param node Node from which to start the search.
+ * @param predicate Predicate function that can be used to decide which nodes should be skipped over
+ *   during the search. Return true if the search should stop or false to keep going up the tree.
  */
-declare function getClosestComponentName(node: Node): string | null;
+declare function getClosestComponentName(node: Node, predicate?: (current: HTMLElement, componentName: string) => boolean): string | null;
 
 /**
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
