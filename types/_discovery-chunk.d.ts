@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.13+sha-fc434c1
+ * @license Angular v21.2.13+sha-c0f5227
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1443,6 +1443,10 @@ interface TNode {
      *   `TNodeType.ICUContainer`: `TIcu`
      */
     value: any;
+    /**
+     * The namespace associated with this node.
+     */
+    namespace: string | null;
     /**
      * Attributes associated with an element. We need to store attributes to support various
      * use-cases (attribute injection, content projection with selectors, directives matching).
