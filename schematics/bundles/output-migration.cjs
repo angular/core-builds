@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-rc.0+sha-c2160cd
+ * @license Angular v22.0.0-rc.0+sha-38aca8f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -511,7 +511,7 @@ function addCommentForEmptyEmit(node, info, checker, reflector, dtsReader, outpu
     if (!propertyDeclaration)
         return;
     const eventEmitterType = getEventEmitterArgumentType(propertyDeclaration);
-    if (!eventEmitterType)
+    if (!eventEmitterType || eventEmitterType === 'void')
         return;
     const id = getUniqueIdForProperty(info, propertyDeclaration);
     const file = project_paths.projectFile(node.getSourceFile(), info);
