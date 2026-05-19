@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-rc.0+sha-38aca8f
+ * @license Angular v22.0.0-rc.0+sha-0e1ec0c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8088,8 +8088,9 @@ interface R3DeclareDirectiveFacade {
         passThroughInput: string | null;
     };
     isStandalone?: boolean;
-    hostDirectives?: R3HostDirectiveMetadataFacade[] | null;
     isSignal?: boolean;
+    hostDirectives?: R3HostDirectiveMetadataFacade[] | null;
+    legacyOptionalChaining?: boolean;
 }
 interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     template: string;
@@ -8107,7 +8108,6 @@ interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     changeDetection?: ChangeDetectionStrategy;
     encapsulation?: ViewEncapsulation;
     preserveWhitespaces?: boolean;
-    legacyOptionalChaining?: boolean;
 }
 type R3DeclareTemplateDependencyFacade = {
     kind: string;
@@ -8181,8 +8181,8 @@ interface R3DeclareNgModuleFacade {
 }
 interface R3DeclarePipeFacade {
     type: Type;
-    name: string;
     version: string;
+    name: string;
     pure?: boolean;
     isStandalone?: boolean;
 }
