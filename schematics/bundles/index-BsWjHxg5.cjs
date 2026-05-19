@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v21.2.13+sha-027c7c0
+ * @license Angular v21.2.13+sha-49113ac
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -310,6 +310,16 @@ class TemplateReferenceVisitor extends compiler.TmplAstRecursiveVisitor {
     }
     visitLetDeclaration(decl) {
         this.checkExpressionForReferencedFields(decl, decl.value);
+    }
+    visitIcu(icu) {
+        for (const v of Object.values(icu.vars)) {
+            this.checkExpressionForReferencedFields(icu, v.value);
+        }
+        for (const p of Object.values(icu.placeholders)) {
+            if (p instanceof compiler.TmplAstBoundText) {
+                this.checkExpressionForReferencedFields(icu, p.value);
+            }
+        }
     }
 }
 /**
