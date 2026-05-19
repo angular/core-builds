@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.13+sha-c0f5227
+ * @license Angular v21.2.13+sha-7f444e1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3379,16 +3379,6 @@ const RESOURCE_MAP = {
   },
   'media': {
     'src': true
-  },
-  'script': {
-    'src': true,
-    'href': true,
-    'xlink:href': true
-  },
-  ':svg:script': {
-    'src': true,
-    'href': true,
-    'xlink:href': true
   },
   'base': {
     'href': true
@@ -8788,7 +8778,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.13+sha-c0f5227'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.13+sha-7f444e1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
