@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.0-rc.0+sha-0e1ec0c
+ * @license Angular v22.0.0-rc.0+sha-1f71ebd
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,7 +13,7 @@ require('node:path');
 var project_paths = require('./project_paths-D2V-Uh2L.cjs');
 var compiler = require('@angular/compiler');
 var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
-var index = require('./index-DxFMpcXS.cjs');
+var index = require('./index-B07c0BtS.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
