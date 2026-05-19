@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-16fe27b
+ * @license Angular v22.1.0-next.0+sha-b53fa3c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3107,7 +3107,8 @@ declare enum SecurityContext {
     STYLE = 2,
     SCRIPT = 3,
     URL = 4,
-    RESOURCE_URL = 5
+    RESOURCE_URL = 5,
+    ATTRIBUTE_NO_BINDING = 6
 }
 
 /**
