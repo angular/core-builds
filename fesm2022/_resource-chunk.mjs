@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-06b004e
+ * @license Angular v22.1.0-next.0+sha-4f9ee3c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -100,21 +100,27 @@ const identityFn = v => v;
 function linkedSignal(optionsOrComputation, options) {
   if (typeof optionsOrComputation === 'function') {
     const getter = createLinkedSignal(optionsOrComputation, identityFn, options?.equal);
-    return upgradeLinkedSignalGetter(getter, options?.debugName);
+    return upgradeLinkedSignalGetter(getter, options?.debugName, options?.set);
   } else {
     const getter = createLinkedSignal(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
-    return upgradeLinkedSignalGetter(getter, optionsOrComputation.debugName);
+    return upgradeLinkedSignalGetter(getter, optionsOrComputation.debugName, optionsOrComputation.set);
   }
 }
-function upgradeLinkedSignalGetter(getter, debugName) {
+function upgradeLinkedSignalGetter(getter, debugName, customSet) {
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     getter[SIGNAL].debugName = debugName;
     getter.toString = () => `[LinkedSignal${debugName ? ' (' + debugName + ')' : ''}: ${getter()}]`;
   }
   const node = getter[SIGNAL];
   const upgradedGetter = getter;
-  upgradedGetter.set = newValue => linkedSignalSetFn(node, newValue);
-  upgradedGetter.update = updateFn => linkedSignalUpdateFn(node, updateFn);
+  if (customSet !== undefined) {
+    const rawSet = newValue => linkedSignalSetFn(node, newValue);
+    upgradedGetter.set = newValue => customSet(newValue, rawSet);
+    upgradedGetter.update = updateFn => customSet(updateFn(untracked(getter)), rawSet);
+  } else {
+    upgradedGetter.set = newValue => linkedSignalSetFn(node, newValue);
+    upgradedGetter.update = updateFn => linkedSignalUpdateFn(node, updateFn);
+  }
   upgradedGetter.asReadonly = signalAsReadonlyFn.bind(getter);
   return upgradedGetter;
 }
