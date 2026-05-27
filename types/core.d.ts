@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.1.0-next.0+sha-a68a33e
+ * @license Angular v22.1.0-next.0+sha-db59909
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { SIGNAL, ReactiveNodeKind } from './_formatter-chunk.js';
-import { Signal, WritableSignal, OutputRef, Type as Type$1, ModuleWithProviders, EnvironmentProviders, Provider, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, Injector, InjectionToken, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectOptions, InternalInjectFlags, AbstractType, StaticProvider, ValueEqualityFn, EventCallback, isSignal, enableProfiling as enableProfiling$1 } from './_chrome_dev_tools_performance-chunk.js';
-export { CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
+import { Signal, WritableSignal, OutputRef, Type as Type$1, ModuleWithProviders, EnvironmentProviders, Provider, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, Injector, InjectionToken, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectOptions, InternalInjectFlags, AbstractType, StaticProvider, ValueEqualityFn, EventCallback } from './_chrome_dev_tools_performance-chunk.js';
+export { CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, enableProfiling, isSignal, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
 import { InputSignalNode, TypeDecorator, ɵɵInjectableDeclaration as __InjectableDeclaration, SchemaMetadata, InputTransformFunction, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, ComponentDef, DirectiveDef, PipeDef, EnvironmentInjector, NgModuleRef as NgModuleRef$1, NgModuleFactory as NgModuleFactory$1, InternalNgModuleRef, ɵɵFactoryDeclaration as __FactoryDeclaration, AfterRenderRef, EffectCleanupRegisterFn, ApplicationRef, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, NgZone, ElementRef, EmbeddedViewRef, ViewRef as ViewRef$1, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, PlatformRef, DehydratedDeferBlock, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, LView, RNode, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, ChangeDetectorRef, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, QueryList, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, Component, TrustedHTML, CompilerOptions, PipeType, DirectiveType, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_debug_node-chunk.js';
 export { APP_BOOTSTRAP_LISTENER, AnimationCallbackEvent, BootstrapOptions, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, Compiler, CompilerFactory, ComponentDecorator, CreateEffectOptions, DebugElement, DebugEventListener, DebugNode, DirectiveDecorator, EffectCleanupFn, EffectRef, EventEmitter, HostBinding, HostBindingDecorator, HostListener, HostListenerDecorator, InjectableType, InjectorType, Input, InputDecorator, ListenerOptions, MAX_ANIMATION_TIMEOUT, NO_ERRORS_SCHEMA, NgModuleDecorator, Output, OutputDecorator, PipeDecorator, Predicate, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, Sanitizer, SecurityContext, asNativeElements, effect, getDebugNode, inputBinding, outputBinding, twoWayBinding, ANIMATIONS_DISABLED as ɵANIMATIONS_DISABLED, AfterRenderManager as ɵAfterRenderManager, AnimationRendererType as ɵAnimationRendererType, AttributeMarker as ɵAttributeMarker, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ControlDirectiveHost as ɵControlDirectiveHost, CssSelectorList as ɵCssSelectorList, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockDetails as ɵDeferBlockDetails, EffectScheduler as ɵEffectScheduler, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, NG_INJ_DEF as ɵNG_INJ_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NavigateEvent as ɵNavigateEvent, Navigation as ɵNavigation, NavigationCurrentEntryChangeEvent as ɵNavigationCurrentEntryChangeEvent, NavigationDestination as ɵNavigationDestination, NavigationHistoryEntry as ɵNavigationHistoryEntry, NavigationInterceptOptions as ɵNavigationInterceptOptions, NavigationNavigateOptions as ɵNavigationNavigateOptions, NavigationOptions as ɵNavigationOptions, NavigationReloadOptions as ɵNavigationReloadOptions, NavigationResult as ɵNavigationResult, NavigationTransition as ɵNavigationTransition, NavigationTypeString as ɵNavigationTypeString, NavigationUpdateCurrentEntryOptions as ɵNavigationUpdateCurrentEntryOptions, NoopNgZone as ɵNoopNgZone, NotificationSource as ɵNotificationSource, PROVIDED_ZONELESS as ɵPROVIDED_ZONELESS, R3Injector as ɵR3Injector, RenderFlags as ɵRenderFlags, TracingAction as ɵTracingAction, TracingService as ɵTracingService, TracingSnapshot as ɵTracingSnapshot, ZONELESS_ENABLED as ɵZONELESS_ENABLED, getDeferBlocks as ɵgetDeferBlocks, getInjectableDef as ɵgetInjectableDef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isInjectable as ɵisInjectable, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵInjectorDef, ɵɵPipeDeclaration, ɵɵdefineInjectable, ɵɵdefineInjector } from './_debug_node-chunk.js';
 import { ResourceOptions, ResourceRef, WritableResource, ResourceStatus, ResourceSnapshot, Resource, ResourceParamsContext, ResourceStreamingLoader, ResourceStreamItem, DebounceTimer, DebouncedOptions } from './_api-chunk.js';
@@ -4599,81 +4599,6 @@ declare enum Framework {
 }
 
 /**
- * Retrieves the component instance associated with a given DOM element.
- *
- * @usageNotes
- * Given the following DOM structure:
- *
- * ```html
- * <app-root>
- *   <div>
- *     <child-comp></child-comp>
- *   </div>
- * </app-root>
- * ```
- *
- * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
- * associated with this DOM element.
- *
- * Calling the function on `<app-root>` will return the `MyApp` instance.
- *
- *
- * @param element DOM element from which the component should be retrieved.
- * @returns Component instance associated with the element or `null` if there
- *    is no component associated with it.
- *
- * @publicApi
- */
-declare function getComponent<T>(element: Element): T | null;
-/**
- * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
- * view that the element is part of. Otherwise retrieves the instance of the component whose view
- * owns the element (in this case, the result is the same as calling `getOwningComponent`).
- *
- * @param element Element for which to get the surrounding component instance.
- * @returns Instance of the component that is around the element or null if the element isn't
- *    inside any component.
- *
- * @publicApi
- */
-declare function getContext<T extends {}>(element: Element): T | null;
-/**
- * Retrieves the component instance whose view contains the DOM element.
- *
- * For example, if `<child-comp>` is used in the template of `<app-comp>`
- * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
- * would return `<app-comp>`.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Component instance whose view owns the DOM element or null if the element is not
- *    part of a component view.
- *
- * @publicApi
- */
-declare function getOwningComponent<T>(elementOrDir: Element | {}): T | null;
-/**
- * Retrieves all root components associated with a DOM element, directive or component instance.
- * Root components are those which have been bootstrapped by Angular.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Root components associated with the target object.
- *
- * @publicApi
- */
-declare function getRootComponents(elementOrDir: Element | {}): {}[];
-/**
- * Retrieves an `Injector` associated with an element, component or directive instance.
- *
- * @param elementOrDir DOM element, component or directive instance for which to
- *    retrieve the injector.
- * @returns Injector associated with the element, component or directive instance.
- *
- * @publicApi
- */
-declare function getInjector(elementOrDir: Element | {}): Injector;
-/**
  * Retrieves directive instances associated with a given DOM node. Does not include
  * component instances.
  *
@@ -4751,17 +4676,6 @@ interface WizComponentDebugMetadata extends BaseDirectiveDebugMetadata {
 /** All potential debug metadata types across all frameworks. */
 type DirectiveDebugMetadata = AngularDirectiveDebugMetadata | AcxDirectiveDebugMetadata | AngularComponentDebugMetadata | AcxComponentDebugMetadata | WizComponentDebugMetadata;
 /**
- * Returns the debug (partial) metadata for a particular directive or component instance.
- * The function accepts an instance of a directive or component and returns the corresponding
- * metadata.
- *
- * @param directiveOrComponentInstance Instance of a directive or component
- * @returns metadata of the passed directive or component
- *
- * @publicApi
- */
-declare function getDirectiveMetadata(directiveOrComponentInstance: any): AngularComponentDebugMetadata | AngularDirectiveDebugMetadata | null;
-/**
  * Retrieves the host element of a component or directive instance.
  * The host element is the DOM element that matched the selector of the directive.
  *
@@ -4790,37 +4704,6 @@ interface Listener {
      */
     type: 'dom' | 'output';
 }
-/**
- * Retrieves a list of event listeners associated with a DOM element. The list does include host
- * listeners, but it does not include event listeners defined outside of the Angular context
- * (e.g. through `addEventListener`).
- *
- * @usageNotes
- * Given the following DOM structure:
- *
- * ```html
- * <app-root>
- *   <div (click)="doSomething()"></div>
- * </app-root>
- * ```
- *
- * Calling `getListeners` on `<div>` will return an object that looks as follows:
- *
- * ```ts
- * {
- *   name: 'click',
- *   element: <div>,
- *   callback: () => doSomething(),
- *   useCapture: false
- * }
- * ```
- *
- * @param element Element for which the DOM listeners should be retrieved.
- * @returns Array of event listeners on the DOM element.
- *
- * @publicApi
- */
-declare function getListeners(element: Element): Listener[];
 
 declare class ViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRef {
     /**
@@ -5674,6 +5557,25 @@ declare function ɵɵdomElementContainerEnd(): typeof ɵɵelementContainerEnd;
  * @codeGenApi
  */
 declare function ɵɵdomElementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵdomElementContainer;
+
+/** Symbol used to store and retrieve the render function for a foreign component. */
+declare const RENDER: unique symbol;
+/**
+ * Represents a component from another framework that Angular can import and render.
+ */
+interface ForeignComponent {
+    readonly [RENDER]: Function;
+}
+
+/**
+ * Creation phase instruction to render a foreign component.
+ *
+ * @param index The index of the container in the data array.
+ * @param foreignComponent The matched foreign component.
+ * @param props Aggregate properties and static attributes.
+ * @codeGenApi
+ */
+declare function ɵɵforeignComponent<TProps>(index: number, foreignComponent: ForeignComponent, props: TProps): void;
 
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
@@ -8767,84 +8669,6 @@ interface ForLoopBlockData extends ControlFlowBlockDataBase {
  */
 type ControlFlowBlock = DeferBlockData | ForLoopBlockData;
 
-/**
- * Adds a callback function which will be invoked before and after performing certain actions at
- * runtime (for example, before and after running change detection). Multiple profiler callbacks can be set:
- * in this case profiling events are reported to every registered callback.
- *
- * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
- * The contract of the function might be changed in any release and/or the function can be removed
- * completely.
- *
- * @param profiler function provided by the caller or null value to disable all profilers.
- * @returns a cleanup function that, when invoked, removes a given profiler callback.
- */
-declare function setProfiler(profiler: Profiler | null): () => void;
-
-/**
- * Marks a component for check (in case of OnPush components) and synchronously
- * performs change detection on the application this component belongs to.
- *
- * @param component Component to {@link /api/core/ChangeDetectorRef#markForCheck mark for check}
- *
- * @publicApi
- */
-declare function applyChanges(component: {}): void;
-
-/**
- * Gets all of the control flow blocks that are present inside the specified DOM node.
- * @param node Node in which to look for control flow blocks.
- */
-declare function getControlFlowBlocks(node: Node): ControlFlowBlock[];
-
-/**
- * Discovers the dependencies of an injectable instance. Provides DI information about each
- * dependency that the injectable was instantiated with, including where they were provided from.
- *
- * @param injector An injector instance
- * @param token a DI token that was constructed by the given injector instance
- * @returns an object that contains the created instance of token as well as all of the dependencies
- * that it was instantiated with OR undefined if the token was not created within the given
- * injector.
- */
-declare function getDependenciesFromInjectable<T>(injector: Injector, token: Type$1<T> | InjectionToken<T>): {
-    instance: T;
-    dependencies: Omit<InjectedService, 'injectedIn'>[];
-} | undefined;
-/**
- * Gets the providers configured on an injector.
- *
- * @param injector the injector to lookup the providers of
- * @returns ProviderRecord[] an array of objects representing the providers of the given injector
- */
-declare function getInjectorProviders(injector: Injector): ProviderRecord[];
-/**
- *
- * Given an injector, this function will return
- * an object containing the type and source of the injector.
- *
- * |              | type        | source                                                      |
- * |--------------|-------------|-------------------------------------------------------------|
- * | NodeInjector | element     | DOM element that created this injector                      |
- * | R3Injector   | environment | `injector.source`                                           |
- * | NullInjector | null        | null                                                        |
- *
- * @param injector the Injector to get metadata for
- * @returns an object containing the type and source of the given injector. If the injector metadata
- *     cannot be determined, returns null.
- */
-declare function getInjectorMetadata(injector: Injector): {
-    type: 'element';
-    source: RElement;
-} | {
-    type: 'environment';
-    source: string | null;
-} | {
-    type: 'null';
-    source: null;
-} | null;
-declare function getInjectorResolutionPath(injector: Injector): Injector[];
-
 interface DebugSignalGraphNode {
     kind: ReactiveNodeKind;
     id: string;
@@ -8870,17 +8694,83 @@ interface DebugSignalGraph {
     nodes: DebugSignalGraphNode[];
     edges: DebugSignalGraphEdge[];
 }
+
+interface NonCoreGlobalUtils {
+    ɵgetLoadedRoutes(route: any): any;
+    ɵnavigateByUrl(router: any, url: string): any;
+    ɵgetRouterInstance(injector: any): any;
+}
 /**
- * Returns a debug representation of the signal graph for the given injector.
+ * A type of the internal (meaning inside google3) global utils. This definition needs to exist
+ * in a place where it can be used by DevTools and also synced into google3 and consumed internally.
  *
- * Currently only supports element injectors. Starts by discovering the consumer nodes
- * and then traverses their producer nodes to build the signal graph.
+ * Since versioning in google3 works differently, we do not have the same constraint as
+ * {@link ExternalCoreGlobalUtils}. We can change these definitions more or less as much as we want
+ * without fear of breaking applications on older framework versions (note that http://go/build-horizon
+ * does technically apply). The trade-off is that external Angular developers cannot use such APIs,
+ * as they would be broken whenever the APIs changed.
  *
- * @param injector The injector to get the signal graph for.
- * @returns A debug representation of the signal graph.
- * @throws If the injector is an environment injector.
+ * `InternalCoreGlobalUtils` serves as a "beta" channel for new APIs which can be implemented and supported
+ * in DevTools. We can then iterate and change these APIs, landing whatever breaking changes necessary,
+ * and update DevTools accordingly without actually breaking any users. Once a given function's design
+ * fully validated, we can move it to {@link ExternalCoreGlobalUtils} and ship the function externally in
+ * Angular. This allows fast iteration on new global utils and only applies Angular's long-lived
+ * versioning constraint when we are ready to accept it.
  */
-declare function getSignalGraph(injector: Injector): DebugSignalGraph;
+interface InternalCoreGlobalUtils {
+}
+/**
+ * The set of external (meaning outside google3) global utils implemented by `@angular/core`.
+ * Other packages may provided their own global utilities with their own types. Any functions
+ * which have *ever* been in this set exist in long-lived public Angular versions which DevTools
+ * needs to support.
+ */
+interface ExternalCoreGlobalUtils {
+    ɵgetDependenciesFromInjectable<T>(injector: Injector, token: Type$1<T> | InjectionToken<T>): {
+        instance: T;
+        dependencies: Omit<InjectedService, 'injectedIn'>[];
+    } | undefined;
+    ɵgetInjectorProviders(injector: Injector): ProviderRecord[];
+    ɵgetInjectorResolutionPath(injector: Injector): Injector[];
+    ɵgetInjectorMetadata(injector: Injector): {
+        type: 'element';
+        source: RElement;
+    } | {
+        type: 'environment';
+        source: string | null;
+    } | {
+        type: 'null';
+        source: null;
+    } | null;
+    ɵsetProfiler(profiler: Profiler | null): () => void;
+    ɵgetSignalGraph(injector: Injector): DebugSignalGraph;
+    ɵgetControlFlowBlocks(node: Node): ControlFlowBlock[];
+    ɵgetTransferState(injector: Injector): Record<string, unknown>;
+    getDirectiveMetadata(directiveOrComponentInstance: any): DirectiveDebugMetadata | null;
+    getComponent<T>(element: Element): T | null;
+    getContext<T extends {}>(element: Element): T | null;
+    getListeners(element: Element): Listener[];
+    getOwningComponent<T>(elementOrDir: Element | {}): T | null;
+    getHostElement(componentOrDirective: {}): Element;
+    getInjector(elementOrDir: Element | {}): Injector;
+    getRootComponents(elementOrDir: Element | {}): {}[];
+    getDirectives(node: Node): {}[];
+    applyChanges(component: {}): void;
+    isSignal(value: unknown): value is Signal<unknown>;
+    enableProfiling(): void;
+}
+/**
+ * Defines the framework-agnostic `ng` global type, not just the `@angular/core` implementation.
+ *
+ * ExternalCoreGlobalUtils is specifically the `@angular/core` implementation, so we
+ * overwrite some properties to make them more framework-agnostic.
+ */
+type FrameworkAgnosticGlobalUtils = ExternalCoreGlobalUtils & InternalCoreGlobalUtils & NonCoreGlobalUtils;
+/**
+ * Publishes the given function to `window.ng` from package other than @angular/core
+ * So that it can be used from the browser console when an application is not in production.
+ */
+declare function publishNonCoreGlobalUtil<K extends keyof NonCoreGlobalUtils>(name: K, fn: NonCoreGlobalUtils[K]): void;
 
 /**
  * Retrieves transfer state data from the DOM using the provided injector to get APP_ID.
@@ -8892,76 +8782,6 @@ declare function getSignalGraph(injector: Injector): DebugSignalGraph;
  * @returns The transfer state data as an object, or empty object if not available
  */
 declare function getTransferState(injector: Injector): Record<string, unknown>;
-
-/**
- * This file introduces series of globally accessible debug tools
- * to allow for the Angular debugging story to function.
- *
- * To see this in action run the following command:
- *
- *   bazel run //packages/core/test/bundling/todo:devserver
- *
- *  Then load `localhost:5432` and start using the console tools.
- */
-/**
- * This value reflects the property on the window where the dev
- * tools are patched (window.ng).
- * */
-declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
-interface ExternalGlobalUtils {
-    ɵgetLoadedRoutes(route: any): any;
-    ɵnavigateByUrl(router: any, url: string): any;
-    ɵgetRouterInstance(injector: any): any;
-}
-declare const globalUtilsFunctions: {
-    /**
-     * Warning: functions that start with `ɵ` are considered *INTERNAL* and should not be relied upon
-     * in application's code. The contract of those functions might be changed in any release and/or a
-     * function can be removed completely.
-     */
-    ɵgetDependenciesFromInjectable: typeof getDependenciesFromInjectable;
-    ɵgetInjectorProviders: typeof getInjectorProviders;
-    ɵgetInjectorResolutionPath: typeof getInjectorResolutionPath;
-    ɵgetInjectorMetadata: typeof getInjectorMetadata;
-    ɵsetProfiler: typeof setProfiler;
-    ɵgetSignalGraph: typeof getSignalGraph;
-    ɵgetControlFlowBlocks: typeof getControlFlowBlocks;
-    ɵgetTransferState: typeof getTransferState;
-    getDirectiveMetadata: typeof getDirectiveMetadata;
-    getComponent: typeof getComponent;
-    getContext: typeof getContext;
-    getListeners: typeof getListeners;
-    getOwningComponent: typeof getOwningComponent;
-    getHostElement: typeof getHostElement;
-    getInjector: typeof getInjector;
-    getRootComponents: typeof getRootComponents;
-    getDirectives: typeof getDirectives;
-    applyChanges: typeof applyChanges;
-    isSignal: typeof isSignal;
-    enableProfiling: typeof enableProfiling$1;
-};
-/**
- * Default debug tools available under `window.ng`.
- */
-type GlobalDevModeUtils = {
-    [GLOBAL_PUBLISH_EXPANDO_KEY]: typeof globalUtilsFunctions;
-};
-/**
- * Defines the framework-agnostic `ng` global type, not just the `@angular/core` implementation.
- *
- * `typeof globalUtilsFunctions` is specifically the `@angular/core` implementation, so we
- * overwrite some properties to make them more framework-agnostic. Longer term, we should define
- * the `ng` global type as an interface implemented by `globalUtilsFunctions` rather than a type
- * derived from it.
- */
-type FrameworkAgnosticGlobalUtils = Omit<typeof globalUtilsFunctions, 'getDirectiveMetadata'> & {
-    getDirectiveMetadata(directiveOrComponentInstance: any): DirectiveDebugMetadata | null;
-} & ExternalGlobalUtils;
-/**
- * Publishes the given function to `window.ng` from package other than @angular/core
- * So that it can be used from the browser console when an application is not in production.
- */
-declare function publishExternalGlobalUtil<K extends keyof ExternalGlobalUtils>(name: K, fn: ExternalGlobalUtils[K]): void;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -9814,5 +9634,5 @@ declare function declareExperimentalWebMcpTool<const InputSchema extends JsonSch
  */
 declare function provideExperimentalWebMcpTools<const InputSchema extends JsonSchemaForInference>(tools: ToolDescriptor<InputSchema>[]): EnvironmentProviders;
 
-export { ANIMATION_MODULE_TYPE, APP_ID, APP_INITIALIZER, AbstractType, AfterRenderRef, AnimationFunction, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, Binding, CSP_NONCE, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, ClassProvider, ClassSansProvider, CompilerOptions, Component, ComponentRef$1 as ComponentRef, ConstructorProvider, ConstructorSansProvider, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebounceTimer, DebouncedOptions, DefaultIterableDiffer, Directive, DirectiveWithBindings, ENVIRONMENT_INITIALIZER, EffectCleanupRegisterFn, ElementRef, EmbeddedViewRef, EnvironmentInjector, EnvironmentProviders, ErrorHandler, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, HOST_TAG_NAME, Host, HostAttributeToken, INJECTOR, Inject, InjectOptions, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithProviders, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgZone, Optional, OutputRef, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Provider, ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Resource, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, SchemaMetadata, Self, Service, Signal, SimpleChange, SkipSelf, StaticClassProvider, StaticClassSansProvider, StaticProvider, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type$1 as Type, TypeDecorator, TypeProvider, VERSION, ValueEqualityFn, ValueProvider, ValueSansProvider, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WritableResource, WritableSignal, afterEveryRender, afterNextRender, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createPlatform, createPlatformFactory, debounced, declareExperimentalWebMcpTool, destroyPlatform, enableProdMode, enableProfiling$1 as enableProfiling, forwardRef, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, injectAsync, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, onIdle, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideExperimentalWebMcpTools, provideIdleServiceWith, provideNgReflectAttributes, providePlatformInitializer, provideStabilityDebugging, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, resourceFromSnapshots, runInInjectionContext, setTestabilityGetter, untracked, viewChild, viewChildren, AcxChangeDetectionStrategy as ɵAcxChangeDetectionStrategy, AcxViewEncapsulation as ɵAcxViewEncapsulation, BypassType as ɵBypassType, CACHE_ACTIVE as ɵCACHE_ACTIVE, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, ComponentDef as ɵComponentDef, ComponentType as ɵComponentType, Console as ɵConsole, ControlFlowBlockType as ɵControlFlowBlockType, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, DeferBlockConfig as ɵDeferBlockConfig, DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, DeferBlockState as ɵDeferBlockState, DirectiveDef as ɵDirectiveDef, DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EVENT_REPLAY_QUEUE as ɵEVENT_REPLAY_QUEUE, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, Framework as ɵFramework, HydrationStatus as ɵHydrationStatus, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION as ɵIS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, InputSignalNode as ɵInputSignalNode, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, PipeDef as ɵPipeDef, ProfilerEvent as ɵProfilerEvent, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SHARED_STYLES_HOST as ɵSHARED_STYLES_HOST, SIGNAL as ɵSIGNAL, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TimerScheduler as ɵTimerScheduler, USE_PENDING_TASKS as ɵUSE_PENDING_TASKS, ViewRef as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allLeavingAnimations as ɵallLeavingAnimations, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, ɵassertType, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, chain as ɵchain, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, encapsulateResourceError as ɵencapsulateResourceError, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDirectives as ɵgetDirectives, getDocument as ɵgetDocument, getHostElement as ɵgetHostElement, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, getTransferState as ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, inferTagNameFromDefinition as ɵinferTagNameFromDefinition, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, maybeUnwrapDefaultExport as ɵmaybeUnwrapDefaultExport, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, promiseWithResolvers as ɵpromiseWithResolvers, provideZonelessChangeDetectionInternal as ɵprovideZonelessChangeDetectionInternal, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests as ɵresetIncrementalHydrationEnabledWarnedForTests, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵControlFeature, ɵɵExternalStylesFeature, __FactoryDeclaration as ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, __InjectableDeclaration as ɵɵInjectableDeclaration, __InjectorDeclaration as ɵɵInjectorDeclaration, __NgModuleDeclaration as ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵenableIncrementalHydrationRuntime, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵngDeclareService, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
-export type { AfterContentChecked, AfterContentInit, AfterRenderOptions, AfterViewChecked, AfterViewInit, ApplicationConfig, AttributeDecorator, ComponentMirror, ContentChildDecorator, ContentChildFunction, ContentChildrenDecorator, CreateComputedOptions, DefaultExport, DoBootstrap, DoCheck, ForwardRefFn, GetTestability, HostDecorator, IdleService, ImportProvidersSource, InjectAsyncOptions, InjectDecorator, InjectableDecorator, InjectableProvider, InputFunction, InputOptions, InputOptionsWithTransform, InputOptionsWithoutTransform, InputSignal, InputSignalWithTransform, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, ModelFunction, ModelOptions, ModelSignal, NgIterable, NgZoneOptions, OnChanges, OnDestroy, OnInit, OptionalDecorator, PipeTransform, PrefetchTrigger, ResponseInit, SelfDecorator, ServiceDecorator, SimpleChanges, SkipSelfDecorator, StateKey, TrackByFunction, ViewChildDecorator, ViewChildFunction, ViewChildrenDecorator, Client as WebMcpClient, ToolDescriptor as WebMcpToolDescriptor, Execute as WebMcpToolExecute, AcxComponentDebugMetadata as ɵAcxComponentDebugMetadata, AcxDirectiveDebugMetadata as ɵAcxDirectiveDebugMetadata, AngularComponentDebugMetadata as ɵAngularComponentDebugMetadata, AngularDirectiveDebugMetadata as ɵAngularDirectiveDebugMetadata, BaseDirectiveDebugMetadata as ɵBaseDirectiveDebugMetadata, ControlFlowBlock as ɵControlFlowBlock, DeferBlockData as ɵDeferBlockData, DirectiveDebugMetadata as ɵDirectiveDebugMetadata, ɵFirstAvailable, ɵFirstAvailableSignal, ForLoopBlockData as ɵForLoopBlockData, FrameworkAgnosticGlobalUtils as ɵFrameworkAgnosticGlobalUtils, GlobalDevModeUtils as ɵGlobalDevModeUtils, HydratedNode as ɵHydratedNode, HydrationInfo as ɵHydrationInfo, ImageConfig as ɵImageConfig, InjectorProfilerContext as ɵInjectorProfilerContext, NgModuleDef as ɵNgModuleDef, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, NgModuleType as ɵNgModuleType, Profiler as ɵProfiler, ProviderRecord as ɵProviderRecord, SafeHtml as ɵSafeHtml, SafeResourceUrl as ɵSafeResourceUrl, SafeScript as ɵSafeScript, SafeStyle as ɵSafeStyle, SafeUrl as ɵSafeUrl, SafeValue as ɵSafeValue, SharedStylesHost as ɵSharedStylesHost, ɵUnwrapDirectiveSignalInputs, WizComponentDebugMetadata as ɵWizComponentDebugMetadata };
+export { ANIMATION_MODULE_TYPE, APP_ID, APP_INITIALIZER, AbstractType, AfterRenderRef, AnimationFunction, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, Binding, CSP_NONCE, ChangeDetectionStrategy$1 as ChangeDetectionStrategy, ChangeDetectorRef, ClassProvider, ClassSansProvider, CompilerOptions, Component, ComponentRef$1 as ComponentRef, ConstructorProvider, ConstructorSansProvider, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebounceTimer, DebouncedOptions, DefaultIterableDiffer, Directive, DirectiveWithBindings, ENVIRONMENT_INITIALIZER, EffectCleanupRegisterFn, ElementRef, EmbeddedViewRef, EnvironmentInjector, EnvironmentProviders, ErrorHandler, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, HOST_TAG_NAME, Host, HostAttributeToken, INJECTOR, Inject, InjectOptions, Injectable, InjectionToken, Injector, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithProviders, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgZone, Optional, OutputRef, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Provider, ProviderToken, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Resource, ResourceOptions, ResourceParamsContext, ResourceRef, ResourceSnapshot, ResourceStatus, ResourceStreamItem, ResourceStreamingLoader, SchemaMetadata, Self, Service, Signal, SimpleChange, SkipSelf, StaticClassProvider, StaticClassSansProvider, StaticProvider, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type$1 as Type, TypeDecorator, TypeProvider, VERSION, ValueEqualityFn, ValueProvider, ValueSansProvider, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WritableResource, WritableSignal, afterEveryRender, afterNextRender, afterRenderEffect, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createPlatform, createPlatformFactory, debounced, declareExperimentalWebMcpTool, destroyPlatform, enableProdMode, forwardRef, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, injectAsync, input, isDevMode, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, onIdle, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideExperimentalWebMcpTools, provideIdleServiceWith, provideNgReflectAttributes, providePlatformInitializer, provideStabilityDebugging, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, resourceFromSnapshots, runInInjectionContext, setTestabilityGetter, untracked, viewChild, viewChildren, AcxChangeDetectionStrategy as ɵAcxChangeDetectionStrategy, AcxViewEncapsulation as ɵAcxViewEncapsulation, BypassType as ɵBypassType, CACHE_ACTIVE as ɵCACHE_ACTIVE, CLIENT_RENDER_MODE_FLAG as ɵCLIENT_RENDER_MODE_FLAG, ComponentDef as ɵComponentDef, ComponentType as ɵComponentType, Console as ɵConsole, ControlFlowBlockType as ɵControlFlowBlockType, CurrencyIndex as ɵCurrencyIndex, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEHYDRATED_BLOCK_REGISTRY as ɵDEHYDRATED_BLOCK_REGISTRY, DeferBlockConfig as ɵDeferBlockConfig, DeferBlockDependencyInterceptor as ɵDeferBlockDependencyInterceptor, DeferBlockState as ɵDeferBlockState, DirectiveDef as ɵDirectiveDef, DirectiveType as ɵDirectiveType, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EVENT_REPLAY_QUEUE as ɵEVENT_REPLAY_QUEUE, ExtraLocaleDataIndex as ɵExtraLocaleDataIndex, Framework as ɵFramework, HydrationStatus as ɵHydrationStatus, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION as ɵIS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, InputSignalNode as ɵInputSignalNode, JSACTION_BLOCK_ELEMENT_MAP as ɵJSACTION_BLOCK_ELEMENT_MAP, LContext as ɵLContext, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, PipeDef as ɵPipeDef, ProfilerEvent as ɵProfilerEvent, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, ResourceImpl as ɵResourceImpl, RuntimeError as ɵRuntimeError, RuntimeErrorCode as ɵRuntimeErrorCode, SHARED_STYLES_HOST as ɵSHARED_STYLES_HOST, SIGNAL as ɵSIGNAL, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TimerScheduler as ɵTimerScheduler, USE_PENDING_TASKS as ɵUSE_PENDING_TASKS, ViewRef as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allLeavingAnimations as ɵallLeavingAnimations, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, ɵassertType, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, chain as ɵchain, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, createOrReusePlatformInjector as ɵcreateOrReusePlatformInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, encapsulateResourceError as ɵencapsulateResourceError, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getComponentDef as ɵgetComponentDef, getDirectives as ɵgetDirectives, getDocument as ɵgetDocument, getHostElement as ɵgetHostElement, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, getTransferState as ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, inferTagNameFromDefinition as ɵinferTagNameFromDefinition, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, isViewDirty as ɵisViewDirty, markForRefresh as ɵmarkForRefresh, maybeUnwrapDefaultExport as ɵmaybeUnwrapDefaultExport, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, promiseWithResolvers as ɵpromiseWithResolvers, provideZonelessChangeDetectionInternal as ɵprovideZonelessChangeDetectionInternal, publishNonCoreGlobalUtil as ɵpublishNonCoreGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests as ɵresetIncrementalHydrationEnabledWarnedForTests, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵControlFeature, ɵɵExternalStylesFeature, __FactoryDeclaration as ɵɵFactoryDeclaration, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, __InjectableDeclaration as ɵɵInjectableDeclaration, __InjectorDeclaration as ɵɵInjectorDeclaration, __NgModuleDeclaration as ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵenableIncrementalHydrationRuntime, ɵɵforeignComponent, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵngDeclareService, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export type { AfterContentChecked, AfterContentInit, AfterRenderOptions, AfterViewChecked, AfterViewInit, ApplicationConfig, AttributeDecorator, ComponentMirror, ContentChildDecorator, ContentChildFunction, ContentChildrenDecorator, CreateComputedOptions, DefaultExport, DoBootstrap, DoCheck, ForwardRefFn, GetTestability, HostDecorator, IdleService, ImportProvidersSource, InjectAsyncOptions, InjectDecorator, InjectableDecorator, InjectableProvider, InputFunction, InputOptions, InputOptionsWithTransform, InputOptionsWithoutTransform, InputSignal, InputSignalWithTransform, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, ModelFunction, ModelOptions, ModelSignal, NgIterable, NgZoneOptions, OnChanges, OnDestroy, OnInit, OptionalDecorator, PipeTransform, PrefetchTrigger, ResponseInit, SelfDecorator, ServiceDecorator, SimpleChanges, SkipSelfDecorator, StateKey, TrackByFunction, ViewChildDecorator, ViewChildFunction, ViewChildrenDecorator, Client as WebMcpClient, ToolDescriptor as WebMcpToolDescriptor, Execute as WebMcpToolExecute, AcxComponentDebugMetadata as ɵAcxComponentDebugMetadata, AcxDirectiveDebugMetadata as ɵAcxDirectiveDebugMetadata, AngularComponentDebugMetadata as ɵAngularComponentDebugMetadata, AngularDirectiveDebugMetadata as ɵAngularDirectiveDebugMetadata, BaseDirectiveDebugMetadata as ɵBaseDirectiveDebugMetadata, ControlFlowBlock as ɵControlFlowBlock, DeferBlockData as ɵDeferBlockData, DirectiveDebugMetadata as ɵDirectiveDebugMetadata, ExternalCoreGlobalUtils as ɵExternalCoreGlobalUtils, ɵFirstAvailable, ɵFirstAvailableSignal, ForLoopBlockData as ɵForLoopBlockData, FrameworkAgnosticGlobalUtils as ɵFrameworkAgnosticGlobalUtils, HydratedNode as ɵHydratedNode, HydrationInfo as ɵHydrationInfo, ImageConfig as ɵImageConfig, InjectorProfilerContext as ɵInjectorProfilerContext, NgModuleDef as ɵNgModuleDef, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, NgModuleType as ɵNgModuleType, Profiler as ɵProfiler, ProviderRecord as ɵProviderRecord, SafeHtml as ɵSafeHtml, SafeResourceUrl as ɵSafeResourceUrl, SafeScript as ɵSafeScript, SafeStyle as ɵSafeStyle, SafeUrl as ɵSafeUrl, SafeValue as ɵSafeValue, SharedStylesHost as ɵSharedStylesHost, ɵUnwrapDirectiveSignalInputs, WizComponentDebugMetadata as ɵWizComponentDebugMetadata };
