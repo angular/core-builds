@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.21+sha-591fa53
+ * @license Angular v20.3.21+sha-3d135ce
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1350,6 +1350,10 @@ interface TNode {
      *   `TNodeType.ICUContainer`: `TIcu`
      */
     value: any;
+    /**
+     * The namespace associated with this node.
+     */
+    namespace: string | null;
     /**
      * Attributes associated with an element. We need to store attributes to support various
      * use-cases (attribute injection, content projection with selectors, directives matching).
@@ -2927,7 +2931,8 @@ declare enum SecurityContext {
     STYLE = 2,
     SCRIPT = 3,
     URL = 4,
-    RESOURCE_URL = 5
+    RESOURCE_URL = 5,
+    ATTRIBUTE_NO_BINDING = 6
 }
 
 /**

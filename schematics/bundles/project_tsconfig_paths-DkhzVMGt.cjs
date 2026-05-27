@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.21+sha-591fa53
+ * @license Angular v20.3.21+sha-3d135ce
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -438,6 +438,150 @@ class SelectorlessMatcher {
     }
 }
 
+/**
+ * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
+ * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
+ * handled.
+ *
+ * See DomSanitizer for more details on security in Angular applications.
+ *
+ * @publicApi
+ */
+var SecurityContext;
+(function (SecurityContext) {
+    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+    SecurityContext[SecurityContext["URL"] = 4] = "URL";
+    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+    SecurityContext[SecurityContext["ATTRIBUTE_NO_BINDING"] = 6] = "ATTRIBUTE_NO_BINDING";
+})(SecurityContext || (SecurityContext = {}));
+// =================================================================================================
+// =================================================================================================
+// =========== S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P  ===========
+// =================================================================================================
+// =================================================================================================
+//
+//        DO NOT EDIT THIS LIST OF SECURITY SENSITIVE PROPERTIES WITHOUT A SECURITY REVIEW!
+//
+// =================================================================================================
+/**
+ *  Map from tagName|propertyName to SecurityContext. Properties applying to all tags use '*'.
+ */
+let _SECURITY_SCHEMA;
+const SVG_NAMESPACE$1 = 'svg';
+const MATH_ML_NAMESPACE$1 = 'math';
+/**
+ * @remarks Keep is a copy of DOM Security Schema.
+ * @see [SECURITY_SCHEMA](../../../compiler/src/schema/dom_security_schema.ts)
+ */
+function SECURITY_SCHEMA() {
+    if (!_SECURITY_SCHEMA) {
+        _SECURITY_SCHEMA = {};
+        // Case is insignificant below, all element and attribute names are lower-cased for lookup.
+        registerContext(SecurityContext.HTML, /** Namespace */ undefined, [
+            ['iframe', ['srcdoc']],
+            ['*', ['innerHTML', 'outerHTML']],
+        ]);
+        registerContext(SecurityContext.STYLE, /** Namespace */ undefined, [['*', ['style']]]);
+        // NB: no SCRIPT contexts here, they are never allowed due to the parser stripping them.
+        registerContext(SecurityContext.URL, /** Namespace */ undefined, [
+            ['*', ['formAction']],
+            ['area', ['href']],
+            ['a', ['href', 'xlink:href']],
+            ['form', ['action']],
+            // The below two items are safe and should be removed but they require a G3 clean-up as a small number of tests fail.
+            ['img', ['src']],
+            ['video', ['src']],
+        ]);
+        registerContext(SecurityContext.URL, MATH_ML_NAMESPACE$1, [
+            // MathML namespace
+            // https://crsrc.org/c/third_party/blink/renderer/core/sanitizer/sanitizer.cc;l=753-768;drc=b3eb16372dcd3317d65e9e0265015e322494edcd;bpv=1;bpt=1
+            ['annotation', ['href', 'xlink:href']],
+            ['annotation-xml', ['href', 'xlink:href']],
+            ['maction', ['href', 'xlink:href']],
+            ['malignmark', ['href', 'xlink:href']],
+            ['math', ['href', 'xlink:href']],
+            ['mroot', ['href', 'xlink:href']],
+            ['msqrt', ['href', 'xlink:href']],
+            ['merror', ['href', 'xlink:href']],
+            ['mfrac', ['href', 'xlink:href']],
+            ['mglyph', ['href', 'xlink:href']],
+            ['msub', ['href', 'xlink:href']],
+            ['msup', ['href', 'xlink:href']],
+            ['msubsup', ['href', 'xlink:href']],
+            ['mmultiscripts', ['href', 'xlink:href']],
+            ['mprescripts', ['href', 'xlink:href']],
+            ['mi', ['href', 'xlink:href']],
+            ['mn', ['href', 'xlink:href']],
+            ['mo', ['href', 'xlink:href']],
+            ['mpadded', ['href', 'xlink:href']],
+            ['mphantom', ['href', 'xlink:href']],
+            ['mrow', ['href', 'xlink:href']],
+            ['ms', ['href', 'xlink:href']],
+            ['mspace', ['href', 'xlink:href']],
+            ['mstyle', ['href', 'xlink:href']],
+            ['mtable', ['href', 'xlink:href']],
+            ['mtd', ['href', 'xlink:href']],
+            ['mtr', ['href', 'xlink:href']],
+            ['mtext', ['href', 'xlink:href']],
+            ['mover', ['href', 'xlink:href']],
+            ['munder', ['href', 'xlink:href']],
+            ['munderover', ['href', 'xlink:href']],
+            ['semantics', ['href', 'xlink:href']],
+            ['none', ['href', 'xlink:href']],
+        ]);
+        registerContext(SecurityContext.RESOURCE_URL, /** Namespace */ undefined, [
+            ['base', ['href']],
+            ['embed', ['src']],
+            ['frame', ['src']],
+            ['iframe', ['src']],
+            ['link', ['href']],
+            ['object', ['codebase', 'data']],
+        ]);
+        registerContext(SecurityContext.URL, SVG_NAMESPACE$1, [['a', ['href', 'xlink:href']]]);
+        // Keep this in sync with SECURITY_SENSITIVE_ELEMENTS in packages/core/src/sanitization/sanitization.ts
+        // Unknown is the internal tag name for unknown elements example used for host-bindings.
+        // These are unsafe as `attributeName` can be `href` or `xlink:href`
+        // See: http://b/463880509#comment7
+        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE$1, [
+            ['animate', ['attributeName', 'values', 'to', 'from']],
+            ['set', ['to', 'attributeName']],
+            ['animateMotion', ['attributeName']],
+            ['animateTransform', ['attributeName']],
+        ]);
+        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, /** Namespace */ undefined, [
+            [
+                'unknown',
+                [
+                    'attributeName',
+                    'values',
+                    'to',
+                    'from',
+                    'sandbox',
+                    'allow',
+                    'allowFullscreen',
+                    'referrerPolicy',
+                    'csp',
+                    'fetchPriority',
+                ],
+            ],
+            ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']],
+        ]);
+    }
+    return _SECURITY_SCHEMA;
+}
+function registerContext(ctx, namespace, specs) {
+    for (const [element, attributeNames] of specs) {
+        let tagName = namespace && element !== '*' && element !== 'unknown' ? `:${namespace}:${element}` : element;
+        tagName = tagName.toLowerCase();
+        for (const attr of attributeNames) {
+            _SECURITY_SCHEMA[`${tagName}|${attr.toLowerCase()}`] = ctx;
+        }
+    }
+}
+
 // Attention:
 // This file duplicates types and values from @angular/core
 // so that we are able to make @angular/compiler independent of @angular/core.
@@ -471,16 +615,6 @@ const CUSTOM_ELEMENTS_SCHEMA = {
 const NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema',
 };
-var SecurityContext;
-(function (SecurityContext) {
-    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-    SecurityContext[SecurityContext["URL"] = 4] = "URL";
-    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-    SecurityContext[SecurityContext["ATTRIBUTE_NO_BINDING"] = 6] = "ATTRIBUTE_NO_BINDING";
-})(SecurityContext || (SecurityContext = {}));
 var MissingTranslationStrategy;
 (function (MissingTranslationStrategy) {
     MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
@@ -12195,10 +12329,7 @@ class ElementAttributes {
             if (value === null) {
                 throw Error('Attribute, i18n attribute, & style element attributes must have a value');
             }
-            if (trustedValueFn !== null) {
-                if (!isStringLiteral(value)) {
-                    throw Error('AssertionError: extracted attribute value should be string literal');
-                }
+            if (trustedValueFn !== null && isStringLiteral(value)) {
                 array.push(taggedTemplate(trustedValueFn, new TemplateLiteralExpr([new TemplateLiteralElementExpr(value.value)], []), undefined, value.sourceSpan));
             }
             else {
@@ -20210,162 +20341,8 @@ function interleave(left, right) {
     return result;
 }
 
-// =================================================================================================
-// =================================================================================================
-// =========== S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P  ===========
-// =================================================================================================
-// =================================================================================================
-//
-//        DO NOT EDIT THIS LIST OF SECURITY SENSITIVE PROPERTIES WITHOUT A SECURITY REVIEW!
-//
-// =================================================================================================
-/** Map from tagName|propertyName to SecurityContext. Properties applying to all tags use '*'. */
-let _SECURITY_SCHEMA;
-function SECURITY_SCHEMA() {
-    if (!_SECURITY_SCHEMA) {
-        _SECURITY_SCHEMA = {};
-        // Case is insignificant below, all element and attribute names are lower-cased for lookup.
-        registerContext(SecurityContext.HTML, ['iframe|srcdoc', '*|innerHTML', '*|outerHTML']);
-        registerContext(SecurityContext.STYLE, ['*|style']);
-        // NB: no SCRIPT contexts here, they are never allowed due to the parser stripping them.
-        registerContext(SecurityContext.URL, [
-            '*|formAction',
-            'area|href',
-            'area|ping',
-            'audio|src',
-            'a|href',
-            'a|xlink:href',
-            'a|ping',
-            'blockquote|cite',
-            'body|background',
-            'del|cite',
-            'form|action',
-            'img|src',
-            'input|src',
-            'ins|cite',
-            'q|cite',
-            'source|src',
-            'track|src',
-            'video|poster',
-            'video|src',
-            // MathML namespace
-            // https://crsrc.org/c/third_party/blink/renderer/core/sanitizer/sanitizer.cc;l=753-768;drc=b3eb16372dcd3317d65e9e0265015e322494edcd;bpv=1;bpt=1
-            'annotation|href',
-            'annotation|xlink:href',
-            'annotation-xml|href',
-            'annotation-xml|xlink:href',
-            'maction|href',
-            'maction|xlink:href',
-            'malignmark|href',
-            'malignmark|xlink:href',
-            'math|href',
-            'math|xlink:href',
-            'mroot|href',
-            'mroot|xlink:href',
-            'msqrt|href',
-            'msqrt|xlink:href',
-            'merror|href',
-            'merror|xlink:href',
-            'mfrac|href',
-            'mfrac|xlink:href',
-            'mglyph|href',
-            'mglyph|xlink:href',
-            'msub|href',
-            'msub|xlink:href',
-            'msup|href',
-            'msup|xlink:href',
-            'msubsup|href',
-            'msubsup|xlink:href',
-            'mmultiscripts|href',
-            'mmultiscripts|xlink:href',
-            'mprescripts|href',
-            'mprescripts|xlink:href',
-            'mi|href',
-            'mi|xlink:href',
-            'mn|href',
-            'mn|xlink:href',
-            'mo|href',
-            'mo|xlink:href',
-            'mpadded|href',
-            'mpadded|xlink:href',
-            'mphantom|href',
-            'mphantom|xlink:href',
-            'mrow|href',
-            'mrow|xlink:href',
-            'ms|href',
-            'ms|xlink:href',
-            'mspace|href',
-            'mspace|xlink:href',
-            'mstyle|href',
-            'mstyle|xlink:href',
-            'mtable|href',
-            'mtable|xlink:href',
-            'mtd|href',
-            'mtd|xlink:href',
-            'mtr|href',
-            'mtr|xlink:href',
-            'mtext|href',
-            'mtext|xlink:href',
-            'mover|href',
-            'mover|xlink:href',
-            'munder|href',
-            'munder|xlink:href',
-            'munderover|href',
-            'munderover|xlink:href',
-            'semantics|href',
-            'semantics|xlink:href',
-            'none|href',
-            'none|xlink:href',
-        ]);
-        registerContext(SecurityContext.RESOURCE_URL, [
-            'applet|code',
-            'applet|codebase',
-            'base|href',
-            'embed|src',
-            'frame|src',
-            'head|profile',
-            'html|manifest',
-            'iframe|src',
-            'link|href',
-            'media|src',
-            'object|codebase',
-            'object|data',
-            'script|src',
-            // The below two are for Script SVG
-            // See: https://developer.mozilla.org/en-US/docs/Web/API/SVGScriptElement/href
-            'script|href',
-            'script|xlink:href',
-        ]);
-        // Keep this in sync with SECURITY_SENSITIVE_ELEMENTS in packages/core/src/sanitization/sanitization.ts
-        // Unknown is the internal tag name for unknown elements example used for host-bindings.
-        // These are unsafe as `attributeName` can be `href` or `xlink:href`
-        // See: http://b/463880509#comment7
-        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, [
-            'animate|attributeName',
-            'set|attributeName',
-            'animateMotion|attributeName',
-            'animateTransform|attributeName',
-            'unknown|attributeName',
-            'iframe|sandbox',
-            'iframe|allow',
-            'iframe|allowFullscreen',
-            'iframe|referrerPolicy',
-            'iframe|csp',
-            'iframe|fetchPriority',
-            'unknown|sandbox',
-            'unknown|allow',
-            'unknown|allowFullscreen',
-            'unknown|referrerPolicy',
-            'unknown|csp',
-            'unknown|fetchPriority',
-        ]);
-    }
-    return _SECURITY_SCHEMA;
-}
-function registerContext(ctx, specs) {
-    for (const spec of specs)
-        _SECURITY_SCHEMA[spec.toLowerCase()] = ctx;
-}
+const SVG_NAMESPACE = 'svg';
+const MATH_ML_NAMESPACE = 'math';
 
 class ElementSchemaRegistry {
 }
@@ -20374,6 +20351,11 @@ const BOOLEAN = 'boolean';
 const NUMBER = 'number';
 const STRING = 'string';
 const OBJECT = 'object';
+function normalizeTagName(tagName) {
+    const tagNameLower = tagName.toLowerCase();
+    const [ns, name] = splitNsName(tagNameLower, false);
+    return ns === SVG_NAMESPACE || ns === MATH_ML_NAMESPACE ? `:${ns}:${name}` : name;
+}
 /**
  * This array represents the DOM schema. It encodes inheritance, properties, and events.
  *
@@ -20719,8 +20701,9 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
         if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
             return true;
         }
-        if (tagName.indexOf('-') > -1) {
-            if (isNgContainer(tagName) || isNgContent(tagName)) {
+        const normalizedTag = normalizeTagName(tagName);
+        if (normalizedTag.includes('-')) {
+            if (isNgContainer(normalizedTag) || isNgContent(normalizedTag)) {
                 return false;
             }
             if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
@@ -20729,15 +20712,16 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
                 return true;
             }
         }
-        const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get('unknown');
+        const elementProperties = this._schema.get(normalizedTag) || this._schema.get('unknown');
         return elementProperties.has(propName);
     }
     hasElement(tagName, schemaMetas) {
         if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
             return true;
         }
-        if (tagName.indexOf('-') > -1) {
-            if (isNgContainer(tagName) || isNgContent(tagName)) {
+        const normalizedTag = normalizeTagName(tagName);
+        if (normalizedTag.includes('-')) {
+            if (isNgContainer(normalizedTag) || isNgContent(normalizedTag)) {
                 return true;
             }
             if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
@@ -20745,7 +20729,7 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
                 return true;
             }
         }
-        return this._schema.has(tagName.toLowerCase());
+        return this._schema.has(normalizedTag);
     }
     /**
      * securityContext returns the security context for the given property on the given DOM tag.
@@ -20762,16 +20746,13 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
             // NB: For security purposes, use the mapped property name, not the attribute name.
             propName = this.getMappedPropName(propName);
         }
-        // Make sure comparisons are case insensitive, so that case differences between attribute and
-        // property names do not have a security impact.
-        tagName = tagName.toLowerCase();
+        const normalizedTag = normalizeTagName(tagName);
         propName = propName.toLowerCase();
-        let ctx = SECURITY_SCHEMA()[tagName + '|' + propName];
-        if (ctx) {
-            return ctx;
-        }
-        ctx = SECURITY_SCHEMA()['*|' + propName];
-        return ctx ? ctx : SecurityContext.NONE;
+        const securitySchema = SECURITY_SCHEMA();
+        const ctx = securitySchema[normalizedTag + '|' + propName] ??
+            securitySchema['*|' + propName] ??
+            SecurityContext.NONE;
+        return ctx;
     }
     getMappedPropName(propName) {
         return _ATTR_TO_PROP.get(propName) ?? propName;
@@ -20805,12 +20786,14 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
         return Array.from(this._schema.keys());
     }
     allKnownAttributesOfElement(tagName) {
-        const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get('unknown');
+        const normalizedTag = normalizeTagName(tagName);
+        const elementProperties = this._schema.get(normalizedTag) || this._schema.get('unknown');
         // Convert properties to attributes.
         return Array.from(elementProperties.keys()).map((prop) => _PROP_TO_ATTR.get(prop) ?? prop);
     }
     allKnownEventsOfElement(tagName) {
-        return Array.from(this._eventSchema.get(tagName.toLowerCase()) ?? []);
+        const normalizedTag = normalizeTagName(tagName);
+        return Array.from(this._eventSchema.get(normalizedTag) ?? []);
     }
     normalizeAnimationStyleProperty(propName) {
         return dashCaseToCamelCase(propName);
@@ -25016,6 +24999,61 @@ function updatePlaceholder(op, value, i18nContexts, icuPlaceholders) {
 }
 
 /**
+ * Wraps static i18n extracted attributes in their corresponding sanitizers/validators.
+ */
+function resolveI18nAttrSanitizers(job) {
+    const tagNamesByElement = new Map();
+    for (const unit of job.units) {
+        for (const op of unit.ops()) {
+            if (op.kind === OpKind.ElementStart || op.kind === OpKind.Template) {
+                let tag = op.tag ?? '';
+                switch (op.namespace) {
+                    case Namespace.SVG:
+                        tag = `:${SVG_NAMESPACE}:${tag}`;
+                        break;
+                    case Namespace.Math:
+                        tag = `:${MATH_ML_NAMESPACE}:${tag}`;
+                        break;
+                }
+                tagNamesByElement.set(op.xref, tag);
+            }
+        }
+    }
+    for (const unit of job.units) {
+        for (const op of unit.create) {
+            if (op.kind === OpKind.ExtractedAttribute &&
+                op.i18nContext !== null &&
+                op.expression !== null) {
+                const tagName = tagNamesByElement.get(op.target) ?? '';
+                let expr = op.expression;
+                switch (op.securityContext) {
+                    case SecurityContext.HTML:
+                        expr = importExpr(Identifiers.sanitizeHtml).callFn([expr]);
+                        break;
+                    case SecurityContext.STYLE:
+                        expr = importExpr(Identifiers.sanitizeStyle).callFn([expr]);
+                        break;
+                    case SecurityContext.SCRIPT:
+                        expr = importExpr(Identifiers.sanitizeScript).callFn([expr]);
+                        break;
+                    case SecurityContext.URL:
+                        expr = importExpr(Identifiers.sanitizeUrl).callFn([expr]);
+                        break;
+                    case SecurityContext.RESOURCE_URL:
+                        expr = importExpr(Identifiers.sanitizeResourceUrl).callFn([expr]);
+                        break;
+                    case SecurityContext.ATTRIBUTE_NO_BINDING:
+                        expr = importExpr(Identifiers.validateAttribute)
+                            .callFn([expr, literal(tagName), literal(op.name)]);
+                        break;
+                }
+                op.expression = expr;
+            }
+        }
+    }
+}
+
+/**
  * Resolves lexical references in views (`ir.LexicalReadExpr`) to either a target variable or to
  * property reads on the top-level component context.
  *
@@ -26414,6 +26452,7 @@ const phases = [
     { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
     { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
     { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
+    { kind: CompilationJobKind.Tmpl, fn: resolveI18nAttrSanitizers },
     { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
     { kind: CompilationJobKind.Both, fn: collectElementConsts },
     { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
@@ -27284,7 +27323,19 @@ function ingestElementBindings(unit, op, element) {
     let i18nAttributeBindingNames = new Set();
     for (const attr of element.attributes) {
         // Attribute literal bindings, such as `attr.foo="bar"`.
-        const securityContext = domSchema.securityContext(element.name, attr.name, true);
+        const [ns, elementName] = splitNsName(element.name);
+        let namespace = ns;
+        if (!ns) {
+            switch (op.namespace) {
+                case Namespace.SVG:
+                    namespace = SVG_NAMESPACE;
+                    break;
+                case Namespace.Math:
+                    namespace = MATH_ML_NAMESPACE;
+                    break;
+            }
+        }
+        const securityContext = domSchema.securityContext(namespace ? `:${namespace}:${elementName}` : elementName, attr.name, true);
         bindings.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, convertAstWithInterpolation(unit.job, attr.value, attr.i18n), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
         if (attr.i18n) {
             i18nAttributeBindingNames.add(attr.name);
@@ -28248,18 +28299,39 @@ function isLegacyAnimationLabel(name) {
 }
 function calcPossibleSecurityContexts(registry, selector, propName, isAttribute) {
     let ctxs;
-    const nameToContext = (elName) => registry.securityContext(elName, propName, isAttribute);
-    if (selector === null) {
-        ctxs = registry.allKnownElementNames().map(nameToContext);
+    const [namespaceKey, baseSelector] = selector ? splitNsName(selector, false) : [null, selector];
+    const nameToContext = (elName) => {
+        const [nsStr, name] = splitNsName(elName, false);
+        const ns = nsStr ?? namespaceKey;
+        const fullName = ns ? `:${ns}:${name}` : name;
+        return registry.securityContext(fullName, propName, isAttribute);
+    };
+    const allKnownElements = registry.allKnownElementNames();
+    if (baseSelector === null) {
+        ctxs = allKnownElements.map(nameToContext);
     }
     else {
         ctxs = [];
-        CssSelector.parse(selector).forEach((selector) => {
-            const elementNames = selector.element ? [selector.element] : registry.allKnownElementNames();
+        CssSelector.parse(baseSelector).forEach((selector) => {
+            let elementNames = selector.element ? [selector.element] : allKnownElements;
+            if (selector.element && !registry.hasElement(selector.element, [])) {
+                const svgElement = `:${SVG_NAMESPACE}:${selector.element}`;
+                const mathElement = `:${MATH_ML_NAMESPACE}:${selector.element}`;
+                if (registry.hasElement(svgElement, [])) {
+                    elementNames = [svgElement];
+                }
+                else if (registry.hasElement(mathElement, [])) {
+                    elementNames = [mathElement];
+                }
+            }
             const notElementNames = new Set(selector.notSelectors
                 .filter((selector) => selector.isElementSelector())
-                .map((selector) => selector.element));
-            const possibleElementNames = elementNames.filter((elName) => !notElementNames.has(elName));
+                .map((selector) => selector.element?.toLowerCase()));
+            const possibleElementNames = elementNames.filter((elName) => {
+                const elNameLowerCase = elName.toLowerCase();
+                return (!notElementNames.has(elNameLowerCase) &&
+                    !notElementNames.has(splitNsName(elNameLowerCase)[1]));
+            });
             ctxs.push(...possibleElementNames.map(nameToContext));
         });
     }
@@ -28294,8 +28366,8 @@ const LINK_ELEMENT = 'link';
 const LINK_STYLE_REL_ATTR = 'rel';
 const LINK_STYLE_HREF_ATTR = 'href';
 const LINK_STYLE_REL_VALUE = 'stylesheet';
-const STYLE_ELEMENT = 'style';
-const SCRIPT_ELEMENT = 'script';
+const STYLE_ELEMENTS = new Set([':svg:style', 'style']);
+const SCRIPT_ELEMENTS = new Set([':svg:script', 'script']);
 const NG_NON_BINDABLE_ATTR = 'ngNonBindable';
 const NG_PROJECT_AS = 'ngProjectAs';
 function preparseElement(ast) {
@@ -28304,7 +28376,7 @@ function preparseElement(ast) {
     let relAttr = null;
     let nonBindable = false;
     let projectAs = '';
-    ast.attrs.forEach((attr) => {
+    for (const attr of ast.attrs) {
         const lcAttrName = attr.name.toLowerCase();
         if (lcAttrName == NG_CONTENT_SELECT_ATTR) {
             selectAttr = attr.value;
@@ -28323,17 +28395,18 @@ function preparseElement(ast) {
                 projectAs = attr.value;
             }
         }
-    });
-    selectAttr = normalizeNgContentSelect(selectAttr);
+    }
+    // Normalize selector to '*' if empty
+    selectAttr ||= '*';
     const nodeName = ast.name.toLowerCase();
     let type = PreparsedElementType.OTHER;
     if (isNgContent(nodeName)) {
         type = PreparsedElementType.NG_CONTENT;
     }
-    else if (nodeName == STYLE_ELEMENT) {
+    else if (STYLE_ELEMENTS.has(nodeName)) {
         type = PreparsedElementType.STYLE;
     }
-    else if (nodeName == SCRIPT_ELEMENT) {
+    else if (SCRIPT_ELEMENTS.has(nodeName)) {
         type = PreparsedElementType.SCRIPT;
     }
     else if (nodeName == LINK_ELEMENT && relAttr == LINK_STYLE_REL_VALUE) {
@@ -28362,12 +28435,6 @@ class PreparsedElement {
         this.nonBindable = nonBindable;
         this.projectAs = projectAs;
     }
-}
-function normalizeNgContentSelect(selectAttr) {
-    if (selectAttr === null || selectAttr.length === 0) {
-        return '*';
-    }
-    return selectAttr;
 }
 
 /** Pattern for the expression in a for loop block. */
@@ -32854,7 +32921,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.21+sha-591fa53');
+const VERSION = new Version('20.3.21+sha-3d135ce');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33916,7 +33983,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D2eb40pS.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DkhzVMGt.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
