@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.0.0-rc.1+sha-d9c38e5
+ * @license Angular v22.0.0-rc.1+sha-e6cfaf5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { assertInInjectionContext, inject, DestroyRef, RuntimeError, effect, Injector, assertNotInReactiveContext, signal, PendingTasks } from './_pending_tasks-chunk.mjs';
+import { assertInInjectionContext, inject, DestroyRef, RuntimeError, effect, Injector, assertNotInReactiveContext, signal, PendingTasks, promiseWithResolvers } from './_pending_tasks-chunk.mjs';
 import { getOutputDestroyRef, untracked, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -216,17 +216,31 @@ function rxResource(opts) {
     loader: undefined,
     stream: params => {
       let sub;
-      const onAbort = () => sub?.unsubscribe();
-      params.abortSignal.addEventListener('abort', onAbort);
+      let aborted = false;
       const stream = signal({
         value: undefined
       });
-      let resolve;
-      const promise = new Promise(r => resolve = r);
+      const {
+        resolve,
+        promise
+      } = promiseWithResolvers();
+      let hasResolved = false;
+      function resolveOnce() {
+        if (!hasResolved) {
+          hasResolved = true;
+          resolve(stream);
+        }
+      }
+      const onAbort = () => {
+        aborted = true;
+        sub?.unsubscribe();
+        params.abortSignal.removeEventListener('abort', onAbort);
+        resolveOnce();
+      };
+      params.abortSignal.addEventListener('abort', onAbort);
       function send(value) {
         stream.set(value);
-        resolve?.(stream);
-        resolve = undefined;
+        resolveOnce();
       }
       const streamFn = opts.stream;
       if (streamFn === undefined) {
@@ -243,7 +257,7 @@ function rxResource(opts) {
           params.abortSignal.removeEventListener('abort', onAbort);
         },
         complete: () => {
-          if (resolve) {
+          if (!hasResolved) {
             send({
               error: new RuntimeError(991, ngDevMode && 'Resource completed before producing a value')
             });
@@ -251,7 +265,10 @@ function rxResource(opts) {
           params.abortSignal.removeEventListener('abort', onAbort);
         }
       });
-      if (resolve === undefined) {
+      if (aborted) {
+        sub.unsubscribe();
+      }
+      if (hasResolved) {
         return stream;
       }
       return promise;
