@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.22+sha-db20819
+ * @license Angular v20.3.22+sha-d40acc6
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28366,7 +28366,7 @@ const LINK_ELEMENT = 'link';
 const LINK_STYLE_REL_ATTR = 'rel';
 const LINK_STYLE_HREF_ATTR = 'href';
 const LINK_STYLE_REL_VALUE = 'stylesheet';
-const STYLE_ELEMENTS = new Set([':svg:style', 'style']);
+const STYLE_ELEMENT = 'style';
 const SCRIPT_ELEMENTS = new Set([':svg:script', 'script']);
 const NG_NON_BINDABLE_ATTR = 'ngNonBindable';
 const NG_PROJECT_AS = 'ngProjectAs';
@@ -28403,7 +28403,7 @@ function preparseElement(ast) {
     if (isNgContent(nodeName)) {
         type = PreparsedElementType.NG_CONTENT;
     }
-    else if (STYLE_ELEMENTS.has(nodeName)) {
+    else if (STYLE_ELEMENT === nodeName) {
         type = PreparsedElementType.STYLE;
     }
     else if (SCRIPT_ELEMENTS.has(nodeName)) {
@@ -32921,7 +32921,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.22+sha-db20819');
+const VERSION = new Version('20.3.22+sha-d40acc6');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33983,7 +33983,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DkhzVMGt.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-D0pvNjuF.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
