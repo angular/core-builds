@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0-rc.2+sha-012609a
+ * @license Angular v22.0.0-rc.2+sha-ae12a09
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3327,9 +3327,7 @@ function enableProdMode() {
 }
 
 function declareExperimentalWebMcpTool(tool, injector) {
-  const {
-    modelContext
-  } = globalThis.navigator;
+  const modelContext = globalThis.document.modelContext ?? globalThis.navigator.modelContext;
   if (!modelContext) return;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     if (!injector) assertInInjectionContext(declareExperimentalWebMcpTool);
@@ -3347,12 +3345,7 @@ function declareExperimentalWebMcpTool(tool, injector) {
   modelContext.registerTool(wrappedTool, {
     signal: abortCtrl.signal
   });
-  destroyRef.onDestroy(() => {
-    abortCtrl.abort();
-    modelContext.unregisterTool?.({
-      name: tool.name
-    });
-  });
+  destroyRef.onDestroy(() => void abortCtrl.abort());
 }
 
 function provideExperimentalWebMcpTools(tools) {
