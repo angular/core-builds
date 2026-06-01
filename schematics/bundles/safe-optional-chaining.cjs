@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-ec4f08b
+ * @license Angular v22.1.0-next.0+sha-ac47524
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -21,6 +21,7 @@ require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DkkMibv-.cjs');
 require('./imports-CKV-ITqD.cjs');
 
+const SAFE_NAVIGATION_MIGRATION_FN = '$safeNavigationMigration';
 /**
  * This migration wraps optional chaining expressions in Angular templates with a call to the
  * `$safeNavigationMigration()` magic function. This function doesn't exist at runtime, but is
@@ -268,6 +269,10 @@ class ExpressionMigrator extends compiler.RecursiveAstVisitor {
     // Function calls — arguments are always null-sensitive
     // ---------------------------------------------------------------------------
     visitCall(ast, nullSensitive) {
+        if (isSafeNavigationMigrationCall(ast)) {
+            this.visit(ast.receiver, false);
+            return;
+        }
         if (nullSensitive && this.hasSafeReceiver(ast.receiver)) {
             this.addReplacement(ast);
         }
@@ -370,6 +375,12 @@ function isNullishLiteralAST(ast) {
     const innerAst = ast instanceof compiler.ASTWithSource ? ast.ast : ast;
     return (innerAst instanceof compiler.LiteralPrimitive &&
         (innerAst.value === null || innerAst.value === undefined));
+}
+function isSafeNavigationMigrationCall(ast) {
+    const innerAst = ast instanceof compiler.ASTWithSource ? ast.ast : ast;
+    return (innerAst instanceof compiler.Call &&
+        innerAst.receiver instanceof compiler.PropertyRead &&
+        innerAst.receiver.name === SAFE_NAVIGATION_MIGRATION_FN);
 }
 /** Returns true if the AST node is a non-null, non-undefined primitive literal. */
 function isNonNullishLiteralAST(ast) {
