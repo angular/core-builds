@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.24+sha-c56f1ec
+ * @license Angular v20.3.24+sha-768a349
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3771,7 +3771,7 @@ function retrieveTransferredState(doc, appId) {
     // Locate the script tag with the JSON data transferred from the server.
     // The id of the script tag is set to the Angular appId + 'state'.
     const script = doc.getElementById(appId + '-state');
-    if (script?.textContent) {
+    if (script?.tagName === 'SCRIPT' && script.textContent) {
         try {
             // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
             // Decoding of `<` is done of the box by browsers and node.js, same behaviour as G3
@@ -14888,7 +14888,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.24+sha-c56f1ec']
+        ? ['ng-version', '20.3.24+sha-768a349']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
