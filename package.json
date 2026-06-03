@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "22.0.0+sha-8e4fd59",
+  "version": "22.0.0+sha-592b121",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -50,7 +50,7 @@
     "@mcp-b/webmcp-types": "^2.2.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "22.0.0+sha-8e4fd59",
+    "@angular/compiler": "22.0.0+sha-592b121",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0 || ~0.16.0"
   },
