@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-276bbae
+ * @license Angular v22.1.0-next.0+sha-e843003
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9092,7 +9092,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-276bbae'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-e843003'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12212,7 +12212,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-276bbae';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-e843003';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14845,7 +14845,79 @@ function enableLocateOrCreateElementContainerNodeImpl() {
   _locateOrCreateElementContainerNode = locateOrCreateElementContainerNode;
 }
 
-function ɵɵforeignComponent(index, foreignComponent, props) {}
+const RENDER = Symbol('RENDER');
+
+class ForeignViewRef extends ViewRef {
+  get head() {
+    const lView = this._lView;
+    const tView = lView[TVIEW];
+    return lView[tView.firstChild.index];
+  }
+  get tail() {
+    const lView = this._lView;
+    const tView = lView[TVIEW];
+    return lView[tView.firstChild.next.index];
+  }
+}
+function createForeignView(lContainer, index) {
+  const declLView = lContainer[PARENT];
+  const declTNode = lContainer[T_HOST];
+  const renderer = declLView[RENDERER];
+  const tView = createTView(3, declTNode, null, 3, 0, null, null, null, null, null, null);
+  const headTNode = tView.data[HEADER_OFFSET] = createTNode(tView, null, 2, HEADER_OFFSET, '', null);
+  const tailTNode = tView.data[HEADER_OFFSET + 1] = createTNode(tView, null, 2, HEADER_OFFSET + 1, '', null);
+  tView.firstChild = headTNode;
+  headTNode.next = tailTNode;
+  tailTNode.prev = headTNode;
+  const lView = createLView(declLView, tView, null, 0, null, null, null, renderer, null, null, null);
+  const headComment = lView[headTNode.index] = renderer.createComment(ngDevMode ? 'foreign-view-head' : '');
+  const tailComment = lView[tailTNode.index] = renderer.createComment(ngDevMode ? 'foreign-view-tail' : '');
+  lView[FLAGS] &= -5;
+  const viewRef = new ForeignViewRef(lView);
+  addLViewToLContainer(lContainer, lView, index);
+  if (!headComment.parentNode) {
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(headComment);
+    fragment.appendChild(tailComment);
+    const fragmentSlotIndex = tailTNode.index + 1;
+    lView[fragmentSlotIndex] = fragment;
+  }
+  return viewRef;
+}
+
+function ɵɵforeignComponent(index, foreignComponent, props) {
+  const lView = getLView();
+  const tView = getTView();
+  const adjustedIndex = index + HEADER_OFFSET;
+  let tNode;
+  if (tView.firstCreatePass) {
+    tNode = getOrCreateTNode(tView, adjustedIndex, 4, null, null);
+    setCurrentTNodeAsNotParent();
+  } else {
+    tNode = tView.data[adjustedIndex];
+    setCurrentTNode(tNode, false);
+  }
+  const renderer = lView[RENDERER];
+  const comment = renderer.createComment(ngDevMode ? 'foreign-component' : '');
+  appendChild(tView, lView, comment, tNode);
+  attachPatchData(comment, lView);
+  const lContainer = createLContainer(comment, lView, comment, tNode);
+  lView[adjustedIndex] = lContainer;
+  addToEndOfViewTree(lView, lContainer);
+  const viewRef = createForeignView(lContainer, 0);
+  const injector = new NodeInjector(tNode, lView);
+  const [nodes, dispose] = runInInjectionContext(injector, () => foreignComponent[RENDER](props));
+  const tail = viewRef.tail;
+  const parent = tail.parentNode;
+  if (parent) {
+    for (let i = 0; i < nodes.length; i++) {
+      nativeInsertBefore(renderer, parent, nodes[i], tail, false);
+    }
+  }
+  if (dispose) {
+    viewRef.onDestroy(dispose);
+  }
+}
 
 function ɵɵgetCurrentView() {
   return getLView();
