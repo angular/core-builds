@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.16+sha-03188dd
+ * @license Angular v21.2.16+sha-1523061
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2002,7 +2002,7 @@ class TransferState {
 }
 function retrieveTransferredState(doc, appId) {
   const script = doc.getElementById(appId + '-state');
-  if (script?.textContent) {
+  if (script?.tagName === 'SCRIPT' && script.textContent) {
     try {
       return JSON.parse(script.textContent);
     } catch (e) {
@@ -8808,7 +8808,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.16+sha-03188dd'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.16+sha-1523061'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
