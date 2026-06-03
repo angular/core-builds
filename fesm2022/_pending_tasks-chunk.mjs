@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-592b121
+ * @license Angular v22.0.0+sha-fa546f3
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.0.0+sha-592b121');
+const VERSION = /* @__PURE__ */new Version('22.0.0+sha-fa546f3');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -2815,7 +2815,7 @@ class TransferState {
 }
 function retrieveTransferredState(doc, appId) {
   const script = doc.getElementById(appId + '-state');
-  if (script?.textContent) {
+  if (script?.tagName === 'SCRIPT' && script.textContent) {
     try {
       return JSON.parse(script.textContent);
     } catch (e) {
