@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-8da1198
+ * @license Angular v22.1.0-next.0+sha-e50d47a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9095,7 +9095,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-8da1198'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-e50d47a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12215,7 +12215,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-8da1198';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-e50d47a';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16743,7 +16743,7 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
     }
   } else if (typeof unwrappedValue === 'object') {
     for (const key in unwrappedValue) {
-      if (unwrappedValue.hasOwnProperty(key)) {
+      if (Object.hasOwn(unwrappedValue, key)) {
         keyValueArraySet(styleKeyValueArray, key, unwrappedValue[key]);
       }
     }
