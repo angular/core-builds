@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-5f36274
+ * @license Angular v22.1.0-next.0+sha-79e5d5d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2002,7 +2002,12 @@ declare const enum LContainerFlags {
      *
      * This flag, once set, is never unset for the `LContainer`.
      */
-    HasTransplantedViews = 2
+    HasTransplantedViews = 2,
+    /**
+     * Flag to signify that this `LContainer` is logical-only and its views should not be added
+     * to or removed from the rendering tree by the platform renderer.
+     */
+    LogicalOnly = 4
 }
 
 /**
