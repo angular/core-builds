@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-652b76b
+ * @license Angular v22.0.0+sha-51d5f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9044,7 +9044,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-652b76b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-51d5f3b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12162,7 +12162,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-652b76b';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-51d5f3b';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14878,31 +14878,30 @@ function getLocaleData(normalizedLocale) {
 function unregisterAllLocaleData() {
   LOCALE_DATA = Object.create(null);
 }
-var LocaleDataIndex;
-(function (LocaleDataIndex) {
-  LocaleDataIndex[LocaleDataIndex["LocaleId"] = 0] = "LocaleId";
-  LocaleDataIndex[LocaleDataIndex["DayPeriodsFormat"] = 1] = "DayPeriodsFormat";
-  LocaleDataIndex[LocaleDataIndex["DayPeriodsStandalone"] = 2] = "DayPeriodsStandalone";
-  LocaleDataIndex[LocaleDataIndex["DaysFormat"] = 3] = "DaysFormat";
-  LocaleDataIndex[LocaleDataIndex["DaysStandalone"] = 4] = "DaysStandalone";
-  LocaleDataIndex[LocaleDataIndex["MonthsFormat"] = 5] = "MonthsFormat";
-  LocaleDataIndex[LocaleDataIndex["MonthsStandalone"] = 6] = "MonthsStandalone";
-  LocaleDataIndex[LocaleDataIndex["Eras"] = 7] = "Eras";
-  LocaleDataIndex[LocaleDataIndex["FirstDayOfWeek"] = 8] = "FirstDayOfWeek";
-  LocaleDataIndex[LocaleDataIndex["WeekendRange"] = 9] = "WeekendRange";
-  LocaleDataIndex[LocaleDataIndex["DateFormat"] = 10] = "DateFormat";
-  LocaleDataIndex[LocaleDataIndex["TimeFormat"] = 11] = "TimeFormat";
-  LocaleDataIndex[LocaleDataIndex["DateTimeFormat"] = 12] = "DateTimeFormat";
-  LocaleDataIndex[LocaleDataIndex["NumberSymbols"] = 13] = "NumberSymbols";
-  LocaleDataIndex[LocaleDataIndex["NumberFormats"] = 14] = "NumberFormats";
-  LocaleDataIndex[LocaleDataIndex["CurrencyCode"] = 15] = "CurrencyCode";
-  LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 16] = "CurrencySymbol";
-  LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 17] = "CurrencyName";
-  LocaleDataIndex[LocaleDataIndex["Currencies"] = 18] = "Currencies";
-  LocaleDataIndex[LocaleDataIndex["Directionality"] = 19] = "Directionality";
-  LocaleDataIndex[LocaleDataIndex["PluralCase"] = 20] = "PluralCase";
-  LocaleDataIndex[LocaleDataIndex["ExtraData"] = 21] = "ExtraData";
-})(LocaleDataIndex || (LocaleDataIndex = {}));
+const LocaleDataIndex = {
+  LocaleId: 0,
+  DayPeriodsFormat: 1,
+  DayPeriodsStandalone: 2,
+  DaysFormat: 3,
+  DaysStandalone: 4,
+  MonthsFormat: 5,
+  MonthsStandalone: 6,
+  Eras: 7,
+  FirstDayOfWeek: 8,
+  WeekendRange: 9,
+  DateFormat: 10,
+  TimeFormat: 11,
+  DateTimeFormat: 12,
+  NumberSymbols: 13,
+  NumberFormats: 14,
+  CurrencyCode: 15,
+  CurrencySymbol: 16,
+  CurrencyName: 17,
+  Currencies: 18,
+  Directionality: 19,
+  PluralCase: 20,
+  ExtraData: 21
+};
 function normalizeLocale(locale) {
   return locale.toLowerCase().replace(/_/g, '-');
 }

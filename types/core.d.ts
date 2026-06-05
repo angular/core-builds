@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-652b76b
+ * @license Angular v22.0.0+sha-51d5f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3929,6 +3929,8 @@ declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
  *  - animations: 3000-3999
  *  - router: 4000-4999
  *  - platform-browser: 5000-5500
+ *  - service-worker: 5600-5699
+ *  - platform-server: 5700-5800
  */
 declare const enum RuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
@@ -4290,32 +4292,34 @@ declare function getLocalePluralCase(locale: string): (value: number) => number;
  */
 declare function unregisterAllLocaleData(): void;
 /**
- * Index of each type of locale data from the locale data array
+ * Index of each type of locale data from the locale data array.
+ * Not an enum: TS enums compile to IIFE side-effects and are not tree-shakable,
+ * even when unused. Using a plain const object with 'as const' instead.
  */
-declare enum LocaleDataIndex {
-    LocaleId = 0,
-    DayPeriodsFormat = 1,
-    DayPeriodsStandalone = 2,
-    DaysFormat = 3,
-    DaysStandalone = 4,
-    MonthsFormat = 5,
-    MonthsStandalone = 6,
-    Eras = 7,
-    FirstDayOfWeek = 8,
-    WeekendRange = 9,
-    DateFormat = 10,
-    TimeFormat = 11,
-    DateTimeFormat = 12,
-    NumberSymbols = 13,
-    NumberFormats = 14,
-    CurrencyCode = 15,
-    CurrencySymbol = 16,
-    CurrencyName = 17,
-    Currencies = 18,
-    Directionality = 19,
-    PluralCase = 20,
-    ExtraData = 21
-}
+declare const LocaleDataIndex: {
+    readonly LocaleId: 0;
+    readonly DayPeriodsFormat: 1;
+    readonly DayPeriodsStandalone: 2;
+    readonly DaysFormat: 3;
+    readonly DaysStandalone: 4;
+    readonly MonthsFormat: 5;
+    readonly MonthsStandalone: 6;
+    readonly Eras: 7;
+    readonly FirstDayOfWeek: 8;
+    readonly WeekendRange: 9;
+    readonly DateFormat: 10;
+    readonly TimeFormat: 11;
+    readonly DateTimeFormat: 12;
+    readonly NumberSymbols: 13;
+    readonly NumberFormats: 14;
+    readonly CurrencyCode: 15;
+    readonly CurrencySymbol: 16;
+    readonly CurrencyName: 17;
+    readonly Currencies: 18;
+    readonly Directionality: 19;
+    readonly PluralCase: 20;
+    readonly ExtraData: 21;
+};
 /**
  * Index of each type of locale data from the extra locale data array
  */
