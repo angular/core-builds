@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-af04e26
+ * @license Angular v22.1.0-next.0+sha-ed2420c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3931,6 +3931,8 @@ declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
  *  - animations: 3000-3999
  *  - router: 4000-4999
  *  - platform-browser: 5000-5500
+ *  - service-worker: 5600-5699
+ *  - platform-server: 5700-5800
  */
 declare const enum RuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
