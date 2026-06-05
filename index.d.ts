@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.24+sha-a68ec70
+ * @license Angular v20.3.24+sha-49368c1
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4874,6 +4874,8 @@ declare const XSS_SECURITY_URL = "https://angular.dev/best-practices/security#pr
  *  - animations: 3000-3999
  *  - router: 4000-4999
  *  - platform-browser: 5000-5500
+ *  - service-worker: 5600-5699
+ *  - platform-server: 5700-5800
  */
 declare const enum RuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
