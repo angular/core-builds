@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-51724b4
+ * @license Angular v22.1.0-next.0+sha-b3748e9
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2556,7 +2556,7 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
     if (isRootView(childLView)) {
       childLView = childLView[HEADER_OFFSET];
       if (isLContainer(childLView)) {
-        numRootNodes = calcNumRootNodesInLContainer(childLView) + 1;
+        numRootNodes = calcNumRootNodesInLContainer(childLView) + 2;
         annotateLContainerForHydration(childLView, context);
         const componentLView = unwrapLView(childLView[HOST]);
         serializedView = {

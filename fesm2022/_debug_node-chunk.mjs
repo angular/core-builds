@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-51724b4
+ * @license Angular v22.1.0-next.0+sha-b3748e9
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5791,10 +5791,18 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     ngDevMode && assertTNodeType(tNode, 3 | 12 | 16 | 32);
     const lNode = lView[tNode.index];
     if (lNode !== null) {
-      result.push(unwrapRNode(lNode));
-    }
-    if (isLContainer(lNode) && !(lNode[FLAGS] & 4)) {
-      collectNativeNodesInLContainer(lNode, result);
+      if (isLContainer(lNode)) {
+        const anchor = lNode[NATIVE];
+        if (anchor !== lNode[HOST]) {
+          result.push(unwrapRNode(lNode));
+        }
+        if (!(lNode[FLAGS] & 4)) {
+          collectNativeNodesInLContainer(lNode, result);
+        }
+        result.push(anchor);
+      } else {
+        result.push(unwrapRNode(lNode));
+      }
     }
     const tNodeType = tNode.type;
     if (tNodeType & 8) {
@@ -5826,9 +5834,6 @@ function collectNativeNodesInLContainer(lContainer, result) {
     if (lViewFirstChildTNode !== null) {
       collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
     }
-  }
-  if (lContainer[NATIVE] !== lContainer[HOST]) {
-    result.push(lContainer[NATIVE]);
   }
 }
 
@@ -9098,7 +9103,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-51724b4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-b3748e9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12218,7 +12223,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-51724b4';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-b3748e9';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
