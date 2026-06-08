@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-255151a
+ * @license Angular v22.1.0-next.0+sha-11b206b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1080,6 +1080,39 @@ declare const enum AttributeMarker {
     I18n = 6
 }
 
+/** Symbol used to store and retrieve the render function for a foreign component. */
+declare const RENDER: unique symbol;
+/** Symbol used to store and retrieve the disposal registration function for a foreign component. */
+declare const ON_DESTROY: unique symbol;
+/**
+ * A function used to render a foreign component in an Angular template.
+ *
+ * The function accepts the component's properties as its only argument. It should return an array
+ * of nodes rendered and owned by the foreign component. It may also return a callback to perform
+ * any necessary cleanup when the component is destroyed.
+ *
+ * @template TProps The properties of the foreign component.
+ */
+type ForeignRenderFn<TProps> = (props: TProps) => [Node[], VoidFunction?];
+/**
+ * A function that allows a foreign component to register a destroy callback.
+ *
+ * Angular will invoke this function during the creation phase of projected content
+ * to provide a cleanup callback. The foreign component is responsible for calling
+ * this callback when the container slot is removed or when the foreign component itself
+ * is destroyed. This triggers the destruction and lifecycle cleanup of the nested Angular views.
+ */
+type ForeignOnDestroyFn = (destroy: VoidFunction) => void;
+/**
+ * Represents a component from another framework that Angular can import and render.
+ *
+ * @template TProps The properties of the foreign component.
+ */
+interface ForeignComponent<TProps> {
+    readonly [RENDER]: ForeignRenderFn<TProps>;
+    readonly [ON_DESTROY]: ForeignOnDestroyFn;
+}
+
 /**
  * Expresses a single CSS Selector.
  *
@@ -1273,8 +1306,9 @@ type TAttributes = (string | AttributeMarker | CssSelector)[];
  * - Attribute arrays.
  * - Local definition arrays.
  * - Translated messages (i18n).
+ * - Foreign components.
  */
-type TConstants = (TAttributes | string)[];
+type TConstants = (TAttributes | string | ForeignComponent<any>)[];
 /**
  * Factory function that returns an array of consts. Consts can be represented as a function in
  * case any additional statements are required to define consts in the list. An example is i18n
