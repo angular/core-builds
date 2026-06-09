@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-f908a3e
+ * @license Angular v22.0.0+sha-cdcea80
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9572,7 +9572,7 @@ interface ToolDescriptor<InputSchema extends JsonSchemaForInference> {
     /** The unique name of this tool. */
     name: string;
     /** A description of what the tool does and how the agent should consider using it. */
-    description?: string;
+    description: string;
     /**
      * A schema which describes the input arguments expected by the {@link execute} function
      * which the agent must provide.
