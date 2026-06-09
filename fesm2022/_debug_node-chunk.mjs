@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-8ddda4d
+ * @license Angular v22.0.0+sha-f908a3e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -17,14 +17,6 @@ function noSideEffects(fn) {
   }.toString();
 }
 
-function applyValueToInputField(instance, inputSignalNode, privateName, value) {
-  if (inputSignalNode !== null) {
-    inputSignalNode.applyValueToInputSignal(inputSignalNode, value);
-  } else {
-    instance[privateName] = value;
-  }
-}
-
 class SimpleChange {
   previousValue;
   currentValue;
@@ -36,6 +28,14 @@ class SimpleChange {
   }
   isFirstChange() {
     return this.firstChange;
+  }
+}
+
+function applyValueToInputField(instance, inputSignalNode, privateName, value) {
+  if (inputSignalNode !== null) {
+    inputSignalNode.applyValueToInputSignal(inputSignalNode, value);
+  } else {
+    instance[privateName] = value;
   }
 }
 
@@ -81,7 +81,7 @@ function ngOnChangesSetInput(instance, inputSignalNode, value, publicName, priva
 }
 const SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
 function getSimpleChangesStore(instance) {
-  return instance[SIMPLE_CHANGES_STORE] || null;
+  return Object.hasOwn(instance, SIMPLE_CHANGES_STORE) ? instance[SIMPLE_CHANGES_STORE] || null : null;
 }
 function setSimpleChangesStore(instance, store) {
   return instance[SIMPLE_CHANGES_STORE] = store;
@@ -9044,7 +9044,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-8ddda4d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-f908a3e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12162,7 +12162,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-8ddda4d';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-f908a3e';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
