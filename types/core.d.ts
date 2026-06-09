@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-7541f30
+ * @license Angular v22.1.0-next.0+sha-d1539a8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1467,7 +1467,7 @@ interface DirectiveDefinition<T> {
     /**
      * Directive type, needed to configure the injector.
      */
-    type: Type$1<T>;
+    type: Type$1<T> | AbstractType<T>;
     /** The selectors that will be used to match nodes to this directive. */
     selectors?: (string | number)[][];
     /**
@@ -1558,6 +1558,8 @@ interface DirectiveDefinition<T> {
     signals?: boolean;
 }
 interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'features'> {
+    /** Component type, needed to configure the injector. */
+    type: Type$1<T>;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -7254,7 +7256,7 @@ interface InjectorProfilerContext {
      *      - Example: if ModuleA --provides--> ServiceA --injects--> ServiceB
      *                 then inject(ServiceB) in ServiceA has ServiceA as a construction context
      */
-    token: Type$1<unknown> | null;
+    token: Type$1<unknown> | AbstractType<unknown> | null;
 }
 /**
  * An object that contains information about a provider that has been configured
@@ -7277,7 +7279,7 @@ interface ProviderRecord {
     /**
      * The path of DI containers that were followed to import this provider
      */
-    importPath?: Type$1<unknown>[];
+    importPath?: (Type$1<unknown> | AbstractType<unknown>)[];
 }
 /**
  * An object that contains information a service that has been injected within an
