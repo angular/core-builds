@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-3dd35c2
+ * @license Angular v22.1.0-next.0+sha-0a9ff4e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var path = require('path');
-var compiler_host = require('./compiler_host-CY14HvaP.cjs');
+var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
 var ts = require('typescript');
 var migrations = require('@angular/compiler-cli/private/migrations');
@@ -128,7 +128,7 @@ function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
     const reflector = new migrations.TypeScriptReflectionHost(typeChecker);
     const printer = ts.createPrinter();
-    const tracker = new compiler_host.ChangeTracker(printer);
+    const tracker = new change_tracker.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
     if (routeArraysToMigrate.length === 0) {
         return { pendingChanges: [], skippedRoutes: [], migratedRoutes: [] };
@@ -382,7 +382,7 @@ function migrate(options) {
         const basePath = process.cwd();
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
+        const pathToMigrate = change_tracker.normalizePath(path.join(basePath, options.path));
         if (!buildPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the route lazy loading migration.');
         }
@@ -417,11 +417,11 @@ function standaloneRoutesMigration(tree, tsconfigPath, basePath, pathToMigrate, 
     if (fs.existsSync(pathToMigrate) && !fs.statSync(pathToMigrate).isDirectory()) {
         throw new schematics.SchematicsException(`Migration path ${pathToMigrate} has to be a directory. Cannot run the route lazy loading migration.`);
     }
-    const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
+    const program = change_tracker.createMigrationProgram(tree, tsconfigPath, basePath);
     const sourceFiles = program
         .getSourceFiles()
         .filter((sourceFile) => sourceFile.fileName.startsWith(pathToMigrate) &&
-        compiler_host.canMigrateFile(basePath, sourceFile, program));
+        change_tracker.canMigrateFile(basePath, sourceFile, program));
     const migratedRoutes = [];
     const skippedRoutes = [];
     if (sourceFiles.length === 0) {

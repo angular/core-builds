@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-3dd35c2
+ * @license Angular v22.1.0-next.0+sha-0a9ff4e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@
 
 var schematics = require('@angular-devkit/schematics');
 var path = require('path');
-var compiler_host = require('./compiler_host-CY14HvaP.cjs');
+var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
@@ -663,7 +663,7 @@ function migrateFile(sourceFile, options) {
         return [];
     }
     const printer = ts.createPrinter();
-    const tracker = new compiler_host.ChangeTracker(printer);
+    const tracker = new change_tracker.ChangeTracker(printer);
     analysis.classes.forEach(({ node, constructor, superCall }) => {
         const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
         const prependToClass = [];
@@ -1328,7 +1328,7 @@ function migrate(options) {
             if (options.path.startsWith('..')) {
                 throw new schematics.SchematicsException('Cannot run inject migration outside of the current project.');
             }
-            pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
+            pathToMigrate = change_tracker.normalizePath(path.join(basePath, options.path));
         }
         const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
         const allPaths = [...buildPaths, ...testPaths];
@@ -1338,11 +1338,11 @@ function migrate(options) {
         }
         let sourceFilesCount = 0;
         for (const tsconfigPath of allPaths) {
-            const program = compiler_host.createMigrationProgram(tree, tsconfigPath, basePath);
+            const program = change_tracker.createMigrationProgram(tree, tsconfigPath, basePath);
             const sourceFiles = program
                 .getSourceFiles()
                 .filter((sourceFile) => (pathToMigrate ? sourceFile.fileName.startsWith(pathToMigrate) : true) &&
-                compiler_host.canMigrateFile(basePath, sourceFile, program));
+                change_tracker.canMigrateFile(basePath, sourceFile, program));
             sourceFilesCount += runInjectMigration(tree, sourceFiles, basePath, options);
         }
         if (sourceFilesCount === 0) {

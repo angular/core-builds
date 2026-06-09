@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-3dd35c2
+ * @license Angular v22.1.0-next.0+sha-0a9ff4e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,7 +11,7 @@ var compilerCli = require('@angular/compiler-cli');
 var fs = require('fs');
 var path = require('path');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-CY14HvaP.cjs');
+var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
 var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
 var nodes = require('./nodes-ZSQ7WZRB.cjs');
@@ -234,7 +234,7 @@ function getRelativeImportPath(fromFile, toFile) {
         path$1 = './' + path$1;
     }
     // Using the Node utilities can yield paths with forward slashes on Windows.
-    return compiler_host.normalizePath(path$1);
+    return change_tracker.normalizePath(path$1);
 }
 /** Function used to remap the generated `imports` for a component to known shorter aliases. */
 function knownInternalAliasRemapper(imports) {
@@ -324,7 +324,7 @@ function toStandalone(sourceFiles, program, printer, fileImportRemapper, declara
     const modulesToMigrate = new Set();
     const testObjectsToMigrate = new Set();
     const declarations = new Set();
-    const tracker = new compiler_host.ChangeTracker(printer, fileImportRemapper);
+    const tracker = new change_tracker.ChangeTracker(printer, fileImportRemapper);
     for (const sourceFile of sourceFiles) {
         const modules = findNgModuleClassesToMigrate(sourceFile, typeChecker);
         const testObjects = findTestObjectsToMigrate(sourceFile, typeChecker);
@@ -935,7 +935,7 @@ function findTightestNode(node, position) {
 
 function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
     const filesToRemove = new Set();
-    const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
+    const tracker = new change_tracker.ChangeTracker(printer, importRemapper);
     const tsProgram = program.getTsProgram();
     const typeChecker = tsProgram.getTypeChecker();
     const templateTypeChecker = program.compiler.getTemplateTypeChecker();
@@ -1452,7 +1452,7 @@ function isInImportsArray(closestAssignment, closestArray) {
 }
 
 function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, declarationImportRemapper) {
-    const tracker = new compiler_host.ChangeTracker(printer, importRemapper);
+    const tracker = new change_tracker.ChangeTracker(printer, importRemapper);
     const typeChecker = program.getTsProgram().getTypeChecker();
     const templateTypeChecker = program.compiler.getTemplateTypeChecker();
     const referenceResolver = new ReferenceResolver(program, host, rootFileNames, basePath, referenceLookupExcludedFiles);
@@ -2045,7 +2045,7 @@ function migrate(options) {
         const allPaths = [...buildPaths, ...testPaths];
         // TS and Schematic use paths in POSIX format even on Windows. This is needed as otherwise
         // string matching such as `sourceFile.fileName.startsWith(pathToMigrate)` might not work.
-        const pathToMigrate = compiler_host.normalizePath(path.join(basePath, options.path));
+        const pathToMigrate = change_tracker.normalizePath(path.join(basePath, options.path));
         let migratedFiles = 0;
         if (!allPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the standalone migration.');
@@ -2065,7 +2065,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
     if (schematicOptions.path.startsWith('..')) {
         throw new schematics.SchematicsException('Cannot run standalone migration outside of the current project.');
     }
-    const { host, options, rootNames } = compiler_host.createProgramOptions(tree, tsconfigPath, basePath, undefined, undefined, {
+    const { host, options, rootNames } = change_tracker.createProgramOptions(tree, tsconfigPath, basePath, undefined, undefined, {
         _enableTemplateTypeChecker: true, // Required for the template type checker to work.
         compileNonExportedClasses: true, // We want to migrate non-exported classes too.
         // Avoid checking libraries to speed up the migration.
@@ -2082,7 +2082,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
         .getTsProgram()
         .getSourceFiles()
         .filter((sourceFile) => sourceFile.fileName.startsWith(pathToMigrate) &&
-        compiler_host.canMigrateFile(basePath, sourceFile, program.getTsProgram()));
+        change_tracker.canMigrateFile(basePath, sourceFile, program.getTsProgram()));
     if (sourceFiles.length === 0) {
         return 0;
     }
