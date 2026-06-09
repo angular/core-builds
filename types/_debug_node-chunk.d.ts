@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.0.0+sha-a704b08
+ * @license Angular v22.0.0+sha-01ea640
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { InjectionToken, Type, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, Provider, ProcessProvidersFunction, ModuleWithProviders, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './_chrome_dev_tools_performance-chunk.js';
+import { InjectionToken, Type, AbstractType, ValueProvider, ExistingProvider, FactoryProvider, ConstructorProvider, StaticClassProvider, ClassProvider, EnvironmentProviders, Injector, ProviderToken, InjectOptions, Provider, ProcessProvidersFunction, ModuleWithProviders, DestroyRef, InternalInjectFlags, WritableSignal, OutputRef, StaticProvider } from './_chrome_dev_tools_performance-chunk.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import './_event_dispatcher-chunk.js';
 import { ReactiveNode } from './_formatter-chunk.js';
@@ -1892,7 +1892,7 @@ type HostDirectiveOutputs = Record<string, (number | string)[]>;
  * }
  * ```
  */
-type DirectiveIndexMap = Map<Type<unknown>, number | [directiveIndex: number, hostDirectivesStart: number, hostDirectivesEnd: number]>;
+type DirectiveIndexMap = Map<Type<unknown> | AbstractType<unknown>, number | [directiveIndex: number, hostDirectivesStart: number, hostDirectivesEnd: number]>;
 /**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
@@ -2573,7 +2573,7 @@ interface DirectiveDef<T> {
      */
     readonly hostAttrs: TAttributes | null;
     /** Token representing the directive. Used by DI. */
-    readonly type: Type<T>;
+    readonly type: Type<T> | AbstractType<T>;
     /** Function that resolves `providers` and publishes them into the DI system. */
     providersResolver: ProvidersResolver | null;
     /** Function that resolves `viewProviders` and publishes them into the DI system. */
@@ -2644,6 +2644,8 @@ interface DirectiveDef<T> {
  * See: {@link defineComponent}
  */
 interface ComponentDef<T> extends DirectiveDef<T> {
+    /** Token representing the component. Used by DI. */
+    readonly type: Type<T>;
     /**
      * Unique ID for the component. Used in view encapsulation and
      * to keep track of the injector in standalone components.
@@ -2758,7 +2760,7 @@ interface ComponentDef<T> extends DirectiveDef<T> {
  */
 interface PipeDef<T> {
     /** Token representing the pipe. */
-    type: Type<T>;
+    type: Type<T> | AbstractType<T>;
     /**
      * Pipe name.
      *
