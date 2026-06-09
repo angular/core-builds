@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-562a566
+ * @license Angular v22.0.0+sha-4289c4c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4814,8 +4814,7 @@ declare enum ChangeDetectionStrategy {
      */
     Eager = 1,
     /**
-     * Use the default `CheckAlways` strategy, in which change detection is automatic until
-     * explicitly deactivated.
+     * This value is equivalent to setting `Eager` and is due to be removed.
      * @deprecated Use `Eager` instead.
      */
     Default = 1
