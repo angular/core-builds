@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-390af25
+ * @license Angular v22.1.0-next.0+sha-0e16bb7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.1.0-next.0+sha-390af25');
+const VERSION = /* @__PURE__ */new Version('22.1.0-next.0+sha-0e16bb7');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -3093,7 +3093,12 @@ class PendingTasks {
   }
   run(fn) {
     const removeTask = this.add();
-    fn().catch(this.errorHandler).finally(removeTask);
+    try {
+      fn().catch(this.errorHandler).finally(removeTask);
+    } catch (err) {
+      this.errorHandler(err);
+      removeTask();
+    }
   }
   static ɵprov =
   /* @__PURE__ */
