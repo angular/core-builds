@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-6cc54e5
+ * @license Angular v22.1.0-next.0+sha-54112d9
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7722,7 +7722,7 @@ declare function createInjector(defType: any, parent?: Injector | null, addition
  *
  * @codeGenApi
  */
-declare function registerNgModuleType(ngModuleType: NgModuleType, id: string): void;
+declare function registerNgModuleType(ngModuleType: Type$1<any>, id: string): void;
 /**
  * Control whether the NgModule registration system enforces that each NgModule type registered has
  * a unique id.
