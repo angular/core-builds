@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.0+sha-e51ad37
+ * @license Angular v22.0.0+sha-4645850
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3355,7 +3355,7 @@ function SECURITY_SCHEMA() {
     registerContext(SecurityContext.HTML, undefined, [['iframe', ['srcdoc']], ['*', ['innerHTML', 'outerHTML']]]);
     registerContext(SecurityContext.STYLE, undefined, [['*', ['style']]]);
     registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']], ['img', ['src']], ['video', ['src']]]);
-    registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [['annotation', ['href', 'xlink:href']], ['annotation-xml', ['href', 'xlink:href']], ['maction', ['href', 'xlink:href']], ['malignmark', ['href', 'xlink:href']], ['math', ['href', 'xlink:href']], ['mroot', ['href', 'xlink:href']], ['msqrt', ['href', 'xlink:href']], ['merror', ['href', 'xlink:href']], ['mfrac', ['href', 'xlink:href']], ['mglyph', ['href', 'xlink:href']], ['msub', ['href', 'xlink:href']], ['msup', ['href', 'xlink:href']], ['msubsup', ['href', 'xlink:href']], ['mmultiscripts', ['href', 'xlink:href']], ['mprescripts', ['href', 'xlink:href']], ['mi', ['href', 'xlink:href']], ['mn', ['href', 'xlink:href']], ['mo', ['href', 'xlink:href']], ['mpadded', ['href', 'xlink:href']], ['mphantom', ['href', 'xlink:href']], ['mrow', ['href', 'xlink:href']], ['ms', ['href', 'xlink:href']], ['mspace', ['href', 'xlink:href']], ['mstyle', ['href', 'xlink:href']], ['mtable', ['href', 'xlink:href']], ['mtd', ['href', 'xlink:href']], ['mtr', ['href', 'xlink:href']], ['mtext', ['href', 'xlink:href']], ['mover', ['href', 'xlink:href']], ['munder', ['href', 'xlink:href']], ['munderover', ['href', 'xlink:href']], ['semantics', ['href', 'xlink:href']], ['none', ['href', 'xlink:href']]]);
+    registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [['*', ['href', 'xlink:href']]]);
     registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
     registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
     registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE, [['animate', ['attributeName', 'values', 'to', 'from']], ['set', ['to', 'attributeName']], ['animateMotion', ['attributeName']], ['animateTransform', ['attributeName']]]);
@@ -3365,12 +3365,27 @@ function SECURITY_SCHEMA() {
 }
 function registerContext(ctx, namespace, specs) {
   for (const [element, attributeNames] of specs) {
-    let tagName = namespace && element !== '*' && element !== 'unknown' ? `:${namespace}:${element}` : element;
+    let tagName = element;
+    if (namespace && element !== 'unknown') {
+      tagName = `:${namespace}:${element}`;
+    }
     tagName = tagName.toLowerCase();
     for (const attr of attributeNames) {
       _SECURITY_SCHEMA[`${tagName}|${attr.toLowerCase()}`] = ctx;
     }
   }
+}
+function checkSecurityContext(tagName, propName, namespace) {
+  const securitySchema = SECURITY_SCHEMA();
+  propName = propName.toLowerCase();
+  tagName = tagName.toLowerCase();
+  let namespacedTag = tagName;
+  let nsWildcardTag;
+  if (namespace === SVG_NAMESPACE || namespace === MATH_ML_NAMESPACE) {
+    namespacedTag = `:${namespace}:${tagName}`;
+    nsWildcardTag = `:${namespace}:*`;
+  }
+  return securitySchema[namespacedTag + '|' + propName] ?? (nsWildcardTag !== undefined ? securitySchema[nsWildcardTag + '|' + propName] : undefined) ?? securitySchema['*|' + propName] ?? SecurityContext.NONE;
 }
 
 function ɵɵsanitizeHtml(unsafeHtml) {
@@ -3477,6 +3492,7 @@ function getSanitizer() {
   return lView && lView[ENVIRONMENT].sanitizer;
 }
 const SECURITY_SENSITIVE_ATTRIBUTE_NAMES = new Set(['href', 'xlink:href']);
+const SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES = ['attributeName', 'attributename'];
 const SECURITY_SENSITIVE_ELEMENTS = {
   'iframe': {
     'sandbox': true,
@@ -3528,8 +3544,8 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
       throw new RuntimeError(-910, errorMessage);
     }
     const element = getNativeByTNode(tNode, lView);
-    const attributeNameValue = element.getAttribute('attributeName');
-    if (attributeNameValue && validationConfig.has(attributeNameValue.toLowerCase())) {
+    const attributeNameValue = getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig);
+    if (attributeNameValue) {
       const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${displayTagName}> element${getTemplateLocationDetails(lView)}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` + `as a static attribute only when the "attributeName" is set to \'${attributeNameValue}\'. \n` + `To fix this, switch the \`${attributeNameValue}\` binding to a static attribute ` + `in a template or in host bindings section.`;
       throw new RuntimeError(-910, errorMessage);
     }
@@ -3537,6 +3553,15 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
   }
   const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${displayTagName}> element${tNode ? getTemplateLocationDetails(lView) : ''}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` + `as a static attribute only. \n` + `To fix this, switch the \`${attributeName}\` binding to a static attribute ` + `in a template or in host bindings section.`;
   throw new RuntimeError(-910, errorMessage);
+}
+function getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig) {
+  for (const attributeName of SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES) {
+    const attributeNameValue = element.getAttribute(attributeName);
+    if (attributeNameValue !== null && validationConfig.has(attributeNameValue.toLowerCase())) {
+      return attributeNameValue;
+    }
+  }
+  return null;
 }
 
 const NG_REFLECT_ATTRS_FLAG_DEFAULT = false;
@@ -9044,7 +9069,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-e51ad37'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.0+sha-4645850'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12163,7 +12188,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-e51ad37';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.0+sha-4645850';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15852,16 +15877,14 @@ function splitNsName(elementName, fatal = true) {
   }
   return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
 }
-function normalizeTagName(tagName) {
-  const tagNameLower = tagName.toLowerCase();
-  const [ns, name] = splitNsName(tagNameLower, false);
-  return ns === SVG_NAMESPACE$1 || ns === MATH_ML_NAMESPACE$1 ? `:${ns}:${name}` : name;
-}
 function i18nResolveSanitizer(attrName, tagName) {
-  const lowerAttrName = attrName.toLowerCase();
-  const lowerTagName = tagName ? normalizeTagName(tagName) : '*';
-  const schema = SECURITY_SCHEMA();
-  const schemaContext = schema[`${lowerTagName}|${lowerAttrName}`] || schema[`*|${lowerAttrName}`] || SecurityContext.NONE;
+  let schemaContext = SecurityContext.NONE;
+  if (tagName) {
+    const [ns, name] = splitNsName(tagName, false);
+    schemaContext = checkSecurityContext(name, attrName, ns);
+  } else {
+    schemaContext = checkSecurityContext('*', attrName);
+  }
   switch (schemaContext) {
     case SecurityContext.HTML:
       return ɵɵsanitizeHtml;
