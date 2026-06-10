@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.24+sha-d55c94a
+ * @license Angular v20.3.24+sha-ca48b47
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6369,6 +6369,7 @@ function getSanitizer() {
     const lView = getLView();
     return lView && lView[ENVIRONMENT].sanitizer;
 }
+const SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES = ['attributeName', 'attributename'];
 /**
  * @remarks Keep this in sync with DOM Security Schema.
  * @see [SECURITY_SCHEMA](../../../compiler/src/schema/dom_security_schema.ts)
@@ -6437,8 +6438,8 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
             throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
         }
         const element = getNativeByTNode(tNode, lView);
-        const attributeNameValue = element.getAttribute('attributeName');
-        if (attributeNameValue && validationConfig.has(attributeNameValue.toLowerCase())) {
+        const attributeNameValue = getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig);
+        if (attributeNameValue) {
             const errorMessage = ngDevMode &&
                 `Angular has detected that the \`${attributeName}\` was applied ` +
                     `as a binding to the <${displayTagName}> element${getTemplateLocationDetails(lView)}. ` +
@@ -6458,6 +6459,15 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
             `To fix this, switch the \`${attributeName}\` binding to a static attribute ` +
             `in a template or in host bindings section.`;
     throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
+}
+function getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig) {
+    for (const attributeName of SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES) {
+        const attributeNameValue = element.getAttribute(attributeName);
+        if (attributeNameValue !== null && validationConfig.has(attributeNameValue.toLowerCase())) {
+            return attributeNameValue;
+        }
+    }
+    return null;
 }
 
 /** Defines the default value of the `NG_REFLECT_ATTRS_FLAG` flag. */
@@ -14888,7 +14898,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.24+sha-d55c94a']
+        ? ['ng-version', '20.3.24+sha-ca48b47']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
