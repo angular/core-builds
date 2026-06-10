@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-d1539a8
+ * @license Angular v22.1.0-next.0+sha-6b0150f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -290,7 +290,11 @@ class ExpressionMigrator extends compiler.RecursiveAstVisitor {
     // Binary operators
     // ---------------------------------------------------------------------------
     visitBinary(ast, nullSensitive) {
-        if (ast.operation === '||' || ast.operation === '&&' || ast.operation === '??') {
+        if (ast.operation === '||' ||
+            ast.operation === '&&' ||
+            ast.operation === '??' ||
+            ast.operation === '==' ||
+            ast.operation === '!=') {
             // These operators normalise null and undefined (both produce the same result),
             // so the operands are not null-sensitive.
             this.visit(ast.left, false);
