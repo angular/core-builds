@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.16+sha-13fb0af
+ * @license Angular v21.2.16+sha-88832c8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3435,6 +3435,7 @@ function getSanitizer() {
   return lView && lView[ENVIRONMENT].sanitizer;
 }
 const SECURITY_SENSITIVE_ATTRIBUTE_NAMES = new Set(['href', 'xlink:href']);
+const SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES = ['attributeName', 'attributename'];
 const SECURITY_SENSITIVE_ELEMENTS = {
   'iframe': {
     'sandbox': true,
@@ -3486,8 +3487,8 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
       throw new RuntimeError(-910, errorMessage);
     }
     const element = getNativeByTNode(tNode, lView);
-    const attributeNameValue = element.getAttribute('attributeName');
-    if (attributeNameValue && validationConfig.has(attributeNameValue.toLowerCase())) {
+    const attributeNameValue = getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig);
+    if (attributeNameValue) {
       const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${displayTagName}> element${getTemplateLocationDetails(lView)}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` + `as a static attribute only when the "attributeName" is set to \'${attributeNameValue}\'. \n` + `To fix this, switch the \`${attributeNameValue}\` binding to a static attribute ` + `in a template or in host bindings section.`;
       throw new RuntimeError(-910, errorMessage);
     }
@@ -3495,6 +3496,15 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
   }
   const errorMessage = ngDevMode && `Angular has detected that the \`${attributeName}\` was applied ` + `as a binding to the <${displayTagName}> element${tNode ? getTemplateLocationDetails(lView) : ''}. ` + `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` + `as a static attribute only. \n` + `To fix this, switch the \`${attributeName}\` binding to a static attribute ` + `in a template or in host bindings section.`;
   throw new RuntimeError(-910, errorMessage);
+}
+function getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig) {
+  for (const attributeName of SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES) {
+    const attributeNameValue = element.getAttribute(attributeName);
+    if (attributeNameValue !== null && validationConfig.has(attributeNameValue.toLowerCase())) {
+      return attributeNameValue;
+    }
+  }
+  return null;
 }
 
 const NG_REFLECT_ATTRS_FLAG_DEFAULT = false;
@@ -8808,7 +8818,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.16+sha-13fb0af'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.16+sha-88832c8'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
