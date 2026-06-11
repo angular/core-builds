@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-6b5616b
+ * @license Angular v22.1.0-next.0+sha-8984c59
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1558,8 +1558,6 @@ interface DirectiveDefinition<T> {
     signals?: boolean;
 }
 interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'features'> {
-    /** Component type, needed to configure the injector. */
-    type: Type$1<T>;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -1752,7 +1750,7 @@ declare function getAsyncClassMetadataFn(type: Type$1<unknown>): (() => Promise<
  * @param dependencyLoaderFn Function that loads dependencies
  * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
  */
-declare function setClassMetadataAsync(type: Type$1<any>, dependencyLoaderFn: () => Array<Promise<Type$1<unknown>>>, metadataSetterFn: (...types: Type$1<unknown>[]) => void): () => Promise<Array<Type$1<unknown>>>;
+declare function setClassMetadataAsync(type: Type$1<any> | AbstractType<any>, dependencyLoaderFn: () => Array<Promise<Type$1<unknown> | AbstractType<unknown>>>, metadataSetterFn: (...types: (Type$1<unknown> | AbstractType<unknown>)[]) => void): () => Promise<Array<Type$1<unknown> | AbstractType<unknown>>>;
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
  * on the type.
@@ -7057,7 +7055,7 @@ declare function ɵɵgetComponentDepsFactory(type: ComponentType<any>, rawImport
  *
  * This runtime is guarded by ngDevMode flag.
  */
-declare function ɵsetClassDebugInfo(type: Type$1<any>, debugInfo: ClassDebugInfo): void;
+declare function ɵsetClassDebugInfo(type: Type$1<any> | AbstractType<any>, debugInfo: ClassDebugInfo): void;
 
 /** Represents `import.meta` plus some information that's not in the built-in types. */
 type ImportMetaExtended = ImportMeta & {

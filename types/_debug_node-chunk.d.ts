@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-6b5616b
+ * @license Angular v22.1.0-next.0+sha-8984c59
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2683,8 +2683,6 @@ interface DirectiveDef<T> {
  * See: {@link defineComponent}
  */
 interface ComponentDef<T> extends DirectiveDef<T> {
-    /** Token representing the component. Used by DI. */
-    readonly type: Type<T>;
     /**
      * Unique ID for the component. Used in view encapsulation and
      * to keep track of the injector in standalone components.
