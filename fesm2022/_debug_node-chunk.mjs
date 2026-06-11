@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.1+sha-6867f77
+ * @license Angular v22.0.1+sha-3a48abc
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4020,24 +4020,32 @@ const noOpAnimationComplete = () => {};
 const enterClassMap = new WeakMap();
 const longestAnimations = new WeakMap();
 const leavingNodes = new WeakMap();
+function getDeclarationView(lView) {
+  if (!lView) return null;
+  return lView[DECLARATION_VIEW] ?? lView;
+}
 const reusedNodes = new WeakSet();
 function clearLeavingNodes(tNode, el) {
   const nodes = leavingNodes.get(tNode);
   if (nodes && nodes.length > 0) {
-    const ix = nodes.findIndex(node => node === el);
+    const ix = nodes.findIndex(node => node.el === el);
     if (ix > -1) nodes.splice(ix, 1);
   }
   if (nodes?.length === 0) {
     leavingNodes.delete(tNode);
   }
 }
-function cancelLeavingNodes(tNode, newElement) {
+function cancelLeavingNodes(tNode, newElement, newLView) {
   const nodes = leavingNodes.get(tNode);
   if (!nodes || nodes.length === 0) return;
   const newParent = newElement.parentNode;
   const prevSibling = newElement.previousSibling;
+  const newDeclarationView = getDeclarationView(newLView);
   for (let i = nodes.length - 1; i >= 0; i--) {
-    const leavingEl = nodes[i];
+    const {
+      el: leavingEl,
+      declarationView: leavingDeclarationView
+    } = nodes[i];
     const leavingParent = leavingEl.parentNode;
     if (leavingEl === newElement) {
       nodes.splice(i, 1);
@@ -4047,7 +4055,7 @@ function cancelLeavingNodes(tNode, newElement) {
           cancel: true
         }
       }));
-    } else if (prevSibling && leavingEl === prevSibling || leavingParent && newParent && leavingParent !== newParent) {
+    } else if (prevSibling && leavingEl === prevSibling) {
       nodes.splice(i, 1);
       leavingEl.dispatchEvent(new CustomEvent('animationend', {
         detail: {
@@ -4055,17 +4063,35 @@ function cancelLeavingNodes(tNode, newElement) {
         }
       }));
       leavingEl.parentNode?.removeChild(leavingEl);
+    } else if (leavingParent && newParent && leavingParent !== newParent) {
+      const sameLogicalView = newDeclarationView === null || leavingDeclarationView === null || newDeclarationView === leavingDeclarationView;
+      if (sameLogicalView) {
+        nodes.splice(i, 1);
+        leavingEl.dispatchEvent(new CustomEvent('animationend', {
+          detail: {
+            cancel: true
+          }
+        }));
+        leavingEl.parentNode?.removeChild(leavingEl);
+      }
     }
   }
 }
-function trackLeavingNodes(tNode, el) {
+function trackLeavingNodes(tNode, el, lView) {
+  const declarationView = getDeclarationView(lView);
   const nodes = leavingNodes.get(tNode);
   if (nodes) {
-    if (!nodes.includes(el)) {
-      nodes.push(el);
+    if (!nodes.some(node => node.el === el)) {
+      nodes.push({
+        el,
+        declarationView
+      });
     }
   } else {
-    leavingNodes.set(tNode, [el]);
+    leavingNodes.set(tNode, [{
+      el,
+      declarationView
+    }]);
   }
 }
 function getLViewEnterAnimations(lView) {
@@ -4682,10 +4708,10 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
     } else if (action === 1 && parent !== null) {
       maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
       nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
-      cancelLeavingNodes(tNode, rNode);
+      cancelLeavingNodes(tNode, rNode, parentLView);
     } else if (action === 2) {
       if (parentLView?.[ANIMATIONS]?.leave?.has(tNode.index)) {
-        trackLeavingNodes(tNode, rNode);
+        trackLeavingNodes(tNode, rNode, parentLView);
       }
       reusedNodes.delete(rNode);
       runLeaveAnimationsWithCallback(parentLView, tNode, injector, nodeHasLeaveAnimations => {
@@ -9069,7 +9095,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.1+sha-6867f77'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.1+sha-3a48abc'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12188,7 +12214,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.1+sha-6867f77';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.1+sha-3a48abc';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
