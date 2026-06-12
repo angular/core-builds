@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-91ab7c6
+ * @license Angular v22.1.0-next.0+sha-58efd86
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -20,20 +20,17 @@ async function getProjectTsConfigPaths(tree) {
     const workspace = await getWorkspace(tree);
     for (const [, project] of workspace.projects) {
         for (const [name, target] of project.targets) {
-            if (name !== 'build' && name !== 'test') {
-                continue;
-            }
             for (const [, options] of allTargetOptions(target)) {
                 const tsConfig = options['tsConfig'];
                 // Filter out tsconfig files that don't exist in the CLI project.
                 if (typeof tsConfig !== 'string' || !tree.exists(tsConfig)) {
                     continue;
                 }
-                if (name === 'build') {
-                    buildPaths.add(core.normalize(tsConfig));
+                if (name === 'test' || name.includes('test')) {
+                    testPaths.add(core.normalize(tsConfig));
                 }
                 else {
-                    testPaths.add(core.normalize(tsConfig));
+                    buildPaths.add(core.normalize(tsConfig));
                 }
             }
         }

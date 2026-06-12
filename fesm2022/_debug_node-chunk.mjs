@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-91ab7c6
+ * @license Angular v22.1.0-next.0+sha-58efd86
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3349,43 +3349,57 @@ var SecurityContext;
 let _SECURITY_SCHEMA;
 const SVG_NAMESPACE = 'svg';
 const MATH_ML_NAMESPACE = 'math';
+const NO_NAMESPACE = '';
+const MATCH_ALL_ELEMENTS = '*';
+const createNullObj = () => Object.create(null);
 function SECURITY_SCHEMA() {
-  if (!_SECURITY_SCHEMA) {
-    _SECURITY_SCHEMA = {};
-    registerContext(SecurityContext.HTML, undefined, [['iframe', ['srcdoc']], ['*', ['innerHTML', 'outerHTML']]]);
-    registerContext(SecurityContext.STYLE, undefined, [['*', ['style']]]);
-    registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']], ['img', ['src']], ['video', ['src']]]);
-    registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [['*', ['href', 'xlink:href']]]);
-    registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
-    registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
-    registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE, [['animate', ['attributeName', 'values', 'to', 'from']], ['set', ['to', 'attributeName']], ['animateMotion', ['attributeName']], ['animateTransform', ['attributeName']]]);
-    registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, undefined, [['unknown', ['attributeName', 'values', 'to', 'from', 'sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']], ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']]]);
+  if (_SECURITY_SCHEMA) {
+    return _SECURITY_SCHEMA;
   }
+  _SECURITY_SCHEMA = createNullObj();
+  registerContext(SecurityContext.HTML, undefined, [['iframe', ['srcdoc']], ['*', ['innerHTML', 'outerHTML']]]);
+  registerContext(SecurityContext.STYLE, undefined, [['*', ['style']]]);
+  registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']], ['img', ['src']], ['video', ['src']]]);
+  registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [['*', ['href', 'xlink:href']]]);
+  registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
+  registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
+  registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE, [['animate', ['attributeName', 'values', 'to', 'from']], ['set', ['to', 'attributeName']], ['animateMotion', ['attributeName']], ['animateTransform', ['attributeName']]]);
+  registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, undefined, [['unknown', ['attributeName', 'values', 'to', 'from', 'sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']], ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']]]);
   return _SECURITY_SCHEMA;
 }
 function registerContext(ctx, namespace, specs) {
+  const nsKey = namespace ?? NO_NAMESPACE;
   for (const [element, attributeNames] of specs) {
-    let tagName = element;
-    if (namespace && element !== 'unknown') {
-      tagName = `:${namespace}:${element}`;
-    }
-    tagName = tagName.toLowerCase();
+    const tagName = element.toLowerCase();
     for (const attr of attributeNames) {
-      _SECURITY_SCHEMA[`${tagName}|${attr.toLowerCase()}`] = ctx;
+      const attrLower = attr.toLowerCase();
+      const attrSchema = _SECURITY_SCHEMA[attrLower] ??= createNullObj();
+      const nsSchema = attrSchema[nsKey] ??= createNullObj();
+      nsSchema[tagName] = ctx;
     }
   }
 }
 function checkSecurityContext(tagName, propName, namespace) {
   const securitySchema = SECURITY_SCHEMA();
-  propName = propName.toLowerCase();
-  tagName = tagName.toLowerCase();
-  let namespacedTag = tagName;
-  let nsWildcardTag;
-  if (namespace === SVG_NAMESPACE || namespace === MATH_ML_NAMESPACE) {
-    namespacedTag = `:${namespace}:${tagName}`;
-    nsWildcardTag = `:${namespace}:*`;
+  const attrSchema = securitySchema[propName.toLowerCase()];
+  if (!attrSchema) {
+    return SecurityContext.NONE;
   }
-  return securitySchema[namespacedTag + '|' + propName] ?? (nsWildcardTag !== undefined ? securitySchema[nsWildcardTag + '|' + propName] : undefined) ?? securitySchema['*|' + propName] ?? SecurityContext.NONE;
+  const tagLower = tagName.toLowerCase();
+  let context;
+  if (namespace) {
+    const nsSchema = attrSchema[namespace];
+    if (nsSchema) {
+      context = nsSchema[tagLower] ?? nsSchema[MATCH_ALL_ELEMENTS];
+    }
+  }
+  if (context === undefined) {
+    const defaultSchema = attrSchema[NO_NAMESPACE];
+    if (defaultSchema) {
+      context = defaultSchema[tagLower] ?? defaultSchema[MATCH_ALL_ELEMENTS];
+    }
+  }
+  return context ?? SecurityContext.NONE;
 }
 
 function ɵɵsanitizeHtml(unsafeHtml) {
@@ -9154,7 +9168,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-91ab7c6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-58efd86'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12274,7 +12288,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-91ab7c6';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-58efd86';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16077,7 +16091,7 @@ function splitNsName(elementName, fatal = true) {
   return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
 }
 function i18nResolveSanitizer(attrName, tagName) {
-  let schemaContext = SecurityContext.NONE;
+  let schemaContext;
   if (tagName) {
     const [ns, name] = splitNsName(tagName, false);
     schemaContext = checkSecurityContext(name, attrName, ns);

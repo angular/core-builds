@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.0+sha-91ab7c6
+ * @license Angular v22.1.0-next.0+sha-58efd86
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,7 +10,7 @@ var ts = require('typescript');
 var compilerCli = require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var project_paths = require('./project_paths-C3_ORvxG.cjs');
 var compiler = require('@angular/compiler');
 
 function getMemberName(member) {
