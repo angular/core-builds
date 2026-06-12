@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.1+sha-b7aa8dc
+ * @license Angular v22.0.1+sha-15314c1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,15 +10,15 @@ var ts = require('typescript');
 require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 require('node:path');
-var project_paths = require('./project_paths-D2V-Uh2L.cjs');
+var project_paths = require('./project_paths-C3_ORvxG.cjs');
 var ng_component_template = require('./ng_component_template-DPAF1aEA.cjs');
 var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
-var apply_import_manager = require('./apply_import_manager-CxA_YYgB.cjs');
+var apply_import_manager = require('./apply_import_manager-aRrR-E5x.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-DkkMibv-.cjs');
+require('./project_tsconfig_paths-BejwmdOG.cjs');
 require('./property_name-BCpALNpZ.cjs');
 
 const commonModuleStr = 'CommonModule';

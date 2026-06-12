@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.1+sha-b7aa8dc
+ * @license Angular v22.0.1+sha-15314c1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,7 +13,7 @@ var posixPath = require('node:path/posix');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 var path = require('node:path');
-var project_tsconfig_paths = require('./project_tsconfig_paths-DkkMibv-.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
 
 function _interopNamespaceDefault(e) {
     var n = Object.create(null);
