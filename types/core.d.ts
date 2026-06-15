@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-50e7f3a
+ * @license Angular v22.1.0-next.0+sha-417a407
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4997,7 +4997,7 @@ declare class ComponentRef<T> extends ComponentRef$1<T> {
 /**
  * @codeGenApi
  */
-declare function ɵɵgetInheritedFactory<T>(type: Type$1<any>): (type: Type$1<T>) => T;
+declare function ɵɵgetInheritedFactory<T>(type: Type$1<any> | AbstractType<any>): (type: Type$1<T>) => T;
 
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
