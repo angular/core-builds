@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.1+sha-fef8bcf
+ * @license Angular v22.0.1+sha-93d0a5f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -25,6 +25,8 @@ declare class OutputEmitterRef<T> implements OutputRef<T> {
     private destroyed;
     private listeners;
     private errorHandler;
+    private isEmitting;
+    private hasNullListeners;
     constructor();
     subscribe(callback: (value: T) => void): OutputRefSubscription;
     /** Emits a new value to the output. */
