@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.1+sha-f2c5045
+ * @license Angular v22.0.1+sha-b32ee7c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3364,7 +3364,7 @@ function SECURITY_SCHEMA() {
   registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
   registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
   registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE, [['animate', ['attributeName', 'values', 'to', 'from']], ['set', ['to', 'attributeName']], ['animateMotion', ['attributeName']], ['animateTransform', ['attributeName']]]);
-  registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, undefined, [['unknown', ['attributeName', 'values', 'to', 'from', 'sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']], ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']]]);
+  registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, undefined, [['unknown', ['attributeName', 'values', 'to', 'from', 'sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority', 'credentialless']], ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority', 'credentialless']]]);
   return _SECURITY_SCHEMA;
 }
 function registerContext(ctx, namespace, specs) {
@@ -3514,7 +3514,8 @@ const SECURITY_SENSITIVE_ELEMENTS = {
     'allowfullscreen': true,
     'referrerpolicy': true,
     'csp': true,
-    'fetchpriority': true
+    'fetchpriority': true,
+    'credentialless': true
   },
   ':svg:animate': {
     'attributename': true,
@@ -9109,7 +9110,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.1+sha-f2c5045'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.1+sha-b32ee7c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12227,7 +12228,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.1+sha-f2c5045';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.1+sha-b32ee7c';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
