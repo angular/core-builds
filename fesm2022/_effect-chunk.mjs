@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-ea18ab2
+ * @license Angular v22.1.0-next.0+sha-1e79dd3
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -59,11 +59,12 @@ function producerAccessed(node) {
     if (nextProducerLink !== undefined && nextProducerLink.producer === node) {
       activeConsumer.producersTail = nextProducerLink;
       nextProducerLink.lastReadVersion = node.version;
+      nextProducerLink.knownValidAtEpoch = epoch;
       return;
     }
   }
   const prevConsumerLink = node.consumersTail;
-  if (prevConsumerLink !== undefined && prevConsumerLink.consumer === activeConsumer && (!isRecomputing || isValidLink(prevConsumerLink, activeConsumer))) {
+  if (prevConsumerLink !== undefined && prevConsumerLink.consumer === activeConsumer && (!isRecomputing || prevConsumerLink.knownValidAtEpoch === epoch)) {
     return;
   }
   const isLive = consumerIsLive(activeConsumer);
@@ -72,6 +73,7 @@ function producerAccessed(node) {
     consumer: activeConsumer,
     nextProducer: nextProducerLink,
     prevConsumer: undefined,
+    knownValidAtEpoch: epoch,
     lastReadVersion: node.version,
     nextConsumer: undefined
   };
@@ -136,6 +138,13 @@ function consumerBeforeComputation(node) {
   return setActiveConsumer(node);
 }
 function resetConsumerBeforeComputation(node) {
+  if (node.producersTail?.knownValidAtEpoch === epoch) {
+    let producer = node.producers;
+    while (producer !== undefined) {
+      producer.knownValidAtEpoch = null;
+      producer = producer.nextProducer;
+    }
+  }
   node.producersTail = undefined;
   node.recomputing = true;
 }
@@ -239,22 +248,6 @@ function setPostProducerCreatedFn(fn) {
   const prev = postProducerCreatedFn;
   postProducerCreatedFn = fn;
   return prev;
-}
-function isValidLink(checkLink, consumer) {
-  const producersTail = consumer.producersTail;
-  if (producersTail !== undefined) {
-    let link = consumer.producers;
-    do {
-      if (link === checkLink) {
-        return true;
-      }
-      if (link === producersTail) {
-        break;
-      }
-      link = link.nextProducer;
-    } while (link !== undefined);
-  }
-  return false;
 }
 
 function defaultEquals(a, b) {

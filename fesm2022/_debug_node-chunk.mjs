@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-ea18ab2
+ * @license Angular v22.1.0-next.0+sha-1e79dd3
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3261,7 +3261,7 @@ function isTemplateElement(el) {
   return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
 }
 
-const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+const COMMENT_DISALLOWED = />|->|<!--|-->|--!>|<!-$/g;
 const COMMENT_DELIMITER = /(<|>)/g;
 const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
 function escapeCommentText(value) {
@@ -9169,7 +9169,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-ea18ab2'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.0+sha-1e79dd3'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12289,7 +12289,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-ea18ab2';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.0+sha-1e79dd3';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-ea18ab2
+ * @license Angular v22.1.0-next.0+sha-1e79dd3
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -34,6 +34,12 @@ declare const REACTIVE_NODE: ReactiveNode;
 interface ReactiveLink {
     producer: ReactiveNode;
     consumer: ReactiveNode;
+    /**
+     * Stores the epoch that holds when this link was observed, allowing subsequent observations of the same producer to
+     * realize that there's an existing link, avoiding the creation of a new, redundant link. A value of `null` indicates
+     * that the link cannot be assumed to be valid based on the epoch counter.
+     */
+    knownValidAtEpoch: Version | null;
     lastReadVersion: number;
     prevConsumer: ReactiveLink | undefined;
     nextConsumer: ReactiveLink | undefined;
