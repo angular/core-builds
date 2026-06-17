@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-1e79dd3
+ * @license Angular v22.1.0-next.0+sha-45192ba
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -45,7 +45,7 @@ interface ReactiveLink {
     nextConsumer: ReactiveLink | undefined;
     nextProducer: ReactiveLink | undefined;
 }
-type ReactiveNodeKind = 'signal' | 'computed' | 'effect' | 'template' | 'linkedSignal' | 'afterRenderEffectPhase' | 'unknown';
+type ReactiveNodeKind = 'signal' | 'computed' | 'effect' | 'template' | 'linkedSignal' | 'afterRenderEffectPhase' | 'childSignalProp' | 'unknown';
 /**
  * A producer and/or consumer which participates in the reactive graph.
  *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.0+sha-1e79dd3
+ * @license Angular v22.1.0-next.0+sha-45192ba
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3344,7 +3344,7 @@ function enableProdMode() {
 function declareExperimentalWebMcpTool(tool, injector) {
   if (typeof ngServerMode !== 'undefined' && ngServerMode) return;
   const modelContext = globalThis.document.modelContext ?? globalThis.navigator.modelContext;
-  if (!modelContext) return;
+  if (!modelContext || typeof modelContext.registerTool !== 'function') return;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     if (!injector) assertInInjectionContext(declareExperimentalWebMcpTool);
   }
