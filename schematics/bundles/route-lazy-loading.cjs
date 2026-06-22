@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.1+sha-a286a32
+ * @license Angular v22.1.0-next.1+sha-792edab
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,20 +13,9 @@ var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
 var ts = require('typescript');
 var migrations = require('@angular/compiler-cli/private/migrations');
+var class_declaration = require('./class_declaration-BiS_wq9g.cjs');
 var property_name = require('./property_name-BCpALNpZ.cjs');
 require('@angular-devkit/core');
-
-/**
- * Finds the class declaration that is being referred to by a node.
- * @param reference Node referring to a class declaration.
- * @param typeChecker
- */
-function findClassDeclaration(reference, typeChecker) {
-    return (typeChecker
-        .getTypeAtLocation(reference)
-        .getSymbol()
-        ?.declarations?.find(ts.isClassDeclaration) || null);
-}
 
 /**
  * Checks whether a component is standalone.
@@ -277,7 +266,7 @@ function migrateRoute(element, route, typeChecker, reflector, tracker) {
     if (!component) {
         return routeMigrationResults;
     }
-    const componentDeclaration = findClassDeclaration(component, typeChecker);
+    const componentDeclaration = class_declaration.findClassDeclaration(component, typeChecker);
     if (!componentDeclaration) {
         return routeMigrationResults;
     }
