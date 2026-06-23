@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.1+sha-dead64f
+ * @license Angular v22.1.0-next.1+sha-91d168e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -125,13 +125,13 @@ function injectAsync(loader, options) {
     return loadedPromise;
   };
   if (options?.prefetch) {
-    options.prefetch().then(() => load());
+    options.prefetch().then(() => load()).catch(() => {});
   }
   return () => load().then(loadedToken => injector.get(maybeUnwrapDefaultExport(loadedToken)));
 }
 function onIdle(options) {
   if (ngDevMode) {
-    assertInInjectionContext(injectAsync);
+    assertInInjectionContext(onIdle);
   }
   const idleService = inject(IDLE_SERVICE);
   const {
