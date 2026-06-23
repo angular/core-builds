@@ -1,13 +1,13 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.1+sha-06e9da4
+ * @license Angular v22.1.0-next.1+sha-681148c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
 var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
-var jsonFile = require('./json-file-Drblb4E1.cjs');
+var jsonFile = require('./json-file-RJY0pCW_.cjs');
 var ts = require('typescript');
 var path = require('node:path');
 require('@angular-devkit/core');

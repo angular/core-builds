@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.1+sha-06e9da4
+ * @license Angular v22.1.0-next.1+sha-681148c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -16,7 +16,7 @@ function getAugmentedNamespace(n) {
 			var isInstance = false;
       try {
         isInstance = this instanceof a;
-      } catch {}
+      } catch (e) {}
 			if (isInstance) {
         return Reflect.construct(f, arguments, this.constructor);
 			}
