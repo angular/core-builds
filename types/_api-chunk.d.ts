@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.1+sha-ea17725
+ * @license Angular v22.1.0-next.1+sha-edea40b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -110,7 +110,11 @@ declare class ResourceParamsStatus extends Error {
     /** Status code that transitions the resource to `loading` status. */
     static readonly LOADING: ResourceParamsStatus;
 }
-/** Context received by a resource's `params` or `request` function. */
+/**
+ * Context received by a resource's `params` or `request` function.
+ *
+ * @see [Chaining resources](guide/signals/resource#chaining-resources)
+ */
 interface ResourceParamsContext {
     /**
      * Chains the current params off of the value of another resource, returning the value
