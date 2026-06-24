@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.25+sha-a075161
+ * @license Angular v20.3.25+sha-26831d0
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14898,7 +14898,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.25+sha-a075161']
+        ? ['ng-version', '20.3.25+sha-26831d0']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -24091,11 +24091,19 @@ function getLocalePluralCase(locale) {
  */
 function getLocaleData(normalizedLocale) {
     if (!(normalizedLocale in LOCALE_DATA)) {
-        LOCALE_DATA[normalizedLocale] =
-            _global.ng &&
-                _global.ng.common &&
-                _global.ng.common.locales &&
-                _global.ng.common.locales[normalizedLocale];
+        const globalLocaleData = _global.ng &&
+            _global.ng.common &&
+            _global.ng.common.locales &&
+            _global.ng.common.locales[normalizedLocale];
+        // Only cache global locale data when an entry is actually found, to avoid
+        // caching missing lookups. In SSR this cache is process-wide across requests,
+        // so caching `undefined` would retain attacker-controlled locale identifiers
+        // indefinitely. It would also make the `in` check above short-circuit on
+        // subsequent lookups and skip the global fallback.
+        if (globalLocaleData !== undefined) {
+            LOCALE_DATA[normalizedLocale] = globalLocaleData;
+        }
+        return globalLocaleData;
     }
     return LOCALE_DATA[normalizedLocale];
 }
