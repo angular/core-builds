@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.2+sha-9d1d1de
+ * @license Angular v22.0.2+sha-f4f7f37
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -16,6 +16,36 @@ function noSideEffects(fn) {
     toString: fn
   }.toString();
 }
+
+var ProfilerEvent;
+(function (ProfilerEvent) {
+  ProfilerEvent[ProfilerEvent["TemplateCreateStart"] = 0] = "TemplateCreateStart";
+  ProfilerEvent[ProfilerEvent["TemplateCreateEnd"] = 1] = "TemplateCreateEnd";
+  ProfilerEvent[ProfilerEvent["TemplateUpdateStart"] = 2] = "TemplateUpdateStart";
+  ProfilerEvent[ProfilerEvent["TemplateUpdateEnd"] = 3] = "TemplateUpdateEnd";
+  ProfilerEvent[ProfilerEvent["LifecycleHookStart"] = 4] = "LifecycleHookStart";
+  ProfilerEvent[ProfilerEvent["LifecycleHookEnd"] = 5] = "LifecycleHookEnd";
+  ProfilerEvent[ProfilerEvent["OutputStart"] = 6] = "OutputStart";
+  ProfilerEvent[ProfilerEvent["OutputEnd"] = 7] = "OutputEnd";
+  ProfilerEvent[ProfilerEvent["BootstrapApplicationStart"] = 8] = "BootstrapApplicationStart";
+  ProfilerEvent[ProfilerEvent["BootstrapApplicationEnd"] = 9] = "BootstrapApplicationEnd";
+  ProfilerEvent[ProfilerEvent["BootstrapComponentStart"] = 10] = "BootstrapComponentStart";
+  ProfilerEvent[ProfilerEvent["BootstrapComponentEnd"] = 11] = "BootstrapComponentEnd";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionStart"] = 12] = "ChangeDetectionStart";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionEnd"] = 13] = "ChangeDetectionEnd";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncStart"] = 14] = "ChangeDetectionSyncStart";
+  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncEnd"] = 15] = "ChangeDetectionSyncEnd";
+  ProfilerEvent[ProfilerEvent["AfterRenderHooksStart"] = 16] = "AfterRenderHooksStart";
+  ProfilerEvent[ProfilerEvent["AfterRenderHooksEnd"] = 17] = "AfterRenderHooksEnd";
+  ProfilerEvent[ProfilerEvent["ComponentStart"] = 18] = "ComponentStart";
+  ProfilerEvent[ProfilerEvent["ComponentEnd"] = 19] = "ComponentEnd";
+  ProfilerEvent[ProfilerEvent["DeferBlockStateStart"] = 20] = "DeferBlockStateStart";
+  ProfilerEvent[ProfilerEvent["DeferBlockStateEnd"] = 21] = "DeferBlockStateEnd";
+  ProfilerEvent[ProfilerEvent["DynamicComponentStart"] = 22] = "DynamicComponentStart";
+  ProfilerEvent[ProfilerEvent["DynamicComponentEnd"] = 23] = "DynamicComponentEnd";
+  ProfilerEvent[ProfilerEvent["HostBindingsUpdateStart"] = 24] = "HostBindingsUpdateStart";
+  ProfilerEvent[ProfilerEvent["HostBindingsUpdateEnd"] = 25] = "HostBindingsUpdateEnd";
+})(ProfilerEvent || (ProfilerEvent = {}));
 
 class SimpleChange {
   previousValue;
@@ -39,11 +69,16 @@ function applyValueToInputField(instance, inputSignalNode, privateName, value) {
   }
 }
 
+let _ngOnChangesFeatureImpl = null;
 const ɵɵNgOnChangesFeature = /* @__PURE__ */(() => {
+  _ngOnChangesFeatureImpl = NgOnChangesFeatureImpl;
   const ɵɵNgOnChangesFeatureImpl = () => NgOnChangesFeatureImpl;
   ɵɵNgOnChangesFeatureImpl.ngInherit = true;
   return ɵɵNgOnChangesFeatureImpl;
 })();
+function getNgOnChangesFeatureImpl() {
+  return _ngOnChangesFeatureImpl;
+}
 function NgOnChangesFeatureImpl(definition) {
   if (definition.type.prototype.ngOnChanges) {
     definition.setInput = ngOnChangesSetInput;
@@ -113,36 +148,6 @@ const profiler = function (event, instance = null, eventFn) {
   }
 };
 
-var ProfilerEvent;
-(function (ProfilerEvent) {
-  ProfilerEvent[ProfilerEvent["TemplateCreateStart"] = 0] = "TemplateCreateStart";
-  ProfilerEvent[ProfilerEvent["TemplateCreateEnd"] = 1] = "TemplateCreateEnd";
-  ProfilerEvent[ProfilerEvent["TemplateUpdateStart"] = 2] = "TemplateUpdateStart";
-  ProfilerEvent[ProfilerEvent["TemplateUpdateEnd"] = 3] = "TemplateUpdateEnd";
-  ProfilerEvent[ProfilerEvent["LifecycleHookStart"] = 4] = "LifecycleHookStart";
-  ProfilerEvent[ProfilerEvent["LifecycleHookEnd"] = 5] = "LifecycleHookEnd";
-  ProfilerEvent[ProfilerEvent["OutputStart"] = 6] = "OutputStart";
-  ProfilerEvent[ProfilerEvent["OutputEnd"] = 7] = "OutputEnd";
-  ProfilerEvent[ProfilerEvent["BootstrapApplicationStart"] = 8] = "BootstrapApplicationStart";
-  ProfilerEvent[ProfilerEvent["BootstrapApplicationEnd"] = 9] = "BootstrapApplicationEnd";
-  ProfilerEvent[ProfilerEvent["BootstrapComponentStart"] = 10] = "BootstrapComponentStart";
-  ProfilerEvent[ProfilerEvent["BootstrapComponentEnd"] = 11] = "BootstrapComponentEnd";
-  ProfilerEvent[ProfilerEvent["ChangeDetectionStart"] = 12] = "ChangeDetectionStart";
-  ProfilerEvent[ProfilerEvent["ChangeDetectionEnd"] = 13] = "ChangeDetectionEnd";
-  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncStart"] = 14] = "ChangeDetectionSyncStart";
-  ProfilerEvent[ProfilerEvent["ChangeDetectionSyncEnd"] = 15] = "ChangeDetectionSyncEnd";
-  ProfilerEvent[ProfilerEvent["AfterRenderHooksStart"] = 16] = "AfterRenderHooksStart";
-  ProfilerEvent[ProfilerEvent["AfterRenderHooksEnd"] = 17] = "AfterRenderHooksEnd";
-  ProfilerEvent[ProfilerEvent["ComponentStart"] = 18] = "ComponentStart";
-  ProfilerEvent[ProfilerEvent["ComponentEnd"] = 19] = "ComponentEnd";
-  ProfilerEvent[ProfilerEvent["DeferBlockStateStart"] = 20] = "DeferBlockStateStart";
-  ProfilerEvent[ProfilerEvent["DeferBlockStateEnd"] = 21] = "DeferBlockStateEnd";
-  ProfilerEvent[ProfilerEvent["DynamicComponentStart"] = 22] = "DynamicComponentStart";
-  ProfilerEvent[ProfilerEvent["DynamicComponentEnd"] = 23] = "DynamicComponentEnd";
-  ProfilerEvent[ProfilerEvent["HostBindingsUpdateStart"] = 24] = "HostBindingsUpdateStart";
-  ProfilerEvent[ProfilerEvent["HostBindingsUpdateEnd"] = 25] = "HostBindingsUpdateEnd";
-})(ProfilerEvent || (ProfilerEvent = {}));
-
 function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
   ngDevMode && assertFirstCreatePass(tView);
   const {
@@ -151,7 +156,7 @@ function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
     ngDoCheck
   } = directiveDef.type.prototype;
   if (ngOnChanges) {
-    const wrappedOnChanges = NgOnChangesFeatureImpl(directiveDef);
+    const wrappedOnChanges = getNgOnChangesFeatureImpl()(directiveDef);
     (tView.preOrderHooks ??= []).push(directiveIndex, wrappedOnChanges);
     (tView.preOrderCheckHooks ??= []).push(directiveIndex, wrappedOnChanges);
   }
@@ -9110,7 +9115,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.2+sha-9d1d1de'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.0.2+sha-f4f7f37'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12228,7 +12233,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.2+sha-9d1d1de';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.0.2+sha-f4f7f37';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
