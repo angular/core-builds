@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.4+sha-0b1cbbd
+ * @license Angular v22.0.4+sha-32c1f30
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -340,6 +340,7 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
     activeTmplAstNode = null;
     detectedInputReferences = [];
     isInsideObjectShorthandExpression = false;
+    isInsideAssignment = false;
     insideConditionalExpressionsWithReads = [];
     constructor(typeChecker, templateTypeChecker, componentClass, knownFields, fieldNamesToConsiderForReferenceLookup) {
         super();
@@ -371,16 +372,19 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
         }
     }
     visitPropertyRead(ast, context) {
-        this._inspectPropertyAccess(ast, false, context);
+        this._inspectPropertyAccess(ast, context);
         super.visitPropertyRead(ast, context);
     }
     visitSafePropertyRead(ast, context) {
-        this._inspectPropertyAccess(ast, false, context);
+        this._inspectPropertyAccess(ast, context);
         super.visitPropertyRead(ast, context);
     }
     visitBinary(ast, context) {
-        if (ast.operation === '=' && ast.left instanceof compiler.PropertyRead) {
-            this._inspectPropertyAccess(ast.left, true, [...context, ast, ast.left]);
+        if (ast.operation === '=') {
+            this.isInsideAssignment = true;
+            this.visit(ast.left, [...context, ast]);
+            this.isInsideAssignment = false;
+            this.visit(ast.right, [...context, ast]);
         }
         else {
             super.visitBinary(ast, context);
@@ -397,12 +401,12 @@ class TemplateExpressionReferenceVisitor extends compiler.RecursiveAstVisitor {
      * Inspects the property access and attempts to resolve whether they access
      * a known field. If so, the result is captured.
      */
-    _inspectPropertyAccess(ast, isAssignment, astPath) {
+    _inspectPropertyAccess(ast, astPath) {
         if (this.fieldNamesToConsiderForReferenceLookup !== null &&
             !this.fieldNamesToConsiderForReferenceLookup.has(ast.name)) {
             return;
         }
-        const isWrite = !!(isAssignment ||
+        const isWrite = !!(this.isInsideAssignment ||
             (this.activeTmplAstNode && isTwoWayBindingNode(this.activeTmplAstNode)));
         this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) ||
             this._checkAccessViaOwningComponentClassType(ast, isWrite, astPath);
