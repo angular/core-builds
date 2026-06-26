@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.2+sha-28a90e3
+ * @license Angular v22.1.0-next.2+sha-26b0c71
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-C3_ORvxG.cjs');
+var project_paths = require('./project_paths-LBcwW5BF.cjs');
 var compiler = require('@angular/compiler');
 var ts = require('typescript');
 var ng_component_template = require('./ng_component_template-DPAF1aEA.cjs');
