@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.3+sha-5ba6443
+ * @license Angular v22.0.3+sha-fd37f09
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,9 +10,9 @@ require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 require('node:path');
-var project_paths = require('./project_paths-C3_ORvxG.cjs');
+var project_paths = require('./project_paths-LBcwW5BF.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
-var apply_import_manager = require('./apply_import_manager-aRrR-E5x.cjs');
+var apply_import_manager = require('./apply_import_manager-BsCkDgPj.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');

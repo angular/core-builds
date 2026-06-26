@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.3+sha-5ba6443
+ * @license Angular v22.0.3+sha-fd37f09
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@
 
 var ts = require('typescript');
 var compilerCli = require('@angular/compiler-cli');
-var project_paths = require('./project_paths-C3_ORvxG.cjs');
+var project_paths = require('./project_paths-LBcwW5BF.cjs');
 
 /**
  * Applies import manager changes, and writes them as replacements the

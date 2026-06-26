@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.3+sha-5ba6443
+ * @license Angular v22.0.3+sha-fd37f09
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -445,6 +445,9 @@ async function runMigrationInDevkit(config) {
     for (const tsconfigPath of tsconfigPaths) {
         config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Analysis);
         const info = migration.createProgram(tsconfigPath, fs);
+        // Devkit tree updates need workspace-relative paths. Keep `sortedRootDirs`
+        // intact for logical file IDs, but make `rootRelativePath` resolve from `/`.
+        info.projectRoot = compilerCli.absoluteFrom(info.program.getCurrentDirectory());
         modifyProgramInfoToEnsureNonOverlappingFiles(tsconfigPath, info, compilationUnitAssignments);
         config.afterProgramCreation?.(info, fs, exports.MigrationStage.Analysis);
         config.beforeUnitAnalysis?.(tsconfigPath);
@@ -466,6 +469,9 @@ async function runMigrationInDevkit(config) {
         for (const tsconfigPath of tsconfigPaths) {
             config.beforeProgramCreation?.(tsconfigPath, exports.MigrationStage.Migrate);
             const info = migration.createProgram(tsconfigPath, fs);
+            // Devkit tree updates need workspace-relative paths. Keep `sortedRootDirs`
+            // intact for logical file IDs, but make `rootRelativePath` resolve from `/`.
+            info.projectRoot = compilerCli.absoluteFrom(info.program.getCurrentDirectory());
             modifyProgramInfoToEnsureNonOverlappingFiles(tsconfigPath, info, compilationUnitAssignments);
             config.afterProgramCreation?.(info, fs, exports.MigrationStage.Migrate);
             const result = await migration.migrate(globalMeta, info);
