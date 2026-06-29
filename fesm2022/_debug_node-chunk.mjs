@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-d109cc5
+ * @license Angular v22.1.0-next.3+sha-1659952
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9174,7 +9174,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.3+sha-d109cc5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.3+sha-1659952'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12294,7 +12294,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.3+sha-d109cc5';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.3+sha-1659952';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14929,6 +14929,7 @@ function enableLocateOrCreateElementContainerNodeImpl() {
 
 const RENDER = Symbol('RENDER');
 const ON_DESTROY = Symbol('ON_DESTROY');
+const CONTENT_ADAPTER = Symbol('CONTENT_ADAPTER');
 
 class ForeignViewRef extends ViewRef {
   get head() {
@@ -15002,20 +15003,7 @@ function ɵɵforeignComponent(index, foreignComponentIndex, props) {
     viewRef.onDestroy(dispose);
   }
 }
-function ɵɵforeignContent(index) {
-  const lView = getLView();
-  const adjustedIndex = index + HEADER_OFFSET;
-  const lContainer = lView[adjustedIndex];
-  ngDevMode && assertLContainer(lContainer);
-  lContainer[FLAGS] |= 4;
-  const tView = getTView();
-  const tNode = tView.data[adjustedIndex];
-  const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, null);
-  addLViewToLContainer(lContainer, embeddedLView, 0, false);
-  const embeddedTView = embeddedLView[TVIEW];
-  return collectNativeNodes(embeddedTView, embeddedLView, embeddedTView.firstChild, []);
-}
-function ɵɵforeignContentFn(index, foreignComponentConstIndex) {
+function ɵɵforeignContent(index, foreignComponentConstIndex) {
   const lView = getLView();
   const adjustedIndex = index + HEADER_OFFSET;
   const lContainer = lView[adjustedIndex];
@@ -15024,9 +15012,10 @@ function ɵɵforeignContentFn(index, foreignComponentConstIndex) {
   const tView = getTView();
   const tNode = tView.data[adjustedIndex];
   const foreignComponent = getConstant(tView.consts, foreignComponentConstIndex);
+  const adapter = foreignComponent[CONTENT_ADAPTER];
   const onDestroy = foreignComponent[ON_DESTROY];
-  return (...args) => {
-    const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, args);
+  const producer = () => {
+    const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, null);
     addLViewToLContainer(lContainer, embeddedLView, lContainer.length - CONTAINER_HEADER_OFFSET, false);
     onDestroy(() => {
       if (!isDestroyed(embeddedLView)) {
@@ -15037,6 +15026,35 @@ function ɵɵforeignContentFn(index, foreignComponentConstIndex) {
     });
     const embeddedTView = embeddedLView[TVIEW];
     return collectNativeNodes(embeddedTView, embeddedLView, embeddedTView.firstChild, []);
+  };
+  return adapter(producer);
+}
+function ɵɵforeignContentFn(index, foreignComponentConstIndex) {
+  const lView = getLView();
+  const adjustedIndex = index + HEADER_OFFSET;
+  const lContainer = lView[adjustedIndex];
+  ngDevMode && assertLContainer(lContainer);
+  lContainer[FLAGS] |= 4;
+  const tView = getTView();
+  const tNode = tView.data[adjustedIndex];
+  const foreignComponent = getConstant(tView.consts, foreignComponentConstIndex);
+  const adapter = foreignComponent[CONTENT_ADAPTER];
+  const onDestroy = foreignComponent[ON_DESTROY];
+  return (...args) => {
+    const producer = () => {
+      const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, args);
+      addLViewToLContainer(lContainer, embeddedLView, lContainer.length - CONTAINER_HEADER_OFFSET, false);
+      onDestroy(() => {
+        if (!isDestroyed(embeddedLView)) {
+          const embeddedLViewIndex = lContainer.indexOf(embeddedLView, CONTAINER_HEADER_OFFSET);
+          ngDevMode && assertNotSame(embeddedLViewIndex, -1, 'Embedded view not found in container');
+          removeLViewFromLContainer(lContainer, embeddedLViewIndex - CONTAINER_HEADER_OFFSET);
+        }
+      });
+      const embeddedTView = embeddedLView[TVIEW];
+      return collectNativeNodes(embeddedTView, embeddedLView, embeddedTView.firstChild, []);
+    };
+    return adapter(producer);
   };
 }
 

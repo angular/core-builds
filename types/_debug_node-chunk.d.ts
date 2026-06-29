@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-d109cc5
+ * @license Angular v22.1.0-next.3+sha-1659952
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1084,6 +1084,8 @@ declare const enum AttributeMarker {
 declare const RENDER: unique symbol;
 /** Symbol used to store and retrieve the disposal registration function for a foreign component. */
 declare const ON_DESTROY: unique symbol;
+/** Symbol used to store and retrieve the content adapter function for a foreign component. */
+declare const CONTENT_ADAPTER: unique symbol;
 /**
  * A function used to render a foreign component in an Angular template.
  *
@@ -1104,6 +1106,11 @@ type ForeignRenderFn<TProps> = (props: TProps) => [Node[], VoidFunction?];
  */
 type ForeignOnDestroyFn = (destroy: VoidFunction) => void;
 /**
+ * A function that adapts an Angular content producer callback into a compatible representation for
+ * the foreign component.
+ */
+type ForeignContentAdapterFn = (producer: () => Node[]) => any;
+/**
  * Represents a component from another framework that Angular can import and render.
  *
  * @template TProps The properties of the foreign component.
@@ -1111,6 +1118,7 @@ type ForeignOnDestroyFn = (destroy: VoidFunction) => void;
 interface ForeignComponent<TProps> {
     readonly [RENDER]: ForeignRenderFn<TProps>;
     readonly [ON_DESTROY]: ForeignOnDestroyFn;
+    readonly [CONTENT_ADAPTER]: ForeignContentAdapterFn;
 }
 
 /**

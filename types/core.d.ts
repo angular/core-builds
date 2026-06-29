@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-d109cc5
+ * @license Angular v22.1.0-next.3+sha-1659952
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5576,9 +5576,10 @@ declare function ɵɵforeignComponent(index: number, foreignComponentIndex: numb
  * and extract its root DOM nodes.
  *
  * @param index The index of the container in the data array.
+ * @param foreignComponentConstIndex The index of the matched foreign component in the constant pool.
  * @codeGenApi
  */
-declare function ɵɵforeignContent(index: number): any[];
+declare function ɵɵforeignContent(index: number, foreignComponentConstIndex: number): any;
 /**
  * Creation phase instruction to return a function for rendering foreign content dynamically
  * with arguments.
@@ -5587,7 +5588,7 @@ declare function ɵɵforeignContent(index: number): any[];
  * @param foreignComponentConstIndex The index of the matched foreign component in the constant pool.
  * @codeGenApi
  */
-declare function ɵɵforeignContentFn(index: number, foreignComponentConstIndex: number): (...args: any[]) => any[];
+declare function ɵɵforeignContentFn(index: number, foreignComponentConstIndex: number): (...args: any[]) => any;
 
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
