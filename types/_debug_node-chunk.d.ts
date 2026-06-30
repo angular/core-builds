@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-74803c7
+ * @license Angular v22.1.0-next.3+sha-a720094
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1086,16 +1086,25 @@ declare const RENDER: unique symbol;
 declare const ON_DESTROY: unique symbol;
 /** Symbol used to store and retrieve the content adapter function for a foreign component. */
 declare const CONTENT_ADAPTER: unique symbol;
+/** Symbol used to store and retrieve the context retrieval function for a foreign component. */
+declare const GET_CONTEXT: unique symbol;
 /**
  * A function used to render a foreign component in an Angular template.
  *
- * The function accepts the component's properties as its only argument. It should return an array
+ * The function accepts the component's properties and optional context. It should return an array
  * of nodes rendered and owned by the foreign component. It may also return a callback to perform
  * any necessary cleanup when the component is destroyed.
  *
  * @template TProps The properties of the foreign component.
+ * @template TContext The context passed to the foreign component.
  */
-type ForeignRenderFn<TProps> = (props: TProps) => [Node[], VoidFunction?];
+type ForeignRenderFn<TProps, TContext> = (props: TProps, context?: TContext) => [Node[], VoidFunction?];
+/**
+ * A function that captures the runtime context of a foreign component.
+ *
+ * @template TContext The captured context type.
+ */
+type ForeignGetContextFn<TContext> = () => TContext;
 /**
  * A function that allows a foreign component to register a destroy callback.
  *
@@ -1114,11 +1123,13 @@ type ForeignContentAdapterFn = (producer: () => Node[]) => any;
  * Represents a component from another framework that Angular can import and render.
  *
  * @template TProps The properties of the foreign component.
+ * @template TContext The context passed to the foreign component.
  */
-interface ForeignComponent<TProps> {
-    readonly [RENDER]: ForeignRenderFn<TProps>;
+interface ForeignComponent<TProps = {}, TContext = unknown> {
+    readonly [RENDER]: ForeignRenderFn<TProps, TContext>;
     readonly [ON_DESTROY]: ForeignOnDestroyFn;
     readonly [CONTENT_ADAPTER]: ForeignContentAdapterFn;
+    readonly [GET_CONTEXT]?: ForeignGetContextFn<TContext>;
 }
 
 /**
@@ -1316,7 +1327,7 @@ type TAttributes = (string | AttributeMarker | CssSelector)[];
  * - Translated messages (i18n).
  * - Foreign components.
  */
-type TConstants = (TAttributes | string | ForeignComponent<any>)[];
+type TConstants = (TAttributes | string | ForeignComponent<any, any>)[];
 /**
  * Factory function that returns an array of consts. Consts can be represented as a function in
  * case any additional statements are required to define consts in the list. An example is i18n

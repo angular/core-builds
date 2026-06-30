@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-74803c7
+ * @license Angular v22.1.0-next.3+sha-a720094
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9174,7 +9174,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.3+sha-74803c7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.3+sha-a720094'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12294,7 +12294,7 @@ let counter = 0;
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.3+sha-74803c7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.3+sha-a720094';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14930,6 +14930,9 @@ function enableLocateOrCreateElementContainerNodeImpl() {
 const RENDER = Symbol('RENDER');
 const ON_DESTROY = Symbol('ON_DESTROY');
 const CONTENT_ADAPTER = Symbol('CONTENT_ADAPTER');
+const GET_CONTEXT = Symbol('GET_CONTEXT');
+
+const FOREIGN_CONTEXT = new InjectionToken('FOREIGN_CONTEXT');
 
 class ForeignViewRef extends ViewRef {
   get head() {
@@ -14990,8 +14993,8 @@ function ɵɵforeignComponent(index, foreignComponentIndex, props) {
   lView[adjustedIndex] = lContainer;
   addToEndOfViewTree(lView, lContainer);
   const viewRef = createForeignView(lContainer, 0);
-  const injector = new NodeInjector(tNode, lView);
-  const [nodes, dispose] = runInInjectionContext(injector, () => foreignComponent[RENDER](props));
+  const context = getOrCreateInjectable(tNode, lView, FOREIGN_CONTEXT, 8);
+  const [nodes, dispose] = foreignComponent[RENDER](props, context ?? undefined);
   const tail = viewRef.tail;
   const parent = tail.parentNode;
   if (parent) {
@@ -15003,7 +15006,16 @@ function ɵɵforeignComponent(index, foreignComponentIndex, props) {
     viewRef.onDestroy(dispose);
   }
 }
-function ɵɵforeignContent(index, foreignComponentConstIndex) {
+class ForeignContextInjector {
+  context;
+  constructor(context) {
+    this.context = context;
+  }
+  get(token, notFoundValue) {
+    return token === FOREIGN_CONTEXT ? this.context : notFoundValue;
+  }
+}
+function resolveForeignContentContainer(index, foreignComponentConstIndex) {
   const lView = getLView();
   const adjustedIndex = index + HEADER_OFFSET;
   const lContainer = lView[adjustedIndex];
@@ -15012,10 +15024,19 @@ function ɵɵforeignContent(index, foreignComponentConstIndex) {
   const tView = getTView();
   const tNode = tView.data[adjustedIndex];
   const foreignComponent = getConstant(tView.consts, foreignComponentConstIndex);
+  ngDevMode && assertDefined(foreignComponent, 'Foreign component must be defined in constant pool.');
+  return [lView, lContainer, tNode, foreignComponent];
+}
+function ɵɵforeignContent(index, foreignComponentConstIndex) {
+  const [lView, lContainer, tNode, foreignComponent] = resolveForeignContentContainer(index, foreignComponentConstIndex);
   const adapter = foreignComponent[CONTENT_ADAPTER];
   const onDestroy = foreignComponent[ON_DESTROY];
+  const getContext = foreignComponent[GET_CONTEXT];
   const producer = () => {
-    const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, null);
+    const options = getContext ? {
+      embeddedViewInjector: new ForeignContextInjector(getContext())
+    } : undefined;
+    const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, null, options);
     addLViewToLContainer(lContainer, embeddedLView, lContainer.length - CONTAINER_HEADER_OFFSET, false);
     onDestroy(() => {
       if (!isDestroyed(embeddedLView)) {
@@ -15030,19 +15051,16 @@ function ɵɵforeignContent(index, foreignComponentConstIndex) {
   return adapter(producer);
 }
 function ɵɵforeignContentFn(index, foreignComponentConstIndex) {
-  const lView = getLView();
-  const adjustedIndex = index + HEADER_OFFSET;
-  const lContainer = lView[adjustedIndex];
-  ngDevMode && assertLContainer(lContainer);
-  lContainer[FLAGS] |= 4;
-  const tView = getTView();
-  const tNode = tView.data[adjustedIndex];
-  const foreignComponent = getConstant(tView.consts, foreignComponentConstIndex);
+  const [lView, lContainer, tNode, foreignComponent] = resolveForeignContentContainer(index, foreignComponentConstIndex);
   const adapter = foreignComponent[CONTENT_ADAPTER];
   const onDestroy = foreignComponent[ON_DESTROY];
+  const getContext = foreignComponent[GET_CONTEXT];
   return (...args) => {
     const producer = () => {
-      const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, args);
+      const options = getContext ? {
+        embeddedViewInjector: new ForeignContextInjector(getContext())
+      } : undefined;
+      const embeddedLView = createAndRenderEmbeddedLView(lView, tNode, args, options);
       addLViewToLContainer(lContainer, embeddedLView, lContainer.length - CONTAINER_HEADER_OFFSET, false);
       onDestroy(() => {
         if (!isDestroyed(embeddedLView)) {
