@@ -1,5 +1,5 @@
 /**
- * @license Angular v20.3.25+sha-26831d0
+ * @license Angular v20.3.25+sha-8eb7aea
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9351,9 +9351,6 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
     // projection.
     const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom;
     const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
-    if (rootElement.tagName.toLowerCase() === 'script') {
-        throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, ngDevMode && `"<script>" tag is not allowed as a component host element.`);
-    }
     applyRootElementTransform(rootElement);
     return rootElement;
 }
@@ -14793,6 +14790,11 @@ function createHostElement(componentDef, renderer) {
     const namespace = tagName === 'svg' ? SVG_NAMESPACE$1 : tagName === 'math' ? MATH_ML_NAMESPACE$1 : null;
     return createElementNode(renderer, tagName, namespace);
 }
+function assertNotScriptHostElement(tagName) {
+    if (tagName?.toLowerCase() === 'script') {
+        throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, ngDevMode && `"<script>" tag is not allowed as a component host element.`);
+    }
+}
 /**
  * Infers the tag name that should be used for a component based on its definition.
  * @param componentDef Definition for which to resolve the tag name.
@@ -14848,6 +14850,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const hostElement = rootSelectorOrNode
                 ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector)
                 : createHostElement(cmpDef, hostRenderer);
+            assertNotScriptHostElement(hostElement?.tagName);
             const hasInputBindings = componentBindings?.some(isInputBinding) ||
                 directives?.some((d) => typeof d !== 'function' && d.bindings.some(isInputBinding));
             const rootLView = createLView(null, rootTView, null, 512 /* LViewFlags.IsRoot */ | getInitialLViewFlagsFromDef(cmpDef), null, null, environment, hostRenderer, rootViewInjector, null, retrieveHydrationInfo(hostElement, rootViewInjector, true /* isRootView */));
@@ -14898,7 +14901,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.25+sha-26831d0']
+        ? ['ng-version', '20.3.25+sha-8eb7aea']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
