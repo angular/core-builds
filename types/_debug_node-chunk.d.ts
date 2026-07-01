@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.3+sha-a5f1b20
+ * @license Angular v22.1.0-next.3+sha-d7f7061
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -95,7 +95,7 @@ interface AnimationLViewData {
 /**
  * Function that returns the class or class list binded to the animate instruction
  */
-type AnimationClassBindingFn = () => string | string[];
+type AnimationClassBindingFn = () => string | string[] | undefined | null;
 
 /** Actions that are supported by the tracing framework. */
 declare enum TracingAction {
