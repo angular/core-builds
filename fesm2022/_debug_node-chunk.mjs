@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.17+sha-6bcce11
+ * @license Angular v21.2.17+sha-5a693ba
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5151,9 +5151,6 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
   const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
   const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom || encapsulation === ViewEncapsulation.ExperimentalIsolatedShadowDom;
   const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
-  if (rootElement.tagName.toLowerCase() === 'script') {
-    throw new RuntimeError(905, ngDevMode && `"<script>" tag is not allowed as a component host element.`);
-  }
   applyRootElementTransform(rootElement);
   return rootElement;
 }
@@ -8734,6 +8731,11 @@ function createHostElement(componentDef, renderer) {
   const namespace = tagName === 'svg' ? SVG_NAMESPACE$1 : tagName === 'math' ? MATH_ML_NAMESPACE$1 : null;
   return createElementNode(renderer, tagName, namespace);
 }
+function assertNotScriptHostElement(tagName) {
+  if (tagName?.toLowerCase() === 'script') {
+    throw new RuntimeError(905, ngDevMode && `"<script>" tag is not allowed as a component host element.`);
+  }
+}
 function inferTagNameFromDefinition(componentDef) {
   return (componentDef.selectors[0][0] || 'div').toLowerCase();
 }
@@ -8786,6 +8788,7 @@ class ComponentFactory extends ComponentFactory$1 {
     const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives);
     const hostRenderer = environment.rendererFactory.createRenderer(null, cmpDef);
     const hostElement = rootSelectorOrNode ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector) : createHostElement(cmpDef, hostRenderer);
+    assertNotScriptHostElement(hostElement?.tagName);
     const hasInputBindings = componentBindings?.some(isInputBinding) || directives?.some(d => typeof d !== 'function' && d.bindings.some(isInputBinding));
     const rootLView = createLView(null, rootTView, null, 512 | getInitialLViewFlagsFromDef(cmpDef), null, null, environment, hostRenderer, rootViewInjector, null, retrieveHydrationInfo(hostElement, rootViewInjector, true));
     rootLView[HEADER_OFFSET] = hostElement;
@@ -8818,7 +8821,7 @@ class ComponentFactory extends ComponentFactory$1 {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.17+sha-6bcce11'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '21.2.17+sha-5a693ba'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
