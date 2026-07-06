@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.4+sha-b126dc9
+ * @license Angular v22.1.0-next.4+sha-731d665
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -848,6 +848,17 @@ declare global {
     }
 }
 /**
+ * Returns the deep link ID assigned to a component or directive instance by the
+ * profiler. This ID is used to construct `angular-devtools://` deep-link URLs in
+ * Chrome Performance traces, which allow navigating from a trace entry directly
+ * to the corresponding component in the Angular DevTools extension.
+ *
+ * The ID is `undefined` until `getDeepLinkProperties` is called for the instance
+ * (which happens when profiling is active and the DevTools extension is connected).
+ * Use `assignComponentInstanceDeepLinkId` to force-assign an ID if needed.
+ */
+declare function getComponentInstanceDeepLinkId(instance: {}): number | undefined;
+/**
  * Start listening to the Angular's internal performance-related events and route those to the Chrome DevTools performance panel.
  * This enables Angular-specific data visualization when recording a performance profile directly in the Chrome DevTools.
  *
@@ -860,5 +871,5 @@ declare global {
  */
 declare function enableProfiling(): () => void;
 
-export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, isEnvironmentProviders, isSignal, isWritableSignal, signal, ɵunwrapWritableSignal };
+export { DestroyRef, InjectionToken, Injector, InternalInjectFlags, JSACTION_EVENT_CONTRACT, Type, enableProfiling, getComponentInstanceDeepLinkId, isEnvironmentProviders, isSignal, isWritableSignal, signal, ɵunwrapWritableSignal };
 export type { AbstractType, ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, CreateSignalOptions, DestroyableInjector, EnvironmentProviders, EventCallback, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, InjectOptions, InternalEnvironmentProviders, ModuleWithProviders, OutputRef, OutputRefSubscription, ProcessProvidersFunction, Provider, ProviderToken, Signal, StaticClassProvider, StaticClassSansProvider, StaticProvider, TypeProvider, ValueEqualityFn, ValueProvider, ValueSansProvider, Writable, WritableSignal };
