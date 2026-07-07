@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.0.5+sha-e839891
+ * @license Angular v22.0.5+sha-ab721b4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -31,20 +31,25 @@ class ModelOutputMigration extends project_paths.TsurgeFunnelMigration {
                 continue;
             }
             const importManager = new migrations.ImportManager();
+            const migratedModelReferences = new Set();
             const visit = (node) => {
                 if (ts.isClassDeclaration(node)) {
-                    this.analyzeClass(node, info.program.getTypeChecker(), importManager, replacements, sourceFile, info);
+                    this.analyzeClass(node, info.program.getTypeChecker(), importManager, replacements, sourceFile, info, migratedModelReferences);
                 }
                 ts.forEachChild(node, visit);
             };
             visit(sourceFile);
+            if (migratedModelReferences.size > 0 &&
+                this.canRemoveModelImport(sourceFile, info.program.getTypeChecker(), migratedModelReferences)) {
+                importManager.removeImport(sourceFile, 'model', '@angular/core');
+            }
             apply_import_manager.applyImportManagerChanges(importManager, replacements, [sourceFile], info);
         }
         return project_paths.confirmAsSerializable({
             replacements,
         });
     }
-    analyzeClass(classNode, typeChecker, importManager, replacements, sourceFile, info) {
+    analyzeClass(classNode, typeChecker, importManager, replacements, sourceFile, info, migratedModelReferences) {
         const modelProperties = [];
         const outputProperties = new Map();
         for (const member of classNode.members) {
@@ -67,23 +72,7 @@ class ModelOutputMigration extends project_paths.TsurgeFunnelMigration {
                 continue;
             }
             const call = member.initializer;
-            let identifier = null;
-            if (ts.isIdentifier(call.expression)) {
-                identifier = call.expression;
-            }
-            else if (ts.isPropertyAccessExpression(call.expression)) {
-                let current = call.expression;
-                while (ts.isPropertyAccessExpression(current)) {
-                    if (ts.isIdentifier(current.name) && current.name.text === 'model') {
-                        identifier = current.name;
-                        break;
-                    }
-                    current = current.expression;
-                }
-                if (!identifier && ts.isIdentifier(current) && current.text === 'model') {
-                    identifier = current;
-                }
-            }
+            const identifier = this.getModelIdentifier(call);
             if (!identifier)
                 continue;
             const imp = imports.getImportOfIdentifier(typeChecker, identifier);
@@ -103,8 +92,51 @@ class ModelOutputMigration extends project_paths.TsurgeFunnelMigration {
             if (outputProperties.has(expectedOutputName)) {
                 const update = this.migrateModelProperty(modelProp, importManager, sourceFile);
                 replacements.push(new project_paths.Replacement(project_paths.projectFile(sourceFile, info), update));
+                const modelIdentifier = this.getModelIdentifier(modelProp.initializer);
+                if (modelIdentifier !== null) {
+                    migratedModelReferences.add(modelIdentifier);
+                }
             }
         }
+    }
+    canRemoveModelImport(sourceFile, typeChecker, migratedModelReferences) {
+        let canRemove = true;
+        const visit = (node) => {
+            if (!canRemove) {
+                return;
+            }
+            if (ts.isImportDeclaration(node)) {
+                return;
+            }
+            if (ts.isIdentifier(node)) {
+                const imp = imports.getImportOfIdentifier(typeChecker, node);
+                if (imp?.importModule === '@angular/core' && imp.name === 'model') {
+                    canRemove = migratedModelReferences.has(node);
+                    return;
+                }
+            }
+            ts.forEachChild(node, visit);
+        };
+        visit(sourceFile);
+        return canRemove;
+    }
+    getModelIdentifier(call) {
+        if (ts.isIdentifier(call.expression)) {
+            return call.expression;
+        }
+        else if (ts.isPropertyAccessExpression(call.expression)) {
+            let current = call.expression;
+            while (ts.isPropertyAccessExpression(current)) {
+                if (ts.isIdentifier(current.name) && current.name.text === 'model') {
+                    return current.name;
+                }
+                current = current.expression;
+            }
+            if (ts.isIdentifier(current) && current.text === 'model') {
+                return current;
+            }
+        }
+        return null;
     }
     migrateModelProperty(modelProp, importManager, sourceFile) {
         const modelName = modelProp.name.text;
