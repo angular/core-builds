@@ -203,7 +203,7 @@ export interface CallToolResult {
     /**
      * Optional machine-readable payload.
      */
-    structuredContent?: JsonObject;
+    structuredContent?: JsonValue;
     /**
      * Marks the result as an error response.
      */

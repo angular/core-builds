@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "22.1.0-next.4+sha-e91046f",
+  "version": "22.1.0-next.4+sha-5ec0b16",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -47,10 +47,10 @@
   },
   "devDependencies": {
     "@mcp-b/webmcp-polyfill": "^4.0.0",
-    "@mcp-b/webmcp-types": "^3.0.0"
+    "@mcp-b/webmcp-types": "^4.0.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "22.1.0-next.4+sha-e91046f",
+    "@angular/compiler": "22.1.0-next.4+sha-5ec0b16",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0 || ~0.16.0"
   },
