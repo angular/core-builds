@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.5+sha-bec1413
+ * @license Angular v22.0.5+sha-748faa4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3299,7 +3299,7 @@ interface CreateEffectOptions {
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
  *
- * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
+ * @see [Effect cleanup functions](guide/signals/effect#effect-cleanup-functions)
  *
  * @publicApi 20.0
  */
@@ -3307,7 +3307,7 @@ type EffectCleanupFn = () => void;
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
  *
- * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
+ * @see [Effect cleanup functions](guide/signals/effect#effect-cleanup-functions)
  *
  * @publicApi 20.0
  */
@@ -3328,7 +3328,7 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
  *
- * @see [Effects](guide/signals#effects)
+ * @see [Effects](guide/signals/effect#effects)
  *
  * @publicApi 20.0
  */
@@ -4940,8 +4940,7 @@ declare abstract class NgModuleFactory<T> {
  * Use the methods to add and remove views from the tree, initiate change-detection,
  * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
  *
- * @see [Using change detection hooks](guide/components/lifecycle#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection)
+ * @see [Using change detection hooks](guide/components/lifecycle)
  *
  * @usageNotes
  *
@@ -7130,8 +7129,8 @@ interface NgModule {
      * The set of injectable objects that are available in the injector
      * of this module.
      *
-     * @see [Dependency Injection guide](guide/di/dependency-injection)
-     * @see [NgModule guide](guide/ngmodules/providers)
+     * @see [Dependency Injection guide](guide/di)
+     * @see [NgModule guide](guide/ngmodules/overview)
      *
      * @usageNotes
      *
@@ -7442,7 +7441,7 @@ declare class DebugElement extends DebugNode {
      * @param eventName The name of the event to trigger
      * @param eventObj The _event object_ expected by the handler
      *
-     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
+     * @see [Testing components scenarios](guide/testing/components-scenarios#triggereventhandler)
      */
     triggerEventHandler(eventName: string, eventObj?: any): void;
 }

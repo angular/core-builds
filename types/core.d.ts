@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.5+sha-bec1413
+ * @license Angular v22.0.5+sha-748faa4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1075,7 +1075,7 @@ interface InjectDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      *
-     * @see [Dependency Injection Guide](guide/di/dependency-injection)
+     * @see [Dependency Injection Guide](guide/di)
      *
      */
     (token: any): any;
@@ -1119,7 +1119,7 @@ interface OptionalDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='Optional'}
      *
-     * @see [Dependency Injection Guide](guide/di/dependency-injection)
+     * @see [Dependency Injection Guide](guide/di)
      */
     (): any;
     new (): Optional;
@@ -1199,7 +1199,7 @@ interface SkipSelfDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
      *
-     * @see [Dependency Injection guide](guide/di/di-in-action#skip).
+     * @see [Dependency Injection guide](guide/di/hierarchical-dependency-injection#skipself).
      * @see {@link Self}
      * @see {@link Optional}
      *
@@ -1239,7 +1239,7 @@ interface HostDecorator {
      * {@example core/di/ts/metadata_spec.ts region='Host'}
      *
      * For an extended example, see ["Dependency Injection
-     * Guide"](guide/di/di-in-action#optional).
+     * Guide"](guide/di/hierarchical-dependency-injection#optional).
      */
     (): any;
     new (): Host;
@@ -3208,9 +3208,6 @@ interface OnInit {
  * to invoke it own change-detection cycle.
  *
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
- *
- * For a more complete example and discussion, see
- * [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection).
  *
  * @publicApi
  */
