@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.5+sha-1fb4678
+ * @license Angular v22.1.0-next.5+sha-e6378eb
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9636,7 +9636,7 @@ interface ToolDescriptor<InputSchema extends JsonSchemaForInference> {
  *     `injector` argument provided.
  * @experimental
  */
-declare function declareExperimentalWebMcpTool<const InputSchema extends JsonSchemaForInference>(tool: ToolDescriptor<InputSchema>, injector?: Injector): void;
+declare function declareExperimentalWebMcpTool<const InputSchema extends JsonSchemaForInference>(tool: ToolDescriptor<InputSchema>, injector?: Injector): Promise<void>;
 
 /**
  * Provides a list of WebMCP tools tied to the lifecycle of the associated `Injector`.
