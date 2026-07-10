@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.5+sha-b178e83
+ * @license Angular v22.1.0-next.5+sha-1fb4678
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -145,14 +145,14 @@ interface InputFunction {
      */ <T, TransformT>(initialValue: undefined, opts: InputOptionsWithTransform<T | undefined, TransformT>): InputSignalWithTransform<T | undefined, TransformT>;
     /**
      * Declares an input of type `T` with an initial value and a transform function
-     * that accepts values of the same type, or string values from static attributes.
+     * that accepts values of the same type.
      */
-    <T>(initialValue: T, opts: InputOptionsWithTransform<T, unknown>): InputSignalWithTransform<T, T | string>;
+    <T>(initialValue: T, opts: InputOptionsWithTransform<T, unknown>): InputSignalWithTransform<T, T>;
     /**
      * Declares an input of type `T|undefined` without an initial value and with a transform
-     * function that accepts values of the same type, or string values from static attributes.
+     * function that accepts values of the same type.
      */
-    <T>(initialValue: undefined, opts: InputOptionsWithTransform<T | undefined, unknown>): InputSignalWithTransform<T | undefined, T | undefined | string>;
+    <T>(initialValue: undefined, opts: InputOptionsWithTransform<T | undefined, unknown>): InputSignalWithTransform<T | undefined, T | undefined>;
     /**
      * Initializes a required input.
      *
