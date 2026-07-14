@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.1.0-next.5+sha-fb6b354
+ * @license Angular v22.1.0-next.5+sha-d997a96
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { SIGNAL, ReactiveNodeKind } from './_formatter-chunk.js';
+import { SIGNAL } from './_formatter-chunk.js';
 import { Signal, WritableSignal, OutputRef, Type as Type$1, ModuleWithProviders, EnvironmentProviders, Provider, TypeProvider, ValueProvider, ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, ProviderToken, Injector, InjectionToken, ValueSansProvider, ExistingSansProvider, StaticClassSansProvider, ConstructorSansProvider, FactorySansProvider, ClassSansProvider, InjectOptions, InternalInjectFlags, AbstractType, StaticProvider, ValueEqualityFn, EventCallback } from './_chrome_dev_tools_performance-chunk.js';
 export { CreateSignalOptions, DestroyRef, DestroyableInjector, OutputRefSubscription, enableProfiling, isSignal, isWritableSignal, signal, InternalEnvironmentProviders as ɵInternalEnvironmentProviders, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, Writable as ɵWritable, getComponentInstanceDeepLinkId as ɵgetComponentInstanceDeepLinkId, isEnvironmentProviders as ɵisEnvironmentProviders, ɵunwrapWritableSignal } from './_chrome_dev_tools_performance-chunk.js';
 import { InputSignalNode, TypeDecorator, ɵɵInjectableDeclaration as __InjectableDeclaration, SchemaMetadata, InputTransformFunction, DirectiveDefFeature, HostBindingsFunction, TAttributes, ContentQueriesFunction, ViewQueriesFunction, ComponentTemplate, ComponentDefFeature, ViewEncapsulation as ViewEncapsulation$1, ChangeDetectionStrategy as ChangeDetectionStrategy$1, TypeOrFactory, DependencyTypeList, ComponentDef, DirectiveDef, PipeDef, EnvironmentInjector, NgModuleRef as NgModuleRef$1, NgModuleFactory as NgModuleFactory$1, InternalNgModuleRef, ɵɵFactoryDeclaration as __FactoryDeclaration, AfterRenderRef, EffectCleanupRegisterFn, ApplicationRef, ɵɵNgModuleDeclaration as __NgModuleDeclaration, ɵɵInjectorDeclaration as __InjectorDeclaration, NgZone, ElementRef, EmbeddedViewRef, ViewRef as ViewRef$1, DirectiveWithBindings, Binding, ComponentRef as ComponentRef$1, PlatformRef, DehydratedDeferBlock, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockState, TNode, LContainer, TView, TDeferBlockDetails, LView, RNode, HostDirectiveConfig, ComponentType, NgModuleScopeInfoFromDecorator, ChangeDetectorRef, DependencyResolverFn, TDeferDetailsFlags, SanitizerFn, AnimationClassBindingFn, AnimationFunction, LocalRefExtractor, OpaqueViewState, GlobalTargetResolver, QueryList, RElement, RawScopeInfoFromDecorator, ClassDebugInfo, Component, TrustedHTML, CompilerOptions, PipeType, DirectiveType, Directive, NgModule, Pipe, TrustedScriptURL, TrustedScript } from './_debug_node-chunk.js';
@@ -15,6 +15,7 @@ import './_event_dispatcher-chunk.js';
 import { Observable, Subscribable } from 'rxjs';
 import * as _angular_core from '@angular/core';
 export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './_weak_ref-chunk.js';
+import { ReactiveNodeKind } from '@angular/core/primitives/signals';
 import { JsonSchemaForInference, InferArgsFromInputSchema } from '../third_party/@mcp-b/webmcp-types/index.js';
 export { setCurrentInjector as ɵsetCurrentInjector } from './primitives-di.js';
 import './_effect-chunk.js';
@@ -4599,6 +4600,32 @@ declare enum Framework {
     Wiz = "wiz"
 }
 
+interface DebugSignalGraphNode {
+    kind: ReactiveNodeKind;
+    id: string;
+    epoch: number;
+    label?: string;
+    value?: unknown;
+    debuggableFn?: () => unknown;
+}
+interface DebugSignalGraphEdge {
+    /**
+     * Index of a signal node in the `nodes` array that is a consumer of the signal produced by the producer node.
+     */
+    consumer: number;
+    /**
+     * Index of a signal node in the `nodes` array that is a producer of the signal consumed by the consumer node.
+     */
+    producer: number;
+}
+/**
+ * A debug representation of the signal graph.
+ */
+interface DebugSignalGraph {
+    nodes: DebugSignalGraphNode[];
+    edges: DebugSignalGraphEdge[];
+}
+
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
  * component instances.
@@ -8687,32 +8714,6 @@ interface ForLoopBlockData extends ControlFlowBlockDataBase {
  * A control flow block information object.
  */
 type ControlFlowBlock = DeferBlockData | ForLoopBlockData;
-
-interface DebugSignalGraphNode {
-    kind: ReactiveNodeKind;
-    id: string;
-    epoch: number;
-    label?: string;
-    value?: unknown;
-    debuggableFn?: () => unknown;
-}
-interface DebugSignalGraphEdge {
-    /**
-     * Index of a signal node in the `nodes` array that is a consumer of the signal produced by the producer node.
-     */
-    consumer: number;
-    /**
-     * Index of a signal node in the `nodes` array that is a producer of the signal consumed by the consumer node.
-     */
-    producer: number;
-}
-/**
- * A debug representation of the signal graph.
- */
-interface DebugSignalGraph {
-    nodes: DebugSignalGraphNode[];
-    edges: DebugSignalGraphEdge[];
-}
 
 interface NonCoreGlobalUtils {
     ɵgetLoadedRoutes(route: any): any;
