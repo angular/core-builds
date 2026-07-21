@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.0-next.6+sha-9bf8b8c
+ * @license Angular v22.1.0-next.6+sha-49672c4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -204,11 +204,12 @@ class NgClassCollector extends compiler.RecursiveVisitor {
         for (const attr of element.attrs) {
             if (attr.name === '[ngClass]' && attr.valueSpan) {
                 const expr = this.originalTemplate.slice(attr.valueSpan.start.offset, attr.valueSpan.end.offset);
-                const staticMatch = tryParseStaticObjectLiteral(expr);
-                if (staticMatch === null) {
+                const parseResult = tryParseStaticObjectLiteral(expr);
+                if (parseResult === null) {
                     this.skippedNgClassCount++;
                     continue;
                 }
+                const { bindings: staticMatch, hasSpaceSeparatedKeys } = parseResult;
                 let replacement;
                 if (staticMatch.length === 0) {
                     replacement = '[class]=""';
@@ -225,26 +226,32 @@ class NgClassCollector extends compiler.RecursiveVisitor {
                     }
                 }
                 else {
-                    // Check if all entries have the same value (condition)
-                    const allSameValue = staticMatch.every((entry) => entry.value === staticMatch[0].value);
-                    if (allSameValue &&
-                        staticMatch.length > 1 &&
-                        // Check if this was originally a single key with multiple classes
-                        expr.includes('{') &&
-                        expr.includes('}') &&
-                        expr.split(':').length === 2) {
-                        // Multiple classes with the same condition: use [class.class1]="condition" [class.class2]="condition"
-                        if (config.migrateSpaceSeparatedKey) {
+                    // Multiple bindings. If any original key contained spaces, [class]="{...}" object
+                    // syntax cannot be used because [class] does not support space-separated key names
+                    // (only [ngClass] does). Either expand every binding individually, or skip.
+                    if (hasSpaceSeparatedKeys) {
+                        // Expanding is only safe if every binding maps to a distinct, non-empty class
+                        // name that doesn't contain a dot: an empty key would produce the invalid
+                        // `[class.]` binding, duplicate keys would produce multiple conflicting
+                        // `[class.foo]` bindings on one element, and a dot in the class name (e.g.
+                        // 'a.b') would silently bind to the wrong property since `[class.a.b]` is
+                        // parsed as `[class.a]` — everything after the first dot is discarded.
+                        const expandedKeys = staticMatch.map(({ key }) => key);
+                        const canExpand = expandedKeys.every((key) => key !== '' && !key.includes('.')) &&
+                            new Set(expandedKeys).size === expandedKeys.length;
+                        if (config.migrateSpaceSeparatedKey && canExpand) {
                             replacement = staticMatch
                                 .map(({ key, value }) => `[class.${key}]="${value}"`)
                                 .join(' ');
                         }
                         else {
+                            // Cannot produce valid [class]="..." output — leave binding as-is.
+                            this.skippedNgClassCount++;
                             continue;
                         }
                     }
                     else {
-                        // Multiple conditions with different values: use [class]="{'class1': condition1, 'class2': condition2}"
+                        // All keys are single class names: [class]="{'cls1': cond1, 'cls2': cond2}" is valid.
                         replacement = `[class]="${expr}"`;
                     }
                 }
@@ -269,7 +276,7 @@ class NgClassCollector extends compiler.RecursiveVisitor {
 function tryParseStaticObjectLiteral(expr) {
     const trimmedExpr = expr.trim();
     if (trimmedExpr === '{}' || trimmedExpr === '[]') {
-        return [];
+        return { bindings: [], hasSpaceSeparatedKeys: false };
     }
     if (!isObjectLiteralSyntax(trimmedExpr)) {
         return null;
@@ -317,23 +324,26 @@ function parseAsObjectLiteral(expr) {
     }
 }
 /**
- * Extracts class bindings from object literal properties
+ * Extracts class bindings from object literal properties.
+ * Returns the list of individual `{key, value}` bindings (space-separated keys are expanded)
+ * along with a flag indicating whether any original key contained spaces.
  */
 function extractClassBindings(objectLiteral) {
-    const result = [];
+    const bindings = [];
+    let hasSpaceSeparatedKeys = false;
     for (const property of objectLiteral.properties) {
         if (ts.isShorthandPropertyAssignment(property)) {
             const key = property.name.getText();
             if (key.includes(' ')) {
                 return null;
             }
-            result.push({ key, value: key });
+            bindings.push({ key, value: key });
         }
         else if (ts.isPropertyAssignment(property)) {
             const keyText = extractPropertyKey(property.name);
             const valueText = extractPropertyValue(property.initializer);
             if (keyText === '' && valueText) {
-                result.push({ key: '', value: valueText });
+                bindings.push({ key: '', value: valueText });
             }
             else {
                 if (!keyText || !valueText) {
@@ -341,8 +351,11 @@ function extractClassBindings(objectLiteral) {
                 }
                 // Handle multiple CSS classes in single key (e.g., 'class1 class2': condition)
                 const classNames = keyText.split(/\s+/).filter(Boolean);
+                if (classNames.length > 1) {
+                    hasSpaceSeparatedKeys = true;
+                }
                 for (const className of classNames) {
-                    result.push({ key: className, value: valueText });
+                    bindings.push({ key: className, value: valueText });
                 }
             }
         }
@@ -350,7 +363,7 @@ function extractClassBindings(objectLiteral) {
             return null;
         }
     }
-    return result;
+    return { bindings, hasSpaceSeparatedKeys };
 }
 /**
  * Extracts text from property key (name)
