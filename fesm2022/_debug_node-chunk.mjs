@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-next.6+sha-223e402
+ * @license Angular v22.1.0-next.6+sha-eb3e480
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3511,7 +3511,6 @@ function getSanitizer() {
   return lView && lView[ENVIRONMENT].sanitizer;
 }
 const SECURITY_SENSITIVE_ATTRIBUTE_NAMES = new Set(['href', 'xlink:href']);
-const SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES = ['attributeName', 'attributename'];
 const SECURITY_SENSITIVE_ELEMENTS = {
   'iframe': {
     'sandbox': true,
@@ -3575,7 +3574,10 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
   throw new RuntimeError(-910, errorMessage);
 }
 function getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig) {
-  for (const attributeName of SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES) {
+  for (const attributeName of element.getAttributeNames()) {
+    if (attributeName.toLowerCase() !== 'attributename') {
+      continue;
+    }
     const attributeNameValue = element.getAttribute(attributeName);
     if (attributeNameValue !== null && validationConfig.has(attributeNameValue.toLowerCase())) {
       return attributeNameValue;
@@ -9177,7 +9179,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.6+sha-223e402'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0-next.6+sha-eb3e480'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12316,7 +12318,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.6+sha-223e402';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0-next.6+sha-eb3e480';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
