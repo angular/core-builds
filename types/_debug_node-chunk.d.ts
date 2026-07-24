@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-rc.0+sha-1b85b3c
+ * @license Angular v22.1.0-rc.0+sha-125a794
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5975,7 +5975,7 @@ declare class Navigation extends EventTarget {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 declare class NavigationTransition {
-    readonly navigationType: NavigationTypeString;
+    readonly navigationType: NavigationType;
     readonly from: NavigationHistoryEntry;
     readonly to: NavigationDestination;
     readonly finished: Promise<void>;
@@ -5997,7 +5997,7 @@ declare class NavigationHistoryEntry extends EventTarget {
     removeEventListener<K extends keyof NavigationHistoryEntryEventMap>(type: K, listener: (this: NavigationHistoryEntry, ev: NavigationHistoryEntryEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
-type NavigationTypeString = 'reload' | 'push' | 'replace' | 'traverse';
+type NavigationType = 'push' | 'reload' | 'replace' | 'traverse';
 interface NavigationUpdateCurrentEntryOptions {
     state: unknown;
 }
@@ -6013,16 +6013,16 @@ interface NavigationReloadOptions extends NavigationOptions {
 }
 declare class NavigationCurrentEntryChangeEvent extends Event {
     constructor(type: string, eventInit?: NavigationCurrentEntryChangeEventInit);
-    readonly navigationType: NavigationTypeString | null;
+    readonly navigationType: NavigationType | null;
     readonly from: NavigationHistoryEntry;
 }
 interface NavigationCurrentEntryChangeEventInit extends EventInit {
-    navigationType?: NavigationTypeString | null;
+    navigationType?: NavigationType | null;
     from: NavigationHistoryEntry;
 }
 declare class NavigateEvent extends Event {
     constructor(type: string, eventInit?: NavigateEventInit);
-    readonly navigationType: NavigationTypeString;
+    readonly navigationType: NavigationType;
     readonly canIntercept: boolean;
     readonly userInitiated: boolean;
     readonly hashChange: boolean;
@@ -6035,7 +6035,7 @@ declare class NavigateEvent extends Event {
     scroll(): void;
 }
 interface NavigateEventInit extends EventInit {
-    navigationType?: NavigationTypeString;
+    navigationType?: NavigationType;
     canIntercept?: boolean;
     userInitiated?: boolean;
     hashChange?: boolean;
@@ -6052,8 +6052,8 @@ interface NavigationInterceptOptions {
 }
 declare class NavigationDestination {
     readonly url: string;
-    readonly key: string | null;
-    readonly id: string | null;
+    readonly key: string;
+    readonly id: string;
     readonly index: number;
     readonly sameDocument: boolean;
     getState(): unknown;
@@ -7520,4 +7520,4 @@ declare function getDebugNode(nativeNode: any): DebugNode | null;
 type Predicate<T> = (value: T) => boolean;
 
 export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
-export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationTypeString, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
+export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationType, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };

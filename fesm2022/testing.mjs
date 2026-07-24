@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0-rc.0+sha-1b85b3c
+ * @license Angular v22.1.0-rc.0+sha-125a794
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1670,6 +1670,7 @@ class FakeNavigation {
   synchronousTraversals = false;
   canSetInitialEntry = true;
   eventTarget;
+  activation = null;
   nextId = 0;
   nextKey = 0;
   disposed = false;
@@ -2249,7 +2250,13 @@ function dispatchNavigateEvent({
       }
     }
     navigation.transition?.committedResolve();
-    const promisesList = handlers.map(handler => handler());
+    const promisesList = [];
+    for (const handler of handlers) {
+      const handlerResult = handler();
+      if (handlerResult) {
+        promisesList.push(handlerResult);
+      }
+    }
     promisesList.push(result.committed);
     Promise.all(promisesList).then(() => {
       if (result.signal.aborted) {
@@ -2424,8 +2431,8 @@ class FakeNavigationDestination {
     this.sameDocument = sameDocument;
     this.state = state;
     this.historyState = historyState;
-    this.key = key;
-    this.id = id;
+    this.key = key ?? '';
+    this.id = id ?? '';
     this.index = index;
   }
   getState() {
