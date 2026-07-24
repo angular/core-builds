@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.0+sha-e779309
+ * @license Angular v22.2.0-next.0+sha-28d59e8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -606,6 +606,7 @@ declare class FakeNavigation implements Navigation {
     private synchronousTraversals;
     /** Whether to allow a call to setInitialEntryForTesting. */
     private canSetInitialEntry;
+    readonly activation: NavigationActivation | null;
     /** The next unique id for created entries. Replace recreates this id. */
     private nextId;
     /** The next unique key for created entries. Replace inherits this id. */
@@ -679,10 +680,8 @@ declare class FakeNavigation implements Navigation {
     private findEntry;
     set onnavigate(_handler: ((this: Navigation, ev: NavigateEvent) => any) | null);
     get onnavigate(): ((this: Navigation, ev: NavigateEvent) => any) | null;
-    set oncurrententrychange(_handler: // tslint:disable-next-line:no-any
-    ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null);
-    get oncurrententrychange(): // tslint:disable-next-line:no-any
-    ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
+    set oncurrententrychange(_handler: ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null);
+    get oncurrententrychange(): ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
     set onnavigatesuccess(_handler: ((this: Navigation, ev: Event) => any) | null);
     get onnavigatesuccess(): ((this: Navigation, ev: Event) => any) | null;
     set onnavigateerror(_handler: ((this: Navigation, ev: ErrorEvent) => any) | null);
@@ -761,8 +760,8 @@ interface InternalFakeNavigateEvent extends FakeNavigateEvent {
 declare class FakeNavigationDestination implements NavigationDestination {
     url: string;
     readonly sameDocument: boolean;
-    readonly key: string | null;
-    readonly id: string | null;
+    readonly key: string;
+    readonly id: string;
     readonly index: number;
     state?: unknown;
     private readonly historyState;
