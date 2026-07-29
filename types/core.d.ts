@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.0.8+sha-d346905
+ * @license Angular v22.0.8+sha-45d7de4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8788,7 +8788,7 @@ declare function getTransferState(injector: Injector): Record<string, unknown>;
  *
  * @codeGenApi
  */
-declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
+declare function ɵɵsanitizeHtml(unsafeHtml: any, tagName?: string, propName?: string): TrustedHTML | string;
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
