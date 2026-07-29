@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.26+sha-4d62760
+ * @license Angular v20.3.26+sha-db0d4a1
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21642,7 +21642,7 @@ class I18nMetaVisitor {
                     else {
                         isTrustedType = isTrustedTypesSink(node.name, name);
                     }
-                    if (isTrustedType) {
+                    if (isTrustedType || isPossibleEventHandler(name)) {
                         this._reportError(attr, `Translating attribute '${name}' is disallowed for security reasons.`);
                     }
                     else {
@@ -21772,6 +21772,16 @@ function i18nMetaToJSDoc(meta) {
         tags.push({ tagName: "meaning" /* o.JSDocTagName.Meaning */, text: meta.meaning });
     }
     return jsDocComment(tags);
+}
+/**
+ * Check if the propertyName is a potential event handler.
+ * We consider a property to be a potential event handler if its name is longer than 2 characters and starts with 'on' (e.g. 'onclick', 'onload', etc.).
+ * @param propertyName The name of the property to check.
+ * @returns True if the property is a potential event handler, false otherwise.
+ */
+function isPossibleEventHandler(propertyName) {
+    const name = propertyName.toLowerCase();
+    return name.length > 2 && name !== 'only' && name.startsWith('on');
 }
 
 /** Closure uses `goog.getMsg(message)` to lookup translations */
@@ -32922,7 +32932,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.26+sha-4d62760');
+const VERSION = new Version('20.3.26+sha-db0d4a1');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33984,7 +33994,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-Cu6YNBK3.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BPMmui7m.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
