@@ -1,5 +1,5 @@
 /**
- * @license Angular v21.2.19+sha-07cb840
+ * @license Angular v21.2.19+sha-6afe6fa
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9073,7 +9073,7 @@ declare function publishExternalGlobalUtil<K extends keyof ExternalGlobalUtils>(
  *
  * @codeGenApi
  */
-declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
+declare function ɵɵsanitizeHtml(unsafeHtml: any, tagName?: string, propName?: string): TrustedHTML | string;
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
