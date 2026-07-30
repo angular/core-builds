@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.0+sha-d068fc1
+ * @license Angular v22.2.0-next.0+sha-6deb6af
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3965,6 +3965,7 @@ declare const enum RuntimeErrorCode {
     NO_BINDING_TARGET = 315,
     INVALID_BINDING_TARGET = 316,
     INVALID_SET_INPUT_CALL = 317,
+    INVALID_STYLE_PROP_VALUE = -318,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = -401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
