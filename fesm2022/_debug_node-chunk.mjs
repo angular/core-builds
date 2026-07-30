@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.0+sha-eb10e93
+ * @license Angular v22.1.0+sha-949de9c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9123,7 +9123,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0+sha-eb10e93'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.0+sha-949de9c'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12262,7 +12262,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0+sha-eb10e93';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.0+sha-949de9c';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16705,8 +16705,24 @@ function checkStylingProperty(prop, value, suffix, isClassBased) {
     stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
   }
   if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
+    if (ngDevMode && !isClassBased) {
+      warnInvalidStylePropValue(prop, value);
+    }
     const tNode = tView.data[getSelectedIndex()];
     updateStyling(tView, tNode, lView, lView[RENDERER], prop, lView[bindingIndex + 1] = normalizeSuffix(value, suffix), isClassBased, bindingIndex);
+  }
+}
+function warnInvalidStylePropValue(prop, value) {
+  if (value == null || typeof value === 'string' || typeof value === 'number' || getSanitizationBypassType(value) === "Style") {
+    return;
+  }
+  console.warn(formatRuntimeError(-318, `\`[style.${prop}]\` was bound to an invalid value. ` + `Expected a string, number, SafeValue, null, or undefined, but received ` + `\`${typeof value}\` (\`${stringifyInvalidStylePropValue(value)}\`).`));
+}
+function stringifyInvalidStylePropValue(value) {
+  try {
+    return stringify(value);
+  } catch {
+    return '[unstringifiable value]';
   }
 }
 function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
@@ -16872,6 +16888,7 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
   return styleKeyValueArray;
 }
 function styleKeyValueArraySet(keyValueArray, key, value) {
+  ngDevMode && warnInvalidStylePropValue(key, value);
   keyValueArraySet(keyValueArray, key, unwrapSafeValue(value));
 }
 function classKeyValueArraySet(keyValueArray, key, value) {
@@ -16973,7 +16990,7 @@ function isStylingValuePresent(value) {
 }
 function normalizeSuffix(value, suffix) {
   if (value == null || value === '') ; else if (typeof suffix === 'string') {
-    value = value + suffix;
+    value = unwrapSafeValue(value) + suffix;
   } else if (typeof value === 'object') {
     value = stringify(unwrapSafeValue(value));
   }
