@@ -1,10 +1,10 @@
 /**
- * @license Angular v20.3.27+sha-72a8512
+ * @license Angular v20.3.27+sha-2f96c80
  * (c) 2010-2025 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, renderStringify, getSelectedTNode, ENVIRONMENT, getSelectedIndex, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, ViewContext, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, EnvironmentInjector, SVG_NAMESPACE as SVG_NAMESPACE$1, MATH_ML_NAMESPACE as MATH_ML_NAMESPACE$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
+import { attachInjectFlag, _global, ɵɵdefineInjectable as __defineInjectable, ɵɵdefineInjector as __defineInjector, ɵɵinject as __inject, ɵɵinvalidFactoryDep as __invalidFactoryDep, resolveForwardRef, newArray, EMPTY_OBJ, assertString, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, assertFirstCreatePass, assertDefined, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, getFactoryDef, assertIndexInRange, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, setInjectImplementation, assertDirectiveDef, NG_ELEMENT_ID, convertToBitFlags, isRootView, T_HOST, TVIEW, injectRootLimpMode, isComponentDef, EMBEDDED_VIEW_INJECTOR, INJECTOR$1 as INJECTOR, DECLARATION_COMPONENT_VIEW, isComponentHost, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, flatten, arrayEquals, ID, isLView, assertDomNode, unwrapRNode, getComponentLViewByIndex, CONTEXT, EMPTY_ARRAY, assertLView, HOST, CHILD_HEAD, NEXT, isLContainer, getLViewParent, Injector, CLEANUP, getComponentDef, getDirectiveDef, InjectionToken, inject, formatRuntimeError, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, XSS_SECURITY_URL, RENDERER, SecurityContext, renderStringify, checkSecurityContext, getSelectedTNode, SVG_NAMESPACE as SVG_NAMESPACE$1, ENVIRONMENT, getSelectedIndex, makeEnvironmentProviders, resetPreOrderHookFlags, PARENT, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, isInInjectionContext, DestroyRef, PendingTasksInternal, noop, ChangeDetectionScheduler, ErrorHandler, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, assertNotInReactiveContext, assertInInjectionContext, ViewContext, assertLContainer, MOVED_VIEWS, isDestroyed, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, assertProjectionSlots, NATIVE, ANIMATIONS, assertParentView, CONTAINER_HEADER_OFFSET, assertNotSame, setCurrentDirectiveIndex, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, INTERNAL_APPLICATION_ERROR_HANDLER, stringify, getCurrentDirectiveIndex, unwrapLView, isCreationMode, enterView, leaveView, markViewForRefresh, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setIsInCheckNoChangesMode, CheckNoChangesMode, setBindingIndex, EFFECTS_TO_SCHEDULE, viewAttachedToChangeDetector, setBindingRootForHostBindings, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTNode, assertTIcu, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, assertNotDefined, nextBindingIndex, getDirectiveDefOrThrow, getTNode, assertComponentType, debugStringifyTypeForError, EnvironmentInjector, MATH_ML_NAMESPACE as MATH_ML_NAMESPACE$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, fillProperties, getBindingsEnabled, lastNodeWasCreated, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, arrayInsert2, arraySplice, setInjectorProfiler, NullInjector, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, isSignal, runInInjectionContext, ZONELESS_ENABLED, EffectScheduler, PendingTasks, assertTNodeCreationIndex, isSkipHydrationRootTNode, leaveSkipHydrationBlock, decreaseElementDepthCount, enterSkipHydrationBlock, getCurrentDirectiveDef, assertIndexInExpandoRange, getBindingIndex, assertOneOf, SECURITY_SCHEMA, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, keyValueArraySet, keyValueArrayGet, incrementBindingIndex, isWritableSignal, store, providerToFactory, emitProviderConfiguredEvent, isClassProvider, getBindingRoot, NG_COMP_DEF, ɵɵresetView as __resetView, ɵɵnamespaceHTML as __namespaceHTML, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceSVG as __namespaceSVG, ɵɵenableBindings as __enableBindings, ɵɵdisableBindings as __disableBindings, ɵɵrestoreView as __restoreView, forwardRef, NG_MOD_DEF, NG_INJ_DEF, NG_DIR_DEF, NG_PIPE_DEF, ZONELESS_SCHEDULER_DISABLED, SCHEDULE_IN_ROOT_ZONE, PROVIDED_ZONELESS, getNativeByTNodeOrNull } from './root_effect_scheduler.mjs';
 import { setActiveConsumer, SIGNAL, consumerDestroy, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './signal.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
@@ -5193,6 +5193,13 @@ function matchingSchemas(schemas, tagName) {
     return false;
 }
 
+const SVG_NAMESPACE = 'svg';
+const MATH_ML_NAMESPACE = 'math';
+const NAMESPACE_URIS = {
+    'http://www.w3.org/2000/svg': SVG_NAMESPACE,
+    'http://www.w3.org/1998/Math/MathML': MATH_ML_NAMESPACE,
+};
+
 /**
  * @fileoverview
  * A module to facilitate use of a Trusted Types policy internally within
@@ -6009,147 +6016,26 @@ function enforceIframeSecurity(iframe) {
 }
 
 /**
- * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
- * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
- * handled.
+ * Splits an element name into its namespace and local name.
  *
- * See DomSanitizer for more details on security in Angular applications.
- *
- * @publicApi
+ * @param elementName The element name to split, in the format ":namespace:name".
+ * @param fatal If true, throws an error if the element name is not in the correct format.
+ * @returns A tuple containing the namespace and local name.
  */
-var SecurityContext;
-(function (SecurityContext) {
-    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
-    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
-    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
-    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
-    SecurityContext[SecurityContext["URL"] = 4] = "URL";
-    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-    SecurityContext[SecurityContext["ATTRIBUTE_NO_BINDING"] = 6] = "ATTRIBUTE_NO_BINDING";
-})(SecurityContext || (SecurityContext = {}));
-// =================================================================================================
-// =================================================================================================
-// =========== S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P  ===========
-// =================================================================================================
-// =================================================================================================
-//
-//        DO NOT EDIT THIS LIST OF SECURITY SENSITIVE PROPERTIES WITHOUT A SECURITY REVIEW!
-//
-// =================================================================================================
-/**
- *  Map from tagName|propertyName to SecurityContext. Properties applying to all tags use '*'.
- */
-let _SECURITY_SCHEMA;
-const SVG_NAMESPACE = 'svg';
-const MATH_ML_NAMESPACE = 'math';
-/**
- * @remarks Keep is a copy of DOM Security Schema.
- * @see [SECURITY_SCHEMA](../../../compiler/src/schema/dom_security_schema.ts)
- */
-function SECURITY_SCHEMA() {
-    if (!_SECURITY_SCHEMA) {
-        _SECURITY_SCHEMA = {};
-        // Case is insignificant below, all element and attribute names are lower-cased for lookup.
-        registerContext(SecurityContext.HTML, /** Namespace */ undefined, [
-            ['iframe', ['srcdoc']],
-            ['*', ['innerHTML', 'outerHTML']],
-        ]);
-        registerContext(SecurityContext.STYLE, /** Namespace */ undefined, [['*', ['style']]]);
-        // NB: no SCRIPT contexts here, they are never allowed due to the parser stripping them.
-        registerContext(SecurityContext.URL, /** Namespace */ undefined, [
-            ['*', ['formAction']],
-            ['area', ['href']],
-            ['a', ['href', 'xlink:href']],
-            ['form', ['action']],
-            // The below two items are safe and should be removed but they require a G3 clean-up as a small number of tests fail.
-            ['img', ['src']],
-            ['video', ['src']],
-        ]);
-        registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [
-            // MathML namespace
-            // https://crsrc.org/c/third_party/blink/renderer/core/sanitizer/sanitizer.cc;l=753-768;drc=b3eb16372dcd3317d65e9e0265015e322494edcd;bpv=1;bpt=1
-            ['annotation', ['href', 'xlink:href']],
-            ['annotation-xml', ['href', 'xlink:href']],
-            ['maction', ['href', 'xlink:href']],
-            ['malignmark', ['href', 'xlink:href']],
-            ['math', ['href', 'xlink:href']],
-            ['mroot', ['href', 'xlink:href']],
-            ['msqrt', ['href', 'xlink:href']],
-            ['merror', ['href', 'xlink:href']],
-            ['mfrac', ['href', 'xlink:href']],
-            ['mglyph', ['href', 'xlink:href']],
-            ['msub', ['href', 'xlink:href']],
-            ['msup', ['href', 'xlink:href']],
-            ['msubsup', ['href', 'xlink:href']],
-            ['mmultiscripts', ['href', 'xlink:href']],
-            ['mprescripts', ['href', 'xlink:href']],
-            ['mi', ['href', 'xlink:href']],
-            ['mn', ['href', 'xlink:href']],
-            ['mo', ['href', 'xlink:href']],
-            ['mpadded', ['href', 'xlink:href']],
-            ['mphantom', ['href', 'xlink:href']],
-            ['mrow', ['href', 'xlink:href']],
-            ['ms', ['href', 'xlink:href']],
-            ['mspace', ['href', 'xlink:href']],
-            ['mstyle', ['href', 'xlink:href']],
-            ['mtable', ['href', 'xlink:href']],
-            ['mtd', ['href', 'xlink:href']],
-            ['mtr', ['href', 'xlink:href']],
-            ['mtext', ['href', 'xlink:href']],
-            ['mover', ['href', 'xlink:href']],
-            ['munder', ['href', 'xlink:href']],
-            ['munderover', ['href', 'xlink:href']],
-            ['semantics', ['href', 'xlink:href']],
-            ['none', ['href', 'xlink:href']],
-        ]);
-        registerContext(SecurityContext.RESOURCE_URL, /** Namespace */ undefined, [
-            ['base', ['href']],
-            ['embed', ['src']],
-            ['frame', ['src']],
-            ['iframe', ['src']],
-            ['link', ['href']],
-            ['object', ['codebase', 'data']],
-        ]);
-        registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
-        // Keep this in sync with SECURITY_SENSITIVE_ELEMENTS in packages/core/src/sanitization/sanitization.ts
-        // Unknown is the internal tag name for unknown elements example used for host-bindings.
-        // These are unsafe as `attributeName` can be `href` or `xlink:href`
-        // See: http://b/463880509#comment7
-        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, SVG_NAMESPACE, [
-            ['animate', ['attributeName', 'values', 'to', 'from']],
-            ['set', ['to', 'attributeName']],
-            ['animateMotion', ['attributeName']],
-            ['animateTransform', ['attributeName']],
-        ]);
-        registerContext(SecurityContext.ATTRIBUTE_NO_BINDING, /** Namespace */ undefined, [
-            [
-                'unknown',
-                [
-                    'attributeName',
-                    'values',
-                    'to',
-                    'from',
-                    'sandbox',
-                    'allow',
-                    'allowFullscreen',
-                    'referrerPolicy',
-                    'csp',
-                    'fetchPriority',
-                ],
-            ],
-            ['iframe', ['sandbox', 'allow', 'allowFullscreen', 'referrerPolicy', 'csp', 'fetchPriority']],
-        ]);
+function splitNsName(elementName, fatal = true) {
+    if (elementName[0] != ':') {
+        return [null, elementName];
     }
-    return _SECURITY_SCHEMA;
-}
-function registerContext(ctx, namespace, specs) {
-    for (const [element, attributeNames] of specs) {
-        let tagName = namespace && element !== '*' && element !== 'unknown' ? `:${namespace}:${element}` : element;
-        tagName = tagName.toLowerCase();
-        for (const attr of attributeNames) {
-            _SECURITY_SCHEMA[`${tagName}|${attr.toLowerCase()}`] = ctx;
+    const colonIndex = elementName.indexOf(':', 1);
+    if (colonIndex === -1) {
+        if (fatal) {
+            throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+        }
+        else {
+            return [null, elementName];
         }
     }
+    return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
 }
 
 /**
@@ -6167,7 +6053,12 @@ function registerContext(ctx, namespace, specs) {
  *
  * @codeGenApi
  */
-function ɵɵsanitizeHtml(unsafeHtml) {
+function ɵɵsanitizeHtml(unsafeHtml, tagName, propName) {
+    if (tagName !== undefined &&
+        propName !== undefined &&
+        getSecurityContext(tagName, propName) !== SecurityContext.HTML) {
+        return unsafeHtml;
+    }
     const sanitizer = getSanitizer();
     if (sanitizer) {
         return trustedHTMLFromStringBypass(sanitizer.sanitize(SecurityContext.HTML, unsafeHtml) || '');
@@ -6317,26 +6208,22 @@ function ɵɵtrustConstantResourceUrl(url) {
     }
     return trustedScriptURLFromString(url[0]);
 }
-// Define sets outside the function for O(1) lookups and memory efficiency
-const RESOURCE_MAP = {
-    'embed': { 'src': true },
-    'frame': { 'src': true },
-    'iframe': { 'src': true },
-    'media': { 'src': true },
-    'base': { 'href': true },
-    'link': { 'href': true },
-    'object': { 'data': true, 'codebase': true },
-};
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
- * The rules are based on the RESOURCE_URL context config from
+ * The rules are based on the URL and RESOURCE_URL context config from
  * `packages/compiler/src/schema/dom_security_schema.ts`.
- * If tag and prop names don't match Resource URL schema, use URL sanitizer.
+ * If tag and prop names don't match URL or Resource URL schema, no sanitizer is required.
  */
 function getUrlSanitizer(tag, prop) {
-    const isResource = RESOURCE_MAP[tag.toLowerCase()]?.[prop.toLowerCase()] === true;
-    return isResource ? ɵɵsanitizeResourceUrl : ɵɵsanitizeUrl;
+    switch (getSecurityContext(tag, prop)) {
+        case SecurityContext.RESOURCE_URL:
+            return ɵɵsanitizeResourceUrl;
+        case SecurityContext.URL:
+            return ɵɵsanitizeUrl;
+        default:
+            return null;
+    }
 }
 /**
  * Sanitizes URL, selecting sanitizer function based on tag and property names.
@@ -6354,7 +6241,7 @@ function getUrlSanitizer(tag, prop) {
  * @codeGenApi
  */
 function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
-    return getUrlSanitizer(tag, prop)(unsafeUrl);
+    return getUrlSanitizer(tag, prop)?.(unsafeUrl) ?? unsafeUrl;
 }
 function validateAgainstEventProperties(name) {
     if (name.toLowerCase().startsWith('on')) {
@@ -6369,33 +6256,46 @@ function getSanitizer() {
     const lView = getLView();
     return lView && lView[ENVIRONMENT].sanitizer;
 }
-const SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES = ['attributeName', 'attributename'];
-/**
- * @remarks Keep this in sync with DOM Security Schema.
- * @see [SECURITY_SCHEMA](../../../compiler/src/schema/dom_security_schema.ts)
- */
+function getSecurityContext(tagName, propName) {
+    const [namespace, resolvedTagName] = resolveElement(tagName);
+    return checkSecurityContext(resolvedTagName, propName, namespace);
+}
+function resolveElement(tagName) {
+    tagName = tagName.toLowerCase();
+    const splitResult = splitNsName(tagName, false);
+    if (splitResult[0]) {
+        return splitResult;
+    }
+    const index = getSelectedIndex();
+    const tNode = index === -1 ? null : getSelectedTNode();
+    let namespace = tNode?.namespace;
+    if (tagName === "#host" /* TNodeName.DynamicHost */ && tNode?.type === 2 /* TNodeType.Element */) {
+        const element = getNativeByTNode(tNode, getLView());
+        if (element.tagName) {
+            tagName = element.tagName.toLowerCase();
+        }
+        if (namespace == null) {
+            const namespaceURI = element.namespaceURI;
+            namespace = namespaceURI && NAMESPACE_URIS[namespaceURI];
+        }
+    }
+    return [namespace, tagName];
+}
 /**
  * Set of attributes that are sensitive and should be sanitized.
  */
 const SECURITY_SENSITIVE_ATTRIBUTE_NAMES = new Set(['href', 'xlink:href']);
-const SECURITY_SENSITIVE_ELEMENTS = {
-    'iframe': {
-        'sandbox': true,
-        'allow': true,
-        'allowfullscreen': true,
-        'referrerpolicy': true,
-        'csp': true,
-        'fetchpriority': true,
-    },
-    ':svg:animate': {
-        'attributename': true,
+/**
+ * @remarks Keep this in sync with DOM Security Schema.
+ * @see [SECURITY_SCHEMA](../../../compiler/src/schema/dom_security_schema.ts)
+ */
+const SVG_ANIMATION_SENSITIVE_STATIC_VALUES = {
+    'animate': {
         'to': SECURITY_SENSITIVE_ATTRIBUTE_NAMES,
         'values': SECURITY_SENSITIVE_ATTRIBUTE_NAMES,
         'from': SECURITY_SENSITIVE_ATTRIBUTE_NAMES,
     },
-    ':svg:set': { 'attributename': true, 'to': SECURITY_SENSITIVE_ATTRIBUTE_NAMES },
-    ':svg:animatemotion': { 'attributename': true },
-    ':svg:animatetransform': { 'attributename': true },
+    'set': { 'to': SECURITY_SENSITIVE_ATTRIBUTE_NAMES },
 };
 /**
  * Validates that the attribute binding is safe to use.
@@ -6405,63 +6305,55 @@ const SECURITY_SENSITIVE_ELEMENTS = {
  * @param attributeName The name of the attribute.
  */
 function ɵɵvalidateAttribute(value, tagName, attributeName) {
-    const lowerCaseTagName = tagName.toLowerCase();
-    const lowerCaseAttrName = attributeName.toLowerCase();
     const index = getSelectedIndex();
     const tNode = index === -1 ? null : getSelectedTNode();
     if (tNode && tNode.type !== 2 /* TNodeType.Element */) {
         return value;
     }
-    // Leverage tNode.namespace if active, otherwise check both namespaced and base variants.
-    const fullTagName = lowerCaseTagName[0] !== ':' && tNode?.namespace
-        ? `:${tNode.namespace}:${lowerCaseTagName}`
-        : lowerCaseTagName;
-    const validationConfig = SECURITY_SENSITIVE_ELEMENTS[fullTagName]?.[lowerCaseAttrName];
-    if (!validationConfig) {
+    const [namespace, resolvedTagName] = resolveElement(tagName);
+    const securityContext = checkSecurityContext(resolvedTagName, attributeName, namespace);
+    if (securityContext !== SecurityContext.ATTRIBUTE_NO_BINDING) {
         return value;
     }
     const lView = getLView();
-    if (tNode && lowerCaseTagName === 'iframe') {
-        const element = getNativeByTNode(tNode, lView);
-        enforceIframeSecurity(element);
-    }
-    const displayTagName = tagName[0] === ':' ? tagName.split(':').pop() : tagName;
-    if (typeof validationConfig !== 'boolean') {
-        if (!tNode) {
-            const errorMessage = ngDevMode &&
-                `Angular has detected that the \`${attributeName}\` was applied ` +
-                    `as a binding to the <${tagName}> element. ` +
-                    `For security reasons, the \`${attributeName}\` can be set on the <${tagName}> element ` +
-                    `as a static attribute only. \n` +
-                    `To fix this, switch the \`${attributeName}\` binding to a static attribute ` +
-                    `in a template or in host bindings section.`;
-            throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
+    if (tNode) {
+        if (resolvedTagName === 'iframe') {
+            const element = getNativeByTNode(tNode, lView);
+            enforceIframeSecurity(element);
         }
-        const element = getNativeByTNode(tNode, lView);
-        const attributeNameValue = getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig);
-        if (attributeNameValue) {
-            const errorMessage = ngDevMode &&
-                `Angular has detected that the \`${attributeName}\` was applied ` +
-                    `as a binding to the <${displayTagName}> element${getTemplateLocationDetails(lView)}. ` +
-                    `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` +
-                    `as a static attribute only when the "attributeName" is set to \'${attributeNameValue}\'. \n` +
-                    `To fix this, switch the \`${attributeNameValue}\` binding to a static attribute ` +
-                    `in a template or in host bindings section.`;
-            throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
+        else if (namespace === SVG_NAMESPACE$1) {
+            const config = SVG_ANIMATION_SENSITIVE_STATIC_VALUES[resolvedTagName]?.[attributeName.toLowerCase()];
+            if (config) {
+                const element = getNativeByTNode(tNode, lView);
+                const attributeNameValue = getSecuritySensitiveSVGAnimationAttributeName(element, config);
+                if (attributeNameValue) {
+                    const errorMessage = ngDevMode &&
+                        `Angular has detected that the \`${attributeName}\` was applied ` +
+                            `as a binding to the <${resolvedTagName}> element${getTemplateLocationDetails(lView)}. ` +
+                            `For security reasons, the \`${attributeName}\` can be set on the <${resolvedTagName}> element ` +
+                            `as a static attribute only when the "attributeName" is set to \'${attributeNameValue}\'. \n` +
+                            `To fix this, switch the \`${attributeNameValue}\` binding to a static attribute ` +
+                            `in a template or in host bindings section.`;
+                    throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
+                }
+                return value;
+            }
         }
-        return value;
     }
     const errorMessage = ngDevMode &&
         `Angular has detected that the \`${attributeName}\` was applied ` +
-            `as a binding to the <${displayTagName}> element${tNode ? getTemplateLocationDetails(lView) : ''}. ` +
-            `For security reasons, the \`${attributeName}\` can be set on the <${displayTagName}> element ` +
+            `as a binding to the <${resolvedTagName}> element${tNode ? getTemplateLocationDetails(lView) : ''}. ` +
+            `For security reasons, the \`${attributeName}\` can be set on the <${resolvedTagName}> element ` +
             `as a static attribute only. \n` +
             `To fix this, switch the \`${attributeName}\` binding to a static attribute ` +
             `in a template or in host bindings section.`;
     throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_ATTRIBUTE_BINDING */, errorMessage);
 }
 function getSecuritySensitiveSVGAnimationAttributeName(element, validationConfig) {
-    for (const attributeName of SVG_ANIMATION_ATTRIBUTE_NAME_CANDIDATES) {
+    for (const attributeName of element.getAttributeNames()) {
+        if (attributeName.toLowerCase() !== 'attributename') {
+            continue;
+        }
         const attributeNameValue = element.getAttribute(attributeName);
         if (attributeNameValue !== null && validationConfig.has(attributeNameValue.toLowerCase())) {
             return attributeNameValue;
@@ -14863,7 +14755,7 @@ class ComponentFactory extends ComponentFactory$1 {
             enterView(rootLView);
             let componentView = null;
             try {
-                const hostTNode = directiveHostFirstCreatePass(HEADER_OFFSET, rootLView, 2 /* TNodeType.Element */, '#host', () => rootTView.directiveRegistry, true, 0);
+                const hostTNode = directiveHostFirstCreatePass(HEADER_OFFSET, rootLView, 2 /* TNodeType.Element */, "#host" /* TNodeName.DynamicHost */, () => rootTView.directiveRegistry, true, 0);
                 // ---- element instruction
                 setupStaticAttributes(hostRenderer, hostElement, hostTNode);
                 attachPatchData(hostElement, rootLView);
@@ -14901,7 +14793,7 @@ class ComponentFactory extends ComponentFactory$1 {
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
     const tAttributes = rootSelectorOrNode
-        ? ['ng-version', '20.3.27+sha-72a8512']
+        ? ['ng-version', '20.3.27+sha-2f96c80']
         : // Extract attributes and classes from the first selector only to match VE behavior.
             extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
     let creationBindings = null;
@@ -25442,12 +25334,9 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
                         const attr = elAttrs.item(i);
                         const lowerAttrName = attr.name.toLowerCase();
                         const hasBinding = !!attr.value.match(BINDING_REGEXP);
-                        const elementNS = element.namespaceURI;
-                        const tagNameWithNamespace = elementNS === 'http://www.w3.org/2000/svg'
-                            ? `:svg:${tagName}`
-                            : elementNS === 'http://www.w3.org/1998/Math/MathML'
-                                ? `:math:${tagName}`
-                                : tagName;
+                        const namespaceUri = element.namespaceURI;
+                        const namespace = namespaceUri && NAMESPACE_URIS[namespaceUri];
+                        const tagNameWithNamespace = namespace ? `:${namespace}:${tagName}` : tagName;
                         if (hasBinding) {
                             if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
                                 generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, i18nResolveSanitizer(lowerAttrName, tagNameWithNamespace));
@@ -25551,31 +25440,18 @@ function addCreateNodeAndAppend(create, marker, text, appendToParentIdx, createA
 function addCreateAttribute(create, newIndex, attrName, attrValue) {
     create.push((newIndex << 1 /* IcuCreateOpCode.SHIFT_REF */) | 1 /* IcuCreateOpCode.Attr */, attrName, attrValue);
 }
-function splitNsName(elementName, fatal = true) {
-    if (elementName[0] != ':') {
-        return [null, elementName];
-    }
-    const colonIndex = elementName.indexOf(':', 1);
-    if (colonIndex === -1) {
-        if (fatal) {
-            throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
-        }
-        else {
-            return [null, elementName];
-        }
-    }
-    return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
-}
 function normalizeTagName(tagName) {
     const tagNameLower = tagName.toLowerCase();
     const [ns, name] = splitNsName(tagNameLower, false);
-    return ns === SVG_NAMESPACE$1 || ns === MATH_ML_NAMESPACE$1 ? `:${ns}:${name}` : name;
+    return ns === SVG_NAMESPACE || ns === MATH_ML_NAMESPACE ? `:${ns}:${name}` : name;
 }
 function i18nResolveSanitizer(attrName, tagName) {
     const lowerAttrName = attrName.toLowerCase();
     const lowerTagName = tagName ? normalizeTagName(tagName) : '*';
+    const [namespace] = splitNsName(lowerTagName, false);
     const schema = SECURITY_SCHEMA();
     const schemaContext = schema[`${lowerTagName}|${lowerAttrName}`] ||
+        (namespace ? schema[`:${namespace}:*|${lowerAttrName}`] : undefined) ||
         schema[`*|${lowerAttrName}`] ||
         SecurityContext.NONE;
     switch (schemaContext) {
@@ -32309,5 +32185,5 @@ function getDebugNode(nativeNode) {
     return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactory$1, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, DehydratedBlockRegistry, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, ElementRef, EnvironmentNgModuleRefAdapter, EventEmitter, Framework, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, ModuleWithComponentFactories, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NgProbeToken, NgZone, NoopNgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PRESERVE_HOST_CONTENT, PROVIDED_NG_ZONE, Pipe, QueryList, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, Self, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, TransferState, Type, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, appendDeferBlocksToJSActionMap, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRef, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveDeferBlockDataImpl, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, gatherDeferBlocksCommentNodes, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getCompilerFacade, getDebugNode, getDeferBlocks$1 as getDeferBlocks, getDirectives, getDocument, getHostElement, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNgZone, getNgZoneOptions, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, internalProvideZoneChangeDetection, invokeListeners, isBoundToModule, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, makeStateKey, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processAndInitTriggers, processBlockData, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideNgReflectAttributes, provideZoneChangeDetection, provideZonelessChangeDetection, publishDefaultGlobalUtils, publishExternalGlobalUtil, publishSignalConfiguration, readHydrationInfo, readPatchedLView, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=debug_node.mjs.map

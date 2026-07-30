@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v20.3.27+sha-72a8512
+ * @license Angular v20.3.27+sha-2f96c80
  * (c) 2010-2025 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -498,6 +498,7 @@ function SECURITY_SCHEMA() {
         registerContext(SecurityContext.URL, MATH_ML_NAMESPACE$1, [
             // MathML namespace
             // https://crsrc.org/c/third_party/blink/renderer/core/sanitizer/sanitizer.cc;l=753-768;drc=b3eb16372dcd3317d65e9e0265015e322494edcd;bpv=1;bpt=1
+            ['*', ['href', 'xlink:href']],
             ['annotation', ['href', 'xlink:href']],
             ['annotation-xml', ['href', 'xlink:href']],
             ['maction', ['href', 'xlink:href']],
@@ -574,7 +575,7 @@ function SECURITY_SCHEMA() {
 }
 function registerContext(ctx, namespace, specs) {
     for (const [element, attributeNames] of specs) {
-        let tagName = namespace && element !== '*' && element !== 'unknown' ? `:${namespace}:${element}` : element;
+        let tagName = namespace && element !== 'unknown' ? `:${namespace}:${element}` : element;
         tagName = tagName.toLowerCase();
         for (const attr of attributeNames) {
             _SECURITY_SCHEMA[`${tagName}|${attr.toLowerCase()}`] = ctx;
@@ -20748,8 +20749,10 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
         }
         const normalizedTag = normalizeTagName(tagName);
         propName = propName.toLowerCase();
+        const [namespace] = splitNsName(normalizedTag, false);
         const securitySchema = SECURITY_SCHEMA();
         const ctx = securitySchema[normalizedTag + '|' + propName] ??
+            (namespace ? securitySchema[`:${namespace}:*|${propName}`] : undefined) ??
             securitySchema['*|' + propName] ??
             SecurityContext.NONE;
         return ctx;
@@ -25231,13 +25234,11 @@ function resolveSanitizers(job) {
                 case OpKind.TwoWayProperty:
                     let sanitizerFn = null;
                     if (Array.isArray(op.securityContext) &&
-                        op.securityContext.length === 2 &&
-                        op.securityContext.includes(SecurityContext.URL) &&
-                        op.securityContext.includes(SecurityContext.RESOURCE_URL)) {
-                        // When the host element isn't known, some URL attributes (such as "src" and "href") may
-                        // be part of multiple different security contexts. In this case we use special
-                        // sanitization function and select the actual sanitizer at runtime based on a tag name
-                        // that is provided while invoking sanitization function.
+                        hasCompositeUrlSecurityContext(op.securityContext)) {
+                        // When the host element isn't known, attributes such as `href`, `src`, `data`,
+                        // `action`, and `codebase` may be part of multiple security contexts. In this case we
+                        // use a special sanitization function and select the actual behavior at runtime based
+                        // on the concrete host element.
                         sanitizerFn = Identifiers.sanitizeUrlOrResourceUrl;
                     }
                     else {
@@ -25249,21 +25250,47 @@ function resolveSanitizers(job) {
         }
     }
 }
+function hasCompositeUrlSecurityContext(securityContext) {
+    let hasUrlContext = false;
+    let hasResourceUrlContext = false;
+    let hasNoneContext = false;
+    for (const context of securityContext) {
+        switch (context) {
+            case SecurityContext.URL:
+                hasUrlContext = true;
+                break;
+            case SecurityContext.RESOURCE_URL:
+                hasResourceUrlContext = true;
+                break;
+            case SecurityContext.NONE:
+                hasNoneContext = true;
+                break;
+            default:
+                return false;
+        }
+    }
+    return (((hasUrlContext || hasResourceUrlContext) && hasNoneContext) ||
+        (hasUrlContext && hasResourceUrlContext));
+}
 /**
- * Asserts that there is only a single security context and returns it.
+ * Asserts that there is only a single non-NONE security context and returns it.
  */
 function getOnlySecurityContext(securityContext) {
-    if (Array.isArray(securityContext)) {
-        if (securityContext.length > 1) {
-            // TODO: What should we do here? TDB just took the first one, but this feels like something we
-            // would want to know about and create a special case for like we did for Url/ResourceUrl. My
-            // guess is that, outside of the Url/ResourceUrl case, this never actually happens. If there
-            // do turn out to be other cases, throwing an error until we can address it feels safer.
-            throw Error(`AssertionError: Ambiguous security context`);
-        }
-        return securityContext[0] || SecurityContext.NONE;
+    if (!Array.isArray(securityContext)) {
+        return securityContext;
     }
-    return securityContext;
+    if (securityContext.length < 2) {
+        return securityContext[0] ?? SecurityContext.NONE;
+    }
+    const nonNoneSecurityContexts = securityContext.filter((context) => context !== SecurityContext.NONE);
+    if (nonNoneSecurityContexts.length > 1) {
+        // TODO: What should we do here? TDB just took the first one, but this feels like something we
+        // would want to know about and create a special case for like we did for Url/ResourceUrl. My
+        // guess is that, outside of the Url/ResourceUrl case, this never actually happens. If there
+        // do turn out to be other cases, throwing an error until we can address it feels safer.
+        throw Error(`AssertionError: Ambiguous security context`);
+    }
+    return nonNoneSecurityContexts[0] ?? SecurityContext.NONE;
 }
 
 /**
@@ -26577,13 +26604,515 @@ function emitHostBindingFunction(job) {
     /* sourceSpan */ undefined, job.root.fnName);
 }
 
+const PROPERTY_PARTS_SEPARATOR = '.';
+const ATTRIBUTE_PREFIX = 'attr';
+const ANIMATE_PREFIX$1 = 'animate';
+const CLASS_PREFIX = 'class';
+const STYLE_PREFIX = 'style';
+const TEMPLATE_ATTR_PREFIX$1 = '*';
+const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
+/**
+ * Parses bindings in templates and in the directive host area.
+ */
+class BindingParser {
+    _exprParser;
+    _interpolationConfig;
+    _schemaRegistry;
+    errors;
+    constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
+        this._exprParser = _exprParser;
+        this._interpolationConfig = _interpolationConfig;
+        this._schemaRegistry = _schemaRegistry;
+        this.errors = errors;
+    }
+    get interpolationConfig() {
+        return this._interpolationConfig;
+    }
+    createBoundHostProperties(properties, sourceSpan) {
+        const boundProps = [];
+        for (const propName of Object.keys(properties)) {
+            const expression = properties[propName];
+            if (typeof expression === 'string') {
+                this.parsePropertyBinding(propName, expression, true, false, sourceSpan, sourceSpan.start.offset, undefined, [], 
+                // Use the `sourceSpan` for  `keySpan`. This isn't really accurate, but neither is the
+                // sourceSpan, as it represents the sourceSpan of the host itself rather than the
+                // source of the host binding (which doesn't exist in the template). Regardless,
+                // neither of these values are used in Ivy but are only here to satisfy the function
+                // signature. This should likely be refactored in the future so that `sourceSpan`
+                // isn't being used inaccurately.
+                boundProps, sourceSpan);
+            }
+            else {
+                this._reportError(`Value of the host property binding "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
+            }
+        }
+        return boundProps;
+    }
+    createDirectiveHostEventAsts(hostListeners, sourceSpan) {
+        const targetEvents = [];
+        for (const propName of Object.keys(hostListeners)) {
+            const expression = hostListeners[propName];
+            if (typeof expression === 'string') {
+                // Use the `sourceSpan` for  `keySpan` and `handlerSpan`. This isn't really accurate, but
+                // neither is the `sourceSpan`, as it represents the `sourceSpan` of the host itself
+                // rather than the source of the host binding (which doesn't exist in the template).
+                // Regardless, neither of these values are used in Ivy but are only here to satisfy the
+                // function signature. This should likely be refactored in the future so that `sourceSpan`
+                // isn't being used inaccurately.
+                this.parseEvent(propName, expression, 
+                /* isAssignmentEvent */ false, sourceSpan, sourceSpan, [], targetEvents, sourceSpan);
+            }
+            else {
+                this._reportError(`Value of the host listener "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
+            }
+        }
+        return targetEvents;
+    }
+    parseInterpolation(value, sourceSpan, interpolatedTokens) {
+        const absoluteOffset = sourceSpan.fullStart.offset;
+        try {
+            const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens, this._interpolationConfig);
+            if (ast) {
+                this.errors.push(...ast.errors);
+            }
+            return ast;
+        }
+        catch (e) {
+            this._reportError(`${e}`, sourceSpan);
+            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+        }
+    }
+    /**
+     * Similar to `parseInterpolation`, but treats the provided string as a single expression
+     * element that would normally appear within the interpolation prefix and suffix (`{{` and `}}`).
+     * This is used for parsing the switch expression in ICUs.
+     */
+    parseInterpolationExpression(expression, sourceSpan) {
+        const absoluteOffset = sourceSpan.start.offset;
+        try {
+            const ast = this._exprParser.parseInterpolationExpression(expression, sourceSpan, absoluteOffset);
+            if (ast) {
+                this.errors.push(...ast.errors);
+            }
+            return ast;
+        }
+        catch (e) {
+            this._reportError(`${e}`, sourceSpan);
+            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+        }
+    }
+    /**
+     * Parses the bindings in a microsyntax expression, and converts them to
+     * `ParsedProperty` or `ParsedVariable`.
+     *
+     * @param tplKey template binding name
+     * @param tplValue template binding value
+     * @param sourceSpan span of template binding relative to entire the template
+     * @param absoluteValueOffset start of the tplValue relative to the entire template
+     * @param targetMatchableAttrs potential attributes to match in the template
+     * @param targetProps target property bindings in the template
+     * @param targetVars target variables in the template
+     */
+    parseInlineTemplateBinding(tplKey, tplValue, sourceSpan, absoluteValueOffset, targetMatchableAttrs, targetProps, targetVars, isIvyAst) {
+        const absoluteKeyOffset = sourceSpan.start.offset + TEMPLATE_ATTR_PREFIX$1.length;
+        const bindings = this._parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
+        for (const binding of bindings) {
+            // sourceSpan is for the entire HTML attribute. bindingSpan is for a particular
+            // binding within the microsyntax expression so it's more narrow than sourceSpan.
+            const bindingSpan = moveParseSourceSpan(sourceSpan, binding.sourceSpan);
+            const key = binding.key.source;
+            const keySpan = moveParseSourceSpan(sourceSpan, binding.key.span);
+            if (binding instanceof VariableBinding) {
+                const value = binding.value ? binding.value.source : '$implicit';
+                const valueSpan = binding.value
+                    ? moveParseSourceSpan(sourceSpan, binding.value.span)
+                    : undefined;
+                targetVars.push(new ParsedVariable(key, value, bindingSpan, keySpan, valueSpan));
+            }
+            else if (binding.value) {
+                const srcSpan = isIvyAst ? bindingSpan : sourceSpan;
+                const valueSpan = moveParseSourceSpan(sourceSpan, binding.value.ast.sourceSpan);
+                this._parsePropertyAst(key, binding.value, false, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+            }
+            else {
+                targetMatchableAttrs.push([key, '' /* value */]);
+                // Since this is a literal attribute with no RHS, source span should be
+                // just the key span.
+                this.parseLiteralAttr(key, null /* value */, keySpan, absoluteValueOffset, undefined /* valueSpan */, targetMatchableAttrs, targetProps, keySpan);
+            }
+        }
+    }
+    /**
+     * Parses the bindings in a microsyntax expression, e.g.
+     * ```html
+     *    <tag *tplKey="let value1 = prop; let value2 = localVar">
+     * ```
+     *
+     * @param tplKey template binding name
+     * @param tplValue template binding value
+     * @param sourceSpan span of template binding relative to entire the template
+     * @param absoluteKeyOffset start of the `tplKey`
+     * @param absoluteValueOffset start of the `tplValue`
+     */
+    _parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset) {
+        try {
+            const bindingsResult = this._exprParser.parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
+            bindingsResult.errors.forEach((e) => this.errors.push(e));
+            bindingsResult.warnings.forEach((warning) => {
+                this._reportError(warning, sourceSpan, ParseErrorLevel.WARNING);
+            });
+            return bindingsResult.templateBindings;
+        }
+        catch (e) {
+            this._reportError(`${e}`, sourceSpan);
+            return [];
+        }
+    }
+    parseLiteralAttr(name, value, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
+        if (isLegacyAnimationLabel(name)) {
+            name = name.substring(1);
+            if (keySpan !== undefined) {
+                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+            }
+            if (value) {
+                this._reportError(`Assigning animation triggers via @prop="exp" attributes with an expression is invalid.` +
+                    ` Use property bindings (e.g. [@prop]="exp") or use an attribute without a value (e.g. @prop) instead.`, sourceSpan, ParseErrorLevel.ERROR);
+            }
+            this._parseLegacyAnimation(name, value, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+        }
+        else {
+            targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, '', absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
+        }
+    }
+    parsePropertyBinding(name, expression, isHost, isPartOfAssignmentBinding, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
+        if (name.length === 0) {
+            this._reportError(`Property name is missing in binding`, sourceSpan);
+        }
+        let isLegacyAnimationProp = false;
+        if (name.startsWith(LEGACY_ANIMATE_PROP_PREFIX)) {
+            isLegacyAnimationProp = true;
+            name = name.substring(LEGACY_ANIMATE_PROP_PREFIX.length);
+            if (keySpan !== undefined) {
+                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + LEGACY_ANIMATE_PROP_PREFIX.length, keySpan.end.offset));
+            }
+        }
+        else if (isLegacyAnimationLabel(name)) {
+            isLegacyAnimationProp = true;
+            name = name.substring(1);
+            if (keySpan !== undefined) {
+                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+            }
+        }
+        if (isLegacyAnimationProp) {
+            this._parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+        }
+        else if (name.startsWith(`${ANIMATE_PREFIX$1}${PROPERTY_PARTS_SEPARATOR}`)) {
+            this._parseAnimation(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+        }
+        else {
+            this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+        }
+    }
+    parsePropertyInterpolation(name, value, sourceSpan, valueSpan, targetMatchableAttrs, targetProps, keySpan, interpolatedTokens) {
+        const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
+        if (expr) {
+            this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+            return true;
+        }
+        return false;
+    }
+    _parsePropertyAst(name, ast, isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
+        targetMatchableAttrs.push([name, ast.source]);
+        targetProps.push(new ParsedProperty(name, ast, isPartOfAssignmentBinding ? ParsedPropertyType.TWO_WAY : ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
+    }
+    _parseAnimation(name, ast, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
+        targetMatchableAttrs.push([name, ast.source]);
+        targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.ANIMATION, sourceSpan, keySpan, valueSpan));
+    }
+    _parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
+        if (name.length === 0) {
+            this._reportError('Animation trigger is missing', sourceSpan);
+        }
+        // This will occur when a @trigger is not paired with an expression.
+        // For animations it is valid to not have an expression since */void
+        // states will be applied by angular when the element is attached/detached
+        const ast = this.parseBinding(expression || 'undefined', false, valueSpan || sourceSpan, absoluteOffset);
+        targetMatchableAttrs.push([name, ast.source]);
+        targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.LEGACY_ANIMATION, sourceSpan, keySpan, valueSpan));
+    }
+    parseBinding(value, isHostBinding, sourceSpan, absoluteOffset) {
+        try {
+            const ast = isHostBinding
+                ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig)
+                : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig);
+            if (ast) {
+                this.errors.push(...ast.errors);
+            }
+            return ast;
+        }
+        catch (e) {
+            this._reportError(`${e}`, sourceSpan);
+            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+        }
+    }
+    createBoundElementProperty(elementSelector, boundProp, skipValidation = false, mapPropertyName = true) {
+        if (boundProp.isLegacyAnimation) {
+            return new BoundElementProperty(boundProp.name, exports.BindingType.LegacyAnimation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
+        }
+        let unit = null;
+        let bindingType = undefined;
+        let boundPropertyName = null;
+        const parts = boundProp.name.split(PROPERTY_PARTS_SEPARATOR);
+        let securityContexts = undefined;
+        // Check for special cases (prefix style, attr, class)
+        if (parts.length > 1) {
+            if (parts[0] == ATTRIBUTE_PREFIX) {
+                boundPropertyName = parts.slice(1).join(PROPERTY_PARTS_SEPARATOR);
+                if (!skipValidation) {
+                    this._validatePropertyOrAttributeName(boundPropertyName, boundProp.sourceSpan, true);
+                }
+                securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, boundPropertyName, true);
+                const nsSeparatorIdx = boundPropertyName.indexOf(':');
+                if (nsSeparatorIdx > -1) {
+                    const ns = boundPropertyName.substring(0, nsSeparatorIdx);
+                    const name = boundPropertyName.substring(nsSeparatorIdx + 1);
+                    boundPropertyName = mergeNsAndName(ns, name);
+                }
+                bindingType = exports.BindingType.Attribute;
+            }
+            else if (parts[0] == CLASS_PREFIX) {
+                boundPropertyName = parts[1];
+                bindingType = exports.BindingType.Class;
+                securityContexts = [SecurityContext.NONE];
+            }
+            else if (parts[0] == STYLE_PREFIX) {
+                unit = parts.length > 2 ? parts[2] : null;
+                boundPropertyName = parts[1];
+                bindingType = exports.BindingType.Style;
+                securityContexts = [SecurityContext.STYLE];
+            }
+            else if (parts[0] == ANIMATE_PREFIX$1) {
+                boundPropertyName = boundProp.name;
+                bindingType = exports.BindingType.Animation;
+                securityContexts = [SecurityContext.NONE];
+            }
+        }
+        // If not a special case, use the full property name
+        if (boundPropertyName === null) {
+            const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
+            boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
+            securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
+            bindingType =
+                boundProp.type === ParsedPropertyType.TWO_WAY ? exports.BindingType.TwoWay : exports.BindingType.Property;
+            if (!skipValidation) {
+                this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
+            }
+        }
+        return new BoundElementProperty(boundPropertyName, bindingType, securityContexts[0], boundProp.expression, unit, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
+    }
+    parseEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
+        if (name.length === 0) {
+            this._reportError(`Event name is missing in binding`, sourceSpan);
+        }
+        if (isLegacyAnimationLabel(name)) {
+            name = name.slice(1);
+            if (keySpan !== undefined) {
+                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+            }
+            this._parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan);
+        }
+        else {
+            this._parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan);
+        }
+    }
+    calcPossibleSecurityContexts(selector, propName, isAttribute) {
+        const prop = this._schemaRegistry.getMappedPropName(propName);
+        return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
+    }
+    parseEventListenerName(rawName) {
+        const [target, eventName] = splitAtColon(rawName, [null, rawName]);
+        return { eventName: eventName, target };
+    }
+    parseLegacyAnimationEventName(rawName) {
+        const matches = splitAtPeriod(rawName, [rawName, null]);
+        return { eventName: matches[0], phase: matches[1] === null ? null : matches[1].toLowerCase() };
+    }
+    _parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan) {
+        const { eventName, phase } = this.parseLegacyAnimationEventName(name);
+        const ast = this._parseAction(expression, handlerSpan);
+        targetEvents.push(new ParsedEvent(eventName, phase, exports.ParsedEventType.LegacyAnimation, ast, sourceSpan, handlerSpan, keySpan));
+        if (eventName.length === 0) {
+            this._reportError(`Animation event name is missing in binding`, sourceSpan);
+        }
+        if (phase) {
+            if (phase !== 'start' && phase !== 'done') {
+                this._reportError(`The provided animation output phase value "${phase}" for "@${eventName}" is not supported (use start or done)`, sourceSpan);
+            }
+        }
+        else {
+            this._reportError(`The animation trigger output event (@${eventName}) is missing its phase value name (start or done are currently supported)`, sourceSpan);
+        }
+    }
+    _parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
+        // long format: 'target: eventName'
+        const { eventName, target } = this.parseEventListenerName(name);
+        const prevErrorCount = this.errors.length;
+        const ast = this._parseAction(expression, handlerSpan);
+        const isValid = this.errors.length === prevErrorCount;
+        targetMatchableAttrs.push([name, ast.source]);
+        // Don't try to validate assignment events if there were other
+        // parsing errors to avoid adding more noise to the error logs.
+        if (isAssignmentEvent && isValid && !this._isAllowedAssignmentEvent(ast)) {
+            this._reportError('Unsupported expression in a two-way binding', sourceSpan);
+        }
+        let eventType = exports.ParsedEventType.Regular;
+        if (isAssignmentEvent) {
+            eventType = exports.ParsedEventType.TwoWay;
+        }
+        if (name.startsWith(`${ANIMATE_PREFIX$1}${PROPERTY_PARTS_SEPARATOR}`)) {
+            eventType = exports.ParsedEventType.Animation;
+        }
+        targetEvents.push(new ParsedEvent(eventName, target, eventType, ast, sourceSpan, handlerSpan, keySpan));
+        // Don't detect directives for event names for now,
+        // so don't add the event name to the matchableAttrs
+    }
+    _parseAction(value, sourceSpan) {
+        const absoluteOffset = sourceSpan && sourceSpan.start ? sourceSpan.start.offset : 0;
+        try {
+            const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset, this._interpolationConfig);
+            if (ast) {
+                this.errors.push(...ast.errors);
+            }
+            if (!ast || ast.ast instanceof EmptyExpr$1) {
+                this._reportError(`Empty expressions are not allowed`, sourceSpan);
+                return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+            }
+            return ast;
+        }
+        catch (e) {
+            this._reportError(`${e}`, sourceSpan);
+            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+        }
+    }
+    _reportError(message, sourceSpan, level = ParseErrorLevel.ERROR) {
+        this.errors.push(new ParseError(sourceSpan, message, level));
+    }
+    /**
+     * @param propName the name of the property / attribute
+     * @param sourceSpan
+     * @param isAttr true when binding to an attribute
+     */
+    _validatePropertyOrAttributeName(propName, sourceSpan, isAttr) {
+        const report = isAttr
+            ? this._schemaRegistry.validateAttribute(propName)
+            : this._schemaRegistry.validateProperty(propName);
+        if (report.error) {
+            this._reportError(report.msg, sourceSpan, ParseErrorLevel.ERROR);
+        }
+    }
+    /**
+     * Returns whether a parsed AST is allowed to be used within the event side of a two-way binding.
+     * @param ast Parsed AST to be checked.
+     */
+    _isAllowedAssignmentEvent(ast) {
+        if (ast instanceof ASTWithSource) {
+            return this._isAllowedAssignmentEvent(ast.ast);
+        }
+        if (ast instanceof NonNullAssert) {
+            return this._isAllowedAssignmentEvent(ast.expression);
+        }
+        if (ast instanceof Call &&
+            ast.args.length === 1 &&
+            ast.receiver instanceof PropertyRead &&
+            ast.receiver.name === '$any' &&
+            ast.receiver.receiver instanceof ImplicitReceiver &&
+            !(ast.receiver.receiver instanceof ThisReceiver)) {
+            return this._isAllowedAssignmentEvent(ast.args[0]);
+        }
+        if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
+            if (!hasRecursiveSafeReceiver(ast)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+function hasRecursiveSafeReceiver(ast) {
+    if (ast instanceof SafePropertyRead || ast instanceof SafeKeyedRead) {
+        return true;
+    }
+    if (ast instanceof ParenthesizedExpression) {
+        return hasRecursiveSafeReceiver(ast.expression);
+    }
+    if (ast instanceof PropertyRead || ast instanceof KeyedRead || ast instanceof Call) {
+        return hasRecursiveSafeReceiver(ast.receiver);
+    }
+    return false;
+}
+function isLegacyAnimationLabel(name) {
+    return name[0] == '@';
+}
+function calcPossibleSecurityContexts(registry, selector, propName, isAttribute) {
+    let ctxs;
+    const [namespaceKey, baseSelector] = selector ? splitNsName(selector, false) : [null, selector];
+    const nameToContext = (elName) => {
+        const [nsStr, name] = splitNsName(elName, false);
+        const ns = nsStr ?? namespaceKey;
+        const fullName = ns ? `:${ns}:${name}` : name;
+        return registry.securityContext(fullName, propName, isAttribute);
+    };
+    const allKnownElements = registry.allKnownElementNames();
+    if (baseSelector === null) {
+        ctxs = allKnownElements.map(nameToContext);
+    }
+    else {
+        ctxs = [];
+        CssSelector.parse(baseSelector).forEach((selector) => {
+            let elementNames = selector.element ? [selector.element] : allKnownElements;
+            if (selector.element && !registry.hasElement(selector.element, [])) {
+                const svgElement = `:${SVG_NAMESPACE}:${selector.element}`;
+                const mathElement = `:${MATH_ML_NAMESPACE}:${selector.element}`;
+                if (registry.hasElement(svgElement, [])) {
+                    elementNames = [svgElement];
+                }
+                else if (registry.hasElement(mathElement, [])) {
+                    elementNames = [mathElement];
+                }
+            }
+            const notElementNames = new Set(selector.notSelectors
+                .filter((selector) => selector.isElementSelector())
+                .map((selector) => selector.element?.toLowerCase()));
+            const possibleElementNames = elementNames.filter((elName) => {
+                const elNameLowerCase = elName.toLowerCase();
+                return (!notElementNames.has(elNameLowerCase) &&
+                    !notElementNames.has(splitNsName(elNameLowerCase)[1]));
+            });
+            ctxs.push(...possibleElementNames.map(nameToContext));
+        });
+    }
+    return ctxs.length === 0 ? [SecurityContext.NONE] : Array.from(new Set(ctxs)).sort();
+}
+/**
+ * Compute a new ParseSourceSpan based off an original `sourceSpan` by using
+ * absolute offsets from the specified `absoluteSpan`.
+ *
+ * @param sourceSpan original source span
+ * @param absoluteSpan absolute source span to move to
+ */
+function moveParseSourceSpan(sourceSpan, absoluteSpan) {
+    // The difference of two absolute offsets provide the relative offset
+    const startDiff = absoluteSpan.start - sourceSpan.start.offset;
+    const endDiff = absoluteSpan.end - sourceSpan.end.offset;
+    return new ParseSourceSpan(sourceSpan.start.moveBy(startDiff), sourceSpan.end.moveBy(endDiff), sourceSpan.fullStart.moveBy(startDiff), sourceSpan.details);
+}
+
 const compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
 // Schema containing DOM elements and their properties.
 const domSchema = new DomElementSchemaRegistry();
 // Tag name of the `ng-template` element.
 const NG_TEMPLATE_TAG_NAME = 'ng-template';
 // prefix for any animation binding
-const ANIMATE_PREFIX$1 = 'animate.';
+const ANIMATE_PREFIX = 'animate.';
 function isI18nRootNode(meta) {
     return meta instanceof Message;
 }
@@ -26619,21 +27148,33 @@ function ingestHostBinding(input, bindingParser, constantPool) {
         if (property.isAnimation) {
             bindingKind = BindingKind.Animation;
         }
-        const securityContexts = bindingParser
-            .calcPossibleSecurityContexts(input.componentSelector, property.name, bindingKind === BindingKind.Attribute)
-            .filter((context) => context !== SecurityContext.NONE);
+        const securityContexts = calcHostBindingSecurityContexts(bindingParser, input.componentSelector, property.name, bindingKind === BindingKind.Attribute);
         ingestDomProperty(job, property, bindingKind, securityContexts);
     }
     for (const [name, expr] of Object.entries(input.attributes) ?? []) {
-        const securityContexts = bindingParser
-            .calcPossibleSecurityContexts(input.componentSelector, name, true)
-            .filter((context) => context !== SecurityContext.NONE);
+        const securityContexts = calcHostBindingSecurityContexts(bindingParser, input.componentSelector, name, true);
         ingestHostAttribute(job, name, expr, securityContexts);
     }
     for (const event of input.events ?? []) {
         ingestHostEvent(job, event);
     }
     return job;
+}
+function calcHostBindingSecurityContexts(bindingParser, selector, name, isAttribute) {
+    const declaringSelectorContexts = bindingParser.calcPossibleSecurityContexts(selector, name, isAttribute);
+    const concreteHostContexts = calcPossibleSecurityContexts(domSchema, null, domSchema.getMappedPropName(name), isAttribute);
+    const concreteHostNonNoneContexts = concreteHostContexts.filter((context) => context !== SecurityContext.NONE);
+    const concreteHostNonNoneCount = concreteHostNonNoneContexts.length;
+    const hasConcreteHostNoneContext = concreteHostNonNoneCount !== concreteHostContexts.length;
+    // Host bindings can run against a concrete host whose element name differs from the declaring
+    // selector, including dynamic root components whose TNode name is `#host`.
+    if (hasConcreteHostNoneContext && concreteHostNonNoneCount > 0) {
+        return concreteHostContexts;
+    }
+    if (concreteHostNonNoneContexts.some((context) => !declaringSelectorContexts.includes(context))) {
+        return concreteHostContexts;
+    }
+    return declaringSelectorContexts.filter((context) => context !== SecurityContext.NONE);
 }
 // TODO: We should refactor the parser to use the same types and structures for host bindings as
 // with ordinary components. This would allow us to share a lot more ingestion code.
@@ -27639,7 +28180,7 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
     if (root !== null) {
         // Collect the static attributes for content projection purposes.
         for (const attr of root.attributes) {
-            if (!attr.name.startsWith(ANIMATE_PREFIX$1)) {
+            if (!attr.name.startsWith(ANIMATE_PREFIX)) {
                 const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
                 unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
             }
@@ -27858,508 +28399,6 @@ class HtmlParser extends Parser$1 {
     parse(source, url, options) {
         return super.parse(source, url, options);
     }
-}
-
-const PROPERTY_PARTS_SEPARATOR = '.';
-const ATTRIBUTE_PREFIX = 'attr';
-const ANIMATE_PREFIX = 'animate';
-const CLASS_PREFIX = 'class';
-const STYLE_PREFIX = 'style';
-const TEMPLATE_ATTR_PREFIX$1 = '*';
-const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
-/**
- * Parses bindings in templates and in the directive host area.
- */
-class BindingParser {
-    _exprParser;
-    _interpolationConfig;
-    _schemaRegistry;
-    errors;
-    constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
-        this._exprParser = _exprParser;
-        this._interpolationConfig = _interpolationConfig;
-        this._schemaRegistry = _schemaRegistry;
-        this.errors = errors;
-    }
-    get interpolationConfig() {
-        return this._interpolationConfig;
-    }
-    createBoundHostProperties(properties, sourceSpan) {
-        const boundProps = [];
-        for (const propName of Object.keys(properties)) {
-            const expression = properties[propName];
-            if (typeof expression === 'string') {
-                this.parsePropertyBinding(propName, expression, true, false, sourceSpan, sourceSpan.start.offset, undefined, [], 
-                // Use the `sourceSpan` for  `keySpan`. This isn't really accurate, but neither is the
-                // sourceSpan, as it represents the sourceSpan of the host itself rather than the
-                // source of the host binding (which doesn't exist in the template). Regardless,
-                // neither of these values are used in Ivy but are only here to satisfy the function
-                // signature. This should likely be refactored in the future so that `sourceSpan`
-                // isn't being used inaccurately.
-                boundProps, sourceSpan);
-            }
-            else {
-                this._reportError(`Value of the host property binding "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
-            }
-        }
-        return boundProps;
-    }
-    createDirectiveHostEventAsts(hostListeners, sourceSpan) {
-        const targetEvents = [];
-        for (const propName of Object.keys(hostListeners)) {
-            const expression = hostListeners[propName];
-            if (typeof expression === 'string') {
-                // Use the `sourceSpan` for  `keySpan` and `handlerSpan`. This isn't really accurate, but
-                // neither is the `sourceSpan`, as it represents the `sourceSpan` of the host itself
-                // rather than the source of the host binding (which doesn't exist in the template).
-                // Regardless, neither of these values are used in Ivy but are only here to satisfy the
-                // function signature. This should likely be refactored in the future so that `sourceSpan`
-                // isn't being used inaccurately.
-                this.parseEvent(propName, expression, 
-                /* isAssignmentEvent */ false, sourceSpan, sourceSpan, [], targetEvents, sourceSpan);
-            }
-            else {
-                this._reportError(`Value of the host listener "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
-            }
-        }
-        return targetEvents;
-    }
-    parseInterpolation(value, sourceSpan, interpolatedTokens) {
-        const absoluteOffset = sourceSpan.fullStart.offset;
-        try {
-            const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens, this._interpolationConfig);
-            if (ast) {
-                this.errors.push(...ast.errors);
-            }
-            return ast;
-        }
-        catch (e) {
-            this._reportError(`${e}`, sourceSpan);
-            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-        }
-    }
-    /**
-     * Similar to `parseInterpolation`, but treats the provided string as a single expression
-     * element that would normally appear within the interpolation prefix and suffix (`{{` and `}}`).
-     * This is used for parsing the switch expression in ICUs.
-     */
-    parseInterpolationExpression(expression, sourceSpan) {
-        const absoluteOffset = sourceSpan.start.offset;
-        try {
-            const ast = this._exprParser.parseInterpolationExpression(expression, sourceSpan, absoluteOffset);
-            if (ast) {
-                this.errors.push(...ast.errors);
-            }
-            return ast;
-        }
-        catch (e) {
-            this._reportError(`${e}`, sourceSpan);
-            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-        }
-    }
-    /**
-     * Parses the bindings in a microsyntax expression, and converts them to
-     * `ParsedProperty` or `ParsedVariable`.
-     *
-     * @param tplKey template binding name
-     * @param tplValue template binding value
-     * @param sourceSpan span of template binding relative to entire the template
-     * @param absoluteValueOffset start of the tplValue relative to the entire template
-     * @param targetMatchableAttrs potential attributes to match in the template
-     * @param targetProps target property bindings in the template
-     * @param targetVars target variables in the template
-     */
-    parseInlineTemplateBinding(tplKey, tplValue, sourceSpan, absoluteValueOffset, targetMatchableAttrs, targetProps, targetVars, isIvyAst) {
-        const absoluteKeyOffset = sourceSpan.start.offset + TEMPLATE_ATTR_PREFIX$1.length;
-        const bindings = this._parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
-        for (const binding of bindings) {
-            // sourceSpan is for the entire HTML attribute. bindingSpan is for a particular
-            // binding within the microsyntax expression so it's more narrow than sourceSpan.
-            const bindingSpan = moveParseSourceSpan(sourceSpan, binding.sourceSpan);
-            const key = binding.key.source;
-            const keySpan = moveParseSourceSpan(sourceSpan, binding.key.span);
-            if (binding instanceof VariableBinding) {
-                const value = binding.value ? binding.value.source : '$implicit';
-                const valueSpan = binding.value
-                    ? moveParseSourceSpan(sourceSpan, binding.value.span)
-                    : undefined;
-                targetVars.push(new ParsedVariable(key, value, bindingSpan, keySpan, valueSpan));
-            }
-            else if (binding.value) {
-                const srcSpan = isIvyAst ? bindingSpan : sourceSpan;
-                const valueSpan = moveParseSourceSpan(sourceSpan, binding.value.ast.sourceSpan);
-                this._parsePropertyAst(key, binding.value, false, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-            }
-            else {
-                targetMatchableAttrs.push([key, '' /* value */]);
-                // Since this is a literal attribute with no RHS, source span should be
-                // just the key span.
-                this.parseLiteralAttr(key, null /* value */, keySpan, absoluteValueOffset, undefined /* valueSpan */, targetMatchableAttrs, targetProps, keySpan);
-            }
-        }
-    }
-    /**
-     * Parses the bindings in a microsyntax expression, e.g.
-     * ```html
-     *    <tag *tplKey="let value1 = prop; let value2 = localVar">
-     * ```
-     *
-     * @param tplKey template binding name
-     * @param tplValue template binding value
-     * @param sourceSpan span of template binding relative to entire the template
-     * @param absoluteKeyOffset start of the `tplKey`
-     * @param absoluteValueOffset start of the `tplValue`
-     */
-    _parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset) {
-        try {
-            const bindingsResult = this._exprParser.parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
-            bindingsResult.errors.forEach((e) => this.errors.push(e));
-            bindingsResult.warnings.forEach((warning) => {
-                this._reportError(warning, sourceSpan, ParseErrorLevel.WARNING);
-            });
-            return bindingsResult.templateBindings;
-        }
-        catch (e) {
-            this._reportError(`${e}`, sourceSpan);
-            return [];
-        }
-    }
-    parseLiteralAttr(name, value, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
-        if (isLegacyAnimationLabel(name)) {
-            name = name.substring(1);
-            if (keySpan !== undefined) {
-                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-            }
-            if (value) {
-                this._reportError(`Assigning animation triggers via @prop="exp" attributes with an expression is invalid.` +
-                    ` Use property bindings (e.g. [@prop]="exp") or use an attribute without a value (e.g. @prop) instead.`, sourceSpan, ParseErrorLevel.ERROR);
-            }
-            this._parseLegacyAnimation(name, value, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-        }
-        else {
-            targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, '', absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
-        }
-    }
-    parsePropertyBinding(name, expression, isHost, isPartOfAssignmentBinding, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
-        if (name.length === 0) {
-            this._reportError(`Property name is missing in binding`, sourceSpan);
-        }
-        let isLegacyAnimationProp = false;
-        if (name.startsWith(LEGACY_ANIMATE_PROP_PREFIX)) {
-            isLegacyAnimationProp = true;
-            name = name.substring(LEGACY_ANIMATE_PROP_PREFIX.length);
-            if (keySpan !== undefined) {
-                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + LEGACY_ANIMATE_PROP_PREFIX.length, keySpan.end.offset));
-            }
-        }
-        else if (isLegacyAnimationLabel(name)) {
-            isLegacyAnimationProp = true;
-            name = name.substring(1);
-            if (keySpan !== undefined) {
-                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-            }
-        }
-        if (isLegacyAnimationProp) {
-            this._parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-        }
-        else if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
-            this._parseAnimation(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-        }
-        else {
-            this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-        }
-    }
-    parsePropertyInterpolation(name, value, sourceSpan, valueSpan, targetMatchableAttrs, targetProps, keySpan, interpolatedTokens) {
-        const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
-        if (expr) {
-            this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-            return true;
-        }
-        return false;
-    }
-    _parsePropertyAst(name, ast, isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
-        targetMatchableAttrs.push([name, ast.source]);
-        targetProps.push(new ParsedProperty(name, ast, isPartOfAssignmentBinding ? ParsedPropertyType.TWO_WAY : ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
-    }
-    _parseAnimation(name, ast, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
-        targetMatchableAttrs.push([name, ast.source]);
-        targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.ANIMATION, sourceSpan, keySpan, valueSpan));
-    }
-    _parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
-        if (name.length === 0) {
-            this._reportError('Animation trigger is missing', sourceSpan);
-        }
-        // This will occur when a @trigger is not paired with an expression.
-        // For animations it is valid to not have an expression since */void
-        // states will be applied by angular when the element is attached/detached
-        const ast = this.parseBinding(expression || 'undefined', false, valueSpan || sourceSpan, absoluteOffset);
-        targetMatchableAttrs.push([name, ast.source]);
-        targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.LEGACY_ANIMATION, sourceSpan, keySpan, valueSpan));
-    }
-    parseBinding(value, isHostBinding, sourceSpan, absoluteOffset) {
-        try {
-            const ast = isHostBinding
-                ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig)
-                : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset, this._interpolationConfig);
-            if (ast) {
-                this.errors.push(...ast.errors);
-            }
-            return ast;
-        }
-        catch (e) {
-            this._reportError(`${e}`, sourceSpan);
-            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-        }
-    }
-    createBoundElementProperty(elementSelector, boundProp, skipValidation = false, mapPropertyName = true) {
-        if (boundProp.isLegacyAnimation) {
-            return new BoundElementProperty(boundProp.name, exports.BindingType.LegacyAnimation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
-        }
-        let unit = null;
-        let bindingType = undefined;
-        let boundPropertyName = null;
-        const parts = boundProp.name.split(PROPERTY_PARTS_SEPARATOR);
-        let securityContexts = undefined;
-        // Check for special cases (prefix style, attr, class)
-        if (parts.length > 1) {
-            if (parts[0] == ATTRIBUTE_PREFIX) {
-                boundPropertyName = parts.slice(1).join(PROPERTY_PARTS_SEPARATOR);
-                if (!skipValidation) {
-                    this._validatePropertyOrAttributeName(boundPropertyName, boundProp.sourceSpan, true);
-                }
-                securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, boundPropertyName, true);
-                const nsSeparatorIdx = boundPropertyName.indexOf(':');
-                if (nsSeparatorIdx > -1) {
-                    const ns = boundPropertyName.substring(0, nsSeparatorIdx);
-                    const name = boundPropertyName.substring(nsSeparatorIdx + 1);
-                    boundPropertyName = mergeNsAndName(ns, name);
-                }
-                bindingType = exports.BindingType.Attribute;
-            }
-            else if (parts[0] == CLASS_PREFIX) {
-                boundPropertyName = parts[1];
-                bindingType = exports.BindingType.Class;
-                securityContexts = [SecurityContext.NONE];
-            }
-            else if (parts[0] == STYLE_PREFIX) {
-                unit = parts.length > 2 ? parts[2] : null;
-                boundPropertyName = parts[1];
-                bindingType = exports.BindingType.Style;
-                securityContexts = [SecurityContext.STYLE];
-            }
-            else if (parts[0] == ANIMATE_PREFIX) {
-                boundPropertyName = boundProp.name;
-                bindingType = exports.BindingType.Animation;
-                securityContexts = [SecurityContext.NONE];
-            }
-        }
-        // If not a special case, use the full property name
-        if (boundPropertyName === null) {
-            const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
-            boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
-            securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
-            bindingType =
-                boundProp.type === ParsedPropertyType.TWO_WAY ? exports.BindingType.TwoWay : exports.BindingType.Property;
-            if (!skipValidation) {
-                this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
-            }
-        }
-        return new BoundElementProperty(boundPropertyName, bindingType, securityContexts[0], boundProp.expression, unit, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
-    }
-    parseEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
-        if (name.length === 0) {
-            this._reportError(`Event name is missing in binding`, sourceSpan);
-        }
-        if (isLegacyAnimationLabel(name)) {
-            name = name.slice(1);
-            if (keySpan !== undefined) {
-                keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-            }
-            this._parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan);
-        }
-        else {
-            this._parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan);
-        }
-    }
-    calcPossibleSecurityContexts(selector, propName, isAttribute) {
-        const prop = this._schemaRegistry.getMappedPropName(propName);
-        return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
-    }
-    parseEventListenerName(rawName) {
-        const [target, eventName] = splitAtColon(rawName, [null, rawName]);
-        return { eventName: eventName, target };
-    }
-    parseLegacyAnimationEventName(rawName) {
-        const matches = splitAtPeriod(rawName, [rawName, null]);
-        return { eventName: matches[0], phase: matches[1] === null ? null : matches[1].toLowerCase() };
-    }
-    _parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan) {
-        const { eventName, phase } = this.parseLegacyAnimationEventName(name);
-        const ast = this._parseAction(expression, handlerSpan);
-        targetEvents.push(new ParsedEvent(eventName, phase, exports.ParsedEventType.LegacyAnimation, ast, sourceSpan, handlerSpan, keySpan));
-        if (eventName.length === 0) {
-            this._reportError(`Animation event name is missing in binding`, sourceSpan);
-        }
-        if (phase) {
-            if (phase !== 'start' && phase !== 'done') {
-                this._reportError(`The provided animation output phase value "${phase}" for "@${eventName}" is not supported (use start or done)`, sourceSpan);
-            }
-        }
-        else {
-            this._reportError(`The animation trigger output event (@${eventName}) is missing its phase value name (start or done are currently supported)`, sourceSpan);
-        }
-    }
-    _parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
-        // long format: 'target: eventName'
-        const { eventName, target } = this.parseEventListenerName(name);
-        const prevErrorCount = this.errors.length;
-        const ast = this._parseAction(expression, handlerSpan);
-        const isValid = this.errors.length === prevErrorCount;
-        targetMatchableAttrs.push([name, ast.source]);
-        // Don't try to validate assignment events if there were other
-        // parsing errors to avoid adding more noise to the error logs.
-        if (isAssignmentEvent && isValid && !this._isAllowedAssignmentEvent(ast)) {
-            this._reportError('Unsupported expression in a two-way binding', sourceSpan);
-        }
-        let eventType = exports.ParsedEventType.Regular;
-        if (isAssignmentEvent) {
-            eventType = exports.ParsedEventType.TwoWay;
-        }
-        if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
-            eventType = exports.ParsedEventType.Animation;
-        }
-        targetEvents.push(new ParsedEvent(eventName, target, eventType, ast, sourceSpan, handlerSpan, keySpan));
-        // Don't detect directives for event names for now,
-        // so don't add the event name to the matchableAttrs
-    }
-    _parseAction(value, sourceSpan) {
-        const absoluteOffset = sourceSpan && sourceSpan.start ? sourceSpan.start.offset : 0;
-        try {
-            const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset, this._interpolationConfig);
-            if (ast) {
-                this.errors.push(...ast.errors);
-            }
-            if (!ast || ast.ast instanceof EmptyExpr$1) {
-                this._reportError(`Empty expressions are not allowed`, sourceSpan);
-                return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-            }
-            return ast;
-        }
-        catch (e) {
-            this._reportError(`${e}`, sourceSpan);
-            return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-        }
-    }
-    _reportError(message, sourceSpan, level = ParseErrorLevel.ERROR) {
-        this.errors.push(new ParseError(sourceSpan, message, level));
-    }
-    /**
-     * @param propName the name of the property / attribute
-     * @param sourceSpan
-     * @param isAttr true when binding to an attribute
-     */
-    _validatePropertyOrAttributeName(propName, sourceSpan, isAttr) {
-        const report = isAttr
-            ? this._schemaRegistry.validateAttribute(propName)
-            : this._schemaRegistry.validateProperty(propName);
-        if (report.error) {
-            this._reportError(report.msg, sourceSpan, ParseErrorLevel.ERROR);
-        }
-    }
-    /**
-     * Returns whether a parsed AST is allowed to be used within the event side of a two-way binding.
-     * @param ast Parsed AST to be checked.
-     */
-    _isAllowedAssignmentEvent(ast) {
-        if (ast instanceof ASTWithSource) {
-            return this._isAllowedAssignmentEvent(ast.ast);
-        }
-        if (ast instanceof NonNullAssert) {
-            return this._isAllowedAssignmentEvent(ast.expression);
-        }
-        if (ast instanceof Call &&
-            ast.args.length === 1 &&
-            ast.receiver instanceof PropertyRead &&
-            ast.receiver.name === '$any' &&
-            ast.receiver.receiver instanceof ImplicitReceiver &&
-            !(ast.receiver.receiver instanceof ThisReceiver)) {
-            return this._isAllowedAssignmentEvent(ast.args[0]);
-        }
-        if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
-            if (!hasRecursiveSafeReceiver(ast)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-function hasRecursiveSafeReceiver(ast) {
-    if (ast instanceof SafePropertyRead || ast instanceof SafeKeyedRead) {
-        return true;
-    }
-    if (ast instanceof ParenthesizedExpression) {
-        return hasRecursiveSafeReceiver(ast.expression);
-    }
-    if (ast instanceof PropertyRead || ast instanceof KeyedRead || ast instanceof Call) {
-        return hasRecursiveSafeReceiver(ast.receiver);
-    }
-    return false;
-}
-function isLegacyAnimationLabel(name) {
-    return name[0] == '@';
-}
-function calcPossibleSecurityContexts(registry, selector, propName, isAttribute) {
-    let ctxs;
-    const [namespaceKey, baseSelector] = selector ? splitNsName(selector, false) : [null, selector];
-    const nameToContext = (elName) => {
-        const [nsStr, name] = splitNsName(elName, false);
-        const ns = nsStr ?? namespaceKey;
-        const fullName = ns ? `:${ns}:${name}` : name;
-        return registry.securityContext(fullName, propName, isAttribute);
-    };
-    const allKnownElements = registry.allKnownElementNames();
-    if (baseSelector === null) {
-        ctxs = allKnownElements.map(nameToContext);
-    }
-    else {
-        ctxs = [];
-        CssSelector.parse(baseSelector).forEach((selector) => {
-            let elementNames = selector.element ? [selector.element] : allKnownElements;
-            if (selector.element && !registry.hasElement(selector.element, [])) {
-                const svgElement = `:${SVG_NAMESPACE}:${selector.element}`;
-                const mathElement = `:${MATH_ML_NAMESPACE}:${selector.element}`;
-                if (registry.hasElement(svgElement, [])) {
-                    elementNames = [svgElement];
-                }
-                else if (registry.hasElement(mathElement, [])) {
-                    elementNames = [mathElement];
-                }
-            }
-            const notElementNames = new Set(selector.notSelectors
-                .filter((selector) => selector.isElementSelector())
-                .map((selector) => selector.element?.toLowerCase()));
-            const possibleElementNames = elementNames.filter((elName) => {
-                const elNameLowerCase = elName.toLowerCase();
-                return (!notElementNames.has(elNameLowerCase) &&
-                    !notElementNames.has(splitNsName(elNameLowerCase)[1]));
-            });
-            ctxs.push(...possibleElementNames.map(nameToContext));
-        });
-    }
-    return ctxs.length === 0 ? [SecurityContext.NONE] : Array.from(new Set(ctxs)).sort();
-}
-/**
- * Compute a new ParseSourceSpan based off an original `sourceSpan` by using
- * absolute offsets from the specified `absoluteSpan`.
- *
- * @param sourceSpan original source span
- * @param absoluteSpan absolute source span to move to
- */
-function moveParseSourceSpan(sourceSpan, absoluteSpan) {
-    // The difference of two absolute offsets provide the relative offset
-    const startDiff = absoluteSpan.start - sourceSpan.start.offset;
-    const endDiff = absoluteSpan.end - sourceSpan.end.offset;
-    return new ParseSourceSpan(sourceSpan.start.moveBy(startDiff), sourceSpan.end.moveBy(endDiff), sourceSpan.fullStart.moveBy(startDiff), sourceSpan.details);
 }
 
 // Some of the code comes from WebComponents.JS
@@ -32932,7 +32971,7 @@ function isAttrNode(ast) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-const VERSION = new Version('20.3.27+sha-72a8512');
+const VERSION = new Version('20.3.27+sha-2f96c80');
 
 //////////////////////////////////////
 // THIS FILE HAS GLOBAL SIDE EFFECT //
@@ -33994,7 +34033,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-BPMmui7m.cjs', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('project_tsconfig_paths-DrrG6kAz.cjs', document.baseURI).href));
 // Note, when this code loads in the browser, `url` may be an empty `{}` due to the Closure shims.
 const currentFileName = isCommonJS
     ? __filename
