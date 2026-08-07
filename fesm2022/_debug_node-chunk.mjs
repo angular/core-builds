@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.1+sha-adb770b
+ * @license Angular v22.2.0-next.1+sha-4631a6e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9026,8 +9026,9 @@ function createHostElement(componentDef, renderer) {
   const namespace = tagName === 'svg' ? SVG_NAMESPACE : tagName === 'math' ? MATH_ML_NAMESPACE : null;
   return createElementNode(renderer, tagName, namespace);
 }
-function assertNotScriptHostElement(tagName) {
-  if (tagName?.toLowerCase() === 'script') {
+function assertNotScriptHostElement(element) {
+  const elementName = element && 'localName' in element && typeof element.localName === 'string' ? element.localName : element?.tagName;
+  if (elementName?.toLowerCase() === 'script') {
     throw new RuntimeError(905, ngDevMode && `"<script>" tag is not allowed as a component host element.`);
   }
 }
@@ -9082,7 +9083,7 @@ class ComponentFactory {
     const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives);
     const hostRenderer = environment.rendererFactory.createRenderer(null, cmpDef);
     const hostElement = rootSelectorOrNode ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector) : createHostElement(cmpDef, hostRenderer);
-    assertNotScriptHostElement(hostElement?.tagName);
+    assertNotScriptHostElement(hostElement);
     const sharedStylesHost = rootViewInjector.get(SHARED_STYLES_HOST, null);
     const styleHost = getStyleHost(hostElement, () => rootViewInjector.get(DOCUMENT$1, null) ?? getDocument());
     if (sharedStylesHost) sharedStylesHost.addHost(styleHost);
@@ -9123,7 +9124,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.1+sha-adb770b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.1+sha-4631a6e'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12262,7 +12263,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.1+sha-adb770b';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.1+sha-4631a6e';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
