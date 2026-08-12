@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.1+sha-3032e7f
+ * @license Angular v22.1.1+sha-e9660b1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3940,7 +3940,121 @@ const MAX_ANIMATION_TIMEOUT = new InjectionToken(typeof ngDevMode !== 'undefined
 });
 const MAX_ANIMATION_TIMEOUT_DEFAULT = 4000;
 
+function parseCssTimeUnitsToMs(value) {
+  if (!value) return 0;
+  const multiplier = value.toLowerCase().indexOf('ms') > -1 ? 1 : 1000;
+  return parseFloat(value) * multiplier;
+}
+function parseCssPropertyValue(computedStyle, name) {
+  const value = computedStyle.getPropertyValue(name);
+  return value.split(',').map(part => part.trim());
+}
+function getLongestComputedTransition(computedStyle) {
+  const transitionedProperties = parseCssPropertyValue(computedStyle, 'transition-property');
+  const rawDurations = parseCssPropertyValue(computedStyle, 'transition-duration');
+  const rawDelays = parseCssPropertyValue(computedStyle, 'transition-delay');
+  const longest = {
+    propertyName: '',
+    duration: 0,
+    animationName: undefined
+  };
+  for (let i = 0; i < transitionedProperties.length; i++) {
+    const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
+    if (duration > longest.duration) {
+      longest.propertyName = transitionedProperties[i];
+      longest.duration = duration;
+    }
+  }
+  return longest;
+}
+function getLongestComputedAnimation(computedStyle) {
+  const rawNames = parseCssPropertyValue(computedStyle, 'animation-name');
+  const rawDelays = parseCssPropertyValue(computedStyle, 'animation-delay');
+  const rawDurations = parseCssPropertyValue(computedStyle, 'animation-duration');
+  const rawIterationCounts = parseCssPropertyValue(computedStyle, 'animation-iteration-count');
+  const longest = {
+    animationName: '',
+    propertyName: undefined,
+    duration: 0
+  };
+  for (let i = 0; i < rawNames.length; i++) {
+    const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
+    const iterationCount = rawIterationCounts[i];
+    if (duration > longest.duration && iterationCount !== 'infinite') {
+      longest.animationName = rawNames[i];
+      longest.duration = duration;
+    }
+  }
+  return longest;
+}
+function isShorterThanExistingAnimation(existing, longest) {
+  return existing !== undefined && existing.duration > longest.duration;
+}
+function longestExists(longest) {
+  return (longest.animationName != undefined || longest.propertyName != undefined) && longest.duration > 0;
+}
+function getAnimationDuration(animation) {
+  const timing = animation.effect?.getTiming();
+  if (timing === undefined) return undefined;
+  const animationDuration = typeof timing.duration === 'number' ? timing.duration : 0;
+  let duration = (timing.delay ?? 0) + animationDuration;
+  const playbackRate = animation.playbackRate;
+  if (playbackRate !== undefined && playbackRate !== 0 && playbackRate !== 1) {
+    duration /= Math.abs(playbackRate);
+  }
+  return duration;
+}
+function determineLongestAnimationFromComputedStyles(el, animationsMap) {
+  const computedStyle = getComputedStyle(el);
+  const longestAnimation = getLongestComputedAnimation(computedStyle);
+  const longestTransition = getLongestComputedTransition(computedStyle);
+  const longest = longestAnimation.duration > longestTransition.duration ? longestAnimation : longestTransition;
+  if (isShorterThanExistingAnimation(animationsMap.get(el), longest)) return;
+  if (longestExists(longest)) {
+    animationsMap.set(el, longest);
+  }
+}
+function determineLongestAnimation(el, animationsMap, areAnimationSupported) {
+  if (!areAnimationSupported) return;
+  const animations = el.getAnimations();
+  return animations.length === 0 ? determineLongestAnimationFromComputedStyles(el, animationsMap) : determineLongestAnimationFromElementAnimations(el, animationsMap, animations);
+}
+function determineLongestAnimationFromElementAnimations(el, animationsMap, animations) {
+  let longest = {
+    animationName: undefined,
+    propertyName: undefined,
+    duration: 0
+  };
+  for (const animation of animations) {
+    const timing = animation.effect?.getTiming();
+    if (timing?.iterations === Infinity) {
+      continue;
+    }
+    const duration = getAnimationDuration(animation) ?? 0;
+    let propertyName;
+    let animationName;
+    if (animation.animationName) {
+      animationName = animation.animationName;
+    } else {
+      propertyName = animation.transitionProperty;
+    }
+    if (duration >= longest.duration) {
+      longest = {
+        animationName,
+        propertyName,
+        duration
+      };
+    }
+  }
+  if (isShorterThanExistingAnimation(animationsMap.get(el), longest)) return;
+  if (longestExists(longest)) {
+    animationsMap.set(el, longest);
+  }
+}
+const allLeavingAnimations = new Set();
+
 const DEFAULT_ANIMATIONS_DISABLED = false;
+const ANIMATION_DURATION_TOLERANCE_MS = 1;
 const areAnimationSupported = (typeof ngServerMode === 'undefined' || !ngServerMode) && typeof document !== 'undefined' && typeof document?.documentElement?.getAnimations === 'function';
 function areAnimationsDisabled(lView) {
   const injector = lView[INJECTOR];
@@ -4098,7 +4212,21 @@ function getEventTarget(event) {
 function isLongestAnimation(event, nativeElement) {
   const longestAnimation = longestAnimations.get(nativeElement);
   if (longestAnimation === undefined) return true;
-  return nativeElement === getEventTarget(event) && (longestAnimation.animationName !== undefined && event.animationName === longestAnimation.animationName || longestAnimation.propertyName !== undefined && (longestAnimation.propertyName === 'all' || event.propertyName === longestAnimation.propertyName));
+  if (nativeElement !== getEventTarget(event)) return false;
+  const eventAnimation = event.animation;
+  if (eventAnimation) {
+    const eventAnimationDuration = getAnimationDuration(eventAnimation);
+    if (eventAnimationDuration !== undefined && eventAnimationDuration + ANIMATION_DURATION_TOLERANCE_MS < longestAnimation.duration) {
+      return false;
+    }
+  }
+  if (longestAnimation.animationName !== undefined) {
+    return event.animationName === longestAnimation.animationName;
+  }
+  if (longestAnimation.propertyName !== undefined) {
+    return longestAnimation.propertyName === 'all' || event.propertyName === longestAnimation.propertyName;
+  }
+  return false;
 }
 function addAnimationToLView(animations, tNode, fn) {
   const nodeAnimations = animations.get(tNode.index) ?? {
@@ -4126,113 +4254,6 @@ function leaveAnimationFunctionCleanup(lView, tNode, nativeElement, resolvers, c
   cleanupAfterLeaveAnimations(resolvers, cleanupFns);
   clearLViewNodeAnimationResolvers(lView, tNode);
 }
-
-function parseCssTimeUnitsToMs(value) {
-  if (!value) return 0;
-  const multiplier = value.toLowerCase().indexOf('ms') > -1 ? 1 : 1000;
-  return parseFloat(value) * multiplier;
-}
-function parseCssPropertyValue(computedStyle, name) {
-  const value = computedStyle.getPropertyValue(name);
-  return value.split(',').map(part => part.trim());
-}
-function getLongestComputedTransition(computedStyle) {
-  const transitionedProperties = parseCssPropertyValue(computedStyle, 'transition-property');
-  const rawDurations = parseCssPropertyValue(computedStyle, 'transition-duration');
-  const rawDelays = parseCssPropertyValue(computedStyle, 'transition-delay');
-  const longest = {
-    propertyName: '',
-    duration: 0,
-    animationName: undefined
-  };
-  for (let i = 0; i < transitionedProperties.length; i++) {
-    const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
-    if (duration > longest.duration) {
-      longest.propertyName = transitionedProperties[i];
-      longest.duration = duration;
-    }
-  }
-  return longest;
-}
-function getLongestComputedAnimation(computedStyle) {
-  const rawNames = parseCssPropertyValue(computedStyle, 'animation-name');
-  const rawDelays = parseCssPropertyValue(computedStyle, 'animation-delay');
-  const rawDurations = parseCssPropertyValue(computedStyle, 'animation-duration');
-  const rawIterationCounts = parseCssPropertyValue(computedStyle, 'animation-iteration-count');
-  const longest = {
-    animationName: '',
-    propertyName: undefined,
-    duration: 0
-  };
-  for (let i = 0; i < rawNames.length; i++) {
-    const duration = parseCssTimeUnitsToMs(rawDelays[i]) + parseCssTimeUnitsToMs(rawDurations[i]);
-    const iterationCount = rawIterationCounts[i];
-    if (duration > longest.duration && iterationCount !== 'infinite') {
-      longest.animationName = rawNames[i];
-      longest.duration = duration;
-    }
-  }
-  return longest;
-}
-function isShorterThanExistingAnimation(existing, longest) {
-  return existing !== undefined && existing.duration > longest.duration;
-}
-function longestExists(longest) {
-  return (longest.animationName != undefined || longest.propertyName != undefined) && longest.duration > 0;
-}
-function determineLongestAnimationFromComputedStyles(el, animationsMap) {
-  const computedStyle = getComputedStyle(el);
-  const longestAnimation = getLongestComputedAnimation(computedStyle);
-  const longestTransition = getLongestComputedTransition(computedStyle);
-  const longest = longestAnimation.duration > longestTransition.duration ? longestAnimation : longestTransition;
-  if (isShorterThanExistingAnimation(animationsMap.get(el), longest)) return;
-  if (longestExists(longest)) {
-    animationsMap.set(el, longest);
-  }
-}
-function determineLongestAnimation(el, animationsMap, areAnimationSupported) {
-  if (!areAnimationSupported) return;
-  const animations = el.getAnimations();
-  return animations.length === 0 ? determineLongestAnimationFromComputedStyles(el, animationsMap) : determineLongestAnimationFromElementAnimations(el, animationsMap, animations);
-}
-function determineLongestAnimationFromElementAnimations(el, animationsMap, animations) {
-  let longest = {
-    animationName: undefined,
-    propertyName: undefined,
-    duration: 0
-  };
-  for (const animation of animations) {
-    const timing = animation.effect?.getTiming();
-    if (timing?.iterations === Infinity) {
-      continue;
-    }
-    const animDuration = typeof timing?.duration === 'number' ? timing.duration : 0;
-    let duration = (timing?.delay ?? 0) + animDuration;
-    const playbackRate = animation.playbackRate;
-    if (playbackRate !== undefined && playbackRate !== 0 && playbackRate !== 1) {
-      duration /= Math.abs(playbackRate);
-    }
-    let propertyName;
-    let animationName;
-    if (animation.animationName) {
-      animationName = animation.animationName;
-    } else {
-      propertyName = animation.transitionProperty;
-    }
-    if (duration >= longest.duration) {
-      longest = {
-        animationName,
-        propertyName,
-        duration
-      };
-    }
-  }
-  if (isShorterThanExistingAnimation(animationsMap.get(el), longest)) return;
-  if (longestExists(longest)) {
-    animationsMap.set(el, longest);
-  }
-}
-const allLeavingAnimations = new Set();
 
 var TracingAction;
 (function (TracingAction) {
@@ -9130,7 +9151,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.1+sha-3032e7f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.1+sha-e9660b1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12269,7 +12290,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.1+sha-3032e7f';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.1+sha-e9660b1';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
