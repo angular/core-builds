@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.2.0-next.1+sha-c9990c4
+ * @license Angular v22.2.0-next.1+sha-6f848db
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { ValueEqualityFn } from './_formatter-chunk.js';
-import { OutputRef, DestroyRef, Injector, Signal } from './_chrome_dev_tools_performance-chunk.js';
-import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './_api-chunk.js';
+import { ValueEqualityFn } from './primitives-signals.js';
+import { OutputRef, DestroyRef, Injector, Signal } from './core.js';
+import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './core.js';
 import './_event_dispatcher-chunk.js';
 import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import '@angular/core';
