@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.2+sha-148fee3
+ * @license Angular v22.1.2+sha-a9f8fb2
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2958,7 +2958,7 @@ interface NgModuleScopeInfoFromDecorator {
  *  - NgModule's annotation imports/exports/declarations fields
  *  - standalone component annotation imports field
  */
-type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>) | any[];
+type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>) | readonly any[];
 
 /**
  * Basic set of data structures used for identifying a defer block
