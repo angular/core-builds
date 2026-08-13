@@ -1,13 +1,14 @@
 /**
- * @license Angular v22.1.1+sha-e9660b1
+ * @license Angular v22.1.1+sha-910f391
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
-import { InjectionToken, Type, ProviderToken, InjectOptions } from './_chrome_dev_tools_performance-chunk.js';
-import { DeferBlockDetails, DeferBlockState, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, DeferBlockBehavior, PlatformRef, NgModule, Component, Directive, Pipe, Binding, Navigation, NavigationHistoryEntry, NavigationNavigateOptions, NavigationResult, NavigationOptions, NavigateEvent, NavigationInterceptOptions, NavigationDestination, NavigationCurrentEntryChangeEvent, NavigationTransition, NavigationUpdateCurrentEntryOptions, NavigationReloadOptions } from './_debug_node-chunk.js';
+import { InjectionToken, Type, ProviderToken, InjectOptions } from './core.js';
+import { DeferBlockState, DeferBlockBehavior } from './_debug_node-chunk.js';
+import { ɵDeferBlockDetails as DeferBlockDetails, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
 import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
