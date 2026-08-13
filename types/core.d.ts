@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-5ed071d
+ * @license Angular v22.2.0-next.2+sha-d3d3bc6
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1761,7 +1761,7 @@ declare function setClassMetadataAsync(type: Type$1<any> | AbstractType<any>, de
  * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
  * being tree-shaken away during production builds.
  */
-declare function setClassMetadata(type: any, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
+declare function setClassMetadata(type: any, decorators: readonly any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
 } | null): void;
 
