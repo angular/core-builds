@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-d3d3bc6
+ * @license Angular v22.2.0-next.2+sha-c6e4a36
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9151,7 +9151,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-d3d3bc6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-c6e4a36'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12147,6 +12147,9 @@ function isComputedNode(node) {
 function isTemplateEffectNode(node) {
   return node.kind === 'template';
 }
+function isEffectNode(node) {
+  return node.kind === 'effect';
+}
 function isSignalNode(node) {
   return node.kind === 'signal';
 }
@@ -12198,6 +12201,14 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
         kind: consumer.kind,
         epoch: consumer.version,
         debuggableFn: consumer.lView?.[CONTEXT]?.constructor,
+        id
+      });
+    } else if (isEffectNode(consumer)) {
+      debugSignalGraphNodes.push({
+        label: consumer.debugName,
+        kind: consumer.kind,
+        epoch: consumer.version,
+        debuggableFn: consumer.fn,
         id
       });
     } else {
@@ -12290,7 +12301,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-d3d3bc6';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-c6e4a36';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14831,6 +14842,9 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, name, index) {
     setSegmentHead(hydrationInfo, index, native.nextSibling);
   }
   if (hydrationInfo) {
+    if (native == null) {
+      throw new RuntimeError(-502, ngDevMode ? `During hydration Angular expected a "<${name}>" element at this location (tNode #${tNode.index}), but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.` : `<${name}>`);
+    }
     if (native.nodeType !== Node.ELEMENT_NODE) {
       const node = native;
       const textContent = node.textContent && node.textContent.slice(0, 50);
