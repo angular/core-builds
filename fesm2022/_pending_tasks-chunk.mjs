@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-5980138
+ * @license Angular v22.2.0-next.2+sha-1c2b057
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.2.0-next.2+sha-5980138');
+const VERSION = /* @__PURE__ */new Version('22.2.0-next.2+sha-1c2b057');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -3111,6 +3111,7 @@ function createViewEffect(view, notifier, fn) {
   node.view = view;
   node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
   node.notifier = notifier;
+  node.userFn = fn;
   node.fn = createEffectFn(node, fn);
   view[EFFECTS] ??= new Set();
   view[EFFECTS].add(node);
@@ -3119,6 +3120,7 @@ function createViewEffect(view, notifier, fn) {
 }
 function createRootEffect(fn, scheduler, notifier) {
   const node = Object.create(ROOT_EFFECT_NODE);
+  node.userFn = fn;
   node.fn = createEffectFn(node, fn);
   node.scheduler = scheduler;
   node.notifier = notifier;

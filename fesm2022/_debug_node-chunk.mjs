@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-5980138
+ * @license Angular v22.2.0-next.2+sha-1c2b057
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9151,7 +9151,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-5980138'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-1c2b057'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12153,6 +12153,12 @@ function isEffectNode(node) {
 function isSignalNode(node) {
   return node.kind === 'signal';
 }
+function isLinkedSignalNode(node) {
+  return node.kind === 'linkedSignal';
+}
+function isAfterRenderEffectPhaseNode(node) {
+  return node.kind === 'afterRenderEffectPhase';
+}
 function getTemplateConsumer(injector) {
   const tNode = getNodeInjectorTNode(injector);
   assertTNode(tNode);
@@ -12187,6 +12193,15 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
         debuggableFn: consumer.computation,
         id
       });
+    } else if (isLinkedSignalNode(consumer)) {
+      debugSignalGraphNodes.push({
+        label: consumer.debugName,
+        value: consumer.value,
+        kind: consumer.kind,
+        epoch: consumer.version,
+        debuggableFn: consumer.computation,
+        id
+      });
     } else if (isSignalNode(consumer)) {
       debugSignalGraphNodes.push({
         label: consumer.debugName,
@@ -12208,7 +12223,15 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
         label: consumer.debugName,
         kind: consumer.kind,
         epoch: consumer.version,
-        debuggableFn: consumer.fn,
+        debuggableFn: consumer.userFn,
+        id
+      });
+    } else if (isAfterRenderEffectPhaseNode(consumer)) {
+      debugSignalGraphNodes.push({
+        label: consumer.debugName,
+        kind: consumer.kind,
+        epoch: consumer.version,
+        debuggableFn: consumer.userFn,
         id
       });
     } else {
@@ -12301,7 +12324,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-5980138';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-1c2b057';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
