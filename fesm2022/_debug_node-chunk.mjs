@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-46d2cb7
+ * @license Angular v22.2.0-next.2+sha-48a0fd6
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5955,6 +5955,9 @@ function runEffectsInView(view) {
       } else {
         effect.zone.run(() => effect.run());
       }
+      if (view[EFFECTS] === null) {
+        return;
+      }
     }
     tryFlushEffects = foundDirtyEffect && !!(view[FLAGS] & 8192);
   }
@@ -9151,7 +9154,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-46d2cb7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.2+sha-48a0fd6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12324,7 +12327,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-46d2cb7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.2+sha-48a0fd6';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
