@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.2+sha-abe019d
+ * @license Angular v22.1.2+sha-94f0b9a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9154,7 +9154,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.2+sha-abe019d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.2+sha-94f0b9a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12293,7 +12293,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.2+sha-abe019d';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.2+sha-94f0b9a';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -13092,7 +13092,6 @@ class IdleScheduler {
     }
     const key = getIdleRequestKey(options);
     const callback = deadline => {
-      this.cancelBucket(bucket);
       for (const cb of bucket.queue) {
         cb();
         this.applicationRef._tick();
@@ -13102,6 +13101,7 @@ class IdleScheduler {
           break;
         }
       }
+      bucket.idleId = null;
       if (bucket.queue.size > 0) {
         this.scheduleBucket(bucket, options);
       } else {
