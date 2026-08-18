@@ -1,11 +1,11 @@
 /**
- * @license Angular v22.2.0-next.2+sha-48a0fd6
+ * @license Angular v22.2.0-next.2+sha-732e505
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, getInjectableDef, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
+import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, getInjectableDef, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
 import * as i0 from '@angular/core';
 import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -614,7 +614,7 @@ class TestBedCompiler {
     return this.resolvers.component.hasOverrides(type);
   }
   verifyNoStandaloneFlagOverrides(type, override) {
-    if (override.add?.hasOwnProperty('standalone') || override.set?.hasOwnProperty('standalone') || override.remove?.hasOwnProperty('standalone')) {
+    if (override.add && Object.hasOwn(override.add, 'standalone') || override.set && Object.hasOwn(override.set, 'standalone') || override.remove && Object.hasOwn(override.remove, 'standalone')) {
       throw new Error(`An override for the ${type.name} class has the \`standalone\` flag. ` + `Changing the \`standalone\` flag via TestBed overrides is not supported.`);
     }
   }
@@ -923,7 +923,7 @@ class TestBedCompiler {
     this.maybeRegisterComponentWithAsyncMetadata(type);
     const component = this.resolvers.component.resolve(type);
     if (component) {
-      if (isComponentDefPendingResolution(type) || !type.hasOwnProperty(NG_COMP_DEF)) {
+      if (isComponentDefPendingResolution(type) || !Object.hasOwn(type, NG_COMP_DEF)) {
         this.pendingComponents.add(type);
       }
       this.seenComponents.add(type);
@@ -934,14 +934,14 @@ class TestBedCompiler {
     }
     const directive = this.resolvers.directive.resolve(type);
     if (directive) {
-      if (!type.hasOwnProperty(NG_DIR_DEF)) {
+      if (!Object.hasOwn(type, NG_DIR_DEF)) {
         this.pendingDirectives.add(type);
       }
       this.seenDirectives.add(type);
       return;
     }
     const pipe = this.resolvers.pipe.resolve(type);
-    if (pipe && !type.hasOwnProperty(NG_PIPE_DEF)) {
+    if (pipe && !Object.hasOwn(type, NG_PIPE_DEF)) {
       this.pendingPipes.add(type);
       return;
     }
@@ -1195,7 +1195,7 @@ function getComponentDef(value) {
   return value.ɵcmp ?? null;
 }
 function hasNgModuleDef(value) {
-  return value.hasOwnProperty('ɵmod');
+  return Object.hasOwn(value, 'ɵmod');
 }
 function isNgModule(value) {
   return hasNgModuleDef(value);
@@ -1238,7 +1238,7 @@ function getProviderToken(provider) {
   return getProviderField(provider, 'provide') || provider;
 }
 function isModuleWithProviders(value) {
-  return value.hasOwnProperty('ngModule');
+  return Object.hasOwn(value, 'ngModule');
 }
 function forEachRight(values, fn) {
   for (let idx = values.length - 1; idx >= 0; idx--) {
@@ -2204,11 +2204,11 @@ function dispatchNavigateEvent({
     if (options.history === 'push' || options.history === 'replace') {
       event.navigationType = options.history;
     }
-    if (options.hasOwnProperty('state')) {
+    if (Object.hasOwn(options, 'state')) {
       event.destination.state = options.state;
     }
     event.destination.url = destinationUrl.href;
-    if (options.hasOwnProperty('info')) {
+    if (Object.hasOwn(options, 'info')) {
       event.info = options.info;
     }
   }

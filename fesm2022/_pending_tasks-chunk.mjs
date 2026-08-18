@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-48a0fd6
+ * @license Angular v22.2.0-next.2+sha-732e505
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.2.0-next.2+sha-48a0fd6');
+const VERSION = /* @__PURE__ */new Version('22.2.0-next.2+sha-732e505');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -67,7 +67,7 @@ function getClosureSafeProperty(objWithPropertyToExtract) {
 }
 function fillProperties(target, source) {
   for (const key in source) {
-    if (source.hasOwnProperty(key) && !target.hasOwnProperty(key)) {
+    if (Object.hasOwn(source, key) && !Object.hasOwn(target, key)) {
       target[key] = source[key];
     }
   }
@@ -122,7 +122,7 @@ function resolveForwardRef(type) {
   return isForwardRef(type) ? type() : type;
 }
 function isForwardRef(fn) {
-  return typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) && fn.__forward_ref__ === forwardRef;
+  return typeof fn === 'function' && Object.hasOwn(fn, __forward_ref__) && fn.__forward_ref__ === forwardRef;
 }
 
 function assertNumber(actual, msg) {
@@ -246,7 +246,7 @@ function isInjectable(type) {
   return getInjectableDef(type) !== null;
 }
 function getOwnDefinition(type, field) {
-  return type.hasOwnProperty(field) && type[field] || null;
+  return Object.hasOwn(type, field) && type[field] || null;
 }
 function getInheritedInjectableDef(type) {
   const def = type?.[NG_PROV_DEF] ?? null;
@@ -258,7 +258,7 @@ function getInheritedInjectableDef(type) {
   }
 }
 function getInjectorDef(type) {
-  return type && type.hasOwnProperty(NG_INJ_DEF) ? type[NG_INJ_DEF] : null;
+  return type && Object.hasOwn(type, NG_INJ_DEF) ? type[NG_INJ_DEF] : null;
 }
 const NG_PROV_DEF = getClosureSafeProperty({
   ɵprov: getClosureSafeProperty
@@ -746,7 +746,7 @@ function getInjectFlag(token) {
 }
 
 function getFactoryDef(type, throwNotFound) {
-  const hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
+  const hasFactoryDef = Object.hasOwn(type, NG_FACTORY_DEF);
   if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
     throw new Error(`Type ${stringify(type)} does not have 'ɵfac' property.`);
   }
@@ -1169,7 +1169,7 @@ class R3Injector extends EnvironmentInjector {
   }
   get(token, notFoundValue = THROW_IF_NOT_FOUND, options) {
     assertNotDestroyed(this);
-    if (token.hasOwnProperty(NG_ENV_ID)) {
+    if (Object.hasOwn(token, NG_ENV_ID)) {
       return token[NG_ENV_ID](this);
     }
     const flags = convertToBitFlags(options);
@@ -1563,7 +1563,7 @@ function assertTNodeForTView(tNode, tView) {
 }
 function assertTNode(tNode) {
   assertDefined(tNode, 'TNode must be defined');
-  if (!(tNode && typeof tNode === 'object' && tNode.hasOwnProperty('directiveStylingLast'))) {
+  if (!(tNode && typeof tNode === 'object' && Object.hasOwn(tNode, 'directiveStylingLast'))) {
     throwError('Not of type TNode, got: ' + tNode);
   }
 }
@@ -2855,7 +2855,7 @@ class TransferState {
     delete this.store[key];
   }
   hasKey(key) {
-    return this.store.hasOwnProperty(key);
+    return Object.hasOwn(this.store, key);
   }
   get isEmpty() {
     return Object.keys(this.store).length === 0;
@@ -2865,7 +2865,7 @@ class TransferState {
   }
   toJson() {
     for (const key in this.onSerializeCallbacks) {
-      if (this.onSerializeCallbacks.hasOwnProperty(key)) {
+      if (Object.hasOwn(this.onSerializeCallbacks, key)) {
         try {
           this.store[key] = this.onSerializeCallbacks[key]();
         } catch (e) {
