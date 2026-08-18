@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.1.2+sha-85f12a5
+ * @license Angular v22.1.2+sha-4413711
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, NG_ELEMENT_ID, assertIndexInRange, INJECTOR, TVIEW as TVIEW$1, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, registerSpecialProvider, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, APP_ID, inject, makeStateKey, formatRuntimeError, TransferState, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, MATH_ML_NAMESPACE, SVG_NAMESPACE, XSS_SECURITY_URL, RENDERER, SecurityContext, renderStringify, getSelectedTNode, checkSecurityContext, getSelectedIndex, ENVIRONMENT, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, PARENT, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, resetPreOrderHookFlags, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTIcu, assertTNode, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, DOCUMENT as DOCUMENT$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, NG_COMP_DEF, NG_DIR_DEF, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, getAllSpecialProviders, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, getInjectorDef, deepForEach, isTypeProvider, VERSION, retrieveTransferredState, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, PendingTasks, promiseWithResolvers, decreaseElementDepthCount, assertTNodeCreationIndex, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, getBindingIndex, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
+import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, assertIndexInRange, INJECTOR, TVIEW as TVIEW$1, NG_ELEMENT_ID, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, registerSpecialProvider, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, APP_ID, inject, makeStateKey, formatRuntimeError, TransferState, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, MATH_ML_NAMESPACE, SVG_NAMESPACE, XSS_SECURITY_URL, RENDERER, SecurityContext, renderStringify, getSelectedTNode, checkSecurityContext, getSelectedIndex, ENVIRONMENT, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, PARENT, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, resetPreOrderHookFlags, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTIcu, assertTNode, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, DOCUMENT as DOCUMENT$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, NG_COMP_DEF, NG_DIR_DEF, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, getAllSpecialProviders, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, deepForEach, getInjectorDef, isTypeProvider, VERSION, retrieveTransferredState, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, PendingTasks, promiseWithResolvers, decreaseElementDepthCount, assertTNodeCreationIndex, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, getBindingIndex, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { setActiveConsumer, consumerDestroy, SIGNAL, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
@@ -465,7 +465,7 @@ function bloomAdd(injectorIndex, tView, type) {
   let id;
   if (typeof type === 'string') {
     id = type.charCodeAt(0) || 0;
-  } else if (type.hasOwnProperty(NG_ELEMENT_ID)) {
+  } else if (Object.hasOwn(type, NG_ELEMENT_ID)) {
     id = type[NG_ELEMENT_ID];
   }
   if (id == null) {
@@ -759,7 +759,7 @@ function bloomHashBitOrFactory(token) {
   if (typeof token === 'string') {
     return token.charCodeAt(0) || 0;
   }
-  const tokenId = token.hasOwnProperty(NG_ELEMENT_ID) ? token[NG_ELEMENT_ID] : undefined;
+  const tokenId = Object.hasOwn(token, NG_ELEMENT_ID) ? token[NG_ELEMENT_ID] : undefined;
   if (typeof tokenId === 'number') {
     if (tokenId >= 0) {
       return tokenId & BLOOM_MASK;
@@ -901,7 +901,7 @@ function makeDecorator(name, props, parentClass, additionalProcessing, typeFn) {
       const annotationInstance = new DecoratorFactory(...args);
       return function TypeDecorator(cls) {
         if (typeFn) typeFn(cls, ...args);
-        const annotations = cls.hasOwnProperty(ANNOTATIONS) ? cls[ANNOTATIONS] : Object.defineProperty(cls, ANNOTATIONS, {
+        const annotations = Object.hasOwn(cls, ANNOTATIONS) ? cls[ANNOTATIONS] : Object.defineProperty(cls, ANNOTATIONS, {
           value: []
         })[ANNOTATIONS];
         annotations.push(annotationInstance);
@@ -938,7 +938,7 @@ function makeParamDecorator(name, props, parentClass) {
       ParamDecorator.annotation = annotationInstance;
       return ParamDecorator;
       function ParamDecorator(cls, unusedKey, index) {
-        const parameters = cls.hasOwnProperty(PARAMETERS) ? cls[PARAMETERS] : Object.defineProperty(cls, PARAMETERS, {
+        const parameters = Object.hasOwn(cls, PARAMETERS) ? cls[PARAMETERS] : Object.defineProperty(cls, PARAMETERS, {
           value: []
         })[PARAMETERS];
         while (parameters.length <= index) {
@@ -967,10 +967,10 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
           throw new Error('Standard Angular field decorators are not supported in JIT mode.');
         }
         const constructor = target.constructor;
-        const meta = constructor.hasOwnProperty(PROP_METADATA) ? constructor[PROP_METADATA] : Object.defineProperty(constructor, PROP_METADATA, {
+        const meta = Object.hasOwn(constructor, PROP_METADATA) ? constructor[PROP_METADATA] : Object.defineProperty(constructor, PROP_METADATA, {
           value: {}
         })[PROP_METADATA];
-        meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
+        meta[name] = Object.hasOwn(meta, name) && meta[name] || [];
         meta[name].unshift(decoratorInstance);
       }
       return PropDecorator;
@@ -1082,7 +1082,7 @@ class ReflectionCapabilities {
       const paramAnnotations = ctorParameters.map(ctorParam => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
       return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
     }
-    const paramAnnotations = type.hasOwnProperty(PARAMETERS) && type[PARAMETERS];
+    const paramAnnotations = Object.hasOwn(type, PARAMETERS) && type[PARAMETERS];
     const paramTypes = this._reflect && this._reflect.getOwnMetadata && this._reflect.getOwnMetadata('design:paramtypes', type);
     if (paramTypes || paramAnnotations) {
       return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
@@ -1111,7 +1111,7 @@ class ReflectionCapabilities {
     if (typeOrFunc.decorators && typeOrFunc.decorators !== parentCtor.decorators) {
       return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
     }
-    if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
+    if (Object.hasOwn(typeOrFunc, ANNOTATIONS)) {
       return typeOrFunc[ANNOTATIONS];
     }
     return null;
@@ -1141,7 +1141,7 @@ class ReflectionCapabilities {
       });
       return propMetadata;
     }
-    if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+    if (Object.hasOwn(typeOrFunc, PROP_METADATA)) {
       return typeOrFunc[PROP_METADATA];
     }
     return null;
@@ -1162,7 +1162,7 @@ class ReflectionCapabilities {
     if (ownPropMetadata) {
       Object.keys(ownPropMetadata).forEach(propName => {
         const decorators = [];
-        if (propMetadata.hasOwnProperty(propName)) {
+        if (Object.hasOwn(propMetadata, propName)) {
           decorators.push(...propMetadata[propName]);
         }
         decorators.push(...ownPropMetadata[propName]);
@@ -1267,7 +1267,7 @@ function reflectDependency(dep) {
 function compileInjectable(type, meta) {
   let ngInjectableDef = null;
   let ngFactoryDef = null;
-  if (!type.hasOwnProperty(NG_PROV_DEF)) {
+  if (!Object.hasOwn(type, NG_PROV_DEF)) {
     Object.defineProperty(type, NG_PROV_DEF, {
       get: () => {
         if (ngInjectableDef === null) {
@@ -1282,7 +1282,7 @@ function compileInjectable(type, meta) {
       }
     });
   }
-  if (!type.hasOwnProperty(NG_FACTORY_DEF)) {
+  if (!Object.hasOwn(type, NG_FACTORY_DEF)) {
     Object.defineProperty(type, NG_FACTORY_DEF, {
       get: () => {
         if (ngFactoryDef === null) {
@@ -1351,7 +1351,7 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
 function compileService(type, meta) {
   let def = null;
   let factoryDef = null;
-  if (!type.hasOwnProperty(NG_PROV_DEF)) {
+  if (!Object.hasOwn(type, NG_PROV_DEF)) {
     Object.defineProperty(type, NG_PROV_DEF, {
       get: () => {
         if (def === null) {
@@ -1366,7 +1366,7 @@ function compileService(type, meta) {
       }
     });
   }
-  if (!type.hasOwnProperty(NG_FACTORY_DEF)) {
+  if (!Object.hasOwn(type, NG_FACTORY_DEF)) {
     Object.defineProperty(type, NG_FACTORY_DEF, {
       get: () => {
         if (factoryDef === null) {
@@ -2036,7 +2036,7 @@ function assertDomElement(value) {
 function extractInputDebugMetadata(inputs) {
   const res = {};
   for (const key in inputs) {
-    if (inputs.hasOwnProperty(key)) {
+    if (Object.hasOwn(inputs, key)) {
       const value = inputs[key];
       if (value !== undefined) {
         res[key] = value[0];
@@ -3109,7 +3109,7 @@ function merge(...sets) {
   const res = {};
   for (const s of sets) {
     for (const v in s) {
-      if (s.hasOwnProperty(v)) res[v] = true;
+      if (Object.hasOwn(s, v)) res[v] = true;
     }
   }
   return res;
@@ -3162,9 +3162,9 @@ class SanitizingHtmlSerializer {
   }
   startElement(element) {
     const tagName = getNodeName(element).toLowerCase();
-    if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+    if (!Object.hasOwn(VALID_ELEMENTS, tagName)) {
       this.sanitizedSomething = true;
-      return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
+      return !Object.hasOwn(SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS, tagName);
     }
     this.buf.push('<');
     this.buf.push(tagName);
@@ -3173,7 +3173,7 @@ class SanitizingHtmlSerializer {
       const elAttr = elAttrs.item(i);
       const attrName = elAttr.name;
       const lower = attrName.toLowerCase();
-      if (!VALID_ATTRS.hasOwnProperty(lower)) {
+      if (!Object.hasOwn(VALID_ATTRS, lower)) {
         this.sanitizedSomething = true;
         continue;
       }
@@ -3186,7 +3186,7 @@ class SanitizingHtmlSerializer {
   }
   endElement(current) {
     const tagName = getNodeName(current).toLowerCase();
-    if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+    if (Object.hasOwn(VALID_ELEMENTS, tagName) && !Object.hasOwn(VOID_ELEMENTS, tagName)) {
       this.buf.push('</');
       this.buf.push(tagName);
       this.buf.push('>');
@@ -5301,7 +5301,7 @@ function writeToDirectiveInput(def, instance, publicName, value) {
   const prevConsumer = setActiveConsumer(null);
   try {
     if (ngDevMode) {
-      if (!def.inputs.hasOwnProperty(publicName)) {
+      if (!Object.hasOwn(def.inputs, publicName)) {
         throw new Error(`ASSERTION ERROR: Directive ${def.type.name} does not have an input with a public name of "${publicName}"`);
       }
       if (instance instanceof NodeInjectorFactory) {
@@ -5687,7 +5687,7 @@ function setDirectiveInput(tNode, tView, lView, target, publicName, value) {
   } else {
     [hostIndex, hostDirectivesStart, hostDirectivesEnd] = data;
   }
-  if (hostDirectivesStart !== null && hostDirectivesEnd !== null && tNode.hostDirectiveInputs?.hasOwnProperty(publicName)) {
+  if (hostDirectivesStart !== null && hostDirectivesEnd !== null && tNode.hostDirectiveInputs && Object.hasOwn(tNode.hostDirectiveInputs, publicName)) {
     const hostDirectiveInputs = tNode.hostDirectiveInputs[publicName];
     for (let i = 0; i < hostDirectiveInputs.length; i += 2) {
       const index = hostDirectiveInputs[i];
@@ -5702,7 +5702,7 @@ function setDirectiveInput(tNode, tView, lView, target, publicName, value) {
       }
     }
   }
-  if (hostIndex !== null && target.inputs.hasOwnProperty(publicName)) {
+  if (hostIndex !== null && Object.hasOwn(target.inputs, publicName)) {
     ngDevMode && assertIndexInRange(lView, hostIndex);
     writeToDirectiveInput(target, lView[hostIndex], publicName, value);
     hasSet = true;
@@ -6908,16 +6908,16 @@ const TVIEW = getClosureSafeProperty({
 function getTIcu(tView, index) {
   const value = tView.data[index];
   if (value === null || typeof value === 'string') return null;
-  if (ngDevMode && !(value.hasOwnProperty(TVIEW) || value.hasOwnProperty(CURRENT_CASE_LVIEW_INDEX))) {
+  if (ngDevMode && !(Object.hasOwn(value, TVIEW) || Object.hasOwn(value, CURRENT_CASE_LVIEW_INDEX))) {
     throwError("We expect to get 'null'|'TIcu'|'TIcuContainer', but got: " + value);
   }
-  const tIcu = value.hasOwnProperty(CURRENT_CASE_LVIEW_INDEX) ? value : value.value;
+  const tIcu = Object.hasOwn(value, CURRENT_CASE_LVIEW_INDEX) ? value : value.value;
   ngDevMode && assertTIcu(tIcu);
   return tIcu;
 }
 function setTIcu(tView, index, tIcu) {
   const tNode = tView.data[index];
-  ngDevMode && assertEqual(tNode === null || tNode.hasOwnProperty(TVIEW), true, "We expect to get 'null'|'TIcuContainer'");
+  ngDevMode && assertEqual(tNode === null || Object.hasOwn(tNode, TVIEW), true, "We expect to get 'null'|'TIcuContainer'");
   if (tNode === null) {
     tView.data[index] = tIcu;
   } else {
@@ -8270,7 +8270,7 @@ function listenToDirectiveOutput(tNode, lView, target, eventName, listenerFn) {
   } else {
     [hostIndex, hostDirectivesStart, hostDirectivesEnd] = data;
   }
-  if (hostDirectivesStart !== null && hostDirectivesEnd !== null && tNode.hostDirectiveOutputs?.hasOwnProperty(eventName)) {
+  if (hostDirectivesStart !== null && hostDirectivesEnd !== null && tNode.hostDirectiveOutputs && Object.hasOwn(tNode.hostDirectiveOutputs, eventName)) {
     const hostDirectiveOutputs = tNode.hostDirectiveOutputs[eventName];
     for (let i = 0; i < hostDirectiveOutputs.length; i += 2) {
       const index = hostDirectiveOutputs[i];
@@ -8283,7 +8283,7 @@ function listenToDirectiveOutput(tNode, lView, target, eventName, listenerFn) {
       }
     }
   }
-  if (target.outputs.hasOwnProperty(eventName)) {
+  if (Object.hasOwn(target.outputs, eventName)) {
     ngDevMode && assertIndexInRange(lView, hostIndex);
     hasOutput = true;
     listenToOutput(tNode, lView, hostIndex, eventName, eventName, listenerFn);
@@ -8790,7 +8790,7 @@ function initializeInputAndOutputAliases(tView, tNode, hostDirectiveDefs) {
 function setupSelectorMatchedInputsOrOutputs(mode, tNode, def, directiveIndex) {
   const aliasMap = mode === 0 ? def.inputs : def.outputs;
   for (const publicName in aliasMap) {
-    if (aliasMap.hasOwnProperty(publicName)) {
+    if (Object.hasOwn(aliasMap, publicName)) {
       let bindings;
       if (mode === 0) {
         bindings = tNode.inputs ??= {};
@@ -8806,7 +8806,7 @@ function setupSelectorMatchedInputsOrOutputs(mode, tNode, def, directiveIndex) {
 function setupHostDirectiveInputsOrOutputs(mode, tNode, config, directiveIndex) {
   const aliasMap = mode === 0 ? config.inputs : config.outputs;
   for (const initialName in aliasMap) {
-    if (aliasMap.hasOwnProperty(initialName)) {
+    if (Object.hasOwn(aliasMap, initialName)) {
       const publicName = aliasMap[initialName];
       let bindings;
       if (mode === 0) {
@@ -8851,7 +8851,7 @@ function setupInitialInputs(tNode, directiveIndex, isHostDirective) {
     } else if (typeof attrName === 'number') {
       break;
     }
-    if (!isHostDirective && inputs.hasOwnProperty(attrName)) {
+    if (!isHostDirective && Object.hasOwn(inputs, attrName)) {
       const inputConfig = inputs[attrName];
       for (const index of inputConfig) {
         if (index === directiveIndex) {
@@ -8860,7 +8860,7 @@ function setupInitialInputs(tNode, directiveIndex, isHostDirective) {
           break;
         }
       }
-    } else if (isHostDirective && hostDirectiveInputs.hasOwnProperty(attrName)) {
+    } else if (isHostDirective && Object.hasOwn(hostDirectiveInputs, attrName)) {
       const config = hostDirectiveInputs[attrName];
       for (let j = 0; j < config.length; j += 2) {
         if (config[j] === directiveIndex) {
@@ -9154,7 +9154,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.2+sha-85f12a5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.2+sha-4413711'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10130,7 +10130,7 @@ function parseAndConvertInputsForDefinition(obj, declaredInputs) {
   if (obj == null) return EMPTY_OBJ;
   const newLookup = {};
   for (const minifiedKey in obj) {
-    if (obj.hasOwnProperty(minifiedKey)) {
+    if (Object.hasOwn(obj, minifiedKey)) {
       const value = obj[minifiedKey];
       let publicName;
       let declaredName;
@@ -10157,7 +10157,7 @@ function parseAndConvertOutputsForDefinition(obj) {
   if (obj == null) return EMPTY_OBJ;
   const newLookup = {};
   for (const minifiedKey in obj) {
-    if (obj.hasOwnProperty(minifiedKey)) {
+    if (Object.hasOwn(obj, minifiedKey)) {
       newLookup[obj[minifiedKey]] = minifiedKey;
     }
   }
@@ -10278,7 +10278,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
   return noSideEffects(() => {
     const clazz = type;
     if (decorators !== null) {
-      if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+      if (Object.hasOwn(clazz, 'decorators') && clazz.decorators !== undefined) {
         clazz.decorators.push(...decorators);
       } else {
         clazz.decorators = decorators;
@@ -10288,7 +10288,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
       clazz.ctorParameters = ctorParameters;
     }
     if (propDecorators !== null) {
-      if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+      if (Object.hasOwn(clazz, 'propDecorators') && clazz.propDecorators !== undefined) {
         clazz.propDecorators = {
           ...clazz.propDecorators,
           ...propDecorators
@@ -10430,7 +10430,7 @@ function isComponentDefPendingResolution(type) {
   return componentDefPendingResolution.has(type);
 }
 function componentNeedsResolution(component) {
-  return !!(component.templateUrl && !component.hasOwnProperty('template') || component.styleUrls?.length || component.styleUrl);
+  return !!(component.templateUrl && !Object.hasOwn(component, 'template') || component.styleUrls?.length || component.styleUrl);
 }
 function clearResolutionOfComponentResourcesQueue() {
   const old = componentResourceResolutionQueue;
@@ -10567,7 +10567,7 @@ function mergeBindingMaps(existingDef, newMap, kind) {
   const targetMap = kind === 'input' ? existingDef.inputs : existingDef.outputs;
   Object.keys(newMap).forEach(publicName => {
     const alias = newMap[publicName];
-    if (!targetMap.hasOwnProperty(publicName) || targetMap[publicName] === alias) {
+    if (!Object.hasOwn(targetMap, publicName) || targetMap[publicName] === alias) {
       targetMap[publicName] = alias;
     } else if (typeof ngDevMode === 'undefined' || ngDevMode) {
       const message = `${kind === 'input' ? 'Input' : 'Output'} "${publicName}" from ${existingDef.directive.name} ` + `is exposed under the following conflicting names: "${targetMap[publicName]}" and "${alias}". ` + `An ${kind} can only be exposed under a single name.`;
@@ -10597,10 +10597,10 @@ function bindingArrayToMap(bindings) {
 }
 function patchDeclaredInputs(declaredInputs, exposedInputs) {
   for (const publicName in exposedInputs) {
-    if (exposedInputs.hasOwnProperty(publicName)) {
+    if (Object.hasOwn(exposedInputs, publicName)) {
       const remappedPublicName = exposedInputs[publicName];
       const privateName = declaredInputs[publicName];
-      if ((typeof ngDevMode === 'undefined' || ngDevMode) && declaredInputs.hasOwnProperty(remappedPublicName)) {
+      if ((typeof ngDevMode === 'undefined' || ngDevMode) && Object.hasOwn(declaredInputs, remappedPublicName)) {
         assertEqual(declaredInputs[remappedPublicName], declaredInputs[publicName], `Conflicting host directive input alias ${publicName}.`);
       }
       declaredInputs[remappedPublicName] = privateName;
@@ -10625,12 +10625,12 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
   const className = def.type.name;
   const bindings = bindingType === 'input' ? def.inputs : def.outputs;
   for (const publicName in hostDirectiveBindings) {
-    if (hostDirectiveBindings.hasOwnProperty(publicName)) {
-      if (!bindings.hasOwnProperty(publicName)) {
+    if (Object.hasOwn(hostDirectiveBindings, publicName)) {
+      if (!Object.hasOwn(bindings, publicName)) {
         throw new RuntimeError(311, `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`);
       }
       const remappedPublicName = hostDirectiveBindings[publicName];
-      if (bindings.hasOwnProperty(remappedPublicName) && remappedPublicName !== publicName) {
+      if (Object.hasOwn(bindings, remappedPublicName) && remappedPublicName !== publicName) {
         throw new RuntimeError(312, `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`);
       }
     }
@@ -10695,10 +10695,10 @@ function ɵɵInheritDefinitionFeature(definition) {
 }
 function mergeInputsWithTransforms(target, source) {
   for (const key in source.inputs) {
-    if (!source.inputs.hasOwnProperty(key)) {
+    if (!Object.hasOwn(source.inputs, key)) {
       continue;
     }
-    if (target.inputs.hasOwnProperty(key)) {
+    if (Object.hasOwn(target.inputs, key)) {
       continue;
     }
     const value = source.inputs[key];
@@ -12293,7 +12293,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.2+sha-85f12a5';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.2+sha-4413711';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16042,7 +16042,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
       case Node.ELEMENT_NODE:
         const element = currentNode;
         const tagName = element.tagName.toLowerCase();
-        if (VALID_ELEMENTS.hasOwnProperty(tagName)) {
+        if (Object.hasOwn(VALID_ELEMENTS, tagName)) {
           addCreateNodeAndAppend(create, ELEMENT_MARKER, tagName, parentIdx, newIndex);
           tView.data[newIndex] = tagName;
           const elAttrs = element.attributes;
@@ -16054,7 +16054,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
             const namespace = namespaceUri && NAMESPACE_URIS[namespaceUri];
             const tagNameWithNamespace = namespace ? `:${namespace}:${tagName}` : tagName;
             if (hasBinding) {
-              if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
+              if (Object.hasOwn(VALID_ATTRS, lowerAttrName)) {
                 generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, i18nResolveSanitizer(lowerAttrName, tagNameWithNamespace));
               } else {
                 ngDevMode && console.warn(`WARNING: ignoring unsafe attribute value ` + `${lowerAttrName} on element ${tagName} ` + `(see ${XSS_SECURITY_URL})`);
@@ -16216,13 +16216,13 @@ function i18nPostprocess(message, replacements = {}) {
     return result;
   }
   result = result.replace(PP_ICU_VARS_REGEXP, (match, start, key, _type, _idx, end) => {
-    return replacements.hasOwnProperty(key) ? `${start}${replacements[key]}${end}` : match;
+    return Object.hasOwn(replacements, key) ? `${start}${replacements[key]}${end}` : match;
   });
   result = result.replace(PP_ICU_PLACEHOLDERS_REGEXP, (match, key) => {
-    return replacements.hasOwnProperty(key) ? replacements[key] : match;
+    return Object.hasOwn(replacements, key) ? replacements[key] : match;
   });
   result = result.replace(PP_ICUS_REGEXP, (match, key) => {
-    if (replacements.hasOwnProperty(key)) {
+    if (Object.hasOwn(replacements, key)) {
       const list = replacements[key];
       if (!list.length) {
         throw new Error(`i18n postprocess: unmatched ICU - ${match} with key: ${key}`);
@@ -18436,17 +18436,17 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
   const transitiveScopes = transitiveScopesFor(moduleType);
   declarations.forEach(declaration => {
     declaration = resolveForwardRef(declaration);
-    if (declaration.hasOwnProperty(NG_COMP_DEF)) {
+    if (Object.hasOwn(declaration, NG_COMP_DEF)) {
       const component = declaration;
       const componentDef = getComponentDef(component);
       patchComponentDefWithScope(componentDef, transitiveScopes);
-    } else if (!declaration.hasOwnProperty(NG_DIR_DEF) && !declaration.hasOwnProperty(NG_PIPE_DEF)) {
+    } else if (!Object.hasOwn(declaration, NG_DIR_DEF) && !Object.hasOwn(declaration, NG_PIPE_DEF)) {
       declaration.ngSelectorScope = moduleType;
     }
   });
 }
 function patchComponentDefWithScope(componentDef, transitiveScopes) {
-  componentDef.directiveDefs = () => Array.from(transitiveScopes.compilation.directives).map(dir => dir.hasOwnProperty(NG_COMP_DEF) ? getComponentDef(dir) : getDirectiveDef(dir)).filter(def => !!def);
+  componentDef.directiveDefs = () => Array.from(transitiveScopes.compilation.directives).map(dir => Object.hasOwn(dir, NG_COMP_DEF) ? getComponentDef(dir) : getDirectiveDef(dir)).filter(def => !!def);
   componentDef.pipeDefs = () => Array.from(transitiveScopes.compilation.pipes).map(pipe => getPipeDef$1(pipe));
   componentDef.schemas = transitiveScopes.schemas;
   componentDef.tView = null;
@@ -18759,7 +18759,7 @@ function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
   const signalQueriesMeta = [];
   const decoratorQueriesMeta = [];
   for (const field in propMetadata) {
-    if (propMetadata.hasOwnProperty(field)) {
+    if (Object.hasOwn(propMetadata, field)) {
       const annotations = propMetadata[field];
       annotations.forEach(ann => {
         if (isQueryAnn(ann)) {
@@ -19512,7 +19512,7 @@ function collectPropertyBindings(properties, tNode, lView, tData) {
 const NG_DEBUG_PROPERTY = '__ng_debug__';
 function getDebugNode(nativeNode) {
   if (nativeNode instanceof Node) {
-    if (!nativeNode.hasOwnProperty(NG_DEBUG_PROPERTY)) {
+    if (!Object.hasOwn(nativeNode, NG_DEBUG_PROPERTY)) {
       nativeNode[NG_DEBUG_PROPERTY] = nativeNode.nodeType == Node.ELEMENT_NODE ? new DebugElement(nativeNode) : new DebugNode(nativeNode);
     }
     return nativeNode[NG_DEBUG_PROPERTY];

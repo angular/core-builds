@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.2+sha-85f12a5
+ * @license Angular v22.1.2+sha-4413711
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -62,7 +62,7 @@ exports.ClassIncompatibilityReason = void 0;
 function isFieldIncompatibility(value) {
     return (value.reason !== undefined &&
         value.context !== undefined &&
-        exports.FieldIncompatibilityReason.hasOwnProperty(value.reason));
+        Object.hasOwn(exports.FieldIncompatibilityReason, value.reason));
 }
 /** Picks the more significant field compatibility. */
 function pickFieldIncompatibility(a, b) {
