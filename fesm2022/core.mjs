@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.2+sha-7e39b4a
+ * @license Angular v22.2.0-next.2+sha-e041f94
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3363,10 +3363,13 @@ async function declareExperimentalWebMcpTool(tool, injector) {
   const abortCtrl = new AbortController();
   const wrappedTool = {
     ...tool,
-    execute: (args, client) => runInInjectionContext(currentInjector, () => tool.execute(args, {
-      ...client,
-      signal: abortCtrl.signal
-    }))
+    execute: (args, client) => {
+      const signal = client?.signal ? AbortSignal.any([abortCtrl.signal, client.signal]) : abortCtrl.signal;
+      return runInInjectionContext(currentInjector, () => tool.execute(args, {
+        ...client,
+        signal
+      }));
+    }
   };
   destroyRef.onDestroy(() => void abortCtrl.abort());
   await modelContext.registerTool(wrappedTool, {
