@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-2e2c426
+ * @license Angular v22.2.0-next.3+sha-238d8bf
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3101,12 +3101,12 @@ function _sanitizeUrl(url) {
 }
 
 function tagSet(tags) {
-  const res = {};
+  const res = Object.create(null);
   for (const t of tags.split(',')) res[t] = true;
   return res;
 }
 function merge(...sets) {
-  const res = {};
+  const res = Object.create(null);
   for (const s of sets) {
     for (const v in s) {
       if (Object.hasOwn(s, v)) res[v] = true;
@@ -9051,9 +9051,9 @@ function createRootLViewEnvironment(rootLViewInjector) {
     tracingService
   };
 }
-function createHostElement(componentDef, renderer) {
+function createHostElement(componentDef, renderer, hostElementNamespace) {
   const tagName = inferTagNameFromDefinition(componentDef);
-  const namespace = tagName === 'svg' ? SVG_NAMESPACE : tagName === 'math' ? MATH_ML_NAMESPACE : null;
+  const namespace = tagName === 'svg' ? SVG_NAMESPACE : tagName === 'math' ? MATH_ML_NAMESPACE : hostElementNamespace;
   return createElementNode(renderer, tagName, namespace);
 }
 function assertNotScriptHostElement(element) {
@@ -9090,7 +9090,7 @@ class ComponentFactory {
     this.ngContentSelectors = componentDef.ngContentSelectors ?? [];
     this.isBoundToModule = !!ngModule;
   }
-  create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings) {
+  create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings, hostElementNamespace) {
     profiler(ProfilerEvent.DynamicComponentStart);
     const prevConsumer = setActiveConsumer(null);
     try {
@@ -9100,19 +9100,19 @@ class ComponentFactory {
       const environment = createRootLViewEnvironment(rootViewInjector);
       const tracingService = environment.tracingService;
       if (tracingService && tracingService.componentCreate) {
-        return tracingService.componentCreate(getComponentName(cmpDef), () => this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings));
+        return tracingService.componentCreate(getComponentName(cmpDef), () => this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace));
       } else {
-        return this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings);
+        return this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace);
       }
     } finally {
       setActiveConsumer(prevConsumer);
     }
   }
-  createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings) {
+  createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace) {
     const cmpDef = this.componentDef;
     const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives);
     const hostRenderer = environment.rendererFactory.createRenderer(null, cmpDef);
-    const hostElement = rootSelectorOrNode ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector) : createHostElement(cmpDef, hostRenderer);
+    const hostElement = rootSelectorOrNode ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector) : createHostElement(cmpDef, hostRenderer, hostElementNamespace ?? null);
     assertNotScriptHostElement(hostElement);
     const sharedStylesHost = rootViewInjector.get(SHARED_STYLES_HOST, null);
     const styleHost = getStyleHost(hostElement, () => rootViewInjector.get(DOCUMENT$1, null) ?? getDocument());
@@ -9154,7 +9154,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-2e2c426'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-238d8bf'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -9388,9 +9388,19 @@ class R3ViewContainerRef extends ViewContainerRef {
     const componentDef = getComponentDef(componentFactory.componentType ?? {});
     const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
     const rNode = dehydratedView?.firstChild ?? null;
-    const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector, directives, bindings);
+    const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector, directives, bindings, this._getHostElementNamespace());
     this.insertImpl(componentRef.hostView, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
     return componentRef;
+  }
+  _getHostElementNamespace() {
+    if (this._hostTNode.type & 2) {
+      const parentTNode = this._hostTNode.parent ?? this._hostLView[T_HOST];
+      if (parentTNode !== null && parentTNode.type & 2 && typeof parentTNode.value === 'string' && parentTNode.value.toLowerCase() === 'foreignobject') {
+        return null;
+      }
+      return parentTNode?.namespace ?? null;
+    }
+    return this._hostTNode.namespace;
   }
   insert(viewRef, index) {
     return this.insertImpl(viewRef, index, true);
@@ -12327,7 +12337,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-2e2c426';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-238d8bf';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
