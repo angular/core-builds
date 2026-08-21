@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.3+sha-004cf3a
+ * @license Angular v22.1.3+sha-ee63c0a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5009,7 +5009,7 @@ declare class ComponentFactory<T> {
      * @param ngModule The NgModuleRef to which the factory is bound.
      */
     constructor(componentDef: ComponentDef<any>, ngModule?: NgModuleRef$1<any> | undefined);
-    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef$1<any> | EnvironmentInjector | undefined, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[]): ComponentRef$1<T>;
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef$1<any> | EnvironmentInjector | undefined, directives?: (Type$1<unknown> | DirectiveWithBindings<unknown>)[], componentBindings?: Binding[], hostElementNamespace?: string | null): ComponentRef$1<T>;
     private createComponentRef;
 }
 /**
@@ -6259,7 +6259,7 @@ declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue 
  *
  * @codeGenApi
  */
-declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
+declare function ɵɵclassProp(className: string, value: any): typeof ɵɵclassProp;
 /**
  * Update style bindings using an object literal on an element.
  *
