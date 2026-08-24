@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.3+sha-ba3bc47
+ * @license Angular v22.1.3+sha-7c752d4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.1.3+sha-ba3bc47');
+const VERSION = /* @__PURE__ */new Version('22.1.3+sha-7c752d4');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -2829,6 +2829,9 @@ const IMAGE_CONFIG = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDe
 function makeStateKey(key) {
   return key;
 }
+function createDictionary() {
+  return Object.create(null);
+}
 class TransferState {
   static ɵprov =
   /* @__PURE__ */
@@ -2843,10 +2846,14 @@ class TransferState {
       return transferState;
     }
   });
-  store = {};
-  onSerializeCallbacks = {};
+  store = createDictionary();
+  onSerializeCallbacks = createDictionary();
   get(key, defaultValue) {
-    return this.store[key] !== undefined ? this.store[key] : defaultValue;
+    if (!Object.hasOwn(this.store, key)) {
+      return defaultValue;
+    }
+    const value = this.store[key];
+    return value !== undefined ? value : defaultValue;
   }
   set(key, value) {
     this.store[key] = value;
@@ -2880,12 +2887,12 @@ function retrieveTransferredState(doc, appId) {
   const script = doc.getElementById(appId + '-state');
   if (script?.tagName === 'SCRIPT' && script.textContent) {
     try {
-      return JSON.parse(script.textContent);
+      return Object.assign(createDictionary(), JSON.parse(script.textContent));
     } catch (e) {
       console.warn('Exception while restoring TransferState for app ' + appId, e);
     }
   }
-  return {};
+  return createDictionary();
 }
 
 function assertNotInReactiveContext(debugFn, extraContext) {
