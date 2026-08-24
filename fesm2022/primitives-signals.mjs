@@ -1,11 +1,11 @@
 /**
- * @license Angular v22.2.0-next.3+sha-671d8d3
+ * @license Angular v22.2.0-next.3+sha-82a7675
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { SIGNAL, consumerMarkDirty, isInNotificationPhase, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation, consumerDestroy, REACTIVE_NODE } from './_effect-chunk.mjs';
-export { BASE_EFFECT_NODE, SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.mjs';
+export { BASE_EFFECT_NODE, ERRORED, SIGNAL_NODE, createComputed, createSignal, defaultEquals, finalizeConsumerAfterComputation, getActiveConsumer, isReactive, producerAccessed, producerIncrementEpoch, producerMarkClean, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, resetConsumerBeforeComputation, runEffect, runPostProducerCreatedFn, runPostSignalSetFn, setActiveConsumer, setPostProducerCreatedFn, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalGetFn, signalSetFn, signalUpdateFn } from './_effect-chunk.mjs';
 export { createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn, untracked } from './_untracked-chunk.mjs';
 export { setAlternateWeakRefImpl } from './_weak_ref-chunk.mjs';
 

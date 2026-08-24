@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-671d8d3
+ * @license Angular v22.2.0-next.3+sha-82a7675
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -39,6 +39,12 @@ type ComputedGetter<T> = (() => T) & {
  * Create a computed signal which derives a reactive value from an expression.
  */
 declare function createComputed<T>(computation: () => T, equal?: ValueEqualityFn<T>): ComputedGetter<T>;
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * failed. The thrown error is cached until the computation gets dirty again.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+declare const ERRORED: any;
 
 type ComputationFn<S, D> = (source: S, previous?: PreviousValue<S, D>) => D;
 type PreviousValue<S, D> = {
@@ -120,5 +126,5 @@ declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sc
  */
 declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
-export { ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
+export { ERRORED, ReactiveNode, SIGNAL, SignalNode, ValueEqualityFn, createComputed, createLinkedSignal, createWatch, linkedSignalSetFn, linkedSignalUpdateFn, setThrowInvalidWriteToSignalError, untracked };
 export type { ComputationFn, ComputedNode, LinkedSignalGetter, LinkedSignalNode, PreviousValue, Watch, WatchCleanupFn, WatchCleanupRegisterFn };

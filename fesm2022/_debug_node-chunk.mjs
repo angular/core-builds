@@ -1,12 +1,12 @@
 /**
- * @license Angular v22.2.0-next.3+sha-671d8d3
+ * @license Angular v22.2.0-next.3+sha-82a7675
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, assertIndexInRange, INJECTOR, TVIEW as TVIEW$1, NG_ELEMENT_ID, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, registerSpecialProvider, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, APP_ID, inject, makeStateKey, formatRuntimeError, TransferState, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, MATH_ML_NAMESPACE, SVG_NAMESPACE, XSS_SECURITY_URL, RENDERER, SecurityContext, renderStringify, getSelectedTNode, checkSecurityContext, getSelectedIndex, ENVIRONMENT, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, PARENT, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, resetPreOrderHookFlags, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, setBindingRootForHostBindings, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTIcu, assertTNode, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, DOCUMENT as DOCUMENT$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, NG_COMP_DEF, NG_DIR_DEF, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, getAllSpecialProviders, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, deepForEach, getInjectorDef, isTypeProvider, VERSION, retrieveTransferredState, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, PendingTasks, promiseWithResolvers, decreaseElementDepthCount, assertTNodeCreationIndex, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, getCurrentDirectiveDef, getBindingIndex, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
-import { setActiveConsumer, consumerDestroy, SIGNAL, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
+import { setActiveConsumer, consumerDestroy, SIGNAL, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, producerUpdateValueVersion, producerAccessed, ERRORED, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Attribute as Attribute$1 } from './_attribute-chunk.mjs';
@@ -9154,7 +9154,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-671d8d3'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-82a7675'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12184,7 +12184,20 @@ function getTemplateConsumer(injector) {
   return null;
 }
 const signalDebugMap = new WeakMap();
+const signalDebugNodeMap = new Map();
+const watchCleanupRegistry = new FinalizationRegistry(({
+  id
+}) => {
+  unwatchSignal(id);
+  signalDebugNodeMap.delete(id);
+});
 let counter$1 = 0;
+function isWatched(id) {
+  const watchRef = signalDebugNodeMap.get(id)?.watch;
+  if (!watchRef) return false;
+  const watchNode = watchRef.deref();
+  return watchNode !== undefined && !watchNode.destroyed;
+}
 function getNodesAndEdgesFromSignalMap(signalMap) {
   const nodes = Array.from(signalMap.keys());
   const debugSignalGraphNodes = [];
@@ -12198,29 +12211,38 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
       signalDebugMap.set(consumer, id);
     }
     if (isComputedNode(consumer)) {
+      if (!signalDebugNodeMap.has(id)) {
+        signalDebugNodeMap.set(id, {
+          node: new WeakRef(consumer)
+        });
+        watchCleanupRegistry.register(consumer, {
+          id
+        });
+      }
       debugSignalGraphNodes.push({
         label: consumer.debugName,
         value: consumer.value,
         kind: consumer.kind,
         epoch: consumer.version,
         debuggableFn: consumer.computation,
-        id
-      });
-    } else if (isLinkedSignalNode(consumer)) {
-      debugSignalGraphNodes.push({
-        label: consumer.debugName,
-        value: consumer.value,
-        kind: consumer.kind,
-        epoch: consumer.version,
-        debuggableFn: consumer.computation,
+        watched: isWatched(id),
         id
       });
     } else if (isSignalNode(consumer)) {
+      if (!signalDebugNodeMap.has(id)) {
+        signalDebugNodeMap.set(id, {
+          node: new WeakRef(consumer)
+        });
+        watchCleanupRegistry.register(consumer, {
+          id
+        });
+      }
       debugSignalGraphNodes.push({
         label: consumer.debugName,
         value: consumer.value,
         kind: consumer.kind,
         epoch: consumer.version,
+        watched: isWatched(id),
         id
       });
     } else if (isTemplateEffectNode(consumer)) {
@@ -12229,6 +12251,25 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
         kind: consumer.kind,
         epoch: consumer.version,
         debuggableFn: consumer.lView?.[CONTEXT]?.constructor,
+        watched: false,
+        id
+      });
+    } else if (isLinkedSignalNode(consumer)) {
+      if (!signalDebugNodeMap.has(id)) {
+        signalDebugNodeMap.set(id, {
+          node: new WeakRef(consumer)
+        });
+        watchCleanupRegistry.register(consumer, {
+          id
+        });
+      }
+      debugSignalGraphNodes.push({
+        label: consumer.debugName,
+        value: consumer.value,
+        kind: consumer.kind,
+        epoch: consumer.version,
+        debuggableFn: consumer.computation,
+        watched: isWatched(id),
         id
       });
     } else if (isEffectNode(consumer)) {
@@ -12252,6 +12293,7 @@ function getNodesAndEdgesFromSignalMap(signalMap) {
         label: consumer.debugName,
         kind: consumer.kind,
         epoch: consumer.version,
+        watched: false,
         id
       });
     }
@@ -12311,6 +12353,84 @@ function getSignalGraph(injector) {
   const signalDependenciesMap = extractSignalNodesAndEdgesFromRoots(signalNodes);
   return getNodesAndEdgesFromSignalMap(signalDependenciesMap);
 }
+function toggleWatchSignal(id) {
+  const entry = signalDebugNodeMap.get(id);
+  if (!entry) {
+    console.warn(`Could not find signal with ID "${id}". The ID may be wrong, or it could have been garbage collected.`);
+    return;
+  }
+  if (entry.watch) {
+    const activeWatch = entry.watch.deref();
+    if (activeWatch && !activeWatch.destroyed) {
+      unwatchSignal(id);
+      return;
+    }
+  }
+  const node = entry.node.deref();
+  if (!node) {
+    unwatchSignal(id);
+    signalDebugNodeMap.delete(id);
+    return;
+  }
+  const watchNode = createDebugWatchNode(node);
+  entry.watch = new WeakRef(watchNode);
+  runDebugWatch(watchNode);
+}
+function createDebugWatchNode(targetNode) {
+  const node = {
+    ...REACTIVE_NODE,
+    consumerIsAlwaysLive: true,
+    consumerAllowSignalWrites: true,
+    dirty: true,
+    kind: 'effect',
+    targetNode: new WeakRef(targetNode),
+    destroyed: false,
+    consumerMarkedDirty: () => {
+      if (node.destroyed) return;
+      queueMicrotask(() => runDebugWatch(node));
+    }
+  };
+  return node;
+}
+function runDebugWatch(node) {
+  if (node.destroyed) return;
+  const targetNode = node.targetNode.deref();
+  if (!targetNode) {
+    node.destroyed = true;
+    consumerDestroy(node);
+    return;
+  }
+  node.dirty = false;
+  if (node.version > 0 && !consumerPollProducersForChange(node)) {
+    return;
+  }
+  node.version++;
+  const prevConsumer = consumerBeforeComputation(node);
+  try {
+    producerUpdateValueVersion(targetNode);
+    producerAccessed(targetNode);
+    const name = targetNode.debugName ? targetNode.debugName : 'DevTools signal watch';
+    if ((isComputedNode(targetNode) || isLinkedSignalNode(targetNode)) && targetNode.value === ERRORED) {
+      console.error(`[${name} (error)]:`, targetNode.error);
+      return;
+    }
+    const value = isSignalNode(targetNode) || isComputedNode(targetNode) || isLinkedSignalNode(targetNode) ? targetNode.value : undefined;
+    console.log(`[${name}]:`, value);
+  } finally {
+    consumerAfterComputation(node, prevConsumer);
+  }
+}
+function unwatchSignal(id) {
+  const entry = signalDebugNodeMap.get(id);
+  if (entry?.watch) {
+    const watchNode = entry.watch.deref();
+    if (watchNode && !watchNode.destroyed) {
+      watchNode.destroyed = true;
+      consumerDestroy(watchNode);
+    }
+    entry.watch = undefined;
+  }
+}
 
 let changeDetectionRuns = 0;
 let changeDetectionSyncRuns = 0;
@@ -12337,7 +12457,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-671d8d3';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-82a7675';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -12530,6 +12650,9 @@ function getTransferState(injector) {
 }
 
 const GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
+const internalCoreGlobalUtils = {
+  toggleWatchSignal
+};
 const externalCoreGlobalUtils = {
   'ɵgetDependenciesFromInjectable': getDependenciesFromInjectable,
   'ɵgetInjectorProviders': getInjectorProviders,
@@ -12561,6 +12684,9 @@ function publishDefaultGlobalUtils$1() {
       setupFrameworkInjectorProfiler();
     }
     for (const [methodName, method] of Object.entries(externalCoreGlobalUtils)) {
+      publishGlobalUtil(methodName, method);
+    }
+    for (const [methodName, method] of Object.entries(internalCoreGlobalUtils)) {
       publishGlobalUtil(methodName, method);
     }
   }

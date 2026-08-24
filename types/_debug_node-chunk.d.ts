@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-671d8d3
+ * @license Angular v22.2.0-next.3+sha-82a7675
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4922,7 +4922,7 @@ type ɵɵInjectorDeclaration<T> = unknown;
 /**
  * @publicApi
  */
-type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = (parent?: Type<any>) => T;
+type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = (parent?: Type<any>) => any;
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
  * The type itself is never referred to from generated code.
