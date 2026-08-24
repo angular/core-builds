@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.2.0-next.3+sha-719e1ad
+ * @license Angular v22.2.0-next.3+sha-d953d2e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1652,6 +1652,19 @@ function migrateBootstrapCall(analysis, tracker, additionalProviders, referenceR
         nodeLookup = nodeLookup || getNodeLookup(moduleSourceFile);
         migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, moduleImportsInNewCall, providersInNewCall, tracker, nodesToCopy, referenceResolver, typeChecker);
     }
+    // Top-level `registerLocaleData` calls aren't referenced from the module's metadata so they
+    // have to be carried over explicitly, otherwise the locale data won't be registered anymore
+    // once the module file is pruned.
+    if (moduleSourceFile !== sourceFile) {
+        const localeDataCalls = findRegisterLocaleDataCalls(moduleSourceFile, typeChecker);
+        if (localeDataCalls.length > 0) {
+            nodeLookup = nodeLookup || getNodeLookup(moduleSourceFile);
+            for (const statement of localeDataCalls) {
+                addNodesToCopy(sourceFile, statement, nodeLookup, tracker, nodesToCopy, referenceResolver);
+                nodesToCopy.add(statement);
+            }
+        }
+    }
     if (additionalProviders) {
         additionalProviders.forEach((moduleSpecifier, name) => {
             providersInNewCall.push(ts.factory.createCallExpression(tracker.addImport(sourceFile, name, moduleSpecifier), undefined, undefined));
@@ -1875,6 +1888,21 @@ function getRouterModuleForRootFeatures(sourceFile, options, tracker) {
     return featureExpressions;
 }
 /**
+ * Finds all the top-level `registerLocaleData` calls within a file.
+ * @param sourceFile File in which to search for the calls.
+ * @param typeChecker
+ */
+function findRegisterLocaleDataCalls(sourceFile, typeChecker) {
+    const importSpecifier = imports.getImportSpecifier(sourceFile, '@angular/common', 'registerLocaleData');
+    if (importSpecifier === null) {
+        return [];
+    }
+    return sourceFile.statements.filter((statement) => ts.isExpressionStatement(statement) &&
+        ts.isCallExpression(statement.expression) &&
+        ts.isIdentifier(statement.expression.expression) &&
+        isReferenceToImport(typeChecker, statement.expression.expression, importSpecifier));
+}
+/**
  * Finds all the nodes that are referenced inside a root node and would need to be copied into a
  * new file in order for the node to compile, and tracks them.
  * @param targetFile File to which the nodes will be copied.
@@ -1904,6 +1932,32 @@ function addNodesToCopy(targetFile, rootNode, nodeLookup, tracker, nodesToCopy, 
             const alias = importSpecifier.propertyName ? importSpecifier.name.text : undefined;
             tracker.addImport(targetFile, symbolName, moduleName, alias);
             continue;
+        }
+        // The reference can also be a default import (e.g. locale data files like
+        // `import localeFr from '@angular/common/locales/fr'`) which the import manager
+        // doesn't support. Copy the import declaration over or recreate it as a named
+        // import of the `default` symbol if it can't be copied verbatim.
+        // Note: when the import clause consists only of a default import, the clause and its name
+        // have the same offsets so the node lookup can resolve the reference to either of the two.
+        const importClause = closestOrSelf(ref, ts.isImportClause);
+        const defaultImportName = importClause !== null && (ref === importClause || ref === importClause.name)
+            ? (importClause.name ?? null)
+            : null;
+        if (importClause && defaultImportName) {
+            const declaration = nodes.closestNode(importClause, ts.isImportDeclaration);
+            if (declaration && ts.isStringLiteralLike(declaration.moduleSpecifier)) {
+                if (importClause.namedBindings === undefined &&
+                    !declaration.moduleSpecifier.text.startsWith('.')) {
+                    nodesToCopy.add(declaration);
+                }
+                else {
+                    const moduleName = declaration.moduleSpecifier.text.startsWith('.')
+                        ? remapRelativeImport(targetFile.fileName, declaration.moduleSpecifier)
+                        : declaration.moduleSpecifier.text;
+                    tracker.addImport(targetFile, 'default', moduleName, defaultImportName.text);
+                }
+                continue;
+            }
         }
         const variableDeclaration = closestOrSelf(ref, ts.isVariableDeclaration);
         const variableStatement = variableDeclaration

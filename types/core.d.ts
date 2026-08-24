@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-719e1ad
+ * @license Angular v22.2.0-next.3+sha-d953d2e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2956,7 +2956,7 @@ declare const PLATFORM_ID: InjectionToken<Object>;
  * module has been loaded.
  * @publicApi
  */
-declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserAnimations">;
+declare const ANIMATION_MODULE_TYPE: InjectionToken<"BrowserAnimations" | "NoopAnimations">;
 /**
  * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
  * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
