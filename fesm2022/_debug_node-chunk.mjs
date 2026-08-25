@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-a46292a
+ * @license Angular v22.2.0-next.3+sha-915a03a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7804,6 +7804,14 @@ class Sanitizer {
   });
 }
 
+const RENDER = Symbol('RENDER');
+const ON_DESTROY = Symbol('ON_DESTROY');
+const CONTENT_ADAPTER = Symbol('CONTENT_ADAPTER');
+const GET_CONTEXT = Symbol('GET_CONTEXT');
+
+function isForeignComponent(value) {
+  return typeof value === 'object' && value !== null && RENDER in value;
+}
 function isModuleWithProviders(value) {
   return value.ngModule !== undefined;
 }
@@ -7842,6 +7850,8 @@ function verifyStandaloneImport(depType, importingType) {
     } else {
       if (isModuleWithProviders(depType)) {
         throw new Error(`A module with providers was imported from "${stringifyForError(importingType)}". Modules with providers are not supported in standalone components imports.`);
+      } else if (isForeignComponent(depType)) {
+        throw new Error(`A foreign component, imported from "${stringifyForError(importingType)}", cannot be imported using 'imports'. Foreign components are only supported in AOT mode and must be registered in 'foreignImports'.`);
       } else {
         throw new Error(`The "${stringifyForError(depType)}" type, imported from "${stringifyForError(importingType)}", must be a standalone component / directive / pipe or an NgModule. Did you forget to add the required @Component / @Directive / @Pipe or @NgModule annotation?`);
       }
@@ -9170,7 +9180,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-a46292a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.3+sha-915a03a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12473,7 +12483,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-a46292a';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.3+sha-915a03a';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15126,11 +15136,6 @@ function locateOrCreateElementContainerNode(tView, lView, tNode, commentText, in
 function enableLocateOrCreateElementContainerNodeImpl() {
   _locateOrCreateElementContainerNode = locateOrCreateElementContainerNode;
 }
-
-const RENDER = Symbol('RENDER');
-const ON_DESTROY = Symbol('ON_DESTROY');
-const CONTENT_ADAPTER = Symbol('CONTENT_ADAPTER');
-const GET_CONTEXT = Symbol('GET_CONTEXT');
 
 const FOREIGN_CONTEXT = new InjectionToken('FOREIGN_CONTEXT');
 
@@ -18695,6 +18700,9 @@ function compileComponent(type, metadata) {
           kind: 'component',
           type: type
         });
+        if (metadata.foreignImports !== undefined) {
+          throw new Error(`Foreign components are not supported in JIT mode. ` + `Component '${type.name}' cannot specify 'foreignImports'.`);
+        }
         if (componentNeedsResolution(metadata)) {
           const error = [`Component '${type.name}' is not resolved:`];
           if (metadata.templateUrl) {
