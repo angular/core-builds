@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.3+sha-1d0945f
+ * @license Angular v22.2.0-next.3+sha-66d505e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2097,11 +2097,11 @@ interface ɵɵInjectableDeclaration<T> {
     /**
      * Factory method to execute to create an instance of the injectable.
      */
-    factory: (t?: Type<any>) => T;
+    factory: (t?: Type<any>) => any;
     /**
      * In a case of no explicit injector, a location where the instance of the injectable is stored.
      */
-    value: T | undefined;
+    value: any;
 }
 /**
  * Information about the providers to be included in an `Injector` as well as how the given type
