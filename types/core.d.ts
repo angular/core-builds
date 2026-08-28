@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.4+sha-ad22e89
+ * @license Angular v22.2.0-next.4+sha-34817da
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5621,10 +5621,10 @@ declare function ɵɵdomElementContainer(index: number, attrsIndex?: number | nu
  *
  * @param index The index of the container in the data array.
  * @param foreignComponentIndex The index of the matched foreign component in the constant pool.
- * @param props Aggregate properties and static attributes.
+ * @param props A factory function returning aggregate properties/static attributes.
  * @codeGenApi
  */
-declare function ɵɵforeignComponent(index: number, foreignComponentIndex: number, props?: any): void;
+declare function ɵɵforeignComponent(index: number, foreignComponentIndex: number, props?: (() => any) | null): void;
 /**
  * Creation phase instruction to render foreign content (children of a foreign component)
  * and extract its root DOM nodes.
