@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.4+sha-3b8723c
+ * @license Angular v22.1.4+sha-2ceeb27
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3238,7 +3238,15 @@ function debounced(source, wait, options) {
   const injector = options?.injector ?? inject(Injector);
   let active;
   let pendingValue;
+  let activeTimer;
+  const cancelTimer = () => {
+    if (activeTimer !== undefined) {
+      clearTimeout(activeTimer);
+      activeTimer = undefined;
+    }
+  };
   injector.get(DestroyRef).onDestroy(() => {
+    cancelTimer();
     active = undefined;
   });
   const state = linkedSignal({
@@ -3286,6 +3294,7 @@ function debounced(source, wait, options) {
         status: 'error',
         error: err
       });
+      cancelTimer();
       active = pendingValue = undefined;
       return;
     } finally {
@@ -3298,7 +3307,13 @@ function debounced(source, wait, options) {
     } else if (currentState.status === 'resolved') {
       if (equal(value, currentState.value)) return;
     }
-    const waitFn = typeof wait === 'number' ? () => new Promise(resolve => setTimeout(resolve, wait)) : wait;
+    cancelTimer();
+    const waitFn = typeof wait === 'number' ? () => new Promise(resolve => {
+      activeTimer = setTimeout(() => {
+        activeTimer = undefined;
+        resolve();
+      }, wait);
+    }) : wait;
     const result = waitFn(value, currentState);
     if (result === undefined) {
       state.set({
