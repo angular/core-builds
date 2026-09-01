@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.4+sha-9f44090
+ * @license Angular v22.2.0-next.4+sha-f44bf0f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './core.js';
 import { DeferBlockState, DeferBlockBehavior } from './_debug_node-chunk.js';
-import { ɵDeferBlockDetails as DeferBlockDetails, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
+import { ɵDeferBlockDetails as DeferBlockDetails, DebugElement, ElementRef, ChangeDetectorRef, ComponentRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
 import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
@@ -55,33 +55,20 @@ declare class DeferBlockFixture {
     getDeferBlocks(): Promise<DeferBlockFixture[]>;
 }
 
-/**
- * Fixture for debugging and testing a component.
- *
- * @publicApi
- */
-declare class ComponentFixture<T> {
-    componentRef: ComponentRef<T>;
+declare abstract class AbstractFixture<E> {
+    private readonly hostRef;
     /**
      * The DebugElement associated with the root element of this component.
      */
     debugElement: DebugElement;
     /**
-     * The instance of the root component class.
-     */
-    componentInstance: T;
-    /**
      * The native element at the root of the component.
      */
-    nativeElement: any;
+    nativeElement: E;
     /**
      * The ElementRef for the element at the root of the component.
      */
-    elementRef: ElementRef;
-    /**
-     * The ChangeDetectorRef for the component
-     */
-    changeDetectorRef: ChangeDetectorRef;
+    elementRef: ElementRef<E>;
     private _renderer;
     private _isDestroyed;
     private readonly _testAppRef;
@@ -93,9 +80,10 @@ declare class ComponentFixture<T> {
     private readonly autoDetectDefault;
     private autoDetect;
     private subscriptions;
-    ngZone: NgZone | null;
+    private readonly hostView;
+    readonly changeDetectorRef: ChangeDetectorRef;
     /** @docs-private */
-    constructor(componentRef: ComponentRef<T>);
+    constructor(hostRef: ComponentRef<unknown>);
     /**
      * Trigger a change detection cycle for the component.
      */
@@ -132,10 +120,6 @@ declare class ComponentFixture<T> {
      * asynchronous change detection.
      */
     whenStable(): Promise<any>;
-    /**
-     * Retrieves all defer block fixtures in the component fixture.
-     */
-    getDeferBlocks(): Promise<DeferBlockFixture[]>;
     private _getRenderer;
     /**
      * Get a promise that resolves when the ui state is stable following animations.
@@ -145,6 +129,37 @@ declare class ComponentFixture<T> {
      * Trigger component destruction.
      */
     destroy(): void;
+}
+/**
+ * Fixture for debugging and testing a component.
+ *
+ * @publicApi
+ */
+declare class ComponentFixture<T> extends AbstractFixture<any> {
+    componentRef: ComponentRef<T>;
+    /**
+     * The instance of the root component class.
+     */
+    componentInstance: T;
+    ngZone: NgZone | null;
+    /** @docs-private */
+    constructor(componentRef: ComponentRef<T>);
+    /**
+     * Retrieves all defer block fixtures in the component fixture.
+     */
+    getDeferBlocks(): Promise<DeferBlockFixture[]>;
+}
+/**
+ * Fixture for debugging and testing a directive.
+ *
+ * @publicApi
+ */
+declare class DirectiveFixture<T> extends AbstractFixture<Element> {
+    /**
+     * The instance of the directive class.
+     */
+    readonly directiveInstance: T;
+    constructor(hostRef: ComponentRef<unknown>, directiveInstance: T);
 }
 
 /**
@@ -422,6 +437,16 @@ interface TestComponentOptions {
     inferTagName?: boolean;
 }
 /**
+ * Options that can be configured for a test directive.
+ *
+ * @publicApi 22.2
+ */
+interface TestDirectiveOptions {
+    tagName?: string;
+    /** Bindings to apply to the test directive. */
+    bindings?: Binding[];
+}
+/**
  * Returns a singleton of the `TestBed` class.
  *
  * @publicApi
@@ -493,6 +518,7 @@ interface TestBed {
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>, options?: TestComponentOptions): ComponentFixture<T>;
+    createDirective<T>(directive: Type<T>, options?: TestDirectiveOptions): DirectiveFixture<T>;
     /**
      * Returns the most recently created `ComponentFixture`, or throws an error if one has not
      * yet been created.
@@ -809,5 +835,5 @@ declare class Log<T = string> {
     static ɵprov: _angular_core.ɵɵInjectableDeclaration<Log<any>>;
 }
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
-export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestComponentOptions, TestEnvironmentOptions, TestModuleMetadata };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, DirectiveFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
+export type { MetadataOverride, ModuleTeardownOptions, TestBedStatic, TestComponentOptions, TestDirectiveOptions, TestEnvironmentOptions, TestModuleMetadata };

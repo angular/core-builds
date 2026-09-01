@@ -1,13 +1,13 @@
 /**
- * @license Angular v22.2.0-next.4+sha-9f44090
+ * @license Angular v22.2.0-next.4+sha-f44bf0f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { Subscription } from 'rxjs';
-import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, getInjectableDef, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1 } from './_pending_tasks-chunk.mjs';
+import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, getInjectableDef, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1, getDirectiveDef } from './_pending_tasks-chunk.mjs';
 import * as i0 from '@angular/core';
-import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest } from './_debug_node-chunk.mjs';
+import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest, ɵɵdefineComponent as __defineComponent, ViewEncapsulation } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -141,13 +141,11 @@ class TestComponentRenderer {
 const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
-class ComponentFixture {
-  componentRef;
+class AbstractFixture {
+  hostRef;
   debugElement;
-  componentInstance;
   nativeElement;
   elementRef;
-  changeDetectorRef;
   _renderer;
   _isDestroyed = false;
   _noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, {
@@ -166,24 +164,24 @@ class ComponentFixture {
     optional: true
   }) ?? this.autoDetectDefault;
   subscriptions = new Subscription();
-  ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
-  constructor(componentRef) {
-    this.componentRef = componentRef;
-    this.changeDetectorRef = componentRef.changeDetectorRef;
-    this.elementRef = componentRef.location;
-    this.debugElement = getDebugNode(this.elementRef.nativeElement);
-    this.componentInstance = componentRef.instance;
-    this.nativeElement = this.elementRef.nativeElement;
-    this.componentRef = componentRef;
-    this._testAppRef.allTestViews.add(this.componentRef.hostView);
+  hostView;
+  changeDetectorRef;
+  constructor(hostRef) {
+    this.hostRef = hostRef;
+    this.changeDetectorRef = hostRef.changeDetectorRef;
+    this.debugElement = getDebugNode(hostRef.location.nativeElement);
+    this.nativeElement = hostRef.location.nativeElement;
+    this.elementRef = hostRef.location;
+    this.hostView = hostRef.hostView;
+    this._testAppRef.allTestViews.add(this.hostView);
     if (this.autoDetect) {
-      this._testAppRef.autoDetectTestViews.add(this.componentRef.hostView);
+      this._testAppRef.autoDetectTestViews.add(this.hostView);
       this.scheduler?.notify(8);
       this.scheduler?.notify(0);
     }
-    this.componentRef.hostView.onDestroy(() => {
-      this._testAppRef.allTestViews.delete(this.componentRef.hostView);
-      this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
+    this.hostView.onDestroy(() => {
+      this._testAppRef.allTestViews.delete(this.hostView);
+      this._testAppRef.autoDetectTestViews.delete(this.hostView);
     });
     this._ngZone.runOutsideAngular(() => {
       this.subscriptions.add(this._ngZone.onError.subscribe({
@@ -197,10 +195,10 @@ class ComponentFixture {
     });
   }
   detectChanges(checkNoChanges = true) {
-    const originalCheckNoChanges = this.componentRef.changeDetectorRef.checkNoChanges;
+    const originalCheckNoChanges = this.changeDetectorRef.checkNoChanges;
     try {
       if (!checkNoChanges) {
-        this.componentRef.changeDetectorRef.checkNoChanges = () => {};
+        this.changeDetectorRef.checkNoChanges = () => {};
       }
       if (this.zonelessEnabled) {
         try {
@@ -217,7 +215,7 @@ class ComponentFixture {
         });
       }
     } finally {
-      this.componentRef.changeDetectorRef.checkNoChanges = originalCheckNoChanges;
+      this.changeDetectorRef.checkNoChanges = originalCheckNoChanges;
     }
   }
   checkNoChanges() {
@@ -231,9 +229,9 @@ class ComponentFixture {
       throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set.');
     }
     if (autoDetect) {
-      this._testAppRef.autoDetectTestViews.add(this.componentRef.hostView);
+      this._testAppRef.autoDetectTestViews.add(this.hostView);
     } else {
-      this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
+      this._testAppRef.autoDetectTestViews.delete(this.hostView);
     }
     this.autoDetect = autoDetect;
     this.detectChanges();
@@ -253,19 +251,9 @@ class ComponentFixture {
       });
     });
   }
-  getDeferBlocks() {
-    const deferBlocks = [];
-    const lView = this.componentRef.hostView['_lView'];
-    getDeferBlocks(lView, deferBlocks);
-    const deferBlockFixtures = [];
-    for (const block of deferBlocks) {
-      deferBlockFixtures.push(new DeferBlockFixture(block, this));
-    }
-    return Promise.resolve(deferBlockFixtures);
-  }
   _getRenderer() {
     if (this._renderer === undefined) {
-      this._renderer = this.componentRef.injector.get(RendererFactory2, null);
+      this._renderer = this.hostRef.injector.get(RendererFactory2, null);
     }
     return this._renderer;
   }
@@ -278,12 +266,39 @@ class ComponentFixture {
   }
   destroy() {
     this.subscriptions.unsubscribe();
-    this._testAppRef.autoDetectTestViews.delete(this.componentRef.hostView);
-    this._testAppRef.allTestViews.delete(this.componentRef.hostView);
+    this._testAppRef.autoDetectTestViews.delete(this.hostView);
+    this._testAppRef.allTestViews.delete(this.hostView);
     if (!this._isDestroyed) {
-      this.componentRef.destroy();
+      this.hostRef.destroy();
       this._isDestroyed = true;
     }
+  }
+}
+class ComponentFixture extends AbstractFixture {
+  componentRef;
+  componentInstance;
+  ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
+  constructor(componentRef) {
+    super(componentRef);
+    this.componentRef = componentRef;
+    this.componentInstance = componentRef.instance;
+  }
+  getDeferBlocks() {
+    const deferBlocks = [];
+    const lView = this.componentRef.hostView['_lView'];
+    const deferBlockFixtures = [];
+    getDeferBlocks(lView, deferBlocks);
+    for (const block of deferBlocks) {
+      deferBlockFixtures.push(new DeferBlockFixture(block, this));
+    }
+    return Promise.resolve(deferBlockFixtures);
+  }
+}
+class DirectiveFixture extends AbstractFixture {
+  directiveInstance;
+  constructor(hostRef, directiveInstance) {
+    super(hostRef);
+    this.directiveInstance = directiveInstance;
   }
 }
 
@@ -1336,6 +1351,9 @@ class TestBedImpl {
   static createComponent(component, options) {
     return TestBedImpl.INSTANCE.createComponent(component, options);
   }
+  static createDirective(directive, options) {
+    return TestBedImpl.INSTANCE.createDirective(directive, options);
+  }
   static getLastFixture() {
     return TestBedImpl.INSTANCE.getLastFixture();
   }
@@ -1493,36 +1511,69 @@ class TestBedImpl {
     });
   }
   createComponent(type, options) {
-    if (getAsyncClassMetadataFn(type)) {
-      const isCompiled = !!getComponentDef$1(type);
-      if (!isCompiled) {
-        throw new Error(`Component '${type.name}' has unresolved metadata. ` + `Please call \`await TestBed.compileComponents()\` before running this test.`);
-      }
-    }
-    const testComponentRenderer = this.inject(TestComponentRenderer);
-    const shouldInferTagName = options?.inferTagName ?? this._instanceInferTagName ?? false;
+    const renderer = this.inject(TestComponentRenderer);
     const componentDef = getComponentDef$1(type);
-    const rootElId = `root${_nextRootElementId++}`;
     if (!componentDef) {
-      throw new Error(`It looks like '${stringify(type)}' has not been compiled.`);
+      throw new Error(getAsyncClassMetadataFn(type) ? `Component '${type.name}' has unresolved metadata. ` + `Please call \`await TestBed.compileComponents()\` before running this test.` : `It looks like '${stringify(type)}' has not been compiled.`);
     }
-    testComponentRenderer.insertRootElement(rootElId, shouldInferTagName ? inferTagNameFromDefinition(componentDef) : undefined);
-    const componentFactory = new ComponentFactory(componentDef);
-    const initComponent = () => {
-      const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef, undefined, options?.bindings);
-      return this.runInInjectionContext(() => new ComponentFixture(componentRef));
-    };
+    const shouldInferTagName = options?.inferTagName ?? this._instanceInferTagName ?? false;
+    const tagName = shouldInferTagName ? inferTagNameFromDefinition(componentDef) : null;
     const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
     const ngZone = noNgZone ? null : this.inject(NgZone, null);
-    const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
-    this._activeFixtures.push(fixture);
-    return fixture;
+    const init = () => {
+      const ref = this.createComponentRef(type, tagName, renderer, options?.bindings);
+      const fixture = this.runInInjectionContext(() => new ComponentFixture(ref));
+      this._activeFixtures.push(fixture);
+      return fixture;
+    };
+    return ngZone ? ngZone.run(init) : init();
+  }
+  createDirective(type, options) {
+    const renderer = this.inject(TestComponentRenderer);
+    const directiveDef = getDirectiveDef(type);
+    if (!directiveDef) {
+      throw new Error(`It looks like '${stringify(type)}' has not been compiled.`);
+    }
+    let tagName = options?.tagName;
+    if (!tagName) {
+      let tagNameFromSelectors;
+      for (const [currentTagName] of directiveDef.selectors) {
+        if (currentTagName) {
+          if (tagNameFromSelectors && currentTagName !== tagNameFromSelectors) {
+            const allTagNames = directiveDef.selectors.filter(selector => selector[0]).map(selector => selector[0]).join(', ');
+            throw new Error(`Directive ${stringify(type)} specifies multiple tag names in its selector ` + `(${allTagNames}). Specify which tag name should be used via the \`tagName\` ` + `key in the options parameter.`);
+          }
+          tagNameFromSelectors = currentTagName;
+        }
+      }
+      tagName = tagNameFromSelectors;
+    }
+    if (!tagName) {
+      throw new Error(`Cannot determine tag name for ${stringify(type)}, because one was not set in ` + `the options object and the selector for ${stringify(type)} does not ` + `include a tag name. Specify which tag name should be used via the \`tagName\` ` + `key in the options parameter.`);
+    }
+    const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
+    const ngZone = noNgZone ? null : this.inject(NgZone, null);
+    const init = () => {
+      const hostRef = this.createComponentRef(DirectiveTestHost, tagName, renderer, undefined, [options?.bindings ? {
+        type,
+        bindings: options.bindings
+      } : type], true);
+      const fixture = this.runInInjectionContext(() => new DirectiveFixture(hostRef, hostRef.injector.get(type, null, {
+        self: true
+      })));
+      this._activeFixtures.push(fixture);
+      return fixture;
+    };
+    return ngZone ? ngZone.run(init) : init();
   }
   getLastFixture() {
-    if (this._activeFixtures.length === 0) {
-      throw new Error('No fixture has been created yet.');
+    for (let i = this._activeFixtures.length - 1; i > -1; i--) {
+      const fixture = this._activeFixtures[i];
+      if (fixture instanceof ComponentFixture) {
+        return fixture;
+      }
     }
-    return this._activeFixtures[this._activeFixtures.length - 1];
+    throw new Error('No fixture has been created yet.');
   }
   get compiler() {
     if (this._compiler === null) {
@@ -1547,6 +1598,12 @@ class TestBedImpl {
     }
     this.globalCompilationChecked = true;
   }
+  createComponentRef(type, tagName, renderer, rootTypeBindings, directives, allowNonStandaloneDirectives) {
+    const rootElId = `root${_nextRootElementId++}`;
+    renderer.insertRootElement(rootElId, tagName ?? undefined);
+    const factory = new ComponentFactory(getComponentDef$1(type));
+    return factory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef, directives, rootTypeBindings, undefined, allowNonStandaloneDirectives);
+  }
   destroyActiveFixtures() {
     let errorCount = 0;
     this._activeFixtures.forEach(fixture => {
@@ -1554,15 +1611,24 @@ class TestBedImpl {
         fixture.destroy();
       } catch (e) {
         errorCount++;
-        console.error('Error during cleanup of component', {
-          component: fixture.componentInstance,
-          stacktrace: e
-        });
+        if (fixture instanceof ComponentFixture) {
+          console.error('Error during cleanup of component', {
+            component: fixture.componentInstance,
+            stacktrace: e
+          });
+        } else if (fixture instanceof DirectiveFixture) {
+          console.error('Error during cleanup of directive', {
+            component: fixture.directiveInstance,
+            stacktrace: e
+          });
+        } else {
+          console.error('Error during cleanup of fixture', e);
+        }
       }
     });
     this._activeFixtures = [];
     if (errorCount > 0 && this.shouldRethrowTeardownErrors()) {
-      throw Error(`${errorCount} ${errorCount === 1 ? 'component' : 'components'} ` + `threw errors during cleanup`);
+      throw Error(`${errorCount} ${errorCount === 1 ? 'fixture' : 'fixtures'} ` + `threw errors during cleanup`);
     }
   }
   shouldRethrowTeardownErrors() {
@@ -1658,6 +1724,17 @@ function withModule(moduleDef, fn) {
     };
   }
   return new InjectSetupWrapper(() => moduleDef);
+}
+class DirectiveTestHost {
+  static ɵfac = () => new DirectiveTestHost();
+  static ɵcmp = __defineComponent({
+    type: DirectiveTestHost,
+    selectors: [['div', 'ng-directive-test-component', '']],
+    decls: 0,
+    vars: 0,
+    template: () => {},
+    encapsulation: ViewEncapsulation.None
+  });
 }
 
 class FakeNavigation {
@@ -2555,5 +2632,5 @@ class Log {
   }], () => [], null);
 })();
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, DirectiveFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };
 //# sourceMappingURL=testing.mjs.map

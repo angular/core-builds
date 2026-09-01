@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.4+sha-9f44090
+ * @license Angular v22.2.0-next.4+sha-f44bf0f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9145,7 +9145,7 @@ class ComponentFactory {
     this.ngContentSelectors = componentDef.ngContentSelectors ?? [];
     this.isBoundToModule = !!ngModule;
   }
-  create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings, hostElementNamespace) {
+  create(injector, projectableNodes, rootSelectorOrNode, environmentInjector, directives, componentBindings, hostElementNamespace, allowNonStandaloneDirectives) {
     profiler(ProfilerEvent.DynamicComponentStart);
     const prevConsumer = setActiveConsumer(null);
     try {
@@ -9155,17 +9155,17 @@ class ComponentFactory {
       const environment = createRootLViewEnvironment(rootViewInjector);
       const tracingService = environment.tracingService;
       if (tracingService && tracingService.componentCreate) {
-        return tracingService.componentCreate(getComponentName(cmpDef), () => this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace));
+        return tracingService.componentCreate(getComponentName(cmpDef), () => this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace, allowNonStandaloneDirectives));
       } else {
-        return this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace);
+        return this.createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace, allowNonStandaloneDirectives);
       }
     } finally {
       setActiveConsumer(prevConsumer);
     }
   }
-  createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace) {
+  createComponentRef(environment, rootViewInjector, projectableNodes, rootSelectorOrNode, directives, componentBindings, hostElementNamespace, allowNonStandaloneDirectives) {
     const cmpDef = this.componentDef;
-    const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives);
+    const rootTView = createRootTView(rootSelectorOrNode, cmpDef, componentBindings, directives, allowNonStandaloneDirectives);
     const hostRenderer = environment.rendererFactory.createRenderer(null, cmpDef);
     const hostElement = rootSelectorOrNode ? locateHostElement(hostRenderer, rootSelectorOrNode, cmpDef.encapsulation, rootViewInjector) : createHostElement(cmpDef, hostRenderer, hostElementNamespace ?? null);
     assertNotScriptHostElement(hostElement);
@@ -9208,8 +9208,8 @@ class ComponentFactory {
     return new ComponentRef(this.componentType, rootLView, !!hasInputBindings);
   }
 }
-function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.4+sha-9f44090'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.4+sha-f44bf0f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -9250,7 +9250,7 @@ function createRootTView(rootSelectorOrNode, componentDef, componentBindings, di
     for (const directive of directives) {
       const directiveType = typeof directive === 'function' ? directive : directive.type;
       const directiveDef = ngDevMode ? getDirectiveDefOrThrow(directiveType) : getDirectiveDef(directiveType);
-      if (ngDevMode && !directiveDef.standalone) {
+      if (ngDevMode && !allowNonStandaloneDirectives && !directiveDef.standalone) {
         throw new RuntimeError(907, `The ${stringifyForError(directiveType)} directive must be standalone in ` + `order to be applied to a dynamically-created component.`);
       }
       directivesToApply.push(directiveDef);
@@ -12512,7 +12512,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.4+sha-9f44090';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.4+sha-f44bf0f';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
