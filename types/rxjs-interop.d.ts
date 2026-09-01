@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.4+sha-d8e74e7
+ * @license Angular v22.2.0-next.4+sha-9f44090
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -178,6 +178,15 @@ declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunc
  * @publicApi 22.0
  */
 interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
+    /**
+     * A function that returns the `Observable` to load the resource's value from.
+     *
+     * This Observable must eventually emit a value or an error before it completes — a resource
+     * needs one of those two things to know what to show. If the Observable completes without ever
+     * emitting anything (for example because of `catchError(() => EMPTY)`), Angular throws
+     * `RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE` (`NG0991`), since it has nothing to give the
+     * resource.
+     */
     stream: (params: ResourceLoaderParams<R>) => Observable<T>;
 }
 /**
