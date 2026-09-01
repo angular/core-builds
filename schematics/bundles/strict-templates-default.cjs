@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v22.2.0-next.4+sha-87d38ec
+ * @license Angular v22.2.0-next.4+sha-d8e74e7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DaUdSee4.cjs');
 var jsonFile = require('./json-file-RJY0pCW_.cjs');
 var ts = require('typescript');
 var path = require('node:path');
@@ -39,7 +39,9 @@ function getResolvedAngularCompilerOptions(tree, tsconfigPath) {
  */
 function migrate() {
     return async (tree) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
+        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree, {
+            angularBuildersOnly: true,
+        });
         const allPaths = [...new Set([...buildPaths, ...testPaths])];
         for (const tsconfigPath of allPaths) {
             const json = new jsonFile.jsonFileExports.JSONFile(tree, tsconfigPath);

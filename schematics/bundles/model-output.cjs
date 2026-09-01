@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.2.0-next.4+sha-87d38ec
+ * @license Angular v22.2.0-next.4+sha-d8e74e7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,13 +10,13 @@ require('@angular/compiler-cli');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 require('node:path');
-var project_paths = require('./project_paths-LBcwW5BF.cjs');
+var project_paths = require('./project_paths-CEexbl9C.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
-var apply_import_manager = require('./apply_import_manager-BsCkDgPj.cjs');
+var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-BejwmdOG.cjs');
+require('./project_tsconfig_paths-DaUdSee4.cjs');
 
 class ModelOutputMigration extends project_paths.TsurgeFunnelMigration {
     config;
