@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.4+sha-36fc3f0
+ * @license Angular v22.1.4+sha-d90698d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4027,7 +4027,7 @@ declare const enum RuntimeErrorCode {
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
     MUST_PROVIDE_STREAM_OPTION = 990,
-    RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = 991,
+    RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = -991,
     INVALID_RESOURCE_CREATION_IN_PARAMS = 992
 }
 /**

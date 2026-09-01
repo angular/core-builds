@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.4+sha-36fc3f0
+ * @license Angular v22.1.4+sha-d90698d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -259,7 +259,7 @@ function rxResource(opts) {
         complete: () => {
           if (!hasResolved) {
             send({
-              error: new RuntimeError(991, ngDevMode && 'Resource completed before producing a value')
+              error: new RuntimeError(-991, ngDevMode && 'Resource completed before producing a value')
             });
           }
           params.abortSignal.removeEventListener('abort', onAbort);
