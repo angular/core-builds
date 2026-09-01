@@ -1,19 +1,21 @@
 'use strict';
 /**
- * @license Angular v22.1.4+sha-d457cc9
+ * @license Angular v22.1.4+sha-36fc3f0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 'use strict';
 
-var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DaUdSee4.cjs');
 var jsonFile = require('./json-file-RJY0pCW_.cjs');
 require('@angular-devkit/core');
 require('node:os');
 
 function migrate() {
     return async (tree) => {
-        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree);
+        const { buildPaths, testPaths } = await project_tsconfig_paths.getProjectTsConfigPaths(tree, {
+            angularBuildersOnly: true,
+        });
         const allPaths = [...new Set([...buildPaths, ...testPaths])];
         for (const tsconfigPath of allPaths) {
             const json = new jsonFile.jsonFileExports.JSONFile(tree, tsconfigPath);

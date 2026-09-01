@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.4+sha-d457cc9
+ * @license Angular v22.1.4+sha-36fc3f0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,14 +8,14 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-LBcwW5BF.cjs');
+var project_paths = require('./project_paths-CEexbl9C.cjs');
 var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 require('@angular/compiler-cli');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-BsCkDgPj.cjs');
+var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-BejwmdOG.cjs');
+require('./project_tsconfig_paths-DaUdSee4.cjs');
 
 class IncrementalHydrationMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {

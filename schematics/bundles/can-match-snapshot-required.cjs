@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.4+sha-d457cc9
+ * @license Angular v22.1.4+sha-36fc3f0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,13 +8,13 @@
 
 require('@angular-devkit/core');
 require('node:path/posix');
-var project_paths = require('./project_paths-LBcwW5BF.cjs');
+var project_paths = require('./project_paths-CEexbl9C.cjs');
 var ts = require('typescript');
 require('@angular/compiler-cli');
 require('@angular/compiler-cli/private/migrations');
 require('node:path');
 require('@angular-devkit/schematics');
-require('./project_tsconfig_paths-BejwmdOG.cjs');
+require('./project_tsconfig_paths-DaUdSee4.cjs');
 
 class CanMatchSnapshotRequiredMigration extends project_paths.TsurgeFunnelMigration {
     async analyze(info) {

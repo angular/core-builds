@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.1.4+sha-d457cc9
+ * @license Angular v22.1.4+sha-36fc3f0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -12,7 +12,7 @@ var fs = require('fs');
 var path = require('path');
 var ts = require('typescript');
 var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
-var project_tsconfig_paths = require('./project_tsconfig_paths-BejwmdOG.cjs');
+var project_tsconfig_paths = require('./project_tsconfig_paths-DaUdSee4.cjs');
 var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
 var nodes = require('./nodes-ZSQ7WZRB.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
