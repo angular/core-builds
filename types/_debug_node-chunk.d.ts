@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.4+sha-94b1d3d
+ * @license Angular v22.1.4+sha-731b959
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6031,6 +6031,7 @@ declare class NavigateEvent extends Event {
     readonly canIntercept: boolean;
     readonly userInitiated: boolean;
     readonly hashChange: boolean;
+    readonly hasUAVisualTransition: boolean;
     readonly destination: NavigationDestination;
     readonly signal: AbortSignal;
     readonly formData: FormData | null;
@@ -6044,6 +6045,7 @@ interface NavigateEventInit extends EventInit {
     canIntercept?: boolean;
     userInitiated?: boolean;
     hashChange?: boolean;
+    hasUAVisualTransition?: boolean;
     destination: NavigationDestination;
     signal: AbortSignal;
     formData?: FormData | null;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.4+sha-94b1d3d
+ * @license Angular v22.1.4+sha-731b959
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3512,7 +3512,7 @@ function ɵɵvalidateAttribute(value, tagName, attributeName) {
     if (resolvedTagName === 'iframe') {
       const element = getNativeByTNode(tNode, lView);
       enforceIframeSecurity(element);
-    } else if (namespace === SVG_NAMESPACE) {
+    } else if (namespace === SVG_NAMESPACE || !namespace) {
       const config = SVG_ANIMATION_SENSITIVE_STATIC_VALUES[resolvedTagName]?.[attributeName.toLowerCase()];
       if (config) {
         const element = getNativeByTNode(tNode, lView);
@@ -9209,7 +9209,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.4+sha-94b1d3d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.4+sha-731b959'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12358,7 +12358,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.4+sha-94b1d3d';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.4+sha-731b959';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -18387,13 +18387,13 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
   function verifyDirectivesHaveSelector(type) {
     type = resolveForwardRef(type);
     const def = getDirectiveDef(type);
-    if (!getComponentDef(type) && def && def.selectors.length == 0) {
+    if (!getComponentDef(type) && !getPipeDef$1(type) && def && def.selectors.length == 0) {
       errors.push(`Directive ${stringifyForError(type)} has no selector, please add it!`);
     }
   }
   function verifyNotStandalone(type, moduleType) {
     type = resolveForwardRef(type);
-    const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
+    const def = getPipeDef$1(type) || getComponentDef(type) || getDirectiveDef(type);
     if (def?.standalone) {
       const location = `"${stringifyForError(moduleType)}" NgModule`;
       errors.push(generateStandaloneInDeclarationsError(type, location));
