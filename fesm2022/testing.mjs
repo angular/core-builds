@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.4+sha-a66fd64
+ * @license Angular v22.2.0-next.4+sha-69c8730
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2059,7 +2059,8 @@ class FakeNavigation {
     const oldUrl = this.currentEntry.url;
     this.updateNavigationEntriesForSameDocumentNavigation(navigateEvent);
     const popStateEvent = createPopStateEvent({
-      state: navigateEvent.destination.getHistoryState()
+      state: navigateEvent.destination.getHistoryState(),
+      hasUAVisualTransition: navigateEvent.hasUAVisualTransition
     });
     this._window.dispatchEvent(popStateEvent);
     if (navigateEvent.hashChange) {
@@ -2206,6 +2207,7 @@ function dispatchNavigateEvent({
   canIntercept,
   userInitiated,
   hashChange,
+  hasUAVisualTransition,
   navigationType,
   destination,
   info,
@@ -2225,6 +2227,9 @@ function dispatchNavigateEvent({
   event.canIntercept = canIntercept;
   event.userInitiated = userInitiated;
   event.hashChange = hashChange;
+  if (hasUAVisualTransition) {
+    event.hasUAVisualTransition = true;
+  }
   event.signal = eventAbortController.signal;
   event.abortController = eventAbortController;
   event.info = info;
@@ -2469,13 +2474,17 @@ function createFakeNavigationCurrentEntryChangeEvent({
   return event;
 }
 function createPopStateEvent({
-  state
+  state,
+  hasUAVisualTransition
 }) {
   const event = new Event('popstate', {
     bubbles: false,
     cancelable: false
   });
   event.state = state;
+  if (hasUAVisualTransition) {
+    event.hasUAVisualTransition = true;
+  }
   return event;
 }
 function createHashChangeEvent(newURL, oldURL) {
