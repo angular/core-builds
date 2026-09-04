@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.5+sha-81c3f3a
+ * @license Angular v22.2.0-next.5+sha-74c1716
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -832,7 +832,7 @@ declare class Log<T = string> {
     clear(): void;
     result(): string;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<Log<any>, never>;
-    static ɵprov: _angular_core.ɵɵInjectableDeclaration<Log<any>>;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<any>;
 }
 
 export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockBehavior, DeferBlockFixture, DeferBlockState, DirectiveFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, FakeNavigation as ɵFakeNavigation, Log as ɵLog, MetadataOverrider as ɵMetadataOverrider, getCleanupHook as ɵgetCleanupHook };

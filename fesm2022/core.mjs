@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.5+sha-81c3f3a
+ * @license Angular v22.2.0-next.5+sha-74c1716
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3376,9 +3376,16 @@ async function declareExperimentalWebMcpTool(tool, injector) {
     }
   };
   destroyRef.onDestroy(() => void abortCtrl.abort());
-  await modelContext.registerTool(wrappedTool, {
-    signal: abortCtrl.signal
-  });
+  try {
+    await modelContext.registerTool(wrappedTool, {
+      signal: abortCtrl.signal
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return;
+    }
+    throw error;
+  }
 }
 
 function provideExperimentalWebMcpTools(tools) {
