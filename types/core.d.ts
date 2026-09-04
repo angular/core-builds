@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.5+sha-468b65b
+ * @license Angular v22.1.5+sha-dfe7be4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1999,7 +1999,7 @@ declare class ApplicationInitStatus {
     private readonly injector;
     constructor();
     static ɵfac: __FactoryDeclaration<ApplicationInitStatus, never>;
-    static ɵprov: __InjectableDeclaration<ApplicationInitStatus>;
+    static ɵprov: __InjectableDeclaration<any>;
 }
 
 /**
@@ -3738,7 +3738,7 @@ declare class Console {
     log(message: string): void;
     warn(message: string): void;
     static ɵfac: __FactoryDeclaration<Console, never>;
-    static ɵprov: __InjectableDeclaration<Console>;
+    static ɵprov: __InjectableDeclaration<any>;
 }
 
 /**
@@ -7618,7 +7618,7 @@ declare class Testability implements PublicTestability {
      */
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
     static ɵfac: __FactoryDeclaration<Testability, never>;
-    static ɵprov: __InjectableDeclaration<Testability>;
+    static ɵprov: __InjectableDeclaration<any>;
 }
 /**
  * A global registry of {@link Testability} instances for specific elements.
@@ -7661,7 +7661,7 @@ declare class TestabilityRegistry {
      */
     findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
     static ɵfac: __FactoryDeclaration<TestabilityRegistry, never>;
-    static ɵprov: __InjectableDeclaration<TestabilityRegistry>;
+    static ɵprov: __InjectableDeclaration<any>;
 }
 /**
  * Adapter interface for retrieving the `Testability` service associated for a

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.5+sha-468b65b
+ * @license Angular v22.1.5+sha-dfe7be4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5945,7 +5945,7 @@ declare class ApplicationRef {
      */
     get viewCount(): number;
     static ɵfac: ɵɵFactoryDeclaration<ApplicationRef, never>;
-    static ɵprov: ɵɵInjectableDeclaration<ApplicationRef>;
+    static ɵprov: ɵɵInjectableDeclaration<any>;
 }
 
 interface NavigationEventMap {
@@ -6103,7 +6103,7 @@ declare class Compiler {
      */
     getModuleId(moduleType: Type<any>): string | undefined;
     static ɵfac: ɵɵFactoryDeclaration<Compiler, never>;
-    static ɵprov: ɵɵInjectableDeclaration<Compiler>;
+    static ɵprov: ɵɵInjectableDeclaration<any>;
 }
 /**
  * Options for creating a compiler.
@@ -6196,7 +6196,7 @@ declare class PlatformRef {
      */
     get destroyed(): boolean;
     static ɵfac: ɵɵFactoryDeclaration<PlatformRef, never>;
-    static ɵprov: ɵɵInjectableDeclaration<PlatformRef>;
+    static ɵprov: ɵɵInjectableDeclaration<any>;
 }
 
 /**
