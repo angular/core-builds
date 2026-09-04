@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.5+sha-bae170d
+ * @license Angular v22.2.0-next.5+sha-9a58353
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -844,11 +844,12 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
     if (nodeInjectorValue !== NOT_FOUND) {
       return nodeInjectorValue;
     }
+    flags &= -5;
     let parentTNode = currentTNode.parent;
     if (!parentTNode) {
       const embeddedViewInjector = currentLView[EMBEDDED_VIEW_INJECTOR];
       if (embeddedViewInjector) {
-        const embeddedViewInjectorValue = embeddedViewInjector.get(token, NOT_FOUND, flags & -5);
+        const embeddedViewInjectorValue = embeddedViewInjector.get(token, NOT_FOUND, flags);
         if (embeddedViewInjectorValue !== NOT_FOUND) {
           return embeddedViewInjectorValue;
         }
@@ -9209,7 +9210,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.5+sha-bae170d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-next.5+sha-9a58353'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12512,7 +12513,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.5+sha-bae170d';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-next.5+sha-9a58353';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
