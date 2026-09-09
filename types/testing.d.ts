@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.5+sha-5afdd98
+ * @license Angular v22.2.0-next.5+sha-2c71e88-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './core.js';
 import { DeferBlockState, DeferBlockBehavior } from './_debug_node-chunk.js';
-import { ɵDeferBlockDetails as DeferBlockDetails, DebugElement, ElementRef, ChangeDetectorRef, ComponentRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
+import { ɵDeferBlockDetails as DeferBlockDetails, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
 import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
@@ -56,7 +56,7 @@ declare class DeferBlockFixture {
 }
 
 declare abstract class AbstractFixture<E> {
-    private readonly hostRef;
+    protected readonly hostRef: ComponentRef<unknown>;
     /**
      * The DebugElement associated with the root element of this component.
      */
@@ -160,6 +160,8 @@ declare class DirectiveFixture<T> extends AbstractFixture<Element> {
      */
     readonly directiveInstance: T;
     constructor(hostRef: ComponentRef<unknown>, directiveInstance: T);
+    /** Registers a callback that will be invoked when the fixture is destroyed. */
+    onDestroy(callback: () => void): void;
 }
 
 /**
