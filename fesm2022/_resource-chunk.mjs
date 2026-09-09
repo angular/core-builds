@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.2.0-next.5+sha-9a58353
+ * @license Angular v22.2.0-next.5+sha-5afdd98
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, InjectionToken, signalAsReadonlyFn, assertInInjectionContext, TransferState, effect, PendingTasks, signal, isSignal, Injector } from './_pending_tasks-chunk.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, InjectionToken, signalAsReadonlyFn, assertInInjectionContext, TransferState, effect, PendingTasks, signal, isSignal, isErrorLike, Injector } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -521,9 +521,6 @@ function encapsulateResourceError(error) {
     return error;
   }
   return new ResourceWrappedError(error);
-}
-function isErrorLike(error) {
-  return error instanceof Error || typeof error === 'object' && typeof error.name === 'string' && typeof error.message === 'string';
 }
 class ResourceValueError extends Error {
   constructor(error) {

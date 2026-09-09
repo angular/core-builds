@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.5+sha-9a58353
+ * @license Angular v22.2.0-next.5+sha-5afdd98
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3156,6 +3156,97 @@ interface DeferBlockDependencyInterceptor {
 }
 
 /**
+ * Error details caught by the error boundary
+ *
+ * @developerPreview 22.2
+ */
+interface ErrorDetails {
+    /**
+     * The class of the component or directive where the error occurred.
+     */
+    readonly declarationType: Type<unknown>;
+    /**
+     * The instance of the component or directive where the error occurred.
+     */
+    readonly declarationInstance: unknown;
+    /**
+     * Information about the error boundary that caught the error.
+     */
+    readonly boundary?: {
+        /**
+         * The component where the error boundary that caught the rendering error was located
+         */
+        readonly type: Type<unknown>;
+        /**
+         * Call this method to retry rendering the error boundary.
+         */
+        readonly reset: () => void;
+    };
+    /**
+     * The function that intercepted the error, if any.
+     */
+    readonly caughtBy?: Function;
+}
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```ts
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * // Provide in standalone apps
+ * bootstrapApplication(AppComponent, {
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ *
+ * // Provide in module-based apps
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ *
+ * @see [Unhandled errors in Angular](best-practices/error-handling)
+ *
+ */
+declare class ErrorHandler {
+    handleError(error: any): void;
+    /**
+     * Callback to handle errors happening during the rendering of a component/directive view.
+     *
+     * @param error The error that was thrown.
+     * @param details Additional information about the error.
+     */
+    onViewError?(error: Error, details: ErrorDetails): void;
+}
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ */
+declare const INTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
+/**
+ * Provides an environment initializer which forwards unhandled errors to the ErrorHandler.
+ *
+ * The listeners added are for the window's 'unhandledrejection' and 'error' events.
+ *
+ * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
+ *
+ * @publicApi
+ */
+declare function provideBrowserGlobalErrorListeners(): EnvironmentProviders;
+
+/**
  * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
  * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
  * handled.
@@ -4088,6 +4179,7 @@ declare const EFFECTS = 23;
 declare const REACTIVE_TEMPLATE_CONSUMER = 24;
 declare const AFTER_RENDER_SEQUENCES_TO_ADD = 25;
 declare const ANIMATIONS = 26;
+declare const ON_ERROR = 27;
 interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -4347,6 +4439,11 @@ interface LView<T = unknown> extends Array<any> {
     [REACTIVE_TEMPLATE_CONSUMER]: ReactiveLViewConsumer | null;
     [AFTER_RENDER_SEQUENCES_TO_ADD]: AfterRenderSequence[] | null;
     [ANIMATIONS]: AnimationLViewData | null;
+    /**
+     * Function to be called when an error occurs during change detection or lifecycle hooks
+     * in this view or any of its descendants. The error is always encapsulated in an `Error` instance.
+     */
+    [ON_ERROR]: ((error: Error, details: ErrorDetails) => void) | null;
 }
 /**
  * Contextual data that is shared across multiple instances of `LView` in the same application.
@@ -7527,5 +7624,5 @@ declare function getDebugNode(nativeNode: any): DebugNode | null;
  */
 type Predicate<T> = (value: T) => boolean;
 
-export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, Input, MAX_ANIMATION_TIMEOUT, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
-export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationType, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
+export { ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, AfterRenderManager, AnimationRendererType, ApplicationRef, AttributeMarker, COMPILER_OPTIONS, CONTAINER_HEADER_OFFSET, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionScheduler, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentRef, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, EffectScheduler, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HostBinding, HostListener, INJECTOR_SCOPE, INTERNAL_APPLICATION_ERROR_HANDLER, Input, MAX_ANIMATION_TIMEOUT, NG_INJ_DEF, NG_PROV_DEF, NO_ERRORS_SCHEMA, NavigateEvent, Navigation, NavigationCurrentEntryChangeEvent, NavigationDestination, NavigationHistoryEntry, NavigationTransition, NgModule, NgModuleFactory, NgModuleRef, NgZone, NoopNgZone, NotificationSource, Output, PROVIDED_ZONELESS, Pipe, PlatformRef, QueryList, R3Injector, RenderFlags, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, TDeferDetailsFlags, TracingAction, TracingService, ViewEncapsulation, ViewRef, ZONELESS_ENABLED, asNativeElements, effect, getDebugNode, getDeferBlocks, getInjectableDef, injectChangeDetectorRef, inputBinding, isInjectable, outputBinding, provideBrowserGlobalErrorListeners, twoWayBinding, ɵɵdefineInjectable, ɵɵdefineInjector };
+export type { AfterRenderRef, AnimationCallbackEvent, AnimationClassBindingFn, AnimationFunction, Binding, BootstrapOptions, ClassDebugInfo, CompilerOptions, ComponentDecorator, ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, ControlDirectiveHost, CreateEffectOptions, CssSelectorList, DeferBlockConfig, DeferBlockDependencyInterceptor, DeferBlockDetails, DehydratedDeferBlock, DependencyResolverFn, DependencyTypeList, DirectiveDecorator, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveWithBindings, EffectCleanupFn, EffectCleanupRegisterFn, EffectRef, ErrorDetails, GlobalTargetResolver, HostBindingDecorator, HostBindingsFunction, HostDirectiveConfig, HostListenerDecorator, InjectableType, InjectorType, InputDecorator, InputSignalNode, InputTransformFunction, InternalNgModuleRef, LContainer, LView, ListenerOptions, LocalRefExtractor, NavigationInterceptOptions, NavigationNavigateOptions, NavigationOptions, NavigationReloadOptions, NavigationResult, NavigationType, NavigationUpdateCurrentEntryOptions, NgModuleDecorator, NgModuleScopeInfoFromDecorator, OpaqueViewState, OutputDecorator, PipeDecorator, PipeDef, PipeType, Predicate, RElement, RNode, RawScopeInfoFromDecorator, RendererType2, SanitizerFn, SchemaMetadata, TAttributes, TDeferBlockDetails, TNode, TView, TracingSnapshot, TrustedHTML, TrustedScript, TrustedScriptURL, TypeDecorator, TypeOrFactory, ViewQueriesFunction, ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectableDeclaration, ɵɵInjectorDeclaration, ɵɵInjectorDef, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration };
