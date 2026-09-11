@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.7+sha-d0ed76c
+ * @license Angular v22.2.0-next.7+sha-a823323
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@ import './_formatter-chunk.js';
 import './_event_dispatcher-chunk.js';
 import { InjectionToken, Type, ProviderToken, InjectOptions } from './core.js';
 import { DeferBlockState, DeferBlockBehavior } from './_debug_node-chunk.js';
-import { ɵDeferBlockDetails as DeferBlockDetails, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationInterceptOptions as NavigationInterceptOptions, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
+import { ɵDeferBlockDetails as DeferBlockDetails, ComponentRef, DebugElement, ElementRef, ChangeDetectorRef, NgZone, SchemaMetadata, PlatformRef, NgModule, Component, Directive, Pipe, Binding, ɵNavigation as Navigation, ɵNavigationHistoryEntry as NavigationHistoryEntry, ɵNavigationNavigateOptions as NavigationNavigateOptions, ɵNavigationResult as NavigationResult, ɵNavigationOptions as NavigationOptions, ɵNavigateEvent as NavigateEvent, ɵNavigationDestination as NavigationDestination, ɵNavigationCurrentEntryChangeEvent as NavigationCurrentEntryChangeEvent, ɵNavigationTransition as NavigationTransition, ɵNavigationUpdateCurrentEntryOptions as NavigationUpdateCurrentEntryOptions, ɵNavigationReloadOptions as NavigationReloadOptions } from './core.js';
 import * as _angular_core from '@angular/core';
 import 'rxjs';
 import './_effect-chunk.js';
@@ -642,9 +642,20 @@ declare class FakeNavigation implements Navigation {
     private nextKey;
     /** Whether this fake is disposed. */
     private disposed;
-    /** Equivalent to `navigation.currentEntry`. */
+    /**
+     * Equivalent to `navigation.currentEntry`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-currententry
+     */
     get currentEntry(): FakeNavigationHistoryEntry;
+    /**
+     * Equivalent to `navigation.canGoBack`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-cangoback
+     */
     get canGoBack(): boolean;
+    /**
+     * Equivalent to `navigation.canGoForward`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-cangoforward
+     */
     get canGoForward(): boolean;
     private readonly createEventTarget;
     private readonly _window;
@@ -664,20 +675,35 @@ declare class FakeNavigation implements Navigation {
      * asynchronous.
      */
     setSynchronousTraversalsForTesting(synchronousTraversals: boolean): void;
-    /** Equivalent to `navigation.entries()`. */
+    /**
+     * Equivalent to `navigation.entries()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-entries
+     */
     entries(): FakeNavigationHistoryEntry[];
-    /** Equivalent to `navigation.navigate()`. */
+    /**
+     * Equivalent to `navigation.navigate()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-navigate
+     */
     navigate(url: string, options?: NavigationNavigateOptions): FakeNavigationResult;
     /** Equivalent to `history.pushState()`. */
     pushState(data: unknown, title: string, url?: string): void;
     /** Equivalent to `history.replaceState()`. */
     replaceState(data: unknown, title: string, url?: string): void;
     private pushOrReplaceState;
-    /** Equivalent to `navigation.traverseTo()`. */
+    /**
+     * Equivalent to `navigation.traverseTo()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-traverseto
+     */
     traverseTo(key: string, options?: NavigationOptions): FakeNavigationResult;
-    /** Equivalent to `navigation.back()`. */
+    /**
+     * Equivalent to `navigation.back()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-back
+     */
     back(options?: NavigationOptions): FakeNavigationResult;
-    /** Equivalent to `navigation.forward()`. */
+    /**
+     * Equivalent to `navigation.forward()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-forward
+     */
     forward(options?: NavigationOptions): FakeNavigationResult;
     /**
      * Equivalent to `history.go()`.
@@ -687,6 +713,14 @@ declare class FakeNavigation implements Navigation {
      * `back(); forward()` chains it collapses certain traversals.
      */
     go(direction: number): void;
+    /** Creates a FakeNavigationDestination matching a given history entry. */
+    private createDestinationFromEntry;
+    /**
+     * Implementation of "performing a non-traverse navigation" from the spec.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-navigate
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-reload
+     */
+    private performNonTraverseNavigation;
     /** Runs a traversal synchronously or asynchronously */
     private runTraversal;
     /** Equivalent to `navigation.addEventListener()`. */
@@ -702,23 +736,50 @@ declare class FakeNavigation implements Navigation {
     abortOngoingNavigation(eventToAbort: InternalFakeNavigateEvent, reason?: Error): void;
     /**
      * Implementation for all navigations and traversals.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigate-event-firing
      * @returns true if the event was intercepted, otherwise false
      */
     private userAgentNavigate;
     /** Utility method for finding entries with the given `key`. */
     private findEntry;
-    set onnavigate(_handler: ((this: Navigation, ev: NavigateEvent) => any) | null);
+    private _onnavigate;
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#handler-navigation-onnavigate
+     */
     get onnavigate(): ((this: Navigation, ev: NavigateEvent) => any) | null;
-    set oncurrententrychange(_handler: ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null);
-    get oncurrententrychange(): ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
-    set onnavigatesuccess(_handler: ((this: Navigation, ev: Event) => any) | null);
+    set onnavigate(handler: ((this: Navigation, ev: NavigateEvent) => any) | null);
+    private _oncurrententrychange;
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#handler-navigation-oncurrententrychange
+     */
+    get oncurrententrychange(): // tslint:disable-next-line:no-any
+    ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null;
+    set oncurrententrychange(handler: // tslint:disable-next-line:no-any
+    ((this: Navigation, ev: NavigationCurrentEntryChangeEvent) => any) | null);
+    private _onnavigatesuccess;
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#handler-navigation-onnavigatesuccess
+     */
     get onnavigatesuccess(): ((this: Navigation, ev: Event) => any) | null;
-    set onnavigateerror(_handler: ((this: Navigation, ev: ErrorEvent) => any) | null);
+    set onnavigatesuccess(handler: ((this: Navigation, ev: Event) => any) | null);
+    private _onnavigateerror;
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#handler-navigation-onnavigateerror
+     */
     get onnavigateerror(): ((this: Navigation, ev: ErrorEvent) => any) | null;
+    set onnavigateerror(handler: ((this: Navigation, ev: ErrorEvent) => any) | null);
     private _transition;
     get transition(): NavigationTransition | null;
-    updateCurrentEntry(_options: NavigationUpdateCurrentEntryOptions): void;
-    reload(_options?: NavigationReloadOptions): NavigationResult;
+    /**
+     * Equivalent to `navigation.updateCurrentEntry()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-updatecurrententry
+     */
+    updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void;
+    /**
+     * Equivalent to `navigation.reload()`.
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigation-reload
+     */
+    reload(options?: NavigationReloadOptions): FakeNavigationResult;
 }
 /**
  * Fake equivalent of the `NavigationResult` interface with
@@ -730,6 +791,7 @@ interface FakeNavigationResult extends NavigationResult {
 }
 /**
  * Fake equivalent of `NavigationHistoryEntry`.
+ * https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-navigationhistoryentry-interface
  */
 declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     private eventTarget;
@@ -738,9 +800,14 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
     readonly id: string;
     readonly key: string;
     readonly index: number;
-    private readonly state;
+    private state;
     private readonly historyState;
-    ondispose: ((this: NavigationHistoryEntry, ev: Event) => any) | null;
+    private _ondispose;
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationhistoryentry-ondispose
+     */
+    get ondispose(): ((this: NavigationHistoryEntry, ev: Event) => any) | null;
+    set ondispose(handler: ((this: NavigationHistoryEntry, ev: Event) => any) | null);
     constructor(eventTarget: EventTarget, url: string | null, { id, key, index, sameDocument, state, historyState, }: {
         id: string;
         key: string;
@@ -749,29 +816,25 @@ declare class FakeNavigationHistoryEntry implements NavigationHistoryEntry {
         historyState: unknown;
         state?: unknown;
     });
+    /**
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationhistoryentry-getstate
+     */
     getState(): unknown;
     getHistoryState(): unknown;
     addEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
     removeEventListener(type: string, callback: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
     dispatchEvent(event: Event): boolean;
-    /** internal */
+    /**
+     * internal
+     * https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationhistoryentry-ondispose
+     */
     dispose(): void;
-}
-/** `NavigationInterceptOptions` with experimental commit option. */
-interface ExperimentalNavigationInterceptOptions extends NavigationInterceptOptions {
-    precommitHandler?: (controller: NavigationPrecommitController) => Promise<void>;
-}
-interface NavigationPrecommitController {
-    redirect: (url: string, options?: NavigationNavigateOptions) => void;
-}
-interface ExperimentalNavigateEvent extends NavigateEvent {
-    intercept(options?: ExperimentalNavigationInterceptOptions): void;
-    precommitHandler?: () => Promise<void>;
 }
 /**
  * Fake equivalent of `NavigateEvent`.
+ * https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-navigateevent-interface
  */
-interface FakeNavigateEvent extends ExperimentalNavigateEvent {
+interface FakeNavigateEvent extends NavigateEvent {
     readonly destination: FakeNavigationDestination;
 }
 interface InternalFakeNavigateEvent extends FakeNavigateEvent {
@@ -785,6 +848,7 @@ interface InternalFakeNavigateEvent extends FakeNavigateEvent {
 }
 /**
  * Fake equivalent of `NavigationDestination`.
+ * https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-navigationdestination-interface
  */
 declare class FakeNavigationDestination implements NavigationDestination {
     url: string;

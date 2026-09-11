@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.7+sha-d0ed76c
+ * @license Angular v22.2.0-next.7+sha-a823323
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6135,6 +6135,7 @@ declare class NavigateEvent extends Event {
     readonly formData: FormData | null;
     readonly downloadRequest: string | null;
     readonly info?: unknown;
+    readonly sourceElement: Element | null;
     intercept(options?: NavigationInterceptOptions): void;
     scroll(): void;
 }
@@ -6149,9 +6150,17 @@ interface NavigateEventInit extends EventInit {
     formData?: FormData | null;
     downloadRequest?: string | null;
     info?: unknown;
+    sourceElement?: Element | null;
+}
+type NavigationInterceptHandler = () => PromiseLike<void> | void;
+type NavigationPrecommitHandler = (controller: NavigationPrecommitController) => PromiseLike<void> | void;
+interface NavigationPrecommitController {
+    redirect: (url: string, options?: NavigationNavigateOptions) => void;
+    addHandler: (handler: NavigationInterceptHandler) => void;
 }
 interface NavigationInterceptOptions {
-    handler?: () => Promise<void>;
+    precommitHandler?: NavigationPrecommitHandler;
+    handler?: NavigationInterceptHandler;
     focusReset?: 'after-transition' | 'manual';
     scroll?: 'after-transition' | 'manual';
 }

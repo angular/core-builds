@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-next.7+sha-d0ed76c
+ * @license Angular v22.2.0-next.7+sha-a823323
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1784,7 +1784,7 @@ class FakeNavigation {
     historyState: null
   }) {
     if (!this.canSetInitialEntry) {
-      throw new Error('setInitialEntryForTesting can only be called before any ' + 'navigation has occurred');
+      throw new Error('setInitialEntryForTesting can only be called before any navigation has occurred');
     }
     const currentInitialEntry = this.entriesArr[0];
     this.entriesArr[0] = new FakeNavigationHistoryEntry(this.eventTarget, new URL(url).toString(), {
@@ -1825,8 +1825,7 @@ class FakeNavigation {
       sameDocument: hashChange,
       historyState: null
     });
-    const result = new InternalNavigationResult(this);
-    const intercepted = this.userAgentNavigate(destination, result, {
+    return this.performNonTraverseNavigation(destination, {
       navigationType,
       cancelable: true,
       canIntercept: true,
@@ -1834,13 +1833,6 @@ class FakeNavigation {
       hashChange,
       info: options?.info
     });
-    if (!intercepted) {
-      this.updateNavigationEntriesForSameDocumentNavigation(this.navigateEvent);
-    }
-    return {
-      committed: result.committed,
-      finished: result.finished
-    };
   }
   pushState(data, title, url) {
     this.pushOrReplaceState('push', data, title, url);
@@ -1858,32 +1850,19 @@ class FakeNavigation {
       historyState: data,
       state: undefined
     });
-    const result = new InternalNavigationResult(this);
-    const intercepted = this.userAgentNavigate(destination, result, {
+    this.performNonTraverseNavigation(destination, {
       navigationType,
       cancelable: true,
       canIntercept: true,
       userInitiated: false,
       hashChange
     });
-    if (intercepted) {
-      return;
-    }
-    this.updateNavigationEntriesForSameDocumentNavigation(this.navigateEvent);
   }
   traverseTo(key, options) {
     const fromUrl = new URL(this.currentEntry.url);
     const entry = this.findEntry(key);
     if (!entry) {
-      const domException = new DOMException('Invalid key', 'InvalidStateError');
-      const committed = Promise.reject(domException);
-      const finished = Promise.reject(domException);
-      committed.catch(() => {});
-      finished.catch(() => {});
-      return {
-        committed,
-        finished
-      };
+      return earlyErrorResult(new DOMException('Invalid key', 'InvalidStateError'));
     }
     if (entry === this.currentEntry) {
       return {
@@ -1899,15 +1878,7 @@ class FakeNavigation {
       };
     }
     const hashChange = isHashChange(fromUrl, new URL(entry.url, this.currentEntry.url));
-    const destination = new FakeNavigationDestination({
-      url: entry.url,
-      state: entry.getState(),
-      historyState: entry.getHistoryState(),
-      key: entry.key,
-      id: entry.id,
-      index: entry.index,
-      sameDocument: entry.sameDocument
-    });
+    const destination = this.createDestinationFromEntry(entry);
     this.propsectiveTraversalDestinations.push(entry.index);
     const result = new InternalNavigationResult(this);
     this.traversalQueue.set(entry.key, result);
@@ -1932,30 +1903,14 @@ class FakeNavigation {
   }
   back(options) {
     if (this.currentEntryIndex === 0) {
-      const domException = new DOMException('Cannot go back', 'InvalidStateError');
-      const committed = Promise.reject(domException);
-      const finished = Promise.reject(domException);
-      committed.catch(() => {});
-      finished.catch(() => {});
-      return {
-        committed,
-        finished
-      };
+      return earlyErrorResult(new DOMException('Cannot go back', 'InvalidStateError'));
     }
     const entry = this.entriesArr[this.currentEntryIndex - 1];
     return this.traverseTo(entry.key, options);
   }
   forward(options) {
     if (this.currentEntryIndex === this.entriesArr.length - 1) {
-      const domException = new DOMException('Cannot go forward', 'InvalidStateError');
-      const committed = Promise.reject(domException);
-      const finished = Promise.reject(domException);
-      committed.catch(() => {});
-      finished.catch(() => {});
-      return {
-        committed,
-        finished
-      };
+      return earlyErrorResult(new DOMException('Cannot go forward', 'InvalidStateError'));
     }
     const entry = this.entriesArr[this.currentEntryIndex + 1];
     return this.traverseTo(entry.key, options);
@@ -1973,15 +1928,7 @@ class FakeNavigation {
       const fromUrl = new URL(this.currentEntry.url);
       const entry = this.entriesArr[targetIndex];
       const hashChange = isHashChange(fromUrl, new URL(entry.url, this.currentEntry.url));
-      const destination = new FakeNavigationDestination({
-        url: entry.url,
-        state: entry.getState(),
-        historyState: entry.getHistoryState(),
-        key: entry.key,
-        id: entry.id,
-        index: entry.index,
-        sameDocument: entry.sameDocument
-      });
+      const destination = this.createDestinationFromEntry(entry);
       const result = new InternalNavigationResult(this);
       const intercepted = this.userAgentNavigate(destination, result, {
         navigationType: 'traverse',
@@ -1994,6 +1941,28 @@ class FakeNavigation {
         this.userAgentTraverse(this.navigateEvent);
       }
     });
+  }
+  createDestinationFromEntry(entry) {
+    return new FakeNavigationDestination({
+      url: entry.url,
+      state: entry.getState(),
+      historyState: entry.getHistoryState(),
+      key: entry.key,
+      id: entry.id,
+      index: entry.index,
+      sameDocument: entry.sameDocument
+    });
+  }
+  performNonTraverseNavigation(destination, options) {
+    const result = new InternalNavigationResult(this);
+    const intercepted = this.userAgentNavigate(destination, result, options);
+    if (!intercepted) {
+      this.updateNavigationEntriesForSameDocumentNavigation(this.navigateEvent);
+    }
+    return {
+      committed: result.committed,
+      finished: result.finished
+    };
   }
   runTraversal(traversal) {
     if (this.synchronousTraversals) {
@@ -2050,6 +2019,8 @@ class FakeNavigation {
       hashChange: options.hashChange,
       destination,
       info: options.info,
+      hasUAVisualTransition: options.hasUAVisualTransition,
+      sourceElement: options.sourceElement,
       sameDocument: destination.sameDocument,
       result
     });
@@ -2102,6 +2073,8 @@ class FakeNavigation {
         historyState: destination.getHistoryState()
       });
       this.entriesArr[this.currentEntryIndex] = newNHE;
+    } else if (navigationType === 'reload') {
+      oldCurrentNHE.setState(destination.getState());
     }
     result.committedResolve(this.currentEntry);
     const currentEntryChangeEvent = createFakeNavigationCurrentEntryChangeEvent({
@@ -2119,29 +2092,33 @@ class FakeNavigation {
     }
     return undefined;
   }
-  set onnavigate(_handler) {
-    throw new Error('unimplemented');
-  }
+  _onnavigate = null;
   get onnavigate() {
-    throw new Error('unimplemented');
+    return this._onnavigate;
   }
-  set oncurrententrychange(_handler) {
-    throw new Error('unimplemented');
+  set onnavigate(handler) {
+    this._onnavigate = setEventHandler(this, 'navigate', this._onnavigate, handler);
   }
+  _oncurrententrychange = null;
   get oncurrententrychange() {
-    throw new Error('unimplemented');
+    return this._oncurrententrychange;
   }
-  set onnavigatesuccess(_handler) {
-    throw new Error('unimplemented');
+  set oncurrententrychange(handler) {
+    this._oncurrententrychange = setEventHandler(this, 'currententrychange', this._oncurrententrychange, handler);
   }
+  _onnavigatesuccess = null;
   get onnavigatesuccess() {
-    throw new Error('unimplemented');
+    return this._onnavigatesuccess;
   }
-  set onnavigateerror(_handler) {
-    throw new Error('unimplemented');
+  set onnavigatesuccess(handler) {
+    this._onnavigatesuccess = setEventHandler(this, 'navigatesuccess', this._onnavigatesuccess, handler);
   }
+  _onnavigateerror = null;
   get onnavigateerror() {
-    throw new Error('unimplemented');
+    return this._onnavigateerror;
+  }
+  set onnavigateerror(handler) {
+    this._onnavigateerror = setEventHandler(this, 'navigateerror', this._onnavigateerror, handler);
   }
   _transition = null;
   set transition(t) {
@@ -2150,11 +2127,41 @@ class FakeNavigation {
   get transition() {
     return this._transition;
   }
-  updateCurrentEntry(_options) {
-    throw new Error('unimplemented');
+  updateCurrentEntry(options) {
+    const current = this.currentEntry;
+    if (!current) {
+      throw new DOMException('Cannot update current entry when current is null', 'InvalidStateError');
+    }
+    current.setState(cloneState(options.state));
+    const currentEntryChangeEvent = createFakeNavigationCurrentEntryChangeEvent({
+      from: current,
+      navigationType: null
+    });
+    this.eventTarget.dispatchEvent(currentEntryChangeEvent);
   }
-  reload(_options) {
-    throw new Error('unimplemented');
+  reload(options) {
+    const current = this.currentEntry;
+    if (!current) {
+      return earlyErrorResult(new DOMException('Cannot reload when currentEntry is null', 'InvalidStateError'));
+    }
+    const state = options && 'state' in options ? options.state : current.getState();
+    const destination = new FakeNavigationDestination({
+      url: current.url,
+      state,
+      historyState: current.getHistoryState(),
+      key: '',
+      id: '',
+      index: -1,
+      sameDocument: current.sameDocument
+    });
+    return this.performNonTraverseNavigation(destination, {
+      navigationType: 'reload',
+      cancelable: true,
+      canIntercept: true,
+      userInitiated: false,
+      hashChange: false,
+      info: options?.info
+    });
   }
 }
 class FakeNavigationHistoryEntry {
@@ -2166,7 +2173,13 @@ class FakeNavigationHistoryEntry {
   index;
   state;
   historyState;
-  ondispose = null;
+  _ondispose = null;
+  get ondispose() {
+    return this._ondispose;
+  }
+  set ondispose(handler) {
+    this._ondispose = setEventHandler(this, 'dispose', this._ondispose, handler);
+  }
   constructor(eventTarget, url, {
     id,
     key,
@@ -2185,10 +2198,13 @@ class FakeNavigationHistoryEntry {
     this.historyState = historyState;
   }
   getState() {
-    return this.state ? JSON.parse(JSON.stringify(this.state)) : this.state;
+    return cloneState(this.state);
+  }
+  setState(state) {
+    this.state = state;
   }
   getHistoryState() {
-    return this.historyState ? JSON.parse(JSON.stringify(this.historyState)) : this.historyState;
+    return cloneState(this.historyState);
   }
   addEventListener(type, callback, options) {
     this.eventTarget.addEventListener(type, callback, options);
@@ -2200,7 +2216,7 @@ class FakeNavigationHistoryEntry {
     return this.eventTarget.dispatchEvent(event);
   }
   dispose() {
-    const disposeEvent = new Event('disposed');
+    const disposeEvent = new Event('dispose');
     this.dispatchEvent(disposeEvent);
     this.eventTarget = null;
   }
@@ -2214,6 +2230,7 @@ function dispatchNavigateEvent({
   navigationType,
   destination,
   info,
+  sourceElement = null,
   sameDocument,
   result
 }) {
@@ -2236,6 +2253,7 @@ function dispatchNavigateEvent({
   event.signal = eventAbortController.signal;
   event.abortController = eventAbortController;
   event.info = info;
+  event.sourceElement = sourceElement;
   event.focusResetBehavior = null;
   event.scrollBehavior = null;
   event.interceptionState = 'none';
@@ -2297,6 +2315,12 @@ function dispatchNavigateEvent({
       event.info = options.info;
     }
   }
+  function addHandler(handler) {
+    if (event.interceptionState !== 'intercepted') {
+      throw new DOMException(`cannot addHandler when event is not in 'intercepted' state`, 'InvalidStateError');
+    }
+    handlers.push(handler);
+  }
   function processNavigateEventHandlerFailure(reason) {
     if (event.abortController.signal.aborted) {
       return;
@@ -2337,9 +2361,13 @@ function dispatchNavigateEvent({
     navigation.transition?.committedResolve();
     const promisesList = [];
     for (const handler of handlers) {
-      const handlerResult = handler();
-      if (handlerResult) {
-        promisesList.push(handlerResult);
+      try {
+        const handlerResult = handler();
+        if (handlerResult) {
+          promisesList.push(handlerResult);
+        }
+      } catch (e) {
+        promisesList.push(Promise.reject(e));
       }
     }
     promisesList.push(result.committed);
@@ -2402,18 +2430,25 @@ function dispatchNavigateEvent({
         commit();
       } else {
         const precommitController = {
-          redirect
+          redirect,
+          addHandler
         };
-        const precommitPromisesList = precommitHandlers.map(handler => {
-          let p;
+        const precommitPromisesList = [];
+        for (const handler of precommitHandlers) {
           try {
-            p = handler(precommitController);
+            const handlerResult = handler(precommitController);
+            if (handlerResult) {
+              if (typeof handlerResult.catch === 'function') {
+                handlerResult.catch(() => {});
+              }
+              precommitPromisesList.push(handlerResult);
+            }
           } catch (e) {
-            p = Promise.reject(e);
+            const rejected = Promise.reject(e);
+            rejected.catch(() => {});
+            precommitPromisesList.push(rejected);
           }
-          p.catch(() => {});
-          return p;
-        });
+        }
         Promise.all(precommitPromisesList).then(() => commit()).catch(processNavigateEventHandlerFailure);
       }
     }
@@ -2533,6 +2568,28 @@ class FakeNavigationDestination {
 }
 function isHashChange(from, to) {
   return to.hash !== from.hash && to.hostname === from.hostname && to.pathname === from.pathname && to.search === from.search;
+}
+function setEventHandler(target, type, current, next) {
+  if (current) {
+    target.removeEventListener(type, current);
+  }
+  if (next) {
+    target.addEventListener(type, next);
+  }
+  return next;
+}
+function cloneState(state) {
+  return state !== undefined && state !== null ? JSON.parse(JSON.stringify(state)) : state;
+}
+function earlyErrorResult(error) {
+  const committed = Promise.reject(error);
+  const finished = Promise.reject(error);
+  committed.catch(() => {});
+  finished.catch(() => {});
+  return {
+    committed,
+    finished
+  };
 }
 class InternalNavigationTransition {
   from;
