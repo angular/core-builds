@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.6+sha-b4138e6
+ * @license Angular v22.1.6+sha-5ffc381
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3391,7 +3391,7 @@ type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
  *
- * @see [Effects](guide/signals/effect#effects)
+ * @see [Effects](guide/signals/effect)
  *
  * @publicApi 20.0
  */
