@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-rc.0+sha-02c6446
+ * @license Angular v22.2.0-rc.0+sha-af2c7e3
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4205,13 +4205,21 @@ function getClassListFromValue(value) {
   }
   return classList;
 }
+function removeClasses(renderer, el, classList) {
+  for (const item of classList) {
+    renderer.removeClass(el, item);
+  }
+}
+function addClasses(renderer, el, classList) {
+  for (const item of classList) {
+    renderer.addClass(el, item);
+  }
+}
 function cancelAnimationsIfRunning(element, renderer) {
   if (!areAnimationSupported) return;
   const elementData = enterClassMap.get(element);
   if (elementData && elementData.classList.length > 0 && elementHasClassList(element, elementData.classList)) {
-    for (const klass of elementData.classList) {
-      renderer.removeClass(element, klass);
-    }
+    removeClasses(renderer, element, elementData.classList);
   }
   cleanupEnterClassData(element);
 }
@@ -4563,24 +4571,19 @@ function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
   } catch {
     return callback(false);
   }
-  const animations = lView?.[ANIMATIONS];
+  const animations = lView ? lView[ANIMATIONS] ??= {} : undefined;
   if (animations?.enter?.has(tNode.index)) {
     removeAnimationsFromQueue(injector, animations.enter.get(tNode.index).animateFns);
   }
   const nodesWithExitAnimations = aggregateDescendantAnimations(lView, tNode, animations);
   if (nodesWithExitAnimations.size === 0) {
-    let hasNestedAnimations = false;
-    if (lView) {
-      const nestedPromises = [];
-      collectNestedViewAnimations(lView, tNode, nestedPromises);
-      hasNestedAnimations = nestedPromises.length > 0;
-    }
+    const hasNestedAnimations = lView ? hasNestedViewAnimations(lView, tNode) : false;
     if (!hasNestedAnimations) {
       return callback(false);
     }
   }
   if (lView) allLeavingAnimations.add(lView[ID]);
-  addToAnimationQueue(injector, () => executeLeaveAnimations(lView, tNode, animations || undefined, nodesWithExitAnimations, callback), animations || undefined);
+  addToAnimationQueue(injector, () => executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimations, callback), animations);
 }
 function aggregateDescendantAnimations(lView, tNode, animations) {
   const nodesWithExitAnimations = new Map();
@@ -4642,6 +4645,43 @@ function executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimation
     callback(false);
   }
 }
+function hasNestedViewAnimations(lView, tNode) {
+  if (tNode.type & 12) {
+    const lContainer = lView[tNode.index];
+    if (isLContainer(lContainer)) {
+      for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const subView = lContainer[i];
+        if (subView[TVIEW$1].type === 2) {
+          if (hasViewLeaveAnimations(subView)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  let child = tNode.child;
+  while (child) {
+    if (hasNestedViewAnimations(lView, child)) {
+      return true;
+    }
+    child = child.next;
+  }
+  return false;
+}
+function hasViewLeaveAnimations(view) {
+  const animations = view[ANIMATIONS];
+  if (animations?.leave && animations.leave.size > 0) {
+    return true;
+  }
+  let child = view[TVIEW$1].firstChild;
+  while (child) {
+    if (hasNestedViewAnimations(view, child)) {
+      return true;
+    }
+    child = child.next;
+  }
+  return false;
+}
 function collectNestedViewAnimations(lView, tNode, collectedPromises) {
   if (tNode.type & 12) {
     const lContainer = lView[tNode.index];
@@ -4687,6 +4727,67 @@ function runAfterLeaveAnimations(lView, runningAnimations, callback) {
     callback(true);
   });
 }
+function initViewDetachAnimations(view) {
+  const animations = view[ANIMATIONS] ??= {};
+  animations.detachedLeaveAnimationFns = [];
+  let child = view[TVIEW$1].firstChild;
+  while (child) {
+    initNestedViewDetachAnimations(view, child);
+    child = child.next;
+  }
+}
+function initNestedViewDetachAnimations(lView, tNode) {
+  if (tNode.type & 12) {
+    const lContainer = lView[tNode.index];
+    if (isLContainer(lContainer)) {
+      for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const subView = lContainer[i];
+        if (subView[TVIEW$1].type === 2) {
+          initViewDetachAnimations(subView);
+        }
+      }
+    }
+  }
+  let child = tNode.child;
+  while (child) {
+    initNestedViewDetachAnimations(lView, child);
+    child = child.next;
+  }
+}
+function clearViewDetachAnimations(view) {
+  const animations = view[ANIMATIONS];
+  if (animations && animations.detachedLeaveAnimationFns && animations.detachedLeaveAnimationFns.length > 0) {
+    const injector = view[INJECTOR];
+    removeFromAnimationQueue(injector, animations);
+    allLeavingAnimations.delete(view[ID]);
+    animations.detachedLeaveAnimationFns = undefined;
+  } else if (animations) {
+    animations.detachedLeaveAnimationFns = undefined;
+  }
+  let child = view[TVIEW$1].firstChild;
+  while (child) {
+    clearNestedViewDetachAnimations(view, child);
+    child = child.next;
+  }
+}
+function clearNestedViewDetachAnimations(lView, tNode) {
+  if (tNode.type & 12) {
+    const lContainer = lView[tNode.index];
+    if (isLContainer(lContainer)) {
+      for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const subView = lContainer[i];
+        if (subView[TVIEW$1].type === 2) {
+          clearViewDetachAnimations(subView);
+        }
+      }
+    }
+  }
+  let child = tNode.child;
+  while (child) {
+    clearNestedViewDetachAnimations(lView, child);
+    child = child.next;
+  }
+}
 
 function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHandle, tNode, beforeNode, parentLView) {
   if (lNodeToHandle != null) {
@@ -4708,9 +4809,11 @@ function applyToElementOrContainer(action, renderer, injector, parent, lNodeToHa
         nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
       }
     } else if (action === 1 && parent !== null) {
-      maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
       nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
       cancelLeavingNodes(tNode, rNode, parentLView);
+      if (!reusedNodes.has(rNode)) {
+        maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
+      }
     } else if (action === 2) {
       if (parentLView?.[ANIMATIONS]?.leave?.has(tNode.index)) {
         trackLeavingNodes(tNode, rNode, parentLView);
@@ -9242,7 +9345,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-rc.0+sha-02c6446'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0-rc.0+sha-af2c7e3'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12557,7 +12660,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-rc.0+sha-02c6446';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0-rc.0+sha-af2c7e3';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14268,17 +14371,13 @@ function runEnterAnimation(lView, tNode, value, ngZone) {
       cleanupFns.push(renderer.listen(nativeElement, 'transitionstart', handleEnterAnimationStart));
     });
     trackEnterClasses(nativeElement, activeClasses, cleanupFns);
-    for (const klass of activeClasses) {
-      renderer.addClass(nativeElement, klass);
-    }
+    addClasses(renderer, nativeElement, activeClasses);
     ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
         if (hasCompleted) return;
         determineLongestAnimation(nativeElement, longestAnimations, areAnimationSupported);
         if (!longestAnimations.has(nativeElement)) {
-          for (const klass of activeClasses) {
-            renderer.removeClass(nativeElement, klass);
-          }
+          removeClasses(renderer, nativeElement, activeClasses);
           cleanupEnterClassData(nativeElement);
         }
       });
@@ -14290,9 +14389,7 @@ function enterAnimationEnd(event, nativeElement, renderer) {
   if (getEventTarget(event) !== nativeElement || !elementData) return;
   if (isLongestAnimation(event, nativeElement)) {
     event.stopPropagation();
-    for (const klass of elementData.classList) {
-      renderer.removeClass(nativeElement, klass);
-    }
+    removeClasses(renderer, nativeElement, elementData.classList);
     cleanupEnterClassData(nativeElement);
   }
 }
@@ -14367,17 +14464,13 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
   const handleOutAnimationEnd = event => {
     const target = getEventTarget(event);
     if (target !== el && event.type !== 'animation-fallback') return;
-    if (event.type === 'animation-fallback' || isLongestAnimation(event, el)) {
+    if (event.type === 'animation-fallback' || event.detail?.cancel || isLongestAnimation(event, el)) {
       hasCompleted = true;
       if (fallbackTimeoutId) clearTimeout(fallbackTimeoutId);
       if (event.type !== 'animation-fallback') event.stopPropagation();
       longestAnimations.delete(el);
       clearLeavingNodes(tNode, el);
-      if (Array.isArray(tNode.projection)) {
-        for (const item of classList) {
-          renderer.removeClass(el, item);
-        }
-      }
+      removeClasses(renderer, el, classList);
       cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
       clearLViewNodeAnimationResolvers(lView, tNode);
     }
@@ -14387,9 +14480,7 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
     cleanupFns.push(renderer.listen(el, 'transitionend', handleOutAnimationEnd));
   });
   trackLeavingNodes(tNode, el);
-  for (const item of classList) {
-    renderer.addClass(el, item);
-  }
+  addClasses(renderer, el, classList);
   ngZone.runOutsideAngular(() => {
     requestAnimationFrame(() => {
       if (hasCompleted) return;
@@ -14397,6 +14488,7 @@ function animateLeaveClassRunner(el, tNode, lView, classList, renderer, ngZone) 
       const longest = longestAnimations.get(el);
       if (!longest) {
         clearLeavingNodes(tNode, el);
+        removeClasses(renderer, el, classList);
         cleanupAfterLeaveAnimations(componentResolvers, cleanupFns);
         clearLViewNodeAnimationResolvers(lView, tNode);
       } else {
@@ -14953,21 +15045,16 @@ function clearDetachAnimationList(lContainer, index) {
   if (lContainer.length <= CONTAINER_HEADER_OFFSET) return;
   const indexInContainer = CONTAINER_HEADER_OFFSET + index;
   const viewToDetach = lContainer[indexInContainer];
-  const animations = viewToDetach ? viewToDetach[ANIMATIONS] : undefined;
-  if (viewToDetach && animations && animations.detachedLeaveAnimationFns && animations.detachedLeaveAnimationFns.length > 0) {
-    const injector = viewToDetach[INJECTOR];
-    removeFromAnimationQueue(injector, animations);
-    allLeavingAnimations.delete(viewToDetach[ID]);
-    animations.detachedLeaveAnimationFns = undefined;
+  if (viewToDetach) {
+    clearViewDetachAnimations(viewToDetach);
   }
 }
 function maybeInitDetachAnimationList(lContainer, index) {
   if (lContainer.length <= CONTAINER_HEADER_OFFSET) return;
   const indexInContainer = CONTAINER_HEADER_OFFSET + index;
   const viewToDetach = lContainer[indexInContainer];
-  const animations = viewToDetach ? viewToDetach[ANIMATIONS] : undefined;
-  if (animations && animations.leave && animations.leave.size > 0) {
-    animations.detachedLeaveAnimationFns = [];
+  if (viewToDetach) {
+    initViewDetachAnimations(viewToDetach);
   }
 }
 function detachExistingView(lContainer, index) {
