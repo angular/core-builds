@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-7263031
+ * @license Angular v22.1.7+sha-c0ed0ad
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2397,14 +2397,14 @@ declare class IterableChangeRecord_<V> implements IterableChangeRecord<V> {
  *
  * In the following example, `TruncatePipe` returns the shortened value with an added ellipses.
  *
- * <code-example path="core/ts/pipes/simple_truncate.ts" header="simple_truncate.ts"></code-example>
+ * {@example core/ts/pipes/simple_truncate.ts region='simple-truncate'}
  *
  * Invoking `{{ 'It was the best of times' | truncate }}` in a template will produce `It was...`.
  *
  * In the following example, `TruncatePipe` takes parameters that sets the truncated length and the
  * string to append with.
  *
- * <code-example path="core/ts/pipes/truncate.ts" header="truncate.ts"></code-example>
+ * {@example core/ts/pipes/truncate.ts region='truncate'}
  *
  * Invoking `{{ 'It was the best of times' | truncate:4:'....' }}` in a template will produce `It
  * was the best....`.

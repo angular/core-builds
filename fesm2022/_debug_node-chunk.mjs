@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-7263031
+ * @license Angular v22.1.7+sha-c0ed0ad
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9213,7 +9213,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.7+sha-7263031'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.7+sha-c0ed0ad'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12362,7 +12362,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.7+sha-7263031';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.7+sha-c0ed0ad';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -13162,12 +13162,15 @@ class IdleScheduler {
     const key = getIdleRequestKey(options);
     const callback = deadline => {
       for (const cb of bucket.queue) {
-        cb();
-        this.applicationRef._tick();
-        bucket.queue.delete(cb);
-        this.callbackBucket.delete(cb);
-        if (deadline && deadline.timeRemaining() === 0 && !deadline.didTimeout) {
-          break;
+        try {
+          cb();
+          this.applicationRef._tick();
+        } finally {
+          bucket.queue.delete(cb);
+          this.callbackBucket.delete(cb);
+          if (deadline && deadline.timeRemaining() === 0 && !deadline.didTimeout) {
+            break;
+          }
         }
       }
       bucket.idleId = null;

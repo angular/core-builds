@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-7263031
+ * @license Angular v22.1.7+sha-c0ed0ad
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7147,6 +7147,11 @@ interface HostListenerDecorator {
      * https://www.w3.org/TR/DOM-Level-3-Events-key/#named-key-attribute-values
      *
      * NOTE: that keys can also be combined, e.g. `@HostListener('keydown.shift.a')`.
+     *
+     * Key names are matched against `KeyboardEvent.key`, which depends on the user's keyboard
+     * layout and input language. To match a physical key regardless of layout, use the `code`
+     * modifier instead, e.g. `@HostListener('keydown.code.KeyA')`. See
+     * [Using key modifiers](guide/templates/event-listeners#using-key-modifiers) for details.
      *
      * The global target names that can be used to prefix an event name are
      * `document:`, `window:` and `body:`.
