@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-1151eb9
+ * @license Angular v22.3.0-next.0+sha-7569a02
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -93,9 +93,14 @@ interface AnimationLViewData {
     detachedLeaveAnimationFns?: VoidFunction[];
 }
 /**
- * Function that returns the class or class list binded to the animate instruction
+ * Represents the class, class list, or a function returning the class or class list
+ * bound to an animate instruction.
  */
-type AnimationClassBindingFn = () => string | string[] | undefined | null;
+type AnimationClassValue = string | string[] | (() => AnimationClassValue) | undefined | null;
+/**
+ * Function that returns the class or class list bound to the animate instruction
+ */
+type AnimationClassBindingFn = () => AnimationClassValue;
 
 /** Actions that are supported by the tracing framework. */
 declare enum TracingAction {
