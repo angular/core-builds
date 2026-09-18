@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-7bf58f9
+ * @license Angular v22.1.7+sha-c08ba52
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9213,7 +9213,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.7+sha-7bf58f9'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.1.7+sha-c08ba52'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12362,7 +12362,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.7+sha-7bf58f9';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.1.7+sha-c08ba52';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -12815,7 +12815,7 @@ function publishSignalConfiguration() {
       const activeConsumer = getActiveConsumer();
       errorMessage = activeConsumer && isReactiveLViewConsumer(activeConsumer) ? 'Writing to signals is not allowed while Angular renders the template (eg. interpolations)' : 'Writing to signals is not allowed in a `computed`';
     }
-    throw new RuntimeError(600, errorMessage);
+    throw new RuntimeError(-600, errorMessage);
   });
 }
 const MAXIMUM_REFRESH_RERUNS = 10;
