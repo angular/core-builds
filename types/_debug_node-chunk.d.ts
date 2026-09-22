@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-afcda88
+ * @license Angular v22.3.0-next.0+sha-95e8dec
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6180,7 +6180,7 @@ declare class NavigationDestination {
 
 /**
  * Low-level service for running the angular compiler during runtime
- * to create {@link AbstractComponentFactory}s, which
+ * to create {@link NgModuleFactory} instances, which
  * can later be used to create and render a Component instance.
  *
  * Each `@NgModule` provides an own `Compiler` to its injector,
