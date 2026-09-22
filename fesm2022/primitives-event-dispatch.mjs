@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0-rc.0+sha-378ecfc
+ * @license Angular v22.2.0-rc.0+sha-bc402cf
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,12 +11,12 @@ const Property = {
   OWNER: '__owner'
 };
 
-const parseCache = {};
+const parseCache = /* @__PURE__ */Object.create(null);
 function get(element) {
   return element[Property.JSACTION];
 }
 function getDefaulted(element) {
-  const cache = get(element) ?? {};
+  const cache = get(element) ?? Object.create(null);
   set(element, cache);
   return cache;
 }
@@ -313,7 +313,7 @@ class EventInfoWrapper {
   }
 }
 
-const EMPTY_ACTION_MAP = {};
+const EMPTY_ACTION_MAP = /* @__PURE__ */Object.create(null);
 const REGEXP_SEMICOLON = /\s*;\s*/;
 const DEFAULT_EVENT_TYPE = EventType.CLICK;
 class ActionResolver {
@@ -415,7 +415,7 @@ class ActionResolver {
       } else {
         actionMap = getParsed(jsactionAttribute);
         if (!actionMap) {
-          actionMap = {};
+          actionMap = Object.create(null);
           const values = jsactionAttribute.split(REGEXP_SEMICOLON);
           for (let idx = 0; idx < values.length; idx++) {
             const value = values[idx];
