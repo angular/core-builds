@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-59e2c2f
+ * @license Angular v22.1.7+sha-282f9fe
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8215,7 +8215,7 @@ interface ContentChildrenDecorator {
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
      *   if the QueryList result has changed. When `false` the `changes` observable might emit even
      *   if the QueryList has not changed.
-     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   **Note:** This config option is **deprecated**, it will be permanently set to `true` and
      *   removed in future versions of Angular.
      * * **read** - Used to read a different token from the queried elements.
      *
@@ -8400,7 +8400,7 @@ interface ViewChildrenDecorator {
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
      *   if the QueryList result has changed. When `false` the `changes` observable might emit even
      *   if the QueryList has not changed.
-     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   **Note:** This config option is **deprecated**, it will be permanently set to `true` and
      * removed in future versions of Angular.
      *
      * The following selectors are supported.

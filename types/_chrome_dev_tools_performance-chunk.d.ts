@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.1.7+sha-59e2c2f
+ * @license Angular v22.1.7+sha-282f9fe
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -490,7 +490,7 @@ interface FactoryProvider extends FactorySansProvider {
  */
 type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
 /**
- * Configures the `Injector` to return an instance of `Type` when `Type' is used as the token.
+ * Configures the `Injector` to return an instance of `Type` when `Type` is used as the token.
  *
  * Create an instance by invoking the `new` operator and supplying additional arguments.
  * This form is a short form of `TypeProvider`;
