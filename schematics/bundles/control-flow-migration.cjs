@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.0+sha-28ad39a
+ * @license Angular v22.3.0-next.0+sha-742fd44
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8,7 +8,7 @@
 
 var schematics = require('@angular-devkit/schematics');
 var path = require('path');
-var change_tracker = require('./change_tracker-BzE4pgz5.cjs');
+var change_tracker = require('./change_tracker-kXE3NE46.cjs');
 var compiler = require('@angular/compiler');
 var ts = require('typescript');
 var parse_html = require('./parse_html-C8eKA9px.cjs');
