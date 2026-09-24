@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-5b52d19
+ * @license Angular v22.3.0-next.0+sha-846c73d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2954,7 +2954,7 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
   lastPhase = null;
   nodes = [undefined, undefined, undefined, undefined];
   onDestroyFns = null;
-  constructor(impl, effectHooks, view, scheduler, injector, snapshot = null) {
+  constructor(impl, effectHooks, view, scheduler, injector, snapshot = null, debugName) {
     super(impl, [undefined, undefined, undefined, undefined], view, false, injector.get(DestroyRef), snapshot);
     this.scheduler = scheduler;
     for (const phase of AFTER_RENDER_PHASES) {
@@ -2976,7 +2976,7 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
       this.nodes[phase] = node;
       this.hooks[phase] = value => node.phaseFn(value);
       if (ngDevMode) {
-        setupDebugInfo(node, injector);
+        setupDebugInfo(node, injector, debugName);
       }
     }
   }
@@ -3028,12 +3028,12 @@ function afterRenderEffect(callbackOrSpec, options) {
   const viewContext = injector.get(ViewContext, null, {
     optional: true
   });
-  const sequence = new AfterRenderEffectSequence(manager.impl, [spec.earlyRead, spec.write, spec.mixedReadWrite, spec.read], viewContext?.view, scheduler, injector, tracing?.snapshot(null));
+  const sequence = new AfterRenderEffectSequence(manager.impl, [spec.earlyRead, spec.write, spec.mixedReadWrite, spec.read], viewContext?.view, scheduler, injector, tracing?.snapshot(null), ngDevMode ? options?.debugName : undefined);
   manager.impl.register(sequence);
   return sequence;
 }
-function setupDebugInfo(node, injector) {
-  node.debugName = `afterRenderEffect - ${phaseDebugName(node.phase)} phase`;
+function setupDebugInfo(node, injector, debugName) {
+  node.debugName = `${debugName || 'afterRenderEffect'} - ${phaseDebugName(node.phase)} phase`;
   const prevInjectorProfilerContext = setInjectorProfilerContext({
     injector,
     token: null
