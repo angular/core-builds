@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.2.0+sha-1ba9b86
+ * @license Angular v22.2.0+sha-4545d66
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -248,6 +248,12 @@ class ChangeTracker {
     _trackChange(file, change) {
         const changes = this._changes.get(file);
         if (changes) {
+            const isDuplicate = changes.some((current) => current.start === change.start &&
+                current.removeLength === change.removeLength &&
+                current.text === change.text);
+            if (isDuplicate) {
+                return;
+            }
             // Insert the changes in reverse so that they're applied in reverse order.
             // This ensures that the offsets of subsequent changes aren't affected by
             // previous changes changing the file's text.
