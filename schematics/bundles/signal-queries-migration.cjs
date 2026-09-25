@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.0+sha-d3eaf9a
+ * @license Angular v22.3.0-next.0+sha-3c5ed06
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -12,7 +12,7 @@ require('@angular/compiler-cli');
 require('node:path');
 var project_paths = require('./project_paths-CEexbl9C.cjs');
 var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
-var migrate_ts_type_references = require('./migrate_ts_type_references-CP8YcwVD.cjs');
+var migrate_ts_type_references = require('./migrate_ts_type_references-q7-hbb2o.cjs');
 var assert = require('assert');
 var index = require('./index-oY1ww2ZR.cjs');
 var compiler = require('@angular/compiler');

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.0+sha-d3eaf9a
+ * @license Angular v22.3.0-next.0+sha-3c5ed06
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -134,6 +134,8 @@ var UnaryOperator;
 (function (UnaryOperator) {
     UnaryOperator[UnaryOperator["Minus"] = 0] = "Minus";
     UnaryOperator[UnaryOperator["Plus"] = 1] = "Plus";
+    UnaryOperator[UnaryOperator["Increment"] = 2] = "Increment";
+    UnaryOperator[UnaryOperator["Decrement"] = 3] = "Decrement";
 })(UnaryOperator || (UnaryOperator = {}));
 var BinaryOperator;
 (function (BinaryOperator) {
