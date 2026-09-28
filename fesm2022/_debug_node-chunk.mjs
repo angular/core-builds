@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-5161707
+ * @license Angular v22.3.0-next.0+sha-259d1b0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4562,13 +4562,43 @@ function queueEnterAnimations(injector, enterAnimations) {
   }
 }
 
+let nodeAnimationRuntime = null;
+let viewDetachAnimationRuntime = null;
 function maybeQueueEnterAnimation(parentLView, parent, tNode, injector) {
+  nodeAnimationRuntime?.maybeQueueEnterAnimation(parentLView, parent, tNode, injector);
+}
+function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
+  if (nodeAnimationRuntime === null) {
+    callback(false);
+  } else {
+    nodeAnimationRuntime.runLeaveAnimationsWithCallback(lView, tNode, injector, callback);
+  }
+}
+function initViewDetachAnimations(view) {
+  viewDetachAnimationRuntime?.initViewDetachAnimations(view);
+}
+function clearViewDetachAnimations(view) {
+  viewDetachAnimationRuntime?.clearViewDetachAnimations(view);
+}
+function enableAnimationRuntimeSupport() {
+  nodeAnimationRuntime ??= {
+    maybeQueueEnterAnimation: maybeQueueEnterAnimationImpl,
+    runLeaveAnimationsWithCallback: runLeaveAnimationsWithCallbackImpl
+  };
+}
+function enableViewDetachAnimationsSupport() {
+  viewDetachAnimationRuntime ??= {
+    initViewDetachAnimations: initViewDetachAnimationsImpl,
+    clearViewDetachAnimations: clearViewDetachAnimationsImpl
+  };
+}
+function maybeQueueEnterAnimationImpl(parentLView, parent, tNode, injector) {
   const enterAnimations = parentLView?.[ANIMATIONS]?.enter;
   if (parent !== null && enterAnimations && enterAnimations.has(tNode.index)) {
     queueEnterAnimations(injector, enterAnimations);
   }
 }
-function runLeaveAnimationsWithCallback(lView, tNode, injector, callback) {
+function runLeaveAnimationsWithCallbackImpl(lView, tNode, injector, callback) {
   try {
     injector.get(INJECTOR$1);
   } catch {
@@ -4730,7 +4760,7 @@ function runAfterLeaveAnimations(lView, runningAnimations, callback) {
     callback(true);
   });
 }
-function initViewDetachAnimations(view) {
+function initViewDetachAnimationsImpl(view) {
   const animations = view[ANIMATIONS] ??= {};
   animations.detachedLeaveAnimationFns = [];
   let child = view[TVIEW$1].firstChild;
@@ -4746,7 +4776,7 @@ function initNestedViewDetachAnimations(lView, tNode) {
       for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         const subView = lContainer[i];
         if (subView[TVIEW$1].type === 2) {
-          initViewDetachAnimations(subView);
+          initViewDetachAnimationsImpl(subView);
         }
       }
     }
@@ -4757,7 +4787,7 @@ function initNestedViewDetachAnimations(lView, tNode) {
     child = child.next;
   }
 }
-function clearViewDetachAnimations(view) {
+function clearViewDetachAnimationsImpl(view) {
   const animations = view[ANIMATIONS];
   if (animations && animations.detachedLeaveAnimationFns && animations.detachedLeaveAnimationFns.length > 0) {
     const injector = view[INJECTOR];
@@ -4780,7 +4810,7 @@ function clearNestedViewDetachAnimations(lView, tNode) {
       for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         const subView = lContainer[i];
         if (subView[TVIEW$1].type === 2) {
-          clearViewDetachAnimations(subView);
+          clearViewDetachAnimationsImpl(subView);
         }
       }
     }
@@ -9348,7 +9378,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-5161707'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-259d1b0'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12663,7 +12693,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-5161707';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-259d1b0';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14361,6 +14391,7 @@ function ɵɵanimateEnter(value) {
   }
   const tNode = getCurrentTNode();
   const ngZone = lView[INJECTOR].get(NgZone);
+  enableAnimationRuntimeSupport();
   addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimation(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
@@ -14426,6 +14457,7 @@ function ɵɵanimateEnterListener(value) {
     return ɵɵanimateEnterListener;
   }
   const tNode = getCurrentTNode();
+  enableAnimationRuntimeSupport();
   addAnimationToLView(getLViewEnterAnimations(lView), tNode, () => runEnterAnimationFunction(lView, tNode, value));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   queueEnterAnimations(lView[INJECTOR], getLViewEnterAnimations(lView));
@@ -14452,6 +14484,8 @@ function ɵɵanimateLeave(value) {
   }
   const tNode = getCurrentTNode();
   const ngZone = lView[INJECTOR].get(NgZone);
+  enableAnimationRuntimeSupport();
+  enableViewDetachAnimationsSupport();
   addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimations(lView, tNode, value, ngZone));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   return ɵɵanimateLeave;
@@ -14533,6 +14567,8 @@ function ɵɵanimateLeaveListener(value) {
   allLeavingAnimations.add(lView[ID]);
   const ngZone = lView[INJECTOR].get(NgZone);
   const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
+  enableAnimationRuntimeSupport();
+  enableViewDetachAnimationsSupport();
   addAnimationToLView(getLViewLeaveAnimations(lView), tNode, () => runLeaveAnimationFunction(lView, tNode, value, ngZone, maxAnimationTimeout));
   initializeAnimationQueueScheduler(lView[INJECTOR]);
   return ɵɵanimateLeaveListener;
