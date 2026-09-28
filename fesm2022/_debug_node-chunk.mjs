@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0+sha-d23932f
+ * @license Angular v22.2.0+sha-f5e8edc
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9348,7 +9348,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0+sha-d23932f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0+sha-f5e8edc'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12663,7 +12663,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0+sha-d23932f';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0+sha-f5e8edc';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -13116,11 +13116,22 @@ function publishDefaultGlobalUtils() {
   ngDevMode && publishDefaultGlobalUtils$1();
 }
 function publishSignalConfiguration() {
-  setThrowInvalidWriteToSignalError(() => {
+  setThrowInvalidWriteToSignalError(node => {
     let errorMessage = '';
     if (ngDevMode) {
       const activeConsumer = getActiveConsumer();
-      errorMessage = activeConsumer && isReactiveLViewConsumer(activeConsumer) ? 'Writing to signals is not allowed while Angular renders the template (eg. interpolations)' : 'Writing to signals is not allowed in a `computed`';
+      if (activeConsumer && isReactiveLViewConsumer(activeConsumer)) {
+        errorMessage = 'Writing to signals is not allowed while Angular renders the template (eg. interpolations)';
+        const componentName = activeConsumer.lView && getDeclarationComponentDef(activeConsumer.lView)?.type?.name;
+        if (componentName) {
+          errorMessage += `. Template location: '${componentName}' component`;
+        }
+      } else {
+        errorMessage = 'Writing to signals is not allowed in a `computed`';
+      }
+      if (node.debugName) {
+        errorMessage += `. Signal: '${node.debugName}'`;
+      }
     }
     throw new RuntimeError(-600, errorMessage);
   });
