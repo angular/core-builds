@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-8d1204a
+ * @license Angular v22.3.0-next.0+sha-2b89a3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3105,7 +3105,7 @@ function isDOMParserAvailable() {
   }
 }
 
-const SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:\/?#]*(?:[\/?#]|$))/i;
+const SAFE_URL_PATTERN = /^(?!javascript:)(?!vbscript:)(?!data:(?!image\/|video\/|audio\/|font\/|application\/octet-stream(?=[;,])|application\/pdf(?=[;,])|application\/json(?=[;,])|text\/plain(?=[;,])|text\/csv(?=[;,])))(?:[a-z0-9+.-]+:|[^&:\/?#]*(?:[\/?#]|$))/i;
 function _sanitizeUrl(url) {
   url = String(url);
   if (url.match(SAFE_URL_PATTERN)) return url;
@@ -9378,7 +9378,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-8d1204a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-2b89a3b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12693,7 +12693,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-8d1204a';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-2b89a3b';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }

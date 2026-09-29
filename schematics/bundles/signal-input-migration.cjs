@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.0+sha-8d1204a
+ * @license Angular v22.3.0-next.0+sha-2b89a3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1483,11 +1483,9 @@ function filterInputsViaConfig(result, knownInputs, config) {
     if (config.shouldMigrateInput === undefined) {
         return;
     }
-    const skippedInputs = new Set();
     // Mark all skipped inputs as incompatible for migration.
     for (const input of knownInputs.knownInputIds.values()) {
         if (!config.shouldMigrateInput(input)) {
-            skippedInputs.add(input.descriptor.key);
             knownInputs.markFieldIncompatible(input.descriptor, {
                 context: null,
                 reason: migrate_ts_type_references.FieldIncompatibilityReason.SkippedViaConfigFilter,
