@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.0+sha-1003328
+ * @license Angular v22.2.0+sha-d33f2d0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9378,7 +9378,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0+sha-1003328'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.0+sha-d33f2d0'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12693,7 +12693,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0+sha-1003328';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.0+sha-d33f2d0';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15372,7 +15372,10 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, name, index) {
   }
   if (hydrationInfo) {
     if (native == null) {
-      throw new RuntimeError(-502, ngDevMode ? `During hydration Angular expected a "<${name}>" element at this location (tNode #${tNode.index}), but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.` : `<${name}>`);
+      throw new RuntimeError(-502, ngDevMode && (() => {
+        const host = lView[HOST] ?? lView[DECLARATION_COMPONENT_VIEW]?.[HOST];
+        return host ? `During hydration Angular expected a "<${name}>" element inside <${host.tagName.toLowerCase()}>, but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.` : `During hydration Angular expected a "<${name}>" element at this location, but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.`;
+      })());
     }
     if (native.nodeType !== Node.ELEMENT_NODE) {
       throw new RuntimeError(-500, ngDevMode && `During hydration Angular expected an element at this location, but found a ${describeDomNode(native)} node instead.`);
