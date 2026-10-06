@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.1+sha-725ffcf
+ * @license Angular v22.2.1+sha-b20a23d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -10,8 +10,8 @@ import { assertInInjectionContext, inject, DestroyRef, RuntimeError, effect, Inj
 import { getOutputDestroyRef, untracked, computed, resource, encapsulateResourceError } from './_resource-chunk.mjs';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
-import '@angular/core/primitives/signals';
 import '@angular/core/primitives/di';
+import '@angular/core/primitives/signals';
 import './_untracked-chunk.mjs';
 
 function takeUntilDestroyed(destroyRef) {

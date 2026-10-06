@@ -1,13 +1,13 @@
 /**
- * @license Angular v22.2.1+sha-725ffcf
+ * @license Angular v22.2.1+sha-b20a23d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
 import { getActiveConsumer, setActiveConsumer as setActiveConsumer$1, createSignal, SIGNAL, consumerDestroy, BASE_EFFECT_NODE, isInNotificationPhase, runEffect } from './_effect-chunk.mjs';
 import { isNotFound, getCurrentInjector, setCurrentInjector } from './_not_found-chunk.mjs';
-import { setActiveConsumer } from '@angular/core/primitives/signals';
 import { isNotFound as isNotFound$1 } from '@angular/core/primitives/di';
+import { setActiveConsumer } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 
 class Version {
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.2.1+sha-725ffcf');
+const VERSION = /* @__PURE__ */new Version('22.2.1+sha-b20a23d');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
