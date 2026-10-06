@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.1+sha-0474258
+ * @license Angular v22.2.1+sha-725ffcf
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4379,14 +4379,16 @@ class AfterRenderImpl {
       (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
       markAncestorsForTraversal(view);
       view[FLAGS] |= 8192;
-    } else if (!this.executing) {
-      this.addSequence(sequence);
     } else {
-      this.deferredRegistrations.add(sequence);
+      this.addSequence(sequence);
     }
   }
   addSequence(sequence) {
-    this.sequences.add(sequence);
+    if (this.executing) {
+      this.deferredRegistrations.add(sequence);
+    } else {
+      this.sequences.add(sequence);
+    }
     this.scheduler.notify(7);
   }
   unregister(sequence) {
@@ -9378,7 +9380,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-0474258'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-725ffcf'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12693,7 +12695,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-0474258';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-725ffcf';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
