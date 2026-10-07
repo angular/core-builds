@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-e118e15
+ * @license Angular v22.3.0-next.0+sha-ff0dbf1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,8 +11,8 @@ import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockSt
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
-import '@angular/core/primitives/signals';
 import '@angular/core/primitives/di';
+import '@angular/core/primitives/signals';
 import 'rxjs/operators';
 import './_attribute-chunk.mjs';
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-e118e15
+ * @license Angular v22.3.0-next.0+sha-ff0dbf1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -753,7 +753,7 @@ declare const ENVIRONMENT_INITIALIZER: InjectionToken<readonly (() => void)[]>;
 /**
  * An ES Module object with a default export of the given type.
  *
- * @see {@link injectAsync}
+ * @see [injectAsync](/api/core/injectAsync)
  * @see [Route#loadComponent](/api/router/Route#loadComponent)
  * @see [LoadChildrenCallback](/api/router/LoadChildrenCallback)
  *
