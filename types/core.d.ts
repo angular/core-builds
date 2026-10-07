@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.1+sha-fa63bfa
+ * @license Angular v22.2.1+sha-f43c63f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3964,7 +3964,7 @@ declare const enum RuntimeErrorCode {
     NO_SUPPORTING_DIFFER_FACTORY = 901,
     VIEW_ALREADY_ATTACHED = 902,
     INVALID_INHERITANCE = 903,
-    UNSAFE_VALUE_IN_RESOURCE_URL = 904,
+    UNSAFE_VALUE_IN_RESOURCE_URL = -904,
     UNSAFE_VALUE_IN_SCRIPT = 905,
     MISSING_GENERATED_DEF = 906,
     TYPE_IS_NOT_STANDALONE = 907,
