@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.2.1+sha-f43c63f
+ * @license Angular v22.2.1+sha-5ff83c1
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, assertIndexInRange, INJECTOR, TVIEW as TVIEW$1, NG_ELEMENT_ID, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, registerSpecialProvider, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, APP_ID, inject, makeStateKey, formatRuntimeError, TransferState, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, isDirectiveHost, MATH_ML_NAMESPACE, SVG_NAMESPACE, XSS_SECURITY_URL, RENDERER, SecurityContext, renderStringify, getSelectedTNode, checkSecurityContext, getSelectedIndex, ENVIRONMENT, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, PARENT, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, resetPreOrderHookFlags, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, encapsulateBoundaryError, setBindingRootForHostBindings, ON_ERROR, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTIcu, assertTNode, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, DOCUMENT as DOCUMENT$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, NG_COMP_DEF, NG_DIR_DEF, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, getAllSpecialProviders, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, deepForEach, getInjectorDef, isTypeProvider, VERSION, retrieveTransferredState, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, PendingTasks, promiseWithResolvers, decreaseElementDepthCount, assertTNodeCreationIndex, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, createViewEffect, getCurrentDirectiveDef, getBindingIndex, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
+import { assertString, EMPTY_OBJ, assertFirstCreatePass, assertDefined, assertNotEqual, FLAGS, assertEqual, isInCheckNoChangesMode, PREORDER_HOOK_FLAGS, throwError, assertNumber, assertGreaterThan, HEADER_OFFSET, DECLARATION_VIEW, NG_FACTORY_DEF, isForwardRef, resolveForwardRef, getFactoryDef, convertToBitFlags, isRootView, assertTNodeForLView, enterDI, runInInjectorProfilerContext, getCurrentTNode, getLView, emitInjectorToCreateInstanceEvent, emitInstanceCreatedByInjectorEvent, throwProviderNotFoundError, leaveDI, assertNodeInjector, setInjectImplementation, injectRootLimpMode, stringifyForError, cyclicDependencyErrorWithDetails, cyclicDependencyError, setInjectorProfilerContext, assertDirectiveDef, EMBEDDED_VIEW_INJECTOR, T_HOST, assertIndexInRange, INJECTOR, TVIEW as TVIEW$1, NG_ELEMENT_ID, isComponentDef, isComponentHost, DECLARATION_COMPONENT_VIEW, makeEnvironmentProviders, InjectionToken, _global, ɵɵinvalidFactoryDep as __invalidFactoryDep, ɵɵinject as __inject, ɵɵdefineInjector as __defineInjector, ɵɵdefineInjectable as __defineInjectable, newArray, attachInjectFlag, RuntimeError, NG_PROV_DEF, getClosureSafeProperty, getNativeByTNode, registerSpecialProvider, flatten, arrayEquals, ID, isLView, assertDomNode, EMPTY_ARRAY, getComponentLViewByIndex, CONTEXT, unwrapRNode, assertLView, HOST, getLViewParent, isLContainer, CONTAINER_HEADER_OFFSET, CHILD_HEAD, NEXT, Injector, CLEANUP, getComponentDef, getDirectiveDef, APP_ID, inject, makeStateKey, formatRuntimeError, TransferState, isInSkipHydrationBlock as isInSkipHydrationBlock$1, HYDRATION, isContentQueryHost, setCurrentQueryIndex, XSS_SECURITY_URL, isDirectiveHost, MATH_ML_NAMESPACE, SVG_NAMESPACE, RENDERER, SecurityContext, renderStringify, getSelectedTNode, checkSecurityContext, getSelectedIndex, ENVIRONMENT, stringify, ANIMATIONS, AFTER_RENDER_SEQUENCES_TO_ADD, markAncestorsForTraversal, NgZone, ChangeDetectionScheduler, ErrorHandler, assertNotInReactiveContext, assertInInjectionContext, DestroyRef, ViewContext, EnvironmentInjector, INJECTOR$1, isDestroyed, assertLContainer, MOVED_VIEWS, assertProjectionSlots, PARENT, NATIVE, REACTIVE_TEMPLATE_CONSUMER, DECLARATION_LCONTAINER, QUERIES, assertParentView, assertNotReactive, ON_DESTROY_HOOKS, assertFunction, EFFECTS, resetPreOrderHookFlags, CHILD_TAIL, assertSame, assertFirstUpdatePass, getTView, assertIndexInDeclRange, setSelectedIndex, INTERNAL_APPLICATION_ERROR_HANDLER, assertNotSame, isCurrentTNodeParent, setCurrentTNodeAsNotParent, assertHasParent, setCurrentTNode, getElementDepthCount, increaseElementDepthCount, wasLastNodeCreated, setCurrentDirectiveIndex, getCurrentDirectiveIndex, unwrapLView, enterView, leaveView, isCreationMode, markViewForRefresh, setIsInCheckNoChangesMode, setIsRefreshingViews, isExhaustiveCheckNoChanges, requiresRefreshOrTraversal, setBindingIndex, EFFECTS_TO_SCHEDULE, encapsulateBoundaryError, setBindingRootForHostBindings, ON_ERROR, viewAttachedToChangeDetector, CheckNoChangesMode, isRefreshingViews, removeFromArray, addToArray, updateAncestorTraversalFlagsOnAttach, storeLViewOnDestroy, VIEW_REFS, DOC_PAGE_BASE_URL, assertGreaterThanOrEqual, isInI18nBlock, assertTNodeForTView, getCurrentParentTNode, getNamespace, getCurrentTNodePlaceholderOk, assertTIcu, assertTNode, assertNumberInRange, DEHYDRATED_VIEWS, getNgModuleDef, getPipeDef as getPipeDef$1, getNgModuleDefOrThrow, isStandalone, getTNode, assertLessThan, getOrCreateTViewCleanup, getOrCreateLViewCleanup, debugStringifyTypeForError, assertNotDefined, nextBindingIndex, concatStringsWithSpace, assertInjectImplementationNotEqual, emitInjectEvent, getConstant, getDirectiveDefOrThrow, DOCUMENT as DOCUMENT$1, viewAttachedToContainer, storeCleanupWithContext, signal, createInjectorWithoutInjectorInstances, R3Injector, getNullInjector, internalImportProvidersFrom, initNgDevMode, runInInjectionContext, fillProperties, NG_COMP_DEF, NG_DIR_DEF, getBindingsEnabled, lastNodeWasCreated, arrayInsert2, arraySplice, removeLViewOnDestroy, walkUpViews, getNativeByIndex, assertElement, setInjectorProfiler, EffectRefImpl, NullInjector, getAllSpecialProviders, ENVIRONMENT_INITIALIZER, INJECTOR_DEF_TYPES, walkProviderTree, deepForEach, getInjectorDef, isTypeProvider, VERSION, retrieveTransferredState, isSignal, isInInjectionContext, PendingTasksInternal, ZONELESS_ENABLED, EffectScheduler, PendingTasks, promiseWithResolvers, decreaseElementDepthCount, assertTNodeCreationIndex, enterSkipHydrationBlock, isSkipHydrationRootTNode, leaveSkipHydrationBlock, createViewEffect, getCurrentDirectiveDef, getBindingIndex, assertIndexInExpandoRange, assertOneOf, setInI18nBlock, nextContextImpl, getCurrentQueryIndex, getContextLView, load, keyValueArrayIndexOf, incrementBindingIndex, keyValueArrayGet, keyValueArraySet, isWritableSignal, store, getBindingRoot, providerToFactory, emitProviderConfiguredEvent, isClassProvider, forwardRef, ɵɵrestoreView as __restoreView, ɵɵdisableBindings as __disableBindings, ɵɵenableBindings as __enableBindings, ɵɵnamespaceSVG as __namespaceSVG, ɵɵnamespaceMathML as __namespaceMathML, ɵɵnamespaceHTML as __namespaceHTML, ɵɵresetView as __resetView, NG_MOD_DEF, NG_INJ_DEF, NG_PIPE_DEF, PROVIDED_ZONELESS, NoopNgZone, angularZoneInstanceIdProperty, scheduleCallbackWithMicrotask, scheduleCallbackWithRafRace, SCHEDULE_IN_ROOT_ZONE, getNativeByTNodeOrNull } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer as setActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { SIGNAL_NODE, signalSetFn, setActiveConsumer, consumerDestroy, SIGNAL, REACTIVE_NODE, consumerPollProducersForChange, consumerBeforeComputation, getActiveConsumer, consumerAfterComputation, createComputed, producerUpdateValueVersion, producerAccessed, ERRORED, setThrowInvalidWriteToSignalError } from './_effect-chunk.mjs';
 import { Subject, Subscription } from 'rxjs';
@@ -2829,6 +2829,70 @@ var ViewEncapsulation;
   ViewEncapsulation[ViewEncapsulation["ExperimentalIsolatedShadowDom"] = 4] = "ExperimentalIsolatedShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
+class SafeValueImpl {
+  changingThisBreaksApplicationSecurity;
+  constructor(changingThisBreaksApplicationSecurity) {
+    this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
+  }
+  toString() {
+    return `SafeValue must use [property]=binding: ${this.changingThisBreaksApplicationSecurity}` + (ngDevMode ? ` (see ${XSS_SECURITY_URL})` : '');
+  }
+}
+class SafeHtmlImpl extends SafeValueImpl {
+  getTypeName() {
+    return "HTML";
+  }
+}
+class SafeStyleImpl extends SafeValueImpl {
+  getTypeName() {
+    return "Style";
+  }
+}
+class SafeScriptImpl extends SafeValueImpl {
+  getTypeName() {
+    return "Script";
+  }
+}
+class SafeUrlImpl extends SafeValueImpl {
+  getTypeName() {
+    return "URL";
+  }
+}
+class SafeResourceUrlImpl extends SafeValueImpl {
+  getTypeName() {
+    return "ResourceURL";
+  }
+}
+function unwrapSafeValue(value) {
+  return value instanceof SafeValueImpl ? value.changingThisBreaksApplicationSecurity : value;
+}
+function allowSanitizationBypassAndThrow(value, type) {
+  const actualType = getSanitizationBypassType(value);
+  if (actualType != null && actualType !== type) {
+    if (actualType === "ResourceURL" && type === "URL") return true;
+    throw new Error(`Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
+  }
+  return actualType === type;
+}
+function getSanitizationBypassType(value) {
+  return value instanceof SafeValueImpl && value.getTypeName() || null;
+}
+function bypassSanitizationTrustHtml(trustedHtml) {
+  return new SafeHtmlImpl(trustedHtml);
+}
+function bypassSanitizationTrustStyle(trustedStyle) {
+  return new SafeStyleImpl(trustedStyle);
+}
+function bypassSanitizationTrustScript(trustedScript) {
+  return new SafeScriptImpl(trustedScript);
+}
+function bypassSanitizationTrustUrl(trustedUrl) {
+  return new SafeUrlImpl(trustedUrl);
+}
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+  return new SafeResourceUrlImpl(trustedResourceUrl);
+}
+
 const CUSTOM_ELEMENTS_SCHEMA = {
   name: 'custom-elements'
 };
@@ -2995,70 +3059,6 @@ function trustedScriptFromStringBypass(script) {
 }
 function trustedScriptURLFromStringBypass(url) {
   return getPolicy()?.createScriptURL(url) || url;
-}
-
-class SafeValueImpl {
-  changingThisBreaksApplicationSecurity;
-  constructor(changingThisBreaksApplicationSecurity) {
-    this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
-  }
-  toString() {
-    return `SafeValue must use [property]=binding: ${this.changingThisBreaksApplicationSecurity}` + ` (see ${XSS_SECURITY_URL})`;
-  }
-}
-class SafeHtmlImpl extends SafeValueImpl {
-  getTypeName() {
-    return "HTML";
-  }
-}
-class SafeStyleImpl extends SafeValueImpl {
-  getTypeName() {
-    return "Style";
-  }
-}
-class SafeScriptImpl extends SafeValueImpl {
-  getTypeName() {
-    return "Script";
-  }
-}
-class SafeUrlImpl extends SafeValueImpl {
-  getTypeName() {
-    return "URL";
-  }
-}
-class SafeResourceUrlImpl extends SafeValueImpl {
-  getTypeName() {
-    return "ResourceURL";
-  }
-}
-function unwrapSafeValue(value) {
-  return value instanceof SafeValueImpl ? value.changingThisBreaksApplicationSecurity : value;
-}
-function allowSanitizationBypassAndThrow(value, type) {
-  const actualType = getSanitizationBypassType(value);
-  if (actualType != null && actualType !== type) {
-    if (actualType === "ResourceURL" && type === "URL") return true;
-    throw new Error(`Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
-  }
-  return actualType === type;
-}
-function getSanitizationBypassType(value) {
-  return value instanceof SafeValueImpl && value.getTypeName() || null;
-}
-function bypassSanitizationTrustHtml(trustedHtml) {
-  return new SafeHtmlImpl(trustedHtml);
-}
-function bypassSanitizationTrustStyle(trustedStyle) {
-  return new SafeStyleImpl(trustedStyle);
-}
-function bypassSanitizationTrustScript(trustedScript) {
-  return new SafeScriptImpl(trustedScript);
-}
-function bypassSanitizationTrustUrl(trustedUrl) {
-  return new SafeUrlImpl(trustedUrl);
-}
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-  return new SafeResourceUrlImpl(trustedResourceUrl);
 }
 
 function getInertBodyHelper(defaultDoc) {
@@ -5575,12 +5575,22 @@ function setDomProperty(tNode, lView, propName, value, renderer, sanitizer) {
       }
     }
     value = sanitizer != null ? sanitizer(value, tNode.value || '', propName) : value;
+    value = unwrapImgVideoSrcValue(propName, element, value);
     renderer.setProperty(element, propName, value);
   } else if (tNode.type & 12) {
     if (ngDevMode && !matchingSchemas(lView[TVIEW$1].schemas, tNode.value)) {
       handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
     }
   }
+}
+function unwrapImgVideoSrcValue(propName, element, value) {
+  if (propName === 'src' && (element.tagName === 'IMG' || element.tagName === 'VIDEO')) {
+    if (value == null) {
+      return '';
+    }
+    return unwrapSafeValue(value);
+  }
+  return value;
 }
 function markDirtyIfOnPush(lView, viewIndex) {
   ngDevMode && assertLView(lView);
@@ -5714,6 +5724,7 @@ function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespac
     assertTNodeType(tNode, 2, `Attempted to set attribute \`${name}\` on a container node. ` + `Host bindings are not valid on ng-container or ng-template.`);
   }
   const element = getNativeByTNode(tNode, lView);
+  value = unwrapImgVideoSrcValue(name, element, value);
   setElementAttribute(lView[RENDERER], element, namespace, tNode.value, name, value, sanitizer);
 }
 function setElementAttribute(renderer, element, namespace, tagName, name, value, sanitizer) {
@@ -9385,7 +9396,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-f43c63f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-5ff83c1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12700,7 +12711,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-f43c63f';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-5ff83c1';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
