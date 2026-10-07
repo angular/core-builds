@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.1+sha-b20a23d
+ * @license Angular v22.2.1+sha-fa63bfa
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6284,7 +6284,12 @@ function refreshView(tView, lView, templateFn, context) {
             declarationType,
             caughtBy: onError
           };
-          onError(encapsulateBoundaryError(errorToHandle), details);
+          const prevConsumer = setActiveConsumer(null);
+          try {
+            onError(encapsulateBoundaryError(errorToHandle), details);
+          } finally {
+            setActiveConsumer(prevConsumer);
+          }
           handled = true;
           break;
         } catch (boundaryError) {
@@ -9380,7 +9385,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-b20a23d'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.1+sha-fa63bfa'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12695,7 +12700,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-b20a23d';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.1+sha-fa63bfa';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
