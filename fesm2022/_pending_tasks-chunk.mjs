@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-b9f7c1f
+ * @license Angular v22.3.0-next.0+sha-97e6aa4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.3.0-next.0+sha-b9f7c1f');
+const VERSION = /* @__PURE__ */new Version('22.3.0-next.0+sha-97e6aa4');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -1661,7 +1661,7 @@ function SECURITY_SCHEMA() {
   _SECURITY_SCHEMA = createNullObj();
   registerContext(SecurityContext.HTML, undefined, [['iframe', ['srcdoc']], ['*', ['innerHTML', 'outerHTML']]]);
   registerContext(SecurityContext.STYLE, undefined, [['*', ['style']]]);
-  registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']], ['img', ['src']], ['video', ['src']]]);
+  registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']]]);
   registerContext(SecurityContext.URL, MATH_ML_NAMESPACE, [['*', ['href', 'xlink:href']]]);
   registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
   registerContext(SecurityContext.URL, SVG_NAMESPACE, [['a', ['href', 'xlink:href']]]);
