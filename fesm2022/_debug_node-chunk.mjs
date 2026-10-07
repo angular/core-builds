@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.0+sha-ff0dbf1
+ * @license Angular v22.3.0-next.0+sha-b9f7c1f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3417,7 +3417,7 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
   if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL")) {
     return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
   }
-  throw new RuntimeError(904, ngDevMode && `unsafe value used in a resource URL context (see ${XSS_SECURITY_URL})`);
+  throw new RuntimeError(-904, ngDevMode && `unsafe value used in a resource URL context (see ${XSS_SECURITY_URL})`);
 }
 function ɵɵsanitizeScript(unsafeScript) {
   const sanitizer = getSanitizer();
@@ -9385,7 +9385,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-ff0dbf1'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.0+sha-b9f7c1f'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12700,7 +12700,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-ff0dbf1';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.0+sha-b9f7c1f';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
