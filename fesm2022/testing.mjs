@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-f942d3b
+ * @license Angular v22.3.0-next.1+sha-554ca69-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Subscription } from 'rxjs';
 import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, getInjectableDef, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1, getDirectiveDef } from './_pending_tasks-chunk.mjs';
 import * as i0 from '@angular/core';
-import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest, ɵɵdefineComponent as __defineComponent, ViewEncapsulation } from './_debug_node-chunk.mjs';
+import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest, ɵɵdefineComponent as __defineComponent, ViewEncapsulation, Service } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -2690,14 +2690,14 @@ class Log {
   static ɵfac = function Log_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || Log)();
   };
-  static ɵprov = /*@__PURE__*/i0.ɵɵdefineInjectable({
+  static ɵprov = /*@__PURE__*/i0.ɵɵdefineService({
     token: Log,
     factory: Log.ɵfac
   });
 }
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(Log, [{
-    type: Injectable
+    type: Service
   }], () => [], null);
 })();
 
