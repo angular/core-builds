@@ -1,24 +1,24 @@
 /**
- * @license Angular v22.2.2+sha-c7a72c2
+ * @license Angular v22.2.2+sha-35a02f8
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-let activeConsumer = null;
-let inNotificationPhase = false;
+const activeConsumer = [null];
+const inNotificationPhase = [false];
 let epoch = 1;
 let postProducerCreatedFn = null;
 const SIGNAL = /* @__PURE__ */Symbol('SIGNAL');
 function setActiveConsumer(consumer) {
-  const prev = activeConsumer;
-  activeConsumer = consumer;
+  const prev = activeConsumer[0];
+  activeConsumer[0] = consumer;
   return prev;
 }
 function getActiveConsumer() {
-  return activeConsumer;
+  return activeConsumer[0];
 }
 function isInNotificationPhase() {
-  return inNotificationPhase;
+  return inNotificationPhase[0];
 }
 function isReactive(value) {
   return value[SIGNAL] !== undefined;
@@ -41,47 +41,48 @@ const REACTIVE_NODE = {
   consumerOnSignalRead: () => {}
 };
 function producerAccessed(node) {
-  if (inNotificationPhase) {
+  if (inNotificationPhase[0]) {
     throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ? `Assertion error: signal read during notification phase` : '');
   }
-  if (activeConsumer === null) {
+  const consumer = activeConsumer[0];
+  if (consumer === null) {
     return;
   }
-  activeConsumer.consumerOnSignalRead(node);
-  const prevProducerLink = activeConsumer.producersTail;
+  consumer.consumerOnSignalRead(node);
+  const prevProducerLink = consumer.producersTail;
   if (prevProducerLink !== undefined && prevProducerLink.producer === node) {
     return;
   }
   let nextProducerLink = undefined;
-  const isRecomputing = activeConsumer.recomputing;
+  const isRecomputing = consumer.recomputing;
   if (isRecomputing) {
-    nextProducerLink = prevProducerLink !== undefined ? prevProducerLink.nextProducer : activeConsumer.producers;
+    nextProducerLink = prevProducerLink !== undefined ? prevProducerLink.nextProducer : consumer.producers;
     if (nextProducerLink !== undefined && nextProducerLink.producer === node) {
-      activeConsumer.producersTail = nextProducerLink;
+      consumer.producersTail = nextProducerLink;
       nextProducerLink.lastReadVersion = node.version;
       nextProducerLink.knownValidAtEpoch = epoch;
       return;
     }
   }
   const prevConsumerLink = node.consumersTail;
-  if (prevConsumerLink !== undefined && prevConsumerLink.consumer === activeConsumer && (!isRecomputing || prevConsumerLink.knownValidAtEpoch === epoch)) {
+  if (prevConsumerLink !== undefined && prevConsumerLink.consumer === consumer && (!isRecomputing || prevConsumerLink.knownValidAtEpoch === epoch)) {
     return;
   }
-  const isLive = consumerIsLive(activeConsumer);
+  const isLive = consumerIsLive(consumer);
   const newLink = {
     producer: node,
-    consumer: activeConsumer,
+    consumer: consumer,
     nextProducer: nextProducerLink,
     prevConsumer: undefined,
     knownValidAtEpoch: epoch,
     lastReadVersion: node.version,
     nextConsumer: undefined
   };
-  activeConsumer.producersTail = newLink;
+  consumer.producersTail = newLink;
   if (prevProducerLink !== undefined) {
     prevProducerLink.nextProducer = newLink;
   } else {
-    activeConsumer.producers = newLink;
+    consumer.producers = newLink;
   }
   if (isLive) {
     producerAddLiveConsumer(node, newLink);
@@ -108,8 +109,8 @@ function producerNotifyConsumers(node) {
   if (node.consumers === undefined) {
     return;
   }
-  const prev = inNotificationPhase;
-  inNotificationPhase = true;
+  const prev = inNotificationPhase[0];
+  inNotificationPhase[0] = true;
   try {
     for (let link = node.consumers; link !== undefined; link = link.nextConsumer) {
       const consumer = link.consumer;
@@ -118,11 +119,11 @@ function producerNotifyConsumers(node) {
       }
     }
   } finally {
-    inNotificationPhase = prev;
+    inNotificationPhase[0] = prev;
   }
 }
 function producerUpdatesAllowed() {
-  return activeConsumer?.consumerAllowSignalWrites !== false;
+  return activeConsumer[0]?.consumerAllowSignalWrites !== false;
 }
 function consumerMarkDirty(node) {
   node.dirty = true;
