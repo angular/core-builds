@@ -1,16 +1,16 @@
 /**
- * @license Angular v22.3.0-next.1+sha-9a2c9f1-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-f2b1c1d-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-let _currentInjector = undefined;
+const _currentInjector = [undefined];
 function getCurrentInjector() {
-  return _currentInjector;
+  return _currentInjector[0];
 }
 function setCurrentInjector(injector) {
-  const former = _currentInjector;
-  _currentInjector = injector;
+  const former = _currentInjector[0];
+  _currentInjector[0] = injector;
   return former;
 }
 function inject(token, options) {
