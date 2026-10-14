@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-01c883e-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-1f1f1f1-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1509,6 +1509,34 @@ class QueryList {
   [Symbol.iterator] = (() => symbolIterator)();
 }
 
+const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+const COMMENT_DELIMITER = /(<|>)/g;
+const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
+function escapeCommentText(value) {
+  return value.replace(COMMENT_DISALLOWED, text => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
+}
+function getNextSibling(node) {
+  const nextSibling = node.nextSibling;
+  if (nextSibling && node !== nextSibling.previousSibling) {
+    throw clobberedElementError(nextSibling);
+  }
+  return nextSibling;
+}
+function getFirstChild(node) {
+  const firstChild = node.firstChild;
+  if (firstChild && (firstChild.parentNode !== node || firstChild.previousSibling !== null)) {
+    throw clobberedElementError(firstChild);
+  }
+  return firstChild;
+}
+function getNodeName(node) {
+  const nodeName = node.nodeName;
+  return typeof nodeName === 'string' ? nodeName : 'FORM';
+}
+function clobberedElementError(node) {
+  return new Error(`Action failed because the element is clobbered: ${node.outerHTML}`);
+}
+
 const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
 const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = 'ngskiphydration';
 function hasSkipHydrationAttrOnTNode(tNode) {
@@ -1524,6 +1552,9 @@ function hasSkipHydrationAttrOnTNode(tNode) {
   return false;
 }
 function hasSkipHydrationAttrOnRElement(rNode) {
+  if (typeof rNode.hasAttribute !== 'function') {
+    throw clobberedElementError(rNode.hasAttribute);
+  }
   return rNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME);
 }
 function hasInSkipHydrationBlockFlag(tNode) {
@@ -2436,11 +2467,11 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
   }
   const dehydratedView = {
     data,
-    firstChild: rNode.firstChild ?? null
+    firstChild: getFirstChild(rNode)
   };
   if (isRootView) {
     dehydratedView.firstChild = rNode;
-    setSegmentHead(dehydratedView, 0, rNode.nextSibling);
+    setSegmentHead(dehydratedView, 0, getNextSibling(rNode));
   }
   if (remainingNgh) {
     rNode.setAttribute(NGH_ATTR_NAME, remainingNgh);
@@ -3059,37 +3090,6 @@ function trustedScriptFromStringBypass(script) {
 }
 function trustedScriptURLFromStringBypass(url) {
   return getPolicy()?.createScriptURL(url) || url;
-}
-
-const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
-const COMMENT_DELIMITER = /(<|>)/g;
-const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
-function escapeCommentText(value) {
-  return value.replace(COMMENT_DISALLOWED, text => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
-}
-function isClobberedElement(parentNode, childNode) {
-  return (parentNode.compareDocumentPosition(childNode) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== Node.DOCUMENT_POSITION_CONTAINED_BY;
-}
-function getNextSibling(node) {
-  const nextSibling = node.nextSibling;
-  if (nextSibling && node !== nextSibling.previousSibling) {
-    throw clobberedElementError(nextSibling);
-  }
-  return nextSibling;
-}
-function getFirstChild(node) {
-  const firstChild = node.firstChild;
-  if (firstChild && isClobberedElement(node, firstChild)) {
-    throw clobberedElementError(firstChild);
-  }
-  return firstChild;
-}
-function getNodeName(node) {
-  const nodeName = node.nodeName;
-  return typeof nodeName === 'string' ? nodeName : 'FORM';
-}
-function clobberedElementError(node) {
-  return new Error(`Action failed because the element is clobbered: ${node.outerHTML}`);
 }
 
 function getInertBodyHelper(defaultDoc) {
@@ -7301,7 +7301,7 @@ function locateNextRNode(hydrationInfo, tView, lView, tNode) {
       } else {
         let previousRElement = getNativeByTNode(previousTNode, lView);
         if (previousTNodeParent) {
-          native = previousRElement.firstChild;
+          native = getFirstChild(previousRElement);
         } else {
           const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
           const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
@@ -7310,7 +7310,7 @@ function locateNextRNode(hydrationInfo, tView, lView, tNode) {
             const nodesToSkip = numRootNodesToSkip + 1;
             native = siblingAfter(nodesToSkip, segmentHead);
           } else {
-            native = previousRElement.nextSibling;
+            native = getNextSibling(previousRElement);
           }
         }
       }
@@ -7325,7 +7325,7 @@ function siblingAfter(skip, from) {
     if (currentNode == null) {
       throw new RuntimeError(-501, ngDevMode && 'During hydration Angular expected more sibling nodes to be present. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
     }
-    currentNode = currentNode.nextSibling;
+    currentNode = getNextSibling(currentNode);
   }
   return currentNode;
 }
@@ -7354,10 +7354,10 @@ function navigateToNode(from, instructions) {
       }
       switch (step) {
         case NODE_NAVIGATION_STEP_FIRST_CHILD:
-          node = node.firstChild;
+          node = getFirstChild(node);
           break;
         case NODE_NAVIGATION_STEP_NEXT_SIBLING:
-          node = node.nextSibling;
+          node = getNextSibling(node);
           break;
       }
     }
@@ -7631,7 +7631,7 @@ function skipSiblingNodes(state, skip) {
     if (!currentNode) {
       break;
     }
-    currentNode = currentNode?.nextSibling ?? null;
+    currentNode = getNextSibling(currentNode);
   }
   return currentNode;
 }
@@ -7656,7 +7656,7 @@ function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplate
     if (isRootTemplateMessage(subTemplateIndex)) {
       ngDevMode && assertDefined(parentTNode, 'Expected parent TNode while hydrating i18n root');
       const rootNode = locateNextRNode(hydrationInfo, tView, lView, parentTNode);
-      return parentTNode.type & 8 ? rootNode : rootNode.firstChild;
+      return parentTNode.type & 8 ? rootNode : getFirstChild(rootNode);
     }
     return hydrationInfo?.firstChild;
   }
@@ -7697,14 +7697,14 @@ function collectI18nNodesFromDom(context, state, nodeOrNodes) {
       case 0:
         {
           const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
-          setCurrentNode(state, currentNode?.nextSibling ?? null);
+          setCurrentNode(state, currentNode && getNextSibling(currentNode));
           break;
         }
       case 1:
         {
-          collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode?.firstChild ?? null), nodeOrNodes.children);
+          collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode && getFirstChild(state.currentNode)), nodeOrNodes.children);
           const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
-          setCurrentNode(state, currentNode?.nextSibling ?? null);
+          setCurrentNode(state, currentNode && getNextSibling(currentNode));
           break;
         }
       case 2:
@@ -7723,8 +7723,8 @@ function collectI18nNodesFromDom(context, state, nodeOrNodes) {
                   const nextNode = skipSiblingNodes(state, 1);
                   setCurrentNode(state, nextNode);
                 } else {
-                  collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode?.firstChild ?? null), nodeOrNodes.children);
-                  setCurrentNode(state, currentNode?.nextSibling ?? null);
+                  collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode && getFirstChild(state.currentNode)), nodeOrNodes.children);
+                  setCurrentNode(state, currentNode && getNextSibling(currentNode));
                   if (containerSize !== null) {
                     const nextNode = skipSiblingNodes(state, containerSize + 1);
                     setCurrentNode(state, nextNode);
@@ -7760,7 +7760,7 @@ function collectI18nNodesFromDom(context, state, nodeOrNodes) {
             });
           }
           const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
-          setCurrentNode(state, currentNode?.nextSibling ?? null);
+          setCurrentNode(state, currentNode && getNextSibling(currentNode));
           break;
         }
     }
@@ -7843,7 +7843,7 @@ function removeDehydratedView(dehydratedView, renderer) {
     const numNodes = dehydratedView.data[NUM_ROOT_NODES];
     while (nodesRemoved < numNodes) {
       ngDevMode && validateSiblingNodeExists(currentRNode);
-      const nextSibling = currentRNode.nextSibling;
+      const nextSibling = getNextSibling(currentRNode);
       nativeRemoveNode(renderer, currentRNode, false);
       currentRNode = nextSibling;
       nodesRemoved++;
@@ -9396,7 +9396,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-01c883e-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-1f1f1f1-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12711,7 +12711,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-01c883e-with-local-changes';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-1f1f1f1-with-local-changes';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15385,8 +15385,9 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, name, index) {
   ngDevMode && validateMatchingNode(native, Node.ELEMENT_NODE, name, lView, tNode);
   ngDevMode && markRNodeAsClaimedByHydration(native);
   if (getSerializedContainerViews(hydrationInfo, index)) {
-    ngDevMode && validateNodeExists(native.nextSibling, lView, tNode);
-    setSegmentHead(hydrationInfo, index, native.nextSibling);
+    const segmentHead = getNextSibling(native);
+    ngDevMode && validateNodeExists(segmentHead, lView, tNode);
+    setSegmentHead(hydrationInfo, index, segmentHead);
   }
   if (hydrationInfo) {
     if (native == null) {
