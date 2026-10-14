@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "20.3.33+sha-fc0e50a",
+  "version": "20.3.34+sha-3291728",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "20.3.33+sha-fc0e50a",
+    "@angular/compiler": "20.3.34+sha-3291728",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0"
   },
