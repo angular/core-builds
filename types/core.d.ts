@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.2+sha-fafec77
+ * @license Angular v22.2.2+sha-f6e7755
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3707,7 +3707,7 @@ declare abstract class ViewContainerRef {
     /**
      * Moves a view to a new location in this container.
      * @param viewRef The view to move.
-     * @param index The 0-based index of the new location.
+     * @param currentIndex The 0-based index of the new location.
      * @returns The moved `ViewRef` instance.
      */
     abstract move(viewRef: ViewRef$1, currentIndex: number): ViewRef$1;

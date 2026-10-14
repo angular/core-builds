@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.2+sha-fafec77
+ * @license Angular v22.2.2+sha-f6e7755
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5438,7 +5438,7 @@ declare function inputBinding(publicName: string, value: () => unknown): Binding
 declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
 /**
  * Creates a two-way binding.
- * @param eventName Public name of the two-way compatible input.
+ * @param publicName Public name of the two-way compatible input.
  * @param value Writable signal from which to get the current value and to which to write new
  * values.
  *
