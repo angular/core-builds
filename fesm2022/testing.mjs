@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-1f1f1f1-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-3881615-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { Subscription } from 'rxjs';
 import { inject as inject$1, ErrorHandler, NgZone, EnvironmentInjector, CONTAINER_HEADER_OFFSET, InjectionToken, NoopNgZone, PendingTasksInternal, ZONELESS_ENABLED, ChangeDetectionScheduler, EffectScheduler, stringify, resolveForwardRef, NG_COMP_DEF, NG_DIR_DEF, NG_PIPE_DEF, NG_INJ_DEF, NG_MOD_DEF, ENVIRONMENT_INITIALIZER, INTERNAL_APPLICATION_ERROR_HANDLER, Injector, getInjectableDef, isEnvironmentProviders, runInInjectionContext, getComponentDef as getComponentDef$1, getDirectiveDef } from './_pending_tasks-chunk.mjs';
 import * as i0 from '@angular/core';
-import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, LOCALE_ID, DEFAULT_LOCALE_ID, setLocaleId, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest, ɵɵdefineComponent as __defineComponent, ViewEncapsulation, Service } from './_debug_node-chunk.mjs';
+import { Injectable, DeferBlockState, triggerResourceLoading, renderDeferBlockState, getDeferBlocks, DeferBlockBehavior, getDebugNode, RendererFactory2, ApplicationRef, Pipe, Directive, Component, NgModule, ReflectionCapabilities, depsTracker, isComponentDefPendingResolution, resolveComponentResources, NgModuleRef, ApplicationInitStatus, ComponentFactory, getAsyncClassMetadataFn, compileComponent, compileDirective, compilePipe, patchComponentDefWithScope, compileNgModuleDefs, clearResolutionOfComponentResourcesQueue, restoreComponentResolutionQueue, provideZonelessChangeDetectionInternal, Compiler, DEFER_BLOCK_CONFIG, ANIMATIONS_DISABLED, COMPILER_OPTIONS, transitiveScopesFor, generateStandaloneInDeclarationsError, NgModuleFactory, resetCompiledComponents, ɵsetUnknownElementStrictMode as _setUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode as _setUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode as _getUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode as _getUnknownPropertyStrictMode, inferTagNameFromDefinition, flushModuleScopingQueueAsMuchAsPossible, setAllowDuplicateNgModuleIdsForTest, ɵɵdefineComponent as __defineComponent, ViewEncapsulation, Service } from './_debug_node-chunk.mjs';
 import { ResourceLoader } from '@angular/compiler';
 import './_effect-chunk.mjs';
 import './_not_found-chunk.mjs';
@@ -736,8 +736,6 @@ class TestBedCompiler {
     const parentInjector = this.platform.injector;
     this.testModuleRef = new NgModuleRef(this.testModuleType, parentInjector, []);
     this.testModuleRef.injector.get(ApplicationInitStatus).runInitializers();
-    const localeId = this.testModuleRef.injector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-    setLocaleId(localeId);
     return this.testModuleRef;
   }
   _compileNgModuleSync(moduleType) {
@@ -1075,7 +1073,6 @@ class TestBedCompiler {
     this.initialNgDefs.clear();
     this.scopesWithOverriddenProviders.clear();
     this.restoreComponentResolutionQueue();
-    setLocaleId(DEFAULT_LOCALE_ID);
   }
   compileTestModule() {
     class RootScopeModule {}

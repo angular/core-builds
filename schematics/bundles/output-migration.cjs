@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.1+sha-1f1f1f1-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-3881615-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -87,8 +87,7 @@ function getOutputDecorator(node, reflector) {
 // THINK: this utility + type is not specific to @Output, really, maybe move it to tsurge?
 /** Computes an unique ID for a given Angular `@Output` property. */
 function getUniqueIdForProperty(info, prop) {
-    const { id } = project_paths.projectFile(prop.getSourceFile(), info);
-    id.replace(/\.d\.ts$/, '.ts');
+    const id = project_paths.projectFile(prop.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
     return `${id}@@${prop.parent.name ?? 'unknown-class'}@@${prop.name.getText()}`;
 }
 function isTestRunnerImport(node) {

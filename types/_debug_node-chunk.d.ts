@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-1f1f1f1-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-3881615-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4467,6 +4467,8 @@ interface LViewEnvironment {
      * (always disabled in prod mode).
      */
     ngReflect: boolean;
+    /** Locale that should be used in i18n instructions. */
+    locale: string;
 }
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 declare const enum LViewFlags {
@@ -5438,7 +5440,7 @@ declare function inputBinding(publicName: string, value: () => unknown): Binding
 declare function outputBinding<T>(eventName: string, listener: (event: T) => unknown): Binding;
 /**
  * Creates a two-way binding.
- * @param eventName Public name of the two-way compatible input.
+ * @param publicName Public name of the two-way compatible input.
  * @param value Writable signal from which to get the current value and to which to write new
  * values.
  *

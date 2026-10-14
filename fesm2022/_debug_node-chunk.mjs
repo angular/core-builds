@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-1f1f1f1-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-3881615-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9234,6 +9234,126 @@ function domOnlyFirstCreatePass(index, tView, type, name, attrsIndex, localRefsI
   return tNode;
 }
 
+const u = undefined;
+function plural(val) {
+  const i = Math.floor(Math.abs(val)),
+    v = val.toString().replace(/^[^.]*\.?/, '').length;
+  if (i === 1 && v === 0) return 1;
+  return 5;
+}
+var localeEn = ["en", [["a", "p"], ["AM", "PM"]], [["AM", "PM"]], [["S", "M", "T", "W", "T", "F", "S"], ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]], u, [["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]], u, [["B", "A"], ["BC", "AD"], ["Before Christ", "Anno Domini"]], 0, [6, 0], ["M/d/yy", "MMM d, y", "MMMM d, y", "EEEE, MMMM d, y"], ["h:mm a", "h:mm:ss a", "h:mm:ss a z", "h:mm:ss a zzzz"], ["{1}, {0}", u, u, u], [".", ",", ";", "%", "+", "-", "E", "×", "‰", "∞", "NaN", ":"], ["#,##0.###", "#,##0%", "¤#,##0.00", "#E0"], "USD", "$", "US Dollar", {}, "ltr", plural];
+
+let LOCALE_DATA = /* @__PURE__ */Object.create(null);
+function registerLocaleData(data, localeId, extraData) {
+  if (typeof localeId !== 'string') {
+    extraData = localeId;
+    localeId = data[LocaleDataIndex.LocaleId];
+  }
+  localeId = localeId.toLowerCase().replace(/_/g, '-');
+  LOCALE_DATA[localeId] = data;
+  if (extraData) {
+    LOCALE_DATA[localeId][LocaleDataIndex.ExtraData] = extraData;
+  }
+}
+function findLocaleData(locale) {
+  const normalizedLocale = normalizeLocale(locale);
+  let match = getLocaleData(normalizedLocale);
+  if (match) {
+    return match;
+  }
+  const parentLocale = normalizedLocale.split('-')[0];
+  match = getLocaleData(parentLocale);
+  if (match) {
+    return match;
+  }
+  if (parentLocale === 'en') {
+    return localeEn;
+  }
+  throw new RuntimeError(701, ngDevMode && `Missing locale data for the locale "${locale}".`);
+}
+function getLocaleCurrencyCode(locale) {
+  const data = findLocaleData(locale);
+  return data[LocaleDataIndex.CurrencyCode] || null;
+}
+function getLocalePluralCase(locale) {
+  const data = findLocaleData(locale);
+  return data[LocaleDataIndex.PluralCase];
+}
+function getLocaleData(normalizedLocale) {
+  if (!(normalizedLocale in LOCALE_DATA)) {
+    const globalLocaleData = _global.ng && _global.ng.common && _global.ng.common.locales && _global.ng.common.locales[normalizedLocale];
+    if (globalLocaleData !== undefined) {
+      LOCALE_DATA[normalizedLocale] = globalLocaleData;
+    }
+    return globalLocaleData;
+  }
+  return LOCALE_DATA[normalizedLocale];
+}
+function unregisterAllLocaleData() {
+  LOCALE_DATA = Object.create(null);
+}
+const LocaleDataIndex = {
+  LocaleId: 0,
+  DayPeriodsFormat: 1,
+  DayPeriodsStandalone: 2,
+  DaysFormat: 3,
+  DaysStandalone: 4,
+  MonthsFormat: 5,
+  MonthsStandalone: 6,
+  Eras: 7,
+  FirstDayOfWeek: 8,
+  WeekendRange: 9,
+  DateFormat: 10,
+  TimeFormat: 11,
+  DateTimeFormat: 12,
+  NumberSymbols: 13,
+  NumberFormats: 14,
+  CurrencyCode: 15,
+  CurrencySymbol: 16,
+  CurrencyName: 17,
+  Currencies: 18,
+  Directionality: 19,
+  PluralCase: 20,
+  ExtraData: 21
+};
+function normalizeLocale(locale) {
+  return locale.toLowerCase().replace(/_/g, '-');
+}
+
+const pluralMapping = ['zero', 'one', 'two', 'few', 'many'];
+function getPluralCase(value, locale) {
+  const plural = getLocalePluralCase(locale)(parseInt(value, 10));
+  const result = pluralMapping[plural];
+  return result !== undefined ? result : 'other';
+}
+const DEFAULT_LOCALE_ID = 'en-US';
+const USD_CURRENCY_CODE = 'USD';
+
+function getGlobalLocale() {
+  if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+    return goog.LOCALE;
+  } else {
+    return typeof $localize !== 'undefined' && $localize.locale || DEFAULT_LOCALE_ID;
+  }
+}
+const LOCALE_ID = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'LocaleId' : '', {
+  factory: () => inject(LOCALE_ID, {
+    optional: true,
+    skipSelf: true
+  }) || getGlobalLocale()
+});
+const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DefaultCurrencyCode' : '', {
+  factory: () => USD_CURRENCY_CODE
+});
+const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Translations' : '');
+const TRANSLATIONS_FORMAT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'TranslationsFormat' : '');
+var MissingTranslationStrategy;
+(function (MissingTranslationStrategy) {
+  MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
+  MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
+  MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
+})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
+
 const shadowRootSupported = typeof ShadowRoot !== 'undefined';
 const documentSupported = typeof Document !== 'undefined';
 function toInputRefArray(map) {
@@ -9290,7 +9410,8 @@ function createRootLViewEnvironment(rootLViewInjector) {
     sanitizer,
     changeDetectionScheduler,
     ngReflect,
-    tracingService
+    tracingService,
+    locale: rootLViewInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID)
   };
 }
 function createHostElement(componentDef, renderer, hostElementNamespace) {
@@ -9396,7 +9517,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-1f1f1f1-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-3881615-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12711,7 +12832,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-1f1f1f1-with-local-changes';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-3881615-with-local-changes';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15685,101 +15806,6 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
   return ɵɵsyntheticHostProperty;
 }
 
-const u = undefined;
-function plural(val) {
-  const i = Math.floor(Math.abs(val)),
-    v = val.toString().replace(/^[^.]*\.?/, '').length;
-  if (i === 1 && v === 0) return 1;
-  return 5;
-}
-var localeEn = ["en", [["a", "p"], ["AM", "PM"]], [["AM", "PM"]], [["S", "M", "T", "W", "T", "F", "S"], ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]], u, [["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]], u, [["B", "A"], ["BC", "AD"], ["Before Christ", "Anno Domini"]], 0, [6, 0], ["M/d/yy", "MMM d, y", "MMMM d, y", "EEEE, MMMM d, y"], ["h:mm a", "h:mm:ss a", "h:mm:ss a z", "h:mm:ss a zzzz"], ["{1}, {0}", u, u, u], [".", ",", ";", "%", "+", "-", "E", "×", "‰", "∞", "NaN", ":"], ["#,##0.###", "#,##0%", "¤#,##0.00", "#E0"], "USD", "$", "US Dollar", {}, "ltr", plural];
-
-let LOCALE_DATA = /* @__PURE__ */Object.create(null);
-function registerLocaleData(data, localeId, extraData) {
-  if (typeof localeId !== 'string') {
-    extraData = localeId;
-    localeId = data[LocaleDataIndex.LocaleId];
-  }
-  localeId = localeId.toLowerCase().replace(/_/g, '-');
-  LOCALE_DATA[localeId] = data;
-  if (extraData) {
-    LOCALE_DATA[localeId][LocaleDataIndex.ExtraData] = extraData;
-  }
-}
-function findLocaleData(locale) {
-  const normalizedLocale = normalizeLocale(locale);
-  let match = getLocaleData(normalizedLocale);
-  if (match) {
-    return match;
-  }
-  const parentLocale = normalizedLocale.split('-')[0];
-  match = getLocaleData(parentLocale);
-  if (match) {
-    return match;
-  }
-  if (parentLocale === 'en') {
-    return localeEn;
-  }
-  throw new RuntimeError(701, ngDevMode && `Missing locale data for the locale "${locale}".`);
-}
-function getLocaleCurrencyCode(locale) {
-  const data = findLocaleData(locale);
-  return data[LocaleDataIndex.CurrencyCode] || null;
-}
-function getLocalePluralCase(locale) {
-  const data = findLocaleData(locale);
-  return data[LocaleDataIndex.PluralCase];
-}
-function getLocaleData(normalizedLocale) {
-  if (!(normalizedLocale in LOCALE_DATA)) {
-    const globalLocaleData = _global.ng && _global.ng.common && _global.ng.common.locales && _global.ng.common.locales[normalizedLocale];
-    if (globalLocaleData !== undefined) {
-      LOCALE_DATA[normalizedLocale] = globalLocaleData;
-    }
-    return globalLocaleData;
-  }
-  return LOCALE_DATA[normalizedLocale];
-}
-function unregisterAllLocaleData() {
-  LOCALE_DATA = Object.create(null);
-}
-const LocaleDataIndex = {
-  LocaleId: 0,
-  DayPeriodsFormat: 1,
-  DayPeriodsStandalone: 2,
-  DaysFormat: 3,
-  DaysStandalone: 4,
-  MonthsFormat: 5,
-  MonthsStandalone: 6,
-  Eras: 7,
-  FirstDayOfWeek: 8,
-  WeekendRange: 9,
-  DateFormat: 10,
-  TimeFormat: 11,
-  DateTimeFormat: 12,
-  NumberSymbols: 13,
-  NumberFormats: 14,
-  CurrencyCode: 15,
-  CurrencySymbol: 16,
-  CurrencyName: 17,
-  Currencies: 18,
-  Directionality: 19,
-  PluralCase: 20,
-  ExtraData: 21
-};
-function normalizeLocale(locale) {
-  return locale.toLowerCase().replace(/_/g, '-');
-}
-
-const pluralMapping = ['zero', 'one', 'two', 'few', 'many'];
-function getPluralCase(value, locale) {
-  const plural = getLocalePluralCase(locale)(parseInt(value, 10));
-  const result = pluralMapping[plural];
-  return result !== undefined ? result : 'other';
-}
-const DEFAULT_LOCALE_ID = 'en-US';
-const USD_CURRENCY_CODE = 'USD';
-
 const ELEMENT_MARKER = {
   marker: 'element'
 };
@@ -15792,17 +15818,6 @@ var I18nCreateOpCode;
   I18nCreateOpCode[I18nCreateOpCode["APPEND_EAGERLY"] = 1] = "APPEND_EAGERLY";
   I18nCreateOpCode[I18nCreateOpCode["COMMENT"] = 2] = "COMMENT";
 })(I18nCreateOpCode || (I18nCreateOpCode = {}));
-
-let LOCALE_ID$1 = DEFAULT_LOCALE_ID;
-function setLocaleId(localeId) {
-  ngDevMode && assertDefined(localeId, `Expected localeId to be defined`);
-  if (typeof localeId === 'string') {
-    LOCALE_ID$1 = localeId.toLowerCase().replace(/_/g, '-');
-  }
-}
-function getLocaleId() {
-  return LOCALE_ID$1;
-}
 
 let changeMask = 0b0;
 let changeMaskCounter = 0;
@@ -16038,7 +16053,7 @@ function applyIcuUpdateCase(tView, tIcu, bindingsStartIndex, lView) {
   }
 }
 function applyIcuSwitchCase(tView, tIcu, lView, value) {
-  const caseIndex = getCaseIndex(tIcu, value);
+  const caseIndex = getCaseIndex(lView[ENVIRONMENT].locale, tIcu, value);
   let activeCaseIndex = getCurrentICUCaseIndex(tIcu, lView);
   if (activeCaseIndex !== caseIndex) {
     applyIcuSwitchCaseRemove(tView, tIcu, lView);
@@ -16068,13 +16083,13 @@ function applyIcuSwitchCaseRemove(tView, tIcu, lView) {
     }
   }
 }
-function getCaseIndex(icuExpression, bindingValue) {
+function getCaseIndex(locale, icuExpression, bindingValue) {
   let index = icuExpression.cases.indexOf(bindingValue);
   if (index === -1) {
     switch (icuExpression.type) {
       case 1:
         {
-          const resolvedCase = getPluralCase(bindingValue, getLocaleId());
+          const resolvedCase = getPluralCase(bindingValue, locale);
           index = icuExpression.cases.indexOf(resolvedCase);
           if (index === -1 && resolvedCase !== 'other') {
             index = icuExpression.cases.indexOf('other');
@@ -19718,31 +19733,6 @@ class Compiler {
 const COMPILER_OPTIONS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'compilerOptions' : '');
 class CompilerFactory {}
 
-function getGlobalLocale() {
-  if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
-    return goog.LOCALE;
-  } else {
-    return typeof $localize !== 'undefined' && $localize.locale || DEFAULT_LOCALE_ID;
-  }
-}
-const LOCALE_ID = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'LocaleId' : '', {
-  factory: () => inject(LOCALE_ID, {
-    optional: true,
-    skipSelf: true
-  }) || getGlobalLocale()
-});
-const DEFAULT_CURRENCY_CODE = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'DefaultCurrencyCode' : '', {
-  factory: () => USD_CURRENCY_CODE
-});
-const TRANSLATIONS = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Translations' : '');
-const TRANSLATIONS_FORMAT = new InjectionToken(typeof ngDevMode !== 'undefined' && ngDevMode ? 'TranslationsFormat' : '');
-var MissingTranslationStrategy;
-(function (MissingTranslationStrategy) {
-  MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
-  MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
-  MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
-})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
-
 function getDeferBlocks(lView, deferBlocks) {
   const tView = lView[TVIEW$1];
   for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
@@ -20090,5 +20080,5 @@ function getDebugNode(nativeNode) {
   return null;
 }
 
-export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CUSTOM_ELEMENTS_SCHEMA, ChainedInjector, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, ControlFlowBlockType, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IDLE_SERVICE, INCREMENTAL_HYDRATION_BOOTSTRAP, INPUT_SIGNAL_NODE, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NodeInjector, Optional, Output, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, REQUIRED_UNSET_VALUE, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SHARED_STYLES_HOST, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, Self, Service, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, Type, USE_PENDING_TASKS, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createDehydratedBlockRegistry, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, describeDomNode, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getComponentInstanceDeepLinkId, getDebugNode, getDeferBlocks, getDirectives, getDocument, getHostElement, getInjector, getInjectorMetadata, getInjectorProviders, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNodeInjectorTNode, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getSignalGraph, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishNonCoreGlobalUtil, publishSignalConfiguration, readHydrationInfo, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetIncrementalHydrationRuntimeForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, runIncrementalHydrationBootstrap, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setLocaleId, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, walkLViewDirectives, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵboundaryCreate, ɵɵboundaryUpdate, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableIncrementalHydrationRuntime, ɵɵforeignComponent, ɵɵforeignContent, ɵɵforeignContentFn, ɵɵgetBoundary, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { AFTER_RENDER_PHASES, ANIMATIONS_DISABLED, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, AcxChangeDetectionStrategy, AcxViewEncapsulation, AfterRenderImpl, AfterRenderManager, AfterRenderSequence, ApplicationInitStatus, ApplicationRef, Attribute, COMPILER_OPTIONS, CONTAINERS, CUSTOM_ELEMENTS_SCHEMA, ChainedInjector, ChangeDetectionSchedulerImpl, ChangeDetectionStrategy, Compiler, CompilerFactory, Component, ComponentFactory, ComponentRef$1 as ComponentRef, ComponentRef as ComponentRef$1, Console, ControlFlowBlockType, DEFAULT_CURRENCY_CODE, DEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DEFER_BLOCK_ID, DEFER_BLOCK_SSR_ID_ATTRIBUTE, DEFER_BLOCK_STATE$1 as DEFER_BLOCK_STATE, DEFER_BLOCK_STATE as DEFER_BLOCK_STATE$1, DEFER_HYDRATE_TRIGGERS, DEFER_PARENT_BLOCK_ID, DEHYDRATED_BLOCK_REGISTRY, DISCONNECTED_NODES, DebugElement, DebugEventListener, DebugNode, DeferBlockBehavior, DeferBlockState, Directive, ELEMENT_CONTAINERS, EVENT_REPLAY_ENABLED_DEFAULT, EVENT_REPLAY_QUEUE, ElementRef, EnvironmentNgModuleRefAdapter, Host, HostBinding, HostListener, HydrationStatus, I18N_DATA, IDLE_SERVICE, INCREMENTAL_HYDRATION_BOOTSTRAP, INPUT_SIGNAL_NODE, IS_ENABLED_BLOCKING_INITIAL_NAVIGATION, IS_EVENT_REPLAY_ENABLED, IS_HYDRATION_DOM_REUSE_ENABLED, IS_I18N_HYDRATION_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED, Inject, Injectable, Input, JSACTION_BLOCK_ELEMENT_MAP, JSACTION_EVENT_CONTRACT, LContext, LOCALE_ID, LocaleDataIndex, MAX_ANIMATION_TIMEOUT, MULTIPLIER, MissingTranslationStrategy, NGH_ATTR_NAME, NGH_DATA_KEY, NGH_DEFER_BLOCKS_KEY, NODES, NOOP_AFTER_RENDER_REF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE, NO_ERRORS_SCHEMA, NUM_ROOT_NODES, NgModule, NgModuleFactory, NgModuleFactory$1, NgModuleRef, NgModuleRef$1, NodeInjector, Optional, Output, PRESERVE_HOST_CONTENT, Pipe, ProfilerEvent, QueryList, REQUIRED_UNSET_VALUE, ReflectionCapabilities, Renderer2, RendererFactory2, RendererStyleFlags2, SHARED_STYLES_HOST, SKIP_HYDRATION_ATTR_NAME, SSR_CONTENT_INTEGRITY_MARKER, Sanitizer, Self, Service, SimpleChange, SkipSelf, TEMPLATES, TEMPLATE_ID, TESTABILITY, TESTABILITY_GETTER, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TimerScheduler, TracingAction, TracingService, Type, USE_PENDING_TASKS, UseExhaustiveCheckNoChanges, ViewContainerRef, ViewEncapsulation, ViewRef, _sanitizeHtml, _sanitizeUrl, afterEveryRender, afterNextRender, allLeavingAnimations, allowSanitizationBypassAndThrow, angularCoreEnv, asNativeElements, assertComponentDef, assertStandaloneComponentType, bypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript, bypassSanitizationTrustStyle, bypassSanitizationTrustUrl, calcPathForNode, checkNoChangesInternal, cleanupDehydratedViews, clearResolutionOfComponentResourcesQueue, collectNativeNodes, collectNativeNodesInLContainer, compileComponent, compileDirective, compileNgModule, compileNgModuleDefs, compilePipe, convertHydrateTriggersToJsAction, countBlocksSkippedByHydration, createDehydratedBlockRegistry, createEnvironmentInjector, createMultiResultQuerySignalFn, createNgModule, createNgModuleRefWithProviders, createSingleResultOptionalQuerySignalFn, createSingleResultRequiredQuerySignalFn, depsTracker, describeDomNode, devModeEqual, enableApplyRootElementTransformImpl, enableClaimDehydratedIcuCaseImpl, enableFindMatchingDehydratedViewImpl, enableLocateOrCreateContainerAnchorImpl, enableLocateOrCreateContainerRefImpl, enableLocateOrCreateElementContainerNodeImpl, enableLocateOrCreateElementNodeImpl, enableLocateOrCreateI18nNodeImpl, enableLocateOrCreateTextNodeImpl, enablePrepareI18nBlockForHydrationImpl, enableProfiling, enableRetrieveHydrationInfoImpl, enableStashEventListenerImpl, findLocaleData, flushModuleScopingQueueAsMuchAsPossible, generateStandaloneInDeclarationsError, getAsyncClassMetadataFn, getClosestComponentName, getCompilerFacade, getComponentInstanceDeepLinkId, getDebugNode, getDeferBlocks, getDirectives, getDocument, getHostElement, getInjector, getInjectorMetadata, getInjectorProviders, getLContext, getLDeferBlockDetails, getLNodeForHydration, getLocaleCurrencyCode, getLocalePluralCase, getNodeInjectorTNode, getOrComputeI18nChildren, getRegisteredNgModuleType, getSanitizationBypassType, getSignalGraph, getTDeferBlockDetails, getTransferState, inferTagNameFromDefinition, inputBinding, invokeListeners, isComponentDefPendingResolution, isComponentResourceResolutionQueueEmpty, isDeferBlock, isDetachedByI18n, isDisconnectedNode, isI18nHydrationEnabled, isI18nHydrationSupportEnabled, isInSkipHydrationBlock, isIncrementalHydrationEnabled, isJsObject, isLetDeclaration, isListLikeIterable, isNgModule, isPromise, isSubscribable, isTNodeShape, isViewDirty, iterateListLike, makePropDecorator, markForRefresh, noSideEffects, optionsReducer, outputBinding, patchComponentDefWithScope, performanceMarkFeature, processTextNodeBeforeSerialization, profiler, provideAppInitializer, provideIdleServiceWith, provideNgReflectAttributes, provideZonelessChangeDetection, provideZonelessChangeDetectionInternal, publishDefaultGlobalUtils, publishNonCoreGlobalUtil, publishSignalConfiguration, readHydrationInfo, registerLocaleData, registerNgModuleType, remove, removeListeners, renderDeferBlockState, resetCompiledComponents, resetIncrementalHydrationEnabledWarnedForTests, resetIncrementalHydrationRuntimeForTests, resetJitOptions, resolveComponentResources, restoreComponentResolutionQueue, runIncrementalHydrationBootstrap, setAllowDuplicateNgModuleIdsForTest, setClassMetadata, setClassMetadataAsync, setDocument, setIsI18nHydrationSupportEnabled, setJSActionAttributes, setJitOptions, setStashFn, setTestabilityGetter, sharedMapFunction, sharedStashFunction, transitiveScopesFor, triggerHydrationFromBlockName, triggerResourceLoading, trySerializeI18nBlock, twoWayBinding, unregisterAllLocaleData, unsupportedProjectionOfDomNodes, unwrapSafeValue, validateMatchingNode, validateNodeExists, verifySsrContentsIntegrity, walkLViewDirectives, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵsetClassDebugInfo, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵɵControlFeature, ɵɵExternalStylesFeature, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵanimateEnter, ɵɵanimateEnterListener, ɵɵanimateLeave, ɵɵanimateLeaveListener, ɵɵariaProperty, ɵɵarrowFunction, ɵɵattachSourceLocations, ɵɵattribute, ɵɵboundaryCreate, ɵɵboundaryUpdate, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵcontrol, ɵɵcontrolCreate, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdefineService, ɵɵdirectiveInject, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableIncrementalHydrationRuntime, ɵɵforeignComponent, ɵɵforeignContent, ɵɵforeignContentFn, ɵɵgetBoundary, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=_debug_node-chunk.mjs.map
