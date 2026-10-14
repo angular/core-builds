@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-4044cef-with-local-changes
+ * @license Angular v22.3.0-next.1+sha-01c883e-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3061,6 +3061,37 @@ function trustedScriptURLFromStringBypass(url) {
   return getPolicy()?.createScriptURL(url) || url;
 }
 
+const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+const COMMENT_DELIMITER = /(<|>)/g;
+const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
+function escapeCommentText(value) {
+  return value.replace(COMMENT_DISALLOWED, text => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
+}
+function isClobberedElement(parentNode, childNode) {
+  return (parentNode.compareDocumentPosition(childNode) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== Node.DOCUMENT_POSITION_CONTAINED_BY;
+}
+function getNextSibling(node) {
+  const nextSibling = node.nextSibling;
+  if (nextSibling && node !== nextSibling.previousSibling) {
+    throw clobberedElementError(nextSibling);
+  }
+  return nextSibling;
+}
+function getFirstChild(node) {
+  const firstChild = node.firstChild;
+  if (firstChild && isClobberedElement(node, firstChild)) {
+    throw clobberedElementError(firstChild);
+  }
+  return firstChild;
+}
+function getNodeName(node) {
+  const nodeName = node.nodeName;
+  return typeof nodeName === 'string' ? nodeName : 'FORM';
+}
+function clobberedElementError(node) {
+  return new Error(`Action failed because the element is clobbered: ${node.outerHTML}`);
+}
+
 function getInertBodyHelper(defaultDoc) {
   const inertDocumentHelper = new InertDocumentHelper(defaultDoc);
   return isDOMParserAvailable() ? new DOMParserHelper(inertDocumentHelper) : inertDocumentHelper;
@@ -3211,30 +3242,6 @@ class SanitizingHtmlSerializer {
     this.buf.push(encodeEntities(chars));
   }
 }
-function isClobberedElement(parentNode, childNode) {
-  return (parentNode.compareDocumentPosition(childNode) & Node.DOCUMENT_POSITION_CONTAINED_BY) !== Node.DOCUMENT_POSITION_CONTAINED_BY;
-}
-function getNextSibling(node) {
-  const nextSibling = node.nextSibling;
-  if (nextSibling && node !== nextSibling.previousSibling) {
-    throw clobberedElementError(nextSibling);
-  }
-  return nextSibling;
-}
-function getFirstChild(node) {
-  const firstChild = node.firstChild;
-  if (firstChild && isClobberedElement(node, firstChild)) {
-    throw clobberedElementError(firstChild);
-  }
-  return firstChild;
-}
-function getNodeName(node) {
-  const nodeName = node.nodeName;
-  return typeof nodeName === 'string' ? nodeName : 'FORM';
-}
-function clobberedElementError(node) {
-  return new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
-}
 const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
 const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
 function encodeEntities(value) {
@@ -3284,13 +3291,6 @@ function getTemplateContent(el) {
 }
 function isTemplateElement(el) {
   return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
-}
-
-const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
-const COMMENT_DELIMITER = /(<|>)/g;
-const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
-function escapeCommentText(value) {
-  return value.replace(COMMENT_DISALLOWED, text => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
 }
 
 function createTextNode(renderer, value) {
@@ -9396,7 +9396,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-4044cef-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.1+sha-01c883e-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12711,7 +12711,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-4044cef-with-local-changes';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.1+sha-01c883e-with-local-changes';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16597,13 +16597,13 @@ function parseIcuCase(ast, tView, tIcu, lView, updateOpCodes, parentIdx, caseNam
 }
 function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
   let bindingMask = 0;
-  let currentNode = parentNode.firstChild;
+  let currentNode = getFirstChild(parentNode);
   while (currentNode) {
     const newIndex = allocExpando(tView, lView, 1, null);
     switch (currentNode.nodeType) {
       case Node.ELEMENT_NODE:
         const element = currentNode;
-        const tagName = element.tagName.toLowerCase();
+        const tagName = getNodeName(element).toLowerCase();
         if (Object.hasOwn(VALID_ELEMENTS, tagName)) {
           addCreateNodeAndAppend(create, ELEMENT_MARKER, tagName, parentIdx, newIndex);
           tView.data[newIndex] = tagName;
@@ -16672,7 +16672,7 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
         }
         break;
     }
-    currentNode = currentNode.nextSibling;
+    currentNode = getNextSibling(currentNode);
   }
   return bindingMask;
 }
