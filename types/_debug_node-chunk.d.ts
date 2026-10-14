@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.1+sha-3d0c9c8
+ * @license Angular v22.3.0-next.1+sha-6d36d6c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2484,10 +2484,6 @@ interface ControlDirectiveHost<_TPassthroughInput extends string | undefined = u
      * input to decide if the value should be written.
      */
     setInputOnDirectives(inputName: string, value: unknown, writePredicate?: (currentValue: unknown) => boolean): boolean;
-    /**
-     * Listens to a DOM event on the host element.
-     */
-    listenToDom(eventName: string, listener: (event: Event) => void): void;
 }
 
 /**
