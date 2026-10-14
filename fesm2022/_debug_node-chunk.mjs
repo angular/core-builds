@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.2+sha-3b65dbe
+ * @license Angular v22.2.2+sha-54f3de5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8205,13 +8205,7 @@ class DepsTracker {
     };
     for (const rawImport of flatten(rawImports ?? [])) {
       const imported = resolveForwardRef(rawImport);
-      try {
-        verifyStandaloneImport(imported, type);
-      } catch (e) {
-        ans.compilation.isPoisoned = true;
-        return ans;
-      }
-      if (isNgModule(imported)) {
+      if (imported && isNgModule(imported)) {
         ans.compilation.ngModules.add(imported);
         const importedScope = this.getNgModuleScope(imported);
         if (importedScope.exported.isPoisoned) {
@@ -8220,10 +8214,15 @@ class DepsTracker {
         }
         addSet(importedScope.exported.directives, ans.compilation.directives);
         addSet(importedScope.exported.pipes, ans.compilation.pipes);
-      } else if (isPipe(imported)) {
-        ans.compilation.pipes.add(imported);
-      } else if (isDirective(imported) || isComponent(imported)) {
-        ans.compilation.directives.add(imported);
+      } else if (imported && isStandalone(imported)) {
+        if (isPipe(imported)) {
+          ans.compilation.pipes.add(imported);
+        } else if (isDirective(imported) || isComponent(imported)) {
+          ans.compilation.directives.add(imported);
+        } else {
+          ans.compilation.isPoisoned = true;
+          return ans;
+        }
       } else {
         ans.compilation.isPoisoned = true;
         return ans;
@@ -9393,7 +9392,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.2+sha-3b65dbe'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.2+sha-54f3de5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12708,7 +12707,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.2+sha-3b65dbe';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.2+sha-54f3de5';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
