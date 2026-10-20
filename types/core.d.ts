@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-3320da9
+ * @license Angular v22.3.0-next.2+sha-cdc2ea0
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9630,6 +9630,11 @@ interface Annotations {
      * with the external world.
      */
     consequentialHint?: boolean;
+    /**
+     * Whether the tool is intended for debugging and development purposes rather than end-user
+     * agent interaction.
+     */
+    debugging?: boolean;
 }
 /**
  * Describes and implements a specific WebMCP tool for an agent to invoke.
