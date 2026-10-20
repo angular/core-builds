@@ -1,10 +1,10 @@
 /**
- * @license Angular v22.2.3+sha-b83a7be
+ * @license Angular v22.2.3+sha-5706791
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
-import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, InjectionToken, signalAsReadonlyFn, assertInInjectionContext, TransferState, effect, PendingTasks, signal, isSignal, isErrorLike, Injector } from './_pending_tasks-chunk.mjs';
+import { inject, RuntimeError, formatRuntimeError, ErrorHandler, DestroyRef, InjectionToken, signalAsReadonlyFn, assertInInjectionContext, TransferState, isSignal, effect, PendingTasks, signal, isErrorLike, Injector } from './_pending_tasks-chunk.mjs';
 import { setActiveConsumer, createComputed, SIGNAL } from './_effect-chunk.mjs';
 import { untracked as untracked$1, createLinkedSignal, linkedSignalSetFn, linkedSignalUpdateFn } from './_untracked-chunk.mjs';
 
@@ -249,11 +249,19 @@ class ResourceImpl extends BaseWritableResource {
     this.transferState = injector.get(TransferState, undefined, {
       optional: true
     }) ?? undefined;
+    const paramsSignal = isSignal(request) ? request : computed(() => {
+      try {
+        setInParamsFunction(true);
+        return request(paramsContext);
+      } finally {
+        setInParamsFunction(false);
+      }
+    }, ngDevMode ? createDebugNameObject(debugName, 'params') : undefined);
     this.extRequest = linkedSignal(() => {
       try {
         setInParamsFunction(true);
         return {
-          request: request(paramsContext),
+          request: paramsSignal(),
           reload: 0
         };
       } catch (error) {
@@ -270,7 +278,7 @@ class ResourceImpl extends BaseWritableResource {
           };
         }
         return {
-          error: error,
+          error: encapsulateResourceError(error),
           reload: 0
         };
       } finally {
@@ -289,7 +297,7 @@ class ResourceImpl extends BaseWritableResource {
         if (error) {
           status = 'resolved';
           stream = signal({
-            error: encapsulateResourceError(error)
+            error
           }, ngDevMode ? createDebugNameObject(this.debugName, 'stream') : undefined);
         } else if (!status) {
           if (!previous) {
