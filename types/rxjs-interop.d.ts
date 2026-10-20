@@ -1,14 +1,14 @@
 /**
- * @license Angular v22.2.3+sha-566facf
+ * @license Angular v22.2.3+sha-6f2fb3d
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
 
+import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import { ValueEqualityFn } from './primitives-signals.js';
 import { OutputRef, DestroyRef, Injector, Signal } from './core.js';
 import { OutputOptions, BaseResourceOptions, ResourceLoaderParams, ResourceRef } from './core.js';
 import './_event_dispatcher-chunk.js';
-import { Observable, MonoTypeOperatorFunction, Subscribable } from 'rxjs';
 import '@angular/core';
 
 /**
@@ -34,6 +34,7 @@ import '@angular/core';
  * ```
  * @see [RxJS interop with component and directive outputs](ecosystem/rxjs-interop/output-interop)
  *
+ * @initializerApiFunction
  * @publicApi 19.0
  */
 declare function outputFromObservable<T>(observable: Observable<T>, opts?: OutputOptions): OutputRef<T>;
