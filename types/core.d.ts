@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-e8a7e49
+ * @license Angular v22.3.0-next.2+sha-98c0265
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5113,14 +5113,14 @@ declare function ɵɵdeferHydrateOnTimer(delay: number): void;
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnHover(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferOnHover(triggerIndex: number | null, walkUpTimes?: number): void;
 /**
  * Creates runtime data structures for the `prefetch on hover` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnHover(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferPrefetchOnHover(triggerIndex: number | null, walkUpTimes?: number): void;
 /**
  * Creates runtime data structures for the `on hover` hydrate trigger.
  * @codeGenApi
@@ -5132,14 +5132,14 @@ declare function ɵɵdeferHydrateOnHover(): void;
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnInteraction(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferOnInteraction(triggerIndex: number | null, walkUpTimes?: number): void;
 /**
  * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnInteraction(triggerIndex: number, walkUpTimes?: number): void;
+declare function ɵɵdeferPrefetchOnInteraction(triggerIndex: number | null, walkUpTimes?: number): void;
 /**
  * Creates runtime data structures for the `on interaction` hydrate trigger.
  * @codeGenApi
@@ -5151,14 +5151,14 @@ declare function ɵɵdeferHydrateOnInteraction(): void;
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnViewport(triggerIndex: number, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
+declare function ɵɵdeferOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
+declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
 /**
  * Creates runtime data structures for the `on viewport` hydrate trigger.
  * @codeGenApi
