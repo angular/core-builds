@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.3+sha-b8102eb-with-local-changes
+ * @license Angular v22.2.3+sha-c1b8b0a-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -124,10 +124,10 @@ const identityFn = v => v;
 function linkedSignal(optionsOrComputation, options) {
   if (typeof optionsOrComputation === 'function') {
     const getter = createLinkedSignal(optionsOrComputation, identityFn, options?.equal);
-    return upgradeLinkedSignalGetter(getter, options?.debugName, options?.set);
+    return upgradeLinkedSignalGetter(getter, typeof ngDevMode !== 'undefined' && ngDevMode ? options?.debugName : undefined, options?.set);
   } else {
     const getter = createLinkedSignal(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
-    return upgradeLinkedSignalGetter(getter, optionsOrComputation.debugName, optionsOrComputation.set);
+    return upgradeLinkedSignalGetter(getter, typeof ngDevMode !== 'undefined' && ngDevMode ? optionsOrComputation.debugName : undefined, optionsOrComputation.set);
   }
 }
 function upgradeLinkedSignalGetter(getter, debugName, customSet) {
