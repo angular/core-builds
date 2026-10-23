@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-e09bbed
+ * @license Angular v22.3.0-next.2+sha-b2d4b6c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -138,7 +138,8 @@ interface ResourceParamsContext {
  * dependencies. `value()` will continue to return the previously fetched value during the reloading
  * operation.
  *
- * `error` - Loading failed with an error. `value()` will be `undefined`.
+ * `error` - Loading failed with an error. Reading `value()` will throw; use `hasValue()` or
+ * `error()` to check first.
  *
  * `resolved` - Loading has completed and the resource has the value returned from the loader.
  *
