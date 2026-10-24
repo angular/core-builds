@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "22.2.3+sha-b2398ec",
+  "version": "22.2.3+sha-1d9b095",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -51,7 +51,7 @@
     "@modelcontextprotocol/server": "^2.0.0"
   },
   "peerDependencies": {
-    "@angular/compiler": "22.2.3+sha-b2398ec",
+    "@angular/compiler": "22.2.3+sha-1d9b095",
     "rxjs": "^6.5.3 || ^7.4.0",
     "zone.js": "~0.15.0 || ~0.16.0"
   },
