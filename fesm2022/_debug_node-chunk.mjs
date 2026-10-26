@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-5244ea7
+ * @license Angular v22.3.0-next.2+sha-6d32550
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9532,7 +9532,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.2+sha-5244ea7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.2+sha-6d32550'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12847,7 +12847,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.2+sha-5244ea7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.2+sha-6d32550';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14210,10 +14210,10 @@ function ɵɵdeferHydrateWhen(rawValue) {
   }
   if (!shouldAttachTrigger(2, lView, tNode)) return;
   const bindingIndex = nextBindingIndex();
-  const tView = getTView();
-  const hydrateTriggers = getHydrateTriggers(tView, tNode);
-  hydrateTriggers.set(6, null);
   if (bindingUpdated(lView, bindingIndex, rawValue)) {
+    const tView = getTView();
+    const hydrateTriggers = getHydrateTriggers(tView, tNode);
+    hydrateTriggers.set(6, null);
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
       triggerDeferBlock(2, lView, tNode);
     } else {
