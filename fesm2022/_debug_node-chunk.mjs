@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.3+sha-566e9b6
+ * @license Angular v22.2.3+sha-84a398b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9407,7 +9407,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.3+sha-566e9b6'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.3+sha-84a398b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12722,7 +12722,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.3+sha-566e9b6';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.3+sha-84a398b';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16621,6 +16621,10 @@ function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remov
           const elAttrs = element.attributes;
           for (let i = 0; i < elAttrs.length; i++) {
             const attr = elAttrs.item(i);
+            if (ngDevMode && isBindingLikeAttributeName(attr.name)) {
+              console.warn(formatRuntimeError(700, `ICU expressions cannot contain bindings or structural directives. ` + `The attribute "${attr.name}" on the <${tagName}> element inside an ICU ` + `expression is not supported and will be ignored. ` + `Only static attributes are allowed inside ICU cases.`));
+              continue;
+            }
             const lowerAttrName = attr.name.toLowerCase();
             const hasBinding = !!attr.value.match(BINDING_REGEXP);
             const namespaceUri = element.namespaceURI;
@@ -16737,6 +16741,9 @@ function i18nResolveSanitizer(attrName, tagName) {
     default:
       return null;
   }
+}
+function isBindingLikeAttributeName(attrName) {
+  return attrName.startsWith('[') || attrName.startsWith('(') || attrName.startsWith('*') || attrName.startsWith('#') || attrName.startsWith('@');
 }
 
 const ROOT_TEMPLATE_ID = 0;
