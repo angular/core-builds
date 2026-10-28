@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-38afab7
+ * @license Angular v22.3.0-next.2+sha-9e99093
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9051,12 +9051,12 @@ function setupSelectorMatchedInputsOrOutputs(mode, tNode, def, directiveIndex) {
       let bindings;
       if (mode === 0) {
         bindings = tNode.inputs ??= {};
+        setShadowStylingInputFlags(tNode, publicName);
       } else {
         bindings = tNode.outputs ??= {};
       }
       bindings[publicName] ??= [];
       bindings[publicName].push(directiveIndex);
-      setShadowStylingInputFlags(tNode, publicName);
     }
   }
 }
@@ -9068,12 +9068,12 @@ function setupHostDirectiveInputsOrOutputs(mode, tNode, config, directiveIndex) 
       let bindings;
       if (mode === 0) {
         bindings = tNode.hostDirectiveInputs ??= {};
+        setShadowStylingInputFlags(tNode, publicName);
       } else {
         bindings = tNode.hostDirectiveOutputs ??= {};
       }
       bindings[publicName] ??= [];
       bindings[publicName].push(directiveIndex, initialName);
-      setShadowStylingInputFlags(tNode, publicName);
     }
   }
 }
@@ -9532,7 +9532,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.2+sha-38afab7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.2+sha-9e99093'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11051,10 +11051,10 @@ function ɵɵInheritDefinitionFeature(definition) {
     if (isComponentDef(definition)) {
       superDef = cmpDef ?? dirDef;
     } else {
-      if (cmpDef) {
+      if (cmpDef && definition.selectors && definition.selectors.length > 0) {
         throw new RuntimeError(903, ngDevMode && `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}`);
       }
-      superDef = dirDef;
+      superDef = cmpDef ?? dirDef;
     }
     if (superDef) {
       if (shouldInheritFields) {
@@ -11071,9 +11071,10 @@ function ɵɵInheritDefinitionFeature(definition) {
         superContentQueries && inheritContentQueries(definition, superContentQueries);
         mergeInputsWithTransforms(definition, superDef);
         fillProperties(definition.outputs, superDef.outputs);
-        if (isComponentDef(superDef) && superDef.data.animation) {
-          const defData = definition.data;
-          defData.animation = (defData.animation || []).concat(superDef.data.animation);
+        const superAnimation = superDef.data?.animation;
+        if (superAnimation) {
+          const defData = definition.data ??= {};
+          defData.animation = (defData.animation || []).concat(superAnimation);
         }
       }
       const features = superDef.features;
@@ -12847,7 +12848,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.2+sha-38afab7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.2+sha-9e99093';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -19341,7 +19342,7 @@ function addDirectiveDefToUndecoratedParents(type) {
   const objPrototype = Object.prototype;
   let parent = Object.getPrototypeOf(type.prototype).constructor;
   while (parent && parent !== objPrototype) {
-    if (!getDirectiveDef(parent) && !getComponentDef(parent) && shouldAddAbstractDirective(parent)) {
+    if (!Object.hasOwn(parent, NG_DIR_DEF) && !Object.hasOwn(parent, NG_COMP_DEF) && shouldAddAbstractDirective(parent)) {
       compileDirective(parent, null);
     }
     parent = Object.getPrototypeOf(parent);
