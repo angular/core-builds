@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.2+sha-d3f7b15
+ * @license Angular v22.3.0-next.2+sha-99fd45a
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -5151,19 +5151,19 @@ declare function ɵɵdeferHydrateOnInteraction(): void;
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
+declare function ɵɵdeferOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: unknown): void;
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
  * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: IntersectionObserverInit): void;
+declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number | null, walkUpTimes?: number | null, options?: unknown): void;
 /**
  * Creates runtime data structures for the `on viewport` hydrate trigger.
  * @codeGenApi
  */
-declare function ɵɵdeferHydrateOnViewport(options?: IntersectionObserverInit): void;
+declare function ɵɵdeferHydrateOnViewport(options?: unknown): void;
 
 /**
  * Advances to an element for later binding instructions.
