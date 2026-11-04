@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.4+sha-11e7670
+ * @license Angular v22.2.4+sha-fcd82c4
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -189,6 +189,10 @@ interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
      * resource.
      */
     stream: (params: ResourceLoaderParams<R>) => Observable<T>;
+    /**
+     * A debug name for the reactive node. Used in Angular DevTools to identify the node.
+     */
+    debugName?: string;
 }
 /**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
