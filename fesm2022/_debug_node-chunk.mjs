@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.3+sha-37563fc-with-local-changes
+ * @license Angular v22.3.0-next.3+sha-2af465b-with-local-changes
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1513,7 +1513,7 @@ class QueryList {
   [Symbol.iterator] = (() => symbolIterator)();
 }
 
-const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+const COMMENT_DISALLOWED = /(^-?|--!?)>|<(?=!--|!-$)/g;
 const COMMENT_DELIMITER = /(<|>)/g;
 const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
 function escapeCommentText(value) {
@@ -5587,10 +5587,10 @@ function setDomProperty(tNode, lView, propName, value, renderer, sanitizer) {
     }
   }
 }
-function unwrapImgVideoSrcValue(propName, element, value) {
+function unwrapImgVideoSrcValue(propName, element, value, isAttribute = false) {
   if (propName === 'src' && (element.tagName === 'IMG' || element.tagName === 'VIDEO')) {
     if (value == null) {
-      return '';
+      return isAttribute ? value : '';
     }
     return unwrapSafeValue(value);
   }
@@ -5728,7 +5728,7 @@ function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespac
     assertTNodeType(tNode, 2, `Attempted to set attribute \`${name}\` on a container node. ` + `Host bindings are not valid on ng-container or ng-template.`);
   }
   const element = getNativeByTNode(tNode, lView);
-  value = unwrapImgVideoSrcValue(name, element, value);
+  value = unwrapImgVideoSrcValue(name, element, value, true);
   setElementAttribute(lView[RENDERER], element, namespace, tNode.value, name, value, sanitizer);
 }
 function setElementAttribute(renderer, element, namespace, tagName, name, value, sanitizer) {
@@ -9532,7 +9532,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.3+sha-37563fc-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.3+sha-2af465b-with-local-changes'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12848,7 +12848,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.3+sha-37563fc-with-local-changes';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.3+sha-2af465b-with-local-changes';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
