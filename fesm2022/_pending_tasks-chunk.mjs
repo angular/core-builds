@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-30aee51
+ * @license Angular v22.2.5+sha-de5a1df
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.2.5+sha-30aee51');
+const VERSION = /* @__PURE__ */new Version('22.2.5+sha-de5a1df');
 
 const DOC_PAGE_BASE_URL = (() => {
   const full = VERSION.full;
@@ -3016,7 +3016,6 @@ class ZoneAwareEffectScheduler {
 }
 
 class EffectRefImpl {
-  [SIGNAL];
   constructor(node) {
     this[SIGNAL] = node;
   }

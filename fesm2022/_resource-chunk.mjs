@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-30aee51
+ * @license Angular v22.2.5+sha-de5a1df
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -116,8 +116,8 @@ class ResourceParamsStatus extends Error {
   constructor(msg) {
     super(msg);
   }
-  static IDLE = new ResourceParamsStatus('IDLE');
-  static LOADING = new ResourceParamsStatus('LOADING');
+  static IDLE = /* @__PURE__ */new ResourceParamsStatus('IDLE');
+  static LOADING = /* @__PURE__ */new ResourceParamsStatus('LOADING');
 }
 
 const identityFn = v => v;

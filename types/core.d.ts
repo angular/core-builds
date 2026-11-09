@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-30aee51
+ * @license Angular v22.2.5+sha-de5a1df
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3949,7 +3949,7 @@ declare const enum RuntimeErrorCode {
     HYDRATION_STABLE_TIMEDOUT = -506,
     MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
     MISCONFIGURED_INCREMENTAL_HYDRATION = 508,
-    HYDRATION_MISSING_NODE_ON_PATH = 509,
+    HYDRATION_MISSING_NODE_ON_PATH = -509,
     PARENT_NODE_NOT_FOUND = 510,
     EVENT_REPLAY_CONTRACT_ALREADY_CONSUMED = 511,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = -600,
