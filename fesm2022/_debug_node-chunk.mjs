@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-ef4f80a
+ * @license Angular v22.3.0-next.4+sha-9731822
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -7369,7 +7369,7 @@ function navigateToNode(from, instructions) {
         throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
       }
       if (!node) {
-        throw new RuntimeError(509, ngDevMode && 'During hydration Angular was unable to locate a node using a recorded navigation path. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
+        throw new RuntimeError(-509, ngDevMode && 'During hydration Angular was unable to locate a node using a recorded navigation path. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
       }
       switch (step) {
         case NODE_NAVIGATION_STEP_FIRST_CHILD:
@@ -7385,7 +7385,7 @@ function navigateToNode(from, instructions) {
     throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
   }
   if (!node) {
-    throw new RuntimeError(509, ngDevMode && 'During hydration Angular was unable to locate a node using a recorded navigation path. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
+    throw new RuntimeError(-509, ngDevMode && 'During hydration Angular was unable to locate a node using a recorded navigation path. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
   }
   return node;
 }
@@ -9532,7 +9532,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-ef4f80a'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-9731822'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12848,7 +12848,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-ef4f80a';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-9731822';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
