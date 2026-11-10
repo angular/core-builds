@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-c476164
+ * @license Angular v22.3.0-next.4+sha-622a7c7
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1995,7 +1995,7 @@ class PlatformRef {
     this._injector = _injector;
   }
   bootstrapModuleFactory(moduleFactory, options) {
-    const allAppProviders = [provideZonelessChangeDetectionInternal(), ...(options?.applicationProviders ?? []), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : [])];
+    const allAppProviders = [provideZonelessChangeDetectionInternal(), ...(options?.applicationProviders ?? []), errorHandlerEnvironmentInitializer, ...(ngDevMode || ngServerMode ? [validAppIdInitializer] : [])];
     const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, allAppProviders);
     setModuleBootstrapImpl();
     return bootstrap({
@@ -2431,7 +2431,7 @@ function internalCreateApplication(config) {
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
       assertStandaloneComponentType(rootComponent);
     }
-    const allAppProviders = [provideZonelessChangeDetectionInternal(), errorHandlerEnvironmentInitializer, ...(ngDevMode ? [validAppIdInitializer] : []), ...(appProviders || [])];
+    const allAppProviders = [provideZonelessChangeDetectionInternal(), errorHandlerEnvironmentInitializer, ...(ngDevMode || ngServerMode ? [validAppIdInitializer] : []), ...(appProviders || [])];
     const adapter = new EnvironmentNgModuleRefAdapter({
       providers: allAppProviders,
       parent: platformInjector,
