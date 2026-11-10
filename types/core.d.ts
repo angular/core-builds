@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-24622b7
+ * @license Angular v22.3.0-next.4+sha-3296939
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3958,6 +3958,7 @@ declare const enum RuntimeErrorCode {
     ANIMATE_INVALID_VALUE = 650,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
+    UNPARSABLE_ICU_EXPRESSION = 702,
     DEFER_LOADING_FAILED = -750,
     DEFER_IN_HMR_MODE = -751,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
@@ -7476,6 +7477,7 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
     private readonly equal;
     private readonly debugName;
     private transferCacheKey;
+    private readonly isStreaming;
     private readonly pendingTasks;
     /**
      * The current state of the resource. Status, value, and error are derived from this.
@@ -7494,7 +7496,7 @@ declare class ResourceImpl<T, R> extends BaseWritableResource<T> implements Reso
     readonly status: Signal<ResourceStatus>;
     readonly error: Signal<Error | undefined>;
     private readonly transferState;
-    constructor(request: (ctx: ResourceParamsContext) => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, debugName: string | undefined, injector: Injector, transferCacheKey: StateKey<T> | undefined, getInitialStream?: (request: R) => Signal<ResourceStreamItem<T>> | undefined);
+    constructor(request: (ctx: ResourceParamsContext) => R, loaderFn: ResourceStreamingLoader<T, R>, defaultValue: T, equal: ValueEqualityFn<T> | undefined, debugName: string | undefined, injector: Injector, transferCacheKey: StateKey<T> | undefined, getInitialStream?: (request: R) => Signal<ResourceStreamItem<T>> | undefined, isStreaming?: boolean);
     /**
      * Called either directly via `WritableResource.set` or via `.value.set()`.
      */
