@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-eaac770
+ * @license Angular v22.2.5+sha-6b257f5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3262,6 +3262,8 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
       mXSSAttempts--;
       unsafeHtml = parsedHtml;
       parsedHtml = inertBodyElement.innerHTML;
+      clearInertBodyElement(inertBodyElement);
+      inertBodyElement = null;
       inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
     } while (unsafeHtml !== parsedHtml);
     const sanitizer = new SanitizingHtmlSerializer();
@@ -3272,11 +3274,14 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
     return trustedHTMLFromString(safeHtml);
   } finally {
     if (inertBodyElement) {
-      const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
-      while (parent.firstChild) {
-        parent.firstChild.remove();
-      }
+      clearInertBodyElement(inertBodyElement);
     }
+  }
+}
+function clearInertBodyElement(inertBodyElement) {
+  const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+  while (parent.firstChild) {
+    parent.firstChild.remove();
   }
 }
 function getTemplateContent(el) {
@@ -9407,7 +9412,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.5+sha-eaac770'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.5+sha-6b257f5'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12722,7 +12727,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.5+sha-eaac770';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.5+sha-6b257f5';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }

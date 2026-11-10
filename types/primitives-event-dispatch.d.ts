@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-eaac770
+ * @license Angular v22.2.5+sha-6b257f5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -56,7 +56,7 @@ declare function getAppScopedQueuedEventInfos(appId: string, dataContainer?: Ear
 declare function registerAppScopedDispatcher(appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
 /** Removes all event listener handlers. */
 declare function removeAllAppScopedEventListeners(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
-/** Clear the early event contract. */
+/** Removes the early event listeners and clears the early event contract. */
 declare function clearAppScopedEarlyEventContract(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
 
 export { Attribute, EarlyJsactionDataContainer, bootstrapAppScopedEarlyEventContract, clearAppScopedEarlyEventContract, getDefaulted as getActionCache, getAppScopedQueuedEventInfos, isCaptureEventType, isEarlyEventType, registerAppScopedDispatcher, removeAllAppScopedEventListeners };

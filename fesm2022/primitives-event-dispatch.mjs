@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-eaac770
+ * @license Angular v22.2.5+sha-6b257f5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -759,6 +759,7 @@ function clearAppScopedEarlyEventContract(appId, dataContainer = window) {
   if (!dataContainer._ejsas) {
     return;
   }
+  removeAllEventListeners(dataContainer._ejsas[appId]);
   dataContainer._ejsas[appId] = undefined;
 }
 
