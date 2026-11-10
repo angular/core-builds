@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-129a57a
+ * @license Angular v22.2.5+sha-0f78a2f
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -155,7 +155,8 @@ function resource(options) {
   }
   const oldNameForParams = options.request;
   const params = options.params ?? oldNameForParams ?? (() => null);
-  return new ResourceImpl(params, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector), options.id);
+  const isStreaming = isStreamingResourceOptions(options);
+  return new ResourceImpl(params, isStreaming ? options.stream : createLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.debugName, options.injector ?? inject(Injector), options.id, undefined, isStreaming);
 }
 class BaseWritableResource {
   value;
@@ -206,6 +207,7 @@ class ResourceImpl extends BaseWritableResource {
   equal;
   debugName;
   transferCacheKey;
+  isStreaming;
   pendingTasks;
   state;
   extRequest;
@@ -217,7 +219,7 @@ class ResourceImpl extends BaseWritableResource {
   status;
   error;
   transferState;
-  constructor(request, loaderFn, defaultValue, equal, debugName, injector, transferCacheKey, getInitialStream) {
+  constructor(request, loaderFn, defaultValue, equal, debugName, injector, transferCacheKey, getInitialStream, isStreaming = false) {
     if (isInParamsFunction()) {
       throw invalidResourceCreationInParams();
     }
@@ -241,6 +243,7 @@ class ResourceImpl extends BaseWritableResource {
     this.equal = equal;
     this.debugName = debugName;
     this.transferCacheKey = transferCacheKey;
+    this.isStreaming = isStreaming;
     const cacheState = injector.get(CACHE_ACTIVE, undefined, {
       optional: true
     }) ?? {
@@ -470,14 +473,21 @@ class ResourceImpl extends BaseWritableResource {
     } finally {
       resolvePendingTask?.();
       resolvePendingTask = undefined;
+      if (!this.isStreaming && this.pendingController?.signal === abortSignal) {
+        this.pendingController = undefined;
+      }
     }
   }
   abortInProgressLoad() {
-    untracked(() => this.pendingController?.abort());
+    untracked(() => this.pendingController?.abort(getAbortReason()));
     this.pendingController = undefined;
     this.resolvePendingTask?.();
     this.resolvePendingTask = undefined;
   }
+}
+let abortReason;
+function getAbortReason() {
+  return abortReason ??= new DOMException('The operation was aborted.', 'AbortError');
 }
 function saveToTransferState(result, transferCacheKey, transferState) {
   if (transferCacheKey && transferState && result && isResolved(result)) {
@@ -487,10 +497,7 @@ function saveToTransferState(result, transferCacheKey, transferState) {
 function wrapEqualityFn(equal) {
   return (a, b) => a === undefined || b === undefined ? a === b : equal(a, b);
 }
-function getLoader(options) {
-  if (isStreamingResourceOptions(options)) {
-    return options.stream;
-  }
+function createLoader(options) {
   return async params => {
     try {
       return signal({
