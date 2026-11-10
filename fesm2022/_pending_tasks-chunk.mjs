@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-0dafb36
+ * @license Angular v22.3.0-next.4+sha-225d600
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-0dafb36');
+const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-225d600');
 
 const DOC_PAGE_BASE_URL = /* @__PURE__ */(() => {
   const full = VERSION.full;
@@ -1683,7 +1683,8 @@ function registerContext(ctx, namespace, specs) {
 }
 function checkSecurityContext(tagName, propName, namespace) {
   const securitySchema = SECURITY_SCHEMA();
-  const attrSchema = securitySchema[propName.toLowerCase()];
+  const normalizedPropName = propName.replace(/^:+/, '').toLowerCase();
+  const attrSchema = securitySchema[normalizedPropName];
   if (!attrSchema) {
     return SecurityContext.NONE;
   }

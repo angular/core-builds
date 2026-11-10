@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-0dafb36
+ * @license Angular v22.3.0-next.4+sha-225d600
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2122,6 +2122,8 @@ Returns:
     - \`token\`: The DI token.
     - \`value\`: The resolved value of that provider if it was instantiated.
   - \`children\`: Array of child environment injectors.
+
+Note: Every element injector has a corresponding environment injector which it uses as a fallback during dependency resolution when a dependency cannot be resolved in the element injector tree. This edge is currently omitted from this graph.
   `.trim(),
   inputSchema: {
     type: 'object',

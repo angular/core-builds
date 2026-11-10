@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-0dafb36
+ * @license Angular v22.3.0-next.4+sha-225d600
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3273,6 +3273,8 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
       mXSSAttempts--;
       unsafeHtml = parsedHtml;
       parsedHtml = inertBodyElement.innerHTML;
+      clearInertBodyElement(inertBodyElement);
+      inertBodyElement = null;
       inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
     } while (unsafeHtml !== parsedHtml);
     const sanitizer = new SanitizingHtmlSerializer();
@@ -3283,11 +3285,14 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
     return trustedHTMLFromString(safeHtml);
   } finally {
     if (inertBodyElement) {
-      const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
-      while (parent.firstChild) {
-        parent.firstChild.remove();
-      }
+      clearInertBodyElement(inertBodyElement);
     }
+  }
+}
+function clearInertBodyElement(inertBodyElement) {
+  const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+  while (parent.firstChild) {
+    parent.firstChild.remove();
   }
 }
 function getTemplateContent(el) {
@@ -3370,7 +3375,7 @@ function splitNsName(elementName, fatal = true) {
     return [null, elementName];
   }
   const colonIndex = elementName.indexOf(':', 1);
-  if (colonIndex === -1) {
+  if (colonIndex === -1 || colonIndex === 1) {
     if (fatal) {
       throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
     } else {
@@ -3459,8 +3464,14 @@ function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
   return getUrlSanitizer(tag, prop)?.(unsafeUrl) ?? unsafeUrl;
 }
 function validateAgainstEventProperties(name) {
-  if (name.toLowerCase().startsWith('on')) {
-    const errorMessage = `Binding to event property '${name}' is disallowed for security reasons, ` + `please use (${name.slice(2)})=...` + `\nIf '${name}' is a directive input, make sure the directive is imported by the` + ` current module.`;
+  if (name.startsWith(':')) {
+    const errorMessage = `Invalid property name '${name}'. Property names cannot start with a colon.`;
+    throw new RuntimeError(306, errorMessage);
+  }
+  const colonIdx = name.lastIndexOf(':');
+  const localName = colonIdx > -1 ? name.substring(colonIdx + 1) : name;
+  if (localName.toLowerCase().startsWith('on')) {
+    const errorMessage = `Binding to event property '${name}' is disallowed for security reasons, ` + `please use (${localName.slice(2)})=...` + `\nIf '${name}' is a directive input, make sure the directive is imported by the` + ` current module.`;
     throw new RuntimeError(306, errorMessage);
   }
 }
@@ -9532,7 +9543,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-0dafb36'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-225d600'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12848,7 +12859,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-0dafb36';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-225d600';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
