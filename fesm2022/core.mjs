@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-262417f
+ * @license Angular v22.3.0-next.4+sha-4854f68
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1709,29 +1709,30 @@ function compileNgModuleFactory(injector, options, moduleType) {
   const moduleFactory = new NgModuleFactory(moduleType);
   if (typeof ngJitMode !== 'undefined' && !ngJitMode) {
     return Promise.resolve(moduleFactory);
+  } else {
+    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+    setJitOptions({
+      defaultEncapsulation: _lastDefined(compilerOptions.map(opts => opts.defaultEncapsulation)),
+      preserveWhitespaces: _lastDefined(compilerOptions.map(opts => opts.preserveWhitespaces))
+    });
+    if (isComponentResourceResolutionQueueEmpty()) {
+      return Promise.resolve(moduleFactory);
+    }
+    const compilerProviders = compilerOptions.flatMap(option => option.providers ?? []);
+    if (compilerProviders.length === 0) {
+      return Promise.resolve(moduleFactory);
+    }
+    const compiler = getCompilerFacade({
+      usage: 0,
+      kind: 'NgModule',
+      type: moduleType
+    });
+    const compilerInjector = Injector.create({
+      providers: compilerProviders
+    });
+    const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
+    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url))).then(() => moduleFactory);
   }
-  const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
-  setJitOptions({
-    defaultEncapsulation: _lastDefined(compilerOptions.map(opts => opts.defaultEncapsulation)),
-    preserveWhitespaces: _lastDefined(compilerOptions.map(opts => opts.preserveWhitespaces))
-  });
-  if (isComponentResourceResolutionQueueEmpty()) {
-    return Promise.resolve(moduleFactory);
-  }
-  const compilerProviders = compilerOptions.flatMap(option => option.providers ?? []);
-  if (compilerProviders.length === 0) {
-    return Promise.resolve(moduleFactory);
-  }
-  const compiler = getCompilerFacade({
-    usage: 0,
-    kind: 'NgModule',
-    type: moduleType
-  });
-  const compilerInjector = Injector.create({
-    providers: compilerProviders
-  });
-  const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
-  return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url))).then(() => moduleFactory);
 }
 function _lastDefined(args) {
   for (let i = args.length - 1; i >= 0; i--) {
