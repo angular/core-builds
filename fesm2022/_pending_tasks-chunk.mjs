@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-9760c80
+ * @license Angular v22.3.0-next.4+sha-7638a3c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,15 +23,15 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-9760c80');
+const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-7638a3c');
 
-const DOC_PAGE_BASE_URL = (() => {
+const DOC_PAGE_BASE_URL = /* @__PURE__ */(() => {
   const full = VERSION.full;
   const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '0.0.0' + '-PLACEHOLDER';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 })();
-const ERROR_DETAILS_PAGE_BASE_URL = (() => {
+const ERROR_DETAILS_PAGE_BASE_URL = /* @__PURE__ */(() => {
   return `${DOC_PAGE_BASE_URL}/errors`;
 })();
 const XSS_SECURITY_URL = 'https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss';
