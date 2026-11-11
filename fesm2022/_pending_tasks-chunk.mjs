@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-a3bc172');
+const VERSION = /* @__PURE__ */new Version('22.3.0-next.4+sha-98b0f3b');
 
 const DOC_PAGE_BASE_URL = /* @__PURE__ */(() => {
   const full = VERSION.full;
@@ -1803,7 +1803,7 @@ function walkUpViews(nestingLevel, currentView) {
   return currentView;
 }
 function requiresRefreshOrTraversal(lView) {
-  return !!(lView[FLAGS] & (1024 | 8192) || lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty);
+  return !!(lView[FLAGS] & (1024 | 4096) || lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty);
 }
 function updateAncestorTraversalFlagsOnAttach(lView) {
   lView[ENVIRONMENT].changeDetectionScheduler?.notify(8);
@@ -1818,10 +1818,10 @@ function markAncestorsForTraversal(lView) {
   lView[ENVIRONMENT].changeDetectionScheduler?.notify(0);
   let parent = getLViewParent(lView);
   while (parent !== null) {
-    if (parent[FLAGS] & 8192) {
+    if (parent[FLAGS] & 4096) {
       break;
     }
-    parent[FLAGS] |= 8192;
+    parent[FLAGS] |= 4096;
     if (!viewAttachedToChangeDetector(parent)) {
       break;
     }
@@ -3117,7 +3117,7 @@ const ROOT_EFFECT_NODE = /* @__PURE__ */(() => ({
 const VIEW_EFFECT_NODE = /* @__PURE__ */(() => ({
   ...EFFECT_NODE,
   consumerMarkedDirty() {
-    this.view[FLAGS] |= 8192;
+    this.view[FLAGS] |= 4096;
     markAncestorsForTraversal(this.view);
     this.notifier.notify(13);
   },

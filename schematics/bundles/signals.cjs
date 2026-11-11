@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -19,9 +19,9 @@ require('@angular-devkit/core');
 require('node:path/posix');
 require('./project_tsconfig_paths-DaUdSee4.cjs');
 require('./apply_import_manager-2ocK7XV4.cjs');
-require('./migrate_ts_type_references-q7-hbb2o.cjs');
+require('./migrate_ts_type_references-BNAUjJht.cjs');
 require('assert');
-require('./index-oY1ww2ZR.cjs');
+require('./index-CYO6gI1M.cjs');
 require('@angular/compiler');
 require('./leading_space-BTPRV0wu.cjs');
 

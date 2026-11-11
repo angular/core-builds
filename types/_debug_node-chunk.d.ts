@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2653,10 +2653,6 @@ interface DirectiveDef<T> {
      */
     readonly standalone: boolean;
     /**
-     * Whether this directive (or component) uses the signals authoring experience.
-     */
-    readonly signals: boolean;
-    /**
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
      */
@@ -2765,8 +2761,6 @@ interface ComponentDef<T> extends DirectiveDef<T> {
     };
     /** Whether or not this component's ChangeDetectionStrategy is OnPush */
     readonly onPush: boolean;
-    /** Whether or not this component is signal-based. */
-    readonly signals: boolean;
     /**
      * Registry of directives and components that may be found in this view.
      *
@@ -4509,23 +4503,21 @@ declare const enum LViewFlags {
     RefreshView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
     HasEmbeddedViewInjector = 2048,
-    /** Indicates that the view was created with `signals: true`. */
-    SignalView = 4096,
     /**
      * Indicates that this LView has a view underneath it that needs to be refreshed during change
      * detection. This flag indicates that even if this view is not dirty itself, we still need to
      * traverse its children during change detection.
      */
-    HasChildViewsToRefresh = 8192,
+    HasChildViewsToRefresh = 4096,
     /**
      * This is the count of the bits the 1 was shifted above (base 10)
      */
-    IndexWithinInitPhaseShift = 14,
+    IndexWithinInitPhaseShift = 13,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 16384,
-    IndexWithinInitPhaseReset = 16383
+    IndexWithinInitPhaseIncrementer = 8192,
+    IndexWithinInitPhaseReset = 8191
 }
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
@@ -4999,7 +4991,7 @@ type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends strin
     };
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never> = unknown;
 /**
  * @publicApi
  */
@@ -5011,7 +5003,7 @@ type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends strin
     };
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never> = unknown;
 /**
  * @publicApi
  */

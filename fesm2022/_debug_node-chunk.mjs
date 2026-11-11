@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -224,7 +224,7 @@ function incrementInitPhaseFlags(lView, initPhase) {
   ngDevMode && assertNotEqual(initPhase, 3, 'Init hooks phase should not be incremented after all init hooks have been run.');
   let flags = lView[FLAGS];
   if ((flags & 3) === initPhase) {
-    flags &= 16383;
+    flags &= 8191;
     flags += 1;
     lView[FLAGS] = flags;
   }
@@ -271,9 +271,9 @@ function callHook(currentView, initPhase, arr, i) {
   const directiveIndex = isInitHook ? -arr[i] : arr[i];
   const directive = currentView[directiveIndex];
   if (isInitHook) {
-    const indexWithintInitPhase = currentView[FLAGS] >> 14;
+    const indexWithintInitPhase = currentView[FLAGS] >> 13;
     if (indexWithintInitPhase < currentView[PREORDER_HOOK_FLAGS] >> 16 && (currentView[FLAGS] & 3) === initPhase) {
-      currentView[FLAGS] += 16384;
+      currentView[FLAGS] += 8192;
       callHookInternal(directive, hook);
     }
   } else {
@@ -4407,7 +4407,7 @@ class AfterRenderImpl {
     if (view !== undefined) {
       (view[AFTER_RENDER_SEQUENCES_TO_ADD] ??= []).push(sequence);
       markAncestorsForTraversal(view);
-      view[FLAGS] |= 8192;
+      view[FLAGS] |= 4096;
     } else {
       this.addSequence(sequence);
     }
@@ -5418,9 +5418,7 @@ function createComponentLView(lView, hostTNode, def) {
 }
 function getInitialLViewFlagsFromDef(def) {
   let flags = 16;
-  if (def.signals) {
-    flags = 4096;
-  } else if (def.onPush) {
+  if (def.onPush) {
     flags = 64;
   }
   return flags;
@@ -5966,9 +5964,7 @@ function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, 
     const embeddedTView = templateTNode.tView;
     ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
     ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-    const isSignalView = declarationLView[FLAGS] & 4096;
-    const viewFlags = isSignalView ? 4096 : 16;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, options?.injector ?? null, options?.embeddedViewInjector ?? null, options?.dehydratedView ?? null);
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, 16, null, templateTNode, null, null, options?.injector ?? null, options?.embeddedViewInjector ?? null, options?.dehydratedView ?? null);
     const declarationLContainer = declarationLView[templateTNode.index];
     ngDevMode && assertLContainer(declarationLContainer);
     embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
@@ -6144,7 +6140,7 @@ function runEffectsInView(view) {
         return;
       }
     }
-    tryFlushEffects = foundDirtyEffect && !!(view[FLAGS] & 8192);
+    tryFlushEffects = foundDirtyEffect && !!(view[FLAGS] & 4096);
   }
 }
 
@@ -6399,10 +6395,10 @@ function detectChangesInView(lView, mode) {
   if (consumer) {
     consumer.dirty = false;
   }
-  lView[FLAGS] &= -9217;
+  lView[FLAGS] &= -5121;
   if (shouldRefreshView) {
     refreshView(tView, lView, tView.template, lView[CONTEXT]);
-  } else if (flags & 8192) {
+  } else if (flags & 4096) {
     const prevConsumer = setActiveConsumer(null);
     try {
       if (!isInCheckNoChangesPass) {
@@ -9546,7 +9542,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-a3bc172'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-98b0f3b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10502,7 +10498,6 @@ function ɵɵdefineComponent(componentDefinition) {
         return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(def);
       } : null,
       getExternalStyles: null,
-      signals: componentDefinition.signals ?? false,
       data: componentDefinition.data || {},
       encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
       styles: componentDefinition.styles || EMPTY_ARRAY,
@@ -10609,7 +10604,6 @@ function getNgDirectiveDef(directiveDefinition) {
     inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
     exportAs: directiveDefinition.exportAs || null,
     standalone: directiveDefinition.standalone ?? true,
-    signals: directiveDefinition.signals === true,
     selectors: directiveDefinition.selectors || EMPTY_ARRAY,
     viewQuery: directiveDefinition.viewQuery || null,
     features: directiveDefinition.features || null,
@@ -10646,7 +10640,7 @@ const GENERATED_COMP_IDS = new Map();
 function getComponentId(componentDef) {
   let hash = 0;
   const componentDefConsts = typeof componentDef.consts === 'function' ? '' : componentDef.consts;
-  const hashSelectors = [componentDef.selectors, componentDef.ngContentSelectors, componentDef.hostVars, componentDef.hostAttrs, componentDefConsts, componentDef.vars, componentDef.decls, componentDef.encapsulation, componentDef.standalone, componentDef.signals, componentDef.exportAs, JSON.stringify(componentDef.inputs), JSON.stringify(componentDef.outputs), Object.getOwnPropertyNames(componentDef.type.prototype), !!componentDef.contentQueries, !!componentDef.viewQuery];
+  const hashSelectors = [componentDef.selectors, componentDef.ngContentSelectors, componentDef.hostVars, componentDef.hostAttrs, componentDefConsts, componentDef.vars, componentDef.decls, componentDef.encapsulation, componentDef.standalone, componentDef.exportAs, JSON.stringify(componentDef.inputs), JSON.stringify(componentDef.outputs), Object.getOwnPropertyNames(componentDef.type.prototype), !!componentDef.contentQueries, !!componentDef.viewQuery];
   if (typeof ngDevMode === 'undefined' || ngDevMode) {
     for (const item of hashSelectors) {
       assertNotEqual(typeof item, 'function', 'Internal error: attempting to use a function in component id computation logic.');
@@ -12862,7 +12856,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-a3bc172';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-98b0f3b';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -19354,7 +19348,6 @@ function directiveMetadata(type, metadata) {
     providers: metadata.providers || null,
     viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
     isStandalone: metadata.standalone === undefined ? true : !!metadata.standalone,
-    isSignal: !!metadata.signals,
     hostDirectives: metadata.hostDirectives?.map(directive => typeof directive === 'function' ? {
       directive
     } : directive) || null

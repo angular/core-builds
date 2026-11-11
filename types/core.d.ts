@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1553,10 +1553,6 @@ interface DirectiveDefinition<T> {
      * Whether this directive/component is standalone.
      */
     standalone?: boolean;
-    /**
-     * Whether this directive/component is signal-based.
-     */
-    signals?: boolean;
 }
 interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'features'> {
     /**
@@ -8056,7 +8052,6 @@ interface R3DeclareDirectiveFacade {
         passThroughInput: string | null;
     };
     isStandalone?: boolean;
-    isSignal?: boolean;
     hostDirectives?: R3HostDirectiveMetadataFacade[] | null;
     legacyOptionalChaining?: boolean;
 }

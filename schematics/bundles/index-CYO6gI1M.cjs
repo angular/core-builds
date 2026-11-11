@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0-next.4+sha-a3bc172
+ * @license Angular v22.3.0-next.4+sha-98b0f3b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -767,7 +767,6 @@ function extractTemplateWithoutCompilerAnalysis(node, checker, reflector, resour
         usePoisonedData: true,
         enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat !== false,
         i18nNormalizeLineEndingsInICUs: options.i18nNormalizeLineEndingsInICUs === true,
-        enableSelectorless: false,
     }, migrations.CompilationMode.FULL).nodes;
 }
 
