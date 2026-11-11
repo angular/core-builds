@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-ba7d313
+ * @license Angular v22.3.0-next.4+sha-1937b96
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3120,11 +3120,9 @@ class DOMParserHelper {
   }
 }
 class InertDocumentHelper {
-  defaultDoc;
   inertDocument;
   constructor(defaultDoc) {
-    this.defaultDoc = defaultDoc;
-    this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+    this.inertDocument = defaultDoc.implementation.createHTMLDocument('sanitization-inert');
   }
   getInertBodyElement(html) {
     const templateEl = this.inertDocument.createElement('template');
@@ -4673,18 +4671,20 @@ function aggregateDescendantAnimations(lView, tNode, animations) {
 }
 function executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimations, callback) {
   const runningAnimations = [];
-  if (animations && animations.leave) {
-    for (const [index] of nodesWithExitAnimations) {
-      if (!animations.leave.has(index)) continue;
-      const currentAnimationData = animations.leave.get(index);
-      for (const animationFn of currentAnimationData.animateFns) {
-        const {
-          promise
-        } = animationFn();
-        runningAnimations.push(promise);
+  if (animations) {
+    if (animations.leave) {
+      for (const [index] of nodesWithExitAnimations) {
+        if (!animations.leave.has(index)) continue;
+        const currentAnimationData = animations.leave.get(index);
+        for (const animationFn of currentAnimationData.animateFns) {
+          const {
+            promise
+          } = animationFn();
+          runningAnimations.push(promise);
+        }
       }
-      animations.detachedLeaveAnimationFns = undefined;
     }
+    animations.detachedLeaveAnimationFns = undefined;
   }
   if (lView) {
     collectNestedViewAnimations(lView, tNode, runningAnimations);
@@ -9542,7 +9542,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-ba7d313'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0-next.4+sha-1937b96'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12856,7 +12856,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-ba7d313';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0-next.4+sha-1937b96';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14065,29 +14065,38 @@ function processAndInitTriggers(injector, blockData, nodes) {
   setTimerTriggers(injector, timerElements);
 }
 function setIdleTriggers(injector, elementTriggers) {
-  for (const elementTrigger of elementTriggers) {
+  for (const {
+    blockName
+  } of elementTriggers) {
     const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-    const onInvoke = () => triggerHydrationFromBlockName(injector, elementTrigger.blockName);
+    const onInvoke = () => triggerHydrationFromBlockName(injector, blockName);
     const cleanupFn = onIdle(onInvoke, injector);
-    registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+    registry.addCleanupFn(blockName, cleanupFn);
   }
 }
 function setViewportTriggers(injector, elementTriggers) {
   if (elementTriggers.length > 0) {
     const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-    for (let elementTrigger of elementTriggers) {
-      const cleanupFn = onViewportWrapper(elementTrigger.el, () => triggerHydrationFromBlockName(injector, elementTrigger.blockName), injector, elementTrigger.intersectionObserverOptions);
-      registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+    for (const {
+      el,
+      blockName,
+      intersectionObserverOptions
+    } of elementTriggers) {
+      const cleanupFn = onViewportWrapper(el, () => triggerHydrationFromBlockName(injector, blockName), injector, intersectionObserverOptions);
+      registry.addCleanupFn(blockName, cleanupFn);
     }
   }
 }
 function setTimerTriggers(injector, elementTriggers) {
-  for (const elementTrigger of elementTriggers) {
+  for (const {
+    blockName,
+    delay
+  } of elementTriggers) {
     const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-    const onInvoke = () => triggerHydrationFromBlockName(injector, elementTrigger.blockName);
-    const timerFn = onTimer(elementTrigger.delay);
+    const onInvoke = () => triggerHydrationFromBlockName(injector, blockName);
+    const timerFn = onTimer(delay);
     const cleanupFn = timerFn(onInvoke, injector);
-    registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+    registry.addCleanupFn(blockName, cleanupFn);
   }
 }
 function setImmediateTriggers(injector, elementTriggers) {
@@ -14730,7 +14739,6 @@ function ɵɵanimateLeaveListener(value) {
   ngDevMode && assertAnimationTypes(value, 'animate.leave');
   const lView = getLView();
   const tNode = getCurrentTNode();
-  allLeavingAnimations.add(lView[ID]);
   const ngZone = lView[INJECTOR].get(NgZone);
   const maxAnimationTimeout = lView[INJECTOR].get(MAX_ANIMATION_TIMEOUT);
   enableAnimationRuntimeSupport();
@@ -14749,6 +14757,7 @@ function runLeaveAnimationFunction(lView, tNode, value, ngZone, maxAnimationTime
   const cleanupFns = [];
   const renderer = lView[RENDERER];
   const animationsDisabled = areAnimationsDisabled(lView);
+  allLeavingAnimations.add(lView[ID]);
   (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
   const resolvers = getLViewLeaveAnimations(lView).get(tNode.index)?.resolvers;
   if (animationsDisabled) {
@@ -15345,7 +15354,7 @@ function ɵɵboundaryUpdate(slotIndex, matchingTemplateIndex, primaryTemplateInd
           const boundary = hostLView[HEADER_OFFSET + slotIndex];
           const context = matchingTemplateIndex === primaryTemplateIndex ? undefined : {
             $error: boundary.error,
-            $reset: () => boundary.reset()
+            $reset: createBoundaryResetFn(boundary)
           };
           embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, context, {
             dehydratedView
@@ -15360,7 +15369,7 @@ function ɵɵboundaryUpdate(slotIndex, matchingTemplateIndex, primaryTemplateInd
                 const boundaryType = boundaryComponentView.constructor;
                 details.boundary = {
                   type: boundaryType,
-                  reset: () => boundary.reset()
+                  reset: createBoundaryResetFn(boundary)
                 };
                 if (errorHandler.onViewError) {
                   errorHandler.onViewError(error, details);
@@ -15386,7 +15395,7 @@ function ɵɵboundaryUpdate(slotIndex, matchingTemplateIndex, primaryTemplateInd
                 declarationType,
                 boundary: {
                   type: declarationType,
-                  reset: () => boundary.reset()
+                  reset: createBoundaryResetFn(boundary)
                 }
               };
               if (errorHandler.onViewError) {
@@ -15411,6 +15420,9 @@ function ɵɵboundaryUpdate(slotIndex, matchingTemplateIndex, primaryTemplateInd
       setActiveConsumer(prevConsumer);
     }
   }
+}
+function createBoundaryResetFn(boundary) {
+  return () => boundary.reset();
 }
 
 function ɵɵproperty(propName, value, sanitizer) {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-ba7d313
+ * @license Angular v22.3.0-next.4+sha-1937b96
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -33,6 +33,7 @@ function linkedSignalSetFn(node, newValue) {
   producerUpdateValueVersion(node);
   signalSetFn(node, newValue);
   producerMarkClean(node);
+  node.error = null;
 }
 function linkedSignalUpdateFn(node, updater) {
   producerUpdateValueVersion(node);
@@ -73,6 +74,7 @@ const LINKED_SIGNAL_NODE = /* @__PURE__ */(() => {
         node.sourceValue = newSourceValue;
         setActiveConsumer(null);
         wasEqual = oldValueValid && newValue !== ERRORED && node.equal(oldValue, newValue);
+        node.error = null;
       } catch (err) {
         newValue = ERRORED;
         node.error = err;
