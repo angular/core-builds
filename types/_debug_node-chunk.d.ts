@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-cf37344
+ * @license Angular v22.3.0-next.4+sha-effbe56
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -2481,9 +2481,9 @@ interface ControlDirectiveHost<_TPassthroughInput extends string | undefined = u
      * @param inputName Name of the input to update.
      * @param value New value to write to the input.
      * @param writePredicate Optional predicate function that receives the current value of the
-     * input to decide if the value should be written.
+     * input and the directive instance to decide if the value should be written.
      */
-    setInputOnDirectives(inputName: string, value: unknown, writePredicate?: (currentValue: unknown) => boolean): boolean;
+    setInputOnDirectives(inputName: string, value: unknown, writePredicate?: (currentValue: unknown, directive: unknown) => boolean): boolean;
 }
 
 /**
