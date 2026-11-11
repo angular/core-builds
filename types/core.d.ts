@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0-next.4+sha-9cbad55
+ * @license Angular v22.3.0-next.4+sha-11df1ed
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8866,10 +8866,12 @@ declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
  * A `url` sanitizer which only lets trusted `url`s through.
  *
  * This passes only `url`s marked trusted by calling {@link bypassSanitizationTrustResourceUrl}.
+ * `null` and `undefined` are not considered unsafe and are mapped to an empty string, so that a
+ * resource URL binding can be cleared without having to provide a trusted placeholder value.
  *
  * @param unsafeResourceUrl untrusted `url`, typically from the user.
- * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
- * only trusted `url`s have been allowed to pass.
+ * @returns `url` string which is safe to bind to the `src` properties such as `<iframe src>`,
+ * because only trusted `url`s have been allowed to pass.
  *
  * @codeGenApi
  */
