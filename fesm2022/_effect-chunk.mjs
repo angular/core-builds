@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-59d5f0d
+ * @license Angular v22.2.5+sha-99a6a1e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -303,6 +303,7 @@ const COMPUTED_NODE = /* @__PURE__ */(() => {
         newValue = node.computation();
         setActiveConsumer(null);
         wasEqual = oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED && node.equal(oldValue, newValue);
+        node.error = null;
       } catch (err) {
         newValue = ERRORED;
         node.error = err;

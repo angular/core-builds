@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.5+sha-59d5f0d
+ * @license Angular v22.2.5+sha-99a6a1e
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,12 +13,12 @@ export { ResourceDependencyError, ResourceParamsStatus, resource, CACHE_ACTIVE a
 import { Subscription } from 'rxjs';
 import { SIGNAL, producerAccessed, signalSetFn, consumerDestroy, SIGNAL_NODE, consumerPollProducersForChange, consumerBeforeComputation, consumerAfterComputation } from './_effect-chunk.mjs';
 import { clearAppScopedEarlyEventContract, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, getAppScopedQueuedEventInfos, EventPhase, isEarlyEventType, isCaptureEventType } from './primitives-event-dispatch.mjs';
+import { Attribute } from './_attribute-chunk.mjs';
 export { setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl } from './_weak_ref-chunk.mjs';
 export { setCurrentInjector as ɵsetCurrentInjector } from './_not_found-chunk.mjs';
 import '@angular/core/primitives/di';
 import '@angular/core/primitives/signals';
 import 'rxjs/operators';
-import './_attribute-chunk.mjs';
 import './_untracked-chunk.mjs';
 
 const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE = /* @__PURE__ */Symbol();
@@ -106,17 +106,20 @@ function injectAsync(loader, options) {
     assertInInjectionContext(injectAsync);
   }
   const injector = inject(Injector);
+  const load = createLoader(loader);
+  if (options?.prefetch) {
+    options.prefetch().then(load).catch(() => {});
+  }
+  return () => load().then(loadedToken => injector.get(maybeUnwrapDefaultExport(loadedToken)));
+}
+function createLoader(loader) {
   let loadedPromise = null;
-  const load = () => {
+  return () => {
     if (!loadedPromise) {
       loadedPromise = loader();
     }
     return loadedPromise;
   };
-  if (options?.prefetch) {
-    options.prefetch().then(() => load()).catch(() => {});
-  }
-  return () => load().then(loadedToken => injector.get(maybeUnwrapDefaultExport(loadedToken)));
 }
 function onIdle(options) {
   if (ngDevMode) {
@@ -360,7 +363,9 @@ function withEventReplay() {
             enableStashEventListenerImpl();
             const appId = injector.get(APP_ID);
             const clearStashFn = setStashFn(appId, (rEl, eventName, listenerFn) => {
-              if (rEl.nodeType !== Node.ELEMENT_NODE) return;
+              if (rEl.nodeType !== Node.ELEMENT_NODE || !rEl.hasAttribute(Attribute.JSACTION)) {
+                return;
+              }
               sharedStashFunction(rEl, eventName, listenerFn);
               sharedMapFunction(rEl, jsActionMap);
             });
