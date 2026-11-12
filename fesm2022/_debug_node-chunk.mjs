@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.6+sha-424c9f4
+ * @license Angular v22.2.6+sha-22b7937
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9415,7 +9415,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.6+sha-424c9f4'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.2.6+sha-22b7937'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -11151,6 +11151,9 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
     markRNodeAsClaimedByHydration(comment);
   }
+  if (comment == null) {
+    throw new RuntimeError(-502, ngDevMode && 'During hydration Angular expected a comment node at this location, but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
+  }
   return comment;
 }
 function enableLocateOrCreateContainerAnchorImpl() {
@@ -12730,7 +12733,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.6+sha-424c9f4';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.2.6+sha-22b7937';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -15526,6 +15529,9 @@ function locateOrCreateElementContainerNode(tView, lView, tNode, commentText, in
   if (ngDevMode) {
     validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
     markRNodeAsClaimedByHydration(comment);
+  }
+  if (comment == null) {
+    throw new RuntimeError(-502, ngDevMode && 'During hydration Angular expected a comment node at this location, but no matching DOM node was found. This usually means the client-rendered DOM no longer matches the server-rendered HTML.');
   }
   return comment;
 }
