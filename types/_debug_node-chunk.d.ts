@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.2.6+sha-490be3e
+ * @license Angular v22.2.6+sha-8bed232
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4991,9 +4991,9 @@ declare enum ChangeDetectionStrategy {
  */
 type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string | {
-        alias: string | null;
-        required: boolean;
-        isSignal?: boolean;
+        'alias': string | null;
+        'required': boolean;
+        'isSignal'?: boolean;
     };
 }, OutputMap extends {
     [key: string]: string;
@@ -5003,9 +5003,9 @@ type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends strin
  */
 type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string | {
-        alias: string | null;
-        required: boolean;
-        isSignal?: boolean;
+        'alias': string | null;
+        'required': boolean;
+        'isSignal'?: boolean;
     };
 }, OutputMap extends {
     [key: string]: string;
