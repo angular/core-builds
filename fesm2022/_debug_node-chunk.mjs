@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-f41e1d8
+ * @license Angular v22.4.0-next.0+sha-ca92b96
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9542,7 +9542,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-f41e1d8'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-ca92b96'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12859,7 +12859,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-f41e1d8';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-ca92b96';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -16783,7 +16783,7 @@ function i18nResolveSanitizer(attrName, tagName) {
     case SecurityContext.SCRIPT:
       return ɵɵsanitizeScript;
     case SecurityContext.URL:
-      return _sanitizeUrl;
+      return ɵɵsanitizeUrl;
     case SecurityContext.RESOURCE_URL:
       return ɵɵsanitizeResourceUrl;
     case SecurityContext.ATTRIBUTE_NO_BINDING:
