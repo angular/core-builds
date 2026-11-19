@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-7391654
+ * @license Angular v22.4.0-next.0+sha-fee6dbf
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -3992,6 +3992,7 @@ declare const enum RuntimeErrorCode {
     OUTPUT_REF_DESTROYED = 953,
     LOOP_TRACK_DUPLICATE_KEYS = -955,
     LOOP_TRACK_RECREATE = -956,
+    LOOP_INVALID_COLLECTION = -957,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
     MUST_PROVIDE_STREAM_OPTION = 990,
