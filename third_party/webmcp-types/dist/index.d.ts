@@ -39,6 +39,12 @@ type InferToolInput<TSchema> = [InferJsonSchema<TSchema>] extends [null | undefi
     : InferJsonSchema<TSchema> extends object ? InferJsonSchema<TSchema>
     : Record<string, unknown>;
 
+// Wrapping the callback in a deferred conditional type makes TypeScript instantiate the contextual
+// signature with the schemas inferred so far, so literals returned by execute are not widened.
+type InferredToolExecuteCallback<TInput extends object, TOutput> = [TOutput] extends [unknown]
+    ? WebMCP.ToolExecuteCallback<TInput, TOutput>
+    : never;
+
 declare global {
 /**
  * The WebMCP API enables web apps to provide JavaScript-based tools to AI agents.
@@ -63,9 +69,9 @@ namespace WebMCP {
      * Callback for tool execution.
      * @param inputObject The input parameters for the tool, as defined by its inputSchema.
      * @param options Options passed when executing the tool.
-     * @returns A promise that resolves with the tool's output.
+     * @returns A promise that resolves with the tool's output, as defined by its outputSchema.
      */
-    type ToolExecuteCallback<T extends object = Record<string, unknown>> = (inputObject: T, options: ToolExecuteCallbackOptions) => MaybePromise<unknown>;
+    type ToolExecuteCallback<TInput extends object = Record<string, unknown>, TOutput = unknown> = (inputObject: TInput, options: ToolExecuteCallbackOptions) => MaybePromise<TOutput>;
 
     /**
      * Metadata about a tool's behavior.
@@ -114,6 +120,11 @@ namespace WebMCP {
          */
         inputSchema?: object;
         /**
+         * A JSON Schema describing the expected output structure for the tool.
+         * Tool output is expected to conform to the provided schema, and agents may reject outputs that do not validate.
+         */
+        outputSchema?: object;
+        /**
          * The function to execute when the tool is called.
          */
         execute: ToolExecuteCallback;
@@ -123,10 +134,11 @@ namespace WebMCP {
         annotations?: ToolAnnotations;
     }
 
-    /** A tool whose execute input is inferred from its input schema. */
-    type ModelContextToolFromSchema<TInputSchema extends object> = Omit<ModelContextTool, "inputSchema" | "execute"> & {
-        inputSchema: TInputSchema;
-        execute: ToolExecuteCallback<InferToolInput<TInputSchema>>;
+    /** A tool whose execute input and output are inferred from its input and output schemas. */
+    type ModelContextToolFromSchema<TInputSchema extends object = object, TOutputSchema extends object = object> = Omit<ModelContextTool, "inputSchema" | "outputSchema" | "execute"> & {
+        inputSchema?: TInputSchema;
+        outputSchema?: TOutputSchema;
+        execute: InferredToolExecuteCallback<InferToolInput<TInputSchema>, InferJsonSchema<TOutputSchema>>;
     };
 
     /**
@@ -185,6 +197,12 @@ namespace WebMCP {
          */
         inputSchema?: object;
         /**
+         * A JSON Schema object describing the expected output structure for the tool.
+         * Tool output is expected to conform to the provided schema, and agents may reject outputs that do not validate.
+         * It is a deep copy of the schema provided at tool registration, via `ModelContextTool.outputSchema`.
+         */
+        outputSchema?: object;
+        /**
          * The Window of the document that registered the tool.
          */
         window: Window;
@@ -229,17 +247,16 @@ namespace WebMCP {
      */
     interface ModelContext extends EventTarget {
         /**
-         * Registers a new tool and infers its execute input from its input schema.
+         * Registers a new tool and infers its execute input and output from its input and output schemas.
+         * Tools without schemas, or with widened `object` schemas, fall back to `Record<string, unknown>` input and `unknown` output.
+         *
+         * Note: when execute declares no parameters (e.g. `() => ({ status: "ok" })`), TypeScript checks it before
+         * inferring the output schema, so returned `enum`/`const` literals are widened (e.g. to `string`) and rejected.
+         * Declaring the input parameter (e.g. `(input) => ...`) avoids this.
          * @param tool The tool definition.
          * @param options Registration options.
          */
-        registerTool<const TInputSchema extends object>(tool: ModelContextToolFromSchema<TInputSchema>, options?: ModelContextRegisterToolOptions): Promise<void>;
-        /**
-         * Registers a new tool.
-         * @param tool The tool definition.
-         * @param options Registration options.
-         */
-        registerTool(tool: ModelContextTool, options?: ModelContextRegisterToolOptions): Promise<void>;
+        registerTool<const TInputSchema extends object = object, const TOutputSchema extends object = object>(tool: ModelContextToolFromSchema<TInputSchema, TOutputSchema>, options?: ModelContextRegisterToolOptions): Promise<void>;
         /**
          * Returns a list of registered tools exposed to this document.
          * @param options Filtering options.
