@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-d201dd7
+ * @license Angular v22.4.0-next.0+sha-34c6c98
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9542,7 +9542,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-d201dd7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-34c6c98'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12859,7 +12859,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-d201dd7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-34c6c98';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -18463,8 +18463,8 @@ function mergeWithExistingDefinition(currentDef, newDef) {
     ...currentDef
   };
   const replacement = Object.assign(currentDef, newDef, {
-    directiveDefs: clone.directiveDefs,
-    pipeDefs: clone.pipeDefs,
+    directiveDefs: newDef.standalone ? newDef.directiveDefs : clone.directiveDefs,
+    pipeDefs: newDef.standalone ? newDef.pipeDefs : clone.pipeDefs,
     setInput: clone.setInput,
     type: clone.type
   });
