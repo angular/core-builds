@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0+sha-c854b7b
+ * @license Angular v22.3.0+sha-da7ec7b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -4198,6 +4198,9 @@ function cancelLeavingNodes(tNode, newElement, newLView) {
       }
     }
   }
+  if (nodes.length === 0) {
+    leavingNodes.delete(tNode);
+  }
 }
 function trackLeavingNodes(tNode, el, lView) {
   const declarationView = getDeclarationView(lView);
@@ -4631,6 +4634,7 @@ function runLeaveAnimationsWithCallbackImpl(lView, tNode, injector, callback) {
   try {
     animationQueue = injector.get(ANIMATION_QUEUE);
   } catch {
+    clearTrackedLeavingNode(lView, tNode);
     return callback(false);
   }
   const animations = lView ? lView[ANIMATIONS] ??= {} : undefined;
@@ -4697,15 +4701,17 @@ function executeLeaveAnimations(lView, tNode, animations, nodesWithExitAnimation
         runningAnimations.push(prevRunning);
       }
       currentAnimations.running = Promise.allSettled(runningAnimations);
-      runAfterLeaveAnimations(lView, currentAnimations.running, callback);
+      runAfterLeaveAnimations(lView, tNode, currentAnimations.running, callback);
     } else {
       Promise.allSettled(runningAnimations).then(() => {
         if (lView) allLeavingAnimations.delete(lView[ID]);
+        clearTrackedLeavingNode(lView, tNode);
         callback(true);
       });
     }
   } else {
     if (lView) allLeavingAnimations.delete(lView[ID]);
+    clearTrackedLeavingNode(lView, tNode);
     callback(false);
   }
 }
@@ -4782,12 +4788,21 @@ function collectAllViewLeaveAnimations(view, collectedPromises) {
     child = child.next;
   }
 }
-function runAfterLeaveAnimations(lView, runningAnimations, callback) {
+function clearTrackedLeavingNode(lView, tNode) {
+  if (lView) {
+    const rawSlot = lView[tNode.index];
+    if (rawSlot != null) {
+      clearLeavingNodes(tNode, unwrapRNode(rawSlot));
+    }
+  }
+}
+function runAfterLeaveAnimations(lView, tNode, runningAnimations, callback) {
   runningAnimations.then(() => {
     if (lView[ANIMATIONS]?.running === runningAnimations) {
       lView[ANIMATIONS].running = undefined;
       allLeavingAnimations.delete(lView[ID]);
     }
+    clearTrackedLeavingNode(lView, tNode);
     callback(true);
   });
 }
@@ -9542,7 +9557,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0+sha-c854b7b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.3.0+sha-da7ec7b'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12859,7 +12874,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0+sha-c854b7b';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.3.0+sha-da7ec7b';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
@@ -14672,11 +14687,11 @@ function runLeaveAnimations(lView, tNode, value, ngZone) {
   } = promiseWithResolvers();
   const nativeElement = getNativeByTNode(tNode, lView);
   ngDevMode && assertElementNodes(nativeElement, 'animate.leave');
-  const renderer = lView[RENDERER];
-  allLeavingAnimations.add(lView[ID]);
-  (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
   const activeClasses = getClassListFromValue(value);
   if (activeClasses && activeClasses.length > 0) {
+    const renderer = lView[RENDERER];
+    allLeavingAnimations.add(lView[ID]);
+    (getLViewLeaveAnimations(lView).get(tNode.index).resolvers ??= []).push(resolve);
     animateLeaveClassRunner(nativeElement, tNode, lView, activeClasses, renderer, ngZone);
   } else {
     resolve();
