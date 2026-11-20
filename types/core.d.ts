@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0+sha-84557ed
+ * @license Angular v22.3.0+sha-c854b7b
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9614,12 +9614,20 @@ type Execute<InputSchema extends object = object> = ModelContextToolFromSchema<I
  *
  * @experimental 22.0
  */
-interface ToolDescriptor<InputSchema extends object = object> extends Omit<ModelContextTool, 'execute'> {
+interface ToolDescriptor<InputSchema extends object = object, OutputSchema extends object = object> extends Omit<ModelContextTool, 'execute'> {
     /**
      * A schema which describes the input arguments expected by the {@link execute} function
      * which the agent must provide.
      */
     inputSchema?: InputSchema;
+    /**
+     * A schema which describes the format of the output data.
+     *
+     * Note: This schema is used purely for metadata purposes to inform AI agents of the expected
+     * output format. Angular does not validate that the return value of `execute` strictly adheres
+     * to this schema.
+     */
+    outputSchema?: OutputSchema;
     /** The callback function which implements this tool. */
     execute: Execute<InputSchema>;
 }
