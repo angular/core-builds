@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.4.0-next.0+sha-c9cbeb7
+ * @license Angular v22.4.0-next.0+sha-c69da30
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -39,7 +39,8 @@ function findBaseClassDeclarations(node, typeChecker) {
 }
 
 function migrateFile(sourceFile, typeChecker) {
-    const tracker = new change_tracker.ChangeTracker(ts.createPrinter());
+    const printer = ts.createPrinter();
+    const tracker = new change_tracker.ChangeTracker(printer);
     let totalInjectables = 0;
     let migratedInjectables = 0;
     ts.forEachChild(sourceFile, function visit(node) {
@@ -50,8 +51,9 @@ function migrateFile(sourceFile, typeChecker) {
                 totalInjectables++;
                 if (analysis.canMigrate) {
                     migratedInjectables++;
-                    tracker.addImport(sourceFile, 'Service', '@angular/core');
-                    tracker.replaceText(sourceFile, decorator.node.getStart(), decorator.node.getWidth(), `@Service(${analysis.providedInRoot ? '' : '{ autoProvided: false }'})`);
+                    const serviceRef = tracker.addImport(sourceFile, 'Service', '@angular/core');
+                    const serviceName = printer.printNode(ts.EmitHint.Unspecified, serviceRef, sourceFile);
+                    tracker.replaceText(sourceFile, decorator.node.getStart(), decorator.node.getWidth(), `@${serviceName}(${analysis.providedInRoot ? '' : '{ autoProvided: false }'})`);
                 }
             }
         }

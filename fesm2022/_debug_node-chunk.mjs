@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-c9cbeb7
+ * @license Angular v22.4.0-next.0+sha-c69da30
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -746,6 +746,7 @@ function getNodeInjectable(lView, tView, index, tNode, flags) {
     const previousInjectImplementation = factory.injectImpl ? setInjectImplementation(factory.injectImpl) : null;
     const success = enterDI(lView, tNode, 0);
     ngDevMode && assertEqual(success, true, "Because flags do not contain `SkipSelf' we expect this to always succeed.");
+    const prevConsumer = setActiveConsumer(null);
     try {
       ngDevMode && emitInjectorToCreateInstanceEvent(token);
       value = lView[index] = factory.factory(undefined, flags, tData, lView, tNode);
@@ -755,6 +756,7 @@ function getNodeInjectable(lView, tView, index, tNode, flags) {
         registerPreOrderHooks(index, tData[index], tView);
       }
     } finally {
+      setActiveConsumer(prevConsumer);
       ngDevMode && setInjectorProfilerContext(prevInjectContext);
       previousInjectImplementation !== null && setInjectImplementation(previousInjectImplementation);
       setIncludeViewProviders(previousIncludeViewProviders);
@@ -9557,7 +9559,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-c9cbeb7'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-c69da30'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -12874,7 +12876,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-c9cbeb7';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-c69da30';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
