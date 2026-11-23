@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0+sha-6e61b2c
+ * @license Angular v22.3.0+sha-3309ac5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -14,7 +14,7 @@ var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-IVztR9rk.cjs');
 require('@angular/compiler-cli');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
+var apply_import_manager = require('./apply_import_manager-utVE7ZGF.cjs');
 var leading_space = require('./leading_space-BTPRV0wu.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DaUdSee4.cjs');

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.3.0+sha-6e61b2c
+ * @license Angular v22.3.0+sha-3309ac5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -11,7 +11,7 @@ var ts = require('typescript');
 require('@angular/compiler-cli');
 require('node:path');
 var project_paths = require('./project_paths-CEexbl9C.cjs');
-var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
+var apply_import_manager = require('./apply_import_manager-utVE7ZGF.cjs');
 var migrate_ts_type_references = require('./migrate_ts_type_references-BNAUjJht.cjs');
 var assert = require('assert');
 var index = require('./index-CYO6gI1M.cjs');
