@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.4.0-next.0+sha-ca660f7
+ * @license Angular v22.4.0-next.0+sha-4cf4938
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -13,7 +13,7 @@ var migrations = require('@angular/compiler-cli/private/migrations');
 var ts = require('typescript');
 require('@angular/compiler-cli');
 require('node:path');
-var apply_import_manager = require('./apply_import_manager-2ocK7XV4.cjs');
+var apply_import_manager = require('./apply_import_manager-utVE7ZGF.cjs');
 var imports = require('./imports-CKV-ITqD.cjs');
 require('@angular-devkit/schematics');
 require('./project_tsconfig_paths-DaUdSee4.cjs');

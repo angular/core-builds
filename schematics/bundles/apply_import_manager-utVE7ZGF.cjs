@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v22.4.0-next.0+sha-ca660f7
+ * @license Angular v22.4.0-next.0+sha-4cf4938
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -55,9 +55,35 @@ function applyImportManagerChanges(importManager, replacements, sourceFiles, inf
     }
     // Update removed imports
     for (const removedImport of deletedImports) {
-        replacements.push(new project_paths.Replacement(project_paths.projectFile(removedImport.getSourceFile(), info), new project_paths.TextUpdate({
-            position: removedImport.getStart(),
-            end: removedImport.getEnd(),
+        const sf = removedImport.getSourceFile();
+        const text = sf.getFullText();
+        let start = removedImport.getStart();
+        let end = removedImport.getEnd();
+        // Remove leading horizontal whitespace on the same line if nothing precedes the import.
+        let lineStart = start;
+        while (lineStart > 0 && (text[lineStart - 1] === ' ' || text[lineStart - 1] === '\t')) {
+            lineStart--;
+        }
+        const isAtLineStart = lineStart === 0 || text[lineStart - 1] === '\n' || text[lineStart - 1] === '\r';
+        if (isAtLineStart) {
+            start = lineStart;
+        }
+        // Remove trailing horizontal whitespace and a single line break if nothing else follows.
+        if (isAtLineStart) {
+            let lineEnd = end;
+            while (lineEnd < text.length && (text[lineEnd] === ' ' || text[lineEnd] === '\t')) {
+                lineEnd++;
+            }
+            if (text[lineEnd] === '\r' && text[lineEnd + 1] === '\n') {
+                end = lineEnd + 2;
+            }
+            else if (text[lineEnd] === '\n' || text[lineEnd] === '\r') {
+                end = lineEnd + 1;
+            }
+        }
+        replacements.push(new project_paths.Replacement(project_paths.projectFile(sf, info), new project_paths.TextUpdate({
+            position: start,
+            end,
             toInsert: '',
         })));
     }
