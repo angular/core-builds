@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.3.0+sha-bb930fe
+ * @license Angular v22.3.0+sha-6e61b2c
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -23,7 +23,7 @@ class Version {
     this.patch = parts.slice(2).join('.');
   }
 }
-const VERSION = /* @__PURE__ */new Version('22.3.0+sha-bb930fe');
+const VERSION = /* @__PURE__ */new Version('22.3.0+sha-6e61b2c');
 
 const DOC_PAGE_BASE_URL = /* @__PURE__ */(() => {
   const full = VERSION.full;
@@ -2713,13 +2713,18 @@ const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken(typeof ngDevMode =
   factory: () => {
     const zone = inject(NgZone);
     const injector = inject(EnvironmentInjector);
+    const isServer = typeof ngServerMode !== 'undefined' && ngServerMode;
     let userErrorHandler;
     return e => {
       zone.runOutsideAngular(() => {
         if (injector.destroyed && !userErrorHandler) {
-          setTimeout(() => {
-            throw e;
-          });
+          if (isServer) {
+            console.error('ERROR', e);
+          } else {
+            setTimeout(() => {
+              throw e;
+            });
+          }
         } else {
           userErrorHandler ??= injector.get(ErrorHandler);
           userErrorHandler.handleError(e);
@@ -3175,6 +3180,7 @@ class PendingTasks {
   internalPendingTasks = inject(PendingTasksInternal);
   scheduler = inject(ChangeDetectionScheduler);
   errorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
+  destroyRef = inject(DestroyRef);
   add() {
     const taskId = this.internalPendingTasks.add();
     return () => {
@@ -3188,9 +3194,15 @@ class PendingTasks {
   run(fn) {
     const removeTask = this.add();
     try {
-      fn().catch(this.errorHandler).finally(removeTask);
+      fn().catch(err => {
+        if (!this.destroyRef.destroyed) {
+          this.errorHandler(err);
+        }
+      }).finally(removeTask);
     } catch (err) {
-      this.errorHandler(err);
+      if (!this.destroyRef.destroyed) {
+        this.errorHandler(err);
+      }
       removeTask();
     }
   }
