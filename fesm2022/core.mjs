@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-c69da30
+ * @license Angular v22.4.0-next.0+sha-f3ea683
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1929,34 +1929,40 @@ function bootstrap(config) {
         onPlatformDestroyListeners.delete(destroyListener);
       });
     }
-    return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+    const completeBootstrap = (onBootstrap, onSkipBootstrap) => {
+      if (envInjector.destroyed) {
+        return;
+      }
+      if (!envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true)) {
+        onSkipBootstrap?.();
+        return;
+      }
+      if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
+        imagePerformanceService.start();
+      }
+      onBootstrap();
+    };
+    return _callAndReportToErrorHandler(exceptionHandler, ngZone, envInjector, () => {
       const pendingTasks = envInjector.get(PendingTasksInternal);
       const taskId = pendingTasks.add();
       const initStatus = envInjector.get(ApplicationInitStatus);
+      if (isApplicationBootstrapConfig(config)) {
+        const appRef = envInjector.get(ApplicationRef);
+        initStatus.runInitializers();
+        return initStatus.donePromise.then(() => {
+          completeBootstrap(() => {
+            if (config.rootComponent !== undefined) {
+              appRef.bootstrap(config.rootComponent);
+            }
+          });
+          return appRef;
+        }).finally(() => void pendingTasks.remove(taskId));
+      }
       initStatus.runInitializers();
       return initStatus.donePromise.then(() => {
-        const enableRootComponentbootstrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
-        if (!enableRootComponentbootstrap) {
-          if (isApplicationBootstrapConfig(config)) {
-            return envInjector.get(ApplicationRef);
-          }
-          config.allPlatformModules.push(config.moduleRef);
-          return config.moduleRef;
-        }
-        if (typeof ngDevMode === 'undefined' || ngDevMode) {
-          const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
-          imagePerformanceService.start();
-        }
-        if (isApplicationBootstrapConfig(config)) {
-          const appRef = envInjector.get(ApplicationRef);
-          if (config.rootComponent !== undefined) {
-            appRef.bootstrap(config.rootComponent);
-          }
-          return appRef;
-        } else {
-          moduleBootstrapImpl?.(config.moduleRef, config.allPlatformModules);
-          return config.moduleRef;
-        }
+        completeBootstrap(() => moduleBootstrapImpl?.(config.moduleRef, config.allPlatformModules), () => config.allPlatformModules.push(config.moduleRef));
+        return config.moduleRef;
       }).finally(() => void pendingTasks.remove(taskId));
     });
   });
@@ -1976,18 +1982,22 @@ function _moduleDoBootstrap(moduleRef, allPlatformModules) {
   }
   allPlatformModules.push(moduleRef);
 }
-function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
+function _callAndReportToErrorHandler(errorHandler, ngZone, envInjector, callback) {
   try {
     const result = callback();
     if (isPromise(result)) {
       return result.catch(e => {
-        ngZone.runOutsideAngular(() => errorHandler(e));
+        if (!envInjector.destroyed) {
+          ngZone.runOutsideAngular(() => errorHandler(e));
+        }
         throw e;
       });
     }
     return result;
   } catch (e) {
-    ngZone.runOutsideAngular(() => errorHandler(e));
+    if (!envInjector.destroyed) {
+      ngZone.runOutsideAngular(() => errorHandler(e));
+    }
     throw e;
   }
 }
@@ -2013,7 +2023,15 @@ class PlatformRef {
   bootstrapModule(moduleType, compilerOptions = []) {
     const options = optionsReducer({}, compilerOptions);
     setModuleBootstrapImpl();
-    return compileNgModuleFactory(this.injector, options, moduleType).then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
+    const wasDestroyed = this._destroyed;
+    return compileNgModuleFactory(this.injector, options, moduleType).then(moduleFactory => {
+      if (!wasDestroyed && this._destroyed) {
+        const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, []);
+        moduleRef.destroy();
+        return moduleRef;
+      }
+      return this.bootstrapModuleFactory(moduleFactory, options);
+    });
   }
   onDestroy(callback) {
     this._destroyListeners.push(callback);
@@ -2444,6 +2462,11 @@ function internalCreateApplication(config) {
       debugName: typeof ngDevMode === 'undefined' || ngDevMode ? 'Environment Injector' : '',
       runEnvironmentInitializers: false
     });
+    if (platformRef?.destroyed) {
+      const appRef = adapter.injector.get(ApplicationRef);
+      adapter.injector.destroy();
+      return Promise.resolve(appRef);
+    }
     return bootstrap({
       r3Injector: adapter.injector,
       platformInjector,

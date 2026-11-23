@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-c69da30
+ * @license Angular v22.4.0-next.0+sha-f3ea683
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -1992,6 +1992,7 @@ declare class ApplicationInitStatus {
     readonly donePromise: Promise<any>;
     private readonly appInits;
     private readonly injector;
+    private readonly destroyRef;
     constructor();
     static ɵfac: __FactoryDeclaration<ApplicationInitStatus, never>;
     static ɵprov: __InjectableDeclaration<any>;
@@ -9275,6 +9276,7 @@ declare class PendingTasks {
     private readonly internalPendingTasks;
     private readonly scheduler;
     private readonly errorHandler;
+    private readonly destroyRef;
     /**
      * Adds a new task that should block application's stability.
      * @returns A cleanup function that removes a task when called.

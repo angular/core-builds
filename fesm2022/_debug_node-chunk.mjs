@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-c69da30
+ * @license Angular v22.4.0-next.0+sha-f3ea683
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -9559,7 +9559,7 @@ class ComponentFactory {
   }
 }
 function createRootTView(rootSelectorOrNode, componentDef, componentBindings, directives, allowNonStandaloneDirectives) {
-  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-c69da30'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
+  const tAttributes = rootSelectorOrNode ? ['ng-version', '22.4.0-next.0+sha-f3ea683'] : extractAttrsAndClassesFromSelector(componentDef.selectors[0]);
   let creationBindings = null;
   let updateBindings = null;
   let varsToAllocate = 0;
@@ -10746,6 +10746,7 @@ class ApplicationInitStatus {
     optional: true
   }) ?? [];
   injector = inject(Injector);
+  destroyRef = inject(DestroyRef);
   constructor() {
     if ((typeof ngDevMode === 'undefined' || ngDevMode) && !Array.isArray(this.appInits)) {
       throw new RuntimeError(-209, 'Unexpected type of the `APP_INITIALIZER` token value ' + `(expected an array, but got ${typeof this.appInits}). ` + 'Please check that the `APP_INITIALIZER` token is configured as a ' + '`multi: true` provider.');
@@ -10757,15 +10758,44 @@ class ApplicationInitStatus {
     }
     const asyncInitPromises = [];
     for (const appInits of this.appInits) {
+      if (this.destroyRef.destroyed) {
+        break;
+      }
       const initResult = runInInjectionContext(this.injector, appInits);
       if (isPromise(initResult)) {
         asyncInitPromises.push(initResult);
       } else if (isSubscribable(initResult)) {
         const observableAsPromise = new Promise((resolve, reject) => {
-          initResult.subscribe({
-            complete: resolve,
-            error: reject
+          let settled = false;
+          let unregisterDestroy;
+          const cleanup = () => {
+            settled = true;
+            unregisterDestroy?.();
+            unregisterDestroy = undefined;
+          };
+          const subscription = initResult.subscribe({
+            complete: () => {
+              cleanup();
+              resolve();
+            },
+            error: err => {
+              cleanup();
+              reject(err);
+            }
           });
+          if (!settled) {
+            if (this.destroyRef.destroyed) {
+              subscription?.unsubscribe?.();
+              cleanup();
+              resolve();
+            } else {
+              unregisterDestroy = this.destroyRef.onDestroy(() => {
+                subscription?.unsubscribe?.();
+                cleanup();
+                resolve();
+              });
+            }
+          }
         });
         asyncInitPromises.push(observableAsPromise);
       }
@@ -10774,13 +10804,28 @@ class ApplicationInitStatus {
       this.done = true;
       this.resolve();
     };
-    Promise.all(asyncInitPromises).then(() => {
+    if (this.destroyRef.destroyed) {
+      if (asyncInitPromises.length > 0) {
+        Promise.all(asyncInitPromises).catch(() => {});
+      }
+      this.resolve();
+    } else if (asyncInitPromises.length === 0) {
       complete();
-    }).catch(e => {
-      this.reject(e);
-    });
-    if (asyncInitPromises.length === 0) {
-      complete();
+    } else {
+      const unregisterDestroy = this.destroyRef.onDestroy(() => {
+        this.resolve();
+      });
+      Promise.all(asyncInitPromises).then(() => {
+        unregisterDestroy();
+        if (!this.destroyRef.destroyed) {
+          complete();
+        }
+      }).catch(e => {
+        unregisterDestroy();
+        if (!this.destroyRef.destroyed) {
+          this.reject(e);
+        }
+      });
     }
     this.initialized = true;
   }
@@ -12876,7 +12921,7 @@ function getDeepLinkProperties(instance) {
 const eventsStack = [];
 function getBaseDocUrl() {
   const full = VERSION.full;
-  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-c69da30';
+  const isPreRelease = full.includes('-next') || full.includes('-rc') || full === '22.4.0-next.0+sha-f3ea683';
   const prefix = isPreRelease ? 'next' : `v${VERSION.major}`;
   return `https://${prefix}.angular.dev`;
 }
