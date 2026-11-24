@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-b9bb8c0
+ * @license Angular v22.4.0-next.0+sha-4201783
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -6860,7 +6860,7 @@ interface Component extends Directive {
      * [`state()`](api/animations/state) and `transition()` definitions.
      * See the [Animations guide](guide/animations) and animations API documentation.
      *
-     * @deprecated 20.2 Use `animate.enter` or `animate.leave` instead. Intent to remove in v23
+     * @deprecated 20.2 Use `animate.enter` or `animate.leave` instead. Intent to remove in a future version
      */
     animations?: any[];
     /**
