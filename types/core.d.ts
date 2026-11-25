@@ -1,5 +1,5 @@
 /**
- * @license Angular v22.4.0-next.0+sha-568c48b
+ * @license Angular v22.4.0-next.0+sha-c3154ea
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -8020,6 +8020,8 @@ interface R3HostDirectiveMetadataFacade {
 }
 type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
 interface R3DeclareDirectiveFacade {
+    minVersion?: string;
+    ngImport?: OpaqueValue;
     selector?: string;
     type: Type;
     version: string;
@@ -8071,7 +8073,7 @@ interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     pipes?: {
         [pipeName: string]: OpaqueValue | (() => OpaqueValue);
     };
-    deferBlockDependencies?: (() => Promise<Type> | null)[];
+    deferBlockDependencies?: ((() => Promise<Type> | null) | null)[];
     viewProviders?: OpaqueValue;
     animations?: OpaqueValue;
     changeDetection?: ChangeDetectionStrategy;
@@ -8099,11 +8101,17 @@ interface R3DeclareNgModuleDependencyFacade {
     type: OpaqueValue | (() => OpaqueValue);
 }
 interface R3DeclareFactoryFacade {
+    minVersion?: string;
+    version?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     deps: R3DeclareDependencyMetadataFacade[] | 'invalid' | null;
     target: FactoryTarget;
 }
 interface R3DeclareInjectableFacade {
+    minVersion?: string;
+    version?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     providedIn?: Type | 'root' | 'platform' | 'any' | null;
     useClass?: OpaqueValue;
@@ -8113,6 +8121,9 @@ interface R3DeclareInjectableFacade {
     deps?: R3DeclareDependencyMetadataFacade[];
 }
 interface R3DeclareServiceFacade {
+    minVersion?: string;
+    version?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     autoProvided?: boolean;
     factory?: OpaqueValue;
@@ -8135,11 +8146,17 @@ interface R3DeclareQueryMetadataFacade {
     isSignal?: boolean;
 }
 interface R3DeclareInjectorFacade {
+    minVersion?: string;
+    version?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     imports?: OpaqueValue[];
     providers?: OpaqueValue[];
 }
 interface R3DeclareNgModuleFacade {
+    minVersion?: string;
+    version?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
     declarations?: OpaqueValue[] | (() => OpaqueValue[]);
@@ -8149,6 +8166,8 @@ interface R3DeclareNgModuleFacade {
     id?: OpaqueValue;
 }
 interface R3DeclarePipeFacade {
+    minVersion?: string;
+    ngImport?: OpaqueValue;
     type: Type;
     version: string;
     name: string;
@@ -8595,14 +8614,17 @@ declare function transitiveScopesFor<T>(type: Type$1<T>): NgModuleTransitiveScop
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): any;
 /**
  * Evaluates the class metadata declaration.
  *
  * @codeGenApi
  */
 declare function ɵɵngDeclareClassMetadata(decl: {
-    type: Type$1<any>;
+    minVersion?: string;
+    version?: string;
+    ngImport?: unknown;
+    type: Type$1<any> | AbstractType<any> | Function;
     decorators: any[];
     ctorParameters?: () => any[];
     propDecorators?: {
@@ -8615,7 +8637,10 @@ declare function ɵɵngDeclareClassMetadata(decl: {
  * @codeGenApi
  */
 declare function ɵɵngDeclareClassMetadataAsync(decl: {
-    type: Type$1<any>;
+    minVersion?: string;
+    version?: string;
+    ngImport?: unknown;
+    type: Type$1<any> | AbstractType<any> | Function;
     resolveDeferredDeps: () => Promise<Type$1<unknown>>[];
     resolveMetadata: (...types: Type$1<unknown>[]) => {
         decorators: any[];
@@ -8630,44 +8655,44 @@ declare function ɵɵngDeclareClassMetadataAsync(decl: {
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): unknown;
+declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): any;
 /**
  * Compiles a partial pipe declaration object into a full pipe definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): unknown;
+declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): any;
 /**
  * Compiles a partial injectable declaration object into a full injectable definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): unknown;
+declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): any;
 
 /**
  * Compiles a partial injector declaration object into a full injector definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): any;
 /**
  * Compiles a partial NgModule declaration object into a full NgModule definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
+declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): any;
 /**
  * Compiles a partial pipe declaration object into a full pipe definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
+declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): any;
 /**
  * Compiles a partial service declaration object into a full service definition object.
  *
  * @codeGenApi
  */
-declare function ɵɵngDeclareService(decl: R3DeclareServiceFacade): unknown;
+declare function ɵɵngDeclareService(decl: R3DeclareServiceFacade): any;
 
 declare function compilePipe(type: Type$1<any>, meta: Pipe): void;
 
